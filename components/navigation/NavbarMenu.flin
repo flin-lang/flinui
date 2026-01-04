@@ -1,0 +1,92 @@
+// NavbarMenu.flin - FlinUI Navbar Menu Container
+// Container for navigation items with alignment options
+
+// Props with defaults
+align = props.align || "left"
+
+// Compute alignment class
+alignClass = match align {
+    "center" -> "flin-navbar-menu--center"
+    "right" -> "flin-navbar-menu--right"
+    _ -> "flin-navbar-menu--left"
+}
+
+<div
+    class={"flin-navbar-menu " ++ alignClass}
+    role="menubar"
+>
+    {children}
+</div>
+
+<style scoped>
+.flin-navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    flex: 1;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.flin-navbar-menu--left {
+    justify-content: flex-start;
+    margin-right: auto;
+}
+
+.flin-navbar-menu--center {
+    justify-content: center;
+}
+
+.flin-navbar-menu--right {
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
+/* Responsive styles - collapse to mobile menu */
+@media (max-width: 768px) {
+    .flin-navbar-menu {
+        position: fixed;
+        top: 64px; /* navbar height */
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        background-color: var(--flin-bg);
+        border-bottom: 1px solid var(--flin-neutral-200);
+        padding: var(--flin-space-2) 0;
+        box-shadow: var(--flin-shadow-lg);
+        z-index: 1000;
+
+        /* Hidden by default on mobile */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: opacity var(--flin-transition-fast),
+                    visibility var(--flin-transition-fast),
+                    transform var(--flin-transition-fast);
+    }
+
+    /* Show when navbar has mobile-open class */
+    .flin-navbar--mobile-open .flin-navbar-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    /* Reset alignment on mobile - always stack vertically */
+    .flin-navbar-menu--left,
+    .flin-navbar-menu--center,
+    .flin-navbar-menu--right {
+        justify-content: flex-start;
+        margin: 0;
+    }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-navbar-menu {
+    background-color: var(--flin-bg);
+    border-bottom-color: var(--flin-neutral-700);
+}
+</style>

@@ -1,0 +1,70 @@
+// FlinUI Stack Component
+// Vertical or horizontal stacking with consistent spacing
+// Props: direction (vertical/horizontal), gap (1-16), align (start/center/end/stretch), justify (start/center/end/between/around/evenly)
+
+direction = props.direction || "vertical"
+gap = props.gap || 4
+align = props.align || "stretch"
+justify = props.justify || "start"
+
+// Build class string
+directionClass = {if direction == "horizontal" { "flin-stack-h" } else { "flin-stack-v" }}
+gapClass = "flin-stack-gap-" + gap
+alignClass = "flin-stack-align-" + align
+justifyClass = "flin-stack-justify-" + justify
+
+stackClass = "flin-stack " + directionClass + " " + gapClass + " " + alignClass + " " + justifyClass
+
+<div class={stackClass}>
+    {children}
+</div>
+
+<style scoped>
+.flin-stack {
+    display: flex;
+    box-sizing: border-box;
+}
+
+/* Direction */
+.flin-stack-v {
+    flex-direction: column;
+}
+
+.flin-stack-h {
+    flex-direction: row;
+}
+
+/* Gap variants */
+.flin-stack-gap-1 { gap: var(--flin-space-1); }
+.flin-stack-gap-2 { gap: var(--flin-space-2); }
+.flin-stack-gap-3 { gap: var(--flin-space-3); }
+.flin-stack-gap-4 { gap: var(--flin-space-4); }
+.flin-stack-gap-5 { gap: calc(var(--flin-space-4) + var(--flin-space-1)); }
+.flin-stack-gap-6 { gap: var(--flin-space-6); }
+.flin-stack-gap-8 { gap: var(--flin-space-8); }
+.flin-stack-gap-10 { gap: calc(var(--flin-space-8) + var(--flin-space-2)); }
+.flin-stack-gap-12 { gap: var(--flin-space-12); }
+.flin-stack-gap-16 { gap: var(--flin-space-16); }
+
+/* Align items (cross axis) */
+.flin-stack-align-start { align-items: flex-start; }
+.flin-stack-align-center { align-items: center; }
+.flin-stack-align-end { align-items: flex-end; }
+.flin-stack-align-stretch { align-items: stretch; }
+.flin-stack-align-baseline { align-items: baseline; }
+
+/* Justify content (main axis) */
+.flin-stack-justify-start { justify-content: flex-start; }
+.flin-stack-justify-center { justify-content: center; }
+.flin-stack-justify-end { justify-content: flex-end; }
+.flin-stack-justify-between { justify-content: space-between; }
+.flin-stack-justify-around { justify-content: space-around; }
+.flin-stack-justify-evenly { justify-content: space-evenly; }
+
+/* Responsive: stack horizontally on mobile */
+@media (max-width: 640px) {
+    .flin-stack-h.flin-stack-responsive {
+        flex-direction: column;
+    }
+}
+</style>

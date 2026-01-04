@@ -1,0 +1,458 @@
+// FlinUI LineChart Component
+// SVG-based line chart with multiple series, points, area fill, and animations
+
+// Props with defaults
+data = props.data || []  // Array of series: { name, values: [{ x, y }], color? }
+width = props.width || 400
+height = props.height || 300
+showPoints = props.showPoints || true
+showArea = props.showArea || false
+showGrid = props.showGrid || true
+showLegend = props.showLegend || true
+animated = props.animated || true
+curved = props.curved || true
+strokeWidth = props.strokeWidth || 2
+pointRadius = props.pointRadius || 4
+title = props.title || ""
+subtitle = props.subtitle || ""
+xAxisLabel = props.xAxisLabel || ""
+yAxisLabel = props.yAxisLabel || ""
+
+// Calculate dimensions
+padding = { top: 40, right: 20, bottom: 50, left: 60 }
+chartWidth = width - padding.left - padding.right
+chartHeight = height - padding.top - padding.bottom
+
+// Find min/max values across all series
+allYValues = []
+allXValues = []
+{for series in data}
+    {for point in series.values}
+        allYValues = allYValues.concat([point.y])
+        allXValues = allXValues.concat([point.x])
+    {/for}
+{/for}
+
+minY = allYValues.length > 0 ? Math.min(...allYValues) : 0
+maxY = allYValues.length > 0 ? Math.max(...allYValues) : 100
+minX = allXValues.length > 0 ? Math.min(...allXValues) : 0
+maxX = allXValues.length > 0 ? Math.max(...allXValues) : 100
+
+// Add padding to Y axis
+yRange = maxY - minY
+minY = minY - yRange * 0.1
+maxY = maxY + yRange * 0.1
+
+// Scale functions
+scaleX = {
+    value = args.value
+    ((value - minX) / (maxX - minX)) * chartWidth
+}
+
+scaleY = {
+    value = args.value
+    chartHeight - ((value - minY) / (maxY - minY)) * chartHeight
+}
+
+// Default colors for series
+seriesColors = [
+    "var(--flin-primary)",
+    "var(--flin-success)",
+    "var(--flin-warning)",
+    "var(--flin-danger)",
+    "var(--flin-info)"
+]
+
+getSeriesColor = {
+    index = args.index
+    series = args.series
+    {if series.color}
+        color = series.color
+    {else}
+        color = seriesColors[index % seriesColors.length]
+    {/if}
+    color
+}
+
+// Generate path data
+generatePath = {
+    values = args.values
+    isCurved = args.curved
+
+    {if values.length < 2}
+        path = ""
+    {else if isCurved}
+        // Smooth curve using catmull-rom to bezier
+        path = "M " ++ scaleX({ value: values[0].x }) ++ " " ++ scaleY({ value: values[0].y })
+        {for i in 1..(values.length)}
+            p0 = values[Math.max(0, i - 2)]
+            p1 = values[i - 1]
+            p2 = values[i]
+            p3 = values[Math.min(values.length - 1, i + 1)]
+
+            cp1x = scaleX({ value: p1.x }) + (scaleX({ value: p2.x }) - scaleX({ value: p0.x })) / 6
+            cp1y = scaleY({ value: p1.y }) + (scaleY({ value: p2.y }) - scaleY({ value: p0.y })) / 6
+            cp2x = scaleX({ value: p2.x }) - (scaleX({ value: p3.x }) - scaleX({ value: p1.x })) / 6
+            cp2y = scaleY({ value: p2.y }) - (scaleY({ value: p3.y }) - scaleY({ value: p1.y })) / 6
+
+            path = path ++ " C " ++ cp1x ++ " " ++ cp1y ++ ", " ++ cp2x ++ " " ++ cp2y ++ ", " ++ scaleX({ value: p2.x }) ++ " " ++ scaleY({ value: p2.y })
+        {/for}
+    {else}
+        // Straight lines
+        path = "M " ++ scaleX({ value: values[0].x }) ++ " " ++ scaleY({ value: values[0].y })
+        {for i in 1..(values.length)}
+            path = path ++ " L " ++ scaleX({ value: values[i].x }) ++ " " ++ scaleY({ value: values[i].y })
+        {/for}
+    {/if}
+    path
+}
+
+// Generate area path
+generateAreaPath = {
+    values = args.values
+    linePath = args.linePath
+
+    {if values.length < 2}
+        areaPath = ""
+    {else}
+        firstX = scaleX({ value: values[0].x })
+        lastX = scaleX({ value: values[values.length - 1].x })
+        baseY = chartHeight
+
+        areaPath = linePath ++ " L " ++ lastX ++ " " ++ baseY ++ " L " ++ firstX ++ " " ++ baseY ++ " Z"
+    {/if}
+    areaPath
+}
+
+// Grid lines
+gridLineCountY = 5
+gridLinesY = []
+{for i in 0..gridLineCountY}
+    gridValue = minY + ((maxY - minY) / gridLineCountY) * i
+    gridLinesY = gridLinesY.concat([{ value: gridValue, y: scaleY({ value: gridValue }) }])
+{/for}
+
+gridLineCountX = 5
+gridLinesX = []
+{for i in 0..gridLineCountX}
+    gridValue = minX + ((maxX - minX) / gridLineCountX) * i
+    gridLinesX = gridLinesX.concat([{ value: gridValue, x: scaleX({ value: gridValue }) }])
+{/for}
+
+// Hover state
+hoveredPoint = null
+
+handlePointHover = {
+    hoveredPoint = { seriesIndex: event.seriesIndex, pointIndex: event.pointIndex }
+}
+
+handlePointLeave = {
+    hoveredPoint = null
+}
+
+<div class="flin-linechart" style="--chart-width: {width}px; --chart-height: {height}px;">
+    {if title || subtitle}
+        <div class="flin-linechart__header">
+            {if title}
+                <h3 class="flin-linechart__title">{title}</h3>
+            {/if}
+            {if subtitle}
+                <p class="flin-linechart__subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <svg
+        class="flin-linechart__svg"
+        viewBox="0 0 {width} {height}"
+        role="img"
+        aria-label={title || "Line chart"}
+    >
+        <defs>
+            {for series, index in data}
+                <linearGradient id="flin-line-gradient-{index}" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color={getSeriesColor({ index: index, series: series })} stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color={getSeriesColor({ index: index, series: series })} stop-opacity="0"/>
+                </linearGradient>
+            {/for}
+        </defs>
+
+        <g class="flin-linechart__container" transform="translate({padding.left}, {padding.top})">
+            // Grid
+            {if showGrid}
+                <g class="flin-linechart__grid">
+                    // Horizontal grid lines
+                    {for line in gridLinesY}
+                        <line
+                            class="flin-linechart__grid-line"
+                            x1="0"
+                            y1={line.y}
+                            x2={chartWidth}
+                            y2={line.y}
+                        />
+                        <text
+                            class="flin-linechart__axis-label"
+                            x="-10"
+                            y={line.y}
+                            text-anchor="end"
+                            dominant-baseline="middle"
+                        >
+                            {Math.round(line.value * 10) / 10}
+                        </text>
+                    {/for}
+                    // Vertical grid lines
+                    {for line in gridLinesX}
+                        <line
+                            class="flin-linechart__grid-line"
+                            x1={line.x}
+                            y1="0"
+                            x2={line.x}
+                            y2={chartHeight}
+                        />
+                        <text
+                            class="flin-linechart__axis-label"
+                            x={line.x}
+                            y={chartHeight + 20}
+                            text-anchor="middle"
+                        >
+                            {Math.round(line.value * 10) / 10}
+                        </text>
+                    {/for}
+                </g>
+            {/if}
+
+            // Series
+            {for series, seriesIndex in data}
+                linePath = generatePath({ values: series.values, curved: curved })
+                seriesColor = getSeriesColor({ index: seriesIndex, series: series })
+
+                <g class="flin-linechart__series">
+                    // Area fill
+                    {if showArea}
+                        <path
+                            class="flin-linechart__area"
+                            d={generateAreaPath({ values: series.values, linePath: linePath })}
+                            fill="url(#flin-line-gradient-{seriesIndex})"
+                        />
+                    {/if}
+
+                    // Line
+                    <path
+                        class={"flin-linechart__line" ++ {if animated { " flin-linechart__line--animated" } else { "" }}}
+                        d={linePath}
+                        fill="none"
+                        stroke={seriesColor}
+                        stroke-width={strokeWidth}
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+
+                    // Points
+                    {if showPoints}
+                        {for point, pointIndex in series.values}
+                            <circle
+                                class={"flin-linechart__point" ++ {if hoveredPoint && hoveredPoint.seriesIndex == seriesIndex && hoveredPoint.pointIndex == pointIndex { " flin-linechart__point--active" } else { "" }}}
+                                cx={scaleX({ value: point.x })}
+                                cy={scaleY({ value: point.y })}
+                                r={pointRadius}
+                                fill={seriesColor}
+                                stroke="var(--flin-bg)"
+                                stroke-width="2"
+                                mouseenter={handlePointHover.bind({ seriesIndex: seriesIndex, pointIndex: pointIndex })}
+                                mouseleave={handlePointLeave}
+                            />
+                        {/for}
+                    {/if}
+                </g>
+            {/for}
+
+            // Axis labels
+            {if xAxisLabel}
+                <text
+                    class="flin-linechart__axis-title"
+                    x={chartWidth / 2}
+                    y={chartHeight + 40}
+                    text-anchor="middle"
+                >
+                    {xAxisLabel}
+                </text>
+            {/if}
+            {if yAxisLabel}
+                <text
+                    class="flin-linechart__axis-title"
+                    x={-chartHeight / 2}
+                    y="-45"
+                    text-anchor="middle"
+                    transform="rotate(-90)"
+                >
+                    {yAxisLabel}
+                </text>
+            {/if}
+        </g>
+    </svg>
+
+    // Legend
+    {if showLegend && data.length > 1}
+        <div class="flin-linechart__legend">
+            {for series, index in data}
+                <div class="flin-linechart__legend-item">
+                    <span
+                        class="flin-linechart__legend-color"
+                        style="--legend-color: {getSeriesColor({ index: index, series: series })};"
+                    ></span>
+                    <span class="flin-linechart__legend-label">{series.name}</span>
+                </div>
+            {/for}
+        </div>
+    {/if}
+
+    // Tooltip
+    {if hoveredPoint != null}
+        hoveredSeries = data[hoveredPoint.seriesIndex]
+        hoveredValue = hoveredSeries.values[hoveredPoint.pointIndex]
+        <div class="flin-linechart__tooltip">
+            <span class="flin-linechart__tooltip-series">{hoveredSeries.name}</span>
+            <span class="flin-linechart__tooltip-value">x: {hoveredValue.x}, y: {hoveredValue.y}</span>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-linechart {
+    position: relative;
+    width: var(--chart-width);
+    font-family: var(--flin-font-sans);
+}
+
+.flin-linechart__header {
+    margin-bottom: var(--flin-space-3);
+}
+
+.flin-linechart__title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.flin-linechart__subtitle {
+    margin: var(--flin-space-1) 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.flin-linechart__svg {
+    display: block;
+    overflow: visible;
+}
+
+.flin-linechart__grid-line {
+    stroke: var(--flin-neutral-200);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+}
+
+.flin-linechart__axis-label {
+    font-size: 11px;
+    fill: var(--flin-fg-muted);
+}
+
+.flin-linechart__axis-title {
+    font-size: 12px;
+    font-weight: 500;
+    fill: var(--flin-fg);
+}
+
+.flin-linechart__line {
+    vector-effect: non-scaling-stroke;
+}
+
+.flin-linechart__line--animated {
+    stroke-dasharray: 2000;
+    stroke-dashoffset: 2000;
+    animation: flin-line-draw 1.5s ease-out forwards;
+}
+
+@keyframes flin-line-draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.flin-linechart__area {
+    opacity: 0.8;
+}
+
+.flin-linechart__point {
+    cursor: pointer;
+    transition: r var(--flin-transition-fast);
+}
+
+.flin-linechart__point:hover,
+.flin-linechart__point--active {
+    r: 6;
+}
+
+.flin-linechart__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-space-4);
+    margin-top: var(--flin-space-3);
+    justify-content: center;
+}
+
+.flin-linechart__legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.flin-linechart__legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--flin-radius-sm);
+    background-color: var(--legend-color);
+}
+
+.flin-linechart__legend-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+}
+
+.flin-linechart__tooltip {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    box-shadow: var(--flin-shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.flin-linechart__tooltip-series {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+}
+
+.flin-linechart__tooltip-value {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-linechart__grid-line {
+    stroke: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-linechart__tooltip {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+</style>

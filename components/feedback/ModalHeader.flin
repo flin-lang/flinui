@@ -1,0 +1,112 @@
+// ModalHeader.flin - FlinUI Modal Header Component
+// Header section for Modal with title, subtitle and close button
+
+// Props with defaults
+title = props.title || ""
+subtitle = props.subtitle || ""
+onClose = props.onClose
+
+// Handle close button click
+handleClose = {
+    {if onClose}
+        onClose()
+    {/if}
+}
+
+<div class="flin-modal-header" role="banner">
+    <div class="modal-header-content">
+        {if title}
+            <h2 class="modal-header-title" id="modal-title">{title}</h2>
+        {/if}
+        {if subtitle}
+            <p class="modal-header-subtitle">{subtitle}</p>
+        {/if}
+        {if !title && !subtitle}
+            {children}
+        {/if}
+    </div>
+
+    {if onClose}
+        <button
+            class="modal-header-close"
+            click={handleClose}
+            aria-label="Close modal"
+            type="button"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    {/if}
+</div>
+
+<style scoped>
+.flin-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    flex-shrink: 0;
+}
+
+.modal-header-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.modal-header-title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+    line-height: 1.4;
+}
+
+.modal-header-subtitle {
+    margin: var(--flin-space-1) 0 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.5;
+}
+
+.modal-header-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.modal-header-close:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.modal-header-close:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.modal-header-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-modal-header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-header-close:hover {
+    background-color: var(--flin-neutral-700);
+}
+</style>

@@ -1,0 +1,118 @@
+// NavbarItem.flin - FlinUI Navbar Item Component
+// Individual navigation link or button in the navbar
+
+// Props with defaults
+href = props.href
+active = props.active || false
+onClick = props.onClick
+disabled = props.disabled || false
+
+// Determine if this is a link or button
+isLink = href != none
+
+// Handle keyboard navigation
+handleKeydown = {
+    if event.key == "Enter" || event.key == " " {
+        if onClick {
+            event.preventDefault
+            onClick()
+        }
+    }
+}
+
+{if isLink}
+    <a
+        href={href}
+        class={"flin-navbar-item" ++ {if active { " flin-navbar-item--active" } else { "" }}}
+        role="menuitem"
+        aria-current={if active { "page" } else { none }}
+        tabindex={if disabled { -1 } else { 0 }}
+    >
+        {children}
+    </a>
+{else}
+    <button
+        class={"flin-navbar-item" ++ {if active { " flin-navbar-item--active" } else { "" }}}
+        click={onClick}
+        keydown={handleKeydown}
+        disabled={disabled}
+        role="menuitem"
+        tabindex={if disabled { -1 } else { 0 }}
+    >
+        {children}
+    </button>
+{/if}
+
+<style scoped>
+.flin-navbar-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+    text-decoration: none;
+    background: none;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: color var(--flin-transition-fast),
+                background-color var(--flin-transition-fast);
+    white-space: nowrap;
+}
+
+.flin-navbar-item:hover:not(:disabled) {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.flin-navbar-item:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.flin-navbar-item--active {
+    color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+}
+
+.flin-navbar-item--active:hover {
+    background-color: var(--flin-primary-light);
+}
+
+.flin-navbar-item:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .flin-navbar-item {
+        width: 100%;
+        padding: var(--flin-space-3) var(--flin-space-4);
+        border-radius: 0;
+        justify-content: flex-start;
+        font-size: var(--flin-text-base);
+    }
+
+    .flin-navbar-item:hover:not(:disabled) {
+        background-color: var(--flin-neutral-100);
+    }
+
+    .flin-navbar-item--active {
+        background-color: var(--flin-primary-light);
+        border-left: 3px solid var(--flin-primary);
+    }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-navbar-item:hover:not(:disabled) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .flin-navbar-item--active {
+    background-color: rgba(59, 130, 246, 0.15);
+}
+</style>

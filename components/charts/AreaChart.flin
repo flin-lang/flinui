@@ -1,0 +1,486 @@
+// FlinUI AreaChart Component
+// SVG-based area chart with stacked/overlay modes, gradients, and animations
+
+// Props with defaults
+data = props.data || []  // Array of series: { name, values: [{ x, y }], color? }
+width = props.width || 400
+height = props.height || 300
+stacked = props.stacked || false
+showGrid = props.showGrid || true
+showLegend = props.showLegend || true
+showPoints = props.showPoints || false
+animated = props.animated || true
+curved = props.curved || true
+opacity = props.opacity || 0.6
+title = props.title || ""
+subtitle = props.subtitle || ""
+xAxisLabel = props.xAxisLabel || ""
+yAxisLabel = props.yAxisLabel || ""
+
+// Calculate dimensions
+padding = { top: 40, right: 20, bottom: 50, left: 60 }
+chartWidth = width - padding.left - padding.right
+chartHeight = height - padding.top - padding.bottom
+
+// Find min/max values
+allYValues = []
+allXValues = []
+{for series in data}
+    {for point in series.values}
+        allYValues = allYValues.concat([point.y])
+        allXValues = allXValues.concat([point.x])
+    {/for}
+{/for}
+
+minY = 0  // Area charts typically start at 0
+maxY = allYValues.length > 0 ? Math.max(...allYValues) : 100
+minX = allXValues.length > 0 ? Math.min(...allXValues) : 0
+maxX = allXValues.length > 0 ? Math.max(...allXValues) : 100
+
+// Add headroom for stacked
+{if stacked}
+    // Calculate stacked max
+    stackedMax = 0
+    {for i in 0..(data.length > 0 && data[0].values ? data[0].values.length : 0)}
+        stackSum = 0
+        {for series in data}
+            {if series.values && series.values[i]}
+                stackSum = stackSum + series.values[i].y
+            {/if}
+        {/for}
+        stackedMax = Math.max(stackedMax, stackSum)
+    {/for}
+    maxY = stackedMax * 1.1
+{else}
+    maxY = maxY * 1.1
+{/if}
+
+// Scale functions
+scaleX = {
+    value = args.value
+    ((value - minX) / (maxX - minX)) * chartWidth
+}
+
+scaleY = {
+    value = args.value
+    chartHeight - ((value - minY) / (maxY - minY)) * chartHeight
+}
+
+// Default colors
+seriesColors = [
+    "var(--flin-primary)",
+    "var(--flin-success)",
+    "var(--flin-info)",
+    "var(--flin-warning)",
+    "var(--flin-danger)"
+]
+
+getSeriesColor = {
+    index = args.index
+    series = args.series
+    {if series.color}
+        color = series.color
+    {else}
+        color = seriesColors[index % seriesColors.length]
+    {/if}
+    color
+}
+
+// Generate area path
+generateAreaPath = {
+    values = args.values
+    baselineValues = args.baseline || null  // For stacking
+    isCurved = args.curved
+
+    {if values.length < 2}
+        path = ""
+    {else}
+        // Top line
+        {if isCurved}
+            topPath = "M " ++ scaleX({ value: values[0].x }) ++ " " ++ scaleY({ value: values[0].y })
+            {for i in 1..(values.length)}
+                p0 = values[Math.max(0, i - 2)]
+                p1 = values[i - 1]
+                p2 = values[i]
+                p3 = values[Math.min(values.length - 1, i + 1)]
+
+                cp1x = scaleX({ value: p1.x }) + (scaleX({ value: p2.x }) - scaleX({ value: p0.x })) / 6
+                cp1y = scaleY({ value: p1.y }) + (scaleY({ value: p2.y }) - scaleY({ value: p0.y })) / 6
+                cp2x = scaleX({ value: p2.x }) - (scaleX({ value: p3.x }) - scaleX({ value: p1.x })) / 6
+                cp2y = scaleY({ value: p2.y }) - (scaleY({ value: p3.y }) - scaleY({ value: p1.y })) / 6
+
+                topPath = topPath ++ " C " ++ cp1x ++ " " ++ cp1y ++ ", " ++ cp2x ++ " " ++ cp2y ++ ", " ++ scaleX({ value: p2.x }) ++ " " ++ scaleY({ value: p2.y })
+            {/for}
+        {else}
+            topPath = "M " ++ scaleX({ value: values[0].x }) ++ " " ++ scaleY({ value: values[0].y })
+            {for i in 1..(values.length)}
+                topPath = topPath ++ " L " ++ scaleX({ value: values[i].x }) ++ " " ++ scaleY({ value: values[i].y })
+            {/for}
+        {/if}
+
+        // Bottom line (baseline or zero line)
+        {if baselineValues}
+            // Use previous series as baseline
+            bottomPath = ""
+            {for i in (values.length - 1)..(-1)}
+                baseY = baselineValues[i] ? baselineValues[i].y : 0
+                x = scaleX({ value: values[i].x })
+                y = scaleY({ value: baseY })
+                bottomPath = bottomPath ++ " L " ++ x ++ " " ++ y
+            {/for}
+        {else}
+            // Use zero line as baseline
+            firstX = scaleX({ value: values[0].x })
+            lastX = scaleX({ value: values[values.length - 1].x })
+            baseY = scaleY({ value: 0 })
+            bottomPath = " L " ++ lastX ++ " " ++ baseY ++ " L " ++ firstX ++ " " ++ baseY
+        {/if}
+
+        path = topPath ++ bottomPath ++ " Z"
+    {/if}
+    path
+}
+
+// Calculate stacked values
+calculateStackedData = {
+    {if !stacked}
+        stackedData = data
+    {else}
+        stackedData = []
+        {for seriesIdx in 0..(data.length)}
+            series = data[seriesIdx]
+            newValues = []
+
+            {for pointIdx in 0..(series.values ? series.values.length : 0)}
+                point = series.values[pointIdx]
+                // Sum all previous series at this point
+                stackedY = point.y
+                {for prevIdx in 0..seriesIdx}
+                    prevSeries = data[prevIdx]
+                    {if prevSeries.values && prevSeries.values[pointIdx]}
+                        stackedY = stackedY + prevSeries.values[pointIdx].y
+                    {/if}
+                {/for}
+                newValues = newValues.concat([{ x: point.x, y: stackedY }])
+            {/for}
+
+            stackedData = stackedData.concat([{
+                name: series.name,
+                values: newValues,
+                color: series.color
+            }])
+        {/for}
+    {/if}
+    stackedData
+}
+
+processedData = calculateStackedData()
+
+// Grid lines
+gridLineCountY = 5
+gridLinesY = []
+{for i in 0..gridLineCountY}
+    gridValue = minY + ((maxY - minY) / gridLineCountY) * i
+    gridLinesY = gridLinesY.concat([{ value: gridValue, y: scaleY({ value: gridValue }) }])
+{/for}
+
+// Hover state
+hoveredSeries = null
+
+handleSeriesHover = {
+    hoveredSeries = event.index
+}
+
+handleSeriesLeave = {
+    hoveredSeries = null
+}
+
+<div class="flin-areachart" style="--chart-width: {width}px; --chart-height: {height}px;">
+    {if title || subtitle}
+        <div class="flin-areachart__header">
+            {if title}
+                <h3 class="flin-areachart__title">{title}</h3>
+            {/if}
+            {if subtitle}
+                <p class="flin-areachart__subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <svg
+        class="flin-areachart__svg"
+        viewBox="0 0 {width} {height}"
+        role="img"
+        aria-label={title || "Area chart"}
+    >
+        <defs>
+            {for series, index in processedData}
+                <linearGradient id="flin-area-gradient-{index}" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color={getSeriesColor({ index: index, series: series })} stop-opacity={opacity}/>
+                    <stop offset="100%" stop-color={getSeriesColor({ index: index, series: series })} stop-opacity="0.1"/>
+                </linearGradient>
+            {/for}
+        </defs>
+
+        <g class="flin-areachart__container" transform="translate({padding.left}, {padding.top})">
+            // Grid
+            {if showGrid}
+                <g class="flin-areachart__grid">
+                    {for line in gridLinesY}
+                        <line
+                            class="flin-areachart__grid-line"
+                            x1="0"
+                            y1={line.y}
+                            x2={chartWidth}
+                            y2={line.y}
+                        />
+                        <text
+                            class="flin-areachart__axis-label"
+                            x="-10"
+                            y={line.y}
+                            text-anchor="end"
+                            dominant-baseline="middle"
+                        >
+                            {Math.round(line.value)}
+                        </text>
+                    {/for}
+                    // X axis
+                    <line
+                        class="flin-areachart__axis"
+                        x1="0"
+                        y1={chartHeight}
+                        x2={chartWidth}
+                        y2={chartHeight}
+                    />
+                </g>
+            {/if}
+
+            // Areas (render in reverse order for stacking)
+            {for i in (processedData.length - 1)..(-1)}
+                series = processedData[i]
+                seriesColor = getSeriesColor({ index: i, series: series })
+                baseline = stacked && i > 0 ? processedData[i - 1].values : null
+
+                <g
+                    class={"flin-areachart__series" ++ {if hoveredSeries == i { " flin-areachart__series--active" } else { "" }}}
+                    mouseenter={handleSeriesHover.bind({ index: i })}
+                    mouseleave={handleSeriesLeave}
+                >
+                    <path
+                        class={"flin-areachart__area" ++ {if animated { " flin-areachart__area--animated" } else { "" }}}
+                        d={generateAreaPath({ values: series.values, baseline: baseline, curved: curved })}
+                        fill="url(#flin-area-gradient-{i})"
+                        style="--area-index: {i};"
+                    />
+                    // Top stroke
+                    <path
+                        class="flin-areachart__stroke"
+                        d={generateAreaPath({ values: series.values, baseline: baseline, curved: curved }).split(" L " + scaleX({ value: series.values[series.values.length - 1].x }))[0]}
+                        fill="none"
+                        stroke={seriesColor}
+                        stroke-width="2"
+                    />
+                </g>
+            {/for}
+
+            // Points
+            {if showPoints}
+                {for series, seriesIdx in processedData}
+                    {for point, pointIdx in series.values}
+                        <circle
+                            class="flin-areachart__point"
+                            cx={scaleX({ value: point.x })}
+                            cy={scaleY({ value: point.y })}
+                            r="4"
+                            fill={getSeriesColor({ index: seriesIdx, series: series })}
+                            stroke="var(--flin-bg)"
+                            stroke-width="2"
+                        />
+                    {/for}
+                {/for}
+            {/if}
+
+            // Axis labels
+            {if xAxisLabel}
+                <text
+                    class="flin-areachart__axis-title"
+                    x={chartWidth / 2}
+                    y={chartHeight + 40}
+                    text-anchor="middle"
+                >
+                    {xAxisLabel}
+                </text>
+            {/if}
+            {if yAxisLabel}
+                <text
+                    class="flin-areachart__axis-title"
+                    x={-chartHeight / 2}
+                    y="-45"
+                    text-anchor="middle"
+                    transform="rotate(-90)"
+                >
+                    {yAxisLabel}
+                </text>
+            {/if}
+        </g>
+    </svg>
+
+    // Legend
+    {if showLegend && data.length > 1}
+        <div class="flin-areachart__legend">
+            {for series, index in data}
+                <div
+                    class={"flin-areachart__legend-item" ++ {if hoveredSeries == index { " flin-areachart__legend-item--active" } else { "" }}}
+                    mouseenter={handleSeriesHover.bind({ index: index })}
+                    mouseleave={handleSeriesLeave}
+                >
+                    <span
+                        class="flin-areachart__legend-color"
+                        style="--legend-color: {getSeriesColor({ index: index, series: series })};"
+                    ></span>
+                    <span class="flin-areachart__legend-label">{series.name}</span>
+                </div>
+            {/for}
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-areachart {
+    position: relative;
+    width: var(--chart-width);
+    font-family: var(--flin-font-sans);
+}
+
+.flin-areachart__header {
+    margin-bottom: var(--flin-space-3);
+}
+
+.flin-areachart__title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.flin-areachart__subtitle {
+    margin: var(--flin-space-1) 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.flin-areachart__svg {
+    display: block;
+    overflow: visible;
+}
+
+.flin-areachart__grid-line {
+    stroke: var(--flin-neutral-200);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+}
+
+.flin-areachart__axis {
+    stroke: var(--flin-neutral-300);
+    stroke-width: 1;
+}
+
+.flin-areachart__axis-label {
+    font-size: 11px;
+    fill: var(--flin-fg-muted);
+}
+
+.flin-areachart__axis-title {
+    font-size: 12px;
+    font-weight: 500;
+    fill: var(--flin-fg);
+}
+
+.flin-areachart__series {
+    cursor: pointer;
+}
+
+.flin-areachart__area {
+    transition: opacity var(--flin-transition-fast);
+}
+
+.flin-areachart__area--animated {
+    animation: flin-area-reveal 1s ease-out forwards;
+    animation-delay: calc(var(--area-index) * 0.15s);
+    opacity: 0;
+}
+
+@keyframes flin-area-reveal {
+    from {
+        opacity: 0;
+        transform: scaleY(0);
+        transform-origin: bottom;
+    }
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
+.flin-areachart__series:hover .flin-areachart__area,
+.flin-areachart__series--active .flin-areachart__area {
+    opacity: 0.9;
+}
+
+.flin-areachart__stroke {
+    pointer-events: none;
+}
+
+.flin-areachart__point {
+    pointer-events: none;
+}
+
+.flin-areachart__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-space-4);
+    margin-top: var(--flin-space-3);
+    justify-content: center;
+}
+
+.flin-areachart__legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.flin-areachart__legend-item:hover,
+.flin-areachart__legend-item--active {
+    background-color: var(--flin-neutral-100);
+}
+
+.flin-areachart__legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--flin-radius-sm);
+    background-color: var(--legend-color);
+}
+
+.flin-areachart__legend-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-areachart__grid-line {
+    stroke: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-areachart__axis {
+    stroke: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .flin-areachart__legend-item:hover,
+[data-theme="dark"] .flin-areachart__legend-item--active {
+    background-color: var(--flin-neutral-800);
+}
+</style>

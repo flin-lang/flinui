@@ -1,0 +1,60 @@
+// FlinUI Container Component
+// Responsive container with max-width constraints
+// Props: size (sm/md/lg/xl/full), padding (1-16), centered (bool)
+
+size = props.size || "lg"
+padding = props.padding || 4
+centered = props.centered || true
+
+// Compute max-width based on size
+maxWidth = match size {
+    "sm" -> "640px"
+    "md" -> "768px"
+    "lg" -> "1024px"
+    "xl" -> "1280px"
+    "2xl" -> "1536px"
+    "full" -> "100%"
+    _ -> "1024px"
+}
+
+// Compute padding class
+paddingClass = "flin-container-p-" + padding
+
+// Compute centered class
+containerClass = "flin-container " + paddingClass + {if centered { " flin-container-centered" } else { "" }}
+
+<div class={containerClass} style="max-width: {maxWidth};">
+    {children}
+</div>
+
+<style scoped>
+.flin-container {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.flin-container-centered {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Padding variants using theme tokens */
+.flin-container-p-1 { padding: var(--flin-space-1); }
+.flin-container-p-2 { padding: var(--flin-space-2); }
+.flin-container-p-3 { padding: var(--flin-space-3); }
+.flin-container-p-4 { padding: var(--flin-space-4); }
+.flin-container-p-5 { padding: calc(var(--flin-space-4) + var(--flin-space-1)); }
+.flin-container-p-6 { padding: var(--flin-space-6); }
+.flin-container-p-8 { padding: var(--flin-space-8); }
+.flin-container-p-10 { padding: calc(var(--flin-space-8) + var(--flin-space-2)); }
+.flin-container-p-12 { padding: var(--flin-space-12); }
+.flin-container-p-16 { padding: var(--flin-space-16); }
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .flin-container {
+        padding-left: var(--flin-space-4);
+        padding-right: var(--flin-space-4);
+    }
+}
+</style>

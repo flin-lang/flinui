@@ -1,0 +1,471 @@
+// FlinUI CommandPalette Component
+// Cmd+K style command palette for quick actions and search
+
+// Props with defaults
+open = props.open || false
+placeholder = props.placeholder || "Type a command or search..."
+commands = props.commands || []  // Array of { id, label, shortcut?, icon?, group?, action }
+recentCommands = props.recentCommands || []
+maxResults = props.maxResults || 8
+showRecent = props.showRecent || true
+onSelect = props.onSelect
+onClose = props.onClose
+onSearch = props.onSearch
+
+// State
+query = ""
+selectedIndex = 0
+filteredCommands = commands
+
+// Filter commands based on query
+filterCommands = {
+    searchQuery = query.toLowerCase().trim()
+
+    {if searchQuery == ""}
+        {if showRecent && recentCommands.length > 0}
+            filteredCommands = recentCommands.slice(0, maxResults)
+        {else}
+            filteredCommands = commands.slice(0, maxResults)
+        {/if}
+    {else}
+        // Filter and score commands
+        matches = []
+        {for cmd in commands}
+            label = cmd.label.toLowerCase()
+            keywords = cmd.keywords ? cmd.keywords.join(" ").toLowerCase() : ""
+            searchText = label + " " + keywords
+
+            {if searchText.includes(searchQuery)}
+                // Calculate score (exact match > starts with > contains)
+                score = 0
+                {if label == searchQuery}
+                    score = 100
+                {else if label.startsWith(searchQuery)}
+                    score = 75
+                {else if label.includes(searchQuery)}
+                    score = 50
+                {else}
+                    score = 25
+                {/if}
+
+                matches = matches.concat([{ ...cmd, score: score }])
+            {/if}
+        {/for}
+
+        // Sort by score and limit
+        filteredCommands = matches
+            .sort((a, b) => b.score - a.score)
+            .slice(0, maxResults)
+    {/if}
+
+    // Reset selection
+    selectedIndex = 0
+}
+
+// Handle input change
+handleInput = {
+    query = event.target.value
+    filterCommands()
+
+    {if onSearch}
+        onSearch(query)
+    {/if}
+}
+
+// Handle keyboard navigation
+handleKeydown = {
+    key = event.key
+
+    {if key == "ArrowDown"}
+        event.preventDefault()
+        selectedIndex = (selectedIndex + 1) % filteredCommands.length
+    {else if key == "ArrowUp"}
+        event.preventDefault()
+        selectedIndex = (selectedIndex - 1 + filteredCommands.length) % filteredCommands.length
+    {else if key == "Enter"}
+        event.preventDefault()
+        {if filteredCommands.length > 0}
+            selectCommand(filteredCommands[selectedIndex])
+        {/if}
+    {else if key == "Escape"}
+        closePanel()
+    {/if}
+}
+
+// Select a command
+selectCommand = {
+    cmd = args.cmd
+
+    {if cmd.action}
+        cmd.action()
+    {/if}
+
+    {if onSelect}
+        onSelect(cmd)
+    {/if}
+
+    closePanel()
+}
+
+// Close the palette
+closePanel = {
+    query = ""
+    selectedIndex = 0
+    filteredCommands = showRecent && recentCommands.length > 0 ? recentCommands : commands.slice(0, maxResults)
+
+    {if onClose}
+        onClose()
+    {/if}
+}
+
+// Handle backdrop click
+handleBackdropClick = {
+    closePanel()
+}
+
+// Handle item click
+handleItemClick = {
+    index = event.index
+    selectCommand({ cmd: filteredCommands[index] })
+}
+
+// Handle item hover
+handleItemHover = {
+    index = event.index
+    selectedIndex = index
+}
+
+// Group commands by group property
+groupedCommands = {
+    groups = {}
+
+    {for cmd in filteredCommands}
+        group = cmd.group || "Commands"
+        {if !groups[group]}
+            groups[group] = []
+        {/if}
+        groups[group] = groups[group].concat([cmd])
+    {/for}
+
+    groups
+}
+
+// Initialize
+filterCommands()
+
+{if open}
+    <div class="flin-command-palette__backdrop" click={handleBackdropClick}>
+        <div class="flin-command-palette" click={(e) => e.stopPropagation()}>
+            // Search input
+            <div class="flin-command-palette__header">
+                <svg class="flin-command-palette__search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <input
+                    type="text"
+                    class="flin-command-palette__input"
+                    value={query}
+                    placeholder={placeholder}
+                    input={handleInput}
+                    keydown={handleKeydown}
+                    autofocus
+                    aria-label="Command search"
+                    aria-autocomplete="list"
+                    aria-controls="command-list"
+                />
+                <kbd class="flin-command-palette__esc">ESC</kbd>
+            </div>
+
+            // Results list
+            <div class="flin-command-palette__content" id="command-list" role="listbox">
+                {if filteredCommands.length == 0}
+                    <div class="flin-command-palette__empty">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        <span>No commands found for "{query}"</span>
+                    </div>
+                {else}
+                    // Show label for recent commands
+                    {if query == "" && showRecent && recentCommands.length > 0}
+                        <div class="flin-command-palette__group-label">Recent</div>
+                    {/if}
+
+                    {for cmd, index in filteredCommands}
+                        <div
+                            class={"flin-command-palette__item" ++ {if index == selectedIndex { " flin-command-palette__item--selected" } else { "" }}}
+                            role="option"
+                            aria-selected={index == selectedIndex}
+                            click={handleItemClick.bind({ index: index })}
+                            mouseenter={handleItemHover.bind({ index: index })}
+                        >
+                            {if cmd.icon}
+                                <span class="flin-command-palette__item-icon" aria-hidden="true">
+                                    {cmd.icon}
+                                </span>
+                            {else}
+                                <span class="flin-command-palette__item-icon flin-command-palette__item-icon--default" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6"/>
+                                    </svg>
+                                </span>
+                            {/if}
+
+                            <span class="flin-command-palette__item-label">{cmd.label}</span>
+
+                            {if cmd.description}
+                                <span class="flin-command-palette__item-desc">{cmd.description}</span>
+                            {/if}
+
+                            {if cmd.shortcut}
+                                <div class="flin-command-palette__item-shortcut">
+                                    {for key in cmd.shortcut.split("+")}
+                                        <kbd class="flin-command-palette__kbd">{key}</kbd>
+                                    {/for}
+                                </div>
+                            {/if}
+                        </div>
+                    {/for}
+                {/if}
+            </div>
+
+            // Footer
+            <div class="flin-command-palette__footer">
+                <div class="flin-command-palette__hint">
+                    <kbd class="flin-command-palette__kbd flin-command-palette__kbd--small">↑</kbd>
+                    <kbd class="flin-command-palette__kbd flin-command-palette__kbd--small">↓</kbd>
+                    <span>navigate</span>
+                </div>
+                <div class="flin-command-palette__hint">
+                    <kbd class="flin-command-palette__kbd flin-command-palette__kbd--small">↵</kbd>
+                    <span>select</span>
+                </div>
+                <div class="flin-command-palette__hint">
+                    <kbd class="flin-command-palette__kbd flin-command-palette__kbd--small">esc</kbd>
+                    <span>close</span>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}
+
+<style scoped>
+.flin-command-palette__backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 15vh;
+    z-index: 9999;
+    animation: flin-backdrop-fade 0.15s ease-out;
+}
+
+@keyframes flin-backdrop-fade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.flin-command-palette {
+    width: 100%;
+    max-width: 560px;
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-xl);
+    overflow: hidden;
+    font-family: var(--flin-font-sans);
+    animation: flin-palette-slide 0.2s ease-out;
+}
+
+@keyframes flin-palette-slide {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.flin-command-palette__header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.flin-command-palette__search-icon {
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+}
+
+.flin-command-palette__input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    outline: none;
+}
+
+.flin-command-palette__input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.flin-command-palette__esc {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    background-color: var(--flin-neutral-100);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    font-family: var(--flin-font-sans);
+}
+
+.flin-command-palette__content {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: var(--flin-space-2);
+}
+
+.flin-command-palette__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-8);
+    color: var(--flin-fg-muted);
+}
+
+.flin-command-palette__empty svg {
+    opacity: 0.5;
+}
+
+.flin-command-palette__group-label {
+    font-size: var(--flin-text-xs);
+    font-weight: 600;
+    color: var(--flin-fg-muted);
+    text-transform: uppercase;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    margin-bottom: var(--flin-space-1);
+}
+
+.flin-command-palette__item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.flin-command-palette__item:hover,
+.flin-command-palette__item--selected {
+    background-color: var(--flin-neutral-100);
+}
+
+.flin-command-palette__item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+}
+
+.flin-command-palette__item-icon--default {
+    opacity: 0.5;
+}
+
+.flin-command-palette__item-label {
+    flex: 1;
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+}
+
+.flin-command-palette__item-desc {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    margin-left: var(--flin-space-2);
+}
+
+.flin-command-palette__item-shortcut {
+    display: flex;
+    gap: var(--flin-space-1);
+    flex-shrink: 0;
+}
+
+.flin-command-palette__kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-family: var(--flin-font-sans);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+    background-color: var(--flin-neutral-100);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-sm);
+}
+
+.flin-command-palette__kbd--small {
+    min-width: 20px;
+    height: 20px;
+    font-size: 10px;
+}
+
+.flin-command-palette__footer {
+    display: flex;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+    background-color: var(--flin-neutral-50);
+}
+
+.flin-command-palette__hint {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-command-palette {
+    background-color: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .flin-command-palette__header,
+[data-theme="dark"] .flin-command-palette__footer {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-command-palette__item:hover,
+[data-theme="dark"] .flin-command-palette__item--selected {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .flin-command-palette__kbd,
+[data-theme="dark"] .flin-command-palette__esc {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-command-palette__footer {
+    background-color: var(--flin-neutral-800);
+}
+</style>

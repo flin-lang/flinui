@@ -1,0 +1,74 @@
+// FormError.flin - FlinUI Form Error Component
+// Displays an error message with optional icon and animation
+
+// Props with defaults
+message = props.message || ""
+icon = props.icon !== false  // Default to true, show icon unless explicitly false
+
+// Only render if there's a message
+{if message != ""}
+    <div class="form-error" role="alert" aria-live="assertive">
+        {if icon}
+            <svg class="form-error-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M8 4.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="8" cy="11.5" r="1" fill="currentColor"/>
+            </svg>
+        {/if}
+        <span class="form-error-message">{message}</span>
+    </div>
+{/if}
+
+<style scoped>
+.form-error {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    background-color: var(--flin-danger-light);
+    border: 1px solid var(--flin-danger);
+    border-radius: var(--flin-radius-md);
+    animation: form-error-appear 0.2s ease-out;
+}
+
+.form-error-icon {
+    flex-shrink: 0;
+    color: var(--flin-danger);
+    margin-top: 1px;
+}
+
+.form-error-message {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-danger);
+    line-height: 1.5;
+}
+
+/* Inline variant (no background, for use within fields) */
+.form-error.form-error-inline {
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+@keyframes form-error-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Multiple errors container */
+.form-error + .form-error {
+    margin-top: var(--flin-space-2);
+}
+
+/* Dark mode adjustment */
+[data-theme="dark"] .form-error {
+    background-color: rgba(239, 68, 68, 0.15);
+}
+</style>

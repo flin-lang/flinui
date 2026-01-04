@@ -1,0 +1,132 @@
+// FlinUI FLIN-Native Components
+// Components that leverage FLIN's unique memory-native architecture
+// These components are ONLY possible in FLIN - no equivalent in React, Vue, etc.
+
+// ============================================================================
+// FLIN-NATIVE COMPONENTS
+// ============================================================================
+//
+// These components showcase what makes FLIN unique:
+// - Memory-native: Every value keeps its complete history
+// - Built-in persistence: FlinDB/ZeroCore stores everything automatically
+// - Time travel: Navigate through any value's past states
+// - Intent queries: Natural language data access
+//
+// Components:
+//   TimeTravel      - Navigate through a variable's value history
+//   MemoryInspector - Visual debugger for FlinDB persistent state
+//
+// Why these can't exist in React/Vue/Angular:
+//   - React has no built-in value history (need Redux DevTools)
+//   - Vue has no automatic persistence (need Vuex + plugins)
+//   - Angular has no time travel (need NgRx + store devtools)
+//   - FLIN has ALL of this built into the language itself!
+//
+// ============================================================================
+
+version = "1.0.0"
+componentCount = 2
+category = "flin-native"
+
+<div class="flinui-native-info">
+    <h2>FLIN-Native Components v{version}</h2>
+    <p class="flinui-native-tagline">Components that only FLIN can provide</p>
+
+    <h3>TimeTravel</h3>
+    <p>
+        Navigate through any variable's complete history.
+        Because FLIN remembers everything - "É flîn nù" means "It remembers things."
+    </p>
+    <pre><code>
+// Every FLIN variable has history
+counter = 0
+counter = counter + 1  // History: [0, 1]
+counter = counter + 1  // History: [0, 1, 2]
+
+// TimeTravel component lets you visualize and navigate it
+&lt;TimeTravel variable={counter} showPlayback={true} /&gt;
+    </code></pre>
+
+    <h3>MemoryInspector</h3>
+    <p>
+        Visual debugger for FlinDB (ZeroCore) - see all your persistent data at once.
+        No localStorage.getItem() needed - FLIN persists automatically.
+    </p>
+    <pre><code>
+// All FLIN data is automatically persisted
+user.name = "Juste"
+user.settings.theme = "dark"
+
+// MemoryInspector shows everything in FlinDB
+&lt;MemoryInspector database={flindb} showStats={true} /&gt;
+    </code></pre>
+
+    <h3>Why FLIN-Native?</h3>
+    <ul>
+        <li><strong>Memory-first</strong> - Every value has a built-in timeline</li>
+        <li><strong>Zero-config persistence</strong> - No setup, just works</li>
+        <li><strong>Time travel debugging</strong> - Go back to any state</li>
+        <li><strong>No state management library needed</strong> - It's in the language</li>
+    </ul>
+</div>
+
+<style scoped>
+.flinui-native-info {
+    font-family: var(--flin-font-sans);
+    padding: var(--flin-space-6);
+    max-width: 700px;
+    background: linear-gradient(135deg, var(--flin-primary-light) 0%, var(--flin-bg) 100%);
+    border-radius: var(--flin-radius-lg);
+}
+
+.flinui-native-info h2 {
+    color: var(--flin-primary);
+    margin-bottom: var(--flin-space-1);
+}
+
+.flinui-native-tagline {
+    font-size: var(--flin-text-lg);
+    color: var(--flin-fg-muted);
+    margin-bottom: var(--flin-space-6);
+}
+
+.flinui-native-info h3 {
+    margin-top: var(--flin-space-6);
+    color: var(--flin-fg);
+    border-bottom: 2px solid var(--flin-primary);
+    padding-bottom: var(--flin-space-2);
+}
+
+.flinui-native-info p {
+    color: var(--flin-fg-muted);
+    line-height: 1.6;
+}
+
+.flinui-native-info pre {
+    background: var(--flin-neutral-900);
+    padding: var(--flin-space-4);
+    border-radius: var(--flin-radius-md);
+    overflow-x: auto;
+    margin: var(--flin-space-3) 0;
+}
+
+.flinui-native-info code {
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-100);
+}
+
+.flinui-native-info ul {
+    margin: var(--flin-space-3) 0;
+    padding-left: var(--flin-space-6);
+}
+
+.flinui-native-info li {
+    margin-bottom: var(--flin-space-2);
+    color: var(--flin-fg-muted);
+}
+
+.flinui-native-info strong {
+    color: var(--flin-primary);
+}
+</style>

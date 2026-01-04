@@ -1,0 +1,204 @@
+// Alert.flin - FlinUI Alert Component
+// Displays important messages with variant-based styling and optional dismiss
+
+// Props with defaults
+variant = props.variant || "info"
+title = props.title || ""
+dismissible = props.dismissible || false
+onDismiss = props.onDismiss
+showIcon = props.icon || true
+
+// Internal state for visibility
+visible = true
+
+// Handle dismiss action
+handleDismiss = {
+    visible = false;
+    {if onDismiss}
+        onDismiss()
+    {/if}
+}
+
+// Compute variant-based classes
+variantClass = match variant {
+    "success" -> "alert-success"
+    "warning" -> "alert-warning"
+    "danger" -> "alert-danger"
+    _ -> "alert-info"
+}
+
+// Icon SVG paths based on variant
+iconPath = match variant {
+    "success" -> "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+    "warning" -> "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+    "danger" -> "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+    _ -> "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+}
+
+{if visible}
+    <div
+        class={"flin-alert " ++ variantClass}
+        role="alert"
+        aria-live="polite"
+    >
+        {if showIcon}
+            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
+            </svg>
+        {/if}
+
+        <div class="alert-content">
+            {if title}
+                <h4 class="alert-title">{title}</h4>
+            {/if}
+            <div class="alert-message">
+                {children}
+            </div>
+        </div>
+
+        {if dismissible}
+            <button
+                class="alert-dismiss"
+                click={handleDismiss}
+                aria-label="Dismiss alert"
+                type="button"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        {/if}
+    </div>
+{/if}
+
+<style scoped>
+.flin-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    border-radius: var(--flin-radius-lg);
+    border: 1px solid transparent;
+    animation: alertSlideIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes alertSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.alert-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.alert-title {
+    font-weight: 600;
+    font-size: var(--flin-text-sm);
+    margin: 0 0 var(--flin-space-1) 0;
+}
+
+.alert-message {
+    font-size: var(--flin-text-sm);
+    line-height: 1.5;
+}
+
+.alert-dismiss {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    padding: var(--flin-space-1);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    opacity: 0.7;
+    transition: opacity var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.alert-dismiss:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.alert-dismiss svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Info variant */
+.alert-info {
+    background-color: var(--flin-info-light);
+    border-color: var(--flin-info);
+    color: #0e7490;
+}
+
+.alert-info .alert-icon {
+    color: var(--flin-info);
+}
+
+/* Success variant */
+.alert-success {
+    background-color: var(--flin-success-light);
+    border-color: var(--flin-success);
+    color: #047857;
+}
+
+.alert-success .alert-icon {
+    color: var(--flin-success);
+}
+
+/* Warning variant */
+.alert-warning {
+    background-color: var(--flin-warning-light);
+    border-color: var(--flin-warning);
+    color: #b45309;
+}
+
+.alert-warning .alert-icon {
+    color: var(--flin-warning);
+}
+
+/* Danger variant */
+.alert-danger {
+    background-color: var(--flin-danger-light);
+    border-color: var(--flin-danger);
+    color: #b91c1c;
+}
+
+.alert-danger .alert-icon {
+    color: var(--flin-danger);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .alert-info {
+    background-color: rgba(6, 182, 212, 0.15);
+    color: #67e8f9;
+}
+
+[data-theme="dark"] .alert-success {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
+}
+
+[data-theme="dark"] .alert-warning {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #fcd34d;
+}
+
+[data-theme="dark"] .alert-danger {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+}
+</style>

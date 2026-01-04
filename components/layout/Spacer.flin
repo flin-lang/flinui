@@ -1,0 +1,59 @@
+// FlinUI Spacer Component
+// Adds empty space between elements
+// Props: size (1-16), direction (h/v for horizontal/vertical), grow (bool to fill available space)
+
+size = props.size || 4
+direction = props.direction || "v"
+grow = props.grow || false
+
+// Build class string
+directionClass = "flin-spacer-" + direction
+sizeClass = "flin-spacer-size-" + size
+growClass = {if grow { "flin-spacer-grow" } else { "" }}
+
+spacerClass = "flin-spacer " + directionClass + " " + sizeClass + " " + growClass
+
+<div class={spacerClass} aria-hidden="true"></div>
+
+<style scoped>
+.flin-spacer {
+    flex-shrink: 0;
+}
+
+/* Grow to fill available space */
+.flin-spacer-grow {
+    flex-grow: 1;
+}
+
+/* Vertical spacer (default) - adds height */
+.flin-spacer-v {
+    width: 100%;
+}
+
+.flin-spacer-v.flin-spacer-size-1 { height: var(--flin-space-1); }
+.flin-spacer-v.flin-spacer-size-2 { height: var(--flin-space-2); }
+.flin-spacer-v.flin-spacer-size-3 { height: var(--flin-space-3); }
+.flin-spacer-v.flin-spacer-size-4 { height: var(--flin-space-4); }
+.flin-spacer-v.flin-spacer-size-5 { height: calc(var(--flin-space-4) + var(--flin-space-1)); }
+.flin-spacer-v.flin-spacer-size-6 { height: var(--flin-space-6); }
+.flin-spacer-v.flin-spacer-size-8 { height: var(--flin-space-8); }
+.flin-spacer-v.flin-spacer-size-10 { height: calc(var(--flin-space-8) + var(--flin-space-2)); }
+.flin-spacer-v.flin-spacer-size-12 { height: var(--flin-space-12); }
+.flin-spacer-v.flin-spacer-size-16 { height: var(--flin-space-16); }
+
+/* Horizontal spacer - adds width */
+.flin-spacer-h {
+    height: 100%;
+}
+
+.flin-spacer-h.flin-spacer-size-1 { width: var(--flin-space-1); }
+.flin-spacer-h.flin-spacer-size-2 { width: var(--flin-space-2); }
+.flin-spacer-h.flin-spacer-size-3 { width: var(--flin-space-3); }
+.flin-spacer-h.flin-spacer-size-4 { width: var(--flin-space-4); }
+.flin-spacer-h.flin-spacer-size-5 { width: calc(var(--flin-space-4) + var(--flin-space-1)); }
+.flin-spacer-h.flin-spacer-size-6 { width: var(--flin-space-6); }
+.flin-spacer-h.flin-spacer-size-8 { width: var(--flin-space-8); }
+.flin-spacer-h.flin-spacer-size-10 { width: calc(var(--flin-space-8) + var(--flin-space-2)); }
+.flin-spacer-h.flin-spacer-size-12 { width: var(--flin-space-12); }
+.flin-spacer-h.flin-spacer-size-16 { width: var(--flin-space-16); }
+</style>

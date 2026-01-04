@@ -1,0 +1,35 @@
+// FlinUI Layout Components Index
+// All layout components for building responsive page structures
+//
+// Components:
+// - Container: Responsive container with max-width constraints
+// - Stack: Vertical or horizontal stacking with consistent spacing
+// - Grid: CSS Grid layout with responsive columns
+// - Flex: Full-featured flexbox container
+// - Box: Utility box with padding, margin, background, border, shadow
+// - Divider: Visual separator for content sections
+// - Spacer: Adds empty space between elements
+// - Center: Centers content horizontally and vertically
+// - AspectRatio: Maintains consistent aspect ratio for content
+// - Wrap: Flex container that wraps children to new lines
+//
+// Usage:
+// <Container size="lg" centered={true}>
+//     <Stack direction="vertical" gap={4}>
+//         <Box padding={4} bg="var(--flin-bg-muted)" radius="lg">
+//             <Center>
+//                 <h1>Welcome to FlinUI</h1>
+//             </Center>
+//         </Box>
+//         <Grid cols={3} gap={4} responsive={true}>
+//             <Box padding={4} border={true}>Card 1</Box>
+//             <Box padding={4} border={true}>Card 2</Box>
+//             <Box padding={4} border={true}>Card 3</Box>
+//         </Grid>
+//     </Stack>
+// </Container>
+//
+// All components use FlinUI theme tokens (CSS variables --flin-*)
+// for consistent styling across your application.
+
+<div class="flin-layout-components-loaded" style="display: none;"></div>

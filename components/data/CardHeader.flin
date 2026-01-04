@@ -1,0 +1,69 @@
+// FlinUI CardHeader Component
+// Header section for Card component with title, subtitle, and action slot
+
+// Props with defaults
+title = props.title || ""
+subtitle = props.subtitle || ""
+
+<div class="flin-card-header">
+    <div class="flin-card-header__content">
+        {if title != ""}
+            <h3 class="flin-card-header__title">{title}</h3>
+        {/if}
+        {if subtitle != ""}
+            <p class="flin-card-header__subtitle">{subtitle}</p>
+        {/if}
+        {if title == "" && subtitle == ""}
+            {children}
+        {/if}
+    </div>
+    {if props.action}
+        <div class="flin-card-header__action">
+            {props.action}
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    padding-bottom: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    margin-bottom: var(--flin-space-4);
+}
+
+.flin-card-header__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.flin-card-header__title {
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.flin-card-header__subtitle {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    margin: var(--flin-space-1) 0 0 0;
+    line-height: 1.5;
+}
+
+.flin-card-header__action {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-card-header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+</style>

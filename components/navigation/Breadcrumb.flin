@@ -1,0 +1,223 @@
+// Breadcrumb.flin - FlinUI Breadcrumb Navigation Component
+// Displays the current page location within a navigational hierarchy
+
+// Props with defaults
+items = props.items || []
+separator = props.separator || "/"
+maxItems = props.maxItems || 0
+showHome = props.showHome || true
+homeHref = props.homeHref || "/"
+homeLabel = props.homeLabel || "Home"
+
+// Compute whether to collapse items
+shouldCollapse = maxItems > 0 && items.length > maxItems
+
+// Collapsed state
+isExpanded = false
+
+// Toggle expanded
+toggleExpanded = {
+    isExpanded = !isExpanded
+}
+
+// Get visible items based on collapse state
+visibleItems = match {
+    !shouldCollapse -> items
+    isExpanded -> items
+    _ -> [items[0], "...", items[items.length - 1]]
+}
+
+<nav class="flin-breadcrumb" aria-label="Breadcrumb">
+    <ol class="flin-breadcrumb__list">
+        // Home item
+        {if showHome}
+            <li class="flin-breadcrumb__item">
+                <a
+                    href={homeHref}
+                    class="flin-breadcrumb__link"
+                    aria-label="Go to home"
+                >
+                    <svg
+                        class="flin-breadcrumb__home-icon"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span class="flin-breadcrumb__home-text">{homeLabel}</span>
+                </a>
+                <span class="flin-breadcrumb__separator" aria-hidden="true">
+                    {separator}
+                </span>
+            </li>
+        {/if}
+
+        // Breadcrumb items
+        {for item, index in items}
+            <li class="flin-breadcrumb__item">
+                {if item == "..."}
+                    // Ellipsis for collapsed items
+                    <button
+                        class="flin-breadcrumb__ellipsis"
+                        click={toggleExpanded}
+                        aria-label="Show all breadcrumb items"
+                        title="Show all"
+                    >
+                        <span>...</span>
+                    </button>
+                {else if index == items.length - 1}
+                    // Current page (last item)
+                    <span
+                        class="flin-breadcrumb__current"
+                        aria-current="page"
+                    >
+                        {item.label}
+                    </span>
+                {else}
+                    // Link item
+                    <a
+                        href={item.href}
+                        class="flin-breadcrumb__link"
+                    >
+                        {item.label}
+                    </a>
+                    <span class="flin-breadcrumb__separator" aria-hidden="true">
+                        {separator}
+                    </span>
+                {/if}
+            </li>
+        {/for}
+    </ol>
+</nav>
+
+<style scoped>
+.flin-breadcrumb {
+    display: flex;
+    align-items: center;
+}
+
+.flin-breadcrumb__list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--flin-space-1);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.flin-breadcrumb__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+.flin-breadcrumb__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    text-decoration: none;
+    padding: var(--flin-space-1) var(--flin-space-1);
+    border-radius: var(--flin-radius-sm);
+    transition: color var(--flin-transition-fast),
+                background-color var(--flin-transition-fast);
+}
+
+.flin-breadcrumb__link:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.flin-breadcrumb__link:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.flin-breadcrumb__home-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.flin-breadcrumb__home-text {
+    display: none;
+}
+
+.flin-breadcrumb__separator {
+    color: var(--flin-neutral-400);
+    font-size: var(--flin-text-sm);
+    margin: 0 var(--flin-space-1);
+    user-select: none;
+}
+
+.flin-breadcrumb__current {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+    padding: var(--flin-space-1) var(--flin-space-1);
+}
+
+.flin-breadcrumb__ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    background: none;
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: color var(--flin-transition-fast),
+                background-color var(--flin-transition-fast);
+}
+
+.flin-breadcrumb__ellipsis:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.flin-breadcrumb__ellipsis:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+/* Responsive styles */
+@media (max-width: 640px) {
+    .flin-breadcrumb__list {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: var(--flin-space-1) 0;
+    }
+
+    .flin-breadcrumb__list::-webkit-scrollbar {
+        display: none;
+    }
+
+    .flin-breadcrumb__item {
+        flex-shrink: 0;
+    }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-breadcrumb__link:hover,
+[data-theme="dark"] .flin-breadcrumb__ellipsis:hover {
+    background-color: var(--flin-neutral-800);
+}
+</style>

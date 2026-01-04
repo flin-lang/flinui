@@ -1,0 +1,97 @@
+// FlinUI Progress Component
+// Progress bar with value, variant, size, and label options
+
+// Props with defaults
+value = props.value || 0
+variant = props.variant || "primary"
+size = props.size || "md"
+showLabel = props.showLabel || false
+
+// Clamp value between 0 and 100
+clampedValue = if value < 0 { 0 } else { if value > 100 { 100 } else { value } }
+
+// Compute color based on variant
+variantColor = match variant {
+    "primary" -> "var(--flin-primary)"
+    "secondary" -> "var(--flin-secondary)"
+    "success" -> "var(--flin-success)"
+    "warning" -> "var(--flin-warning)"
+    "danger" -> "var(--flin-danger)"
+    "info" -> "var(--flin-info)"
+    _ -> "var(--flin-primary)"
+}
+
+// Compute height based on size
+barHeight = match size {
+    "sm" -> "4px"
+    "md" -> "8px"
+    "lg" -> "12px"
+    "xl" -> "16px"
+    _ -> "8px"
+}
+
+<div class="flin-progress" role="progressbar"
+     aria-valuenow={clampedValue} aria-valuemin="0" aria-valuemax="100">
+    <div class="flin-progress__track" style="--progress-height: {barHeight};">
+        <div class="flin-progress__bar"
+             style="--progress-value: {clampedValue}%; --progress-color: {variantColor};">
+        </div>
+    </div>
+    {if showLabel}
+        <span class="flin-progress__label">{clampedValue}%</span>
+    {/if}
+</div>
+
+<style scoped>
+.flin-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    width: 100%;
+}
+
+.flin-progress__track {
+    flex: 1;
+    height: var(--progress-height);
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.flin-progress__bar {
+    height: 100%;
+    width: var(--progress-value);
+    background-color: var(--progress-color);
+    border-radius: var(--flin-radius-full);
+    transition: width var(--flin-transition-slow);
+}
+
+.flin-progress__label {
+    flex-shrink: 0;
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+    min-width: 3ch;
+    text-align: right;
+}
+
+/* Indeterminate animation */
+.flin-progress--indeterminate .flin-progress__bar {
+    width: 30%;
+    animation: flin-progress-indeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes flin-progress-indeterminate {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(400%);
+    }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-progress__track {
+    background-color: var(--flin-neutral-700);
+}
+</style>

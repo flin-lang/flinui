@@ -1,0 +1,276 @@
+// FlinUI ChartTooltip Component
+// Shared tooltip component for charts with positioning and formatting
+
+// Props with defaults
+visible = props.visible || false
+x = props.x || 0
+y = props.y || 0
+title = props.title || ""
+items = props.items || []  // Array of { label, value, color? }
+position = props.position || "auto"  // auto, top, bottom, left, right
+offset = props.offset || 10
+showArrow = props.showArrow || true
+formatValue = props.formatValue  // Optional formatter function
+theme = props.theme || "default"  // default, dark, light
+
+// Calculate position with boundary awareness
+// In real usage, this would detect viewport boundaries
+computedPosition = match position {
+    "auto" -> "top"
+    _ -> position
+}
+
+// Format value helper
+formatDisplayValue = {
+    value = args.value
+    {if formatValue}
+        formatted = formatValue(value)
+    {else if typeof value == "number"}
+        // Add thousand separators
+        formatted = value.toLocaleString()
+    {else}
+        formatted = value
+    {/if}
+    formatted
+}
+
+// Theme class
+themeClass = match theme {
+    "dark" -> "flin-chart-tooltip--dark"
+    "light" -> "flin-chart-tooltip--light"
+    _ -> ""
+}
+
+<div
+    class={"flin-chart-tooltip" ++ " " ++ themeClass ++ " flin-chart-tooltip--" ++ computedPosition ++ {if visible { " flin-chart-tooltip--visible" } else { "" }}}
+    style="--tooltip-x: {x}px; --tooltip-y: {y}px; --tooltip-offset: {offset}px;"
+    role="tooltip"
+    aria-hidden={!visible}
+>
+    <div class="flin-chart-tooltip__content">
+        {if title}
+            <div class="flin-chart-tooltip__header">
+                <span class="flin-chart-tooltip__title">{title}</span>
+            </div>
+        {/if}
+
+        {if items.length > 0}
+            <div class="flin-chart-tooltip__body">
+                {for item in items}
+                    <div class="flin-chart-tooltip__row">
+                        {if item.color}
+                            <span
+                                class="flin-chart-tooltip__dot"
+                                style="--dot-color: {item.color};"
+                            ></span>
+                        {/if}
+                        <span class="flin-chart-tooltip__label">{item.label}</span>
+                        <span class="flin-chart-tooltip__value">{formatDisplayValue({ value: item.value })}</span>
+                    </div>
+                {/for}
+            </div>
+        {/if}
+
+        // Single value display (when no items array)
+        {if items.length == 0 && props.value != null}
+            <div class="flin-chart-tooltip__single">
+                <span class="flin-chart-tooltip__single-value">{formatDisplayValue({ value: props.value })}</span>
+            </div>
+        {/if}
+    </div>
+
+    {if showArrow}
+        <div class="flin-chart-tooltip__arrow"></div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-chart-tooltip {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transform: translate(-50%, -100%) translateY(calc(-1 * var(--tooltip-offset)));
+    transition: opacity var(--flin-transition-fast), transform var(--flin-transition-fast);
+    left: var(--tooltip-x);
+    top: var(--tooltip-y);
+}
+
+.flin-chart-tooltip--visible {
+    opacity: 1;
+}
+
+.flin-chart-tooltip--top {
+    transform: translate(-50%, -100%) translateY(calc(-1 * var(--tooltip-offset)));
+}
+
+.flin-chart-tooltip--bottom {
+    transform: translate(-50%, 0) translateY(var(--tooltip-offset));
+}
+
+.flin-chart-tooltip--left {
+    transform: translate(-100%, -50%) translateX(calc(-1 * var(--tooltip-offset)));
+}
+
+.flin-chart-tooltip--right {
+    transform: translate(0, -50%) translateX(var(--tooltip-offset));
+}
+
+.flin-chart-tooltip__content {
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    box-shadow: var(--flin-shadow-lg);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    min-width: 120px;
+    max-width: 280px;
+    font-family: var(--flin-font-sans);
+}
+
+.flin-chart-tooltip__header {
+    margin-bottom: var(--flin-space-2);
+    padding-bottom: var(--flin-space-2);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.flin-chart-tooltip__title {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.flin-chart-tooltip__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.flin-chart-tooltip__row {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.flin-chart-tooltip__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--flin-radius-full);
+    background-color: var(--dot-color);
+    flex-shrink: 0;
+}
+
+.flin-chart-tooltip__label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    flex: 1;
+}
+
+.flin-chart-tooltip__value {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+    font-variant-numeric: tabular-nums;
+}
+
+.flin-chart-tooltip__single {
+    text-align: center;
+}
+
+.flin-chart-tooltip__single-value {
+    font-size: var(--flin-text-lg);
+    font-weight: 700;
+    color: var(--flin-fg);
+}
+
+.flin-chart-tooltip__arrow {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    transform: rotate(45deg);
+}
+
+.flin-chart-tooltip--top .flin-chart-tooltip__arrow {
+    bottom: -5px;
+    left: 50%;
+    margin-left: -4px;
+    border-top: none;
+    border-left: none;
+}
+
+.flin-chart-tooltip--bottom .flin-chart-tooltip__arrow {
+    top: -5px;
+    left: 50%;
+    margin-left: -4px;
+    border-bottom: none;
+    border-right: none;
+}
+
+.flin-chart-tooltip--left .flin-chart-tooltip__arrow {
+    right: -5px;
+    top: 50%;
+    margin-top: -4px;
+    border-left: none;
+    border-bottom: none;
+}
+
+.flin-chart-tooltip--right .flin-chart-tooltip__arrow {
+    left: -5px;
+    top: 50%;
+    margin-top: -4px;
+    border-right: none;
+    border-top: none;
+}
+
+/* Dark theme variant */
+.flin-chart-tooltip--dark .flin-chart-tooltip__content {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+.flin-chart-tooltip--dark .flin-chart-tooltip__title,
+.flin-chart-tooltip--dark .flin-chart-tooltip__value,
+.flin-chart-tooltip--dark .flin-chart-tooltip__single-value {
+    color: var(--flin-neutral-50);
+}
+
+.flin-chart-tooltip--dark .flin-chart-tooltip__label {
+    color: var(--flin-neutral-400);
+}
+
+.flin-chart-tooltip--dark .flin-chart-tooltip__header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+.flin-chart-tooltip--dark .flin-chart-tooltip__arrow {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+/* Light theme variant (for dark mode pages) */
+.flin-chart-tooltip--light .flin-chart-tooltip__content {
+    background-color: white;
+    border-color: var(--flin-neutral-200);
+}
+
+.flin-chart-tooltip--light .flin-chart-tooltip__arrow {
+    background-color: white;
+    border-color: var(--flin-neutral-200);
+}
+
+/* Global dark theme support */
+[data-theme="dark"] .flin-chart-tooltip__content {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-chart-tooltip__header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-chart-tooltip__arrow {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+</style>

@@ -1,0 +1,151 @@
+// Avatar.flin - FlinUI Avatar Component
+// An avatar with image support and initials fallback
+
+// Props with defaults
+src = props.src || ""
+name = props.name || ""
+size = props.size || "md"
+alt = props.alt || name
+
+// Computed size class
+sizeClass = match size {
+    "sm" -> "avatar-sm"
+    "lg" -> "avatar-lg"
+    "xl" -> "avatar-xl"
+    _ -> "avatar-md"
+}
+
+// Generate initials from name
+initials = {if name != "" {
+    // Get first letter of first and last word
+    words = name.split(" ")
+    {if words.length > 1 {
+        words[0][0] ++ words[words.length - 1][0]
+    } else {
+        name[0]
+    }}
+} else {
+    "?"
+}}
+
+// State for image error
+hasError = false
+
+onImageError = {
+    hasError = true
+}
+
+// Decide whether to show image or initials
+showImage = src != "" && !hasError
+
+// Generate a deterministic background color from name
+bgColorIndex = {if name != "" {
+    (name.charCodeAt(0) + name.length) % 6
+} else {
+    0
+}}
+
+bgColorClass = match bgColorIndex {
+    0 -> "avatar-bg-blue"
+    1 -> "avatar-bg-green"
+    2 -> "avatar-bg-purple"
+    3 -> "avatar-bg-orange"
+    4 -> "avatar-bg-pink"
+    _ -> "avatar-bg-cyan"
+}
+
+<div class={"avatar " ++ sizeClass ++ " " ++ {if !showImage { bgColorClass } else { "" }}} role="img" aria-label={alt}>
+    {if showImage}
+        <img
+            class="avatar-image"
+            src={src}
+            alt={alt}
+            error={onImageError}
+        >
+    {else}
+        <span class="avatar-initials">{initials}</span>
+    {/if}
+</div>
+
+<style scoped>
+.avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    flex-shrink: 0;
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-fg);
+}
+
+/* Size variants */
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: var(--flin-text-xs);
+}
+
+.avatar-md {
+    width: 40px;
+    height: 40px;
+    font-size: var(--flin-text-sm);
+}
+
+.avatar-lg {
+    width: 56px;
+    height: 56px;
+    font-size: var(--flin-text-lg);
+}
+
+.avatar-xl {
+    width: 80px;
+    height: 80px;
+    font-size: var(--flin-text-2xl);
+}
+
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-initials {
+    font-family: var(--flin-font-sans);
+    font-weight: 600;
+    text-transform: uppercase;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Background color variants for initials */
+.avatar-bg-blue {
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.avatar-bg-green {
+    background-color: var(--flin-success-light);
+    color: var(--flin-success);
+}
+
+.avatar-bg-purple {
+    background-color: #ede9fe;
+    color: #7c3aed;
+}
+
+.avatar-bg-orange {
+    background-color: var(--flin-warning-light);
+    color: #c2410c;
+}
+
+.avatar-bg-pink {
+    background-color: #fce7f3;
+    color: #db2777;
+}
+
+.avatar-bg-cyan {
+    background-color: var(--flin-info-light);
+    color: var(--flin-info);
+}
+</style>

@@ -1,0 +1,117 @@
+// FlinUI Table Component
+// Data table with striped, hoverable, and bordered options
+
+// Props with defaults
+striped = props.striped || false
+hoverable = props.hoverable || false
+bordered = props.bordered || false
+
+// Build class string
+tableClass = "flin-table"
+tableClass = tableClass + " " + (if striped { "flin-table--striped" } else { "" })
+tableClass = tableClass + " " + (if hoverable { "flin-table--hoverable" } else { "" })
+tableClass = tableClass + " " + (if bordered { "flin-table--bordered" } else { "" })
+
+<div class="flin-table-wrapper">
+    <table class={tableClass}>
+        {children}
+    </table>
+</div>
+
+<style scoped>
+.flin-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--flin-radius-lg);
+}
+
+.flin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--flin-text-sm);
+    text-align: left;
+}
+
+.flin-table thead {
+    background-color: var(--flin-neutral-50);
+    border-bottom: 2px solid var(--flin-neutral-200);
+}
+
+.flin-table th {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-weight: 600;
+    color: var(--flin-fg);
+    white-space: nowrap;
+}
+
+.flin-table td {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    color: var(--flin-fg);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.flin-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Striped variant */
+.flin-table--striped tbody tr:nth-child(even) {
+    background-color: var(--flin-neutral-50);
+}
+
+/* Hoverable variant */
+.flin-table--hoverable tbody tr {
+    transition: background-color var(--flin-transition-fast);
+}
+
+.flin-table--hoverable tbody tr:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+/* Bordered variant */
+.flin-table--bordered {
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+}
+
+.flin-table--bordered th,
+.flin-table--bordered td {
+    border: 1px solid var(--flin-neutral-200);
+}
+
+/* Empty state */
+.flin-table tbody:empty::after {
+    content: "No data available";
+    display: block;
+    text-align: center;
+    padding: var(--flin-space-8);
+    color: var(--flin-fg-muted);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-table thead {
+    background-color: var(--flin-neutral-800);
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-table td {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-table--striped tbody tr:nth-child(even) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .flin-table--hoverable tbody tr:hover {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-table--bordered {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-table--bordered th,
+[data-theme="dark"] .flin-table--bordered td {
+    border-color: var(--flin-neutral-700);
+}
+</style>

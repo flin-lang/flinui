@@ -1,0 +1,67 @@
+// FlinUI Wrap Component
+// Flex container that wraps children to new lines
+// Props: gap (1-16), align (start/center/end/stretch/baseline), justify (start/center/end/between/around/evenly), direction (row/row-reverse)
+
+gap = props.gap || 4
+align = props.align || "start"
+justify = props.justify || "start"
+direction = props.direction || "row"
+
+// Build class string
+gapClass = "flin-wrap-gap-" + gap
+alignClass = "flin-wrap-align-" + align
+justifyClass = "flin-wrap-justify-" + justify
+directionClass = "flin-wrap-dir-" + direction
+
+wrapClass = "flin-wrap " + gapClass + " " + alignClass + " " + justifyClass + " " + directionClass
+
+<div class={wrapClass}>
+    {children}
+</div>
+
+<style scoped>
+.flin-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+}
+
+/* Direction */
+.flin-wrap-dir-row { flex-direction: row; }
+.flin-wrap-dir-row-reverse { flex-direction: row-reverse; }
+
+/* Gap variants */
+.flin-wrap-gap-1 { gap: var(--flin-space-1); }
+.flin-wrap-gap-2 { gap: var(--flin-space-2); }
+.flin-wrap-gap-3 { gap: var(--flin-space-3); }
+.flin-wrap-gap-4 { gap: var(--flin-space-4); }
+.flin-wrap-gap-5 { gap: calc(var(--flin-space-4) + var(--flin-space-1)); }
+.flin-wrap-gap-6 { gap: var(--flin-space-6); }
+.flin-wrap-gap-8 { gap: var(--flin-space-8); }
+.flin-wrap-gap-10 { gap: calc(var(--flin-space-8) + var(--flin-space-2)); }
+.flin-wrap-gap-12 { gap: var(--flin-space-12); }
+.flin-wrap-gap-16 { gap: var(--flin-space-16); }
+
+/* Align items (cross axis) */
+.flin-wrap-align-start { align-items: flex-start; }
+.flin-wrap-align-center { align-items: center; }
+.flin-wrap-align-end { align-items: flex-end; }
+.flin-wrap-align-stretch { align-items: stretch; }
+.flin-wrap-align-baseline { align-items: baseline; }
+
+/* Justify content (main axis) */
+.flin-wrap-justify-start { justify-content: flex-start; }
+.flin-wrap-justify-center { justify-content: center; }
+.flin-wrap-justify-end { justify-content: flex-end; }
+.flin-wrap-justify-between { justify-content: space-between; }
+.flin-wrap-justify-around { justify-content: space-around; }
+.flin-wrap-justify-evenly { justify-content: space-evenly; }
+
+/* Align content (for multi-line flex) */
+.flin-wrap-content-start { align-content: flex-start; }
+.flin-wrap-content-center { align-content: center; }
+.flin-wrap-content-end { align-content: flex-end; }
+.flin-wrap-content-between { align-content: space-between; }
+.flin-wrap-content-around { align-content: space-around; }
+.flin-wrap-content-stretch { align-content: stretch; }
+</style>

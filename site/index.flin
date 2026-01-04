@@ -1,0 +1,836 @@
+// FlinUI Documentation Site - Landing Page
+// Built with FLIN itself - the ultimate dogfooding!
+
+version = "1.2.0"
+componentCount = 94
+categories = 8
+
+// Hero stats
+statComponents = "94"
+statDependencies = "0"
+statCategories = "8"
+statUnique = "2"
+
+// Current theme
+theme = "light"
+
+<div class="flinui-site" data-theme={theme}>
+    <nav class="nav">
+        <div class="nav-brand">
+            <img src="/public/logo.png" alt="FlinUI" class="nav-logo" />
+            <span class="nav-title">FlinUI</span>
+            <span class="nav-version">v{version}</span>
+        </div>
+        <div class="nav-links">
+            <a href="/site/components.flin" class="nav-link">Components</a>
+            <a href="/site/examples.flin" class="nav-link">Examples</a>
+            <a href="/site/playground.flin" class="nav-link">Playground</a>
+            <a href="https://github.com/flin-lang/flinui" class="nav-link" target="_blank">GitHub</a>
+        </div>
+        <button class="theme-toggle" click={theme = match theme { "light" -> "dark", _ -> "light" }}>
+            {match theme { "light" -> "🌙", _ -> "☀️" }}
+        </button>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-badge">✨ The Component Library for FLIN</div>
+        <h1 class="hero-title">
+            Build Beautiful UIs<br/>
+            <span class="hero-highlight">Without the Complexity</span>
+        </h1>
+        <p class="hero-subtitle">
+            {componentCount} production-ready components. Zero npm installs.
+            No webpack configs. Just FLIN.
+        </p>
+        <div class="hero-actions">
+            <a href="/site/components.flin" class="btn btn-primary">Browse Components</a>
+            <a href="/site/playground.flin" class="btn btn-secondary">Try Playground</a>
+        </div>
+        <pre class="hero-code"><code>// That's it. No imports needed.
+&lt;Button label="Click me" variant="primary" /&gt;
+&lt;Card&gt;
+    &lt;CardHeader title="Welcome" /&gt;
+    &lt;CardBody&gt;Your content here&lt;/CardBody&gt;
+&lt;/Card&gt;</code></pre>
+    </header>
+
+    <section class="stats">
+        <div class="stat">
+            <div class="stat-value">{statComponents}</div>
+            <div class="stat-label">Components</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">{statDependencies}</div>
+            <div class="stat-label">Dependencies</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">{statCategories}</div>
+            <div class="stat-label">Categories</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">{statUnique}</div>
+            <div class="stat-label">FLIN-Only</div>
+        </div>
+    </section>
+
+    <section class="categories">
+        <h2 class="section-title">Component Categories</h2>
+        <div class="category-grid">
+            <a href="/site/components.flin?cat=basic" class="category-card">
+                <div class="category-icon">🎨</div>
+                <h3>Basic</h3>
+                <p>15 components</p>
+                <span class="category-list">Button, Input, Select, Avatar, Badge...</span>
+            </a>
+            <a href="/site/components.flin?cat=layout" class="category-card">
+                <div class="category-icon">📐</div>
+                <h3>Layout</h3>
+                <p>11 components</p>
+                <span class="category-list">Container, Stack, Grid, Flex, Box...</span>
+            </a>
+            <a href="/site/components.flin?cat=data" class="category-card">
+                <div class="category-icon">📊</div>
+                <h3>Data Display</h3>
+                <p>17 components</p>
+                <span class="category-list">Card, Table, DataTable, Calendar...</span>
+            </a>
+            <a href="/site/components.flin?cat=forms" class="category-card">
+                <div class="category-icon">📝</div>
+                <h3>Forms</h3>
+                <p>10 components</p>
+                <span class="category-list">Form, DatePicker, ColorPicker...</span>
+            </a>
+            <a href="/site/components.flin?cat=feedback" class="category-card">
+                <div class="category-icon">💬</div>
+                <h3>Feedback</h3>
+                <p>11 components</p>
+                <span class="category-list">Alert, Toast, Modal, Drawer...</span>
+            </a>
+            <a href="/site/components.flin?cat=navigation" class="category-card">
+                <div class="category-icon">🧭</div>
+                <h3>Navigation</h3>
+                <p>14 components</p>
+                <span class="category-list">Navbar, Sidebar, Tabs, Pagination...</span>
+            </a>
+            <a href="/site/components.flin?cat=charts" class="category-card category-new">
+                <div class="category-icon">📈</div>
+                <h3>Charts</h3>
+                <p>7 components</p>
+                <span class="category-list">BarChart, LineChart, PieChart...</span>
+                <span class="category-badge">Native SVG</span>
+            </a>
+            <a href="/site/components.flin?cat=flin-native" class="category-card category-unique">
+                <div class="category-icon">⚡</div>
+                <h3>FLIN-Native</h3>
+                <p>2 components</p>
+                <span class="category-list">TimeTravel, MemoryInspector</span>
+                <span class="category-badge">Unique!</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="unique">
+        <h2 class="section-title">Only in FLIN</h2>
+        <p class="section-subtitle">Components that no other library can provide</p>
+
+        <div class="unique-grid">
+            <div class="unique-card">
+                <h3>⏰ TimeTravel</h3>
+                <p>Navigate through any variable's complete history. Because FLIN remembers everything - "É flîn nù" means "It remembers things."</p>
+                <pre><code>// Every FLIN variable has history
+counter = 0
+counter = counter + 1  // [0, 1]
+counter = counter + 1  // [0, 1, 2]
+
+// TimeTravel lets you navigate it
+&lt;TimeTravel variable={counter} /&gt;</code></pre>
+            </div>
+            <div class="unique-card">
+                <h3>🔍 MemoryInspector</h3>
+                <p>Visual debugger for FlinDB (ZeroCore). See all your persistent data at once - no localStorage.getItem() needed.</p>
+                <pre><code>// All FLIN data persists automatically
+user.name = "Juste"
+user.settings.theme = "dark"
+
+// MemoryInspector shows everything
+&lt;MemoryInspector showStats={true} /&gt;</code></pre>
+            </div>
+        </div>
+
+        <div class="comparison">
+            <h3>Why FLIN-Native components are impossible elsewhere</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>FlinUI</th>
+                        <th>React</th>
+                        <th>Vue</th>
+                        <th>Angular</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Value History</td>
+                        <td class="yes">Built-in</td>
+                        <td class="no">Redux DevTools</td>
+                        <td class="no">Vuex plugins</td>
+                        <td class="no">NgRx DevTools</td>
+                    </tr>
+                    <tr>
+                        <td>Auto Persistence</td>
+                        <td class="yes">Built-in</td>
+                        <td class="no">Manual setup</td>
+                        <td class="no">Manual setup</td>
+                        <td class="no">Manual setup</td>
+                    </tr>
+                    <tr>
+                        <td>Time Travel</td>
+                        <td class="yes">Native</td>
+                        <td class="no">External lib</td>
+                        <td class="no">External lib</td>
+                        <td class="no">External lib</td>
+                    </tr>
+                    <tr>
+                        <td>Dependencies</td>
+                        <td class="yes">0</td>
+                        <td class="no">100+</td>
+                        <td class="no">50+</td>
+                        <td class="no">200+</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="comparison-libs">
+        <h2 class="section-title">How FlinUI Compares</h2>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Library</th>
+                    <th>Components</th>
+                    <th>Native Charts</th>
+                    <th>Zero Deps</th>
+                    <th>Time Travel</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="highlight-row">
+                    <td><strong>FlinUI</strong></td>
+                    <td><strong>94</strong></td>
+                    <td class="yes">✅</td>
+                    <td class="yes">✅</td>
+                    <td class="yes">✅</td>
+                </tr>
+                <tr>
+                    <td>Chakra UI</td>
+                    <td>~50</td>
+                    <td class="no">❌</td>
+                    <td class="no">❌</td>
+                    <td class="no">❌</td>
+                </tr>
+                <tr>
+                    <td>shadcn/ui</td>
+                    <td>~40</td>
+                    <td class="no">❌</td>
+                    <td class="no">❌</td>
+                    <td class="no">❌</td>
+                </tr>
+                <tr>
+                    <td>Material UI</td>
+                    <td>~50</td>
+                    <td class="no">❌ (paid)</td>
+                    <td class="no">❌</td>
+                    <td class="no">❌</td>
+                </tr>
+                <tr>
+                    <td>DaisyUI</td>
+                    <td>61</td>
+                    <td class="no">❌</td>
+                    <td class="no">❌</td>
+                    <td class="no">❌</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="cta">
+        <h2>Ready to Build?</h2>
+        <p>Start building beautiful UIs with zero complexity.</p>
+        <div class="cta-actions">
+            <a href="/site/components.flin" class="btn btn-primary btn-large">Get Started</a>
+            <a href="https://github.com/flin-lang/flinui" class="btn btn-secondary btn-large">View on GitHub</a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <img src="/public/logo.png" alt="FlinUI" class="footer-logo" />
+                <p>FlinUI v{version}</p>
+                <p class="footer-tagline">The component library for FLIN</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Docs</h4>
+                    <a href="/site/components.flin">Components</a>
+                    <a href="/site/examples.flin">Examples</a>
+                    <a href="/site/playground.flin">Playground</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Community</h4>
+                    <a href="https://github.com/flin-lang/flinui">GitHub</a>
+                    <a href="https://discord.gg/7uxR6VfA">Discord</a>
+                    <a href="https://x.com/flinlang">Twitter</a>
+                </div>
+                <div class="footer-col">
+                    <h4>FLIN</h4>
+                    <a href="https://flin.dev">flin.dev</a>
+                    <a href="https://github.com/flin-lang/flin">Main Repo</a>
+                    <a href="https://welcome.flin.dev">Welcome Page</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 ZeroSuite, Inc. | Built with FLIN 🇧🇯</p>
+        </div>
+    </footer>
+</div>
+
+<style scoped>
+/* Base Reset & Variables */
+.flinui-site {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary-light: #818cf8;
+    --bg: #ffffff;
+    --bg-muted: #f8fafc;
+    --bg-card: #ffffff;
+    --fg: #0f172a;
+    --fg-muted: #64748b;
+    --border: #e2e8f0;
+    --success: #10b981;
+    --error: #ef4444;
+
+    font-family: system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    color: var(--fg);
+    background: var(--bg);
+    min-height: 100vh;
+}
+
+.flinui-site[data-theme="dark"] {
+    --bg: #0f172a;
+    --bg-muted: #1e293b;
+    --bg-card: #1e293b;
+    --fg: #f8fafc;
+    --fg-muted: #94a3b8;
+    --border: #334155;
+}
+
+/* Navigation */
+.nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.nav-logo {
+    width: 36px;
+    height: 36px;
+}
+
+.nav-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.nav-version {
+    font-size: 0.75rem;
+    background: var(--primary);
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: var(--fg-muted);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: var(--primary);
+}
+
+.theme-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 1.25rem;
+}
+
+/* Hero */
+.hero {
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+
+.hero-highlight {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--fg-muted);
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 3rem;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.875rem 1.75rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: var(--bg-muted);
+    color: var(--fg);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-card);
+    border-color: var(--primary);
+}
+
+.btn-large {
+    padding: 1rem 2.5rem;
+    font-size: 1.125rem;
+}
+
+.hero-code {
+    background: var(--bg-muted);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    text-align: left;
+    overflow-x: auto;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.hero-code code {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 0.875rem;
+    color: var(--fg);
+}
+
+/* Stats */
+.stats {
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+    padding: 3rem 2rem;
+    background: var(--bg-muted);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: var(--fg-muted);
+    font-weight: 500;
+}
+
+/* Categories */
+.categories {
+    padding: 5rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.section-subtitle {
+    text-align: center;
+    color: var(--fg-muted);
+    margin-bottom: 3rem;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.category-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.2s;
+    position: relative;
+}
+
+.category-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 40px rgba(99, 102, 241, 0.15);
+}
+
+.category-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.category-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.category-card p {
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.category-list {
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+}
+
+.category-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--primary);
+    color: white;
+    font-size: 0.625rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.category-new {
+    border-color: var(--success);
+}
+
+.category-unique {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, var(--bg-card), rgba(99, 102, 241, 0.05));
+}
+
+/* Unique Section */
+.unique {
+    padding: 5rem 2rem;
+    background: var(--bg-muted);
+}
+
+.unique-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto 3rem;
+}
+
+.unique-card {
+    background: var(--bg-card);
+    border: 2px solid var(--primary);
+    border-radius: 1rem;
+    padding: 2rem;
+}
+
+.unique-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.unique-card p {
+    color: var(--fg-muted);
+    margin-bottom: 1.5rem;
+}
+
+.unique-card pre {
+    background: var(--bg-muted);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+}
+
+.unique-card code {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 0.8rem;
+}
+
+/* Comparison Tables */
+.comparison, .comparison-libs {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.comparison h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.comparison-libs {
+    padding: 5rem 2rem;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-card);
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.comparison-table th {
+    background: var(--bg-muted);
+    font-weight: 600;
+}
+
+.comparison-table .yes {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.comparison-table .no {
+    color: var(--error);
+}
+
+.highlight-row {
+    background: rgba(99, 102, 241, 0.1);
+}
+
+/* CTA */
+.cta {
+    text-align: center;
+    padding: 5rem 2rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+}
+
+.cta h2 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.cta p {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+.cta-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.cta .btn-primary {
+    background: white;
+    color: var(--primary);
+}
+
+.cta .btn-primary:hover {
+    background: var(--bg-muted);
+}
+
+.cta .btn-secondary {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+}
+
+.cta .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Footer */
+.footer {
+    background: var(--bg-muted);
+    border-top: 1px solid var(--border);
+    padding: 4rem 2rem 2rem;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto 3rem;
+}
+
+.footer-brand {
+    max-width: 300px;
+}
+
+.footer-logo {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+}
+
+.footer-brand p {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.footer-tagline {
+    color: var(--fg-muted);
+    font-weight: 400 !important;
+}
+
+.footer-links {
+    display: flex;
+    gap: 4rem;
+}
+
+.footer-col h4 {
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.footer-col a {
+    display: block;
+    color: var(--fg-muted);
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+}
+
+.footer-col a:hover {
+    color: var(--primary);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--fg-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .stats {
+        flex-wrap: wrap;
+        gap: 2rem;
+    }
+
+    .unique-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .footer-links {
+        flex-wrap: wrap;
+        gap: 2rem;
+    }
+}
+</style>

@@ -1,0 +1,100 @@
+// ModalBody.flin - FlinUI Modal Body Component
+// Main content area for Modal component
+
+// Props with defaults
+padding = props.padding || "md"
+
+// Compute padding based on size
+paddingClass = match padding {
+    "none" -> "modal-body-padding-none"
+    "sm" -> "modal-body-padding-sm"
+    "lg" -> "modal-body-padding-lg"
+    "xl" -> "modal-body-padding-xl"
+    _ -> "modal-body-padding-md"
+}
+
+<div class={"flin-modal-body " ++ paddingClass} role="main">
+    {children}
+</div>
+
+<style scoped>
+.flin-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Padding variants */
+.modal-body-padding-none {
+    padding: 0;
+}
+
+.modal-body-padding-sm {
+    padding: var(--flin-space-2) var(--flin-space-4);
+}
+
+.modal-body-padding-md {
+    padding: var(--flin-space-4) var(--flin-space-6);
+}
+
+.modal-body-padding-lg {
+    padding: var(--flin-space-6) var(--flin-space-8);
+}
+
+.modal-body-padding-xl {
+    padding: var(--flin-space-8);
+}
+
+/* Scrollbar styling */
+.flin-modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.flin-modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.flin-modal-body::-webkit-scrollbar-thumb {
+    background-color: var(--flin-neutral-300);
+    border-radius: var(--flin-radius-full);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.flin-modal-body::-webkit-scrollbar-thumb:hover {
+    background-color: var(--flin-neutral-400);
+}
+
+/* Firefox scrollbar */
+.flin-modal-body {
+    scrollbar-width: thin;
+    scrollbar-color: var(--flin-neutral-300) transparent;
+}
+
+/* Content spacing for nested elements */
+.flin-modal-body > * + * {
+    margin-top: var(--flin-space-4);
+}
+
+.flin-modal-body > *:first-child {
+    margin-top: 0;
+}
+
+.flin-modal-body > *:last-child {
+    margin-bottom: 0;
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-modal-body::-webkit-scrollbar-thumb {
+    background-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .flin-modal-body::-webkit-scrollbar-thumb:hover {
+    background-color: var(--flin-neutral-500);
+}
+
+[data-theme="dark"] .flin-modal-body {
+    scrollbar-color: var(--flin-neutral-600) transparent;
+}
+</style>

@@ -1,0 +1,211 @@
+// FlinUI ChartLegend Component
+// Shared legend component for charts with interactive highlighting
+
+// Props with defaults
+items = props.items || []  // Array of { label, color, value?, active? }
+orientation = props.orientation || "horizontal"  // horizontal, vertical
+position = props.position || "bottom"  // top, bottom, left, right
+size = props.size || "md"  // sm, md, lg
+clickable = props.clickable || true
+showValues = props.showValues || false
+onItemClick = props.onItemClick
+onItemHover = props.onItemHover
+activeItems = props.activeItems || []  // Array of active item indices
+
+// Compute size values
+dotSize = match size {
+    "sm" -> "8px"
+    "md" -> "12px"
+    "lg" -> "16px"
+    _ -> "12px"
+}
+
+fontSize = match size {
+    "sm" -> "var(--flin-text-xs)"
+    "md" -> "var(--flin-text-sm)"
+    "lg" -> "var(--flin-text-base)"
+    _ -> "var(--flin-text-sm)"
+}
+
+gap = match size {
+    "sm" -> "var(--flin-space-2)"
+    "md" -> "var(--flin-space-3)"
+    "lg" -> "var(--flin-space-4)"
+    _ -> "var(--flin-space-3)"
+}
+
+// Orientation class
+orientationClass = match orientation {
+    "horizontal" -> "flin-legend--horizontal"
+    "vertical" -> "flin-legend--vertical"
+    _ -> "flin-legend--horizontal"
+}
+
+// Position class
+positionClass = match position {
+    "top" -> "flin-legend--top"
+    "bottom" -> "flin-legend--bottom"
+    "left" -> "flin-legend--left"
+    "right" -> "flin-legend--right"
+    _ -> "flin-legend--bottom"
+}
+
+// Handle item click
+handleClick = {
+    index = event.index
+    {if clickable && onItemClick}
+        onItemClick({ index: index, item: items[index] })
+    {/if}
+}
+
+// Handle item hover
+handleHover = {
+    index = event.index
+    {if onItemHover}
+        onItemHover({ index: index, item: items[index], hovering: true })
+    {/if}
+}
+
+handleLeave = {
+    index = event.index
+    {if onItemHover}
+        onItemHover({ index: index, item: items[index], hovering: false })
+    {/if}
+}
+
+// Check if item is active
+isActive = {
+    index = args.index
+    activeItems.length == 0 || activeItems.includes(index)
+}
+
+<div
+    class={"flin-legend " ++ orientationClass ++ " " ++ positionClass}
+    style="--legend-gap: {gap}; --legend-dot-size: {dotSize}; --legend-font-size: {fontSize};"
+    role="list"
+    aria-label="Chart legend"
+>
+    {for item, index in items}
+        <div
+            class={"flin-legend__item" ++ {if clickable { " flin-legend__item--clickable" } else { "" }} ++ {if !isActive({ index: index }) { " flin-legend__item--inactive" } else { "" }}}
+            role="listitem"
+            click={handleClick.bind({ index: index })}
+            mouseenter={handleHover.bind({ index: index })}
+            mouseleave={handleLeave.bind({ index: index })}
+        >
+            <span
+                class="flin-legend__dot"
+                style="--legend-color: {item.color};"
+                aria-hidden="true"
+            ></span>
+            <span class="flin-legend__label">{item.label}</span>
+            {if showValues && item.value != null}
+                <span class="flin-legend__value">{item.value}</span>
+            {/if}
+        </div>
+    {/for}
+</div>
+
+<style scoped>
+.flin-legend {
+    display: flex;
+    gap: var(--legend-gap);
+    font-family: var(--flin-font-sans);
+}
+
+.flin-legend--horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.flin-legend--vertical {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.flin-legend--top {
+    margin-bottom: var(--flin-space-4);
+}
+
+.flin-legend--bottom {
+    margin-top: var(--flin-space-4);
+}
+
+.flin-legend--left {
+    margin-right: var(--flin-space-4);
+}
+
+.flin-legend--right {
+    margin-left: var(--flin-space-4);
+}
+
+.flin-legend__item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    transition: all var(--flin-transition-fast);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.flin-legend__item--clickable {
+    cursor: pointer;
+}
+
+.flin-legend__item--clickable:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.flin-legend__item--inactive {
+    opacity: 0.4;
+}
+
+.flin-legend__item--inactive .flin-legend__dot {
+    background-color: var(--flin-neutral-400) !important;
+}
+
+.flin-legend__dot {
+    width: var(--legend-dot-size);
+    height: var(--legend-dot-size);
+    border-radius: var(--flin-radius-sm);
+    background-color: var(--legend-color);
+    flex-shrink: 0;
+    transition: transform var(--flin-transition-fast);
+}
+
+.flin-legend__item:hover .flin-legend__dot {
+    transform: scale(1.15);
+}
+
+.flin-legend__label {
+    font-size: var(--legend-font-size);
+    color: var(--flin-fg);
+    line-height: 1.2;
+}
+
+.flin-legend__value {
+    font-size: var(--legend-font-size);
+    font-weight: 600;
+    color: var(--flin-fg-muted);
+    margin-left: var(--flin-space-1);
+}
+
+/* Dot shapes variant */
+.flin-legend--circles .flin-legend__dot {
+    border-radius: var(--flin-radius-full);
+}
+
+.flin-legend--lines .flin-legend__dot {
+    width: calc(var(--legend-dot-size) * 2);
+    height: 3px;
+    border-radius: var(--flin-radius-full);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-legend__item--clickable:hover {
+    background-color: var(--flin-neutral-800);
+}
+</style>

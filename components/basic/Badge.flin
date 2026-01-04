@@ -1,0 +1,65 @@
+// Badge.flin - FlinUI Badge Component
+// A small status indicator badge with variants
+
+// Props with defaults
+variant = props.variant || "default"
+
+// Computed variant class
+variantClass = match variant {
+    "success" -> "badge-success"
+    "warning" -> "badge-warning"
+    "danger" -> "badge-danger"
+    "info" -> "badge-info"
+    _ -> "badge-default"
+}
+
+<span class={"badge " ++ variantClass}>
+    {children}
+</span>
+
+<style scoped>
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    line-height: 1;
+    border-radius: var(--flin-radius-full);
+    white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Default variant */
+.badge-default {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-700);
+}
+
+/* Success variant */
+.badge-success {
+    background-color: var(--flin-success-light);
+    color: #065f46;
+}
+
+/* Warning variant */
+.badge-warning {
+    background-color: var(--flin-warning-light);
+    color: #92400e;
+}
+
+/* Danger variant */
+.badge-danger {
+    background-color: var(--flin-danger-light);
+    color: #991b1b;
+}
+
+/* Info variant */
+.badge-info {
+    background-color: var(--flin-info-light);
+    color: #0e7490;
+}
+</style>

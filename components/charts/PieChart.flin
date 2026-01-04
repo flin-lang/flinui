@@ -1,0 +1,453 @@
+// FlinUI PieChart Component
+// SVG-based pie/donut chart with animations, labels, and legend
+
+// Props with defaults
+data = props.data || []  // Array of { label, value, color? }
+width = props.width || 300
+height = props.height || 300
+donut = props.donut || false  // true for donut chart
+donutWidth = props.donutWidth || 40  // width of donut ring
+showLabels = props.showLabels || true
+showLegend = props.showLegend || true
+showValues = props.showValues || false
+showPercentages = props.showPercentages || true
+animated = props.animated || true
+title = props.title || ""
+subtitle = props.subtitle || ""
+centerLabel = props.centerLabel || ""  // Label in center of donut
+
+// Calculate total
+total = data.reduce((sum, item) => sum + item.value, 0)
+
+// Calculate dimensions
+chartSize = Math.min(width, height)
+radius = chartSize / 2 - 20
+innerRadius = donut ? radius - donutWidth : 0
+centerX = width / 2
+centerY = height / 2
+
+// Default colors
+defaultColors = [
+    "var(--flin-primary)",
+    "var(--flin-success)",
+    "var(--flin-warning)",
+    "var(--flin-danger)",
+    "var(--flin-info)",
+    "#8b5cf6",
+    "#ec4899",
+    "#14b8a6"
+]
+
+getSliceColor = {
+    index = args.index
+    item = args.item
+    {if item.color}
+        color = item.color
+    {else}
+        color = defaultColors[index % defaultColors.length]
+    {/if}
+    color
+}
+
+// Calculate slice paths
+calculateSlices = {
+    slices = []
+    startAngle = -90  // Start from top
+
+    {for item, index in data}
+        percentage = total > 0 ? (item.value / total) * 100 : 0
+        angle = (percentage / 100) * 360
+        endAngle = startAngle + angle
+
+        // Convert to radians
+        startRad = (startAngle * Math.PI) / 180
+        endRad = (endAngle * Math.PI) / 180
+        midRad = ((startAngle + endAngle) / 2 * Math.PI) / 180
+
+        // Calculate arc points
+        x1 = centerX + radius * Math.cos(startRad)
+        y1 = centerY + radius * Math.sin(startRad)
+        x2 = centerX + radius * Math.cos(endRad)
+        y2 = centerY + radius * Math.sin(endRad)
+
+        // Inner arc points (for donut)
+        ix1 = centerX + innerRadius * Math.cos(startRad)
+        iy1 = centerY + innerRadius * Math.sin(startRad)
+        ix2 = centerX + innerRadius * Math.cos(endRad)
+        iy2 = centerY + innerRadius * Math.sin(endRad)
+
+        // Large arc flag
+        largeArc = angle > 180 ? 1 : 0
+
+        // Generate path
+        {if donut}
+            path = "M " ++ x1 ++ " " ++ y1 ++
+                   " A " ++ radius ++ " " ++ radius ++ " 0 " ++ largeArc ++ " 1 " ++ x2 ++ " " ++ y2 ++
+                   " L " ++ ix2 ++ " " ++ iy2 ++
+                   " A " ++ innerRadius ++ " " ++ innerRadius ++ " 0 " ++ largeArc ++ " 0 " ++ ix1 ++ " " ++ iy1 ++
+                   " Z"
+        {else}
+            path = "M " ++ centerX ++ " " ++ centerY ++
+                   " L " ++ x1 ++ " " ++ y1 ++
+                   " A " ++ radius ++ " " ++ radius ++ " 0 " ++ largeArc ++ " 1 " ++ x2 ++ " " ++ y2 ++
+                   " Z"
+        {/if}
+
+        // Label position
+        labelRadius = donut ? (radius + innerRadius) / 2 : radius * 0.65
+        labelX = centerX + labelRadius * Math.cos(midRad)
+        labelY = centerY + labelRadius * Math.sin(midRad)
+
+        // External label position (for percentage)
+        extLabelRadius = radius + 20
+        extLabelX = centerX + extLabelRadius * Math.cos(midRad)
+        extLabelY = centerY + extLabelRadius * Math.sin(midRad)
+
+        slices = slices.concat([{
+            path: path,
+            color: getSliceColor({ index: index, item: item }),
+            item: item,
+            percentage: percentage,
+            labelX: labelX,
+            labelY: labelY,
+            extLabelX: extLabelX,
+            extLabelY: extLabelY,
+            startAngle: startAngle,
+            angle: angle
+        }])
+
+        startAngle = endAngle
+    {/for}
+
+    slices
+}
+
+slices = calculateSlices()
+
+// Hover state
+hoveredIndex = null
+
+handleSliceHover = {
+    hoveredIndex = event.index
+}
+
+handleSliceLeave = {
+    hoveredIndex = null
+}
+
+<div class="flin-piechart" style="--chart-width: {width}px; --chart-height: {height}px;">
+    {if title || subtitle}
+        <div class="flin-piechart__header">
+            {if title}
+                <h3 class="flin-piechart__title">{title}</h3>
+            {/if}
+            {if subtitle}
+                <p class="flin-piechart__subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <svg
+        class="flin-piechart__svg"
+        viewBox="0 0 {width} {height}"
+        role="img"
+        aria-label={title || "Pie chart"}
+    >
+        <g class="flin-piechart__slices">
+            {for slice, index in slices}
+                <path
+                    class={"flin-piechart__slice" ++ {if animated { " flin-piechart__slice--animated" } else { "" }} ++ {if hoveredIndex == index { " flin-piechart__slice--active" } else { "" }}}
+                    d={slice.path}
+                    fill={slice.color}
+                    style="--slice-index: {index}; --slice-angle: {slice.angle}; --slice-start: {slice.startAngle};"
+                    mouseenter={handleSliceHover.bind({ index: index })}
+                    mouseleave={handleSliceLeave}
+                />
+            {/for}
+        </g>
+
+        // Labels on slices
+        {if showLabels && !showLegend}
+            <g class="flin-piechart__labels">
+                {for slice, index in slices}
+                    {if slice.percentage > 5}
+                        <text
+                            class="flin-piechart__label"
+                            x={slice.labelX}
+                            y={slice.labelY}
+                            text-anchor="middle"
+                            dominant-baseline="middle"
+                        >
+                            {slice.item.label}
+                        </text>
+                    {/if}
+                {/for}
+            </g>
+        {/if}
+
+        // Percentage labels
+        {if showPercentages}
+            <g class="flin-piechart__percentages">
+                {for slice, index in slices}
+                    {if slice.percentage > 3}
+                        <text
+                            class={"flin-piechart__percentage" ++ {if hoveredIndex == index { " flin-piechart__percentage--active" } else { "" }}}
+                            x={slice.extLabelX}
+                            y={slice.extLabelY}
+                            text-anchor="middle"
+                            dominant-baseline="middle"
+                        >
+                            {Math.round(slice.percentage)}%
+                        </text>
+                    {/if}
+                {/for}
+            </g>
+        {/if}
+
+        // Center label for donut
+        {if donut && centerLabel}
+            <text
+                class="flin-piechart__center-label"
+                x={centerX}
+                y={centerY}
+                text-anchor="middle"
+                dominant-baseline="middle"
+            >
+                {centerLabel}
+            </text>
+        {/if}
+
+        // Hovered value in center for donut
+        {if donut && hoveredIndex != null && !centerLabel}
+            <g class="flin-piechart__center-info">
+                <text
+                    class="flin-piechart__center-value"
+                    x={centerX}
+                    y={centerY - 8}
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                >
+                    {slices[hoveredIndex].item.value}
+                </text>
+                <text
+                    class="flin-piechart__center-name"
+                    x={centerX}
+                    y={centerY + 12}
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                >
+                    {slices[hoveredIndex].item.label}
+                </text>
+            </g>
+        {/if}
+    </svg>
+
+    // Legend
+    {if showLegend}
+        <div class="flin-piechart__legend">
+            {for slice, index in slices}
+                <div
+                    class={"flin-piechart__legend-item" ++ {if hoveredIndex == index { " flin-piechart__legend-item--active" } else { "" }}}
+                    mouseenter={handleSliceHover.bind({ index: index })}
+                    mouseleave={handleSliceLeave}
+                >
+                    <span
+                        class="flin-piechart__legend-color"
+                        style="--legend-color: {slice.color};"
+                    ></span>
+                    <span class="flin-piechart__legend-label">{slice.item.label}</span>
+                    {if showValues}
+                        <span class="flin-piechart__legend-value">{slice.item.value}</span>
+                    {/if}
+                </div>
+            {/for}
+        </div>
+    {/if}
+
+    // Tooltip
+    {if hoveredIndex != null}
+        <div class="flin-piechart__tooltip">
+            <span class="flin-piechart__tooltip-label">{slices[hoveredIndex].item.label}</span>
+            <span class="flin-piechart__tooltip-value">
+                {slices[hoveredIndex].item.value} ({Math.round(slices[hoveredIndex].percentage)}%)
+            </span>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-piechart {
+    position: relative;
+    width: var(--chart-width);
+    font-family: var(--flin-font-sans);
+}
+
+.flin-piechart__header {
+    margin-bottom: var(--flin-space-3);
+    text-align: center;
+}
+
+.flin-piechart__title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.flin-piechart__subtitle {
+    margin: var(--flin-space-1) 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.flin-piechart__svg {
+    display: block;
+    overflow: visible;
+}
+
+.flin-piechart__slice {
+    cursor: pointer;
+    transition: transform var(--flin-transition-fast), opacity var(--flin-transition-fast);
+    transform-origin: center;
+}
+
+.flin-piechart__slice:hover,
+.flin-piechart__slice--active {
+    transform: scale(1.03);
+    filter: brightness(1.05);
+}
+
+.flin-piechart__slice--animated {
+    animation: flin-pie-reveal 0.8s ease-out forwards;
+    animation-delay: calc(var(--slice-index) * 0.1s);
+    opacity: 0;
+}
+
+@keyframes flin-pie-reveal {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.flin-piechart__label {
+    font-size: 11px;
+    font-weight: 500;
+    fill: white;
+    pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.flin-piechart__percentage {
+    font-size: 11px;
+    font-weight: 600;
+    fill: var(--flin-fg-muted);
+    pointer-events: none;
+    transition: fill var(--flin-transition-fast);
+}
+
+.flin-piechart__percentage--active {
+    fill: var(--flin-fg);
+}
+
+.flin-piechart__center-label {
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    fill: var(--flin-fg);
+}
+
+.flin-piechart__center-value {
+    font-size: var(--flin-text-xl);
+    font-weight: 700;
+    fill: var(--flin-fg);
+}
+
+.flin-piechart__center-name {
+    font-size: var(--flin-text-sm);
+    fill: var(--flin-fg-muted);
+}
+
+.flin-piechart__legend {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-4);
+}
+
+.flin-piechart__legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.flin-piechart__legend-item:hover,
+.flin-piechart__legend-item--active {
+    background-color: var(--flin-neutral-100);
+}
+
+.flin-piechart__legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--flin-radius-sm);
+    background-color: var(--legend-color);
+    flex-shrink: 0;
+}
+
+.flin-piechart__legend-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    flex: 1;
+}
+
+.flin-piechart__legend-value {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+}
+
+.flin-piechart__tooltip {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    box-shadow: var(--flin-shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.flin-piechart__tooltip-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.flin-piechart__tooltip-value {
+    font-size: var(--flin-text-base);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-piechart__legend-item:hover,
+[data-theme="dark"] .flin-piechart__legend-item--active {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .flin-piechart__tooltip {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+</style>

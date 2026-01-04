@@ -1,0 +1,345 @@
+// FlinUI Playground - Live Code Editor
+// Try FlinUI components in real-time
+
+theme = "light"
+
+// Editor content
+editorCode = "// Try FlinUI components!\ncount = 0\n\n<Card>\n    <CardHeader title=\"Counter Example\" />\n    <CardBody>\n        <Text>Count: {count}</Text>\n        <Button \n            label=\"Increment\" \n            variant=\"primary\" \n            click={count = count + 1} \n        />\n    </CardBody>\n</Card>"
+
+// Starter templates
+templates = [
+    { name: "Counter", icon: "🔢" },
+    { name: "Form", icon: "📝" },
+    { name: "Dashboard", icon: "📊" },
+    { name: "Modal", icon: "💬" }
+]
+
+activeTemplate = "Counter"
+
+<div class="playground" data-theme={theme}>
+    <header class="playground-header">
+        <a href="/site/index.flin" class="brand">
+            <img src="/public/logo.png" alt="FlinUI" class="logo" />
+            <span>FlinUI Playground</span>
+        </a>
+        <div class="template-selector">
+            {for tpl, idx in templates}
+                <button
+                    class="template-btn {match activeTemplate { tpl.name -> 'active', _ -> '' }}"
+                    click={activeTemplate = tpl.name}
+                >
+                    {tpl.icon} {tpl.name}
+                </button>
+            {/for}
+        </div>
+        <div class="header-actions">
+            <button class="action-btn">Share</button>
+            <button class="theme-toggle" click={theme = match theme { "light" -> "dark", _ -> "light" }}>
+                {match theme { "light" -> "🌙", _ -> "☀️" }}
+            </button>
+        </div>
+    </header>
+
+    <div class="playground-layout">
+        <div class="editor-panel">
+            <div class="panel-header">
+                <span>Editor</span>
+                <div class="panel-actions">
+                    <button class="panel-btn">Format</button>
+                    <button class="panel-btn">Reset</button>
+                </div>
+            </div>
+            <div class="editor-area">
+                <textarea
+                    class="code-editor"
+                    value={editorCode}
+                    input={editorCode = event.target.value}
+                    spellcheck="false"
+                ></textarea>
+            </div>
+        </div>
+
+        <div class="preview-panel">
+            <div class="panel-header">
+                <span>Preview</span>
+                <div class="panel-actions">
+                    <button class="panel-btn active">Desktop</button>
+                    <button class="panel-btn">Tablet</button>
+                    <button class="panel-btn">Mobile</button>
+                </div>
+            </div>
+            <div class="preview-area">
+                <div class="preview-content">
+                    <div class="preview-placeholder">
+                        <p>Live preview of your FLIN code</p>
+                        <p class="preview-note">
+                            Full playground coming soon!
+                            For now, use: <code>flin dev your-file.flin</code>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="playground-footer">
+        <div class="footer-info">
+            <span>FlinUI v1.2.0</span>
+            <span>•</span>
+            <span>94 Components</span>
+        </div>
+        <div class="footer-links">
+            <a href="/site/components.flin">Components</a>
+            <a href="https://github.com/flin-lang/flinui">GitHub</a>
+            <a href="https://discord.gg/7uxR6VfA">Discord</a>
+        </div>
+    </footer>
+</div>
+
+<style scoped>
+.playground {
+    --primary: #6366f1;
+    --bg: #ffffff;
+    --bg-muted: #f8fafc;
+    --bg-dark: #1e293b;
+    --fg: #0f172a;
+    --fg-muted: #64748b;
+    --border: #e2e8f0;
+
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    color: var(--fg);
+}
+
+.playground[data-theme="dark"] {
+    --bg: #0f172a;
+    --bg-muted: #1e293b;
+    --fg: #f8fafc;
+    --fg-muted: #94a3b8;
+    --border: #334155;
+}
+
+/* Header */
+.playground-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: var(--fg);
+    font-weight: 600;
+}
+
+.logo {
+    width: 28px;
+    height: 28px;
+}
+
+.template-selector {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.template-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    color: var(--fg);
+    font-size: 0.875rem;
+}
+
+.template-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.action-btn {
+    padding: 0.5rem 1rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.theme-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 1.125rem;
+}
+
+/* Layout */
+.playground-layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.editor-panel,
+.preview-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.editor-panel {
+    border-right: 1px solid var(--border);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: var(--bg-muted);
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.panel-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.panel-btn {
+    padding: 0.25rem 0.75rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+}
+
+.panel-btn.active {
+    background: var(--bg);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.editor-area {
+    flex: 1;
+    background: #1e1e2e;
+}
+
+.code-editor {
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    border: none;
+    resize: none;
+    font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    background: #1e1e2e;
+    color: #cdd6f4;
+}
+
+.code-editor:focus {
+    outline: none;
+}
+
+.preview-area {
+    flex: 1;
+    padding: 1.5rem;
+    background: var(--bg);
+    overflow: auto;
+}
+
+.preview-content {
+    min-height: 100%;
+}
+
+.preview-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: var(--fg-muted);
+}
+
+.preview-note {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+}
+
+.preview-note code {
+    background: var(--bg-muted);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+}
+
+/* Footer */
+.playground-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg-muted);
+    font-size: 0.875rem;
+}
+
+.footer-info {
+    display: flex;
+    gap: 0.75rem;
+    color: var(--fg-muted);
+}
+
+.footer-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.footer-links a {
+    color: var(--fg-muted);
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    color: var(--primary);
+}
+
+@media (max-width: 768px) {
+    .playground-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+
+    .editor-panel {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .template-selector {
+        display: none;
+    }
+}
+</style>

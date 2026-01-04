@@ -1,0 +1,126 @@
+// FormField.flin - FlinUI Form Field Component
+// A labeled form field wrapper with validation states, error messages, and help text
+
+// Props with defaults
+label = props.label || ""
+required = props.required || false
+error = props.error || ""
+helpText = props.helpText || ""
+
+// Generate unique ID for accessibility
+fieldId = "field-" ++ Math.random().toString(36).substr(2, 9)
+
+// Determine field state
+hasError = error != ""
+
+<div class={"form-field" ++ {if hasError { " form-field-error" } else { "" }}}>
+    {if label != ""}
+        <label class="form-field-label" for={fieldId}>
+            {label}
+            {if required}
+                <span class="form-field-required" aria-label="required">*</span>
+            {/if}
+        </label>
+    {/if}
+
+    <div class="form-field-input" data-field-id={fieldId}>
+        {children}
+    </div>
+
+    {if hasError}
+        <div class="form-field-error-msg" role="alert" aria-live="polite">
+            <svg class="form-field-error-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M7 4V7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="7" cy="10" r="0.75" fill="currentColor"/>
+            </svg>
+            <span>{error}</span>
+        </div>
+    {else if helpText != ""}
+        <div class="form-field-help" id={fieldId ++ "-help"}>
+            {helpText}
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+    width: 100%;
+}
+
+.form-field-label {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+    user-select: none;
+}
+
+.form-field-required {
+    color: var(--flin-danger);
+    font-weight: 600;
+}
+
+.form-field-input {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Pass error styling to nested inputs */
+.form-field-error .form-field-input :global(input),
+.form-field-error .form-field-input :global(select),
+.form-field-error .form-field-input :global(textarea) {
+    border-color: var(--flin-danger);
+}
+
+.form-field-error .form-field-input :global(input:focus),
+.form-field-error .form-field-input :global(select:focus),
+.form-field-error .form-field-input :global(textarea:focus) {
+    border-color: var(--flin-danger);
+    box-shadow: 0 0 0 3px var(--flin-danger-light);
+}
+
+.form-field-error-msg {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-danger);
+    animation: form-field-error-shake 0.3s ease-out;
+}
+
+.form-field-error-icon {
+    flex-shrink: 0;
+}
+
+.form-field-help {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.4;
+}
+
+/* Animation for error appearance */
+@keyframes form-field-error-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-2px); }
+    80% { transform: translateX(2px); }
+}
+
+/* Focus state indicator for the whole field */
+.form-field:focus-within .form-field-label {
+    color: var(--flin-primary);
+}
+
+.form-field-error:focus-within .form-field-label {
+    color: var(--flin-danger);
+}
+</style>

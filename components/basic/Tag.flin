@@ -1,0 +1,143 @@
+// Tag.flin - FlinUI Tag Component
+// A removable tag/chip component with variants
+
+// Props with defaults
+variant = props.variant || "default"
+removable = props.removable || false
+onRemove = props.onRemove
+
+// Computed variant class
+variantClass = match variant {
+    "primary" -> "tag-primary"
+    "success" -> "tag-success"
+    "warning" -> "tag-warning"
+    "danger" -> "tag-danger"
+    "info" -> "tag-info"
+    _ -> "tag-default"
+}
+
+<span class={"tag " ++ variantClass}>
+    <span class="tag-content">
+        {children}
+    </span>
+    {if removable}
+        <button
+            class="tag-remove"
+            click={onRemove}
+            aria-label="Remove tag"
+            type="button"
+        >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    {/if}
+</span>
+
+<style scoped>
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    line-height: 1.4;
+    border-radius: var(--flin-radius-md);
+    white-space: nowrap;
+}
+
+.tag-content {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+.tag-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    margin-left: var(--flin-space-1);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all var(--flin-transition-fast);
+}
+
+.tag-remove:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.tag-remove:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 1px;
+    opacity: 1;
+}
+
+/* Default variant */
+.tag-default {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-700);
+}
+
+.tag-default .tag-remove:hover {
+    background-color: var(--flin-neutral-200);
+}
+
+/* Primary variant */
+.tag-primary {
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.tag-primary .tag-remove:hover {
+    background-color: rgba(59, 130, 246, 0.2);
+}
+
+/* Success variant */
+.tag-success {
+    background-color: var(--flin-success-light);
+    color: #065f46;
+}
+
+.tag-success .tag-remove:hover {
+    background-color: rgba(16, 185, 129, 0.2);
+}
+
+/* Warning variant */
+.tag-warning {
+    background-color: var(--flin-warning-light);
+    color: #92400e;
+}
+
+.tag-warning .tag-remove:hover {
+    background-color: rgba(245, 158, 11, 0.2);
+}
+
+/* Danger variant */
+.tag-danger {
+    background-color: var(--flin-danger-light);
+    color: #991b1b;
+}
+
+.tag-danger .tag-remove:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+}
+
+/* Info variant */
+.tag-info {
+    background-color: var(--flin-info-light);
+    color: #0e7490;
+}
+
+.tag-info .tag-remove:hover {
+    background-color: rgba(6, 182, 212, 0.2);
+}
+</style>

@@ -1,0 +1,111 @@
+// FlinUI Stat Component
+// Statistics display with label, value, help text, and trend indicator
+
+// Props with defaults
+label = props.label || ""
+value = props.value || "0"
+helpText = props.helpText || ""
+trend = props.trend || ""
+
+// Determine trend direction
+trendUp = trend == "up"
+trendDown = trend == "down"
+hasTrend = trendUp || trendDown
+
+<div class="flin-stat">
+    {if label != ""}
+        <dt class="flin-stat__label">{label}</dt>
+    {/if}
+
+    <dd class="flin-stat__value">
+        <span class="flin-stat__number">{value}</span>
+
+        {if hasTrend}
+            <span class="flin-stat__trend {if trendUp { 'flin-stat__trend--up' }} {if trendDown { 'flin-stat__trend--down' }}">
+                {if trendUp}
+                    <svg class="flin-stat__trend-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                {/if}
+                {if trendDown}
+                    <svg class="flin-stat__trend-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                {/if}
+            </span>
+        {/if}
+    </dd>
+
+    {if helpText != ""}
+        <p class="flin-stat__help">{helpText}</p>
+    {/if}
+</div>
+
+<style scoped>
+.flin-stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.flin-stat__label {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+    margin: 0;
+}
+
+.flin-stat__value {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    margin: 0;
+}
+
+.flin-stat__number {
+    font-size: var(--flin-text-3xl);
+    font-weight: 700;
+    color: var(--flin-fg);
+    line-height: 1.2;
+}
+
+.flin-stat__trend {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    border-radius: var(--flin-radius-full);
+}
+
+.flin-stat__trend--up {
+    color: var(--flin-success);
+    background-color: var(--flin-success-light);
+}
+
+.flin-stat__trend--down {
+    color: var(--flin-danger);
+    background-color: var(--flin-danger-light);
+}
+
+.flin-stat__trend-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.flin-stat__help {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    margin: var(--flin-space-1) 0 0 0;
+    line-height: 1.4;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-stat__trend--up {
+    background-color: rgba(16, 185, 129, 0.2);
+}
+
+[data-theme="dark"] .flin-stat__trend--down {
+    background-color: rgba(239, 68, 68, 0.2);
+}
+</style>

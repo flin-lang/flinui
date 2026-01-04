@@ -1,0 +1,72 @@
+// NavbarBrand.flin - FlinUI Navbar Brand Component
+// Logo and brand section for the navigation bar
+
+// Props with defaults
+href = props.href || "/"
+logo = props.logo  // Named slot for logo content
+
+<a
+    href={href}
+    class="flin-navbar-brand"
+    aria-label="Home"
+>
+    {if logo}
+        <span class="flin-navbar-brand__logo">
+            {logo}
+        </span>
+    {/if}
+    <span class="flin-navbar-brand__text">
+        {children}
+    </span>
+</a>
+
+<style scoped>
+.flin-navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    text-decoration: none;
+    color: var(--flin-fg);
+    font-size: var(--flin-text-xl);
+    font-weight: 600;
+    transition: opacity var(--flin-transition-fast);
+    flex-shrink: 0;
+}
+
+.flin-navbar-brand:hover {
+    opacity: 0.8;
+}
+
+.flin-navbar-brand:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+    border-radius: var(--flin-radius-sm);
+}
+
+.flin-navbar-brand__logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flin-navbar-brand__logo img,
+.flin-navbar-brand__logo svg {
+    width: auto;
+    height: 32px;
+    max-height: 40px;
+    object-fit: contain;
+}
+
+.flin-navbar-brand__text {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+/* Hide text on very small screens if logo exists */
+@media (max-width: 480px) {
+    .flin-navbar-brand:has(.flin-navbar-brand__logo) .flin-navbar-brand__text {
+        display: none;
+    }
+}
+</style>

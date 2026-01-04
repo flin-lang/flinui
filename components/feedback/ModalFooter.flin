@@ -1,0 +1,80 @@
+// ModalFooter.flin - FlinUI Modal Footer Component
+// Footer section for Modal with action buttons
+
+// Props with defaults
+align = props.align || "right"
+
+// Compute alignment class
+alignClass = match align {
+    "left" -> "modal-footer-left"
+    "center" -> "modal-footer-center"
+    "between" -> "modal-footer-between"
+    _ -> "modal-footer-right"
+}
+
+<div class={"flin-modal-footer " ++ alignClass} role="contentinfo">
+    {children}
+</div>
+
+<style scoped>
+.flin-modal-footer {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-top: 1px solid var(--flin-neutral-200);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+/* Alignment variants */
+.modal-footer-left {
+    justify-content: flex-start;
+}
+
+.modal-footer-center {
+    justify-content: center;
+}
+
+.modal-footer-right {
+    justify-content: flex-end;
+}
+
+.modal-footer-between {
+    justify-content: space-between;
+}
+
+/* Button styling within footer */
+.flin-modal-footer > button,
+.flin-modal-footer > .btn {
+    min-width: 80px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+    .flin-modal-footer {
+        padding: var(--flin-space-3) var(--flin-space-4);
+        gap: var(--flin-space-2);
+    }
+
+    .flin-modal-footer > button,
+    .flin-modal-footer > .btn {
+        flex: 1;
+        min-width: unset;
+    }
+
+    .modal-footer-between {
+        flex-direction: column-reverse;
+    }
+
+    .modal-footer-between > button,
+    .modal-footer-between > .btn {
+        width: 100%;
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-modal-footer {
+    border-top-color: var(--flin-neutral-700);
+}
+</style>

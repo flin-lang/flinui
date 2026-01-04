@@ -1,0 +1,319 @@
+// Toast.flin - FlinUI Toast Component
+// Temporary notifications that appear and auto-dismiss
+
+// Props with defaults
+variant = props.variant || "info"
+title = props.title || ""
+message = props.message || ""
+duration = props.duration || 5000
+position = props.position || "top-right"
+onClose = props.onClose
+
+// Internal state
+visible = true
+isExiting = false
+
+// Auto-dismiss timer
+onMount = {
+    {if duration > 0}
+        setTimeout({
+            handleClose()
+        }, duration)
+    {/if}
+}
+
+// Handle close with exit animation
+handleClose = {
+    isExiting = true;
+    setTimeout({
+        visible = false;
+        {if onClose}
+            onClose()
+        {/if}
+    }, 200)
+}
+
+// Variant class
+variantClass = match variant {
+    "success" -> "toast-success"
+    "warning" -> "toast-warning"
+    "danger" -> "toast-danger"
+    _ -> "toast-info"
+}
+
+// Position class
+positionClass = match position {
+    "top-left" -> "toast-top-left"
+    "top-center" -> "toast-top-center"
+    "bottom-left" -> "toast-bottom-left"
+    "bottom-center" -> "toast-bottom-center"
+    "bottom-right" -> "toast-bottom-right"
+    _ -> "toast-top-right"
+}
+
+// Icon paths
+iconPath = match variant {
+    "success" -> "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+    "warning" -> "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+    "danger" -> "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+    _ -> "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+}
+
+{if visible}
+    <div
+        class={"flin-toast " ++ variantClass ++ " " ++ positionClass ++ {if isExiting { " toast-exiting" } else { "" }}}
+        role="alert"
+        aria-live="polite"
+    >
+        <div class="toast-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
+            </svg>
+        </div>
+
+        <div class="toast-content">
+            {if title}
+                <div class="toast-title">{title}</div>
+            {/if}
+            {if message}
+                <div class="toast-message">{message}</div>
+            {/if}
+        </div>
+
+        <button
+            class="toast-close"
+            click={handleClose}
+            aria-label="Close notification"
+            type="button"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        {if duration > 0}
+            <div class="toast-progress" style="animation-duration: {duration}ms;"></div>
+        {/if}
+    </div>
+{/if}
+
+<style scoped>
+.flin-toast {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    background: var(--flin-bg);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+    border: 1px solid var(--flin-neutral-200);
+    min-width: 300px;
+    max-width: 420px;
+    position: fixed;
+    z-index: 9999;
+    overflow: hidden;
+    animation: toastSlideIn var(--flin-transition-normal) ease-out;
+}
+
+/* Position variants */
+.toast-top-right {
+    top: var(--flin-space-4);
+    right: var(--flin-space-4);
+}
+
+.toast-top-left {
+    top: var(--flin-space-4);
+    left: var(--flin-space-4);
+}
+
+.toast-top-center {
+    top: var(--flin-space-4);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.toast-bottom-right {
+    bottom: var(--flin-space-4);
+    right: var(--flin-space-4);
+}
+
+.toast-bottom-left {
+    bottom: var(--flin-space-4);
+    left: var(--flin-space-4);
+}
+
+.toast-bottom-center {
+    bottom: var(--flin-space-4);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Slide-in animations based on position */
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.toast-top-left,
+.toast-bottom-left {
+    animation-name: toastSlideInLeft;
+}
+
+@keyframes toastSlideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.toast-top-center,
+.toast-bottom-center {
+    animation-name: toastSlideInCenter;
+}
+
+@keyframes toastSlideInCenter {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Exit animation */
+.toast-exiting {
+    animation: toastFadeOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes toastFadeOut {
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+.toast-icon {
+    flex-shrink: 0;
+}
+
+.toast-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.toast-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.toast-title {
+    font-weight: 600;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    margin-bottom: var(--flin-space-1);
+}
+
+.toast-message {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.5;
+}
+
+.toast-close {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    padding: var(--flin-space-1);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-fg-muted);
+    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.toast-close:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.toast-close svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Progress bar */
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: currentColor;
+    opacity: 0.3;
+    animation: toastProgress linear forwards;
+    transform-origin: left;
+}
+
+@keyframes toastProgress {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
+}
+
+/* Variant colors */
+.toast-info .toast-icon {
+    color: var(--flin-info);
+}
+
+.toast-info .toast-progress {
+    background: var(--flin-info);
+}
+
+.toast-success .toast-icon {
+    color: var(--flin-success);
+}
+
+.toast-success .toast-progress {
+    background: var(--flin-success);
+}
+
+.toast-warning .toast-icon {
+    color: var(--flin-warning);
+}
+
+.toast-warning .toast-progress {
+    background: var(--flin-warning);
+}
+
+.toast-danger .toast-icon {
+    color: var(--flin-danger);
+}
+
+.toast-danger .toast-progress {
+    background: var(--flin-danger);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-toast {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .toast-close:hover {
+    background-color: var(--flin-neutral-700);
+}
+</style>

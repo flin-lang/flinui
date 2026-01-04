@@ -1,0 +1,262 @@
+// Modal.flin - FlinUI Modal Component
+// A dialog overlay for important content or user interactions
+
+// Props with defaults
+open = props.open || false
+title = props.title || ""
+size = props.size || "md"
+closable = props.closable || true
+onClose = props.onClose
+
+// Internal state for animations
+isClosing = false
+
+// Handle close with animation
+handleClose = {
+    {if closable}
+        isClosing = true;
+        setTimeout({
+            isClosing = false;
+            {if onClose}
+                onClose()
+            {/if}
+        }, 200)
+    {/if}
+}
+
+// Handle backdrop click
+handleBackdropClick = {
+    handleClose()
+}
+
+// Handle escape key
+handleKeyDown = {
+    {if event.key == "Escape"}
+        handleClose()
+    {/if}
+}
+
+// Size class computation
+sizeClass = match size {
+    "sm" -> "modal-sm"
+    "lg" -> "modal-lg"
+    "xl" -> "modal-xl"
+    "full" -> "modal-full"
+    _ -> "modal-md"
+}
+
+{if open}
+    <div
+        class={"flin-modal-backdrop" ++ {if isClosing { " modal-backdrop-closing" } else { "" }}}
+        click={handleBackdropClick}
+        aria-hidden="true"
+    ></div>
+
+    <div
+        class={"flin-modal " ++ sizeClass ++ {if isClosing { " modal-closing" } else { "" }}}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        tabindex="-1"
+        keydown={handleKeyDown}
+    >
+        {if title || closable}
+            <div class="modal-header">
+                {if title}
+                    <h2 id="modal-title" class="modal-title">{title}</h2>
+                {/if}
+                {if closable}
+                    <button
+                        class="modal-close"
+                        click={handleClose}
+                        aria-label="Close modal"
+                        type="button"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                {/if}
+            </div>
+        {/if}
+
+        <div class="modal-content">
+            {children}
+        </div>
+    </div>
+{/if}
+
+<style scoped>
+/* Backdrop */
+.flin-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 9998;
+    animation: backdropFadeIn var(--flin-transition-fast) ease-out;
+}
+
+@keyframes backdropFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-backdrop-closing {
+    animation: backdropFadeOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes backdropFadeOut {
+    to {
+        opacity: 0;
+    }
+}
+
+/* Modal */
+.flin-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-xl);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    animation: modalSlideIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.modal-closing {
+    animation: modalSlideOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes modalSlideOut {
+    to {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.95);
+    }
+}
+
+/* Size variants */
+.modal-sm {
+    width: 100%;
+    max-width: 400px;
+}
+
+.modal-md {
+    width: 100%;
+    max-width: 560px;
+}
+
+.modal-lg {
+    width: 100%;
+    max-width: 720px;
+}
+
+.modal-xl {
+    width: 100%;
+    max-width: 960px;
+}
+
+.modal-full {
+    width: calc(100vw - var(--flin-space-8));
+    max-width: none;
+    height: calc(100vh - var(--flin-space-8));
+    max-height: none;
+}
+
+/* Header */
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    flex-shrink: 0;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    color: var(--flin-fg-muted);
+    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.modal-close:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.modal-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Content */
+.modal-content {
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Focus trap visual indicator */
+.flin-modal:focus {
+    outline: none;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+    .flin-modal {
+        width: calc(100vw - var(--flin-space-4));
+        max-height: calc(100vh - var(--flin-space-8));
+    }
+
+    .modal-header {
+        padding: var(--flin-space-3) var(--flin-space-4);
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-modal {
+    background-color: var(--flin-neutral-800);
+    border: 1px solid var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-close:hover {
+    background-color: var(--flin-neutral-700);
+}
+</style>

@@ -1,0 +1,56 @@
+// FlinUI Center Component
+// Centers content both horizontally and vertically
+// Props: inline (bool for inline-flex display), minHeight (CSS value), maxWidth (CSS value)
+
+inline = props.inline || false
+minHeight = props.minHeight || "auto"
+maxWidth = props.maxWidth || "none"
+padding = props.padding || 0
+
+// Build class string
+inlineClass = {if inline { "flin-center-inline" } else { "" }}
+paddingClass = {if padding > 0 { "flin-center-p-" + padding } else { "" }}
+
+centerClass = "flin-center " + inlineClass + " " + paddingClass
+
+// Build style for custom dimensions
+centerStyle = "min-height: " + minHeight + "; max-width: " + maxWidth + ";"
+
+<div class={centerClass} style={centerStyle}>
+    {children}
+</div>
+
+<style scoped>
+.flin-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.flin-center-inline {
+    display: inline-flex;
+}
+
+/* Padding variants */
+.flin-center-p-1 { padding: var(--flin-space-1); }
+.flin-center-p-2 { padding: var(--flin-space-2); }
+.flin-center-p-3 { padding: var(--flin-space-3); }
+.flin-center-p-4 { padding: var(--flin-space-4); }
+.flin-center-p-5 { padding: calc(var(--flin-space-4) + var(--flin-space-1)); }
+.flin-center-p-6 { padding: var(--flin-space-6); }
+.flin-center-p-8 { padding: var(--flin-space-8); }
+.flin-center-p-10 { padding: calc(var(--flin-space-8) + var(--flin-space-2)); }
+.flin-center-p-12 { padding: var(--flin-space-12); }
+.flin-center-p-16 { padding: var(--flin-space-16); }
+
+/* Common use cases */
+.flin-center-fullscreen {
+    min-height: 100vh;
+    width: 100%;
+}
+
+.flin-center-fullwidth {
+    width: 100%;
+}
+</style>

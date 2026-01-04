@@ -1,0 +1,95 @@
+// FlinUI Dark Theme
+// Override tokens for dark mode
+
+// Dark mode is automatically applied via CSS variables in tokens.flin
+// This file provides additional dark theme utilities
+
+// TH-05: Dark Mode Support
+
+isDarkMode = false
+
+// Toggle dark mode
+toggleDarkMode = fn() {
+    isDarkMode = !isDarkMode
+    if isDarkMode {
+        // JavaScript: document.documentElement.setAttribute('data-theme', 'dark')
+    } else {
+        // JavaScript: document.documentElement.removeAttribute('data-theme')
+    }
+}
+
+// Detect system preference
+prefersDarkMode = fn() {
+    // JavaScript: window.matchMedia('(prefers-color-scheme: dark)').matches
+    false
+}
+
+// Auto-apply based on system preference
+initTheme = fn() {
+    if prefersDarkMode() {
+        isDarkMode = true
+    }
+}
+
+<style>
+/* Dark theme overrides - applied when [data-theme="dark"] on :root */
+[data-theme="dark"] {
+    /* Background & Foreground */
+    --flin-bg: #18181b;
+    --flin-bg-muted: #27272a;
+    --flin-fg: #fafafa;
+    --flin-fg-muted: #a1a1aa;
+
+    /* Inverted neutral scale for dark mode */
+    --flin-neutral-50: #18181b;
+    --flin-neutral-100: #27272a;
+    --flin-neutral-200: #3f3f46;
+    --flin-neutral-300: #52525b;
+    --flin-neutral-400: #71717a;
+    --flin-neutral-500: #a1a1aa;
+    --flin-neutral-600: #d4d4d8;
+    --flin-neutral-700: #e4e4e7;
+    --flin-neutral-800: #f4f4f5;
+    --flin-neutral-900: #fafafa;
+
+    /* Adjusted primary for dark mode - slightly brighter */
+    --flin-primary: #60a5fa;
+    --flin-primary-hover: #3b82f6;
+    --flin-primary-light: rgba(59, 130, 246, 0.15);
+
+    /* Adjusted other colors for dark mode */
+    --flin-success-light: rgba(16, 185, 129, 0.15);
+    --flin-warning-light: rgba(245, 158, 11, 0.15);
+    --flin-danger-light: rgba(239, 68, 68, 0.15);
+    --flin-info-light: rgba(6, 182, 212, 0.15);
+
+    /* Shadows for dark mode - use lighter shadows */
+    --flin-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --flin-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --flin-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+
+    /* Border colors for dark mode */
+    --flin-border: #3f3f46;
+    --flin-border-hover: #52525b;
+}
+
+/* Smooth transition when switching themes */
+:root {
+    color-scheme: light dark;
+}
+
+[data-theme="dark"] {
+    color-scheme: dark;
+}
+
+/* Media query for system preference */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        /* Same as [data-theme="dark"] */
+        --flin-bg: #18181b;
+        --flin-bg-muted: #27272a;
+        --flin-fg: #fafafa;
+        --flin-fg-muted: #a1a1aa;
+    }
+}
+</style>

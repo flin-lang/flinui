@@ -1,0 +1,276 @@
+// Sidebar.flin - FlinUI Sidebar Navigation Component
+// A collapsible sidebar for application navigation
+
+// Props with defaults
+collapsed = props.collapsed || false
+width = props.width || "260px"
+collapsedWidth = props.collapsedWidth || "64px"
+position = props.position || "left"
+onToggle = props.onToggle
+
+// Internal state
+isCollapsed = collapsed
+
+// Toggle collapsed state
+toggleCollapse = {
+    isCollapsed = !isCollapsed
+    if onToggle {
+        onToggle(isCollapsed)
+    }
+}
+
+// Handle keyboard navigation
+handleKeydown = {
+    if event.key == "Escape" {
+        if !isCollapsed {
+            toggleCollapse()
+        }
+    }
+}
+
+// Position class
+positionClass = match position {
+    "right" -> "flin-sidebar--right"
+    _ -> "flin-sidebar--left"
+}
+
+<aside
+    class={"flin-sidebar " ++ positionClass ++ {if isCollapsed { " flin-sidebar--collapsed" } else { "" }}}
+    style="--sidebar-width: {width}; --sidebar-collapsed-width: {collapsedWidth};"
+    role="navigation"
+    aria-label="Sidebar navigation"
+    keydown={handleKeydown}
+>
+    // Collapse toggle button
+    <button
+        class="flin-sidebar__toggle"
+        click={toggleCollapse}
+        aria-expanded={!isCollapsed}
+        aria-label={if isCollapsed { "Expand sidebar" } else { "Collapse sidebar" }}
+        title={if isCollapsed { "Expand" } else { "Collapse" }}
+    >
+        <svg
+            class="flin-sidebar__toggle-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+        >
+            <polyline points={if position == "right" { "10,4 6,8 10,12" } else { "6,4 10,8 6,12" }}></polyline>
+        </svg>
+    </button>
+
+    // Sidebar content
+    <nav class="flin-sidebar__content">
+        {children}
+    </nav>
+
+    // Sidebar footer slot area
+    <div class="flin-sidebar__footer">
+        {props.footer}
+    </div>
+</aside>
+
+// Mobile overlay
+{if !isCollapsed}
+    <div
+        class="flin-sidebar__overlay"
+        click={toggleCollapse}
+        aria-hidden="true"
+    ></div>
+{/if}
+
+<style scoped>
+.flin-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background-color: var(--flin-bg);
+    border-right: 1px solid var(--flin-neutral-200);
+    position: fixed;
+    top: 0;
+    z-index: 900;
+    transition: width var(--flin-transition-normal),
+                transform var(--flin-transition-normal);
+    overflow: hidden;
+}
+
+.flin-sidebar--left {
+    left: 0;
+}
+
+.flin-sidebar--right {
+    right: 0;
+    left: auto;
+    border-right: none;
+    border-left: 1px solid var(--flin-neutral-200);
+}
+
+.flin-sidebar--collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+/* Toggle button */
+.flin-sidebar__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin: var(--flin-space-3);
+    padding: 0;
+    background-color: var(--flin-neutral-100);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast),
+                transform var(--flin-transition-fast);
+    flex-shrink: 0;
+    align-self: flex-end;
+}
+
+.flin-sidebar--left .flin-sidebar__toggle {
+    align-self: flex-end;
+}
+
+.flin-sidebar--right .flin-sidebar__toggle {
+    align-self: flex-start;
+}
+
+.flin-sidebar__toggle:hover {
+    background-color: var(--flin-neutral-200);
+}
+
+.flin-sidebar__toggle:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.flin-sidebar__toggle-icon {
+    transition: transform var(--flin-transition-fast);
+    color: var(--flin-fg-muted);
+}
+
+.flin-sidebar--collapsed .flin-sidebar__toggle-icon {
+    transform: rotate(180deg);
+}
+
+/* Content area */
+.flin-sidebar__content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: var(--flin-space-2);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.flin-sidebar__content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.flin-sidebar__content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.flin-sidebar__content::-webkit-scrollbar-thumb {
+    background-color: var(--flin-neutral-300);
+    border-radius: 3px;
+}
+
+/* Footer area */
+.flin-sidebar__footer {
+    padding: var(--flin-space-3);
+    border-top: 1px solid var(--flin-neutral-200);
+    margin-top: auto;
+}
+
+.flin-sidebar--collapsed .flin-sidebar__footer {
+    padding: var(--flin-space-2);
+}
+
+/* Mobile overlay */
+.flin-sidebar__overlay {
+    display: none;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .flin-sidebar {
+        transform: translateX(-100%);
+        box-shadow: var(--flin-shadow-xl);
+    }
+
+    .flin-sidebar--right {
+        transform: translateX(100%);
+    }
+
+    .flin-sidebar:not(.flin-sidebar--collapsed) {
+        transform: translateX(0);
+        width: min(var(--sidebar-width), 80vw);
+    }
+
+    .flin-sidebar__overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 899;
+        animation: fadeIn var(--flin-transition-fast);
+    }
+
+    .flin-sidebar--collapsed + .flin-sidebar__overlay {
+        display: none;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-sidebar {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-sidebar__toggle {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-sidebar__toggle:hover {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-sidebar__footer {
+    border-top-color: var(--flin-neutral-700);
+}
+
+/* Body adjustment when sidebar is open */
+body:has(.flin-sidebar--left:not(.flin-sidebar--collapsed)) {
+    margin-left: var(--sidebar-width);
+}
+
+body:has(.flin-sidebar--left.flin-sidebar--collapsed) {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+body:has(.flin-sidebar--right:not(.flin-sidebar--collapsed)) {
+    margin-right: var(--sidebar-width);
+}
+
+body:has(.flin-sidebar--right.flin-sidebar--collapsed) {
+    margin-right: var(--sidebar-collapsed-width);
+}
+
+@media (max-width: 768px) {
+    body:has(.flin-sidebar) {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+</style>

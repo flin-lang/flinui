@@ -1,0 +1,69 @@
+// Link.flin - FlinUI Link Component
+// An accessible link component with external link support
+
+// Props with defaults
+href = props.href || "#"
+external = props.external || false
+onClick = props.onClick
+
+// External link attributes
+target = {if external { "_blank" } else { "" }}
+rel = {if external { "noopener noreferrer" } else { "" }}
+
+<a
+    class="link"
+    href={href}
+    target={target}
+    rel={rel}
+    click={onClick}
+>
+    {children}
+    {if external}
+        <span class="link-external-icon" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M9 3L3 9M9 3H5M9 3V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+    {/if}
+</a>
+
+<style scoped>
+.link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-family: var(--flin-font-sans);
+    font-size: inherit;
+    color: var(--flin-primary);
+    text-decoration: none;
+    transition: color var(--flin-transition-fast);
+    cursor: pointer;
+}
+
+.link:hover {
+    color: var(--flin-primary-hover);
+    text-decoration: underline;
+}
+
+.link:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+    border-radius: var(--flin-radius-sm);
+}
+
+.link:active {
+    color: var(--flin-primary-active);
+}
+
+.link-external-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.link:hover .link-external-icon {
+    opacity: 1;
+}
+</style>

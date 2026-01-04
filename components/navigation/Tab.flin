@@ -1,0 +1,205 @@
+// Tab.flin - FlinUI Individual Tab Component
+// A single tab within a Tabs container
+
+// Props with defaults
+value = props.value || ""
+label = props.label || ""
+icon = props.icon
+disabled = props.disabled || false
+
+// Get active state from parent context
+isActive = props.isActive || false
+
+// Handle click
+handleClick = {
+    if !disabled {
+        // Dispatch custom event to parent Tabs component
+        props.onSelect(value)
+    }
+}
+
+// Handle keyboard interaction
+handleKeydown = {
+    if event.key == "Enter" || event.key == " " {
+        event.preventDefault
+        handleClick()
+    }
+}
+
+<button
+    class={"flin-tab" ++ {if isActive { " flin-tab--active" } else { "" }}}
+    role="tab"
+    aria-selected={isActive}
+    aria-disabled={disabled}
+    tabindex={if isActive { 0 } else { -1 }}
+    click={handleClick}
+    keydown={handleKeydown}
+    disabled={disabled}
+    data-value={value}
+>
+    {if icon}
+        <span class="flin-tab__icon" aria-hidden="true">
+            {icon}
+        </span>
+    {/if}
+    <span class="flin-tab__label">
+        {if label}
+            {label}
+        {else}
+            {children}
+        {/if}
+    </span>
+</button>
+
+<style scoped>
+.flin-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: color var(--flin-transition-fast),
+                background-color var(--flin-transition-fast);
+    white-space: nowrap;
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.flin-tab:hover:not(:disabled) {
+    color: var(--flin-fg);
+}
+
+.flin-tab:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.flin-tab:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.flin-tab--active {
+    color: var(--flin-primary);
+}
+
+/* Icon */
+.flin-tab__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+}
+
+.flin-tab__icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Label */
+.flin-tab__label {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Size variants (inherited from parent) */
+.flin-tabs--sm .flin-tab {
+    padding: var(--flin-space-1) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+}
+
+.flin-tabs--lg .flin-tab {
+    padding: var(--flin-space-3) var(--flin-space-6);
+    font-size: var(--flin-text-base);
+}
+
+/* Line variant styles */
+.flin-tabs--line .flin-tab {
+    border-radius: 0;
+    padding-bottom: calc(var(--flin-space-2) + 2px);
+}
+
+.flin-tabs--line .flin-tab--active {
+    border-bottom: 2px solid var(--flin-primary);
+    margin-bottom: -1px;
+}
+
+.flin-tabs--line .flin-tab:hover:not(:disabled):not(.flin-tab--active) {
+    border-bottom: 2px solid var(--flin-neutral-300);
+    margin-bottom: -1px;
+}
+
+/* Enclosed variant styles */
+.flin-tabs--enclosed .flin-tab {
+    border-radius: var(--flin-radius-md);
+}
+
+.flin-tabs--enclosed .flin-tab--active {
+    background-color: var(--flin-bg);
+    box-shadow: var(--flin-shadow-sm);
+    color: var(--flin-fg);
+}
+
+.flin-tabs--enclosed .flin-tab:hover:not(:disabled):not(.flin-tab--active) {
+    background-color: var(--flin-neutral-200);
+}
+
+/* Soft variant styles */
+.flin-tabs--soft .flin-tab--active {
+    background-color: var(--flin-bg);
+    box-shadow: var(--flin-shadow-sm);
+    color: var(--flin-fg);
+}
+
+.flin-tabs--soft .flin-tab:hover:not(:disabled):not(.flin-tab--active) {
+    background-color: var(--flin-neutral-200);
+}
+
+/* Pills variant styles */
+.flin-tabs--pills .flin-tab {
+    border-radius: var(--flin-radius-full);
+}
+
+.flin-tabs--pills .flin-tab--active {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.flin-tabs--pills .flin-tab:hover:not(:disabled):not(.flin-tab--active) {
+    background-color: var(--flin-neutral-100);
+}
+
+/* Full width */
+.flin-tabs--full-width .flin-tab {
+    flex: 1;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-tabs--enclosed .flin-tab--active,
+[data-theme="dark"] .flin-tabs--soft .flin-tab--active {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-tabs--enclosed .flin-tab:hover:not(:disabled):not(.flin-tab--active),
+[data-theme="dark"] .flin-tabs--soft .flin-tab:hover:not(:disabled):not(.flin-tab--active) {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-tabs--pills .flin-tab:hover:not(:disabled):not(.flin-tab--active) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .flin-tabs--line .flin-tab:hover:not(:disabled):not(.flin-tab--active) {
+    border-bottom-color: var(--flin-neutral-600);
+}
+</style>

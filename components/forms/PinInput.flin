@@ -1,0 +1,296 @@
+// PinInput.flin - FlinUI PIN Input Component
+// A multi-digit PIN/OTP input with keyboard navigation and paste support
+
+// Props with defaults
+length = props.length || 4  // 4-6 digits
+value = props.value || ""
+type = props.type || "number"  // "number" or "alphanumeric"
+disabled = props.disabled || false
+onComplete = props.onComplete
+onChange = props.onChange
+
+// Validate length (must be 4-6)
+validLength = Math.max(4, Math.min(6, length))
+
+// State management - array of individual digits
+digits = value.split("").concat(Array(validLength - value.length).fill(""))
+focusedIndex = -1
+isComplete = false
+
+// Input pattern based on type
+inputPattern = match type {
+    "alphanumeric" -> "[A-Za-z0-9]"
+    _ -> "[0-9]"
+}
+
+inputMode = match type {
+    "alphanumeric" -> "text"
+    _ -> "numeric"
+}
+
+// Get current value as string
+getCurrentValue = {
+    digits.join("")
+}
+
+// Update value and check completion
+updateValue = {
+    newValue = getCurrentValue();
+    value = newValue;
+    isComplete = newValue.length == validLength && !newValue.includes("");
+
+    {if onChange}
+        onChange(newValue)
+    {/if}
+
+    {if isComplete && onComplete}
+        onComplete(newValue)
+    {/if}
+}
+
+// Handle input at specific index
+handleInput = {
+    index = parseInt(event.target.dataset.index);
+    inputValue = event.target.value;
+
+    // Filter based on type
+    {if type == "number"}
+        inputValue = inputValue.replace(/[^0-9]/g, "")
+    {else}
+        inputValue = inputValue.replace(/[^A-Za-z0-9]/g, "")
+    {/if}
+
+    {if inputValue.length > 0}
+        // Take only the last character if multiple entered
+        digits[index] = inputValue.slice(-1).toUpperCase();
+        digits = [...digits];
+        updateValue();
+
+        // Move to next input
+        {if index < validLength - 1}
+            focusInput(index + 1)
+        {/if}
+    {/if}
+}
+
+// Handle keydown for navigation and deletion
+handleKeydown = {
+    index = parseInt(event.target.dataset.index);
+
+    {if event.key == "Backspace"}
+        {if digits[index] != ""}
+            digits[index] = "";
+            digits = [...digits];
+            updateValue()
+        {else if index > 0}
+            // Move to previous input and clear it
+            digits[index - 1] = "";
+            digits = [...digits];
+            updateValue();
+            focusInput(index - 1)
+        {/if}
+        event.preventDefault()
+    {else if event.key == "Delete"}
+        digits[index] = "";
+        digits = [...digits];
+        updateValue()
+    {else if event.key == "ArrowLeft" && index > 0}
+        focusInput(index - 1);
+        event.preventDefault()
+    {else if event.key == "ArrowRight" && index < validLength - 1}
+        focusInput(index + 1);
+        event.preventDefault()
+    {/if}
+}
+
+// Handle paste
+handlePaste = {
+    event.preventDefault();
+    pastedData = event.clipboardData.getData("text");
+
+    // Filter based on type
+    {if type == "number"}
+        pastedData = pastedData.replace(/[^0-9]/g, "")
+    {else}
+        pastedData = pastedData.replace(/[^A-Za-z0-9]/g, "").toUpperCase()
+    {/if}
+
+    // Fill digits from pasted data
+    startIndex = parseInt(event.target.dataset.index);
+    {for i in range(0, validLength)}
+        {if i >= startIndex && (i - startIndex) < pastedData.length}
+            digits[i] = pastedData[i - startIndex]
+        {/if}
+    {/for}
+    digits = [...digits];
+    updateValue();
+
+    // Focus on next empty or last input
+    nextEmpty = digits.findIndex(d => d == "");
+    {if nextEmpty >= 0}
+        focusInput(nextEmpty)
+    {else}
+        focusInput(validLength - 1)
+    {/if}
+}
+
+// Focus input by index
+focusInput = {
+    index = event;
+    inputEl = document.querySelector("[data-pin-input-index='" ++ index ++ "']");
+    {if inputEl}
+        inputEl.focus();
+        inputEl.select()
+    {/if}
+}
+
+// Handle focus
+handleFocus = {
+    index = parseInt(event.target.dataset.index);
+    focusedIndex = index;
+    event.target.select()
+}
+
+// Handle blur
+handleBlur = {
+    focusedIndex = -1
+}
+
+<div class={"pin-input" ++ {if disabled { " pin-input-disabled" } else { "" }} ++ {if isComplete { " pin-input-complete" } else { "" }}} role="group" aria-label="PIN input">
+    {for i in range(0, validLength)}
+        <input
+            type="text"
+            class={"pin-input-digit" ++ {if focusedIndex == i { " pin-input-digit-focused" } else { "" }} ++ {if digits[i] != "" { " pin-input-digit-filled" } else { "" }}}
+            maxlength="1"
+            inputmode={inputMode}
+            pattern={inputPattern}
+            value={digits[i]}
+            disabled={disabled}
+            data-index={i}
+            data-pin-input-index={i}
+            input={handleInput}
+            keydown={handleKeydown}
+            paste={handlePaste}
+            focus={handleFocus}
+            blur={handleBlur}
+            aria-label={"Digit " ++ (i + 1) ++ " of " ++ validLength}
+            autocomplete="one-time-code"
+        >
+        {if i == 2 && validLength > 4}
+            <span class="pin-input-separator" aria-hidden="true">-</span>
+        {/if}
+    {/for}
+</div>
+
+<style scoped>
+.pin-input {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    width: fit-content;
+}
+
+.pin-input-digit {
+    width: 48px;
+    height: 56px;
+    padding: 0;
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-2xl);
+    font-weight: 600;
+    text-align: center;
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-lg);
+    transition: all var(--flin-transition-fast);
+    outline: none;
+    caret-color: var(--flin-primary);
+}
+
+.pin-input-digit::placeholder {
+    color: var(--flin-neutral-300);
+}
+
+.pin-input-digit:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.pin-input-digit-focused {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.pin-input-digit-filled {
+    border-color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+}
+
+.pin-input-separator {
+    font-size: var(--flin-text-xl);
+    color: var(--flin-fg-muted);
+    margin: 0 var(--flin-space-1);
+    user-select: none;
+}
+
+/* Complete state */
+.pin-input-complete .pin-input-digit {
+    border-color: var(--flin-success);
+    background-color: var(--flin-success-light);
+}
+
+.pin-input-complete .pin-input-digit-focused {
+    box-shadow: 0 0 0 3px var(--flin-success-light);
+}
+
+/* Disabled state */
+.pin-input-disabled .pin-input-digit {
+    background-color: var(--flin-bg-muted);
+    color: var(--flin-fg-muted);
+    cursor: not-allowed;
+    border-color: var(--flin-neutral-200);
+}
+
+/* Animation for digit entry */
+@keyframes pin-digit-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.pin-input-digit-filled {
+    animation: pin-digit-pop 0.15s ease-out;
+}
+
+/* Hide spin buttons for number input */
+.pin-input-digit::-webkit-outer-spin-button,
+.pin-input-digit::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.pin-input-digit[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Error state support */
+.pin-input.pin-input-error .pin-input-digit {
+    border-color: var(--flin-danger);
+}
+
+.pin-input.pin-input-error .pin-input-digit-focused {
+    box-shadow: 0 0 0 3px var(--flin-danger-light);
+}
+
+/* Responsive sizing for mobile */
+@media (max-width: 480px) {
+    .pin-input-digit {
+        width: 40px;
+        height: 48px;
+        font-size: var(--flin-text-xl);
+    }
+
+    .pin-input {
+        gap: var(--flin-space-1);
+    }
+}
+</style>

@@ -1,0 +1,368 @@
+// Autocomplete.flin - FlinUI Autocomplete Component
+// A searchable dropdown with keyboard navigation and custom rendering
+
+// Props with defaults
+value = props.value || ""
+options = props.options || []
+placeholder = props.placeholder || "Search..."
+disabled = props.disabled || false
+onSelect = props.onSelect
+onChange = props.onChange
+
+// State management
+isOpen = false
+inputValue = value
+highlightedIndex = -1
+filteredOptions = options
+
+// Filter options based on input
+filterOptions = {
+    query = inputValue.toLowerCase();
+    {if query == ""}
+        filteredOptions = options
+    {else}
+        filteredOptions = options.filter(opt => {
+            label = opt.label || opt;
+            label.toLowerCase().includes(query)
+        })
+    {/if}
+    highlightedIndex = -1
+}
+
+// Handle input change
+handleInput = {
+    inputValue = event.target.value;
+    filterOptions();
+    isOpen = true;
+    {if onChange}
+        onChange(inputValue)
+    {/if}
+}
+
+// Handle option selection
+selectOption = {
+    option = event.target.dataset.value || filteredOptions[highlightedIndex];
+    optionLabel = option.label || option;
+    optionValue = option.value || option;
+
+    inputValue = optionLabel;
+    value = optionValue;
+    isOpen = false;
+    highlightedIndex = -1;
+
+    {if onSelect}
+        onSelect(option)
+    {/if}
+}
+
+// Handle keyboard navigation
+handleKeydown = {
+    {if event.key == "ArrowDown"}
+        event.preventDefault();
+        isOpen = true;
+        {if highlightedIndex < filteredOptions.length - 1}
+            highlightedIndex = highlightedIndex + 1
+        {else}
+            highlightedIndex = 0
+        {/if}
+    {else if event.key == "ArrowUp"}
+        event.preventDefault();
+        {if highlightedIndex > 0}
+            highlightedIndex = highlightedIndex - 1
+        {else}
+            highlightedIndex = filteredOptions.length - 1
+        {/if}
+    {else if event.key == "Enter" && highlightedIndex >= 0}
+        event.preventDefault();
+        selectOption()
+    {else if event.key == "Escape"}
+        isOpen = false;
+        highlightedIndex = -1
+    {/if}
+}
+
+// Handle focus
+handleFocus = {
+    isOpen = true;
+    filterOptions()
+}
+
+// Handle blur (delayed to allow click on option)
+handleBlur = {
+    setTimeout(() => {
+        isOpen = false;
+        highlightedIndex = -1
+    }, 150)
+}
+
+// Clear input
+clearInput = {
+    inputValue = "";
+    value = "";
+    filteredOptions = options;
+    isOpen = true
+}
+
+<div class={"autocomplete" ++ {if disabled { " autocomplete-disabled" } else { "" }}}>
+    <div class="autocomplete-input-wrapper">
+        <svg class="autocomplete-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M11 11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input
+            type="text"
+            class="autocomplete-input"
+            value={inputValue}
+            placeholder={placeholder}
+            disabled={disabled}
+            input={handleInput}
+            focus={handleFocus}
+            blur={handleBlur}
+            keydown={handleKeydown}
+            role="combobox"
+            aria-expanded={isOpen}
+            aria-haspopup="listbox"
+            aria-autocomplete="list"
+            aria-controls="autocomplete-listbox"
+            autocomplete="off"
+        >
+        {if inputValue != ""}
+            <button
+                type="button"
+                class="autocomplete-clear"
+                click={clearInput}
+                aria-label="Clear input"
+                tabindex="-1"
+            >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M3.5 3.5L10.5 10.5M10.5 3.5L3.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </button>
+        {/if}
+    </div>
+
+    {if isOpen && filteredOptions.length > 0}
+        <ul class="autocomplete-dropdown" id="autocomplete-listbox" role="listbox">
+            {for option, index in filteredOptions}
+                <li
+                    class={"autocomplete-option" ++ {if index == highlightedIndex { " autocomplete-option-highlighted" } else { "" }} ++ {if (option.value || option) == value { " autocomplete-option-selected" } else { "" }}}
+                    role="option"
+                    aria-selected={index == highlightedIndex}
+                    data-value={option.value || option}
+                    click={selectOption}
+                    mouseenter={highlightedIndex = index}
+                >
+                    {if option.icon}
+                        <span class="autocomplete-option-icon">{option.icon}</span>
+                    {/if}
+                    <span class="autocomplete-option-label">{option.label || option}</span>
+                    {if option.description}
+                        <span class="autocomplete-option-description">{option.description}</span>
+                    {/if}
+                    {if (option.value || option) == value}
+                        <svg class="autocomplete-option-check" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    {/if}
+                </li>
+            {/for}
+        </ul>
+    {else if isOpen && inputValue != "" && filteredOptions.length == 0}
+        <div class="autocomplete-dropdown autocomplete-empty">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M15 9L9 15M9 9L15 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>No results found</span>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.autocomplete {
+    position: relative;
+    width: 100%;
+}
+
+.autocomplete-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.autocomplete-search-icon {
+    position: absolute;
+    left: var(--flin-space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--flin-fg-muted);
+    pointer-events: none;
+}
+
+.autocomplete-input {
+    width: 100%;
+    height: 40px;
+    padding: var(--flin-space-2) var(--flin-space-10);
+    padding-left: var(--flin-space-10);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+    outline: none;
+}
+
+.autocomplete-input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.autocomplete-input:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.autocomplete-input:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.autocomplete-clear {
+    position: absolute;
+    right: var(--flin-space-2);
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: var(--flin-space-1);
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    border-radius: var(--flin-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--flin-transition-fast);
+}
+
+.autocomplete-clear:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+/* Dropdown */
+.autocomplete-dropdown {
+    position: absolute;
+    top: calc(100% + var(--flin-space-1));
+    left: 0;
+    width: 100%;
+    max-height: 280px;
+    overflow-y: auto;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    box-shadow: var(--flin-shadow-lg);
+    z-index: 50;
+    margin: 0;
+    padding: var(--flin-space-1);
+    list-style: none;
+    animation: autocomplete-open 0.1s ease-out;
+}
+
+@keyframes autocomplete-open {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.autocomplete-option {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.autocomplete-option:hover,
+.autocomplete-option-highlighted {
+    background-color: var(--flin-primary-light);
+}
+
+.autocomplete-option-selected {
+    background-color: var(--flin-neutral-100);
+}
+
+.autocomplete-option-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.autocomplete-option-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.autocomplete-option-description {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.autocomplete-option-check {
+    flex-shrink: 0;
+    color: var(--flin-primary);
+}
+
+/* Empty state */
+.autocomplete-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-6);
+    color: var(--flin-fg-muted);
+    font-size: var(--flin-text-sm);
+}
+
+/* Disabled state */
+.autocomplete-disabled .autocomplete-input {
+    background-color: var(--flin-bg-muted);
+    color: var(--flin-fg-muted);
+    cursor: not-allowed;
+}
+
+.autocomplete-disabled .autocomplete-search-icon {
+    color: var(--flin-neutral-400);
+}
+
+/* Scrollbar styling */
+.autocomplete-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-thumb {
+    background-color: var(--flin-neutral-300);
+    border-radius: 3px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-thumb:hover {
+    background-color: var(--flin-neutral-400);
+}
+</style>

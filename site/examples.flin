@@ -1,0 +1,481 @@
+// FlinUI Examples - Full Page Templates
+// Ready-to-use templates for common patterns
+
+theme = "light"
+
+<div class="examples-page" data-theme={theme}>
+    <header class="page-header">
+        <a href="/site/index.flin" class="brand">
+            <img src="/public/logo.png" alt="FlinUI" class="logo" />
+            <span>FlinUI Examples</span>
+        </a>
+        <button class="theme-toggle" click={theme = match theme { "light" -> "dark", _ -> "light" }}>
+            {match theme { "light" -> "🌙", _ -> "☀️" }}
+        </button>
+    </header>
+
+    <main class="examples-content">
+        <h1>Example Templates</h1>
+        <p class="subtitle">Production-ready templates to kickstart your project</p>
+
+        <div class="examples-grid">
+            <div class="example-card">
+                <div class="example-preview dashboard-preview">
+                    <div class="preview-nav"></div>
+                    <div class="preview-sidebar"></div>
+                    <div class="preview-content">
+                        <div class="preview-cards">
+                            <div class="preview-stat"></div>
+                            <div class="preview-stat"></div>
+                            <div class="preview-stat"></div>
+                        </div>
+                        <div class="preview-chart"></div>
+                    </div>
+                </div>
+                <h3>Dashboard</h3>
+                <p>Admin dashboard with sidebar, stats, charts, and data tables</p>
+                <div class="example-tech">
+                    <span>Navbar</span>
+                    <span>Sidebar</span>
+                    <span>Card</span>
+                    <span>DataTable</span>
+                    <span>Charts</span>
+                </div>
+                <a href="/examples/dashboard/index.flin" class="example-btn">View Template</a>
+            </div>
+
+            <div class="example-card">
+                <div class="example-preview landing-preview">
+                    <div class="preview-hero"></div>
+                    <div class="preview-features">
+                        <div class="preview-feature"></div>
+                        <div class="preview-feature"></div>
+                        <div class="preview-feature"></div>
+                    </div>
+                    <div class="preview-cta"></div>
+                </div>
+                <h3>Landing Page</h3>
+                <p>Marketing landing page with hero, features, and CTA sections</p>
+                <div class="example-tech">
+                    <span>Container</span>
+                    <span>Grid</span>
+                    <span>Card</span>
+                    <span>Button</span>
+                </div>
+                <a href="/examples/landing/index.flin" class="example-btn">View Template</a>
+            </div>
+
+            <div class="example-card">
+                <div class="example-preview auth-preview">
+                    <div class="preview-form-card">
+                        <div class="preview-form-header"></div>
+                        <div class="preview-input"></div>
+                        <div class="preview-input"></div>
+                        <div class="preview-form-btn"></div>
+                    </div>
+                </div>
+                <h3>Authentication</h3>
+                <p>Login, signup, and password reset forms with validation</p>
+                <div class="example-tech">
+                    <span>Form</span>
+                    <span>Input</span>
+                    <span>Button</span>
+                    <span>Alert</span>
+                </div>
+                <a href="/examples/auth/index.flin" class="example-btn">View Template</a>
+            </div>
+
+            <div class="example-card">
+                <div class="example-preview settings-preview">
+                    <div class="preview-tabs"></div>
+                    <div class="preview-settings-form">
+                        <div class="preview-setting-row"></div>
+                        <div class="preview-setting-row"></div>
+                        <div class="preview-setting-row"></div>
+                    </div>
+                </div>
+                <h3>Settings Page</h3>
+                <p>User settings with tabs, forms, and profile management</p>
+                <div class="example-tech">
+                    <span>Tabs</span>
+                    <span>Form</span>
+                    <span>Switch</span>
+                    <span>Avatar</span>
+                </div>
+                <a href="/examples/settings/index.flin" class="example-btn">View Template</a>
+            </div>
+
+            <div class="example-card">
+                <div class="example-preview ecommerce-preview">
+                    <div class="preview-product-grid">
+                        <div class="preview-product"></div>
+                        <div class="preview-product"></div>
+                        <div class="preview-product"></div>
+                        <div class="preview-product"></div>
+                    </div>
+                </div>
+                <h3>E-Commerce</h3>
+                <p>Product listing with filters, cart, and checkout flow</p>
+                <div class="example-tech">
+                    <span>Grid</span>
+                    <span>Card</span>
+                    <span>Badge</span>
+                    <span>Drawer</span>
+                </div>
+                <a href="/examples/ecommerce/index.flin" class="example-btn">View Template</a>
+            </div>
+
+            <div class="example-card">
+                <div class="example-preview blog-preview">
+                    <div class="preview-article-hero"></div>
+                    <div class="preview-article-content">
+                        <div class="preview-text-line"></div>
+                        <div class="preview-text-line"></div>
+                        <div class="preview-text-line short"></div>
+                    </div>
+                </div>
+                <h3>Blog / Article</h3>
+                <p>Blog layout with typography, code blocks, and comments</p>
+                <div class="example-tech">
+                    <span>Container</span>
+                    <span>Code</span>
+                    <span>Breadcrumb</span>
+                    <span>Text</span>
+                </div>
+                <a href="/examples/blog/index.flin" class="example-btn">View Template</a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<style scoped>
+.examples-page {
+    --primary: #6366f1;
+    --bg: #ffffff;
+    --bg-muted: #f8fafc;
+    --fg: #0f172a;
+    --fg-muted: #64748b;
+    --border: #e2e8f0;
+
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--fg);
+}
+
+.examples-page[data-theme="dark"] {
+    --bg: #0f172a;
+    --bg-muted: #1e293b;
+    --fg: #f8fafc;
+    --fg-muted: #94a3b8;
+    --border: #334155;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: var(--fg);
+    font-weight: 600;
+}
+
+.logo {
+    width: 32px;
+    height: 32px;
+}
+
+.theme-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 1.25rem;
+}
+
+.examples-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+.examples-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--fg-muted);
+    font-size: 1.125rem;
+    margin-bottom: 3rem;
+}
+
+.examples-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.example-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.example-preview {
+    height: 200px;
+    background: var(--bg-muted);
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Dashboard Preview */
+.dashboard-preview {
+    display: grid;
+    grid-template-areas: "nav nav" "side content";
+    grid-template-columns: 50px 1fr;
+    grid-template-rows: 24px 1fr;
+    gap: 0.5rem;
+}
+
+.preview-nav {
+    grid-area: nav;
+    background: var(--border);
+    border-radius: 0.25rem;
+}
+
+.preview-sidebar {
+    grid-area: side;
+    background: var(--border);
+    border-radius: 0.25rem;
+}
+
+.preview-content {
+    grid-area: content;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.preview-cards {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.preview-stat {
+    flex: 1;
+    height: 40px;
+    background: var(--border);
+    border-radius: 0.25rem;
+}
+
+.preview-chart {
+    flex: 1;
+    background: var(--border);
+    border-radius: 0.25rem;
+}
+
+/* Landing Preview */
+.landing-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.preview-hero {
+    height: 60px;
+    background: var(--primary);
+    border-radius: 0.25rem;
+    opacity: 0.3;
+}
+
+.preview-features {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.preview-feature {
+    flex: 1;
+    background: var(--border);
+    border-radius: 0.25rem;
+}
+
+.preview-cta {
+    height: 30px;
+    background: var(--primary);
+    border-radius: 0.25rem;
+    opacity: 0.5;
+}
+
+/* Auth Preview */
+.auth-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-form-card {
+    width: 140px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.preview-form-header {
+    height: 16px;
+    width: 80px;
+    background: var(--border);
+    border-radius: 0.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.preview-input {
+    height: 24px;
+    background: var(--bg-muted);
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.preview-form-btn {
+    height: 24px;
+    background: var(--primary);
+    border-radius: 0.25rem;
+    opacity: 0.7;
+}
+
+/* Settings Preview */
+.settings-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.preview-tabs {
+    height: 30px;
+    background: var(--border);
+    border-radius: 0.25rem;
+}
+
+.preview-settings-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.preview-setting-row {
+    height: 30px;
+    background: var(--border);
+    border-radius: 0.25rem;
+}
+
+/* E-commerce Preview */
+.ecommerce-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.preview-product {
+    width: 60px;
+    height: 60px;
+    background: var(--border);
+    border-radius: 0.25rem;
+}
+
+/* Blog Preview */
+.blog-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.preview-article-hero {
+    height: 80px;
+    background: var(--border);
+    border-radius: 0.25rem;
+}
+
+.preview-article-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.preview-text-line {
+    height: 10px;
+    background: var(--border);
+    border-radius: 0.25rem;
+}
+
+.preview-text-line.short {
+    width: 60%;
+}
+
+/* Card Content */
+.example-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    padding: 1rem 1rem 0.5rem;
+}
+
+.example-card p {
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+}
+
+.example-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+}
+
+.example-tech span {
+    font-size: 0.75rem;
+    background: var(--bg-muted);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    color: var(--fg-muted);
+}
+
+.example-btn {
+    display: block;
+    text-align: center;
+    padding: 0.75rem;
+    background: var(--primary);
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 1rem;
+    border-radius: 0.5rem;
+}
+
+.example-btn:hover {
+    opacity: 0.9;
+}
+</style>

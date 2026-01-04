@@ -1,0 +1,334 @@
+// FlinUI Responsive Tokens
+// TH-08: Breakpoint and responsive design tokens
+
+// ============================================================================
+// BREAKPOINT VALUES
+// ============================================================================
+
+// Standard breakpoints (mobile-first)
+breakpointXs = "0px"        // Extra small devices (portrait phones)
+breakpointSm = "640px"      // Small devices (landscape phones)
+breakpointMd = "768px"      // Medium devices (tablets)
+breakpointLg = "1024px"     // Large devices (desktops)
+breakpointXl = "1280px"     // Extra large devices (large desktops)
+breakpoint2xl = "1536px"    // 2X large devices (larger desktops)
+
+// Container Max Widths
+containerSm = "640px"
+containerMd = "768px"
+containerLg = "1024px"
+containerXl = "1280px"
+container2xl = "1536px"
+
+// Responsive Font Sizes (fluid typography)
+fluidTextSm = "clamp(0.8rem, 0.75rem + 0.25vw, 0.875rem)"
+fluidTextBase = "clamp(0.875rem, 0.825rem + 0.25vw, 1rem)"
+fluidTextLg = "clamp(1rem, 0.9rem + 0.5vw, 1.125rem)"
+fluidTextXl = "clamp(1.125rem, 1rem + 0.625vw, 1.25rem)"
+fluidText2xl = "clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem)"
+fluidText3xl = "clamp(1.5rem, 1.25rem + 1.25vw, 1.875rem)"
+fluidText4xl = "clamp(1.875rem, 1.5rem + 1.875vw, 2.25rem)"
+
+// Responsive Spacing (fluid)
+fluidSpace1 = "clamp(0.25rem, 0.2rem + 0.25vw, 0.375rem)"
+fluidSpace2 = "clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem)"
+fluidSpace4 = "clamp(1rem, 0.8rem + 1vw, 1.5rem)"
+fluidSpace8 = "clamp(2rem, 1.6rem + 2vw, 3rem)"
+
+// ============================================================================
+// MEDIA QUERY HELPERS
+// ============================================================================
+
+/// Check if viewport matches a breakpoint
+/// @param breakpoint - Breakpoint name (xs, sm, md, lg, xl, 2xl)
+/// @returns Boolean indicating if viewport is at or above breakpoint
+matchesBreakpoint = fn(breakpoint) {
+    // JavaScript implementation:
+    // const breakpoints = {
+    //     xs: 0,
+    //     sm: 640,
+    //     md: 768,
+    //     lg: 1024,
+    //     xl: 1280,
+    //     '2xl': 1536
+    // };
+    // return window.innerWidth >= breakpoints[breakpoint];
+
+    false
+}
+
+/// Get current breakpoint
+/// @returns Current breakpoint name (xs, sm, md, lg, xl, 2xl)
+getCurrentBreakpoint = fn() {
+    // JavaScript implementation:
+    // const width = window.innerWidth;
+    // if (width >= 1536) return '2xl';
+    // if (width >= 1280) return 'xl';
+    // if (width >= 1024) return 'lg';
+    // if (width >= 768) return 'md';
+    // if (width >= 640) return 'sm';
+    // return 'xs';
+
+    "md"
+}
+
+/// Check if viewport is between two breakpoints
+/// @param min - Minimum breakpoint (inclusive)
+/// @param max - Maximum breakpoint (exclusive)
+isBetweenBreakpoints = fn(min, max) {
+    // JavaScript: return matchesBreakpoint(min) && !matchesBreakpoint(max);
+    false
+}
+
+/// Media query generator
+/// @param breakpoint - Breakpoint name
+/// @param type - 'min' (default) or 'max'
+/// @returns Media query string
+mediaQuery = fn(breakpoint, type) {
+    queryType = type || "min"
+    breakpointValue = getBreakpointValue(breakpoint)
+
+    if queryType == "min" {
+        "(min-width: " + breakpointValue + ")"
+    } else {
+        "(max-width: " + breakpointValue + ")"
+    }
+}
+
+/// Get breakpoint pixel value
+getBreakpointValue = fn(breakpoint) {
+    if breakpoint == "xs" { breakpointXs }
+    else if breakpoint == "sm" { breakpointSm }
+    else if breakpoint == "md" { breakpointMd }
+    else if breakpoint == "lg" { breakpointLg }
+    else if breakpoint == "xl" { breakpointXl }
+    else if breakpoint == "2xl" { breakpoint2xl }
+    else { "768px" }
+}
+
+// ============================================================================
+// REACTIVE BREAKPOINT HOOK
+// ============================================================================
+
+/// Reactive breakpoint state (updates on window resize)
+currentBreakpoint = "md"
+isXs = false
+isSm = false
+isMd = true
+isLg = false
+isXl = false
+is2xl = false
+
+/// Use breakpoint - reactive helper that updates on window resize
+/// @returns Object with current breakpoint info
+useBreakpoint = fn() {
+    // JavaScript implementation:
+    // const updateBreakpoint = () => {
+    //     const bp = getCurrentBreakpoint();
+    //     currentBreakpoint = bp;
+    //     isXs = bp === 'xs';
+    //     isSm = bp === 'sm';
+    //     isMd = bp === 'md';
+    //     isLg = bp === 'lg';
+    //     isXl = bp === 'xl';
+    //     is2xl = bp === '2xl';
+    // };
+    //
+    // window.addEventListener('resize', updateBreakpoint);
+    // updateBreakpoint();
+
+    {
+        current: currentBreakpoint,
+        isXs: isXs,
+        isSm: isSm,
+        isMd: isMd,
+        isLg: isLg,
+        isXl: isXl,
+        is2xl: is2xl,
+        matches: matchesBreakpoint
+    }
+}
+
+/// Check if device is mobile (xs or sm)
+isMobile = fn() {
+    bp = getCurrentBreakpoint()
+    bp == "xs" || bp == "sm"
+}
+
+/// Check if device is tablet (md)
+isTablet = fn() {
+    getCurrentBreakpoint() == "md"
+}
+
+/// Check if device is desktop (lg or larger)
+isDesktop = fn() {
+    bp = getCurrentBreakpoint()
+    bp == "lg" || bp == "xl" || bp == "2xl"
+}
+
+<style>
+/* Responsive CSS Variables */
+:root {
+    /* Breakpoints - use in JS, not in CSS (CSS can't use vars in media queries) */
+    --flin-breakpoint-xs: 0px;
+    --flin-breakpoint-sm: 640px;
+    --flin-breakpoint-md: 768px;
+    --flin-breakpoint-lg: 1024px;
+    --flin-breakpoint-xl: 1280px;
+    --flin-breakpoint-2xl: 1536px;
+
+    /* Container max widths */
+    --flin-container-sm: 640px;
+    --flin-container-md: 768px;
+    --flin-container-lg: 1024px;
+    --flin-container-xl: 1280px;
+    --flin-container-2xl: 1536px;
+
+    /* Fluid typography */
+    --flin-fluid-text-sm: clamp(0.8rem, 0.75rem + 0.25vw, 0.875rem);
+    --flin-fluid-text-base: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);
+    --flin-fluid-text-lg: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+    --flin-fluid-text-xl: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+    --flin-fluid-text-2xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+    --flin-fluid-text-3xl: clamp(1.5rem, 1.25rem + 1.25vw, 1.875rem);
+    --flin-fluid-text-4xl: clamp(1.875rem, 1.5rem + 1.875vw, 2.25rem);
+
+    /* Fluid spacing */
+    --flin-fluid-space-1: clamp(0.25rem, 0.2rem + 0.25vw, 0.375rem);
+    --flin-fluid-space-2: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem);
+    --flin-fluid-space-4: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+    --flin-fluid-space-8: clamp(2rem, 1.6rem + 2vw, 3rem);
+}
+
+/* Responsive utility classes */
+
+/* Hide/Show at breakpoints */
+.flin-hide-sm { display: none; }
+.flin-hide-md { display: none; }
+.flin-hide-lg { display: none; }
+
+@media (min-width: 640px) {
+    .flin-hide-sm { display: block; }
+    .flin-show-sm { display: none; }
+}
+
+@media (min-width: 768px) {
+    .flin-hide-md { display: block; }
+    .flin-show-md { display: none; }
+}
+
+@media (min-width: 1024px) {
+    .flin-hide-lg { display: block; }
+    .flin-show-lg { display: none; }
+}
+
+/* Responsive padding */
+.flin-p-responsive {
+    padding: var(--flin-space-4);
+}
+
+@media (min-width: 640px) {
+    .flin-p-responsive {
+        padding: var(--flin-space-6);
+    }
+}
+
+@media (min-width: 1024px) {
+    .flin-p-responsive {
+        padding: var(--flin-space-8);
+    }
+}
+
+/* Responsive gaps */
+.flin-gap-responsive {
+    gap: var(--flin-space-4);
+}
+
+@media (min-width: 640px) {
+    .flin-gap-responsive {
+        gap: var(--flin-space-6);
+    }
+}
+
+@media (min-width: 1024px) {
+    .flin-gap-responsive {
+        gap: var(--flin-space-8);
+    }
+}
+
+/* Responsive font sizes */
+.flin-text-responsive-base {
+    font-size: var(--flin-fluid-text-base);
+}
+
+.flin-text-responsive-lg {
+    font-size: var(--flin-fluid-text-lg);
+}
+
+.flin-text-responsive-xl {
+    font-size: var(--flin-fluid-text-xl);
+}
+
+.flin-text-responsive-2xl {
+    font-size: var(--flin-fluid-text-2xl);
+}
+
+.flin-text-responsive-3xl {
+    font-size: var(--flin-fluid-text-3xl);
+}
+
+.flin-text-responsive-4xl {
+    font-size: var(--flin-fluid-text-4xl);
+}
+
+/* Responsive grid columns */
+.flin-grid-responsive {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--flin-space-4);
+}
+
+@media (min-width: 640px) {
+    .flin-grid-responsive {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .flin-grid-responsive {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    .flin-grid-responsive {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Responsive stack - vertical on mobile, horizontal on desktop */
+.flin-stack-responsive {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+@media (min-width: 768px) {
+    .flin-stack-responsive {
+        flex-direction: row;
+    }
+}
+
+/* Container queries support */
+@supports (container-type: inline-size) {
+    .flin-container-query {
+        container-type: inline-size;
+    }
+
+    @container (min-width: 400px) {
+        .flin-cq-horizontal {
+            flex-direction: row;
+        }
+    }
+}
+</style>
