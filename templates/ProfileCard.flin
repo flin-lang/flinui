@@ -1,0 +1,621 @@
+// ProfileCard.flin - User profile card template
+
+// Props
+user = props.user || {} // { name, username, avatar, bio, coverImage, verified, stats, links }
+showStats = props.showStats ?? true
+showActions = props.showActions ?? true
+showBio = props.showBio ?? true
+showLinks = props.showLinks ?? true
+isOwnProfile = props.isOwnProfile || false
+onEdit = props.onEdit || { }
+onFollow = props.onFollow || { }
+onMessage = props.onMessage || { }
+onShare = props.onShare || { }
+isFollowing = props.isFollowing || false
+variant = props.variant || "default" // "default" | "compact" | "horizontal"
+size = props.size || "medium" // "small" | "medium" | "large"
+
+// Default user data
+userName = user.name || "Unknown User"
+userUsername = user.username || nil
+userAvatar = user.avatar || nil
+userBio = user.bio || nil
+userCoverImage = user.coverImage || nil
+userVerified = user.verified || false
+userStats = user.stats || [] // [{label, value}]
+userLinks = user.links || [] // [{icon, url, label}]
+
+// State
+followLoading = false
+messageLoading = false
+
+// Handlers
+handleFollow = {
+    followLoading = true
+    onFollow()
+}
+
+handleMessage = {
+    messageLoading = true
+    onMessage()
+}
+
+// Computed
+cardClass = "profile-card profile-card--" ++ variant ++ " profile-card--" ++ size
+avatarInitials = userName.split(" ").map { n -> n[0] }.join("").toUpperCase().slice(0, 2)
+
+<article class={cardClass}>
+    // Cover image (for default and horizontal variants)
+    {if (variant == "default" || variant == "horizontal") && userCoverImage then
+        <div class="profile-cover">
+            <img src={userCoverImage} alt="" class="cover-image" />
+        </div>
+    else if variant == "default" then
+        <div class="profile-cover profile-cover--gradient"></div>
+    }
+
+    <div class="profile-body">
+        // Avatar section
+        <div class="profile-avatar-section">
+            <div class="avatar-wrapper">
+                {if userAvatar then
+                    <img src={userAvatar} alt={userName} class="profile-avatar" />
+                else
+                    <div class="profile-avatar profile-avatar--initials">
+                        {avatarInitials}
+                    </div>
+                }
+                {if userVerified then
+                    <span class="verified-badge" title="Verified">✓</span>
+                }
+            </div>
+
+            // Edit button (for own profile, horizontal variant)
+            {if isOwnProfile && variant == "horizontal" then
+                <button class="edit-btn edit-btn--small" onClick={onEdit}>
+                    Edit Profile
+                </button>
+            }
+        </div>
+
+        // Info section
+        <div class="profile-info">
+            <div class="profile-header">
+                <div class="name-group">
+                    <h2 class="profile-name">
+                        {userName}
+                        {if userVerified && variant == "compact" then
+                            <span class="verified-inline">✓</span>
+                        }
+                    </h2>
+                    {if userUsername then
+                        <p class="profile-username">@{userUsername}</p>
+                    }
+                </div>
+
+                // Actions for horizontal variant
+                {if showActions && variant == "horizontal" then
+                    <div class="profile-actions profile-actions--inline">
+                        {if isOwnProfile then
+                            <button class="action-btn action-btn--secondary" onClick={onShare}>
+                                Share
+                            </button>
+                        else
+                            <div class="action-buttons">
+                                <button
+                                    class={if isFollowing then "action-btn action-btn--secondary" else "action-btn action-btn--primary"}
+                                    onClick={handleFollow}
+                                    disabled={followLoading}
+                                >
+                                    {if isFollowing then "Following" else "Follow"}
+                                </button>
+                                <button
+                                    class="action-btn action-btn--secondary"
+                                    onClick={handleMessage}
+                                    disabled={messageLoading}
+                                >
+                                    Message
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            // Bio
+            {if showBio && userBio then
+                <p class="profile-bio">{userBio}</p>
+            }
+
+            // Stats
+            {if showStats && userStats.length > 0 then
+                <div class="profile-stats">
+                    {userStats.map { stat ->
+                        <div class="stat-item" key={stat.label}>
+                            <span class="stat-value">{stat.value}</span>
+                            <span class="stat-label">{stat.label}</span>
+                        </div>
+                    }}
+                </div>
+            }
+
+            // Links
+            {if showLinks && userLinks.length > 0 then
+                <div class="profile-links">
+                    {userLinks.map { link ->
+                        <a href={link.url} class="profile-link" target="_blank" rel="noopener" key={link.url}>
+                            {if link.icon then <span class="link-icon">{link.icon}</span>}
+                            <span class="link-label">{link.label || link.url}</span>
+                        </a>
+                    }}
+                </div>
+            }
+
+            // Actions (for default and compact variants)
+            {if showActions && variant != "horizontal" then
+                <div class="profile-actions">
+                    {if isOwnProfile then
+                        <button class="action-btn action-btn--primary action-btn--full" onClick={onEdit}>
+                            Edit Profile
+                        </button>
+                    else
+                        <div class="action-buttons">
+                            <button
+                                class={if isFollowing then "action-btn action-btn--secondary action-btn--full" else "action-btn action-btn--primary action-btn--full"}
+                                onClick={handleFollow}
+                                disabled={followLoading}
+                            >
+                                {if followLoading then
+                                    <span class="btn-spinner"></span>
+                                }
+                                {if isFollowing then "Following" else "Follow"}
+                            </button>
+                            <button
+                                class="action-btn action-btn--secondary"
+                                onClick={handleMessage}
+                                disabled={messageLoading}
+                                aria-label="Message"
+                            >
+                                {if messageLoading then <span class="btn-spinner"></span> else "✉"}
+                            </button>
+                            <button
+                                class="action-btn action-btn--secondary"
+                                onClick={onShare}
+                                aria-label="Share"
+                            >
+                                ↗
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</article>
+
+<style scoped>
+/* Base card */
+.profile-card {
+    background: var(--flin-color-white);
+    border: 1px solid var(--flin-color-gray-200);
+    border-radius: var(--flin-radius-xl);
+    overflow: hidden;
+}
+
+/* Size variants */
+.profile-card--small {
+    max-width: 280px;
+}
+
+.profile-card--medium {
+    max-width: 360px;
+}
+
+.profile-card--large {
+    max-width: 420px;
+}
+
+/* Cover image */
+.profile-cover {
+    height: 100px;
+    background: var(--flin-color-gray-100);
+    overflow: hidden;
+}
+
+.profile-card--large .profile-cover {
+    height: 140px;
+}
+
+.profile-cover--gradient {
+    background: linear-gradient(135deg, var(--flin-color-primary-400) 0%, var(--flin-color-primary-600) 100%);
+}
+
+.cover-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Body */
+.profile-body {
+    padding: var(--flin-spacing-5);
+}
+
+.profile-card--small .profile-body {
+    padding: var(--flin-spacing-4);
+}
+
+/* Avatar section */
+.profile-avatar-section {
+    display: flex;
+    justify-content: center;
+    margin-top: -48px;
+    margin-bottom: var(--flin-spacing-4);
+}
+
+.profile-card--small .profile-avatar-section {
+    margin-top: -36px;
+}
+
+.profile-card--large .profile-avatar-section {
+    margin-top: -60px;
+}
+
+.avatar-wrapper {
+    position: relative;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--flin-radius-full);
+    border: 4px solid var(--flin-color-white);
+    box-shadow: var(--flin-shadow-md);
+    object-fit: cover;
+    background: var(--flin-color-gray-100);
+}
+
+.profile-card--small .profile-avatar {
+    width: 64px;
+    height: 64px;
+    border-width: 3px;
+}
+
+.profile-card--large .profile-avatar {
+    width: 96px;
+    height: 96px;
+}
+
+.profile-avatar--initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-font-size-2xl);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-white);
+    background: linear-gradient(135deg, var(--flin-color-primary-500) 0%, var(--flin-color-primary-600) 100%);
+}
+
+.verified-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    background: var(--flin-color-primary-500);
+    color: var(--flin-color-white);
+    border-radius: var(--flin-radius-full);
+    border: 2px solid var(--flin-color-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.profile-card--small .verified-badge {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+}
+
+/* Info section */
+.profile-info {
+    text-align: center;
+}
+
+.profile-header {
+    margin-bottom: var(--flin-spacing-3);
+}
+
+.profile-name {
+    font-size: var(--flin-font-size-xl);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-spacing-2);
+}
+
+.profile-card--small .profile-name {
+    font-size: var(--flin-font-size-lg);
+}
+
+.verified-inline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background: var(--flin-color-primary-500);
+    color: var(--flin-color-white);
+    border-radius: var(--flin-radius-full);
+    font-size: 10px;
+}
+
+.profile-username {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+    margin: var(--flin-spacing-1) 0 0 0;
+}
+
+/* Bio */
+.profile-bio {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-600);
+    line-height: 1.6;
+    margin: 0 0 var(--flin-spacing-4) 0;
+}
+
+/* Stats */
+.profile-stats {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-spacing-6);
+    padding: var(--flin-spacing-4) 0;
+    border-top: 1px solid var(--flin-color-gray-100);
+    border-bottom: 1px solid var(--flin-color-gray-100);
+    margin-bottom: var(--flin-spacing-4);
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: var(--flin-font-size-lg);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+}
+
+.profile-card--small .stat-value {
+    font-size: var(--flin-font-size-base);
+}
+
+.stat-label {
+    display: block;
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-500);
+    margin-top: var(--flin-spacing-1);
+}
+
+/* Links */
+.profile-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--flin-spacing-3);
+    margin-bottom: var(--flin-spacing-4);
+}
+
+.profile-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-spacing-1);
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+    text-decoration: none;
+    transition: color var(--flin-transition-fast);
+}
+
+.profile-link:hover {
+    color: var(--flin-color-primary-600);
+}
+
+.link-icon {
+    font-size: var(--flin-font-size-base);
+}
+
+/* Actions */
+.profile-actions {
+    margin-top: var(--flin-spacing-4);
+}
+
+.action-buttons {
+    display: flex;
+    gap: var(--flin-spacing-2);
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-spacing-2);
+    padding: var(--flin-spacing-2) var(--flin-spacing-4);
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    border-radius: var(--flin-radius-md);
+    border: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.action-btn--full {
+    flex: 1;
+}
+
+.action-btn--primary {
+    background: var(--flin-color-primary-600);
+    color: var(--flin-color-white);
+}
+
+.action-btn--primary:hover:not(:disabled) {
+    background: var(--flin-color-primary-700);
+}
+
+.action-btn--secondary {
+    background: var(--flin-color-white);
+    color: var(--flin-color-gray-700);
+    border: 1px solid var(--flin-color-gray-300);
+}
+
+.action-btn--secondary:hover:not(:disabled) {
+    background: var(--flin-color-gray-50);
+    border-color: var(--flin-color-gray-400);
+}
+
+.action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: var(--flin-radius-full);
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Compact variant */
+.profile-card--compact .profile-cover {
+    display: none;
+}
+
+.profile-card--compact .profile-avatar-section {
+    margin-top: 0;
+}
+
+.profile-card--compact .profile-avatar {
+    width: 64px;
+    height: 64px;
+    border: 3px solid var(--flin-color-white);
+}
+
+.profile-card--compact .verified-badge {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+}
+
+/* Horizontal variant */
+.profile-card--horizontal {
+    max-width: 600px;
+}
+
+.profile-card--horizontal .profile-cover {
+    display: none;
+}
+
+.profile-card--horizontal .profile-body {
+    display: flex;
+    gap: var(--flin-spacing-5);
+    align-items: flex-start;
+}
+
+.profile-card--horizontal .profile-avatar-section {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.profile-card--horizontal .profile-avatar {
+    border: 3px solid var(--flin-color-gray-200);
+    box-shadow: none;
+}
+
+.profile-card--horizontal .profile-info {
+    flex: 1;
+    text-align: left;
+}
+
+.profile-card--horizontal .profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.profile-card--horizontal .profile-name {
+    justify-content: flex-start;
+}
+
+.profile-card--horizontal .profile-stats {
+    justify-content: flex-start;
+    border: none;
+    padding: var(--flin-spacing-3) 0;
+}
+
+.profile-card--horizontal .profile-links {
+    justify-content: flex-start;
+}
+
+.profile-card--horizontal .profile-actions--inline {
+    margin: 0;
+}
+
+.edit-btn--small {
+    padding: var(--flin-spacing-1) var(--flin-spacing-3);
+    font-size: var(--flin-font-size-xs);
+    background: var(--flin-color-gray-100);
+    color: var(--flin-color-gray-700);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    margin-top: var(--flin-spacing-2);
+}
+
+.edit-btn--small:hover {
+    background: var(--flin-color-gray-200);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .profile-card--horizontal .profile-body {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile-card--horizontal .profile-info {
+        text-align: center;
+    }
+
+    .profile-card--horizontal .profile-header {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--flin-spacing-3);
+    }
+
+    .profile-card--horizontal .profile-name {
+        justify-content: center;
+    }
+
+    .profile-card--horizontal .profile-stats {
+        justify-content: center;
+    }
+
+    .profile-card--horizontal .profile-links {
+        justify-content: center;
+    }
+
+    .profile-stats {
+        gap: var(--flin-spacing-4);
+    }
+}
+</style>

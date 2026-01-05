@@ -1,0 +1,617 @@
+// SettingsLayout.flin - Settings page with sidebar navigation
+
+// Props
+sections = props.sections || [] // [{id, label, icon, badge, description}]
+activeSection = props.activeSection || nil
+onSectionChange = props.onSectionChange || { sectionId -> }
+title = props.title || "Settings"
+subtitle = props.subtitle || nil
+backLink = props.backLink || nil // { href, text }
+children = props.children || nil
+variant = props.variant || "sidebar" // "sidebar" | "tabs" | "accordion"
+showSectionDescription = props.showSectionDescription ?? true
+
+// State
+currentSection = activeSection || (if sections.length > 0 then sections[0].id else nil)
+mobileMenuOpen = false
+accordionExpanded = {}
+
+// Initialize accordion state
+sections.forEach { section ->
+    accordionExpanded[section.id] = section.id == currentSection
+}
+
+// Handlers
+handleSectionChange = { sectionId ->
+    currentSection = sectionId
+    mobileMenuOpen = false
+    onSectionChange(sectionId)
+}
+
+toggleMobileMenu = {
+    mobileMenuOpen = !mobileMenuOpen
+}
+
+toggleAccordion = { sectionId ->
+    accordionExpanded[sectionId] = !accordionExpanded[sectionId]
+    if accordionExpanded[sectionId] then
+        currentSection = sectionId
+        onSectionChange(sectionId)
+}
+
+// Get current section data
+getCurrentSection = {
+    sections.find { section -> section.id == currentSection }
+}
+
+currentSectionData = getCurrentSection()
+
+<div class={"settings-layout settings-layout--" ++ variant}>
+    // Header
+    <header class="settings-header">
+        <div class="settings-header-content">
+            {if backLink then
+                <a href={backLink.href} class="settings-back">
+                    <span class="back-icon">←</span>
+                    <span class="back-text">{backLink.text || "Back"}</span>
+                </a>
+            }
+            <div class="settings-title-group">
+                <h1 class="settings-title">{title}</h1>
+                {if subtitle then
+                    <p class="settings-subtitle">{subtitle}</p>
+                }
+            </div>
+        </div>
+
+        // Mobile section selector (for sidebar variant)
+        {if variant == "sidebar" then
+            <button class="settings-mobile-toggle" onClick={toggleMobileMenu}>
+                <span class="mobile-current">
+                    {if currentSectionData then
+                        <span>
+                            {if currentSectionData.icon then <span class="current-icon">{currentSectionData.icon}</span>}
+                            {currentSectionData.label}
+                        </span>
+                    }
+                </span>
+                <span class="mobile-arrow">{if mobileMenuOpen then "▲" else "▼"}</span>
+            </button>
+        }
+    </header>
+
+    <div class="settings-body">
+        // Sidebar variant
+        {if variant == "sidebar" then
+            <nav class={if mobileMenuOpen then "settings-nav settings-nav--open" else "settings-nav"}>
+                <ul class="nav-list">
+                    {sections.map { section ->
+                        <li class="nav-item" key={section.id}>
+                            <button
+                                class={if currentSection == section.id then "nav-link nav-link--active" else "nav-link"}
+                                onClick={ handleSectionChange(section.id) }
+                            >
+                                {if section.icon then
+                                    <span class="nav-icon">{section.icon}</span>
+                                }
+                                <span class="nav-label">{section.label}</span>
+                                {if section.badge then
+                                    <span class="nav-badge">{section.badge}</span>
+                                }
+                            </button>
+                        </li>
+                    }}
+                </ul>
+            </nav>
+        }
+
+        // Tabs variant
+        {if variant == "tabs" then
+            <nav class="settings-tabs">
+                <div class="tabs-scroll">
+                    {sections.map { section ->
+                        <button
+                            class={if currentSection == section.id then "tab-btn tab-btn--active" else "tab-btn"}
+                            onClick={ handleSectionChange(section.id) }
+                            key={section.id}
+                        >
+                            {if section.icon then
+                                <span class="tab-icon">{section.icon}</span>
+                            }
+                            <span class="tab-label">{section.label}</span>
+                            {if section.badge then
+                                <span class="tab-badge">{section.badge}</span>
+                            }
+                        </button>
+                    }}
+                </div>
+            </nav>
+        }
+
+        // Content area (for sidebar and tabs)
+        {if variant == "sidebar" || variant == "tabs" then
+            <main class="settings-content">
+                {if currentSectionData && showSectionDescription then
+                    <div class="content-header">
+                        <h2 class="content-title">{currentSectionData.label}</h2>
+                        {if currentSectionData.description then
+                            <p class="content-description">{currentSectionData.description}</p>
+                        }
+                    </div>
+                }
+                <div class="content-body">
+                    {children}
+                </div>
+            </main>
+        }
+
+        // Accordion variant
+        {if variant == "accordion" then
+            <div class="settings-accordion">
+                {sections.map { section ->
+                    <div class="accordion-section" key={section.id}>
+                        <button
+                            class={if accordionExpanded[section.id] then "accordion-header accordion-header--expanded" else "accordion-header"}
+                            onClick={ toggleAccordion(section.id) }
+                            aria-expanded={accordionExpanded[section.id]}
+                        >
+                            <div class="accordion-header-content">
+                                {if section.icon then
+                                    <span class="accordion-icon">{section.icon}</span>
+                                }
+                                <div class="accordion-header-text">
+                                    <span class="accordion-label">{section.label}</span>
+                                    {if section.description then
+                                        <span class="accordion-description">{section.description}</span>
+                                    }
+                                </div>
+                                {if section.badge then
+                                    <span class="accordion-badge">{section.badge}</span>
+                                }
+                            </div>
+                            <span class="accordion-arrow">{if accordionExpanded[section.id] then "−" else "+"}</span>
+                        </button>
+                        <div class={if accordionExpanded[section.id] then "accordion-content accordion-content--expanded" else "accordion-content"}>
+                            <div class="accordion-body">
+                                {if currentSection == section.id then children}
+                            </div>
+                        </div>
+                    </div>
+                }}
+            </div>
+        }
+    </div>
+</div>
+
+<style scoped>
+.settings-layout {
+    min-height: 100vh;
+    background: var(--flin-color-gray-50);
+}
+
+/* Header */
+.settings-header {
+    background: var(--flin-color-white);
+    border-bottom: 1px solid var(--flin-color-gray-200);
+    padding: var(--flin-spacing-6);
+}
+
+.settings-header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.settings-back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+    text-decoration: none;
+    margin-bottom: var(--flin-spacing-4);
+    transition: color var(--flin-transition-fast);
+}
+
+.settings-back:hover {
+    color: var(--flin-color-gray-700);
+}
+
+.settings-title-group {
+    margin-bottom: var(--flin-spacing-4);
+}
+
+.settings-title {
+    font-size: var(--flin-font-size-2xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--flin-color-gray-900);
+    margin: 0;
+}
+
+.settings-subtitle {
+    font-size: var(--flin-font-size-base);
+    color: var(--flin-color-gray-500);
+    margin: var(--flin-spacing-2) 0 0 0;
+}
+
+/* Mobile toggle */
+.settings-mobile-toggle {
+    display: none;
+    width: 100%;
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    background: var(--flin-color-white);
+    border: 1px solid var(--flin-color-gray-300);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-font-size-base);
+    color: var(--flin-color-gray-700);
+    cursor: pointer;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mobile-current {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+}
+
+.current-icon {
+    font-size: var(--flin-font-size-lg);
+}
+
+/* Body */
+.settings-body {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--flin-spacing-6);
+    display: flex;
+    gap: var(--flin-spacing-8);
+}
+
+/* Sidebar navigation */
+.settings-nav {
+    width: 240px;
+    flex-shrink: 0;
+}
+
+.nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: sticky;
+    top: var(--flin-spacing-6);
+}
+
+.nav-item {
+    margin-bottom: var(--flin-spacing-1);
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-3);
+    width: 100%;
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    background: none;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-600);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.nav-link:hover {
+    background: var(--flin-color-gray-100);
+    color: var(--flin-color-gray-900);
+}
+
+.nav-link--active {
+    background: var(--flin-color-primary-50);
+    color: var(--flin-color-primary-700);
+}
+
+.nav-icon {
+    font-size: var(--flin-font-size-lg);
+    flex-shrink: 0;
+}
+
+.nav-label {
+    flex: 1;
+}
+
+.nav-badge {
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    padding: 2px 8px;
+    background: var(--flin-color-red-100);
+    color: var(--flin-color-red-600);
+    border-radius: var(--flin-radius-full);
+}
+
+/* Tabs navigation */
+.settings-tabs {
+    margin-bottom: var(--flin-spacing-6);
+    border-bottom: 1px solid var(--flin-color-gray-200);
+    overflow-x: auto;
+}
+
+.tabs-scroll {
+    display: flex;
+    gap: var(--flin-spacing-1);
+    min-width: max-content;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-500);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    margin-bottom: -1px;
+}
+
+.tab-btn:hover {
+    color: var(--flin-color-gray-700);
+}
+
+.tab-btn--active {
+    color: var(--flin-color-primary-600);
+    border-bottom-color: var(--flin-color-primary-600);
+}
+
+.tab-icon {
+    font-size: var(--flin-font-size-base);
+}
+
+.tab-badge {
+    font-size: var(--flin-font-size-xs);
+    padding: 2px 6px;
+    background: var(--flin-color-gray-100);
+    color: var(--flin-color-gray-600);
+    border-radius: var(--flin-radius-full);
+}
+
+.tab-btn--active .tab-badge {
+    background: var(--flin-color-primary-100);
+    color: var(--flin-color-primary-700);
+}
+
+/* Tabs layout body */
+.settings-layout--tabs .settings-body {
+    flex-direction: column;
+}
+
+/* Content area */
+.settings-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.content-header {
+    margin-bottom: var(--flin-spacing-6);
+    padding-bottom: var(--flin-spacing-6);
+    border-bottom: 1px solid var(--flin-color-gray-200);
+}
+
+.content-title {
+    font-size: var(--flin-font-size-xl);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+    margin: 0 0 var(--flin-spacing-2) 0;
+}
+
+.content-description {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.content-body {
+    background: var(--flin-color-white);
+    border: 1px solid var(--flin-color-gray-200);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-spacing-6);
+}
+
+/* Accordion */
+.settings-accordion {
+    width: 100%;
+}
+
+.accordion-section {
+    background: var(--flin-color-white);
+    border: 1px solid var(--flin-color-gray-200);
+    border-radius: var(--flin-radius-lg);
+    margin-bottom: var(--flin-spacing-4);
+    overflow: hidden;
+}
+
+.accordion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--flin-spacing-4) var(--flin-spacing-5);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.accordion-header:hover {
+    background: var(--flin-color-gray-50);
+}
+
+.accordion-header--expanded {
+    background: var(--flin-color-gray-50);
+    border-bottom: 1px solid var(--flin-color-gray-200);
+}
+
+.accordion-header-content {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-4);
+    flex: 1;
+}
+
+.accordion-icon {
+    font-size: var(--flin-font-size-xl);
+    flex-shrink: 0;
+}
+
+.accordion-header-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-1);
+}
+
+.accordion-label {
+    font-size: var(--flin-font-size-base);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-900);
+}
+
+.accordion-description {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+}
+
+.accordion-badge {
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    padding: 2px 8px;
+    background: var(--flin-color-primary-100);
+    color: var(--flin-color-primary-700);
+    border-radius: var(--flin-radius-full);
+}
+
+.accordion-arrow {
+    font-size: var(--flin-font-size-xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--flin-color-gray-400);
+    width: 24px;
+    text-align: center;
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--flin-transition-normal);
+}
+
+.accordion-content--expanded {
+    max-height: 2000px;
+}
+
+.accordion-body {
+    padding: var(--flin-spacing-5);
+}
+
+/* Accordion layout body */
+.settings-layout--accordion .settings-body {
+    flex-direction: column;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .settings-header {
+        padding: var(--flin-spacing-4);
+    }
+
+    .settings-mobile-toggle {
+        display: flex;
+    }
+
+    .settings-body {
+        flex-direction: column;
+        padding: var(--flin-spacing-4);
+        gap: var(--flin-spacing-4);
+    }
+
+    .settings-nav {
+        display: none;
+        width: 100%;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--flin-color-white);
+        border: 1px solid var(--flin-color-gray-200);
+        border-radius: var(--flin-radius-md);
+        box-shadow: var(--flin-shadow-lg);
+        z-index: var(--flin-z-index-dropdown);
+        margin-top: var(--flin-spacing-2);
+    }
+
+    .settings-nav--open {
+        display: block;
+    }
+
+    .nav-list {
+        position: static;
+        padding: var(--flin-spacing-2);
+    }
+
+    .settings-title {
+        font-size: var(--flin-font-size-xl);
+    }
+
+    .settings-header {
+        position: relative;
+    }
+
+    .content-header {
+        margin-bottom: var(--flin-spacing-4);
+        padding-bottom: var(--flin-spacing-4);
+    }
+
+    .content-body {
+        padding: var(--flin-spacing-4);
+    }
+
+    .settings-tabs {
+        margin: 0 calc(-1 * var(--flin-spacing-4));
+        padding: 0 var(--flin-spacing-4);
+    }
+
+    .accordion-header {
+        padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    }
+
+    .accordion-body {
+        padding: var(--flin-spacing-4);
+    }
+}
+
+@media (max-width: 480px) {
+    .settings-title {
+        font-size: var(--flin-font-size-lg);
+    }
+
+    .accordion-header-content {
+        gap: var(--flin-spacing-3);
+    }
+
+    .accordion-icon {
+        font-size: var(--flin-font-size-lg);
+    }
+
+    .accordion-label {
+        font-size: var(--flin-font-size-sm);
+    }
+
+    .accordion-description {
+        display: none;
+    }
+}
+</style>

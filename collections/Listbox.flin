@@ -1,0 +1,341 @@
+// Listbox.flin - Selection list with keyboard navigation
+
+// Props with defaults
+options = props.options || []
+value = props.value || nil
+multiple = props.multiple || false
+disabled = props.disabled || false
+horizontal = props.horizontal || false
+onChange = props.onChange || nil
+
+// State
+focusedIndex = -1
+selectedValues = multiple ? (value || []) : nil
+
+// CSS classes
+containerClass = "listbox {horizontal ? 'listbox--horizontal' : ''} {disabled ? 'listbox--disabled' : ''}"
+optionClass = "listbox-option"
+optionSelectedClass = "listbox-option listbox-option--selected"
+optionFocusedClass = "listbox-option listbox-option--focused"
+optionDisabledClass = "listbox-option listbox-option--disabled"
+
+// Check if an option is selected
+isSelected = |option| {
+    if multiple {
+        selectedValues && selectedValues.includes(option.value)
+    } else {
+        value == option.value
+    }
+}
+
+// Check if an option is disabled
+isDisabled = |option| {
+    disabled || option.disabled
+}
+
+// Get class for option
+getOptionClass = |option, index| {
+    if isDisabled(option) {
+        optionDisabledClass
+    } else if isSelected(option) {
+        optionSelectedClass
+    } else if index == focusedIndex {
+        optionFocusedClass
+    } else {
+        optionClass
+    }
+}
+
+// Handlers
+handleSelect = |option| {
+    if isDisabled(option) { return }
+
+    if multiple {
+        if selectedValues.includes(option.value) {
+            newValues = selectedValues.filter(|v| v != option.value)
+        } else {
+            newValues = [...selectedValues, option.value]
+        }
+        selectedValues = newValues
+        if onChange { onChange(newValues) }
+    } else {
+        if onChange { onChange(option.value) }
+    }
+}
+
+handleKeyDown = |e| {
+    if disabled { return }
+
+    enabledOptions = options.filter(|o| !o.disabled)
+    enabledIndices = options.map(|o, i| o.disabled ? -1 : i).filter(|i| i >= 0)
+
+    match e.key {
+        "ArrowDown" | "ArrowRight" => {
+            e.preventDefault()
+            currentEnabledIndex = enabledIndices.indexOf(focusedIndex)
+            if currentEnabledIndex < enabledIndices.length - 1 {
+                focusedIndex = enabledIndices[currentEnabledIndex + 1]
+            } else {
+                focusedIndex = enabledIndices[0]
+            }
+        }
+        "ArrowUp" | "ArrowLeft" => {
+            e.preventDefault()
+            currentEnabledIndex = enabledIndices.indexOf(focusedIndex)
+            if currentEnabledIndex > 0 {
+                focusedIndex = enabledIndices[currentEnabledIndex - 1]
+            } else {
+                focusedIndex = enabledIndices[enabledIndices.length - 1]
+            }
+        }
+        "Enter" | " " => {
+            e.preventDefault()
+            if focusedIndex >= 0 && focusedIndex < options.length {
+                handleSelect(options[focusedIndex])
+            }
+        }
+        "Home" => {
+            e.preventDefault()
+            focusedIndex = enabledIndices[0]
+        }
+        "End" => {
+            e.preventDefault()
+            focusedIndex = enabledIndices[enabledIndices.length - 1]
+        }
+        "a" => {
+            if multiple && e.ctrlKey {
+                e.preventDefault()
+                allValues = options.filter(|o| !o.disabled).map(|o| o.value)
+                selectedValues = allValues
+                if onChange { onChange(allValues) }
+            }
+        }
+    }
+}
+
+handleFocus = {
+    if focusedIndex < 0 {
+        // Focus first enabled option
+        firstEnabled = options.findIndex(|o| !o.disabled)
+        focusedIndex = firstEnabled >= 0 ? firstEnabled : 0
+    }
+}
+
+handleBlur = {
+    focusedIndex = -1
+}
+
+<div
+    class={containerClass}
+    role="listbox"
+    aria-multiselectable={multiple}
+    aria-disabled={disabled}
+    tabIndex={disabled ? -1 : 0}
+    onKeyDown={handleKeyDown}
+    onFocus={handleFocus}
+    onBlur={handleBlur}
+>
+    {options.map(|option, index| (
+        <div
+            key={option.value}
+            class={getOptionClass(option, index)}
+            role="option"
+            aria-selected={isSelected(option)}
+            aria-disabled={isDisabled(option)}
+            onClick={() => handleSelect(option)}
+        >
+            {multiple ? (
+                <span class="listbox-checkbox">
+                    {isSelected(option) ? (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    ) : nil}
+                </span>
+            ) : nil}
+
+            {option.icon ? (
+                <span class="listbox-icon">{option.icon}</span>
+            ) : nil}
+
+            <div class="listbox-content">
+                <span class="listbox-label">{option.label}</span>
+                {option.description ? (
+                    <span class="listbox-description">{option.description}</span>
+                ) : nil}
+            </div>
+
+            {!multiple && isSelected(option) ? (
+                <svg class="listbox-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            ) : nil}
+        </div>
+    ))}
+
+    {options.length == 0 ? (
+        <div class="listbox-empty">No options available</div>
+    ) : nil}
+</div>
+
+<style scoped>
+.listbox {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px;
+    background: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.listbox:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px rgba(var(--flin-primary-rgb), 0.1);
+}
+
+.listbox--horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: none;
+    overflow: visible;
+}
+
+.listbox--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    background: var(--flin-neutral-100);
+}
+
+.listbox-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    user-select: none;
+}
+
+.listbox--horizontal .listbox-option {
+    flex: 0 0 auto;
+    padding: 8px 16px;
+}
+
+.listbox-option:hover {
+    background: var(--flin-neutral-100);
+}
+
+.listbox-option--focused {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    user-select: none;
+    background: var(--flin-neutral-100);
+    outline: 2px solid var(--flin-primary);
+    outline-offset: -2px;
+}
+
+.listbox-option--selected {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    user-select: none;
+    background: rgba(var(--flin-primary-rgb), 0.1);
+    color: var(--flin-primary);
+}
+
+.listbox-option--selected:hover {
+    background: rgba(var(--flin-primary-rgb), 0.15);
+}
+
+.listbox-option--disabled {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--flin-radius-sm);
+    user-select: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.listbox-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: 4px;
+    background: var(--flin-bg);
+    flex-shrink: 0;
+    transition: all var(--flin-transition-fast);
+}
+
+.listbox-option--selected .listbox-checkbox {
+    background: var(--flin-primary);
+    border-color: var(--flin-primary);
+    color: white;
+}
+
+.listbox-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: var(--flin-neutral-500);
+}
+
+.listbox-option--selected .listbox-icon {
+    color: var(--flin-primary);
+}
+
+.listbox-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.listbox-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--flin-fg);
+}
+
+.listbox-option--selected .listbox-label {
+    color: var(--flin-primary);
+}
+
+.listbox-description {
+    font-size: 12px;
+    color: var(--flin-neutral-500);
+}
+
+.listbox-check {
+    flex-shrink: 0;
+    color: var(--flin-primary);
+}
+
+.listbox-empty {
+    padding: 24px;
+    text-align: center;
+    color: var(--flin-neutral-400);
+    font-size: 14px;
+}
+</style>

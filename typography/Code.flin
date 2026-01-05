@@ -1,0 +1,34 @@
+// Code.flin - FlinUI Inline Code Component
+// Inline code styling for embedding code snippets within text
+
+// Props with defaults
+color = props.color || ""
+fontSize = props.fontSize || ""
+
+// Build style string
+colorPart = {if color != "" { "color: " ++ color ++ ";" } else { "" }}
+fontSizePart = {if fontSize != "" { "font-size: " ++ fontSize ++ ";" } else { "" }}
+codeStyle = colorPart ++ fontSizePart
+
+<code class="inline-code" style={codeStyle}>
+    {children}
+</code>
+
+<style scoped>
+.inline-code {
+    display: inline;
+    padding: 0.15em 0.4em;
+    font-family: var(--flin-font-mono);
+    font-size: 0.875em;
+    color: var(--flin-danger);
+    background-color: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-sm);
+    word-break: break-word;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .inline-code {
+    background-color: var(--flin-neutral-800);
+    color: var(--flin-danger-light);
+}
+</style>

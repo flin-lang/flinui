@@ -1,0 +1,329 @@
+// Prose.flin - FlinUI Prose Component
+// Long-form article styling container for rich content
+
+// Props with defaults
+size = props.size || "base"
+dark = props.dark || false
+maxWidth = props.maxWidth || "65ch"
+
+// Computed size class
+sizeClass = match size {
+    "sm" -> "prose--sm"
+    "lg" -> "prose--lg"
+    "xl" -> "prose--xl"
+    _ -> "prose--base"
+}
+
+// Dark mode class
+darkClass = match dark {
+    true -> " prose--dark"
+    _ -> ""
+}
+
+// Build full class string
+proseClass = "prose " ++ sizeClass ++ darkClass
+
+// Build inline style for max-width
+proseStyle = "max-width: " ++ maxWidth ++ ";"
+
+<article class={proseClass} style={proseStyle}>
+    {children}
+</article>
+
+<style scoped>
+.prose {
+    font-family: var(--flin-font-sans);
+    color: var(--flin-fg);
+    line-height: 1.75;
+}
+
+/* Size: base */
+.prose--base {
+    font-size: var(--flin-text-base);
+}
+
+.prose--base h1 {
+    font-size: var(--flin-text-4xl);
+    margin-top: 0;
+    margin-bottom: var(--flin-space-6);
+    line-height: 1.2;
+}
+
+.prose--base h2 {
+    font-size: var(--flin-text-2xl);
+    margin-top: var(--flin-space-10);
+    margin-bottom: var(--flin-space-4);
+    line-height: 1.3;
+}
+
+.prose--base h3 {
+    font-size: var(--flin-text-xl);
+    margin-top: var(--flin-space-8);
+    margin-bottom: var(--flin-space-3);
+    line-height: 1.4;
+}
+
+.prose--base p {
+    margin-top: 0;
+    margin-bottom: var(--flin-space-5);
+}
+
+/* Size: sm */
+.prose--sm {
+    font-size: var(--flin-text-sm);
+}
+
+.prose--sm h1 {
+    font-size: var(--flin-text-2xl);
+    margin-top: 0;
+    margin-bottom: var(--flin-space-4);
+}
+
+.prose--sm h2 {
+    font-size: var(--flin-text-xl);
+    margin-top: var(--flin-space-8);
+    margin-bottom: var(--flin-space-3);
+}
+
+.prose--sm h3 {
+    font-size: var(--flin-text-lg);
+    margin-top: var(--flin-space-6);
+    margin-bottom: var(--flin-space-2);
+}
+
+.prose--sm p {
+    margin-top: 0;
+    margin-bottom: var(--flin-space-4);
+}
+
+/* Size: lg */
+.prose--lg {
+    font-size: var(--flin-text-lg);
+}
+
+.prose--lg h1 {
+    font-size: var(--flin-text-4xl);
+    margin-top: 0;
+    margin-bottom: var(--flin-space-8);
+    line-height: 1.15;
+}
+
+.prose--lg h2 {
+    font-size: var(--flin-text-3xl);
+    margin-top: var(--flin-space-12);
+    margin-bottom: var(--flin-space-5);
+    line-height: 1.25;
+}
+
+.prose--lg h3 {
+    font-size: var(--flin-text-2xl);
+    margin-top: var(--flin-space-10);
+    margin-bottom: var(--flin-space-4);
+    line-height: 1.35;
+}
+
+.prose--lg p {
+    margin-top: 0;
+    margin-bottom: var(--flin-space-6);
+}
+
+/* Size: xl */
+.prose--xl {
+    font-size: var(--flin-text-xl);
+}
+
+.prose--xl h1 {
+    font-size: var(--flin-text-4xl);
+    margin-top: 0;
+    margin-bottom: var(--flin-space-10);
+    line-height: 1.1;
+}
+
+.prose--xl h2 {
+    font-size: var(--flin-text-3xl);
+    margin-top: var(--flin-space-14);
+    margin-bottom: var(--flin-space-6);
+}
+
+.prose--xl h3 {
+    font-size: var(--flin-text-2xl);
+    margin-top: var(--flin-space-12);
+    margin-bottom: var(--flin-space-5);
+}
+
+.prose--xl p {
+    margin-top: 0;
+    margin-bottom: var(--flin-space-8);
+}
+
+/* Common prose styles for all sizes */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--flin-fg);
+}
+
+.prose a {
+    color: var(--flin-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.prose a:hover {
+    color: var(--flin-primary-hover);
+}
+
+.prose strong {
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.prose em {
+    font-style: italic;
+}
+
+.prose code {
+    font-family: var(--flin-font-mono);
+    font-size: 0.875em;
+    padding: 0.15em 0.4em;
+    background-color: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-sm);
+    color: var(--flin-danger);
+}
+
+.prose pre {
+    margin: var(--flin-space-6) 0;
+    padding: var(--flin-space-4);
+    background-color: var(--flin-neutral-900);
+    border-radius: var(--flin-radius-lg);
+    overflow-x: auto;
+}
+
+.prose pre code {
+    padding: 0;
+    background-color: transparent;
+    color: var(--flin-neutral-100);
+}
+
+.prose blockquote {
+    margin: var(--flin-space-6) 0;
+    padding-left: var(--flin-space-6);
+    border-left: 4px solid var(--flin-primary);
+    font-style: italic;
+    color: var(--flin-fg-muted);
+}
+
+.prose ul,
+.prose ol {
+    margin: var(--flin-space-5) 0;
+    padding-left: var(--flin-space-6);
+}
+
+.prose li {
+    margin-bottom: var(--flin-space-2);
+}
+
+.prose ul > li {
+    list-style-type: disc;
+}
+
+.prose ol > li {
+    list-style-type: decimal;
+}
+
+.prose hr {
+    margin: var(--flin-space-10) 0;
+    border: none;
+    border-top: 1px solid var(--flin-neutral-300);
+}
+
+.prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--flin-radius-lg);
+    margin: var(--flin-space-6) 0;
+}
+
+.prose table {
+    width: 100%;
+    margin: var(--flin-space-6) 0;
+    border-collapse: collapse;
+}
+
+.prose th,
+.prose td {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border: 1px solid var(--flin-neutral-300);
+    text-align: left;
+}
+
+.prose th {
+    font-weight: 600;
+    background-color: var(--flin-bg-muted);
+}
+
+/* Dark mode */
+.prose--dark {
+    color: var(--flin-neutral-300);
+}
+
+.prose--dark h1,
+.prose--dark h2,
+.prose--dark h3,
+.prose--dark h4,
+.prose--dark strong {
+    color: var(--flin-neutral-100);
+}
+
+.prose--dark code {
+    background-color: var(--flin-neutral-800);
+    color: var(--flin-danger-light);
+}
+
+.prose--dark hr {
+    border-top-color: var(--flin-neutral-700);
+}
+
+.prose--dark th {
+    background-color: var(--flin-neutral-800);
+}
+
+.prose--dark th,
+.prose--dark td {
+    border-color: var(--flin-neutral-700);
+}
+
+/* Auto dark theme */
+[data-theme="dark"] .prose {
+    color: var(--flin-neutral-300);
+}
+
+[data-theme="dark"] .prose h1,
+[data-theme="dark"] .prose h2,
+[data-theme="dark"] .prose h3,
+[data-theme="dark"] .prose h4,
+[data-theme="dark"] .prose strong {
+    color: var(--flin-neutral-100);
+}
+
+[data-theme="dark"] .prose code {
+    background-color: var(--flin-neutral-800);
+    color: var(--flin-danger-light);
+}
+
+[data-theme="dark"] .prose hr {
+    border-top-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .prose th {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .prose th,
+[data-theme="dark"] .prose td {
+    border-color: var(--flin-neutral-700);
+}
+</style>

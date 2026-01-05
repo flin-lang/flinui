@@ -1,0 +1,269 @@
+// AvatarGroup.flin - FlinUI Avatar Group Component
+// Stacked avatars with overflow indicator for displaying multiple users
+
+// Props with defaults
+max = props.max || 5
+size = props.size || "md"
+spacing = props.spacing || "tight"
+expandOnHover = props.expandOnHover || false
+
+// Internal state
+isExpanded = false
+
+// Handle hover expand
+handleMouseEnter = {
+    {if expandOnHover}
+        isExpanded = true
+    {/if}
+}
+
+handleMouseLeave = {
+    {if expandOnHover}
+        isExpanded = false
+    {/if}
+}
+
+// Size classes
+sizeClass = match size {
+    "xs" -> "avatar-group-xs"
+    "sm" -> "avatar-group-sm"
+    "lg" -> "avatar-group-lg"
+    "xl" -> "avatar-group-xl"
+    _ -> "avatar-group-md"
+}
+
+// Spacing classes
+spacingClass = match spacing {
+    "none" -> "avatar-group-spacing-none"
+    "loose" -> "avatar-group-spacing-loose"
+    _ -> "avatar-group-spacing-tight"
+}
+
+// Expanded class
+expandedClass = match isExpanded { true -> " avatar-group-expanded", _ -> "" }
+
+// Avatar size values for inline styling
+avatarSize = match size {
+    "xs" -> "24px"
+    "sm" -> "32px"
+    "lg" -> "48px"
+    "xl" -> "64px"
+    _ -> "40px"
+}
+
+// Overlap offset (negative margin)
+overlapOffset = match spacing {
+    "none" -> "0px"
+    "loose" -> "-8px"
+    _ -> "-12px"
+}
+
+<div
+    class={"flin-avatar-group " ++ sizeClass ++ " " ++ spacingClass ++ expandedClass}
+    role="group"
+    aria-label="Avatar group"
+    mouseenter={handleMouseEnter}
+    mouseleave={handleMouseLeave}
+    style={"--avatar-size: " ++ avatarSize ++ "; --avatar-overlap: " ++ overlapOffset}
+>
+    <div class="avatar-group-stack">
+        {loop avatar, index in children}
+            {if index < max}
+                <div
+                    class="avatar-group-item"
+                    style={"z-index: " ++ (max - index)}
+                    aria-hidden={index >= max}
+                >
+                    {avatar}
+                </div>
+            {/if}
+        {/loop}
+
+        {if children.length > max}
+            {
+                overflowCount = children.length - max
+            }
+            <div class="avatar-group-overflow" style={"z-index: 0"}>
+                <span class="overflow-count">+{overflowCount}</span>
+            </div>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+/* Avatar Group Container */
+.flin-avatar-group {
+    display: inline-flex;
+    align-items: center;
+}
+
+.avatar-group-stack {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Individual Avatar Item */
+.avatar-group-item {
+    position: relative;
+    margin-left: var(--avatar-overlap);
+    border-radius: 50%;
+    background-color: var(--flin-bg);
+    box-shadow: 0 0 0 2px var(--flin-bg);
+    transition: transform var(--flin-transition-fast) ease-out,
+                margin var(--flin-transition-fast) ease-out;
+}
+
+.avatar-group-item:last-child {
+    margin-left: 0;
+}
+
+/* Size nested avatar styling */
+.avatar-group-item :global(img),
+.avatar-group-item :global(.avatar),
+.avatar-group-item :global(.flin-avatar) {
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Overflow Indicator */
+.avatar-group-overflow {
+    position: relative;
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    border-radius: 50%;
+    background-color: var(--flin-neutral-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: var(--avatar-overlap);
+    box-shadow: 0 0 0 2px var(--flin-bg);
+    transition: transform var(--flin-transition-fast) ease-out;
+}
+
+.overflow-count {
+    font-size: var(--flin-text-xs);
+    font-weight: 600;
+    color: var(--flin-fg-muted);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Size Variants */
+.avatar-group-xs .overflow-count {
+    font-size: 10px;
+}
+
+.avatar-group-sm .overflow-count {
+    font-size: var(--flin-text-xs);
+}
+
+.avatar-group-md .overflow-count {
+    font-size: var(--flin-text-sm);
+}
+
+.avatar-group-lg .overflow-count {
+    font-size: var(--flin-text-base);
+}
+
+.avatar-group-xl .overflow-count {
+    font-size: var(--flin-text-lg);
+}
+
+/* Spacing Variants */
+.avatar-group-spacing-none .avatar-group-item,
+.avatar-group-spacing-none .avatar-group-overflow {
+    margin-left: 0;
+}
+
+.avatar-group-spacing-tight .avatar-group-item,
+.avatar-group-spacing-tight .avatar-group-overflow {
+    margin-left: -12px;
+}
+
+.avatar-group-spacing-loose .avatar-group-item,
+.avatar-group-spacing-loose .avatar-group-overflow {
+    margin-left: -8px;
+}
+
+/* Expanded State (Hover) */
+.avatar-group-expanded .avatar-group-item,
+.avatar-group-expanded .avatar-group-overflow {
+    margin-left: var(--flin-space-1);
+}
+
+.avatar-group-expanded .avatar-group-item:last-child {
+    margin-left: 0;
+}
+
+/* Hover Effects */
+.flin-avatar-group:hover .avatar-group-item {
+    transform: translateY(-2px);
+}
+
+.flin-avatar-group:hover .avatar-group-overflow {
+    transform: scale(1.05);
+}
+
+/* Individual hover highlight */
+.avatar-group-item:hover {
+    z-index: 100 !important;
+    transform: scale(1.1) translateY(-2px) !important;
+}
+
+/* Focus styling for accessibility */
+.avatar-group-item:focus-within {
+    z-index: 100 !important;
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+/* Animation on mount */
+@keyframes avatarSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.avatar-group-item {
+    animation: avatarSlideIn var(--flin-transition-fast) ease-out;
+    animation-fill-mode: both;
+}
+
+.avatar-group-item:nth-child(1) { animation-delay: 0ms; }
+.avatar-group-item:nth-child(2) { animation-delay: 30ms; }
+.avatar-group-item:nth-child(3) { animation-delay: 60ms; }
+.avatar-group-item:nth-child(4) { animation-delay: 90ms; }
+.avatar-group-item:nth-child(5) { animation-delay: 120ms; }
+
+/* Dark theme support */
+[data-theme="dark"] .avatar-group-item {
+    box-shadow: 0 0 0 2px var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .avatar-group-overflow {
+    background-color: var(--flin-neutral-700);
+    box-shadow: 0 0 0 2px var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .overflow-count {
+    color: var(--flin-neutral-300);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .avatar-group-lg,
+    .avatar-group-xl {
+        --avatar-size: 40px;
+    }
+}
+</style>

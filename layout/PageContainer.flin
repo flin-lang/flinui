@@ -1,0 +1,221 @@
+// FlinUI PageContainer Component
+// Full page layout container with optional sidebar, header, and footer
+// Props: sidebar (slot), sidebarPosition (left/right), sidebarWidth (string), header (slot), footer (slot), maxWidth (sm/md/lg/xl/full)
+
+sidebarPosition = props.sidebarPosition || "left"
+sidebarWidth = props.sidebarWidth || "280px"
+maxWidth = props.maxWidth || "full"
+
+// Check for slots
+hasSidebar = props.sidebar != null
+hasHeader = props.header != null
+hasFooter = props.footer != null
+
+// Build class strings
+positionClass = match sidebarPosition {
+    "right" -> " flin-page-sidebar-right"
+    _ -> " flin-page-sidebar-left"
+}
+
+maxWidthClass = match maxWidth {
+    "sm" -> " flin-page-max-sm"
+    "md" -> " flin-page-max-md"
+    "lg" -> " flin-page-max-lg"
+    "xl" -> " flin-page-max-xl"
+    "full" -> ""
+    _ -> ""
+}
+
+hasSidebarClass = match hasSidebar {
+    true -> " flin-page-has-sidebar"
+    _ -> ""
+}
+
+pageClass = "flin-page-container" ++ positionClass ++ maxWidthClass ++ hasSidebarClass
+
+// Custom sidebar width style
+sidebarStyle = "--flin-sidebar-width: " ++ sidebarWidth ++ ";"
+
+<div class={pageClass} style={sidebarStyle}>
+    {if hasHeader {
+        <header class="flin-page-header">
+            {props.header}
+        </header>
+    }}
+
+    <div class="flin-page-body">
+        {if hasSidebar {
+            <aside class="flin-page-sidebar">
+                <div class="flin-page-sidebar-content">
+                    {props.sidebar}
+                </div>
+            </aside>
+        }}
+
+        <main class="flin-page-main">
+            <div class="flin-page-main-content">
+                {children}
+            </div>
+        </main>
+    </div>
+
+    {if hasFooter {
+        <footer class="flin-page-footer">
+            {props.footer}
+        </footer>
+    }}
+</div>
+
+<style scoped>
+.flin-page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    background-color: var(--flin-bg);
+    box-sizing: border-box;
+}
+
+/* Max width variants */
+.flin-page-max-sm {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flin-page-max-md {
+    max-width: 768px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flin-page-max-lg {
+    max-width: 1024px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flin-page-max-xl {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Header */
+.flin-page-header {
+    flex-shrink: 0;
+    width: 100%;
+    z-index: 100;
+}
+
+/* Body (sidebar + main) */
+.flin-page-body {
+    display: flex;
+    flex: 1;
+    width: 100%;
+}
+
+/* Sidebar */
+.flin-page-sidebar {
+    flex-shrink: 0;
+    width: var(--flin-sidebar-width, 280px);
+    background-color: var(--flin-bg-muted);
+    border-right: 1px solid var(--flin-neutral-200);
+    overflow-y: auto;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.flin-page-sidebar-right .flin-page-sidebar {
+    border-right: none;
+    border-left: 1px solid var(--flin-neutral-200);
+    order: 2;
+}
+
+.flin-page-sidebar-content {
+    padding: var(--flin-space-4);
+}
+
+/* Main content */
+.flin-page-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.flin-page-main-content {
+    flex: 1;
+    padding: var(--flin-space-6);
+}
+
+/* Footer */
+.flin-page-footer {
+    flex-shrink: 0;
+    width: 100%;
+}
+
+/* Sidebar position adjustments */
+.flin-page-sidebar-left .flin-page-body {
+    flex-direction: row;
+}
+
+.flin-page-sidebar-right .flin-page-body {
+    flex-direction: row;
+}
+
+.flin-page-sidebar-right .flin-page-main {
+    order: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .flin-page-has-sidebar .flin-page-sidebar {
+        width: 240px;
+    }
+}
+
+@media (max-width: 768px) {
+    .flin-page-body {
+        flex-direction: column;
+    }
+
+    .flin-page-has-sidebar .flin-page-sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid var(--flin-neutral-200);
+        order: 0 !important;
+    }
+
+    .flin-page-sidebar-right .flin-page-sidebar {
+        border-left: none;
+        border-bottom: 1px solid var(--flin-neutral-200);
+    }
+
+    .flin-page-sidebar-content {
+        padding: var(--flin-space-3);
+    }
+
+    .flin-page-main {
+        order: 1 !important;
+    }
+
+    .flin-page-main-content {
+        padding: var(--flin-space-4);
+    }
+}
+
+/* Collapsible sidebar for mobile (optional enhancement) */
+.flin-page-container[data-sidebar-collapsed="true"] .flin-page-sidebar {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .flin-page-container[data-sidebar-mobile="hidden"] .flin-page-sidebar {
+        display: none;
+    }
+}
+</style>

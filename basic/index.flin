@@ -3,38 +3,44 @@
 //
 // COMPONENTS:
 // -----------
-// 1. Button   - Versatile button with variants (primary/secondary/danger/success/warning),
-//               sizes (sm/md/lg), loading state, and disabled state
+// 1. Button      - Versatile button with variants (primary/secondary/danger/success/warning),
+//                  sizes (sm/md/lg), loading state, and disabled state
 //
-// 2. Input    - Text input with types (text/password/email/number), error states,
-//               placeholder, and validation support
+// 2. Input       - Text input with types (text/password/email/number), error states,
+//                  placeholder, and validation support
 //
-// 3. Textarea - Multi-line text input with configurable rows and error states
+// 3. Textarea    - Multi-line text input with configurable rows and error states
 //
-// 4. Select   - Dropdown select with options array, placeholder, and custom styling
+// 4. Select      - Dropdown select with options array, placeholder, and custom styling
 //
-// 5. Checkbox - Accessible checkbox with custom styling and label support
+// 5. Checkbox    - Accessible checkbox with custom styling and label support
 //
-// 6. Radio    - Radio button for single selection within a group
+// 6. Radio       - Radio button for single selection within a group
 //
-// 7. Switch   - Toggle switch with smooth animations
+// 7. Switch      - Toggle switch with smooth animations
 //
-// 8. Slider   - Range slider with min/max/step and optional value display
+// 8. Slider      - Range slider with min/max/step and optional value display
 //
-// 9. Text     - Typography component with size (xs/sm/base/lg/xl/2xl),
-//               weight (normal/medium/semibold/bold), and color options
+// 9. Text        - Typography component with size (xs/sm/base/lg/xl/2xl),
+//                  weight (normal/medium/semibold/bold), and color options
 //
-// 10. Link    - Accessible link with external link support (opens new tab with security attrs)
+// 10. Link       - Accessible link with external link support (opens new tab with security attrs)
 //
-// 11. Icon    - SVG icon placeholder with built-in icons and size variants
+// 11. Icon       - 200+ Lucide icons with SVG paths, sizes (xs/sm/md/lg/xl), colors
 //
-// 12. Image   - Image with loading skeleton, error handling, and lazy loading
+// 12. Image      - Image with loading skeleton, error handling, and lazy loading
 //
-// 13. Avatar  - User avatar with image support and initials fallback
+// 13. Avatar     - User avatar with image support and initials fallback
 //
-// 14. Badge   - Small status indicator with variants (default/success/warning/danger/info)
+// 14. Badge      - Small status indicator with variants (default/success/warning/danger/info)
 //
-// 15. Tag     - Removable tag/chip component with variants
+// 15. Tag        - Removable tag/chip component with variants
+//
+// 16. IconButton - Icon-only button for toolbar actions (all Icon icons available)
+//
+// 17. CloseButton - Dismiss button with X icon for modals, alerts, notifications
+//
+// 18. ButtonGroup - Grouped buttons with attached styling and dividers
 //
 // USAGE:
 // ------
@@ -50,7 +56,7 @@
 
 <div class="flinui-basic-info">
     <h2>FlinUI Basic Components</h2>
-    <p>15 production-ready components for building beautiful interfaces.</p>
+    <p>18 production-ready components for building beautiful interfaces.</p>
 </div>
 
 <style scoped>

@@ -1,0 +1,575 @@
+// ContextMenu.flin - FlinUI Context Menu Component
+// Right-click context menu with nested submenus and keyboard navigation
+
+// Props with defaults
+items = props.items || []
+disabled = props.disabled || false
+
+// Internal state
+isOpen = false
+isExiting = false
+menuX = 0
+menuY = 0
+focusedIndex = -1
+activeSubmenuIndex = -1
+
+// Handle context menu (right-click)
+handleContextMenu = {
+    {if !disabled}
+        event.preventDefault();
+
+        // Get click position
+        menuX = event.clientX;
+        menuY = event.clientY;
+
+        // Adjust position if menu would overflow viewport
+        viewportWidth = window.innerWidth;
+        viewportHeight = window.innerHeight;
+        menuWidth = 200;
+        menuHeight = items.length * 40;
+
+        {if menuX + menuWidth > viewportWidth}
+            menuX = viewportWidth - menuWidth - 16
+        {/if}
+
+        {if menuY + menuHeight > viewportHeight}
+            menuY = viewportHeight - menuHeight - 16
+        {/if}
+
+        isOpen = true;
+        focusedIndex = -1;
+        activeSubmenuIndex = -1
+    {/if}
+}
+
+// Handle close with animation
+handleClose = {
+    isExiting = true;
+    setTimeout({
+        isOpen = false;
+        isExiting = false;
+        focusedIndex = -1;
+        activeSubmenuIndex = -1
+    }, 150)
+}
+
+// Handle backdrop click
+handleBackdropClick = {
+    handleClose()
+}
+
+// Handle item click
+handleItemClick = { item ->
+    {if !item.disabled && !item.divider && !item.submenu}
+        {if item.onClick}
+            item.onClick()
+        {/if}
+        handleClose()
+    {/if}
+}
+
+// Handle submenu hover
+handleSubmenuEnter = { index ->
+    {if items[index].submenu && !items[index].disabled}
+        activeSubmenuIndex = index
+    {/if}
+}
+
+handleSubmenuLeave = {
+    activeSubmenuIndex = -1
+}
+
+// Handle submenu item click
+handleSubmenuItemClick = { item ->
+    {if !item.disabled}
+        {if item.onClick}
+            item.onClick()
+        {/if}
+        handleClose()
+    {/if}
+}
+
+// Handle keyboard navigation
+handleKeyDown = {
+    match event.key {
+        "Escape" -> handleClose()
+        "ArrowDown" -> {
+            event.preventDefault();
+            focusNextItem()
+        }
+        "ArrowUp" -> {
+            event.preventDefault();
+            focusPreviousItem()
+        }
+        "ArrowRight" -> {
+            event.preventDefault();
+            {if focusedIndex >= 0 && items[focusedIndex].submenu}
+                activeSubmenuIndex = focusedIndex
+            {/if}
+        }
+        "ArrowLeft" -> {
+            event.preventDefault();
+            activeSubmenuIndex = -1
+        }
+        "Home" -> {
+            event.preventDefault();
+            focusFirstItem()
+        }
+        "End" -> {
+            event.preventDefault();
+            focusLastItem()
+        }
+        "Enter" | " " -> {
+            event.preventDefault();
+            {if focusedIndex >= 0 && focusedIndex < items.length}
+                {if items[focusedIndex].submenu}
+                    activeSubmenuIndex = focusedIndex
+                {else}
+                    handleItemClick(items[focusedIndex])
+                {/if}
+            {/if}
+        }
+        _ -> {}
+    }
+}
+
+// Keyboard navigation helpers
+focusNextItem = {
+    loop i from focusedIndex + 1 to items.length {
+        {if !items[i].disabled && !items[i].divider}
+            focusedIndex = i;
+            break
+        {/if}
+    }
+}
+
+focusPreviousItem = {
+    loop i from focusedIndex - 1 to -1 step -1 {
+        {if !items[i].disabled && !items[i].divider}
+            focusedIndex = i;
+            break
+        {/if}
+    }
+}
+
+focusFirstItem = {
+    loop i from 0 to items.length {
+        {if !items[i].disabled && !items[i].divider}
+            focusedIndex = i;
+            break
+        {/if}
+    }
+}
+
+focusLastItem = {
+    loop i from items.length - 1 to -1 step -1 {
+        {if !items[i].disabled && !items[i].divider}
+            focusedIndex = i;
+            break
+        {/if}
+    }
+}
+
+// Computed classes
+disabledClass = match disabled { true -> " context-menu-disabled", _ -> "" }
+exitingClass = match isExiting { true -> " context-menu-exiting", _ -> "" }
+
+<div
+    class={"flin-context-menu-wrapper" ++ disabledClass}
+    contextmenu={handleContextMenu}
+>
+    {children}
+
+    {if isOpen}
+        <div
+            class="context-menu-backdrop"
+            click={handleBackdropClick}
+            contextmenu={{event.preventDefault(); handleClose()}}
+            aria-hidden="true"
+        ></div>
+
+        <div
+            class={"flin-context-menu" ++ exitingClass}
+            role="menu"
+            aria-orientation="vertical"
+            tabindex="-1"
+            keydown={handleKeyDown}
+            style={"left: " ++ menuX ++ "px; top: " ++ menuY ++ "px"}
+        >
+            <ul class="context-menu-list" role="none">
+                {loop item, index in items}
+                    {if item.divider}
+                        <li class="context-menu-divider" role="separator"></li>
+                    {else}
+                        {
+                            itemDisabledClass = match item.disabled { true -> " context-menu-item-disabled", _ -> "" }
+                            itemFocusedClass = match index == focusedIndex { true -> " context-menu-item-focused", _ -> "" }
+                            itemHasSubmenuClass = match item.submenu { true -> " context-menu-item-has-submenu", _ -> "" }
+                            itemVariantClass = match item.variant {
+                                "danger" -> " context-menu-item-danger"
+                                _ -> ""
+                            }
+                        }
+                        <li
+                            class={"context-menu-item" ++ itemDisabledClass ++ itemFocusedClass ++ itemHasSubmenuClass ++ itemVariantClass}
+                            role="menuitem"
+                            tabindex={match item.disabled { true -> "-1", _ -> "0" }}
+                            aria-disabled={item.disabled}
+                            aria-haspopup={match item.submenu { true -> "menu", _ -> "false" }}
+                            aria-expanded={match activeSubmenuIndex == index { true -> "true", _ -> "false" }}
+                            click={{handleItemClick(item)}}
+                            mouseenter={{
+                                {if !item.disabled}
+                                    focusedIndex = index;
+                                    handleSubmenuEnter(index)
+                                {/if}
+                            }}
+                            mouseleave={handleSubmenuLeave}
+                        >
+                            {if item.icon}
+                                <span class="context-menu-item-icon" aria-hidden="true">
+                                    {item.icon}
+                                </span>
+                            {/if}
+                            <span class="context-menu-item-label">
+                                {item.label}
+                            </span>
+                            {if item.shortcut}
+                                <span class="context-menu-item-shortcut" aria-label="Keyboard shortcut">
+                                    {item.shortcut}
+                                </span>
+                            {/if}
+                            {if item.submenu}
+                                <span class="context-menu-item-arrow" aria-hidden="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+
+                                {if activeSubmenuIndex == index}
+                                    <div class="context-submenu" role="menu">
+                                        <ul class="context-menu-list" role="none">
+                                            {loop subItem in item.submenu}
+                                                {if subItem.divider}
+                                                    <li class="context-menu-divider" role="separator"></li>
+                                                {else}
+                                                    {
+                                                        subItemDisabledClass = match subItem.disabled { true -> " context-menu-item-disabled", _ -> "" }
+                                                        subItemVariantClass = match subItem.variant {
+                                                            "danger" -> " context-menu-item-danger"
+                                                            _ -> ""
+                                                        }
+                                                    }
+                                                    <li
+                                                        class={"context-menu-item" ++ subItemDisabledClass ++ subItemVariantClass}
+                                                        role="menuitem"
+                                                        tabindex={match subItem.disabled { true -> "-1", _ -> "0" }}
+                                                        aria-disabled={subItem.disabled}
+                                                        click={{handleSubmenuItemClick(subItem)}}
+                                                    >
+                                                        {if subItem.icon}
+                                                            <span class="context-menu-item-icon" aria-hidden="true">
+                                                                {subItem.icon}
+                                                            </span>
+                                                        {/if}
+                                                        <span class="context-menu-item-label">
+                                                            {subItem.label}
+                                                        </span>
+                                                        {if subItem.shortcut}
+                                                            <span class="context-menu-item-shortcut">
+                                                                {subItem.shortcut}
+                                                            </span>
+                                                        {/if}
+                                                    </li>
+                                                {/if}
+                                            {/loop}
+                                        </ul>
+                                    </div>
+                                {/if}
+                            {/if}
+                        </li>
+                    {/if}
+                {/loop}
+            </ul>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+/* Wrapper */
+.flin-context-menu-wrapper {
+    display: contents;
+}
+
+.context-menu-disabled {
+    pointer-events: none;
+}
+
+/* Backdrop */
+.context-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9997;
+    background-color: transparent;
+}
+
+/* Context Menu */
+.flin-context-menu {
+    position: fixed;
+    z-index: 9998;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+    min-width: 180px;
+    max-width: 280px;
+    padding: var(--flin-space-2);
+    animation: contextMenuFadeIn var(--flin-transition-fast) ease-out;
+}
+
+@keyframes contextMenuFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.context-menu-exiting {
+    animation: contextMenuFadeOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes contextMenuFadeOut {
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+/* Focus styling */
+.flin-context-menu:focus {
+    outline: none;
+}
+
+/* Menu List */
+.context-menu-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+/* Menu Item */
+.context-menu-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    line-height: 1.5;
+    color: var(--flin-fg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    user-select: none;
+    -webkit-user-select: none;
+    outline: none;
+}
+
+.context-menu-item:hover:not(.context-menu-item-disabled),
+.context-menu-item-focused:not(.context-menu-item-disabled) {
+    background-color: var(--flin-neutral-100);
+}
+
+.context-menu-item:active:not(.context-menu-item-disabled) {
+    background-color: var(--flin-neutral-200);
+}
+
+/* Disabled Item */
+.context-menu-item-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Danger Variant */
+.context-menu-item-danger {
+    color: var(--flin-danger);
+}
+
+.context-menu-item-danger:hover:not(.context-menu-item-disabled),
+.context-menu-item-danger.context-menu-item-focused:not(.context-menu-item-disabled) {
+    background-color: var(--flin-danger-light);
+}
+
+/* Item Icon */
+.context-menu-item-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-fg-muted);
+}
+
+.context-menu-item:hover .context-menu-item-icon,
+.context-menu-item-focused .context-menu-item-icon {
+    color: inherit;
+}
+
+/* Item Label */
+.context-menu-item-label {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Item Shortcut */
+.context-menu-item-shortcut {
+    flex-shrink: 0;
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    font-family: var(--flin-font-mono);
+    background-color: var(--flin-neutral-100);
+    padding: 2px 6px;
+    border-radius: var(--flin-radius-sm);
+}
+
+/* Item Arrow (for submenus) */
+.context-menu-item-arrow {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-fg-muted);
+    margin-left: auto;
+}
+
+.context-menu-item-arrow svg {
+    width: 12px;
+    height: 12px;
+}
+
+/* Submenu */
+.context-submenu {
+    position: absolute;
+    left: 100%;
+    top: -4px;
+    margin-left: var(--flin-space-1);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+    min-width: 160px;
+    max-width: 240px;
+    padding: var(--flin-space-2);
+    animation: submenuSlideIn var(--flin-transition-fast) ease-out;
+}
+
+@keyframes submenuSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Has Submenu Indicator */
+.context-menu-item-has-submenu {
+    padding-right: var(--flin-space-2);
+}
+
+/* Divider */
+.context-menu-divider {
+    height: 1px;
+    background-color: var(--flin-neutral-200);
+    margin: var(--flin-space-1) 0;
+}
+
+/* Focus visible styling */
+.context-menu-item:focus-visible {
+    background-color: var(--flin-neutral-100);
+    box-shadow: 0 0 0 2px var(--flin-primary);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-context-menu,
+[data-theme="dark"] .context-submenu {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .context-menu-item:hover:not(.context-menu-item-disabled),
+[data-theme="dark"] .context-menu-item-focused:not(.context-menu-item-disabled) {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .context-menu-item:active:not(.context-menu-item-disabled) {
+    background-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .context-menu-item-shortcut {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .context-menu-divider {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .context-menu-item-danger:hover:not(.context-menu-item-disabled),
+[data-theme="dark"] .context-menu-item-danger.context-menu-item-focused:not(.context-menu-item-disabled) {
+    background-color: rgba(239, 68, 68, 0.15);
+}
+
+/* Responsive - flip submenu to left on small viewports */
+@media (max-width: 640px) {
+    .flin-context-menu {
+        min-width: 160px;
+    }
+
+    .context-submenu {
+        left: auto;
+        right: 100%;
+        margin-left: 0;
+        margin-right: var(--flin-space-1);
+    }
+
+    @keyframes submenuSlideIn {
+        from {
+            opacity: 0;
+            transform: translateX(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .flin-context-menu,
+    .context-submenu {
+        animation: none;
+    }
+
+    .context-menu-exiting {
+        animation: none;
+        opacity: 0;
+    }
+}
+</style>

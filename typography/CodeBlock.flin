@@ -1,0 +1,227 @@
+// CodeBlock.flin - FlinUI Code Block Component
+// Multi-line code display with line numbers, copy button, and title support
+
+// Props with defaults
+language = props.language || ""
+showLineNumbers = props.showLineNumbers || false
+showCopyButton = props.showCopyButton || true
+title = props.title || ""
+maxHeight = props.maxHeight || ""
+
+// State for copy feedback
+copied = state(false)
+
+// Handle copy action
+handleCopy = fn() {
+    // Copy code content to clipboard
+    copyToClipboard(children)
+    copied.set(true)
+    // Reset after 2 seconds
+    setTimeout(fn() { copied.set(false) }, 2000)
+}
+
+// Build classes
+numberedClass = match showLineNumbers {
+    true -> " code-block--numbered"
+    _ -> ""
+}
+
+hasHeaderClass = match (language != "" || title != "" || showCopyButton) {
+    true -> " code-block--has-header"
+    _ -> ""
+}
+
+preClass = "code-block__pre" ++ numberedClass
+
+// Build max-height style
+maxHeightStyle = {if maxHeight != "" { "max-height: " ++ maxHeight ++ ";" } else { "" }}
+
+<div class={"code-block" ++ hasHeaderClass}>
+    {if language != "" || title != "" || showCopyButton}
+        <div class="code-block__header">
+            <div class="code-block__meta">
+                {if title != ""}
+                    <span class="code-block__title">{title}</span>
+                {/if}
+                {if language != ""}
+                    <span class="code-block__language">{language}</span>
+                {/if}
+            </div>
+            {if showCopyButton}
+                <button
+                    class="code-block__copy"
+                    click={handleCopy}
+                    aria-label="Copy code"
+                >
+                    {if copied.get()}
+                        <span class="code-block__copy-icon code-block__copy-icon--success">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </span>
+                        <span class="code-block__copy-text">Copied!</span>
+                    {else}
+                        <span class="code-block__copy-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </span>
+                        <span class="code-block__copy-text">Copy</span>
+                    {/if}
+                </button>
+            {/if}
+        </div>
+    {/if}
+    <pre class={preClass} style={maxHeightStyle}>
+        <code class="code-block__code" data-language={language}>
+            {children}
+        </code>
+    </pre>
+</div>
+
+<style scoped>
+.code-block {
+    position: relative;
+    margin: var(--flin-space-4) 0;
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+    background-color: var(--flin-neutral-900);
+}
+
+.code-block__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background-color: var(--flin-neutral-800);
+    border-bottom: 1px solid var(--flin-neutral-700);
+}
+
+.code-block__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+.code-block__title {
+    font-size: var(--flin-text-sm);
+    font-family: var(--flin-font-sans);
+    color: var(--flin-neutral-200);
+    font-weight: 500;
+}
+
+.code-block__language {
+    font-size: var(--flin-text-xs);
+    font-family: var(--flin-font-mono);
+    color: var(--flin-neutral-400);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.code-block__copy {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-400);
+    background-color: transparent;
+    border: 1px solid var(--flin-neutral-600);
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.code-block__copy:hover {
+    color: var(--flin-neutral-200);
+    border-color: var(--flin-neutral-500);
+    background-color: var(--flin-neutral-700);
+}
+
+.code-block__copy-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.code-block__copy-icon--success {
+    color: var(--flin-success);
+}
+
+.code-block__copy-text {
+    display: none;
+}
+
+@media (min-width: 640px) {
+    .code-block__copy-text {
+        display: inline;
+    }
+}
+
+.code-block__pre {
+    margin: 0;
+    padding: var(--flin-space-4);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.code-block--has-header .code-block__pre {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.code-block__code {
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-100);
+    line-height: 1.7;
+    white-space: pre;
+    tab-size: 4;
+}
+
+/* Line numbers */
+.code-block--numbered {
+    counter-reset: line;
+    padding-left: 0;
+}
+
+.code-block--numbered .code-block__code {
+    display: block;
+    padding-left: var(--flin-space-12);
+    position: relative;
+}
+
+.code-block--numbered .code-block__code::before {
+    content: counter(line);
+    counter-increment: line;
+    position: absolute;
+    left: 0;
+    width: var(--flin-space-10);
+    padding-right: var(--flin-space-4);
+    text-align: right;
+    color: var(--flin-neutral-600);
+    user-select: none;
+    border-right: 1px solid var(--flin-neutral-700);
+}
+
+/* Scrollbar styling */
+.code-block__pre::-webkit-scrollbar {
+    height: 8px;
+}
+
+.code-block__pre::-webkit-scrollbar-track {
+    background: var(--flin-neutral-800);
+    border-radius: var(--flin-radius-full);
+}
+
+.code-block__pre::-webkit-scrollbar-thumb {
+    background: var(--flin-neutral-600);
+    border-radius: var(--flin-radius-full);
+}
+
+.code-block__pre::-webkit-scrollbar-thumb:hover {
+    background: var(--flin-neutral-500);
+}
+</style>

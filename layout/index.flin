@@ -1,7 +1,7 @@
 // FlinUI Layout Components Index
 // All layout components for building responsive page structures
 //
-// Components:
+// Core Components:
 // - Container: Responsive container with max-width constraints
 // - Stack: Vertical or horizontal stacking with consistent spacing
 // - Grid: CSS Grid layout with responsive columns
@@ -12,22 +12,46 @@
 // - Center: Centers content horizontally and vertically
 // - AspectRatio: Maintains consistent aspect ratio for content
 // - Wrap: Flex container that wraps children to new lines
+// - ResizablePanels: Resizable split panel layout
+//
+// Page Layout Components:
+// - Header: Page header with title, description, actions area
+// - Footer: Page footer with columns, links, social icons
+// - Section: Content section with title and optional dividers
+// - Hero: Hero section for landing pages with multiple layouts
+// - PageContainer: Full page layout with optional sidebar
+// - Collapse: Collapsible content panel with animation
 //
 // Usage:
-// <Container size="lg" centered={true}>
-//     <Stack direction="vertical" gap={4}>
-//         <Box padding={4} bg="var(--flin-bg-muted)" radius="lg">
-//             <Center>
-//                 <h1>Welcome to FlinUI</h1>
-//             </Center>
-//         </Box>
-//         <Grid cols={3} gap={4} responsive={true}>
-//             <Box padding={4} border={true}>Card 1</Box>
-//             <Box padding={4} border={true}>Card 2</Box>
-//             <Box padding={4} border={true}>Card 3</Box>
-//         </Grid>
-//     </Stack>
-// </Container>
+// <PageContainer sidebar={<Navigation />} sidebarPosition="left">
+//     <Header title="Dashboard" description="Welcome back" sticky={true}>
+//         <Button>New Item</Button>
+//     </Header>
+//     <Container size="lg" centered={true}>
+//         <Section title="Overview" divider="bottom" spacing="lg">
+//             <Grid cols={3} gap={4} responsive={true}>
+//                 <Box padding={4} border={true}>Card 1</Box>
+//                 <Box padding={4} border={true}>Card 2</Box>
+//                 <Box padding={4} border={true}>Card 3</Box>
+//             </Grid>
+//         </Section>
+//         <Collapse title="Advanced Settings">
+//             <p>Collapsible content here</p>
+//         </Collapse>
+//     </Container>
+//     <Footer variant="columns" copyright="2025 FlinUI" />
+// </PageContainer>
+//
+// Hero Example:
+// <Hero
+//     title="Build Beautiful Apps"
+//     subtitle="FlinUI makes it easy"
+//     variant="centered"
+//     height="lg"
+// >
+//     <Button variant="primary">Get Started</Button>
+//     <Button variant="outline">Learn More</Button>
+// </Hero>
 //
 // All components use FlinUI theme tokens (CSS variables --flin-*)
 // for consistent styling across your application.

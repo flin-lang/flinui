@@ -31,6 +31,12 @@
 // Notification - Rich notification with avatar and actions
 // Usage: <Notification variant="info" title="New Comment" message="John replied to your post" avatar="..." timestamp="2 min ago" />
 
+// AlertDialog - Confirmation dialog with variant-based styling and actions
+// Usage: <AlertDialog open={showDialog} title="Delete Item?" description="This action cannot be undone." variant="danger" confirmLabel="Delete" cancelLabel="Cancel" onConfirm={handleDelete} onCancel={closeDialog} />
+
+// Sheet - Mobile-optimized bottom sheet with drag gestures and snap points
+// Usage: <Sheet open={showSheet} snapPoints={[0.5, 1.0]} showHandle={true} onClose={closeSheet}>Content here</Sheet>
+
 <div class="flinui-feedback-components">
     {children}
 </div>

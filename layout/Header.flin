@@ -1,0 +1,123 @@
+// FlinUI Header Component
+// Page header with title, description, and actions area
+// Props: title (string), description (string), sticky (bool), bordered (bool), actions (slot)
+
+title = props.title || ""
+description = props.description || ""
+sticky = props.sticky || false
+bordered = props.bordered || true
+
+// Build class string
+stickyClass = match sticky {
+    true -> " flin-header-sticky"
+    _ -> ""
+}
+
+borderedClass = match bordered {
+    true -> " flin-header-bordered"
+    _ -> ""
+}
+
+headerClass = "flin-header" ++ stickyClass ++ borderedClass
+
+// Check if we have a title to display
+hasTitle = title != ""
+hasDescription = description != ""
+
+<header class={headerClass}>
+    <div class="flin-header-content">
+        <div class="flin-header-text">
+            {if hasTitle {
+                <h1 class="flin-header-title">{title}</h1>
+            }}
+            {if hasDescription {
+                <p class="flin-header-description">{description}</p>
+            }}
+        </div>
+        <div class="flin-header-actions">
+            {children}
+        </div>
+    </div>
+</header>
+
+<style scoped>
+.flin-header {
+    width: 100%;
+    padding: var(--flin-space-6) var(--flin-space-4);
+    background-color: var(--flin-bg);
+    box-sizing: border-box;
+    z-index: 100;
+}
+
+.flin-header-sticky {
+    position: sticky;
+    top: 0;
+    backdrop-filter: blur(8px);
+    background-color: color-mix(in srgb, var(--flin-bg) 90%, transparent);
+}
+
+.flin-header-bordered {
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.flin-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    max-width: 100%;
+}
+
+.flin-header-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.flin-header-title {
+    margin: 0;
+    font-size: var(--flin-text-3xl);
+    font-weight: 700;
+    color: var(--flin-fg);
+    line-height: 1.2;
+}
+
+.flin-header-description {
+    margin: var(--flin-space-2) 0 0 0;
+    font-size: var(--flin-text-base);
+    color: var(--flin-muted-fg);
+    line-height: 1.5;
+}
+
+.flin-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    flex-shrink: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .flin-header {
+        padding: var(--flin-space-4) var(--flin-space-3);
+    }
+
+    .flin-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--flin-space-3);
+    }
+
+    .flin-header-title {
+        font-size: var(--flin-text-2xl);
+    }
+
+    .flin-header-description {
+        font-size: var(--flin-text-sm);
+    }
+
+    .flin-header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}
+</style>

@@ -1,0 +1,364 @@
+// OTPInput.flin - FlinUI OTP Input Component
+// One-time password input with auto-focus and paste support
+
+// Props with defaults
+length = props.length || 6
+type = props.type || "number"  // "number" or "alphanumeric"
+mask = props.mask || false
+disabled = props.disabled || false
+size = props.size || "md"
+onComplete = props.onComplete
+onChange = props.onChange
+
+// Internal state
+digits = Array(length).fill("")
+focusedIndex = -1
+isComplete = false
+
+// Size classes
+sizeClass = match size {
+    "sm" -> "otp-input-sm"
+    "lg" -> "otp-input-lg"
+    _ -> "otp-input-md"
+}
+
+// Input mode based on type
+inputMode = match type {
+    "alphanumeric" -> "text"
+    _ -> "numeric"
+}
+
+// Pattern for validation
+inputPattern = match type {
+    "alphanumeric" -> "[A-Za-z0-9]"
+    _ -> "[0-9]"
+}
+
+// Get current value as string
+getCurrentValue = {
+    digits.join("")
+}
+
+// Check if complete
+checkComplete = {
+    value = getCurrentValue();
+    complete = value.length == length && !digits.includes("");
+    isComplete = complete;
+    complete
+}
+
+// Update and notify
+notifyChange = {
+    value = getCurrentValue();
+
+    {if onChange}
+        onChange(value)
+    {/if}
+
+    {if checkComplete() && onComplete}
+        onComplete(value)
+    {/if}
+}
+
+// Focus input by index
+focusInput = {
+    index = event;
+    {if index >= 0 && index < length}
+        inputEl = document.querySelector("[data-otp-index='" ++ index ++ "']");
+        {if inputEl}
+            inputEl.focus();
+            inputEl.select()
+        {/if}
+    {/if}
+}
+
+// Filter input based on type
+filterInput = {
+    val = event;
+    {if type == "number"}
+        val.replace(/[^0-9]/g, "")
+    {else}
+        val.replace(/[^A-Za-z0-9]/g, "").toUpperCase()
+    {/if}
+}
+
+// Handle input at specific index
+handleInput = {
+    index = parseInt(event.target.dataset.otpIndex);
+    rawValue = event.target.value;
+    filteredValue = filterInput(rawValue);
+
+    {if filteredValue.length > 0}
+        // Take only the last character (in case of multiple)
+        char = filteredValue.slice(-1);
+        digits[index] = char;
+        digits = [...digits];
+        notifyChange();
+
+        // Auto-advance to next input
+        {if index < length - 1}
+            focusInput(index + 1)
+        {/if}
+    {/if}
+}
+
+// Handle keydown for navigation and deletion
+handleKeydown = {
+    index = parseInt(event.target.dataset.otpIndex);
+
+    {if event.key == "Backspace"}
+        {if digits[index] != ""}
+            // Clear current digit
+            digits[index] = "";
+            digits = [...digits];
+            notifyChange()
+        {else if index > 0}
+            // Move to previous and clear
+            digits[index - 1] = "";
+            digits = [...digits];
+            notifyChange();
+            focusInput(index - 1)
+        {/if}
+        event.preventDefault()
+    {else if event.key == "Delete"}
+        digits[index] = "";
+        digits = [...digits];
+        notifyChange()
+    {else if event.key == "ArrowLeft" && index > 0}
+        focusInput(index - 1);
+        event.preventDefault()
+    {else if event.key == "ArrowRight" && index < length - 1}
+        focusInput(index + 1);
+        event.preventDefault()
+    {/if}
+}
+
+// Handle paste
+handlePaste = {
+    event.preventDefault();
+    pastedData = event.clipboardData.getData("text");
+    filteredData = filterInput(pastedData);
+
+    startIndex = parseInt(event.target.dataset.otpIndex);
+
+    // Fill digits from pasted data
+    {for i in range(0, length)}
+        pasteIndex = i - startIndex;
+        {if pasteIndex >= 0 && pasteIndex < filteredData.length}
+            digits[i] = filteredData[pasteIndex]
+        {/if}
+    {/for}
+    digits = [...digits];
+    notifyChange();
+
+    // Focus appropriate input
+    nextEmpty = digits.findIndex(d => d == "");
+    {if nextEmpty >= 0}
+        focusInput(nextEmpty)
+    {else}
+        focusInput(length - 1)
+    {/if}
+}
+
+// Handle focus
+handleFocus = {
+    index = parseInt(event.target.dataset.otpIndex);
+    focusedIndex = index;
+    event.target.select()
+}
+
+// Handle blur
+handleBlur = {
+    focusedIndex = -1
+}
+
+// Compute container classes
+disabledClass = match disabled { true -> " otp-input-disabled", _ -> "" }
+completeClass = match isComplete { true -> " otp-input-complete", _ -> "" }
+containerClass = "otp-input " ++ sizeClass ++ disabledClass ++ completeClass
+
+// Display value (masked or actual)
+getDisplayValue = {
+    index = event;
+    digit = digits[index];
+    {if mask && digit != ""}
+        "*"
+    {else}
+        digit
+    {/if}
+}
+
+<div class={containerClass} role="group" aria-label="One-time password input">
+    {for i in range(0, length)}
+        digitFocusedClass = match focusedIndex == i { true -> " otp-digit-focused", _ -> "" }
+        digitFilledClass = match digits[i] != "" { true -> " otp-digit-filled", _ -> "" }
+        <input
+            type={mask ? "password" : "text"}
+            class={"otp-digit" ++ digitFocusedClass ++ digitFilledClass}
+            maxlength="2"
+            inputmode={inputMode}
+            pattern={inputPattern}
+            value={digits[i]}
+            disabled={disabled}
+            data-otp-index={i}
+            input={handleInput}
+            keydown={handleKeydown}
+            paste={handlePaste}
+            focus={handleFocus}
+            blur={handleBlur}
+            autocomplete="one-time-code"
+            aria-label={"Digit " ++ (i + 1) ++ " of " ++ length}
+        >
+        {if i == 2 && length == 6}
+            <span class="otp-separator" aria-hidden="true">-</span>
+        {/if}
+    {/for}
+</div>
+
+<style scoped>
+.otp-input {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.otp-digit {
+    width: 44px;
+    height: 52px;
+    padding: 0;
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-xl);
+    font-weight: 600;
+    text-align: center;
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+    outline: none;
+    caret-color: var(--flin-primary);
+}
+
+.otp-digit::placeholder {
+    color: var(--flin-neutral-300);
+}
+
+.otp-digit:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.otp-digit-focused {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.otp-digit-filled {
+    border-color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+}
+
+.otp-separator {
+    font-size: var(--flin-text-lg);
+    color: var(--flin-fg-muted);
+    margin: 0 var(--flin-space-1);
+    user-select: none;
+}
+
+/* Complete state */
+.otp-input-complete .otp-digit {
+    border-color: var(--flin-success);
+    background-color: var(--flin-success-light);
+}
+
+.otp-input-complete .otp-digit-focused {
+    box-shadow: 0 0 0 3px var(--flin-success-light);
+}
+
+/* Size variants */
+.otp-input-sm {
+    gap: var(--flin-space-1);
+}
+
+.otp-input-sm .otp-digit {
+    width: 36px;
+    height: 44px;
+    font-size: var(--flin-text-lg);
+}
+
+.otp-input-sm .otp-separator {
+    font-size: var(--flin-text-base);
+}
+
+.otp-input-lg {
+    gap: var(--flin-space-3);
+}
+
+.otp-input-lg .otp-digit {
+    width: 56px;
+    height: 64px;
+    font-size: var(--flin-text-2xl);
+    border-radius: var(--flin-radius-lg);
+}
+
+.otp-input-lg .otp-separator {
+    font-size: var(--flin-text-xl);
+}
+
+/* Disabled state */
+.otp-input-disabled .otp-digit {
+    background-color: var(--flin-bg-muted);
+    color: var(--flin-fg-muted);
+    cursor: not-allowed;
+    border-color: var(--flin-neutral-200);
+}
+
+/* Animation for digit entry */
+@keyframes otp-digit-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.otp-digit-filled {
+    animation: otp-digit-pop 0.15s ease-out;
+}
+
+/* Hide spin buttons */
+.otp-digit::-webkit-outer-spin-button,
+.otp-digit::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.otp-digit[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Error state support */
+.otp-input.otp-input-error .otp-digit {
+    border-color: var(--flin-danger);
+}
+
+.otp-input.otp-input-error .otp-digit-focused {
+    box-shadow: 0 0 0 3px var(--flin-danger-light);
+}
+
+/* Responsive sizing */
+@media (max-width: 480px) {
+    .otp-input {
+        gap: var(--flin-space-1);
+    }
+
+    .otp-digit {
+        width: 38px;
+        height: 46px;
+        font-size: var(--flin-text-lg);
+    }
+
+    .otp-input-lg .otp-digit {
+        width: 44px;
+        height: 52px;
+        font-size: var(--flin-text-xl);
+    }
+}
+</style>

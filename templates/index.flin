@@ -1,0 +1,79 @@
+// FlinUI Templates - Complete, ready-to-use page templates
+//
+// Templates are full-page layouts and complex components that combine
+// multiple FlinUI components into production-ready solutions.
+//
+// Available Templates:
+//
+// Layout Templates:
+// - DashboardLayout   - Complete dashboard shell with sidebar, header, content area
+// - AuthLayout        - Authentication page wrapper (login/register pages)
+// - SettingsLayout    - Settings page with sidebar navigation
+//
+// Form Templates:
+// - LoginForm         - Complete login form with validation
+// - RegisterForm      - Complete registration form with password strength
+//
+// Marketing Templates:
+// - LandingHero       - Landing page hero section
+// - PricingTable      - Pricing comparison table
+// - FeaturesGrid      - Feature showcase grid
+//
+// Profile Templates:
+// - ProfileCard       - User profile card template
+//
+// Utility Templates:
+// - ErrorPage         - Error pages (404, 500, etc.)
+//
+// Usage:
+// ```flin
+// import { DashboardLayout, LoginForm, ErrorPage } from "flinui/templates"
+//
+// // Dashboard with sidebar
+// <DashboardLayout
+//     sidebarItems={navigationItems}
+//     headerContent={<SearchBar />}
+//     userMenu={currentUser}
+// >
+//     <DashboardContent />
+// </DashboardLayout>
+//
+// // Login page
+// <AuthLayout title="Welcome back" variant="split">
+//     <LoginForm
+//         onSubmit={handleLogin}
+//         socialProviders={[
+//             { id: "google", name: "Google", icon: "G" },
+//             { id: "github", name: "GitHub", icon: "GH" }
+//         ]}
+//     />
+// </AuthLayout>
+//
+// // 404 Error page
+// <ErrorPage
+//     code={404}
+//     showHomeButton={true}
+//     backLink={{ href: "/dashboard", text: "Back to Dashboard" }}
+// />
+// ```
+//
+// All templates are:
+// - Fully responsive (mobile-first design)
+// - Accessible (ARIA labels, keyboard navigation)
+// - Customizable (via props and CSS variables)
+// - Production-ready (complete with animations, states, validation)
+//
+// Templates use FlinUI theme tokens for consistent styling.
+// Override styles using CSS custom properties or scoped styles.
+
+// Export all templates
+export { DashboardLayout } from "./DashboardLayout.flin"
+export { AuthLayout } from "./AuthLayout.flin"
+export { LoginForm } from "./LoginForm.flin"
+export { RegisterForm } from "./RegisterForm.flin"
+export { LandingHero } from "./LandingHero.flin"
+export { PricingTable } from "./PricingTable.flin"
+export { FeaturesGrid } from "./FeaturesGrid.flin"
+export { SettingsLayout } from "./SettingsLayout.flin"
+export { ProfileCard } from "./ProfileCard.flin"
+export { ErrorPage } from "./ErrorPage.flin"

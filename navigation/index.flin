@@ -17,6 +17,8 @@
 // - BottomNav: Mobile-optimized bottom navigation bar
 // - LinkBox: Clickable card/box wrapper
 // - SkipNav: Accessibility skip navigation link
+// - Dropdown: Click-triggered dropdown menu with icons and keyboard navigation
+// - ContextMenu: Right-click context menu with nested submenus
 //
 // All components use FlinUI theme tokens (--flin-*) for consistent styling
 // and support both light and dark themes.
@@ -105,6 +107,32 @@
 // <main id="main-content">
 //     <!-- Your main content -->
 // </main>
+//
+// Dropdown:
+// dropdownItems = [
+//     { label: "Edit", icon: <EditIcon />, onClick: () -> handleEdit() },
+//     { label: "Duplicate", icon: <CopyIcon />, shortcut: "Ctrl+D" },
+//     { divider: true },
+//     { label: "Delete", icon: <TrashIcon />, variant: "danger", onClick: () -> handleDelete() }
+// ]
+// <Dropdown items={dropdownItems} placement="bottom-start">
+//     <slot name="trigger"><Button>Options</Button></slot>
+// </Dropdown>
+//
+// ContextMenu:
+// contextItems = [
+//     { label: "Cut", icon: <ScissorsIcon />, shortcut: "Ctrl+X" },
+//     { label: "Copy", icon: <CopyIcon />, shortcut: "Ctrl+C" },
+//     { label: "Paste", icon: <ClipboardIcon />, shortcut: "Ctrl+V" },
+//     { divider: true },
+//     { label: "More actions", submenu: [
+//         { label: "Export", icon: <DownloadIcon /> },
+//         { label: "Share", icon: <ShareIcon /> }
+//     ]}
+// ]
+// <ContextMenu items={contextItems}>
+//     <div class="my-element">Right-click me</div>
+// </ContextMenu>
 
 <div class="flin-navigation-index">
     <p>FlinUI Navigation Components</p>

@@ -1,0 +1,88 @@
+// Mark.flin - FlinUI Mark Component
+// Simple text marking/highlighting with color variants
+
+// Props with defaults
+color = props.color || "yellow"
+
+// Computed color class
+colorClass = match color {
+    "green" -> "mark--green"
+    "blue" -> "mark--blue"
+    "red" -> "mark--red"
+    "purple" -> "mark--purple"
+    _ -> "mark--yellow"
+}
+
+// Build full class string
+markClass = "mark " ++ colorClass
+
+<mark class={markClass}>
+    {children}
+</mark>
+
+<style scoped>
+.mark {
+    padding: 0.1em 0.25em;
+    border-radius: var(--flin-radius-sm);
+    font-weight: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+/* Yellow (default) */
+.mark--yellow {
+    background-color: #fef08a;
+    color: #854d0e;
+}
+
+/* Green */
+.mark--green {
+    background-color: #bbf7d0;
+    color: #166534;
+}
+
+/* Blue */
+.mark--blue {
+    background-color: #bfdbfe;
+    color: #1e40af;
+}
+
+/* Red */
+.mark--red {
+    background-color: #fecaca;
+    color: #991b1b;
+}
+
+/* Purple */
+.mark--purple {
+    background-color: #e9d5ff;
+    color: #6b21a8;
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .mark--yellow {
+    background-color: #854d0e;
+    color: #fef08a;
+}
+
+[data-theme="dark"] .mark--green {
+    background-color: #166534;
+    color: #bbf7d0;
+}
+
+[data-theme="dark"] .mark--blue {
+    background-color: #1e40af;
+    color: #bfdbfe;
+}
+
+[data-theme="dark"] .mark--red {
+    background-color: #991b1b;
+    color: #fecaca;
+}
+
+[data-theme="dark"] .mark--purple {
+    background-color: #6b21a8;
+    color: #e9d5ff;
+}
+</style>

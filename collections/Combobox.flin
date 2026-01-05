@@ -1,0 +1,545 @@
+// Combobox.flin - Searchable dropdown with filtering and optional creation
+
+// Props with defaults
+options = props.options || []
+value = props.value || nil
+placeholder = props.placeholder || "Select..."
+searchable = props.searchable || true
+creatable = props.creatable || false
+multiple = props.multiple || false
+loading = props.loading || false
+disabled = props.disabled || false
+onChange = props.onChange || nil
+
+// State
+isOpen = false
+searchQuery = ""
+focusedIndex = -1
+selectedValues = multiple ? (value || []) : []
+
+// Computed values
+filteredOptions = options
+hasValue = multiple ? selectedValues.length > 0 : value != nil
+
+// Display value for single select
+displayValue = {
+    if multiple {
+        selectedValues.length > 0 ? "{selectedValues.length} selected" : ""
+    } else {
+        match = options.find(|opt| opt.value == value)
+        match ? match.label : ""
+    }
+}
+
+// CSS classes
+containerClass = "combobox-container"
+triggerClass = "combobox-trigger {disabled ? 'combobox-trigger--disabled' : ''} {isOpen ? 'combobox-trigger--open' : ''}"
+dropdownClass = "combobox-dropdown {isOpen ? 'combobox-dropdown--open' : ''}"
+inputClass = "combobox-input"
+optionClass = "combobox-option"
+optionSelectedClass = "combobox-option combobox-option--selected"
+optionFocusedClass = "combobox-option combobox-option--focused"
+tagClass = "combobox-tag"
+emptyClass = "combobox-empty"
+loadingClass = "combobox-loading"
+createClass = "combobox-create"
+
+// Handlers
+handleToggle = {
+    if !disabled {
+        isOpen = !isOpen
+        if isOpen {
+            searchQuery = ""
+            focusedIndex = -1
+        }
+    }
+}
+
+handleSearch = |e| {
+    searchQuery = e.target.value
+    focusedIndex = 0
+}
+
+handleSelect = |option| {
+    if multiple {
+        exists = selectedValues.includes(option.value)
+        if exists {
+            selectedValues = selectedValues.filter(|v| v != option.value)
+        } else {
+            selectedValues = [...selectedValues, option.value]
+        }
+        if onChange { onChange(selectedValues) }
+    } else {
+        if onChange { onChange(option.value) }
+        isOpen = false
+        searchQuery = ""
+    }
+}
+
+handleCreate = {
+    if creatable && searchQuery.trim() != "" {
+        newOption = { value: searchQuery, label: searchQuery }
+        handleSelect(newOption)
+        searchQuery = ""
+    }
+}
+
+handleRemoveTag = |val| {
+    selectedValues = selectedValues.filter(|v| v != val)
+    if onChange { onChange(selectedValues) }
+}
+
+handleKeyDown = |e| {
+    match e.key {
+        "ArrowDown" => {
+            e.preventDefault()
+            if !isOpen {
+                isOpen = true
+            } else {
+                maxIndex = filteredOptions.length - 1
+                if creatable && searchQuery.trim() != "" {
+                    maxIndex = maxIndex + 1
+                }
+                focusedIndex = focusedIndex < maxIndex ? focusedIndex + 1 : 0
+            }
+        }
+        "ArrowUp" => {
+            e.preventDefault()
+            if isOpen {
+                maxIndex = filteredOptions.length - 1
+                if creatable && searchQuery.trim() != "" {
+                    maxIndex = maxIndex + 1
+                }
+                focusedIndex = focusedIndex > 0 ? focusedIndex - 1 : maxIndex
+            }
+        }
+        "Enter" => {
+            e.preventDefault()
+            if isOpen {
+                if focusedIndex >= 0 && focusedIndex < filteredOptions.length {
+                    handleSelect(filteredOptions[focusedIndex])
+                } else if creatable && searchQuery.trim() != "" {
+                    handleCreate()
+                }
+            } else {
+                isOpen = true
+            }
+        }
+        "Escape" => {
+            isOpen = false
+            searchQuery = ""
+        }
+        "Backspace" => {
+            if multiple && searchQuery == "" && selectedValues.length > 0 {
+                selectedValues = selectedValues.slice(0, -1)
+                if onChange { onChange(selectedValues) }
+            }
+        }
+    }
+}
+
+handleClickOutside = {
+    isOpen = false
+    searchQuery = ""
+}
+
+// Check if option is selected
+isSelected = |option| {
+    if multiple {
+        selectedValues.includes(option.value)
+    } else {
+        value == option.value
+    }
+}
+
+// Get label for a value
+getLabelForValue = |val| {
+    opt = options.find(|o| o.value == val)
+    opt ? opt.label : val
+}
+
+<div class={containerClass} onKeyDown={handleKeyDown}>
+    <button
+        type="button"
+        class={triggerClass}
+        onClick={handleToggle}
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+    >
+        <div class="combobox-value">
+            {multiple && selectedValues.length > 0 ? (
+                <div class="combobox-tags">
+                    {selectedValues.map(|val| (
+                        <span class={tagClass} key={val}>
+                            {getLabelForValue(val)}
+                            <button
+                                type="button"
+                                class="combobox-tag-remove"
+                                onClick={|e| { e.stopPropagation(); handleRemoveTag(val) }}
+                            >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </span>
+                    ))}
+                </div>
+            ) : hasValue ? (
+                <span class="combobox-display">{displayValue}</span>
+            ) : (
+                <span class="combobox-placeholder">{placeholder}</span>
+            )}
+        </div>
+        <div class="combobox-icons">
+            {loading ? (
+                <svg class="combobox-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-linecap="round"></circle>
+                </svg>
+            ) : (
+                <svg class="combobox-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            )}
+        </div>
+    </button>
+
+    {isOpen ? (
+        <div class={dropdownClass} role="listbox">
+            {searchable ? (
+                <div class="combobox-search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input
+                        type="text"
+                        class={inputClass}
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onInput={handleSearch}
+                        autoFocus
+                    />
+                </div>
+            ) : nil}
+
+            <div class="combobox-options">
+                {loading ? (
+                    <div class={loadingClass}>
+                        <svg class="combobox-spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-linecap="round"></circle>
+                        </svg>
+                        <span>Loading...</span>
+                    </div>
+                ) : filteredOptions.length == 0 && !creatable ? (
+                    <div class={emptyClass}>No options found</div>
+                ) : (
+                    <>
+                        {filteredOptions.map(|option, index| (
+                            <div
+                                key={option.value}
+                                class={isSelected(option) ? optionSelectedClass : (index == focusedIndex ? optionFocusedClass : optionClass)}
+                                onClick={() => handleSelect(option)}
+                                role="option"
+                                aria-selected={isSelected(option)}
+                            >
+                                {multiple ? (
+                                    <span class="combobox-checkbox">
+                                        {isSelected(option) ? (
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        ) : nil}
+                                    </span>
+                                ) : nil}
+                                <span class="combobox-option-label">{option.label}</span>
+                                {!multiple && isSelected(option) ? (
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                ) : nil}
+                            </div>
+                        ))}
+                        {creatable && searchQuery.trim() != "" && !options.some(|o| o.label.toLowerCase() == searchQuery.toLowerCase()) ? (
+                            <div
+                                class={focusedIndex == filteredOptions.length ? "combobox-create combobox-create--focused" : createClass}
+                                onClick={handleCreate}
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                <span>Create "{searchQuery}"</span>
+                            </div>
+                        ) : nil}
+                    </>
+                )}
+            </div>
+        </div>
+    ) : nil}
+
+    {isOpen ? (
+        <div class="combobox-backdrop" onClick={handleClickOutside}></div>
+    ) : nil}
+</div>
+
+<style scoped>
+.combobox-container {
+    position: relative;
+    width: 100%;
+}
+
+.combobox-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 12px;
+    background: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    text-align: left;
+}
+
+.combobox-trigger:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.combobox-trigger:focus {
+    outline: none;
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px rgba(var(--flin-primary-rgb), 0.1);
+}
+
+.combobox-trigger--open {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px rgba(var(--flin-primary-rgb), 0.1);
+}
+
+.combobox-trigger--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--flin-neutral-100);
+}
+
+.combobox-value {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.combobox-display {
+    color: var(--flin-fg);
+}
+
+.combobox-placeholder {
+    color: var(--flin-neutral-400);
+}
+
+.combobox-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.combobox-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    background: var(--flin-primary);
+    color: white;
+    border-radius: var(--flin-radius-sm);
+    font-size: 12px;
+}
+
+.combobox-tag-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.combobox-tag-remove:hover {
+    opacity: 1;
+}
+
+.combobox-icons {
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+    color: var(--flin-neutral-400);
+}
+
+.combobox-chevron {
+    transition: transform var(--flin-transition-fast);
+}
+
+.combobox-trigger--open .combobox-chevron {
+    transform: rotate(180deg);
+}
+
+.combobox-spinner {
+    animation: combobox-spin 1s linear infinite;
+}
+
+@keyframes combobox-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.combobox-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    box-shadow: var(--flin-shadow-md);
+    z-index: 50;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.combobox-dropdown--open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.combobox-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--flin-neutral-200);
+    color: var(--flin-neutral-400);
+}
+
+.combobox-input {
+    flex: 1;
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 14px;
+    color: var(--flin-fg);
+}
+
+.combobox-input::placeholder {
+    color: var(--flin-neutral-400);
+}
+
+.combobox-options {
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.combobox-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.combobox-option:hover {
+    background: var(--flin-neutral-100);
+}
+
+.combobox-option--focused {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    background: var(--flin-neutral-100);
+}
+
+.combobox-option--selected {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    background: rgba(var(--flin-primary-rgb), 0.1);
+    color: var(--flin-primary);
+}
+
+.combobox-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: 3px;
+    background: var(--flin-bg);
+}
+
+.combobox-option--selected .combobox-checkbox {
+    background: var(--flin-primary);
+    border-color: var(--flin-primary);
+    color: white;
+}
+
+.combobox-option-label {
+    flex: 1;
+}
+
+.combobox-empty {
+    padding: 16px;
+    text-align: center;
+    color: var(--flin-neutral-400);
+    font-size: 14px;
+}
+
+.combobox-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    color: var(--flin-neutral-400);
+}
+
+.combobox-create {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    color: var(--flin-primary);
+    transition: background var(--flin-transition-fast);
+}
+
+.combobox-create:hover,
+.combobox-create--focused {
+    background: rgba(var(--flin-primary-rgb), 0.1);
+}
+
+.combobox-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+}
+</style>

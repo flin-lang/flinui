@@ -1,0 +1,187 @@
+// Heading.flin - FlinUI Heading Component
+// Semantic headings h1-h6 with size, weight, color, and text utilities
+
+// Props with defaults
+as = props.as || "h2"
+size = props.size || ""
+weight = props.weight || "bold"
+color = props.color || ""
+truncate = props.truncate || false
+lineClamp = props.lineClamp || 0
+
+// Auto-size based on heading level if no explicit size
+autoSize = match as {
+    "h1" -> "4xl"
+    "h2" -> "3xl"
+    "h3" -> "2xl"
+    "h4" -> "xl"
+    "h5" -> "lg"
+    "h6" -> "base"
+    _ -> "2xl"
+}
+
+// Use explicit size or auto-determined size
+resolvedSize = {if size != "" { size } else { autoSize }}
+
+// Computed size class
+sizeClass = match resolvedSize {
+    "xs" -> "heading-xs"
+    "sm" -> "heading-sm"
+    "base" -> "heading-base"
+    "lg" -> "heading-lg"
+    "xl" -> "heading-xl"
+    "2xl" -> "heading-2xl"
+    "3xl" -> "heading-3xl"
+    "4xl" -> "heading-4xl"
+    _ -> "heading-2xl"
+}
+
+// Computed weight class
+weightClass = match weight {
+    "normal" -> "heading-normal"
+    "medium" -> "heading-medium"
+    "semibold" -> "heading-semibold"
+    _ -> "heading-bold"
+}
+
+// Truncate class
+truncateClass = match truncate {
+    true -> " heading-truncate"
+    _ -> ""
+}
+
+// Line clamp class
+lineClampClass = match lineClamp {
+    1 -> " heading-clamp-1"
+    2 -> " heading-clamp-2"
+    3 -> " heading-clamp-3"
+    4 -> " heading-clamp-4"
+    5 -> " heading-clamp-5"
+    _ -> ""
+}
+
+// Color style
+colorStyle = {if color != "" { "color: " ++ color } else { "" }}
+
+// Build full class string
+headingClass = "heading " ++ sizeClass ++ " " ++ weightClass ++ truncateClass ++ lineClampClass
+
+// Render appropriate heading element
+{match as {
+    "h1" -> <h1 class={headingClass} style={colorStyle}>{children}</h1>
+    "h2" -> <h2 class={headingClass} style={colorStyle}>{children}</h2>
+    "h3" -> <h3 class={headingClass} style={colorStyle}>{children}</h3>
+    "h4" -> <h4 class={headingClass} style={colorStyle}>{children}</h4>
+    "h5" -> <h5 class={headingClass} style={colorStyle}>{children}</h5>
+    "h6" -> <h6 class={headingClass} style={colorStyle}>{children}</h6>
+    _ -> <h2 class={headingClass} style={colorStyle}>{children}</h2>
+}}
+
+<style scoped>
+.heading {
+    font-family: var(--flin-font-sans);
+    margin: 0;
+    color: var(--flin-fg);
+    letter-spacing: -0.02em;
+}
+
+/* Size variants */
+.heading-xs {
+    font-size: var(--flin-text-xs);
+    line-height: 1.4;
+    letter-spacing: 0;
+}
+
+.heading-sm {
+    font-size: var(--flin-text-sm);
+    line-height: 1.4;
+    letter-spacing: 0;
+}
+
+.heading-base {
+    font-size: var(--flin-text-base);
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+}
+
+.heading-lg {
+    font-size: var(--flin-text-lg);
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+}
+
+.heading-xl {
+    font-size: var(--flin-text-xl);
+    line-height: 1.35;
+}
+
+.heading-2xl {
+    font-size: var(--flin-text-2xl);
+    line-height: 1.3;
+}
+
+.heading-3xl {
+    font-size: var(--flin-text-3xl);
+    line-height: 1.25;
+}
+
+.heading-4xl {
+    font-size: var(--flin-text-4xl);
+    line-height: 1.2;
+}
+
+/* Weight variants */
+.heading-normal {
+    font-weight: 400;
+}
+
+.heading-medium {
+    font-weight: 500;
+}
+
+.heading-semibold {
+    font-weight: 600;
+}
+
+.heading-bold {
+    font-weight: 700;
+}
+
+/* Truncate */
+.heading-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Line clamp utilities */
+.heading-clamp-1,
+.heading-clamp-2,
+.heading-clamp-3,
+.heading-clamp-4,
+.heading-clamp-5 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.heading-clamp-1 {
+    -webkit-line-clamp: 1;
+}
+
+.heading-clamp-2 {
+    -webkit-line-clamp: 2;
+}
+
+.heading-clamp-3 {
+    -webkit-line-clamp: 3;
+}
+
+.heading-clamp-4 {
+    -webkit-line-clamp: 4;
+}
+
+.heading-clamp-5 {
+    -webkit-line-clamp: 5;
+}
+</style>

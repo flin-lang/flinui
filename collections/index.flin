@@ -1,0 +1,132 @@
+// FlinUI Collections - Category Index
+// Advanced collection components for managing lists, trees, and data selection
+
+/**
+ * Collections Category
+ *
+ * Components for working with collections of data including searchable dropdowns,
+ * selection lists, hierarchical trees, virtualized lists, and transfer interfaces.
+ *
+ * Components:
+ *
+ * 1. Combobox
+ *    Searchable dropdown with filtering and optional item creation.
+ *    - Search/filter options as you type
+ *    - Single or multi-select modes
+ *    - Creatable option for adding new items
+ *    - Keyboard navigation support
+ *    - Loading state for async options
+ *
+ * 2. Listbox
+ *    Selection list with keyboard navigation.
+ *    - Vertical or horizontal layout
+ *    - Single or multi-select
+ *    - Full keyboard navigation (arrows, home, end)
+ *    - Optional descriptions and icons
+ *    - Disabled item support
+ *
+ * 3. TreeView
+ *    Hierarchical tree structure with expand/collapse.
+ *    - Nested data visualization
+ *    - Expand/collapse controls
+ *    - Optional checkboxes for selection
+ *    - Keyboard navigation
+ *    - Indeterminate checkbox states
+ *
+ * 4. VirtualList
+ *    Virtualized list for rendering large datasets efficiently.
+ *    - Only renders visible items
+ *    - Configurable item height
+ *    - Overscan for smooth scrolling
+ *    - Scroll position tracking
+ *    - Custom item rendering
+ *
+ * 5. TransferList
+ *    Dual listbox interface for moving items between lists.
+ *    - Two-panel layout
+ *    - Move selected or all items
+ *    - Search/filter in each panel
+ *    - Select all functionality
+ *    - Disabled state support
+ *
+ * Usage Examples:
+ *
+ * // Combobox - Searchable select
+ * <Combobox
+ *     options={[
+ *         { value: "react", label: "React" },
+ *         { value: "vue", label: "Vue" },
+ *         { value: "angular", label: "Angular" }
+ *     ]}
+ *     placeholder="Select framework..."
+ *     searchable={true}
+ *     onChange={handleChange}
+ * />
+ *
+ * // Listbox - Selection list
+ * <Listbox
+ *     options={[
+ *         { value: "sm", label: "Small" },
+ *         { value: "md", label: "Medium" },
+ *         { value: "lg", label: "Large" }
+ *     ]}
+ *     value="md"
+ *     onChange={handleChange}
+ * />
+ *
+ * // TreeView - Hierarchical data
+ * <TreeView
+ *     data={[
+ *         {
+ *             key: "src",
+ *             label: "src",
+ *             children: [
+ *                 { key: "components", label: "components" },
+ *                 { key: "utils", label: "utils" }
+ *             ]
+ *         }
+ *     ]}
+ *     checkable={true}
+ *     onCheck={handleCheck}
+ * />
+ *
+ * // VirtualList - Large dataset
+ * <VirtualList
+ *     items={thousandsOfItems}
+ *     itemHeight={40}
+ *     height={400}
+ *     renderItem={|item, index| (
+ *         <div>Row {index}: {item.name}</div>
+ *     )}
+ * />
+ *
+ * // TransferList - Move items between lists
+ * <TransferList
+ *     sourceItems={availableItems}
+ *     targetItems={selectedItems}
+ *     sourceTitle="Available"
+ *     targetTitle="Selected"
+ *     onChange={handleChange}
+ * />
+ *
+ * Theme Tokens Used:
+ * - --flin-bg, --flin-fg: Background and foreground colors
+ * - --flin-primary, --flin-primary-rgb: Primary accent color
+ * - --flin-neutral-*: Neutral color scale (50-900)
+ * - --flin-radius-sm, --flin-radius-md: Border radius
+ * - --flin-shadow-md: Box shadow for dropdowns
+ * - --flin-transition-fast: Animation timing
+ *
+ * Accessibility:
+ * - All components support keyboard navigation
+ * - Proper ARIA roles (listbox, option, tree, treeitem)
+ * - Focus management and visible focus states
+ * - Screen reader announcements
+ */
+
+// Export all collection components
+export { Combobox } from "./Combobox.flin"
+export { Listbox } from "./Listbox.flin"
+export { TreeView } from "./TreeView.flin"
+export { VirtualList } from "./VirtualList.flin"
+export { TransferList } from "./TransferList.flin"

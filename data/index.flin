@@ -21,6 +21,8 @@
 // - Tree: Hierarchical tree view
 // - Timeline: Event timeline display
 // - Highlight: Text highlighting
+// - AvatarGroup: Stacked avatars with overflow indicator
+// - BadgeGroup: Multiple badges in a row with overflow
 //
 // All components use FlinUI theme tokens (--flin-*) for consistent styling
 // and support both light and dark themes.
@@ -63,6 +65,23 @@
 //
 // Highlight:
 // <Highlight text="Search results with highlighted terms" query="highlighted" color="yellow" />
+//
+// AvatarGroup:
+// <AvatarGroup max={4} size="md" spacing="tight" expandOnHover={true}>
+//     <img src="avatar1.jpg" alt="User 1" />
+//     <img src="avatar2.jpg" alt="User 2" />
+//     <img src="avatar3.jpg" alt="User 3" />
+//     <img src="avatar4.jpg" alt="User 4" />
+//     <img src="avatar5.jpg" alt="User 5" />
+// </AvatarGroup>
+//
+// BadgeGroup:
+// <BadgeGroup max={3} gap="sm" expandable={true}>
+//     <Badge>JavaScript</Badge>
+//     <Badge>React</Badge>
+//     <Badge>TypeScript</Badge>
+//     <Badge>Node.js</Badge>
+// </BadgeGroup>
 
 <div class="flin-data-index">
     <p>FlinUI Data Display Components</p>

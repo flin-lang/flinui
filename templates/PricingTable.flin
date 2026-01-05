@@ -1,0 +1,594 @@
+// PricingTable.flin - Pricing comparison table
+
+// Props
+plans = props.plans || [] // [{id, name, description, price, originalPrice, period, features, cta, highlighted}]
+highlightedPlan = props.highlightedPlan || nil // Plan ID to highlight
+billingPeriod = props.billingPeriod || "monthly" // "monthly" | "yearly"
+showBillingToggle = props.showBillingToggle ?? true
+onSelect = props.onSelect || { plan -> }
+onBillingChange = props.onBillingChange || { period -> }
+yearlyDiscount = props.yearlyDiscount || 20 // Percentage discount for yearly
+currency = props.currency || "$"
+currencyPosition = props.currencyPosition || "before" // "before" | "after"
+title = props.title || nil
+subtitle = props.subtitle || nil
+compactOnMobile = props.compactOnMobile ?? true
+
+// State
+currentBilling = billingPeriod
+
+// Handlers
+handleBillingToggle = { period ->
+    currentBilling = period
+    onBillingChange(period)
+}
+
+handleSelect = { plan ->
+    onSelect(plan)
+}
+
+// Price calculation
+getPrice = { plan ->
+    basePrice = plan.price
+    if currentBilling == "yearly" then
+        return Math.round(basePrice * 12 * (1 - yearlyDiscount / 100))
+    else
+        return basePrice
+}
+
+getDisplayPrice = { plan ->
+    price = getPrice(plan)
+    if currencyPosition == "before" then
+        return currency ++ price
+    else
+        return price ++ currency
+}
+
+getPeriodLabel = {
+    if currentBilling == "yearly" then "/year" else "/month"
+}
+
+// Computed
+isHighlighted = { plan ->
+    plan.highlighted || plan.id == highlightedPlan
+}
+
+<section class="pricing-table">
+    // Header
+    {if title || subtitle then
+        <div class="pricing-header">
+            {if title then <h2 class="pricing-title">{title}</h2>}
+            {if subtitle then <p class="pricing-subtitle">{subtitle}</p>}
+        </div>
+    }
+
+    // Billing toggle
+    {if showBillingToggle then
+        <div class="billing-toggle">
+            <button
+                class={if currentBilling == "monthly" then "billing-btn billing-btn--active" else "billing-btn"}
+                onClick={ handleBillingToggle("monthly") }
+            >
+                Monthly
+            </button>
+            <button
+                class={if currentBilling == "yearly" then "billing-btn billing-btn--active" else "billing-btn"}
+                onClick={ handleBillingToggle("yearly") }
+            >
+                Yearly
+                {if yearlyDiscount > 0 then
+                    <span class="billing-discount">Save {yearlyDiscount}%</span>
+                }
+            </button>
+        </div>
+    }
+
+    // Plans grid
+    <div class={"pricing-grid pricing-grid--" ++ plans.length}>
+        {plans.map { plan ->
+            <div
+                class={if isHighlighted(plan) then "pricing-card pricing-card--highlighted" else "pricing-card"}
+                key={plan.id}
+            >
+                // Highlighted badge
+                {if isHighlighted(plan) && plan.badge then
+                    <div class="card-badge">{plan.badge || "Most Popular"}</div>
+                }
+
+                // Plan header
+                <div class="card-header">
+                    <h3 class="plan-name">{plan.name}</h3>
+                    {if plan.description then
+                        <p class="plan-description">{plan.description}</p>
+                    }
+                </div>
+
+                // Price
+                <div class="card-price">
+                    {if plan.price == 0 then
+                        <span class="price-free">Free</span>
+                    else
+                        <div class="price-display">
+                            {if plan.originalPrice && currentBilling == "monthly" then
+                                <span class="price-original">{currency}{plan.originalPrice}</span>
+                            }
+                            <span class="price-amount">{getDisplayPrice(plan)}</span>
+                            <span class="price-period">{getPeriodLabel()}</span>
+                        </div>
+                    }
+                    {if plan.priceNote then
+                        <p class="price-note">{plan.priceNote}</p>
+                    }
+                </div>
+
+                // CTA button
+                <div class="card-cta">
+                    <button
+                        class={if isHighlighted(plan) then "cta-btn cta-btn--primary" else "cta-btn cta-btn--secondary"}
+                        onClick={ handleSelect(plan) }
+                    >
+                        {plan.cta || "Get Started"}
+                    </button>
+                </div>
+
+                // Features
+                {if plan.features && plan.features.length > 0 then
+                    <div class="card-features">
+                        <div class="features-header">What's included:</div>
+                        <ul class="features-list">
+                            {plan.features.map { feature ->
+                                <li class={if feature.included == false then "feature-item feature-item--excluded" else "feature-item"} key={feature.text || feature}>
+                                    <span class="feature-icon">
+                                        {if feature.included == false then "✕" else "✓"}
+                                    </span>
+                                    <span class="feature-text">
+                                        {feature.text || feature}
+                                        {if feature.tooltip then
+                                            <span class="feature-tooltip" title={feature.tooltip}>ⓘ</span>
+                                        }
+                                    </span>
+                                </li>
+                            }}
+                        </ul>
+                    </div>
+                }
+            </div>
+        }}
+    </div>
+
+    // Comparison table (for desktop, when more details needed)
+    {if props.showComparison then
+        <div class="pricing-comparison">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th class="comparison-feature-header">Features</th>
+                        {plans.map { plan ->
+                            <th class={if isHighlighted(plan) then "comparison-plan-header comparison-plan-header--highlighted" else "comparison-plan-header"} key={plan.id}>
+                                {plan.name}
+                            </th>
+                        }}
+                    </tr>
+                </thead>
+                <tbody>
+                    {props.comparisonFeatures.map { feature ->
+                        <tr key={feature.name}>
+                            <td class="comparison-feature-name">{feature.name}</td>
+                            {plans.map { plan ->
+                                <td class="comparison-feature-value" key={plan.id}>
+                                    {if feature.values[plan.id] == true then "✓"
+                                     else if feature.values[plan.id] == false then "—"
+                                     else feature.values[plan.id]}
+                                </td>
+                            }}
+                        </tr>
+                    }}
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<style scoped>
+.pricing-table {
+    padding: var(--flin-spacing-12) var(--flin-spacing-6);
+}
+
+/* Header */
+.pricing-header {
+    text-align: center;
+    margin-bottom: var(--flin-spacing-8);
+}
+
+.pricing-title {
+    font-size: var(--flin-font-size-3xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--flin-color-gray-900);
+    margin: 0 0 var(--flin-spacing-3) 0;
+}
+
+.pricing-subtitle {
+    font-size: var(--flin-font-size-lg);
+    color: var(--flin-color-gray-600);
+    margin: 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Billing toggle */
+.billing-toggle {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-spacing-1);
+    margin-bottom: var(--flin-spacing-10);
+    background: var(--flin-color-gray-100);
+    padding: var(--flin-spacing-1);
+    border-radius: var(--flin-radius-lg);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.billing-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    padding: var(--flin-spacing-2) var(--flin-spacing-4);
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-600);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.billing-btn:hover {
+    color: var(--flin-color-gray-900);
+}
+
+.billing-btn--active {
+    background: var(--flin-color-white);
+    color: var(--flin-color-gray-900);
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.billing-discount {
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-green-600);
+    background: var(--flin-color-green-100);
+    padding: 2px 6px;
+    border-radius: var(--flin-radius-full);
+}
+
+/* Pricing grid */
+.pricing-grid {
+    display: grid;
+    gap: var(--flin-spacing-6);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.pricing-grid--1 {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+}
+
+.pricing-grid--2 {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 800px;
+}
+
+.pricing-grid--3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.pricing-grid--4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Pricing card */
+.pricing-card {
+    position: relative;
+    background: var(--flin-color-white);
+    border: 1px solid var(--flin-color-gray-200);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-spacing-6);
+    display: flex;
+    flex-direction: column;
+    transition: all var(--flin-transition-fast);
+}
+
+.pricing-card:hover {
+    border-color: var(--flin-color-gray-300);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.pricing-card--highlighted {
+    border-color: var(--flin-color-primary-500);
+    box-shadow: 0 0 0 1px var(--flin-color-primary-500), var(--flin-shadow-xl);
+    transform: scale(1.02);
+    z-index: 1;
+}
+
+.card-badge {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--flin-color-primary-500);
+    color: var(--flin-color-white);
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-semibold);
+    padding: var(--flin-spacing-1) var(--flin-spacing-3);
+    border-radius: var(--flin-radius-full);
+    white-space: nowrap;
+}
+
+/* Card header */
+.card-header {
+    margin-bottom: var(--flin-spacing-5);
+}
+
+.plan-name {
+    font-size: var(--flin-font-size-xl);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+    margin: 0 0 var(--flin-spacing-2) 0;
+}
+
+.plan-description {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Price display */
+.card-price {
+    margin-bottom: var(--flin-spacing-5);
+}
+
+.price-display {
+    display: flex;
+    align-items: baseline;
+    gap: var(--flin-spacing-1);
+}
+
+.price-original {
+    font-size: var(--flin-font-size-lg);
+    color: var(--flin-color-gray-400);
+    text-decoration: line-through;
+    margin-right: var(--flin-spacing-2);
+}
+
+.price-free {
+    font-size: var(--flin-font-size-4xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--flin-color-gray-900);
+}
+
+.price-amount {
+    font-size: var(--flin-font-size-4xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--flin-color-gray-900);
+    line-height: 1;
+}
+
+.price-period {
+    font-size: var(--flin-font-size-base);
+    color: var(--flin-color-gray-500);
+}
+
+.price-note {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+    margin: var(--flin-spacing-2) 0 0 0;
+}
+
+/* CTA */
+.card-cta {
+    margin-bottom: var(--flin-spacing-6);
+}
+
+.cta-btn {
+    width: 100%;
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    font-size: var(--flin-font-size-base);
+    font-weight: var(--flin-font-weight-medium);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    border: none;
+}
+
+.cta-btn--primary {
+    background: var(--flin-color-primary-600);
+    color: var(--flin-color-white);
+}
+
+.cta-btn--primary:hover {
+    background: var(--flin-color-primary-700);
+}
+
+.cta-btn--secondary {
+    background: var(--flin-color-white);
+    color: var(--flin-color-gray-700);
+    border: 1px solid var(--flin-color-gray-300);
+}
+
+.cta-btn--secondary:hover {
+    background: var(--flin-color-gray-50);
+    border-color: var(--flin-color-gray-400);
+}
+
+/* Features */
+.card-features {
+    flex: 1;
+    border-top: 1px solid var(--flin-color-gray-200);
+    padding-top: var(--flin-spacing-5);
+}
+
+.features-header {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-700);
+    margin-bottom: var(--flin-spacing-4);
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-spacing-3);
+    padding: var(--flin-spacing-2) 0;
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-600);
+}
+
+.feature-item--excluded {
+    color: var(--flin-color-gray-400);
+}
+
+.feature-icon {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--flin-radius-full);
+    font-size: var(--flin-font-size-xs);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.feature-item:not(.feature-item--excluded) .feature-icon {
+    background: var(--flin-color-green-100);
+    color: var(--flin-color-green-600);
+}
+
+.feature-item--excluded .feature-icon {
+    background: var(--flin-color-gray-100);
+    color: var(--flin-color-gray-400);
+}
+
+.feature-text {
+    flex: 1;
+    line-height: 1.5;
+}
+
+.feature-tooltip {
+    margin-left: var(--flin-spacing-1);
+    color: var(--flin-color-gray-400);
+    cursor: help;
+}
+
+/* Comparison table */
+.pricing-comparison {
+    margin-top: var(--flin-spacing-12);
+    overflow-x: auto;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: var(--flin-spacing-4);
+    text-align: center;
+    border-bottom: 1px solid var(--flin-color-gray-200);
+}
+
+.comparison-feature-header {
+    text-align: left;
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+}
+
+.comparison-plan-header {
+    font-size: var(--flin-font-size-base);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+}
+
+.comparison-plan-header--highlighted {
+    color: var(--flin-color-primary-600);
+}
+
+.comparison-feature-name {
+    text-align: left;
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-600);
+}
+
+.comparison-feature-value {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-700);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .pricing-grid--4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .pricing-table {
+        padding: var(--flin-spacing-8) var(--flin-spacing-4);
+    }
+
+    .pricing-grid--3,
+    .pricing-grid--4 {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .pricing-card--highlighted {
+        transform: none;
+    }
+
+    .pricing-title {
+        font-size: var(--flin-font-size-2xl);
+    }
+
+    .billing-toggle {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .billing-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .pricing-grid--2 {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+    }
+
+    .price-amount {
+        font-size: var(--flin-font-size-3xl);
+    }
+
+    .billing-discount {
+        display: none;
+    }
+}
+</style>

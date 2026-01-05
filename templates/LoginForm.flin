@@ -1,0 +1,561 @@
+// LoginForm.flin - Complete login form with validation
+
+// Props
+onSubmit = props.onSubmit || { credentials -> }
+showRememberMe = props.showRememberMe ?? true
+showForgotPassword = props.showForgotPassword ?? true
+forgotPasswordLink = props.forgotPasswordLink || "#"
+forgotPasswordText = props.forgotPasswordText || "Forgot password?"
+socialProviders = props.socialProviders || [] // [{id, name, icon, onClick}]
+loading = props.loading || false
+disabled = props.disabled || false
+usernameLabel = props.usernameLabel || "Email"
+usernamePlaceholder = props.usernamePlaceholder || "Enter your email"
+usernameType = props.usernameType || "email" // "email" | "text"
+passwordLabel = props.passwordLabel || "Password"
+passwordPlaceholder = props.passwordPlaceholder || "Enter your password"
+submitText = props.submitText || "Sign in"
+loadingText = props.loadingText || "Signing in..."
+rememberMeText = props.rememberMeText || "Remember me"
+socialDividerText = props.socialDividerText || "Or continue with"
+errorMessage = props.errorMessage || nil
+successMessage = props.successMessage || nil
+
+// State
+username = ""
+password = ""
+rememberMe = false
+showPassword = false
+errors = {}
+touched = {}
+
+// Validation
+validateUsername = {
+    if username == "" then
+        errors.username = "Email is required"
+    else if usernameType == "email" && !username.includes("@") then
+        errors.username = "Please enter a valid email"
+    else
+        errors.username = nil
+}
+
+validatePassword = {
+    if password == "" then
+        errors.password = "Password is required"
+    else if password.length < 6 then
+        errors.password = "Password must be at least 6 characters"
+    else
+        errors.password = nil
+}
+
+validateForm = {
+    validateUsername()
+    validatePassword()
+    return !errors.username && !errors.password
+}
+
+// Handlers
+handleUsernameChange = { value ->
+    username = value
+    if touched.username then validateUsername()
+}
+
+handleUsernameBlur = {
+    touched.username = true
+    validateUsername()
+}
+
+handlePasswordChange = { value ->
+    password = value
+    if touched.password then validatePassword()
+}
+
+handlePasswordBlur = {
+    touched.password = true
+    validatePassword()
+}
+
+handleRememberMeChange = { checked ->
+    rememberMe = checked
+}
+
+togglePasswordVisibility = {
+    showPassword = !showPassword
+}
+
+handleSubmit = { event ->
+    event.preventDefault()
+    touched.username = true
+    touched.password = true
+
+    if validateForm() then
+        onSubmit({
+            username: username,
+            password: password,
+            rememberMe: rememberMe
+        })
+}
+
+handleSocialLogin = { provider ->
+    if provider.onClick then provider.onClick()
+}
+
+// Computed
+submitDisabled = loading || disabled
+usernameInputClass = if errors.username && touched.username then "login-input login-input--error" else "login-input"
+passwordInputClass = if errors.password && touched.password then "login-input login-input--error" else "login-input"
+
+<form class="login-form" onSubmit={handleSubmit}>
+    // Error message
+    {if errorMessage then
+        <div class="login-message login-message--error" role="alert">
+            <span class="message-icon">⚠</span>
+            <span class="message-text">{errorMessage}</span>
+        </div>
+    }
+
+    // Success message
+    {if successMessage then
+        <div class="login-message login-message--success" role="status">
+            <span class="message-icon">✓</span>
+            <span class="message-text">{successMessage}</span>
+        </div>
+    }
+
+    // Username/Email field
+    <div class="login-field">
+        <label class="login-label" htmlFor="login-username">{usernameLabel}</label>
+        <input
+            type={usernameType}
+            id="login-username"
+            class={usernameInputClass}
+            placeholder={usernamePlaceholder}
+            value={username}
+            onChange={e -> handleUsernameChange(e.target.value)}
+            onBlur={handleUsernameBlur}
+            disabled={submitDisabled}
+            autoComplete={if usernameType == "email" then "email" else "username"}
+            aria-invalid={if errors.username && touched.username then "true" else "false"}
+            aria-describedby={if errors.username then "username-error" else nil}
+        />
+        {if errors.username && touched.username then
+            <span class="login-error" id="username-error" role="alert">{errors.username}</span>
+        }
+    </div>
+
+    // Password field
+    <div class="login-field">
+        <div class="login-label-row">
+            <label class="login-label" htmlFor="login-password">{passwordLabel}</label>
+            {if showForgotPassword then
+                <a href={forgotPasswordLink} class="login-forgot-link">{forgotPasswordText}</a>
+            }
+        </div>
+        <div class="login-password-wrapper">
+            <input
+                type={if showPassword then "text" else "password"}
+                id="login-password"
+                class={passwordInputClass}
+                placeholder={passwordPlaceholder}
+                value={password}
+                onChange={e -> handlePasswordChange(e.target.value)}
+                onBlur={handlePasswordBlur}
+                disabled={submitDisabled}
+                autoComplete="current-password"
+                aria-invalid={if errors.password && touched.password then "true" else "false"}
+                aria-describedby={if errors.password then "password-error" else nil}
+            />
+            <button
+                type="button"
+                class="login-password-toggle"
+                onClick={togglePasswordVisibility}
+                aria-label={if showPassword then "Hide password" else "Show password"}
+                tabIndex="-1"
+            >
+                {if showPassword then "👁" else "👁‍🗨"}
+            </button>
+        </div>
+        {if errors.password && touched.password then
+            <span class="login-error" id="password-error" role="alert">{errors.password}</span>
+        }
+    </div>
+
+    // Remember me checkbox
+    {if showRememberMe then
+        <div class="login-remember">
+            <label class="login-checkbox-label">
+                <input
+                    type="checkbox"
+                    class="login-checkbox"
+                    checked={rememberMe}
+                    onChange={e -> handleRememberMeChange(e.target.checked)}
+                    disabled={submitDisabled}
+                />
+                <span class="login-checkbox-custom"></span>
+                <span class="login-checkbox-text">{rememberMeText}</span>
+            </label>
+        </div>
+    }
+
+    // Submit button
+    <button
+        type="submit"
+        class="login-submit"
+        disabled={submitDisabled}
+    >
+        {if loading then
+            <span class="login-spinner"></span>
+        }
+        <span>{if loading then loadingText else submitText}</span>
+    </button>
+
+    // Social login providers
+    {if socialProviders.length > 0 then
+        <div class="login-social">
+            <div class="login-divider">
+                <span class="login-divider-text">{socialDividerText}</span>
+            </div>
+
+            <div class="login-social-buttons">
+                {socialProviders.map { provider ->
+                    <button
+                        type="button"
+                        class="login-social-btn"
+                        onClick={ handleSocialLogin(provider) }
+                        disabled={submitDisabled}
+                        key={provider.id}
+                        aria-label={"Sign in with " ++ provider.name}
+                    >
+                        {if provider.icon then
+                            <span class="social-icon">{provider.icon}</span>
+                        }
+                        <span class="social-name">{provider.name}</span>
+                    </button>
+                }}
+            </div>
+        </div>
+    }
+</form>
+
+<style scoped>
+.login-form {
+    width: 100%;
+}
+
+/* Messages */
+.login-message {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-spacing-3);
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    border-radius: var(--flin-radius-md);
+    margin-bottom: var(--flin-spacing-5);
+    font-size: var(--flin-font-size-sm);
+}
+
+.login-message--error {
+    background: var(--flin-color-red-50);
+    color: var(--flin-color-red-700);
+    border: 1px solid var(--flin-color-red-200);
+}
+
+.login-message--success {
+    background: var(--flin-color-green-50);
+    color: var(--flin-color-green-700);
+    border: 1px solid var(--flin-color-green-200);
+}
+
+.message-icon {
+    flex-shrink: 0;
+    font-size: var(--flin-font-size-base);
+}
+
+.message-text {
+    line-height: 1.5;
+}
+
+/* Form fields */
+.login-field {
+    margin-bottom: var(--flin-spacing-5);
+}
+
+.login-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--flin-spacing-2);
+}
+
+.login-label {
+    display: block;
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-700);
+    margin-bottom: var(--flin-spacing-2);
+}
+
+.login-label-row .login-label {
+    margin-bottom: 0;
+}
+
+.login-forgot-link {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-primary-600);
+    text-decoration: none;
+    transition: color var(--flin-transition-fast);
+}
+
+.login-forgot-link:hover {
+    color: var(--flin-color-primary-700);
+    text-decoration: underline;
+}
+
+.login-input {
+    width: 100%;
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    font-size: var(--flin-font-size-base);
+    border: 1px solid var(--flin-color-gray-300);
+    border-radius: var(--flin-radius-md);
+    background: var(--flin-color-white);
+    color: var(--flin-color-gray-900);
+    transition: all var(--flin-transition-fast);
+    outline: none;
+}
+
+.login-input:focus {
+    border-color: var(--flin-color-primary-500);
+    box-shadow: 0 0 0 3px var(--flin-color-primary-100);
+}
+
+.login-input:disabled {
+    background: var(--flin-color-gray-100);
+    cursor: not-allowed;
+}
+
+.login-input--error {
+    border-color: var(--flin-color-red-500);
+}
+
+.login-input--error:focus {
+    box-shadow: 0 0 0 3px var(--flin-color-red-100);
+}
+
+.login-input::placeholder {
+    color: var(--flin-color-gray-400);
+}
+
+/* Password field */
+.login-password-wrapper {
+    position: relative;
+}
+
+.login-password-wrapper .login-input {
+    padding-right: var(--flin-spacing-12);
+}
+
+.login-password-toggle {
+    position: absolute;
+    right: var(--flin-spacing-1);
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: var(--flin-spacing-2) var(--flin-spacing-3);
+    cursor: pointer;
+    color: var(--flin-color-gray-500);
+    font-size: var(--flin-font-size-base);
+    transition: color var(--flin-transition-fast);
+}
+
+.login-password-toggle:hover {
+    color: var(--flin-color-gray-700);
+}
+
+/* Error messages */
+.login-error {
+    display: block;
+    margin-top: var(--flin-spacing-2);
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-red-600);
+}
+
+/* Remember me checkbox */
+.login-remember {
+    margin-bottom: var(--flin-spacing-6);
+}
+
+.login-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-3);
+    cursor: pointer;
+    user-select: none;
+}
+
+.login-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.login-checkbox-custom {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--flin-color-gray-300);
+    border-radius: var(--flin-radius-sm);
+    background: var(--flin-color-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--flin-transition-fast);
+    flex-shrink: 0;
+}
+
+.login-checkbox:checked + .login-checkbox-custom {
+    background: var(--flin-color-primary-500);
+    border-color: var(--flin-color-primary-500);
+}
+
+.login-checkbox:checked + .login-checkbox-custom::after {
+    content: "✓";
+    color: var(--flin-color-white);
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.login-checkbox:focus + .login-checkbox-custom {
+    box-shadow: 0 0 0 3px var(--flin-color-primary-100);
+}
+
+.login-checkbox:disabled + .login-checkbox-custom {
+    background: var(--flin-color-gray-100);
+    cursor: not-allowed;
+}
+
+.login-checkbox-text {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-600);
+}
+
+/* Submit button */
+.login-submit {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-spacing-2);
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    font-size: var(--flin-font-size-base);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-white);
+    background: var(--flin-color-primary-600);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.login-submit:hover:not(:disabled) {
+    background: var(--flin-color-primary-700);
+}
+
+.login-submit:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--flin-color-primary-100);
+}
+
+.login-submit:disabled {
+    background: var(--flin-color-gray-300);
+    cursor: not-allowed;
+}
+
+/* Loading spinner */
+.login-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    border-top-color: var(--flin-color-white);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Social login */
+.login-social {
+    margin-top: var(--flin-spacing-6);
+}
+
+.login-divider {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--flin-spacing-5);
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--flin-color-gray-200);
+}
+
+.login-divider-text {
+    padding: 0 var(--flin-spacing-4);
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+    white-space: nowrap;
+}
+
+.login-social-buttons {
+    display: flex;
+    gap: var(--flin-spacing-3);
+}
+
+.login-social-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-spacing-2);
+    padding: var(--flin-spacing-3);
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-700);
+    background: var(--flin-color-white);
+    border: 1px solid var(--flin-color-gray-300);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.login-social-btn:hover:not(:disabled) {
+    background: var(--flin-color-gray-50);
+    border-color: var(--flin-color-gray-400);
+}
+
+.login-social-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.social-icon {
+    font-size: var(--flin-font-size-lg);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .login-social-buttons {
+        flex-direction: column;
+    }
+
+    .login-social-btn {
+        width: 100%;
+    }
+}
+</style>

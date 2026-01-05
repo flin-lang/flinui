@@ -173,6 +173,49 @@ MIT License - see [LICENSE](LICENSE) for details.
 - **Discord:** [discord.gg/7uxR6VfA](https://discord.gg/7uxR6VfA)
 - **Twitter:** [@flinlang](https://x.com/flinlang)
 
+<div align="center">
+
+### **É flin nù — It Remembers Things**
+<em>The memory-native language where nothing is forgotten.</em>
+
+**One file · Zero config · Full stack**
+
+> “Write apps like it’s 1995 — with the power of 2025.”
+
+🐘 **Code that remembers.**  
+One file. Full stack. Complete history.
+
+---
+
+**Proof**  
+`1,847 dependencies → 0` · `15 config files → 1` · `2 hours → 2 minutes`
+
+---
+
+<a href="https://flin.dev">
+  <img src="https://welcome.flin.dev/logo-flin-512.png" alt="FLIN logo" width="120" />
+</a>
+
+Created by **Juste A. Gnimavo**  
+Built at **[ZeroSuite, Inc.](https://www.zerosuite.dev)**
+
+---
+
+**Community & Socials**
+
+[X / Twitter](https://x.com/flinlang) ·
+[Bluesky](https://bsky.app/profile/flinlang.bsky.social) ·
+[Facebook](https://fb.me/FlinLang) ·
+[Discord](https://discord.gg/7uxR6VfA) ·
+[GitHub](https://github.com/flin-lang/flin) ·
+[YouTube](https://www.youtube.com/@FlinLang)
+
+---
+
+<sub>Made with care in Abidjan × San Francisco</sub>
+
+</div>
+
 ---
 
 Built with FLIN by [ZeroSuite, Inc.](https://zerosuite.io)

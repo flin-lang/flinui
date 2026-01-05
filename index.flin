@@ -1,12 +1,12 @@
 // FlinUI - Official Component Library for FLIN
-// 94 production-ready components. No npm install. No dependencies. Just FLIN.
-// Version 1.2.0
+// 155 production-ready components. No npm install. No dependencies. Just FLIN.
+// Version 1.4.0
 
 // ============================================================================
 // FLINUI COMPONENT LIBRARY
 // ============================================================================
 //
-// 94 production-ready components for building modern web applications.
+// 155 production-ready components for building modern web applications.
 // All components use theme tokens for consistent styling and dark mode support.
 //
 // Usage:
@@ -21,34 +21,50 @@
 
 // Component Categories:
 //
-// BASIC (15 components)
+// BASIC (18 components)
 //   Button, Input, Textarea, Select, Checkbox, Radio, Switch, Slider
-//   Text, Link, Icon, Image, Avatar, Badge, Tag
+//   Text, Link, Icon (200+ Lucide icons), Image, Avatar, Badge, Tag
+//   IconButton, CloseButton, ButtonGroup
 //
-// LAYOUT (11 components)
+// LAYOUT (17 components)
 //   Container, Stack, Grid, Flex, Box, Divider, Spacer, Center
-//   AspectRatio, Wrap, ResizablePanels
+//   AspectRatio, Wrap, ResizablePanels, Header, Footer, Collapse
+//   Section, Hero, PageContainer
 //
-// DATA DISPLAY (17 components)
+// DATA DISPLAY (23 components)
 //   Card, CardHeader, CardBody, CardFooter, Table, List, ListItem
 //   Progress, Spinner, Skeleton, Empty, Code, Kbd, Stat, Accordion
-//   Calendar, Carousel
+//   Calendar, Carousel, Timeline, DataTable, AvatarGroup, BadgeGroup
+//   Comment, StatsGrid
 //
-// FORMS (10 components)
+// FORMS (16 components)
 //   Form, FormField, FormError, FormHelp, DatePicker, TimePicker
-//   ColorPicker, FileUpload, Autocomplete, PinInput
+//   ColorPicker, FileUpload, Autocomplete, PinInput, NumberInput
+//   PasswordInput, TagsInput, RatingInput, SearchInput, OTPInput
 //
-// FEEDBACK (11 components)
+// FEEDBACK (13 components)
 //   Alert, Toast, Modal, ModalHeader, ModalBody, ModalFooter
 //   Drawer, Popover, Tooltip, Notification, CommandPalette
+//   AlertDialog, Sheet
 //
-// NAVIGATION (14 components)
+// NAVIGATION (17 components)
 //   Navbar, NavbarBrand, NavbarMenu, NavbarItem, Sidebar, SidebarItem
 //   Tabs, Tab, Breadcrumb, Pagination, Menu, Stepper, BottomNav, SkipNav
+//   Dropdown, ContextMenu, SpeedDial
 //
-// CHARTS (7 components) - NEW!
+// CHARTS (7 components)
 //   BarChart, LineChart, PieChart, AreaChart, SparkLine
 //   ChartLegend, ChartTooltip
+//
+// TYPOGRAPHY (8 components) - NEW!
+//   Heading, Text, Code, CodeBlock, Blockquote, Highlight, Mark, Prose
+//
+// COLLECTIONS (5 components) - NEW!
+//   Combobox, Listbox, TreeView, VirtualList, TransferList
+//
+// TEMPLATES (10 templates) - NEW!
+//   DashboardLayout, AuthLayout, LoginForm, RegisterForm, LandingHero
+//   PricingTable, FeaturesGrid, SettingsLayout, ProfileCard, ErrorPage
 //
 // FLIN-NATIVE (2 components) - UNIQUE TO FLIN!
 //   TimeTravel - Navigate through variable history (memory-native)
@@ -64,9 +80,9 @@
 //   custom.flin - Theme customization
 //   index.flin - Theme provider
 
-version = "1.2.0"
-componentCount = 94
-categories = ["basic", "layout", "data", "forms", "feedback", "navigation", "charts", "flin-native"]
+version = "1.4.0"
+componentCount = 155
+categories = ["basic", "layout", "data", "forms", "feedback", "navigation", "charts", "typography", "collections", "templates", "flin-native"]
 
 <div class="flinui-root">
     <h1>FlinUI v{version}</h1>

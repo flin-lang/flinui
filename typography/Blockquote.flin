@@ -1,0 +1,123 @@
+// Blockquote.flin - FlinUI Blockquote Component
+// Styled quotations with optional citation and variants
+
+// Props with defaults
+cite = props.cite || ""
+variant = props.variant || "default"
+
+// Computed variant class
+variantClass = match variant {
+    "bordered" -> "blockquote--bordered"
+    "filled" -> "blockquote--filled"
+    _ -> "blockquote--default"
+}
+
+// Build full class string
+blockquoteClass = "blockquote " ++ variantClass
+
+<figure class={blockquoteClass}>
+    <blockquote class="blockquote__content">
+        {children}
+    </blockquote>
+    {if cite != ""}
+        <figcaption class="blockquote__cite">
+            <span class="blockquote__cite-dash">---</span>
+            {cite}
+        </figcaption>
+    {/if}
+</figure>
+
+<style scoped>
+.blockquote {
+    margin: var(--flin-space-6) 0;
+    padding: 0;
+    font-family: var(--flin-font-sans);
+}
+
+.blockquote__content {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    line-height: 1.7;
+    color: var(--flin-fg);
+    font-style: italic;
+}
+
+.blockquote__cite {
+    margin-top: var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    font-style: normal;
+}
+
+.blockquote__cite-dash {
+    margin-right: var(--flin-space-2);
+    color: var(--flin-neutral-400);
+}
+
+/* Default variant */
+.blockquote--default {
+    padding-left: var(--flin-space-6);
+    border-left: 4px solid var(--flin-primary);
+}
+
+.blockquote--default .blockquote__content {
+    color: var(--flin-fg-muted);
+}
+
+/* Bordered variant */
+.blockquote--bordered {
+    padding: var(--flin-space-6);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-lg);
+    background-color: transparent;
+}
+
+.blockquote--bordered .blockquote__content {
+    font-style: normal;
+    text-align: center;
+}
+
+.blockquote--bordered .blockquote__cite {
+    text-align: center;
+}
+
+/* Filled variant */
+.blockquote--filled {
+    padding: var(--flin-space-6);
+    background-color: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-lg);
+    border-left: 4px solid var(--flin-primary);
+}
+
+.blockquote--filled .blockquote__content {
+    font-style: normal;
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .blockquote--bordered {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .blockquote--filled {
+    background-color: var(--flin-neutral-800);
+}
+
+/* Quote marks for bordered variant */
+.blockquote--bordered .blockquote__content::before {
+    content: open-quote;
+    font-size: var(--flin-text-4xl);
+    color: var(--flin-primary);
+    line-height: 0;
+    vertical-align: -0.4em;
+    margin-right: var(--flin-space-1);
+}
+
+.blockquote--bordered .blockquote__content::after {
+    content: close-quote;
+    font-size: var(--flin-text-4xl);
+    color: var(--flin-primary);
+    line-height: 0;
+    vertical-align: -0.4em;
+    margin-left: var(--flin-space-1);
+}
+</style>

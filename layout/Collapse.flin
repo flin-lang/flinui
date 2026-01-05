@@ -1,0 +1,153 @@
+// FlinUI Collapse Component
+// Collapsible content panel with smooth animation
+// Props: open (bool), defaultOpen (bool), title (string), icon (string), onToggle (fn)
+
+open = props.open
+defaultOpen = props.defaultOpen || false
+title = props.title || ""
+icon = props.icon || ""
+
+// Internal state for uncontrolled mode
+// If open prop is provided, use controlled mode; otherwise use internal state
+isControlled = open != null
+internalOpen = defaultOpen
+
+// Determine current open state
+isOpen = match isControlled {
+    true -> open
+    _ -> internalOpen
+}
+
+// Build class strings
+openClass = match isOpen {
+    true -> " flin-collapse-open"
+    _ -> ""
+}
+
+collapseClass = "flin-collapse" ++ openClass
+
+// Check if we have an icon
+hasIcon = icon != ""
+hasTitle = title != ""
+
+// Toggle handler
+handleToggle = fn() {
+    if !isControlled {
+        internalOpen = !internalOpen
+    }
+    if props.onToggle {
+        props.onToggle(!isOpen)
+    }
+}
+
+<div class={collapseClass}>
+    <button class="flin-collapse-header" onClick={handleToggle} aria-expanded={isOpen} type="button">
+        {if hasIcon {
+            <span class="flin-collapse-icon">{icon}</span>
+        }}
+        {if hasTitle {
+            <span class="flin-collapse-title">{title}</span>
+        }}
+        <span class="flin-collapse-chevron">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+    </button>
+    <div class="flin-collapse-content">
+        <div class="flin-collapse-content-inner">
+            {children}
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.flin-collapse {
+    width: 100%;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    background-color: var(--flin-bg);
+    overflow: hidden;
+}
+
+.flin-collapse-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--flin-space-4);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    transition: background-color 0.15s ease;
+}
+
+.flin-collapse-header:hover {
+    background-color: var(--flin-bg-muted);
+}
+
+.flin-collapse-header:focus-visible {
+    outline: 2px solid var(--flin-ring);
+    outline-offset: -2px;
+}
+
+.flin-collapse-icon {
+    flex-shrink: 0;
+    margin-right: var(--flin-space-3);
+    font-size: var(--flin-text-lg);
+    color: var(--flin-muted-fg);
+}
+
+.flin-collapse-title {
+    flex: 1;
+    font-weight: 500;
+    min-width: 0;
+}
+
+.flin-collapse-chevron {
+    flex-shrink: 0;
+    margin-left: var(--flin-space-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-muted-fg);
+    transition: transform 0.2s ease;
+}
+
+.flin-collapse-open .flin-collapse-chevron {
+    transform: rotate(180deg);
+}
+
+.flin-collapse-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.2s ease;
+}
+
+.flin-collapse-open .flin-collapse-content {
+    grid-template-rows: 1fr;
+}
+
+.flin-collapse-content-inner {
+    overflow: hidden;
+}
+
+.flin-collapse-open .flin-collapse-content-inner {
+    padding: 0 var(--flin-space-4) var(--flin-space-4) var(--flin-space-4);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .flin-collapse-header {
+        padding: var(--flin-space-3);
+        font-size: var(--flin-text-sm);
+    }
+
+    .flin-collapse-open .flin-collapse-content-inner {
+        padding: 0 var(--flin-space-3) var(--flin-space-3) var(--flin-space-3);
+    }
+}
+</style>

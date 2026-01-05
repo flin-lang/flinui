@@ -1,0 +1,172 @@
+// CloseButton.flin - FlinUI Close Button Component
+// A specialized X/dismiss button commonly used in modals, alerts, and dismissible content
+
+// Props with defaults
+size = props.size || "md"
+variant = props.variant || "ghost"
+onClick = props.onClick
+ariaLabel = props.ariaLabel || "Close"
+disabled = props.disabled || false
+
+// Computed size class
+sizeClass = match size {
+    "xs" -> "close-btn-xs"
+    "sm" -> "close-btn-sm"
+    "lg" -> "close-btn-lg"
+    _ -> "close-btn-md"
+}
+
+// Map button size to icon size
+iconSize = match size {
+    "xs" -> "xs"
+    "sm" -> "sm"
+    "lg" -> "lg"
+    _ -> "md"
+}
+
+// Computed variant class
+variantClass = match variant {
+    "subtle" -> "close-btn-subtle"
+    "solid" -> "close-btn-solid"
+    _ -> "close-btn-ghost"
+}
+
+// Pre-compute full class string
+btnClass = "close-btn " ++ sizeClass ++ " " ++ variantClass
+
+<button
+    class={btnClass}
+    click={onClick}
+    aria-label={ariaLabel}
+    disabled={disabled}
+    type="button"
+>
+    <Icon name="x" size={iconSize}/>
+</button>
+
+<style scoped>
+/* Base close button styles */
+.close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    padding: 0;
+    flex-shrink: 0;
+    border-radius: var(--flin-radius-sm);
+}
+
+.close-btn:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.close-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Size variants */
+.close-btn-xs {
+    width: 20px;
+    height: 20px;
+}
+
+.close-btn-sm {
+    width: 24px;
+    height: 24px;
+}
+
+.close-btn-md {
+    width: 28px;
+    height: 28px;
+}
+
+.close-btn-lg {
+    width: 32px;
+    height: 32px;
+}
+
+/* Ghost variant (default) */
+.close-btn-ghost {
+    background-color: transparent;
+    color: var(--flin-neutral-500);
+}
+
+.close-btn-ghost:hover:not(:disabled) {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-700);
+}
+
+.close-btn-ghost:active:not(:disabled) {
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-neutral-800);
+}
+
+/* Subtle variant */
+.close-btn-subtle {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-600);
+}
+
+.close-btn-subtle:hover:not(:disabled) {
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-neutral-800);
+}
+
+.close-btn-subtle:active:not(:disabled) {
+    background-color: var(--flin-neutral-300);
+}
+
+/* Solid variant */
+.close-btn-solid {
+    background-color: var(--flin-neutral-800);
+    color: white;
+}
+
+.close-btn-solid:hover:not(:disabled) {
+    background-color: var(--flin-neutral-900);
+}
+
+.close-btn-solid:active:not(:disabled) {
+    background-color: var(--flin-neutral-950);
+}
+
+/* Dark mode adjustments (when .dark class is present on parent) */
+:global(.dark) .close-btn-ghost {
+    color: var(--flin-neutral-400);
+}
+
+:global(.dark) .close-btn-ghost:hover:not(:disabled) {
+    background-color: var(--flin-neutral-800);
+    color: var(--flin-neutral-200);
+}
+
+:global(.dark) .close-btn-ghost:active:not(:disabled) {
+    background-color: var(--flin-neutral-700);
+}
+
+:global(.dark) .close-btn-subtle {
+    background-color: var(--flin-neutral-800);
+    color: var(--flin-neutral-400);
+}
+
+:global(.dark) .close-btn-subtle:hover:not(:disabled) {
+    background-color: var(--flin-neutral-700);
+    color: var(--flin-neutral-200);
+}
+
+:global(.dark) .close-btn-solid {
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-neutral-900);
+}
+
+:global(.dark) .close-btn-solid:hover:not(:disabled) {
+    background-color: var(--flin-neutral-100);
+}
+</style>

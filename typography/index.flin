@@ -1,0 +1,88 @@
+// FlinUI Typography Components
+// A comprehensive set of text and content styling components
+//
+// COMPONENTS:
+// -----------
+// 1. Heading     - Semantic headings h1-h6 with size (xs-4xl), weight (normal/medium/
+//                  semibold/bold), color, truncate, and lineClamp props
+//
+// 2. Text        - Enhanced text component with size, weight, color, align,
+//                  truncate, italic, and underline options
+//
+// 3. Code        - Inline code styling for embedding code within text.
+//                  Props: color, fontSize
+//
+// 4. CodeBlock   - Multi-line code display with line numbers, copy button, and title.
+//                  Props: language, showLineNumbers, showCopyButton, title, maxHeight
+//
+// 5. Blockquote  - Styled quotations with optional citation.
+//                  Variants: default (left border), bordered, filled
+//
+// 6. Highlight   - Search result highlighting with query matching.
+//                  Props: query, text, highlightColor (yellow/green/blue/red/purple/orange)
+//
+// 7. Mark        - Simple text marking/highlighting.
+//                  Props: color (yellow/green/blue/red/purple)
+//
+// 8. Prose       - Long-form article styling container.
+//                  Props: size (sm/base/lg/xl), dark, maxWidth
+//
+// USAGE:
+// ------
+// All components use FlinUI theme tokens (CSS variables --flin-*).
+// Import the theme first: <link href="flinui/theme/tokens.flin">
+//
+// Then use components directly (auto-imported in FLIN):
+//
+//   <Heading as="h1" size="4xl">Welcome to FLIN</Heading>
+//
+//   <Text size="lg" weight="medium" align="center">
+//       Centered emphasized text
+//   </Text>
+//
+//   <Code>const x = 42</Code>
+//
+//   <CodeBlock language="flin" showLineNumbers={true} showCopyButton={true}>
+//       fn greet(name) {
+//           print("Hello, " ++ name)
+//       }
+//   </CodeBlock>
+//
+//   <Blockquote cite="Albert Einstein" variant="bordered">
+//       Imagination is more important than knowledge.
+//   </Blockquote>
+//
+//   <Highlight query="FLIN" text="Welcome to FLIN language" highlightColor="yellow" />
+//
+//   <Mark color="green">Important note</Mark>
+//
+//   <Prose size="lg" maxWidth="70ch">
+//       <h1>Article Title</h1>
+//       <p>Long form content goes here...</p>
+//   </Prose>
+//
+// See individual component files for full prop documentation.
+
+<div class="flinui-typography-info">
+    <h2>FlinUI Typography Components</h2>
+    <p>8 production-ready components for beautiful text styling and content presentation.</p>
+</div>
+
+<style scoped>
+.flinui-typography-info {
+    font-family: var(--flin-font-sans);
+    padding: var(--flin-space-4);
+    background: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-md);
+}
+
+.flinui-typography-info h2 {
+    margin: 0 0 var(--flin-space-2) 0;
+    color: var(--flin-fg);
+}
+
+.flinui-typography-info p {
+    margin: 0;
+    color: var(--flin-fg-muted);
+}
+</style>

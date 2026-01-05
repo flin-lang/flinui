@@ -20,6 +20,12 @@
 // FileUpload       - Drag-and-drop file upload with preview
 // Autocomplete     - Searchable dropdown with keyboard navigation
 // PinInput         - Multi-digit PIN/OTP input (4-6 digits)
+// NumberInput      - Numeric input with increment/decrement buttons
+// PasswordInput    - Password field with show/hide toggle and strength meter
+// TagsInput        - Multi-tag input with add/remove functionality
+// RatingInput      - Star rating input with hover preview
+// SearchInput      - Search input with clear button and loading state
+// OTPInput         - One-time password input with auto-focus
 //
 // ============================================================================
 // USAGE EXAMPLES
@@ -84,6 +90,70 @@
 //         length={6}
 //         type="number"
 //         onComplete={handleVerification}
+//     />
+// </FormField>
+//
+// Number input:
+// -------------
+// <FormField label="Quantity">
+//     <NumberInput
+//         value={quantity}
+//         min={1}
+//         max={100}
+//         step={1}
+//         onChange={handleQuantityChange}
+//     />
+// </FormField>
+//
+// Password input with strength meter:
+// ------------------------------------
+// <FormField label="New Password">
+//     <PasswordInput
+//         value={password}
+//         showStrengthMeter={true}
+//         onChange={handlePasswordChange}
+//     />
+// </FormField>
+//
+// Tags input:
+// -----------
+// <FormField label="Skills">
+//     <TagsInput
+//         value={skills}
+//         placeholder="Add a skill..."
+//         maxTags={10}
+//         onChange={handleSkillsChange}
+//     />
+// </FormField>
+//
+// Rating input:
+// -------------
+// <FormField label="Your Rating">
+//     <RatingInput
+//         value={rating}
+//         max={5}
+//         precision="half"
+//         onChange={handleRatingChange}
+//     />
+// </FormField>
+//
+// Search input:
+// -------------
+// <SearchInput
+//     value={searchQuery}
+//     placeholder="Search products..."
+//     loading={isSearching}
+//     onSearch={handleSearch}
+//     debounce={300}
+// />
+//
+// OTP input:
+// ----------
+// <FormField label="Enter OTP">
+//     <OTPInput
+//         length={6}
+//         type="number"
+//         onComplete={handleOTPVerification}
 //     />
 // </FormField>
 //

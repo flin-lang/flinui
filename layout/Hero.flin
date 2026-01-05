@@ -1,0 +1,287 @@
+// FlinUI Hero Component
+// Hero section for landing pages with multiple layout variants
+// Props: title (string), subtitle (string), image (string), actions (slot), variant (centered/split/full), height (sm/md/lg/full), overlay (bool)
+
+title = props.title || ""
+subtitle = props.subtitle || ""
+image = props.image || ""
+variant = props.variant || "centered"
+height = props.height || "md"
+overlay = props.overlay || false
+
+// Build class strings
+variantClass = match variant {
+    "centered" -> "flin-hero-centered"
+    "split" -> "flin-hero-split"
+    "full" -> "flin-hero-full"
+    _ -> "flin-hero-centered"
+}
+
+heightClass = match height {
+    "sm" -> " flin-hero-height-sm"
+    "md" -> " flin-hero-height-md"
+    "lg" -> " flin-hero-height-lg"
+    "full" -> " flin-hero-height-full"
+    _ -> " flin-hero-height-md"
+}
+
+overlayClass = match overlay {
+    true -> " flin-hero-overlay"
+    _ -> ""
+}
+
+heroClass = "flin-hero " ++ variantClass ++ heightClass ++ overlayClass
+
+// Background image style
+hasImage = image != ""
+backgroundStyle = match hasImage {
+    true -> "background-image: url(" ++ image ++ ");"
+    _ -> ""
+}
+
+// Content checks
+hasTitle = title != ""
+hasSubtitle = subtitle != ""
+
+<section class={heroClass} style={backgroundStyle}>
+    {if overlay && hasImage {
+        <div class="flin-hero-overlay-bg"></div>
+    }}
+
+    <div class="flin-hero-container">
+        {if variant == "split" {
+            <div class="flin-hero-content">
+                {if hasTitle {
+                    <h1 class="flin-hero-title">{title}</h1>
+                }}
+                {if hasSubtitle {
+                    <p class="flin-hero-subtitle">{subtitle}</p>
+                }}
+                <div class="flin-hero-actions">
+                    {children}
+                </div>
+            </div>
+            {if hasImage {
+                <div class="flin-hero-image-container">
+                    <img src={image} alt="" class="flin-hero-image" />
+                </div>
+            }}
+        } else {
+            <div class="flin-hero-content">
+                {if hasTitle {
+                    <h1 class="flin-hero-title">{title}</h1>
+                }}
+                {if hasSubtitle {
+                    <p class="flin-hero-subtitle">{subtitle}</p>
+                }}
+                <div class="flin-hero-actions">
+                    {children}
+                </div>
+            </div>
+        }}
+    </div>
+</section>
+
+<style scoped>
+.flin-hero {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: var(--flin-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* Height variants */
+.flin-hero-height-sm {
+    min-height: 300px;
+    padding: var(--flin-space-8) var(--flin-space-4);
+}
+
+.flin-hero-height-md {
+    min-height: 500px;
+    padding: var(--flin-space-12) var(--flin-space-4);
+}
+
+.flin-hero-height-lg {
+    min-height: 700px;
+    padding: var(--flin-space-16) var(--flin-space-4);
+}
+
+.flin-hero-height-full {
+    min-height: 100vh;
+    padding: var(--flin-space-8) var(--flin-space-4);
+}
+
+/* Overlay */
+.flin-hero-overlay-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+    z-index: 1;
+}
+
+.flin-hero-overlay .flin-hero-container {
+    position: relative;
+    z-index: 2;
+}
+
+.flin-hero-overlay .flin-hero-title,
+.flin-hero-overlay .flin-hero-subtitle {
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Container */
+.flin-hero-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Centered variant */
+.flin-hero-centered .flin-hero-container {
+    text-align: center;
+}
+
+.flin-hero-centered .flin-hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.flin-hero-centered .flin-hero-actions {
+    justify-content: center;
+}
+
+/* Split variant */
+.flin-hero-split .flin-hero-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--flin-space-8);
+    align-items: center;
+}
+
+.flin-hero-split .flin-hero-image-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flin-hero-split .flin-hero-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+/* Full variant (full background) */
+.flin-hero-full .flin-hero-container {
+    text-align: center;
+}
+
+.flin-hero-full .flin-hero-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.flin-hero-full .flin-hero-actions {
+    justify-content: center;
+}
+
+/* Content styles */
+.flin-hero-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.flin-hero-title {
+    margin: 0;
+    font-size: clamp(var(--flin-text-3xl), 5vw, var(--flin-text-5xl));
+    font-weight: 800;
+    color: var(--flin-fg);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.flin-hero-subtitle {
+    margin: 0;
+    font-size: clamp(var(--flin-text-lg), 2vw, var(--flin-text-xl));
+    color: var(--flin-muted-fg);
+    line-height: 1.5;
+    max-width: 600px;
+}
+
+.flin-hero-centered .flin-hero-subtitle,
+.flin-hero-full .flin-hero-subtitle {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.flin-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-space-3);
+    margin-top: var(--flin-space-4);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .flin-hero-height-sm {
+        min-height: 250px;
+        padding: var(--flin-space-6) var(--flin-space-4);
+    }
+
+    .flin-hero-height-md {
+        min-height: 400px;
+        padding: var(--flin-space-8) var(--flin-space-4);
+    }
+
+    .flin-hero-height-lg {
+        min-height: 500px;
+        padding: var(--flin-space-10) var(--flin-space-4);
+    }
+
+    .flin-hero-split .flin-hero-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .flin-hero-split .flin-hero-content {
+        order: 1;
+    }
+
+    .flin-hero-split .flin-hero-image-container {
+        order: 2;
+        margin-top: var(--flin-space-6);
+    }
+
+    .flin-hero-split .flin-hero-actions {
+        justify-content: center;
+    }
+
+    .flin-hero-split .flin-hero-subtitle {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .flin-hero-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .flin-hero-centered .flin-hero-actions,
+    .flin-hero-split .flin-hero-actions,
+    .flin-hero-full .flin-hero-actions {
+        align-items: center;
+    }
+}
+</style>

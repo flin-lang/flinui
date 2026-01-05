@@ -1,0 +1,718 @@
+// RegisterForm.flin - Complete registration form with validation
+
+// Props
+onSubmit = props.onSubmit || { data -> }
+fields = props.fields || ["name", "email", "password", "confirmPassword"] // which fields to show
+showPasswordStrength = props.showPasswordStrength ?? true
+termsLink = props.termsLink || "#"
+termsText = props.termsText || "Terms of Service"
+privacyLink = props.privacyLink || "#"
+privacyText = props.privacyText || "Privacy Policy"
+showTermsCheckbox = props.showTermsCheckbox ?? true
+loading = props.loading || false
+disabled = props.disabled || false
+submitText = props.submitText || "Create account"
+loadingText = props.loadingText || "Creating account..."
+errorMessage = props.errorMessage || nil
+successMessage = props.successMessage || nil
+minPasswordLength = props.minPasswordLength || 8
+
+// State
+formData = {
+    firstName: "",
+    lastName: "",
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    phone: "",
+    company: "",
+    acceptTerms: false
+}
+showPassword = false
+showConfirmPassword = false
+errors = {}
+touched = {}
+
+// Password strength calculation
+calculatePasswordStrength = { password ->
+    if password.length == 0 then return { score: 0, label: "", color: "" }
+
+    score = 0
+
+    // Length checks
+    if password.length >= 8 then score = score + 1
+    if password.length >= 12 then score = score + 1
+
+    // Character variety checks
+    if password.match("[a-z]") then score = score + 1
+    if password.match("[A-Z]") then score = score + 1
+    if password.match("[0-9]") then score = score + 1
+    if password.match("[^a-zA-Z0-9]") then score = score + 1
+
+    // Normalize to 0-4
+    normalizedScore = Math.min(4, Math.floor(score * 4 / 6))
+
+    labels = ["Very weak", "Weak", "Fair", "Good", "Strong"]
+    colors = ["var(--flin-color-red-500)", "var(--flin-color-orange-500)", "var(--flin-color-yellow-500)", "var(--flin-color-green-400)", "var(--flin-color-green-600)"]
+
+    return {
+        score: normalizedScore,
+        label: labels[normalizedScore],
+        color: colors[normalizedScore]
+    }
+}
+
+passwordStrength = calculatePasswordStrength(formData.password)
+
+// Validation functions
+validateField = { fieldName ->
+    value = formData[fieldName]
+
+    match fieldName {
+        "firstName" -> {
+            if value == "" then errors.firstName = "First name is required"
+            else errors.firstName = nil
+        }
+        "lastName" -> {
+            if value == "" then errors.lastName = "Last name is required"
+            else errors.lastName = nil
+        }
+        "name" -> {
+            if value == "" then errors.name = "Name is required"
+            else if value.length < 2 then errors.name = "Name must be at least 2 characters"
+            else errors.name = nil
+        }
+        "email" -> {
+            if value == "" then errors.email = "Email is required"
+            else if !value.includes("@") || !value.includes(".") then errors.email = "Please enter a valid email"
+            else errors.email = nil
+        }
+        "password" -> {
+            if value == "" then errors.password = "Password is required"
+            else if value.length < minPasswordLength then errors.password = "Password must be at least " ++ minPasswordLength ++ " characters"
+            else errors.password = nil
+
+            // Also validate confirm password if it's been touched
+            if touched.confirmPassword && formData.confirmPassword != "" then
+                if value != formData.confirmPassword then
+                    errors.confirmPassword = "Passwords do not match"
+                else
+                    errors.confirmPassword = nil
+        }
+        "confirmPassword" -> {
+            if value == "" then errors.confirmPassword = "Please confirm your password"
+            else if value != formData.password then errors.confirmPassword = "Passwords do not match"
+            else errors.confirmPassword = nil
+        }
+        "phone" -> {
+            if fields.includes("phone") && value == "" then errors.phone = "Phone number is required"
+            else errors.phone = nil
+        }
+        "company" -> {
+            // Company is usually optional, no validation
+            errors.company = nil
+        }
+        "acceptTerms" -> {
+            if showTermsCheckbox && !value then errors.acceptTerms = "You must accept the terms"
+            else errors.acceptTerms = nil
+        }
+    }
+}
+
+validateForm = {
+    fields.forEach { field ->
+        touched[field] = true
+        validateField(field)
+    }
+    if showTermsCheckbox then {
+        touched.acceptTerms = true
+        validateField("acceptTerms")
+    }
+
+    hasErrors = fields.some { field -> errors[field] != nil }
+    if showTermsCheckbox then
+        hasErrors = hasErrors || errors.acceptTerms != nil
+
+    return !hasErrors
+}
+
+// Handlers
+handleChange = { fieldName, value ->
+    formData[fieldName] = value
+    if fieldName == "password" then
+        passwordStrength = calculatePasswordStrength(value)
+    if touched[fieldName] then validateField(fieldName)
+}
+
+handleBlur = { fieldName ->
+    touched[fieldName] = true
+    validateField(fieldName)
+}
+
+handleSubmit = { event ->
+    event.preventDefault()
+
+    if validateForm() then
+        onSubmit(formData)
+}
+
+togglePasswordVisibility = { field ->
+    if field == "password" then
+        showPassword = !showPassword
+    else
+        showConfirmPassword = !showConfirmPassword
+}
+
+// Computed
+submitDisabled = loading || disabled
+getInputClass = { fieldName ->
+    if errors[fieldName] && touched[fieldName] then
+        "register-input register-input--error"
+    else
+        "register-input"
+}
+
+<form class="register-form" onSubmit={handleSubmit}>
+    // Error message
+    {if errorMessage then
+        <div class="register-message register-message--error" role="alert">
+            <span class="message-icon">⚠</span>
+            <span class="message-text">{errorMessage}</span>
+        </div>
+    }
+
+    // Success message
+    {if successMessage then
+        <div class="register-message register-message--success" role="status">
+            <span class="message-icon">✓</span>
+            <span class="message-text">{successMessage}</span>
+        </div>
+    }
+
+    // First name & Last name (side by side if both present)
+    {if fields.includes("firstName") || fields.includes("lastName") then
+        <div class="register-row">
+            {if fields.includes("firstName") then
+                <div class="register-field register-field--half">
+                    <label class="register-label" htmlFor="register-firstName">First name</label>
+                    <input
+                        type="text"
+                        id="register-firstName"
+                        class={getInputClass("firstName")}
+                        placeholder="John"
+                        value={formData.firstName}
+                        onChange={e -> handleChange("firstName", e.target.value)}
+                        onBlur={ handleBlur("firstName") }
+                        disabled={submitDisabled}
+                        autoComplete="given-name"
+                    />
+                    {if errors.firstName && touched.firstName then
+                        <span class="register-error">{errors.firstName}</span>
+                    }
+                </div>
+            }
+            {if fields.includes("lastName") then
+                <div class="register-field register-field--half">
+                    <label class="register-label" htmlFor="register-lastName">Last name</label>
+                    <input
+                        type="text"
+                        id="register-lastName"
+                        class={getInputClass("lastName")}
+                        placeholder="Doe"
+                        value={formData.lastName}
+                        onChange={e -> handleChange("lastName", e.target.value)}
+                        onBlur={ handleBlur("lastName") }
+                        disabled={submitDisabled}
+                        autoComplete="family-name"
+                    />
+                    {if errors.lastName && touched.lastName then
+                        <span class="register-error">{errors.lastName}</span>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    // Full name field
+    {if fields.includes("name") then
+        <div class="register-field">
+            <label class="register-label" htmlFor="register-name">Full name</label>
+            <input
+                type="text"
+                id="register-name"
+                class={getInputClass("name")}
+                placeholder="John Doe"
+                value={formData.name}
+                onChange={e -> handleChange("name", e.target.value)}
+                onBlur={ handleBlur("name") }
+                disabled={submitDisabled}
+                autoComplete="name"
+            />
+            {if errors.name && touched.name then
+                <span class="register-error">{errors.name}</span>
+            }
+        </div>
+    }
+
+    // Email field
+    {if fields.includes("email") then
+        <div class="register-field">
+            <label class="register-label" htmlFor="register-email">Email</label>
+            <input
+                type="email"
+                id="register-email"
+                class={getInputClass("email")}
+                placeholder="john@example.com"
+                value={formData.email}
+                onChange={e -> handleChange("email", e.target.value)}
+                onBlur={ handleBlur("email") }
+                disabled={submitDisabled}
+                autoComplete="email"
+            />
+            {if errors.email && touched.email then
+                <span class="register-error">{errors.email}</span>
+            }
+        </div>
+    }
+
+    // Phone field
+    {if fields.includes("phone") then
+        <div class="register-field">
+            <label class="register-label" htmlFor="register-phone">Phone number</label>
+            <input
+                type="tel"
+                id="register-phone"
+                class={getInputClass("phone")}
+                placeholder="+1 (555) 123-4567"
+                value={formData.phone}
+                onChange={e -> handleChange("phone", e.target.value)}
+                onBlur={ handleBlur("phone") }
+                disabled={submitDisabled}
+                autoComplete="tel"
+            />
+            {if errors.phone && touched.phone then
+                <span class="register-error">{errors.phone}</span>
+            }
+        </div>
+    }
+
+    // Company field
+    {if fields.includes("company") then
+        <div class="register-field">
+            <label class="register-label" htmlFor="register-company">Company <span class="register-optional">(optional)</span></label>
+            <input
+                type="text"
+                id="register-company"
+                class={getInputClass("company")}
+                placeholder="Acme Inc."
+                value={formData.company}
+                onChange={e -> handleChange("company", e.target.value)}
+                onBlur={ handleBlur("company") }
+                disabled={submitDisabled}
+                autoComplete="organization"
+            />
+        </div>
+    }
+
+    // Password field
+    {if fields.includes("password") then
+        <div class="register-field">
+            <label class="register-label" htmlFor="register-password">Password</label>
+            <div class="register-password-wrapper">
+                <input
+                    type={if showPassword then "text" else "password"}
+                    id="register-password"
+                    class={getInputClass("password")}
+                    placeholder="Create a strong password"
+                    value={formData.password}
+                    onChange={e -> handleChange("password", e.target.value)}
+                    onBlur={ handleBlur("password") }
+                    disabled={submitDisabled}
+                    autoComplete="new-password"
+                />
+                <button
+                    type="button"
+                    class="register-password-toggle"
+                    onClick={ togglePasswordVisibility("password") }
+                    aria-label={if showPassword then "Hide password" else "Show password"}
+                    tabIndex="-1"
+                >
+                    {if showPassword then "👁" else "👁‍🗨"}
+                </button>
+            </div>
+            {if errors.password && touched.password then
+                <span class="register-error">{errors.password}</span>
+            }
+
+            // Password strength meter
+            {if showPasswordStrength && formData.password.length > 0 then
+                <div class="password-strength">
+                    <div class="strength-bars">
+                        {[0, 1, 2, 3].map { i ->
+                            <div
+                                class={if i <= passwordStrength.score then "strength-bar strength-bar--filled" else "strength-bar"}
+                                style={if i <= passwordStrength.score then "background-color: " ++ passwordStrength.color else ""}
+                                key={i}
+                            ></div>
+                        }}
+                    </div>
+                    <span class="strength-label" style={"color: " ++ passwordStrength.color}>{passwordStrength.label}</span>
+                </div>
+            }
+        </div>
+    }
+
+    // Confirm password field
+    {if fields.includes("confirmPassword") then
+        <div class="register-field">
+            <label class="register-label" htmlFor="register-confirmPassword">Confirm password</label>
+            <div class="register-password-wrapper">
+                <input
+                    type={if showConfirmPassword then "text" else "password"}
+                    id="register-confirmPassword"
+                    class={getInputClass("confirmPassword")}
+                    placeholder="Confirm your password"
+                    value={formData.confirmPassword}
+                    onChange={e -> handleChange("confirmPassword", e.target.value)}
+                    onBlur={ handleBlur("confirmPassword") }
+                    disabled={submitDisabled}
+                    autoComplete="new-password"
+                />
+                <button
+                    type="button"
+                    class="register-password-toggle"
+                    onClick={ togglePasswordVisibility("confirm") }
+                    aria-label={if showConfirmPassword then "Hide password" else "Show password"}
+                    tabIndex="-1"
+                >
+                    {if showConfirmPassword then "👁" else "👁‍🗨"}
+                </button>
+            </div>
+            {if errors.confirmPassword && touched.confirmPassword then
+                <span class="register-error">{errors.confirmPassword}</span>
+            }
+        </div>
+    }
+
+    // Terms checkbox
+    {if showTermsCheckbox then
+        <div class="register-terms">
+            <label class="register-checkbox-label">
+                <input
+                    type="checkbox"
+                    class="register-checkbox"
+                    checked={formData.acceptTerms}
+                    onChange={e -> handleChange("acceptTerms", e.target.checked)}
+                    disabled={submitDisabled}
+                />
+                <span class="register-checkbox-custom"></span>
+                <span class="register-checkbox-text">
+                    I agree to the <a href={termsLink} target="_blank" rel="noopener">{termsText}</a> and <a href={privacyLink} target="_blank" rel="noopener">{privacyText}</a>
+                </span>
+            </label>
+            {if errors.acceptTerms && touched.acceptTerms then
+                <span class="register-error">{errors.acceptTerms}</span>
+            }
+        </div>
+    }
+
+    // Submit button
+    <button
+        type="submit"
+        class="register-submit"
+        disabled={submitDisabled}
+    >
+        {if loading then
+            <span class="register-spinner"></span>
+        }
+        <span>{if loading then loadingText else submitText}</span>
+    </button>
+</form>
+
+<style scoped>
+.register-form {
+    width: 100%;
+}
+
+/* Messages */
+.register-message {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-spacing-3);
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    border-radius: var(--flin-radius-md);
+    margin-bottom: var(--flin-spacing-5);
+    font-size: var(--flin-font-size-sm);
+}
+
+.register-message--error {
+    background: var(--flin-color-red-50);
+    color: var(--flin-color-red-700);
+    border: 1px solid var(--flin-color-red-200);
+}
+
+.register-message--success {
+    background: var(--flin-color-green-50);
+    color: var(--flin-color-green-700);
+    border: 1px solid var(--flin-color-green-200);
+}
+
+.message-icon {
+    flex-shrink: 0;
+}
+
+/* Form layout */
+.register-row {
+    display: flex;
+    gap: var(--flin-spacing-4);
+}
+
+.register-field {
+    margin-bottom: var(--flin-spacing-5);
+}
+
+.register-field--half {
+    flex: 1;
+}
+
+.register-label {
+    display: block;
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-700);
+    margin-bottom: var(--flin-spacing-2);
+}
+
+.register-optional {
+    font-weight: var(--flin-font-weight-normal);
+    color: var(--flin-color-gray-400);
+}
+
+/* Input styles */
+.register-input {
+    width: 100%;
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    font-size: var(--flin-font-size-base);
+    border: 1px solid var(--flin-color-gray-300);
+    border-radius: var(--flin-radius-md);
+    background: var(--flin-color-white);
+    color: var(--flin-color-gray-900);
+    transition: all var(--flin-transition-fast);
+    outline: none;
+}
+
+.register-input:focus {
+    border-color: var(--flin-color-primary-500);
+    box-shadow: 0 0 0 3px var(--flin-color-primary-100);
+}
+
+.register-input:disabled {
+    background: var(--flin-color-gray-100);
+    cursor: not-allowed;
+}
+
+.register-input--error {
+    border-color: var(--flin-color-red-500);
+}
+
+.register-input--error:focus {
+    box-shadow: 0 0 0 3px var(--flin-color-red-100);
+}
+
+.register-input::placeholder {
+    color: var(--flin-color-gray-400);
+}
+
+/* Password field */
+.register-password-wrapper {
+    position: relative;
+}
+
+.register-password-wrapper .register-input {
+    padding-right: var(--flin-spacing-12);
+}
+
+.register-password-toggle {
+    position: absolute;
+    right: var(--flin-spacing-1);
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: var(--flin-spacing-2) var(--flin-spacing-3);
+    cursor: pointer;
+    color: var(--flin-color-gray-500);
+    font-size: var(--flin-font-size-base);
+}
+
+.register-password-toggle:hover {
+    color: var(--flin-color-gray-700);
+}
+
+/* Password strength meter */
+.password-strength {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-3);
+    margin-top: var(--flin-spacing-2);
+}
+
+.strength-bars {
+    display: flex;
+    gap: var(--flin-spacing-1);
+    flex: 1;
+}
+
+.strength-bar {
+    height: 4px;
+    flex: 1;
+    border-radius: var(--flin-radius-full);
+    background: var(--flin-color-gray-200);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.strength-bar--filled {
+    background: var(--flin-color-gray-400);
+}
+
+.strength-label {
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    min-width: 70px;
+    text-align: right;
+}
+
+/* Error messages */
+.register-error {
+    display: block;
+    margin-top: var(--flin-spacing-2);
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-red-600);
+}
+
+/* Terms checkbox */
+.register-terms {
+    margin-bottom: var(--flin-spacing-6);
+}
+
+.register-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-spacing-3);
+    cursor: pointer;
+    user-select: none;
+}
+
+.register-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.register-checkbox-custom {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--flin-color-gray-300);
+    border-radius: var(--flin-radius-sm);
+    background: var(--flin-color-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--flin-transition-fast);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.register-checkbox:checked + .register-checkbox-custom {
+    background: var(--flin-color-primary-500);
+    border-color: var(--flin-color-primary-500);
+}
+
+.register-checkbox:checked + .register-checkbox-custom::after {
+    content: "✓";
+    color: var(--flin-color-white);
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.register-checkbox:focus + .register-checkbox-custom {
+    box-shadow: 0 0 0 3px var(--flin-color-primary-100);
+}
+
+.register-checkbox-text {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-600);
+    line-height: 1.5;
+}
+
+.register-checkbox-text a {
+    color: var(--flin-color-primary-600);
+    text-decoration: none;
+}
+
+.register-checkbox-text a:hover {
+    text-decoration: underline;
+}
+
+/* Submit button */
+.register-submit {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-spacing-2);
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    font-size: var(--flin-font-size-base);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-white);
+    background: var(--flin-color-primary-600);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.register-submit:hover:not(:disabled) {
+    background: var(--flin-color-primary-700);
+}
+
+.register-submit:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--flin-color-primary-100);
+}
+
+.register-submit:disabled {
+    background: var(--flin-color-gray-300);
+    cursor: not-allowed;
+}
+
+/* Loading spinner */
+.register-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    border-top-color: var(--flin-color-white);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .register-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .register-field--half {
+        width: 100%;
+    }
+}
+</style>

@@ -1,0 +1,442 @@
+// TreeView.flin - Hierarchical tree with expand/collapse and selection
+
+// Props with defaults
+data = props.data || []
+defaultExpandedKeys = props.defaultExpandedKeys || []
+selectedKeys = props.selectedKeys || []
+checkable = props.checkable || false
+selectable = props.selectable || true
+expandOnClick = props.expandOnClick || true
+onSelect = props.onSelect || nil
+onExpand = props.onExpand || nil
+onCheck = props.onCheck || nil
+
+// State
+expandedKeys = [...defaultExpandedKeys]
+checkedKeys = props.checkedKeys || []
+focusedKey = nil
+
+// CSS classes
+containerClass = "treeview"
+nodeClass = "treeview-node"
+nodeSelectedClass = "treeview-node treeview-node--selected"
+nodeFocusedClass = "treeview-node treeview-node--focused"
+contentClass = "treeview-content"
+expanderClass = "treeview-expander"
+expanderExpandedClass = "treeview-expander treeview-expander--expanded"
+checkboxClass = "treeview-checkbox"
+checkboxCheckedClass = "treeview-checkbox treeview-checkbox--checked"
+checkboxIndeterminateClass = "treeview-checkbox treeview-checkbox--indeterminate"
+labelClass = "treeview-label"
+iconClass = "treeview-icon"
+childrenClass = "treeview-children"
+childrenExpandedClass = "treeview-children treeview-children--expanded"
+
+// Check if a node is expanded
+isExpanded = |key| {
+    expandedKeys.includes(key)
+}
+
+// Check if a node is selected
+isSelected = |key| {
+    selectedKeys.includes(key)
+}
+
+// Check if a node is checked
+isChecked = |key| {
+    checkedKeys.includes(key)
+}
+
+// Check if a node has children
+hasChildren = |node| {
+    node.children && node.children.length > 0
+}
+
+// Get check state (for indeterminate)
+getCheckState = |node| {
+    if !hasChildren(node) {
+        return isChecked(node.key) ? "checked" : "unchecked"
+    }
+
+    allChildKeys = getAllChildKeys(node)
+    checkedCount = allChildKeys.filter(|k| checkedKeys.includes(k)).length
+
+    if checkedCount == 0 {
+        "unchecked"
+    } else if checkedCount == allChildKeys.length {
+        "checked"
+    } else {
+        "indeterminate"
+    }
+}
+
+// Get all child keys recursively
+getAllChildKeys = |node| {
+    keys = [node.key]
+    if hasChildren(node) {
+        node.children.forEach(|child| {
+            keys = [...keys, ...getAllChildKeys(child)]
+        })
+    }
+    keys
+}
+
+// Handlers
+handleToggleExpand = |node, e| {
+    e.stopPropagation()
+
+    if isExpanded(node.key) {
+        expandedKeys = expandedKeys.filter(|k| k != node.key)
+    } else {
+        expandedKeys = [...expandedKeys, node.key]
+    }
+
+    if onExpand {
+        onExpand(expandedKeys, { node: node, expanded: !isExpanded(node.key) })
+    }
+}
+
+handleSelect = |node, e| {
+    if !selectable { return }
+
+    if expandOnClick && hasChildren(node) {
+        handleToggleExpand(node, e)
+    }
+
+    newSelectedKeys = isSelected(node.key)
+        ? selectedKeys.filter(|k| k != node.key)
+        : [...selectedKeys, node.key]
+
+    if onSelect {
+        onSelect(newSelectedKeys, { node: node, selected: !isSelected(node.key) })
+    }
+}
+
+handleCheck = |node, e| {
+    e.stopPropagation()
+
+    allKeys = getAllChildKeys(node)
+    currentlyChecked = isChecked(node.key)
+
+    if currentlyChecked {
+        newCheckedKeys = checkedKeys.filter(|k| !allKeys.includes(k))
+    } else {
+        newCheckedKeys = [...new Set([...checkedKeys, ...allKeys])]
+    }
+
+    checkedKeys = newCheckedKeys
+
+    if onCheck {
+        onCheck(newCheckedKeys, { node: node, checked: !currentlyChecked })
+    }
+}
+
+handleKeyDown = |e| {
+    if !focusedKey { return }
+
+    flatNodes = flattenTree(data)
+    currentIndex = flatNodes.findIndex(|n| n.key == focusedKey)
+
+    match e.key {
+        "ArrowDown" => {
+            e.preventDefault()
+            if currentIndex < flatNodes.length - 1 {
+                focusedKey = flatNodes[currentIndex + 1].key
+            }
+        }
+        "ArrowUp" => {
+            e.preventDefault()
+            if currentIndex > 0 {
+                focusedKey = flatNodes[currentIndex - 1].key
+            }
+        }
+        "ArrowRight" => {
+            e.preventDefault()
+            node = flatNodes[currentIndex]
+            if hasChildren(node) && !isExpanded(node.key) {
+                expandedKeys = [...expandedKeys, node.key]
+            } else if hasChildren(node) && isExpanded(node.key) {
+                // Move to first child
+                focusedKey = node.children[0].key
+            }
+        }
+        "ArrowLeft" => {
+            e.preventDefault()
+            node = flatNodes[currentIndex]
+            if hasChildren(node) && isExpanded(node.key) {
+                expandedKeys = expandedKeys.filter(|k| k != node.key)
+            } else if node.parentKey {
+                focusedKey = node.parentKey
+            }
+        }
+        "Enter" | " " => {
+            e.preventDefault()
+            node = flatNodes[currentIndex]
+            if checkable {
+                handleCheck(node, e)
+            } else {
+                handleSelect(node, e)
+            }
+        }
+    }
+}
+
+// Flatten tree for keyboard navigation
+flattenTree = |nodes, parentKey = nil| {
+    result = []
+    nodes.forEach(|node| {
+        nodeWithParent = { ...node, parentKey: parentKey }
+        result = [...result, nodeWithParent]
+        if hasChildren(node) && isExpanded(node.key) {
+            result = [...result, ...flattenTree(node.children, node.key)]
+        }
+    })
+    result
+}
+
+// Render a single node
+renderNode = |node, level = 0| {
+    expanded = isExpanded(node.key)
+    selected = isSelected(node.key)
+    checkState = checkable ? getCheckState(node) : nil
+
+    nodeClassName = selected ? nodeSelectedClass : (focusedKey == node.key ? nodeFocusedClass : nodeClass)
+    expanderClassName = expanded ? expanderExpandedClass : expanderClass
+    checkboxClassName = {
+        if checkState == "checked" { checkboxCheckedClass }
+        else if checkState == "indeterminate" { checkboxIndeterminateClass }
+        else { checkboxClass }
+    }
+    childrenClassName = expanded ? childrenExpandedClass : childrenClass
+
+    <div class="treeview-item" style="--level: {level}">
+        <div
+            class={nodeClassName}
+            onClick={|e| handleSelect(node, e)}
+            onFocus={() => { focusedKey = node.key }}
+            tabIndex={level == 0 ? 0 : -1}
+            role="treeitem"
+            aria-expanded={hasChildren(node) ? expanded : nil}
+            aria-selected={selected}
+        >
+            <span class={expanderClassName} onClick={|e| handleToggleExpand(node, e)}>
+                {hasChildren(node) ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                ) : (
+                    <span class="treeview-expander-placeholder"></span>
+                )}
+            </span>
+
+            {checkable ? (
+                <span class={checkboxClassName} onClick={|e| handleCheck(node, e)}>
+                    {checkState == "checked" ? (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    ) : checkState == "indeterminate" ? (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    ) : nil}
+                </span>
+            ) : nil}
+
+            {node.icon ? (
+                <span class={iconClass}>{node.icon}</span>
+            ) : nil}
+
+            <span class={labelClass}>{node.label}</span>
+        </div>
+
+        {hasChildren(node) ? (
+            <div class={childrenClassName} role="group">
+                {node.children.map(|child| renderNode(child, level + 1))}
+            </div>
+        ) : nil}
+    </div>
+}
+
+<div
+    class={containerClass}
+    role="tree"
+    onKeyDown={handleKeyDown}
+>
+    {data.map(|node| renderNode(node, 0))}
+
+    {data.length == 0 ? (
+        <div class="treeview-empty">No items to display</div>
+    ) : nil}
+</div>
+
+<style scoped>
+.treeview {
+    font-size: 14px;
+    color: var(--flin-fg);
+    user-select: none;
+}
+
+.treeview-item {
+    padding-left: calc(var(--level, 0) * 20px);
+}
+
+.treeview-node {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+    outline: none;
+}
+
+.treeview-node:hover {
+    background: var(--flin-neutral-100);
+}
+
+.treeview-node:focus {
+    background: var(--flin-neutral-100);
+    outline: 2px solid var(--flin-primary);
+    outline-offset: -2px;
+}
+
+.treeview-node--selected {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    outline: none;
+    background: rgba(var(--flin-primary-rgb), 0.1);
+    color: var(--flin-primary);
+}
+
+.treeview-node--selected:hover {
+    background: rgba(var(--flin-primary-rgb), 0.15);
+}
+
+.treeview-node--focused {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    background: var(--flin-neutral-100);
+    outline: 2px solid var(--flin-primary);
+    outline-offset: -2px;
+}
+
+.treeview-expander {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--flin-neutral-400);
+    transition: transform var(--flin-transition-fast);
+}
+
+.treeview-expander:hover {
+    color: var(--flin-fg);
+}
+
+.treeview-expander--expanded {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--flin-neutral-400);
+    transform: rotate(90deg);
+}
+
+.treeview-expander-placeholder {
+    width: 16px;
+    height: 16px;
+}
+
+.treeview-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: 3px;
+    background: var(--flin-bg);
+    flex-shrink: 0;
+    transition: all var(--flin-transition-fast);
+}
+
+.treeview-checkbox:hover {
+    border-color: var(--flin-primary);
+}
+
+.treeview-checkbox--checked {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--flin-primary);
+    border-radius: 3px;
+    flex-shrink: 0;
+    background: var(--flin-primary);
+    color: white;
+}
+
+.treeview-checkbox--indeterminate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--flin-primary);
+    border-radius: 3px;
+    flex-shrink: 0;
+    background: var(--flin-primary);
+    color: white;
+}
+
+.treeview-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--flin-neutral-500);
+}
+
+.treeview-node--selected .treeview-icon {
+    color: var(--flin-primary);
+}
+
+.treeview-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.treeview-children {
+    display: none;
+}
+
+.treeview-children--expanded {
+    display: block;
+}
+
+.treeview-empty {
+    padding: 24px;
+    text-align: center;
+    color: var(--flin-neutral-400);
+}
+</style>

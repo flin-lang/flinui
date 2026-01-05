@@ -1,0 +1,171 @@
+// Text.flin - FlinUI Enhanced Text Component
+// Flexible typography with size, weight, color, alignment, and text utilities
+
+// Props with defaults
+size = props.size || "base"
+weight = props.weight || "normal"
+color = props.color || ""
+align = props.align || "left"
+truncate = props.truncate || false
+italic = props.italic || false
+underline = props.underline || false
+as = props.as || "span"
+
+// Computed size class
+sizeClass = match size {
+    "xs" -> "text-xs"
+    "sm" -> "text-sm"
+    "lg" -> "text-lg"
+    "xl" -> "text-xl"
+    "2xl" -> "text-2xl"
+    "3xl" -> "text-3xl"
+    "4xl" -> "text-4xl"
+    _ -> "text-base"
+}
+
+// Computed weight class
+weightClass = match weight {
+    "medium" -> "text-medium"
+    "semibold" -> "text-semibold"
+    "bold" -> "text-bold"
+    _ -> "text-normal"
+}
+
+// Computed align class
+alignClass = match align {
+    "center" -> " text-center"
+    "right" -> " text-right"
+    "justify" -> " text-justify"
+    _ -> ""
+}
+
+// Truncate class
+truncateClass = match truncate {
+    true -> " text-truncate"
+    _ -> ""
+}
+
+// Italic class
+italicClass = match italic {
+    true -> " text-italic"
+    _ -> ""
+}
+
+// Underline class
+underlineClass = match underline {
+    true -> " text-underline"
+    _ -> ""
+}
+
+// Color style
+colorStyle = {if color != "" { "color: " ++ color } else { "" }}
+
+// Build full class string
+textClass = "text " ++ sizeClass ++ " " ++ weightClass ++ alignClass ++ truncateClass ++ italicClass ++ underlineClass
+
+// Render appropriate element
+{match as {
+    "p" -> <p class={textClass} style={colorStyle}>{children}</p>
+    "div" -> <div class={textClass} style={colorStyle}>{children}</div>
+    "label" -> <label class={textClass} style={colorStyle}>{children}</label>
+    "small" -> <small class={textClass} style={colorStyle}>{children}</small>
+    "strong" -> <strong class={textClass} style={colorStyle}>{children}</strong>
+    "em" -> <em class={textClass} style={colorStyle}>{children}</em>
+    _ -> <span class={textClass} style={colorStyle}>{children}</span>
+}}
+
+<style scoped>
+.text {
+    font-family: var(--flin-font-sans);
+    line-height: 1.5;
+    margin: 0;
+    color: var(--flin-fg);
+}
+
+/* Size variants */
+.text-xs {
+    font-size: var(--flin-text-xs);
+    line-height: 1.4;
+}
+
+.text-sm {
+    font-size: var(--flin-text-sm);
+    line-height: 1.45;
+}
+
+.text-base {
+    font-size: var(--flin-text-base);
+    line-height: 1.5;
+}
+
+.text-lg {
+    font-size: var(--flin-text-lg);
+    line-height: 1.55;
+}
+
+.text-xl {
+    font-size: var(--flin-text-xl);
+    line-height: 1.4;
+}
+
+.text-2xl {
+    font-size: var(--flin-text-2xl);
+    line-height: 1.35;
+}
+
+.text-3xl {
+    font-size: var(--flin-text-3xl);
+    line-height: 1.3;
+}
+
+.text-4xl {
+    font-size: var(--flin-text-4xl);
+    line-height: 1.2;
+}
+
+/* Weight variants */
+.text-normal {
+    font-weight: 400;
+}
+
+.text-medium {
+    font-weight: 500;
+}
+
+.text-semibold {
+    font-weight: 600;
+}
+
+.text-bold {
+    font-weight: 700;
+}
+
+/* Alignment variants */
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-justify {
+    text-align: justify;
+}
+
+/* Text utilities */
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.text-italic {
+    font-style: italic;
+}
+
+.text-underline {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+</style>

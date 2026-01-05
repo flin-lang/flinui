@@ -1,0 +1,275 @@
+// BadgeGroup.flin - FlinUI Badge Group Component
+// Multiple badges in a row with overflow indicator
+
+// Props with defaults
+max = props.max || 3
+gap = props.gap || "sm"
+expandable = props.expandable || false
+
+// Internal state
+isExpanded = false
+
+// Handle expansion toggle
+handleToggle = {
+    {if expandable}
+        isExpanded = !isExpanded
+    {/if}
+}
+
+// Gap class
+gapClass = match gap {
+    "xs" -> "badge-group-gap-xs"
+    "md" -> "badge-group-gap-md"
+    "lg" -> "badge-group-gap-lg"
+    _ -> "badge-group-gap-sm"
+}
+
+// Expanded class
+expandedClass = match isExpanded { true -> " badge-group-expanded", _ -> "" }
+
+// Calculate visible badges and overflow
+visibleCount = match isExpanded {
+    true -> children.length
+    _ -> match children.length > max {
+        true -> max
+        _ -> children.length
+    }
+}
+
+overflowCount = match isExpanded {
+    true -> 0
+    _ -> match children.length > max {
+        true -> children.length - max
+        _ -> 0
+    }
+}
+
+<div
+    class={"flin-badge-group " ++ gapClass ++ expandedClass}
+    role="group"
+    aria-label="Badge group"
+>
+    <div class="badge-group-items">
+        {loop badge, index in children}
+            {if index < visibleCount}
+                <div class="badge-group-item" aria-hidden={index >= visibleCount}>
+                    {badge}
+                </div>
+            {/if}
+        {/loop}
+    </div>
+
+    {if overflowCount > 0}
+        {
+            expandableClass = match expandable { true -> " badge-overflow-expandable", _ -> "" }
+        }
+        <button
+            class={"badge-group-overflow" ++ expandableClass}
+            click={handleToggle}
+            aria-expanded={isExpanded}
+            aria-label={"Show " ++ overflowCount ++ " more badges"}
+            type="button"
+            disabled={!expandable}
+        >
+            <span class="overflow-text">+{overflowCount} more</span>
+        </button>
+    {/if}
+
+    {if isExpanded && children.length > max}
+        <button
+            class="badge-group-collapse"
+            click={handleToggle}
+            aria-label="Show fewer badges"
+            type="button"
+        >
+            <span class="collapse-text">Show less</span>
+        </button>
+    {/if}
+</div>
+
+<style scoped>
+/* Badge Group Container */
+.flin-badge-group {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--flin-space-2);
+}
+
+/* Badge Items Row */
+.badge-group-items {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: inherit;
+}
+
+/* Individual Badge Item */
+.badge-group-item {
+    animation: badgeFadeIn var(--flin-transition-fast) ease-out;
+    animation-fill-mode: both;
+}
+
+@keyframes badgeFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Staggered animation */
+.badge-group-item:nth-child(1) { animation-delay: 0ms; }
+.badge-group-item:nth-child(2) { animation-delay: 30ms; }
+.badge-group-item:nth-child(3) { animation-delay: 60ms; }
+.badge-group-item:nth-child(4) { animation-delay: 90ms; }
+.badge-group-item:nth-child(5) { animation-delay: 120ms; }
+
+/* Gap Variants */
+.badge-group-gap-xs {
+    gap: var(--flin-space-1);
+}
+
+.badge-group-gap-sm {
+    gap: var(--flin-space-2);
+}
+
+.badge-group-gap-md {
+    gap: var(--flin-space-3);
+}
+
+.badge-group-gap-lg {
+    gap: var(--flin-space-4);
+}
+
+/* Overflow Indicator */
+.badge-group-overflow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+    background-color: var(--flin-neutral-100);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-full);
+    white-space: nowrap;
+    transition: all var(--flin-transition-fast);
+}
+
+.badge-group-overflow:disabled {
+    cursor: default;
+}
+
+.badge-group-overflow:not(:disabled) {
+    cursor: pointer;
+}
+
+.badge-overflow-expandable:hover {
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-fg);
+}
+
+.badge-overflow-expandable:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.overflow-text {
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* Collapse Button */
+.badge-group-collapse {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    color: var(--flin-primary);
+    background-color: transparent;
+    border: 1px solid var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--flin-transition-fast);
+}
+
+.badge-group-collapse:hover {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.badge-group-collapse:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.collapse-text {
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* Expanded State Animation */
+.badge-group-expanded .badge-group-item {
+    animation: badgeExpand var(--flin-transition-fast) ease-out;
+}
+
+@keyframes badgeExpand {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Hover effects */
+.badge-group-item:hover {
+    transform: translateY(-1px);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .badge-group-overflow {
+    background-color: var(--flin-neutral-700);
+    border-color: var(--flin-neutral-600);
+    color: var(--flin-neutral-300);
+}
+
+[data-theme="dark"] .badge-overflow-expandable:hover {
+    background-color: var(--flin-neutral-600);
+    color: var(--flin-neutral-100);
+}
+
+[data-theme="dark"] .badge-group-collapse {
+    border-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .badge-group-collapse:hover {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .flin-badge-group {
+        gap: var(--flin-space-1);
+    }
+
+    .badge-group-overflow,
+    .badge-group-collapse {
+        padding: var(--flin-space-1);
+        font-size: 10px;
+    }
+}
+</style>

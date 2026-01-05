@@ -1,0 +1,329 @@
+// NumberInput.flin - FlinUI Number Input Component
+// Numeric input with increment/decrement buttons and validation
+
+// Props with defaults
+value = props.value || 0
+min = props.min
+max = props.max
+step = props.step || 1
+precision = props.precision || 0
+disabled = props.disabled || false
+size = props.size || "md"
+placeholder = props.placeholder || ""
+onChange = props.onChange
+allowMouseWheel = props.allowMouseWheel || false
+
+// Internal state
+internalValue = value
+isFocused = false
+
+// Size classes
+sizeClass = match size {
+    "sm" -> "number-input-sm"
+    "lg" -> "number-input-lg"
+    _ -> "number-input-md"
+}
+
+// Format value with precision
+formatValue = {
+    val = event;
+    {if precision > 0}
+        val.toFixed(precision)
+    {else}
+        Math.round(val).toString()
+    {/if}
+}
+
+// Clamp value within min/max bounds
+clampValue = {
+    val = event;
+    {if min != null && val < min}
+        val = min
+    {/if}
+    {if max != null && val > max}
+        val = max
+    {/if}
+    val
+}
+
+// Update value and trigger onChange
+updateValue = {
+    newVal = event;
+    newVal = clampValue(newVal);
+    internalValue = newVal;
+    {if onChange}
+        onChange(newVal)
+    {/if}
+}
+
+// Increment value
+handleIncrement = {
+    {if !disabled}
+        newVal = parseFloat(internalValue) + step;
+        updateValue(newVal)
+    {/if}
+}
+
+// Decrement value
+handleDecrement = {
+    {if !disabled}
+        newVal = parseFloat(internalValue) - step;
+        updateValue(newVal)
+    {/if}
+}
+
+// Handle direct input
+handleInput = {
+    inputVal = event.target.value;
+    {if inputVal == "" || inputVal == "-"}
+        internalValue = inputVal
+    {else}
+        parsed = parseFloat(inputVal);
+        {if !isNaN(parsed)}
+            internalValue = inputVal
+        {/if}
+    {/if}
+}
+
+// Handle blur - finalize value
+handleBlur = {
+    isFocused = false;
+    parsed = parseFloat(internalValue);
+    {if isNaN(parsed)}
+        internalValue = min != null ? min : 0
+    {else}
+        updateValue(parsed)
+    {/if}
+}
+
+// Handle focus
+handleFocus = {
+    isFocused = true;
+    event.target.select()
+}
+
+// Handle keyboard
+handleKeydown = {
+    {if event.key == "ArrowUp"}
+        event.preventDefault();
+        handleIncrement()
+    {else if event.key == "ArrowDown"}
+        event.preventDefault();
+        handleDecrement()
+    {/if}
+}
+
+// Handle mouse wheel
+handleWheel = {
+    {if allowMouseWheel && isFocused && !disabled}
+        event.preventDefault();
+        {if event.deltaY < 0}
+            handleIncrement()
+        {else}
+            handleDecrement()
+        {/if}
+    {/if}
+}
+
+// Compute classes
+disabledClass = match disabled { true -> " number-input-disabled", _ -> "" }
+focusedClass = match isFocused { true -> " number-input-focused", _ -> "" }
+containerClass = "number-input " ++ sizeClass ++ disabledClass ++ focusedClass
+
+// Check button states
+decrementDisabled = disabled || (min != null && parseFloat(internalValue) <= min)
+incrementDisabled = disabled || (max != null && parseFloat(internalValue) >= max)
+
+<div class={containerClass}>
+    <button
+        type="button"
+        class="number-input-btn number-input-btn-decrement"
+        click={handleDecrement}
+        disabled={decrementDisabled}
+        tabindex="-1"
+        aria-label="Decrease value"
+    >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14"/>
+        </svg>
+    </button>
+    <input
+        type="text"
+        class="number-input-field"
+        value={internalValue}
+        placeholder={placeholder}
+        disabled={disabled}
+        inputmode="decimal"
+        input={handleInput}
+        focus={handleFocus}
+        blur={handleBlur}
+        keydown={handleKeydown}
+        wheel={handleWheel}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={internalValue}
+        role="spinbutton"
+    >
+    <button
+        type="button"
+        class="number-input-btn number-input-btn-increment"
+        click={handleIncrement}
+        disabled={incrementDisabled}
+        tabindex="-1"
+        aria-label="Increase value"
+    >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+        </svg>
+    </button>
+</div>
+
+<style scoped>
+.number-input {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    background-color: var(--flin-bg);
+    transition: all var(--flin-transition-fast);
+    overflow: hidden;
+}
+
+.number-input:hover:not(.number-input-disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.number-input-focused {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.number-input-field {
+    flex: 1;
+    min-width: 0;
+    padding: 0 var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background: transparent;
+    border: none;
+    outline: none;
+    text-align: center;
+    -moz-appearance: textfield;
+}
+
+.number-input-field::-webkit-outer-spin-button,
+.number-input-field::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.number-input-field::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.number-input-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: var(--flin-neutral-100);
+    border: none;
+    color: var(--flin-fg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    flex-shrink: 0;
+}
+
+.number-input-btn:hover:not(:disabled) {
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-primary);
+}
+
+.number-input-btn:active:not(:disabled) {
+    background-color: var(--flin-neutral-300);
+}
+
+.number-input-btn:disabled {
+    color: var(--flin-neutral-300);
+    cursor: not-allowed;
+}
+
+.number-input-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.number-input-btn-decrement {
+    border-right: 1px solid var(--flin-neutral-200);
+}
+
+.number-input-btn-increment {
+    border-left: 1px solid var(--flin-neutral-200);
+}
+
+/* Size variants */
+.number-input-sm {
+    height: 32px;
+}
+
+.number-input-sm .number-input-btn {
+    width: 28px;
+}
+
+.number-input-sm .number-input-field {
+    font-size: var(--flin-text-sm);
+    min-width: 48px;
+}
+
+.number-input-sm .number-input-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.number-input-md {
+    height: 40px;
+}
+
+.number-input-md .number-input-btn {
+    width: 36px;
+}
+
+.number-input-md .number-input-field {
+    min-width: 64px;
+}
+
+.number-input-lg {
+    height: 48px;
+}
+
+.number-input-lg .number-input-btn {
+    width: 44px;
+}
+
+.number-input-lg .number-input-field {
+    font-size: var(--flin-text-lg);
+    min-width: 80px;
+}
+
+.number-input-lg .number-input-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Disabled state */
+.number-input-disabled {
+    background-color: var(--flin-bg-muted);
+    cursor: not-allowed;
+    border-color: var(--flin-neutral-200);
+}
+
+.number-input-disabled .number-input-field {
+    color: var(--flin-fg-muted);
+    cursor: not-allowed;
+}
+
+.number-input-disabled .number-input-btn {
+    background-color: transparent;
+}
+</style>

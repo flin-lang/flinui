@@ -1,0 +1,142 @@
+// FlinUI Section Component
+// Content section with title, description, and optional dividers
+// Props: title (string), description (string), divider (top/bottom/both/none), spacing (sm/md/lg/xl)
+
+title = props.title || ""
+description = props.description || ""
+divider = props.divider || "none"
+spacing = props.spacing || "md"
+
+// Build class strings
+spacingClass = match spacing {
+    "sm" -> "flin-section-spacing-sm"
+    "md" -> "flin-section-spacing-md"
+    "lg" -> "flin-section-spacing-lg"
+    "xl" -> "flin-section-spacing-xl"
+    _ -> "flin-section-spacing-md"
+}
+
+dividerTopClass = match divider {
+    "top" -> " flin-section-divider-top"
+    "both" -> " flin-section-divider-top"
+    _ -> ""
+}
+
+dividerBottomClass = match divider {
+    "bottom" -> " flin-section-divider-bottom"
+    "both" -> " flin-section-divider-bottom"
+    _ -> ""
+}
+
+sectionClass = "flin-section " ++ spacingClass ++ dividerTopClass ++ dividerBottomClass
+
+// Check content availability
+hasTitle = title != ""
+hasDescription = description != ""
+hasHeader = hasTitle || hasDescription
+
+<section class={sectionClass}>
+    {if hasHeader {
+        <header class="flin-section-header">
+            {if hasTitle {
+                <h2 class="flin-section-title">{title}</h2>
+            }}
+            {if hasDescription {
+                <p class="flin-section-description">{description}</p>
+            }}
+        </header>
+    }}
+    <div class="flin-section-content">
+        {children}
+    </div>
+</section>
+
+<style scoped>
+.flin-section {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Spacing variants */
+.flin-section-spacing-sm {
+    padding: var(--flin-space-4) 0;
+}
+
+.flin-section-spacing-md {
+    padding: var(--flin-space-8) 0;
+}
+
+.flin-section-spacing-lg {
+    padding: var(--flin-space-12) 0;
+}
+
+.flin-section-spacing-xl {
+    padding: var(--flin-space-16) 0;
+}
+
+/* Divider variants */
+.flin-section-divider-top {
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.flin-section-divider-bottom {
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+/* Header */
+.flin-section-header {
+    margin-bottom: var(--flin-space-6);
+}
+
+.flin-section-title {
+    margin: 0;
+    font-size: var(--flin-text-2xl);
+    font-weight: 600;
+    color: var(--flin-fg);
+    line-height: 1.3;
+}
+
+.flin-section-description {
+    margin: var(--flin-space-2) 0 0 0;
+    font-size: var(--flin-text-base);
+    color: var(--flin-muted-fg);
+    line-height: 1.6;
+    max-width: 65ch;
+}
+
+/* Content area */
+.flin-section-content {
+    width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .flin-section-spacing-sm {
+        padding: var(--flin-space-3) 0;
+    }
+
+    .flin-section-spacing-md {
+        padding: var(--flin-space-6) 0;
+    }
+
+    .flin-section-spacing-lg {
+        padding: var(--flin-space-8) 0;
+    }
+
+    .flin-section-spacing-xl {
+        padding: var(--flin-space-12) 0;
+    }
+
+    .flin-section-header {
+        margin-bottom: var(--flin-space-4);
+    }
+
+    .flin-section-title {
+        font-size: var(--flin-text-xl);
+    }
+
+    .flin-section-description {
+        font-size: var(--flin-text-sm);
+    }
+}
+</style>

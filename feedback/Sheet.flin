@@ -1,0 +1,429 @@
+// Sheet.flin - FlinUI Bottom Sheet Component
+// Mobile-optimized bottom sheet with drag gestures and snap points
+
+// Props with defaults
+open = props.open || false
+snapPoints = props.snapPoints || [0.5, 1.0]
+defaultSnapIndex = props.defaultSnapIndex || 0
+showHandle = props.showHandle || true
+onClose = props.onClose
+dismissible = props.dismissible || true
+
+// Internal state
+isClosing = false
+isDragging = false
+currentHeight = 0
+startY = 0
+startHeight = 0
+currentSnapIndex = defaultSnapIndex
+
+// Calculate actual height from snap point percentage
+calculateHeight = { snapPoint ->
+    snapPoint * 100
+}
+
+// Initialize height on open
+onMount = {
+    {if open && snapPoints.length > 0}
+        currentHeight = calculateHeight(snapPoints[currentSnapIndex])
+    {/if}
+}
+
+// Watch for open changes
+onUpdate = {
+    {if open && currentHeight == 0}
+        currentHeight = calculateHeight(snapPoints[currentSnapIndex])
+    {/if}
+}
+
+// Handle close with animation
+handleClose = {
+    {if dismissible}
+        isClosing = true;
+        setTimeout({
+            isClosing = false;
+            currentHeight = 0;
+            currentSnapIndex = defaultSnapIndex;
+            {if onClose}
+                onClose()
+            {/if}
+        }, 300)
+    {/if}
+}
+
+// Handle backdrop click
+handleBackdropClick = {
+    handleClose()
+}
+
+// Handle escape key
+handleKeyDown = {
+    {if event.key == "Escape"}
+        handleClose()
+    {/if}
+}
+
+// Handle drag start
+handleDragStart = {
+    isDragging = true;
+    startY = event.touches ? event.touches[0].clientY : event.clientY;
+    startHeight = currentHeight
+}
+
+// Handle drag move
+handleDragMove = {
+    {if isDragging}
+        clientY = event.touches ? event.touches[0].clientY : event.clientY;
+        deltaY = startY - clientY;
+        deltaPercent = (deltaY / window.innerHeight) * 100;
+        newHeight = startHeight + deltaPercent;
+
+        // Clamp between 10% and 100%
+        {if newHeight < 10}
+            newHeight = 10
+        {/if}
+        {if newHeight > 100}
+            newHeight = 100
+        {/if}
+
+        currentHeight = newHeight
+    {/if}
+}
+
+// Handle drag end - snap to nearest point
+handleDragEnd = {
+    {if isDragging}
+        isDragging = false;
+
+        // Find nearest snap point
+        nearestIndex = 0;
+        nearestDistance = 1000;
+
+        loop snapPoint, index in snapPoints {
+            snapHeight = calculateHeight(snapPoint);
+            distance = Math.abs(currentHeight - snapHeight);
+            {if distance < nearestDistance}
+                nearestDistance = distance;
+                nearestIndex = index
+            {/if}
+        }
+
+        // Check if dragged below minimum threshold (close)
+        {if currentHeight < 15 && dismissible}
+            handleClose()
+        {else}
+            currentSnapIndex = nearestIndex;
+            currentHeight = calculateHeight(snapPoints[nearestIndex])
+        {/if}
+    {/if}
+}
+
+// Snap to specific point
+snapTo = { index ->
+    {if index >= 0 && index < snapPoints.length}
+        currentSnapIndex = index;
+        currentHeight = calculateHeight(snapPoints[index])
+    {/if}
+}
+
+// Computed classes
+backdropClosingClass = match isClosing { true -> " sheet-backdrop-closing", _ -> "" }
+sheetClosingClass = match isClosing { true -> " sheet-closing", _ -> "" }
+draggingClass = match isDragging { true -> " sheet-dragging", _ -> "" }
+
+{if open}
+    <div
+        class={"flin-sheet-backdrop" ++ backdropClosingClass}
+        click={handleBackdropClick}
+        aria-hidden="true"
+    ></div>
+
+    <div
+        class={"flin-sheet" ++ sheetClosingClass ++ draggingClass}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sheet-title"
+        tabindex="-1"
+        keydown={handleKeyDown}
+        style={"height: " ++ currentHeight ++ "vh"}
+    >
+        {if showHandle}
+            <div
+                class="sheet-handle-area"
+                mousedown={handleDragStart}
+                mousemove={handleDragMove}
+                mouseup={handleDragEnd}
+                mouseleave={handleDragEnd}
+                touchstart={handleDragStart}
+                touchmove={handleDragMove}
+                touchend={handleDragEnd}
+            >
+                <div class="sheet-handle" aria-hidden="true"></div>
+            </div>
+        {/if}
+
+        <div class="sheet-content">
+            {children}
+        </div>
+
+        {if snapPoints.length > 1}
+            <div class="sheet-snap-indicators" aria-hidden="true">
+                {loop snapPoint, index in snapPoints}
+                    {
+                        activeClass = match index == currentSnapIndex { true -> " snap-indicator-active", _ -> "" }
+                    }
+                    <button
+                        class={"snap-indicator" ++ activeClass}
+                        click={{snapTo(index)}}
+                        aria-label={"Snap to " ++ (snapPoint * 100) ++ "%"}
+                        type="button"
+                    ></button>
+                {/loop}
+            </div>
+        {/if}
+    </div>
+{/if}
+
+<style scoped>
+/* Backdrop */
+.flin-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 9998;
+    animation: sheetBackdropFadeIn var(--flin-transition-fast) ease-out;
+}
+
+@keyframes sheetBackdropFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.sheet-backdrop-closing {
+    animation: sheetBackdropFadeOut var(--flin-transition-slow) ease-in forwards;
+}
+
+@keyframes sheetBackdropFadeOut {
+    to {
+        opacity: 0;
+    }
+}
+
+/* Sheet Container */
+.flin-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--flin-bg);
+    border-top-left-radius: var(--flin-radius-2xl);
+    border-top-right-radius: var(--flin-radius-2xl);
+    box-shadow: var(--flin-shadow-xl);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    max-height: 100vh;
+    min-height: 100px;
+    transition: height var(--flin-transition-normal) ease-out;
+    animation: sheetSlideUp var(--flin-transition-slow) ease-out;
+    -webkit-overflow-scrolling: touch;
+}
+
+@keyframes sheetSlideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.sheet-closing {
+    animation: sheetSlideDown var(--flin-transition-slow) ease-in forwards;
+}
+
+@keyframes sheetSlideDown {
+    to {
+        transform: translateY(100%);
+    }
+}
+
+/* Disable transition while dragging */
+.sheet-dragging {
+    transition: none !important;
+}
+
+/* Focus styling */
+.flin-sheet:focus {
+    outline: none;
+}
+
+/* Handle Area */
+.sheet-handle-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    flex-shrink: 0;
+}
+
+.sheet-handle-area:active {
+    cursor: grabbing;
+}
+
+/* Handle Bar */
+.sheet-handle {
+    width: 40px;
+    height: 4px;
+    background-color: var(--flin-neutral-300);
+    border-radius: var(--flin-radius-full);
+    transition: width var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.sheet-handle-area:hover .sheet-handle {
+    width: 48px;
+    background-color: var(--flin-neutral-400);
+}
+
+.sheet-dragging .sheet-handle {
+    width: 56px;
+    background-color: var(--flin-primary);
+}
+
+/* Content */
+.sheet-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 var(--flin-space-4) var(--flin-space-4);
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Snap Point Indicators */
+.sheet-snap-indicators {
+    position: absolute;
+    right: var(--flin-space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.snap-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--flin-neutral-300);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.snap-indicator:hover {
+    background-color: var(--flin-neutral-400);
+    transform: scale(1.2);
+}
+
+.snap-indicator-active {
+    background-color: var(--flin-primary);
+}
+
+.snap-indicator-active:hover {
+    background-color: var(--flin-primary);
+}
+
+.snap-indicator:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+/* Safe area padding for iOS */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .sheet-content {
+        padding-bottom: calc(var(--flin-space-4) + env(safe-area-inset-bottom));
+    }
+}
+
+/* Desktop adjustments - center and limit width */
+@media (min-width: 768px) {
+    .flin-sheet {
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: 560px;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    @keyframes sheetSlideUp {
+        from {
+            transform: translateX(-50%) translateY(100%);
+        }
+        to {
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    .sheet-closing {
+        animation: sheetSlideDownDesktop var(--flin-transition-slow) ease-in forwards;
+    }
+
+    @keyframes sheetSlideDownDesktop {
+        to {
+            transform: translateX(-50%) translateY(100%);
+        }
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-sheet {
+    background-color: var(--flin-neutral-800);
+    border-top: 1px solid var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .sheet-handle {
+    background-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .sheet-handle-area:hover .sheet-handle {
+    background-color: var(--flin-neutral-500);
+}
+
+[data-theme="dark"] .snap-indicator {
+    background-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .snap-indicator:hover {
+    background-color: var(--flin-neutral-500);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .flin-sheet {
+        animation: none;
+        transition: none;
+    }
+
+    .sheet-closing {
+        animation: none;
+    }
+
+    .flin-sheet-backdrop {
+        animation: none;
+    }
+
+    .sheet-backdrop-closing {
+        animation: none;
+    }
+}
+</style>

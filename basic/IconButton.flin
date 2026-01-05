@@ -1,0 +1,272 @@
+// IconButton.flin - FlinUI Icon Button Component
+// A button that displays only an icon, with various sizes, variants, and states
+
+// Props with defaults
+icon = props.icon || "circle"
+size = props.size || "md"
+variant = props.variant || "secondary"
+rounded = props.rounded || false
+disabled = props.disabled || false
+loading = props.loading || false
+onClick = props.onClick
+ariaLabel = props.ariaLabel || icon
+title = props.title || ""
+
+// Computed size class
+sizeClass = match size {
+    "xs" -> "icon-btn-xs"
+    "sm" -> "icon-btn-sm"
+    "lg" -> "icon-btn-lg"
+    "xl" -> "icon-btn-xl"
+    _ -> "icon-btn-md"
+}
+
+// Map button size to icon size
+iconSize = match size {
+    "xs" -> "xs"
+    "sm" -> "sm"
+    "lg" -> "lg"
+    "xl" -> "xl"
+    _ -> "md"
+}
+
+// Computed variant class
+variantClass = match variant {
+    "primary" -> "icon-btn-primary"
+    "danger" -> "icon-btn-danger"
+    "success" -> "icon-btn-success"
+    "warning" -> "icon-btn-warning"
+    "ghost" -> "icon-btn-ghost"
+    "outline" -> "icon-btn-outline"
+    _ -> "icon-btn-secondary"
+}
+
+// Computed rounded class
+roundedClass = match rounded {
+    true -> " icon-btn-rounded"
+    _ -> ""
+}
+
+// Computed loading class
+loadingClass = match loading {
+    true -> " icon-btn-loading"
+    _ -> ""
+}
+
+// Pre-compute full class string
+btnClass = "icon-btn " ++ sizeClass ++ " " ++ variantClass ++ roundedClass ++ loadingClass
+
+<button
+    class={btnClass}
+    disabled={disabled || loading}
+    click={onClick}
+    aria-label={ariaLabel}
+    title={title}
+    aria-busy={loading}
+>
+    {if loading}
+        <span class="icon-btn-spinner" aria-hidden="true"></span>
+    {/if}
+    {if !loading}
+        <Icon name={icon} size={iconSize}/>
+    {/if}
+</button>
+
+<style scoped>
+/* Base icon button styles */
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.icon-btn:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.icon-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Size variants */
+.icon-btn-xs {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--flin-radius-sm);
+}
+
+.icon-btn-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--flin-radius-sm);
+}
+
+.icon-btn-md {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--flin-radius-md);
+}
+
+.icon-btn-lg {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--flin-radius-md);
+}
+
+.icon-btn-xl {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--flin-radius-lg);
+}
+
+/* Rounded modifier */
+.icon-btn-rounded {
+    border-radius: 50%;
+}
+
+/* Primary variant */
+.icon-btn-primary {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.icon-btn-primary:hover:not(:disabled) {
+    background-color: var(--flin-primary-hover);
+}
+
+.icon-btn-primary:active:not(:disabled) {
+    background-color: var(--flin-primary-active);
+}
+
+/* Secondary variant */
+.icon-btn-secondary {
+    background-color: var(--flin-secondary-light);
+    color: var(--flin-secondary);
+}
+
+.icon-btn-secondary:hover:not(:disabled) {
+    background-color: var(--flin-neutral-200);
+}
+
+.icon-btn-secondary:active:not(:disabled) {
+    background-color: var(--flin-neutral-300);
+}
+
+/* Danger variant */
+.icon-btn-danger {
+    background-color: var(--flin-danger);
+    color: white;
+}
+
+.icon-btn-danger:hover:not(:disabled) {
+    background-color: var(--flin-danger-hover);
+}
+
+.icon-btn-danger:active:not(:disabled) {
+    background-color: #b91c1c;
+}
+
+/* Success variant */
+.icon-btn-success {
+    background-color: var(--flin-success);
+    color: white;
+}
+
+.icon-btn-success:hover:not(:disabled) {
+    background-color: var(--flin-success-hover);
+}
+
+.icon-btn-success:active:not(:disabled) {
+    background-color: #047857;
+}
+
+/* Warning variant */
+.icon-btn-warning {
+    background-color: var(--flin-warning);
+    color: var(--flin-neutral-900);
+}
+
+.icon-btn-warning:hover:not(:disabled) {
+    background-color: var(--flin-warning-hover);
+}
+
+.icon-btn-warning:active:not(:disabled) {
+    background-color: #b45309;
+}
+
+/* Ghost variant */
+.icon-btn-ghost {
+    background-color: transparent;
+    color: var(--flin-neutral-700);
+}
+
+.icon-btn-ghost:hover:not(:disabled) {
+    background-color: var(--flin-neutral-100);
+}
+
+.icon-btn-ghost:active:not(:disabled) {
+    background-color: var(--flin-neutral-200);
+}
+
+/* Outline variant */
+.icon-btn-outline {
+    background-color: transparent;
+    color: var(--flin-neutral-700);
+    border: 1px solid var(--flin-neutral-300);
+}
+
+.icon-btn-outline:hover:not(:disabled) {
+    background-color: var(--flin-neutral-50);
+    border-color: var(--flin-neutral-400);
+}
+
+.icon-btn-outline:active:not(:disabled) {
+    background-color: var(--flin-neutral-100);
+}
+
+/* Loading state */
+.icon-btn-loading {
+    pointer-events: none;
+}
+
+.icon-btn-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: icon-btn-spin 0.6s linear infinite;
+}
+
+.icon-btn-xs .icon-btn-spinner {
+    width: 12px;
+    height: 12px;
+}
+
+.icon-btn-sm .icon-btn-spinner {
+    width: 14px;
+    height: 14px;
+}
+
+.icon-btn-lg .icon-btn-spinner,
+.icon-btn-xl .icon-btn-spinner {
+    width: 20px;
+    height: 20px;
+}
+
+@keyframes icon-btn-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+</style>
