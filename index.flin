@@ -1,12 +1,12 @@
 // FlinUI - Official Component Library for FLIN
-// 155 production-ready components. No npm install. No dependencies. Just FLIN.
-// Version 1.4.0
+// 185 production-ready components. No npm install. No dependencies. Just FLIN.
+// Version 1.5.0
 
 // ============================================================================
 // FLINUI COMPONENT LIBRARY
 // ============================================================================
 //
-// 155 production-ready components for building modern web applications.
+// 185 production-ready components for building modern web applications.
 // All components use theme tokens for consistent styling and dark mode support.
 //
 // Usage:
@@ -23,46 +23,51 @@
 //
 // BASIC (18 components)
 //   Button, Input, Textarea, Select, Checkbox, Radio, Switch, Slider
-//   Text, Link, Icon (200+ Lucide icons), Image, Avatar, Badge, Tag
+//   Text, Link, Icon (287+ Lucide icons), Image, Avatar, Badge, Tag
 //   IconButton, CloseButton, ButtonGroup
 //
-// LAYOUT (17 components)
+// LAYOUT (21 components)
 //   Container, Stack, Grid, Flex, Box, Divider, Spacer, Center
 //   AspectRatio, Wrap, ResizablePanels, Header, Footer, Collapse
-//   Section, Hero, PageContainer
+//   Section, Hero, PageContainer, Affix, BackTop, ScrollArea, Splitter
 //
-// DATA DISPLAY (23 components)
+// DATA DISPLAY (30 components)
 //   Card, CardHeader, CardBody, CardFooter, Table, List, ListItem
 //   Progress, Spinner, Skeleton, Empty, Code, Kbd, Stat, Accordion
 //   Calendar, Carousel, Timeline, DataTable, AvatarGroup, BadgeGroup
-//   Comment, StatsGrid
+//   Comment, StatsGrid, Descriptions, QRCode, Watermark, Segmented
+//   InfiniteScroll, Masonry, AdvancedDataTable
 //
-// FORMS (16 components)
+// FORMS (22 components)
 //   Form, FormField, FormError, FormHelp, DatePicker, TimePicker
 //   ColorPicker, FileUpload, Autocomplete, PinInput, NumberInput
 //   PasswordInput, TagsInput, RatingInput, SearchInput, OTPInput
+//   RichTextEditor, DateRangePicker, MultiSelect, ImageCropper
+//   Mentions, InputMask
 //
-// FEEDBACK (13 components)
+// FEEDBACK (17 components)
 //   Alert, Toast, Modal, ModalHeader, ModalBody, ModalFooter
 //   Drawer, Popover, Tooltip, Notification, CommandPalette
-//   AlertDialog, Sheet
+//   AlertDialog, Sheet, Tour, Popconfirm, HoverCard, Result
 //
 // NAVIGATION (17 components)
 //   Navbar, NavbarBrand, NavbarMenu, NavbarItem, Sidebar, SidebarItem
 //   Tabs, Tab, Breadcrumb, Pagination, Menu, Stepper, BottomNav, SkipNav
 //   Dropdown, ContextMenu, SpeedDial
 //
-// CHARTS (7 components)
+// CHARTS (13 components)
 //   BarChart, LineChart, PieChart, AreaChart, SparkLine
-//   ChartLegend, ChartTooltip
+//   ChartLegend, ChartTooltip, HeatmapChart, GanttChart
+//   ScatterChart, RadarChart, DonutChart, TreemapChart
 //
-// TYPOGRAPHY (8 components) - NEW!
+// TYPOGRAPHY (8 components)
 //   Heading, Text, Code, CodeBlock, Blockquote, Highlight, Mark, Prose
 //
-// COLLECTIONS (5 components) - NEW!
+// COLLECTIONS (8 components)
 //   Combobox, Listbox, TreeView, VirtualList, TransferList
+//   DragDrop, Sortable, Kanban
 //
-// TEMPLATES (10 templates) - NEW!
+// TEMPLATES (10 templates)
 //   DashboardLayout, AuthLayout, LoginForm, RegisterForm, LandingHero
 //   PricingTable, FeaturesGrid, SettingsLayout, ProfileCard, ErrorPage
 //
@@ -80,8 +85,8 @@
 //   custom.flin - Theme customization
 //   index.flin - Theme provider
 
-version = "1.4.0"
-componentCount = 155
+version = "1.5.0"
+componentCount = 185
 categories = ["basic", "layout", "data", "forms", "feedback", "navigation", "charts", "typography", "collections", "templates", "flin-native"]
 
 <div class="flinui-root">

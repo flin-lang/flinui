@@ -1,0 +1,216 @@
+// FlinUI Descriptions Component
+// Key-value display grid for detailed information (like Ant Design descriptions)
+
+// Props with defaults
+title = props.title || ""
+bordered = props.bordered || false
+layout = props.layout || "horizontal"
+column = props.column || 3
+size = props.size || "md"
+colon = props.colon || true
+items = props.items || []
+
+// Compute layout class
+layoutClass = match layout {
+    "horizontal" -> "flin-descriptions--horizontal"
+    "vertical" -> "flin-descriptions--vertical"
+    _ -> "flin-descriptions--horizontal"
+}
+
+// Compute size class
+sizeClass = match size {
+    "sm" -> "flin-descriptions--sm"
+    "md" -> "flin-descriptions--md"
+    "lg" -> "flin-descriptions--lg"
+    _ -> "flin-descriptions--md"
+}
+
+// Compute border class
+borderClass = match bordered {
+    true -> " flin-descriptions--bordered"
+    _ -> ""
+}
+
+// Compute colon suffix
+colonSuffix = match colon {
+    true -> ":"
+    _ -> ""
+}
+
+<div class={"flin-descriptions " ++ layoutClass ++ " " ++ sizeClass ++ borderClass}
+     style={"--desc-columns: " ++ column}
+     role="list"
+     aria-label={if title != "" { title } else { "Description list" }}>
+
+    {if title != ""}
+        <div class="flin-descriptions__header">
+            <h3 class="flin-descriptions__title">{title}</h3>
+            {if props.extra}
+                <div class="flin-descriptions__extra">{props.extra}</div>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="flin-descriptions__body">
+        {for item, index in items}
+            <div class="flin-descriptions__item"
+                 style={if item.span { "--item-span: " ++ item.span } else { "--item-span: 1" }}
+                 role="listitem">
+                <dt class="flin-descriptions__label">
+                    {item.label}{colonSuffix}
+                </dt>
+                <dd class="flin-descriptions__content">
+                    {item.value}
+                </dd>
+            </div>
+        {/for}
+    </div>
+</div>
+
+<style scoped>
+.flin-descriptions {
+    font-family: var(--flin-font-sans);
+    width: 100%;
+}
+
+.flin-descriptions__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--flin-space-4);
+}
+
+.flin-descriptions__title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.flin-descriptions__extra {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.flin-descriptions__body {
+    display: grid;
+    grid-template-columns: repeat(var(--desc-columns), 1fr);
+    gap: var(--flin-space-4);
+}
+
+.flin-descriptions__item {
+    grid-column: span var(--item-span);
+}
+
+.flin-descriptions__label {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+    margin: 0 0 var(--flin-space-1) 0;
+}
+
+.flin-descriptions__content {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    word-break: break-word;
+}
+
+/* Horizontal layout (label and value side by side) */
+.flin-descriptions--horizontal .flin-descriptions__item {
+    display: flex;
+    align-items: flex-start;
+}
+
+.flin-descriptions--horizontal .flin-descriptions__label {
+    flex-shrink: 0;
+    min-width: 100px;
+    margin: 0 var(--flin-space-3) 0 0;
+}
+
+.flin-descriptions--horizontal .flin-descriptions__content {
+    flex: 1;
+}
+
+/* Vertical layout (label above value) */
+.flin-descriptions--vertical .flin-descriptions__item {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Size variants */
+.flin-descriptions--sm .flin-descriptions__label,
+.flin-descriptions--sm .flin-descriptions__content {
+    font-size: var(--flin-text-xs);
+}
+
+.flin-descriptions--sm .flin-descriptions__body {
+    gap: var(--flin-space-3);
+}
+
+.flin-descriptions--lg .flin-descriptions__label {
+    font-size: var(--flin-text-base);
+}
+
+.flin-descriptions--lg .flin-descriptions__content {
+    font-size: var(--flin-text-base);
+}
+
+.flin-descriptions--lg .flin-descriptions__body {
+    gap: var(--flin-space-6);
+}
+
+/* Bordered variant */
+.flin-descriptions--bordered .flin-descriptions__body {
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    gap: 0;
+}
+
+.flin-descriptions--bordered .flin-descriptions__item {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    border-right: 1px solid var(--flin-neutral-200);
+}
+
+.flin-descriptions--bordered .flin-descriptions__item:nth-child(var(--desc-columns)n) {
+    border-right: none;
+}
+
+.flin-descriptions--bordered .flin-descriptions__item:nth-last-child(-n+var(--desc-columns)) {
+    border-bottom: none;
+}
+
+.flin-descriptions--bordered.flin-descriptions--horizontal .flin-descriptions__label {
+    background-color: var(--flin-neutral-50);
+    padding: var(--flin-space-3) var(--flin-space-4);
+    margin: calc(var(--flin-space-3) * -1) 0 calc(var(--flin-space-3) * -1) calc(var(--flin-space-4) * -1);
+    border-right: 1px solid var(--flin-neutral-200);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .flin-descriptions__body {
+        grid-template-columns: 1fr;
+    }
+
+    .flin-descriptions__item {
+        grid-column: span 1 !important;
+    }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-descriptions--bordered .flin-descriptions__body {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-descriptions--bordered .flin-descriptions__item {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-descriptions--bordered.flin-descriptions--horizontal .flin-descriptions__label {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+</style>

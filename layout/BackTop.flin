@@ -1,0 +1,218 @@
+// FlinUI BackTop Component
+// Scroll to top button that appears after scrolling down
+// Props: visibilityHeight (number), target (scroll container selector), onClick (fn)
+
+// Props with defaults
+visibilityHeight = props.visibilityHeight || 400
+target = props.target || null
+onClick = props.onClick
+duration = props.duration || 300
+
+// State management
+isVisible = false
+scrollContainer = null
+
+// Initialize component
+initBackTop = {
+    {if target}
+        scrollContainer = document.querySelector(target)
+    {else}
+        scrollContainer = window
+    {/if}
+}
+
+// Handle scroll events
+handleScroll = {
+    scrollTop = match target {
+        null -> window.scrollY,
+        _ -> scrollContainer.scrollTop
+    }
+
+    isVisible = scrollTop >= visibilityHeight
+}
+
+// Smooth scroll to top
+scrollToTop = {
+    startTime = null
+    startPosition = match target {
+        null -> window.scrollY,
+        _ -> scrollContainer.scrollTop
+    }
+
+    // Easing function (ease-out cubic)
+    easeOutCubic = fn(t) {
+        return 1 - Math.pow(1 - t, 3)
+    }
+
+    animateScroll = fn(currentTime) {
+        {if startTime == null}
+            startTime = currentTime
+        {/if}
+
+        elapsed = currentTime - startTime
+        progress = Math.min(elapsed / duration, 1)
+        easedProgress = easeOutCubic(progress)
+
+        newPosition = startPosition * (1 - easedProgress)
+
+        {if target}
+            scrollContainer.scrollTop = newPosition
+        {else}
+            window.scrollTo(0, newPosition)
+        {/if}
+
+        {if progress < 1}
+            requestAnimationFrame(animateScroll)
+        {/if}
+    }
+
+    requestAnimationFrame(animateScroll)
+
+    // Trigger callback
+    {if onClick}
+        onClick()
+    {/if}
+}
+
+// Handle click
+handleClick = {
+    scrollToTop()
+}
+
+// Handle keyboard
+handleKeyDown = {
+    {if event.key == "Enter" || event.key == " "}
+        event.preventDefault()
+        scrollToTop()
+    {/if}
+}
+
+// Setup event listeners on mount
+onMount = {
+    initBackTop()
+
+    {if target && scrollContainer}
+        scrollContainer.addEventListener("scroll", handleScroll, { passive: true })
+    {else}
+        window.addEventListener("scroll", handleScroll, { passive: true })
+    {/if}
+
+    // Initial check
+    handleScroll()
+}
+
+// Cleanup on unmount
+onUnmount = {
+    {if target && scrollContainer}
+        scrollContainer.removeEventListener("scroll", handleScroll)
+    {else}
+        window.removeEventListener("scroll", handleScroll)
+    {/if}
+}
+
+// Build class string
+visibleClass = match isVisible { true -> " flin-backtop--visible", _ -> "" }
+
+<button
+    class={"flin-backtop" ++ visibleClass}
+    click={handleClick}
+    keydown={handleKeyDown}
+    type="button"
+    aria-label="Scroll to top"
+    title="Back to top"
+    tabindex={if isVisible { 0 } else { -1 }}
+>
+    <svg
+        class="flin-backtop__icon"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+    >
+        <path d="M18 15L12 9L6 15" />
+    </svg>
+</button>
+
+<style scoped>
+.flin-backtop {
+    position: fixed;
+    right: var(--flin-space-6);
+    bottom: var(--flin-space-6);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background-color: var(--flin-primary);
+    color: white;
+    border: none;
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+    box-shadow: var(--flin-shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(16px) scale(0.8);
+    transition:
+        opacity var(--flin-transition-fast),
+        visibility var(--flin-transition-fast),
+        transform var(--flin-transition-fast),
+        background-color var(--flin-transition-fast);
+}
+
+.flin-backtop--visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.flin-backtop:hover {
+    background-color: var(--flin-primary-dark);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: var(--flin-shadow-xl);
+}
+
+.flin-backtop:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.flin-backtop:active {
+    transform: translateY(0) scale(0.95);
+}
+
+.flin-backtop__icon {
+    flex-shrink: 0;
+}
+
+/* Responsive positioning */
+@media (max-width: 640px) {
+    .flin-backtop {
+        right: var(--flin-space-4);
+        bottom: var(--flin-space-4);
+        width: 40px;
+        height: 40px;
+    }
+
+    .flin-backtop__icon {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-backtop {
+    background-color: var(--flin-primary);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .flin-backtop:hover {
+    background-color: var(--flin-primary-light);
+}
+</style>

@@ -49,6 +49,27 @@
  *    - Select all functionality
  *    - Disabled state support
  *
+ * 6. DragDrop
+ *    Draggable wrapper component with HTML5 drag and drop.
+ *    - Make any element draggable
+ *    - Visual feedback during drag operations
+ *    - Drop position indicators
+ *    - Keyboard accessibility support
+ *
+ * 7. Sortable
+ *    Reorderable list container with drag and drop.
+ *    - Drag to reorder items
+ *    - Optional drag handle
+ *    - Keyboard navigation (arrows to move)
+ *    - Horizontal or vertical layouts
+ *
+ * 8. Kanban
+ *    Kanban board with columns for organizing cards.
+ *    - Drag cards between columns
+ *    - Add/edit/delete cards and columns
+ *    - Custom card rendering
+ *    - Visual drop indicators
+ *
  * Usage Examples:
  *
  * // Combobox - Searchable select
@@ -109,6 +130,34 @@
  *     onChange={handleChange}
  * />
  *
+ * // DragDrop - Draggable wrapper
+ * <DragDrop
+ *     data={{ id: "item-1", name: "Task" }}
+ *     onDragStart={handleStart}
+ *     onDrop={handleDrop}
+ * >
+ *     <Card>Drag me!</Card>
+ * </DragDrop>
+ *
+ * // Sortable - Reorderable list
+ * <Sortable
+ *     items={tasks}
+ *     handle={true}
+ *     onReorder={({ items }) => setTasks(items)}
+ *     renderItem={|item| <div>{item.title}</div>}
+ * />
+ *
+ * // Kanban - Project board
+ * <Kanban
+ *     columns={[
+ *         { id: "todo", title: "To Do", items: todoItems },
+ *         { id: "progress", title: "In Progress", items: progressItems },
+ *         { id: "done", title: "Done", items: doneItems }
+ *     ]}
+ *     onMove={handleCardMove}
+ *     allowCardAdd={true}
+ * />
+ *
  * Theme Tokens Used:
  * - --flin-bg, --flin-fg: Background and foreground colors
  * - --flin-primary, --flin-primary-rgb: Primary accent color
@@ -130,3 +179,6 @@ export { Listbox } from "./Listbox.flin"
 export { TreeView } from "./TreeView.flin"
 export { VirtualList } from "./VirtualList.flin"
 export { TransferList } from "./TransferList.flin"
+export { DragDrop } from "./DragDrop.flin"
+export { Sortable } from "./Sortable.flin"
+export { Kanban } from "./Kanban.flin"

@@ -1,0 +1,325 @@
+// FlinUI HeatmapChart Component
+// SVG-based heatmap/activity grid visualization (like GitHub contributions)
+
+// Props with defaults
+data = props.data || []  // Array of { x, y, value, label? } or flat array for calendar view
+width = props.width || 800
+height = props.height || 200
+cellSize = props.cellSize || 14
+cellGap = props.cellGap || 3
+cellRadius = props.cellRadius || 2
+showLabels = props.showLabels || true
+showLegend = props.showLegend || true
+animated = props.animated || true
+title = props.title || ""
+subtitle = props.subtitle || ""
+colorScheme = props.colorScheme || "green"  // "green", "blue", "purple", "orange", "red"
+emptyColor = props.emptyColor || "var(--flin-neutral-100)"
+xLabels = props.xLabels || []  // Labels for X axis (e.g., months)
+yLabels = props.yLabels || ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]  // Labels for Y axis (e.g., days)
+minValue = props.minValue || 0
+maxValue = props.maxValue || null  // Auto-detect if null
+
+// Calculate max value from data if not provided
+computedMaxValue = maxValue
+{if maxValue == null && data.length > 0}
+    computedMaxValue = Math.max(...data.map(d => d.value || 0))
+{/if}
+{if computedMaxValue == 0}
+    computedMaxValue = 1  // Prevent division by zero
+{/if}
+
+// Color schemes for intensity levels
+colorSchemes = {
+    green: ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"],
+    blue: ["#ebedf0", "#9ecae1", "#6baed6", "#3182bd", "#08519c"],
+    purple: ["#ebedf0", "#c4b5fd", "#a78bfa", "#8b5cf6", "#7c3aed"],
+    orange: ["#ebedf0", "#fdba74", "#fb923c", "#f97316", "#ea580c"],
+    red: ["#ebedf0", "#fca5a5", "#f87171", "#ef4444", "#dc2626"]
+}
+
+colors = colorSchemes[colorScheme] || colorSchemes.green
+
+// Get color based on value intensity
+getIntensityColor = {
+    value = args.value
+    {if value == 0 || value == null}
+        color = emptyColor
+    {else}
+        intensity = Math.min(1, (value - minValue) / (computedMaxValue - minValue))
+        colorIndex = Math.ceil(intensity * (colors.length - 1))
+        color = colors[colorIndex]
+    {/if}
+    color
+}
+
+// Calculate dimensions
+yLabelWidth = showLabels && yLabels.length > 0 ? 40 : 0
+xLabelHeight = showLabels && xLabels.length > 0 ? 20 : 0
+padding = { top: 40, right: 20, bottom: xLabelHeight + 20, left: yLabelWidth + 10 }
+
+// Calculate grid dimensions
+cols = data.length > 0 ? Math.max(...data.map(d => d.x || 0)) + 1 : 0
+rows = data.length > 0 ? Math.max(...data.map(d => d.y || 0)) + 1 : yLabels.length
+
+chartWidth = cols * (cellSize + cellGap) - cellGap
+chartHeight = rows * (cellSize + cellGap) - cellGap
+
+// Create lookup map for data
+dataMap = {}
+{for item in data}
+    key = (item.x || 0) ++ "-" ++ (item.y || 0)
+    dataMap[key] = item
+{/for}
+
+// Generate cells
+cells = []
+{for row in 0..rows}
+    {for col in 0..cols}
+        key = col ++ "-" ++ row
+        item = dataMap[key]
+        value = item ? item.value : 0
+        label = item ? (item.label || "") : ""
+        cells = cells.concat([{
+            x: col,
+            y: row,
+            value: value,
+            label: label,
+            color: getIntensityColor({ value: value })
+        }])
+    {/for}
+{/for}
+
+// Hover state
+hoveredCell = null
+
+handleCellHover = {
+    hoveredCell = { x: event.x, y: event.y, value: event.value, label: event.label }
+}
+
+handleCellLeave = {
+    hoveredCell = null
+}
+
+<div class="flin-heatmap" style="--chart-width: {width}px; --chart-height: {height}px;">
+    {if title || subtitle}
+        <div class="flin-heatmap__header">
+            {if title}
+                <h3 class="flin-heatmap__title">{title}</h3>
+            {/if}
+            {if subtitle}
+                <p class="flin-heatmap__subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <svg
+        class="flin-heatmap__svg"
+        viewBox="0 0 {chartWidth + padding.left + padding.right} {chartHeight + padding.top + padding.bottom}"
+        role="img"
+        aria-label={title || "Heatmap chart"}
+    >
+        <g class="flin-heatmap__container" transform="translate({padding.left}, {padding.top})">
+            // Y-axis labels (day names)
+            {if showLabels && yLabels.length > 0}
+                <g class="flin-heatmap__y-labels">
+                    {for label, index in yLabels}
+                        {if index < rows}
+                            <text
+                                class="flin-heatmap__label"
+                                x="-10"
+                                y={index * (cellSize + cellGap) + cellSize / 2}
+                                text-anchor="end"
+                                dominant-baseline="middle"
+                            >
+                                {label}
+                            </text>
+                        {/if}
+                    {/for}
+                </g>
+            {/if}
+
+            // X-axis labels (month names)
+            {if showLabels && xLabels.length > 0}
+                <g class="flin-heatmap__x-labels">
+                    {for label, index in xLabels}
+                        <text
+                            class="flin-heatmap__label"
+                            x={label.position * (cellSize + cellGap)}
+                            y={chartHeight + 15}
+                            text-anchor="start"
+                        >
+                            {label.text}
+                        </text>
+                    {/for}
+                </g>
+            {/if}
+
+            // Cells
+            <g class="flin-heatmap__cells">
+                {for cell, index in cells}
+                    cellAnimatedClass = match animated { true -> " flin-heatmap__cell--animated", _ -> "" }
+                    cellActiveClass = match hoveredCell && hoveredCell.x == cell.x && hoveredCell.y == cell.y { true -> " flin-heatmap__cell--active", _ -> "" }
+                    <rect
+                        class={"flin-heatmap__cell" ++ cellAnimatedClass ++ cellActiveClass}
+                        x={cell.x * (cellSize + cellGap)}
+                        y={cell.y * (cellSize + cellGap)}
+                        width={cellSize}
+                        height={cellSize}
+                        rx={cellRadius}
+                        fill={cell.color}
+                        style="--cell-index: {index};"
+                        mouseenter={handleCellHover.bind({ x: cell.x, y: cell.y, value: cell.value, label: cell.label })}
+                        mouseleave={handleCellLeave}
+                    />
+                {/for}
+            </g>
+        </g>
+    </svg>
+
+    // Legend
+    {if showLegend}
+        <div class="flin-heatmap__legend">
+            <span class="flin-heatmap__legend-label">Less</span>
+            {for color, index in colors}
+                <span
+                    class="flin-heatmap__legend-cell"
+                    style="--cell-color: {color};"
+                ></span>
+            {/for}
+            <span class="flin-heatmap__legend-label">More</span>
+        </div>
+    {/if}
+
+    // Tooltip
+    {if hoveredCell != null}
+        <div class="flin-heatmap__tooltip">
+            {if hoveredCell.label}
+                <span class="flin-heatmap__tooltip-label">{hoveredCell.label}</span>
+            {/if}
+            <span class="flin-heatmap__tooltip-value">
+                {hoveredCell.value} contribution{hoveredCell.value != 1 ? "s" : ""}
+            </span>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-heatmap {
+    position: relative;
+    width: var(--chart-width);
+    font-family: var(--flin-font-sans);
+}
+
+.flin-heatmap__header {
+    margin-bottom: var(--flin-space-3);
+}
+
+.flin-heatmap__title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.flin-heatmap__subtitle {
+    margin: var(--flin-space-1) 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.flin-heatmap__svg {
+    display: block;
+    overflow: visible;
+}
+
+.flin-heatmap__label {
+    font-size: 10px;
+    fill: var(--flin-fg-muted);
+}
+
+.flin-heatmap__cell {
+    cursor: pointer;
+    transition: transform var(--flin-transition-fast), filter var(--flin-transition-fast);
+}
+
+.flin-heatmap__cell:hover,
+.flin-heatmap__cell--active {
+    filter: brightness(0.9);
+    transform: scale(1.1);
+}
+
+.flin-heatmap__cell--animated {
+    opacity: 0;
+    animation: flin-heatmap-reveal 0.3s ease-out forwards;
+    animation-delay: calc(var(--cell-index) * 2ms);
+}
+
+@keyframes flin-heatmap-reveal {
+    from {
+        opacity: 0;
+        transform: scale(0);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.flin-heatmap__legend {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    margin-top: var(--flin-space-3);
+    justify-content: flex-end;
+}
+
+.flin-heatmap__legend-label {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+.flin-heatmap__legend-cell {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    background-color: var(--cell-color);
+}
+
+.flin-heatmap__tooltip {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    box-shadow: var(--flin-shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.flin-heatmap__tooltip-label {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+}
+
+.flin-heatmap__tooltip-value {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-heatmap__tooltip {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-heatmap__legend-cell:first-of-type {
+    background-color: var(--flin-neutral-700);
+}
+</style>

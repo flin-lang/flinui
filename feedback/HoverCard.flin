@@ -1,0 +1,543 @@
+// HoverCard.flin - FlinUI Rich Preview Card Component
+// A floating card that shows additional content when hovering over a trigger
+
+// Props with defaults
+openDelay = props.openDelay || 200
+closeDelay = props.closeDelay || 100
+position = props.position || "bottom"
+align = props.align || "center"
+disabled = props.disabled || false
+closeOnContentClick = props.closeOnContentClick || false
+width = props.width || 320
+
+// State
+isOpen = false
+isExiting = false
+openTimer = nil
+closeTimer = nil
+
+// Handle mouse enter on trigger
+handleTriggerEnter = {
+    if disabled { return }
+
+    // Clear any pending close
+    if closeTimer {
+        clearTimeout(closeTimer)
+        closeTimer = nil
+    }
+
+    // Set open timer
+    openTimer = setTimeout({
+        isOpen = true
+        isExiting = false
+    }, openDelay)
+}
+
+// Handle mouse leave on trigger
+handleTriggerLeave = {
+    // Clear any pending open
+    if openTimer {
+        clearTimeout(openTimer)
+        openTimer = nil
+    }
+
+    // Don't close immediately - check if hovering content
+    closeTimer = setTimeout({
+        handleClose()
+    }, closeDelay)
+}
+
+// Handle mouse enter on content
+handleContentEnter = {
+    // Cancel pending close
+    if closeTimer {
+        clearTimeout(closeTimer)
+        closeTimer = nil
+    }
+}
+
+// Handle mouse leave on content
+handleContentLeave = {
+    // Start close timer
+    closeTimer = setTimeout({
+        handleClose()
+    }, closeDelay)
+}
+
+// Handle close with animation
+handleClose = {
+    isExiting = true
+    setTimeout({
+        isOpen = false
+        isExiting = false
+    }, 150)
+}
+
+// Handle content click
+handleContentClick = {
+    if closeOnContentClick {
+        handleClose()
+    }
+}
+
+// Handle focus for keyboard accessibility
+handleFocus = {
+    if disabled { return }
+
+    if openTimer {
+        clearTimeout(openTimer)
+    }
+
+    openTimer = setTimeout({
+        isOpen = true
+        isExiting = false
+    }, openDelay)
+}
+
+// Handle blur
+handleBlur = |e| {
+    // Check if focus is moving to the content
+    relatedTarget = e.relatedTarget
+    if relatedTarget && e.currentTarget.contains(relatedTarget) {
+        return
+    }
+
+    if closeTimer {
+        clearTimeout(closeTimer)
+    }
+
+    closeTimer = setTimeout({
+        handleClose()
+    }, closeDelay)
+}
+
+// Handle escape key
+handleKeyDown = |e| {
+    if e.key == "Escape" && isOpen {
+        handleClose()
+    }
+}
+
+// Position class computation
+positionClass = match position {
+    "top" -> "hover-card--top"
+    "bottom" -> "hover-card--bottom"
+    "left" -> "hover-card--left"
+    "right" -> "hover-card--right"
+    _ -> "hover-card--bottom"
+}
+
+// Alignment class
+alignClass = match align {
+    "start" -> " hover-card--align-start"
+    "end" -> " hover-card--align-end"
+    _ -> " hover-card--align-center"
+}
+
+// Exiting class
+exitingClass = match isExiting { true -> " hover-card--exiting", _ -> "" }
+
+// Disabled class
+disabledClass = match disabled { true -> " hover-card-wrapper--disabled", _ -> "" }
+
+<div
+    class={"flin-hover-card-wrapper" ++ disabledClass}
+    onkeydown={handleKeyDown}
+>
+    <!-- Trigger -->
+    <div
+        class="hover-card-trigger"
+        onmouseenter={handleTriggerEnter}
+        onmouseleave={handleTriggerLeave}
+        onfocus={handleFocus}
+        onblur={handleBlur}
+        tabindex={disabled ? -1 : 0}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+    >
+        <slot name="trigger">
+            {children}
+        </slot>
+    </div>
+
+    {if isOpen}
+        <!-- Hover Card -->
+        <div
+            class={"flin-hover-card " ++ positionClass ++ alignClass ++ exitingClass}
+            style="width: {width}px"
+            onmouseenter={handleContentEnter}
+            onmouseleave={handleContentLeave}
+            onclick={handleContentClick}
+            role="dialog"
+            aria-modal="false"
+        >
+            <div class="hover-card-arrow"></div>
+
+            <div class="hover-card-content">
+                <slot name="content">
+                    <!-- Default content slot -->
+                    <div class="hover-card-default">
+                        No content provided
+                    </div>
+                </slot>
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-hover-card-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.hover-card-wrapper--disabled {
+    cursor: not-allowed;
+}
+
+.hover-card-wrapper--disabled .hover-card-trigger {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* Trigger */
+.hover-card-trigger {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.hover-card-trigger:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+    border-radius: var(--flin-radius-sm);
+}
+
+/* Hover Card */
+.flin-hover-card {
+    position: absolute;
+    z-index: 9998;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-xl);
+    animation: hoverCardFadeIn var(--flin-transition-fast) ease-out;
+}
+
+@keyframes hoverCardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hover-card--exiting {
+    animation: hoverCardFadeOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes hoverCardFadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+}
+
+/* Position: Bottom */
+.hover-card--bottom {
+    top: 100%;
+    margin-top: var(--flin-space-2);
+}
+
+.hover-card--bottom.hover-card--align-center {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.hover-card--bottom.hover-card--align-start {
+    left: 0;
+}
+
+.hover-card--bottom.hover-card--align-end {
+    right: 0;
+}
+
+/* Position: Top */
+.hover-card--top {
+    bottom: 100%;
+    margin-bottom: var(--flin-space-2);
+}
+
+.hover-card--top.hover-card--align-center {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.hover-card--top.hover-card--align-start {
+    left: 0;
+}
+
+.hover-card--top.hover-card--align-end {
+    right: 0;
+}
+
+@keyframes hoverCardFadeInTop {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.hover-card--top.hover-card--align-center {
+    animation-name: hoverCardFadeInTop;
+}
+
+/* Position: Left */
+.hover-card--left {
+    right: 100%;
+    margin-right: var(--flin-space-2);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+@keyframes hoverCardFadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+.hover-card--left {
+    animation-name: hoverCardFadeInLeft;
+}
+
+/* Position: Right */
+.hover-card--right {
+    left: 100%;
+    margin-left: var(--flin-space-2);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+@keyframes hoverCardFadeInRight {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+.hover-card--right {
+    animation-name: hoverCardFadeInRight;
+}
+
+/* Arrow */
+.hover-card-arrow {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    transform: rotate(45deg);
+}
+
+/* Arrow positions */
+.hover-card--bottom .hover-card-arrow {
+    top: -7px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.hover-card--bottom.hover-card--align-center .hover-card-arrow {
+    left: 50%;
+    margin-left: -6px;
+}
+
+.hover-card--bottom.hover-card--align-start .hover-card-arrow {
+    left: 24px;
+}
+
+.hover-card--bottom.hover-card--align-end .hover-card-arrow {
+    right: 24px;
+}
+
+.hover-card--top .hover-card-arrow {
+    bottom: -7px;
+    border-left: none;
+    border-top: none;
+}
+
+.hover-card--top.hover-card--align-center .hover-card-arrow {
+    left: 50%;
+    margin-left: -6px;
+}
+
+.hover-card--top.hover-card--align-start .hover-card-arrow {
+    left: 24px;
+}
+
+.hover-card--top.hover-card--align-end .hover-card-arrow {
+    right: 24px;
+}
+
+.hover-card--left .hover-card-arrow {
+    right: -7px;
+    top: 50%;
+    margin-top: -6px;
+    border-left: none;
+    border-bottom: none;
+}
+
+.hover-card--right .hover-card-arrow {
+    left: -7px;
+    top: 50%;
+    margin-top: -6px;
+    border-right: none;
+    border-top: none;
+}
+
+/* Content */
+.hover-card-content {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--flin-radius-lg);
+}
+
+.hover-card-default {
+    padding: var(--flin-space-4);
+    text-align: center;
+    color: var(--flin-fg-muted);
+    font-size: var(--flin-text-sm);
+}
+
+/* Common content patterns */
+.hover-card-content :global(.hover-card-header) {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-100);
+}
+
+.hover-card-content :global(.hover-card-avatar) {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--flin-radius-full);
+    object-fit: cover;
+}
+
+.hover-card-content :global(.hover-card-info) {
+    flex: 1;
+    min-width: 0;
+}
+
+.hover-card-content :global(.hover-card-name) {
+    font-size: var(--flin-text-base);
+    font-weight: 600;
+    color: var(--flin-fg);
+    line-height: 1.4;
+}
+
+.hover-card-content :global(.hover-card-username) {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.hover-card-content :global(.hover-card-body) {
+    padding: var(--flin-space-4);
+}
+
+.hover-card-content :global(.hover-card-description) {
+    font-size: var(--flin-text-sm);
+    line-height: 1.6;
+    color: var(--flin-fg);
+}
+
+.hover-card-content :global(.hover-card-stats) {
+    display: flex;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-3) var(--flin-space-4);
+    background-color: var(--flin-neutral-50);
+    border-top: 1px solid var(--flin-neutral-100);
+}
+
+.hover-card-content :global(.hover-card-stat) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hover-card-content :global(.hover-card-stat-value) {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.hover-card-content :global(.hover-card-stat-label) {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+.hover-card-content :global(.hover-card-footer) {
+    display: flex;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-100);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-hover-card {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .hover-card-arrow {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .hover-card-content :global(.hover-card-header) {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .hover-card-content :global(.hover-card-stats) {
+    background-color: var(--flin-neutral-850);
+    border-top-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .hover-card-content :global(.hover-card-footer) {
+    border-top-color: var(--flin-neutral-700);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .flin-hover-card {
+        max-width: calc(100vw - 32px);
+    }
+
+    .hover-card--left,
+    .hover-card--right {
+        left: 50%;
+        right: auto;
+        top: 100%;
+        bottom: auto;
+        transform: translateX(-50%);
+        margin-left: 0;
+        margin-right: 0;
+        margin-top: var(--flin-space-2);
+    }
+}
+</style>

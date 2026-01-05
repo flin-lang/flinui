@@ -1,0 +1,246 @@
+// FlinUI InfiniteScroll Component
+// Container that loads more content when scrolling near the bottom
+
+// Props with defaults
+threshold = props.threshold || 200
+hasMore = props.hasMore || false
+loading = props.loading || false
+loadingText = props.loadingText || "Loading..."
+endText = props.endText || "No more items"
+onLoadMore = props.onLoadMore
+inverse = props.inverse || false
+scrollableTarget = props.scrollableTarget || ""
+initialLoad = props.initialLoad || true
+
+// State
+isLoading = loading
+hasTriggered = false
+
+// Intersection observer reference
+observerRef = null
+sentinelRef = null
+
+// Handle intersection (when sentinel becomes visible)
+handleIntersection = (entries) => {
+    entry = entries[0]
+
+    {if entry.isIntersecting && hasMore && !isLoading && !hasTriggered}
+        hasTriggered = true
+
+        {if onLoadMore}
+            onLoadMore()
+        {/if}
+    {/if}
+}
+
+// Reset trigger when loading completes
+{if !loading && hasTriggered}
+    hasTriggered = false
+{/if}
+
+// Setup intersection observer on mount
+onMount = () => {
+    {if sentinelRef}
+        options = {
+            root: if scrollableTarget != "" { document.querySelector(scrollableTarget) } else { null },
+            rootMargin: threshold ++ "px",
+            threshold: 0
+        }
+
+        observerRef = new IntersectionObserver(handleIntersection, options)
+        observerRef.observe(sentinelRef)
+    {/if}
+
+    // Initial load if enabled
+    {if initialLoad && hasMore && onLoadMore}
+        onLoadMore()
+    {/if}
+}
+
+// Cleanup on unmount
+onUnmount = () => {
+    {if observerRef}
+        observerRef.disconnect()
+    {/if}
+}
+
+// Manual scroll handler as fallback
+handleScroll = (event) => {
+    {if !hasMore || isLoading}
+        return
+    {/if}
+
+    container = event.target
+
+    {if inverse}
+        // For inverse scroll (chat-like), check if near top
+        nearTop = container.scrollTop < threshold
+
+        {if nearTop && !hasTriggered}
+            hasTriggered = true
+            {if onLoadMore}
+                onLoadMore()
+            {/if}
+        {/if}
+    {else}
+        // Normal scroll, check if near bottom
+        nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold
+
+        {if nearBottom && !hasTriggered}
+            hasTriggered = true
+            {if onLoadMore}
+                onLoadMore()
+            {/if}
+        {/if}
+    {/if}
+}
+
+<div class={"flin-infinite-scroll" ++ (if inverse { " flin-infinite-scroll--inverse" } else { "" })}
+     scroll={handleScroll}
+     role="feed"
+     aria-busy={loading}>
+
+    {if inverse && loading}
+        <div class="flin-infinite-scroll__loader" aria-live="polite">
+            <div class="flin-infinite-scroll__spinner"></div>
+            <span class="flin-infinite-scroll__text">{loadingText}</span>
+        </div>
+    {/if}
+
+    {if inverse && !hasMore && !loading}
+        <div class="flin-infinite-scroll__end" aria-live="polite">
+            <span class="flin-infinite-scroll__text">{endText}</span>
+        </div>
+    {/if}
+
+    <div class="flin-infinite-scroll__content">
+        {children}
+    </div>
+
+    {if !inverse}
+        <!-- Sentinel element for intersection observer -->
+        <div class="flin-infinite-scroll__sentinel" ref={sentinelRef}></div>
+
+        {if loading}
+            <div class="flin-infinite-scroll__loader" aria-live="polite">
+                <div class="flin-infinite-scroll__spinner"></div>
+                <span class="flin-infinite-scroll__text">{loadingText}</span>
+            </div>
+        {/if}
+
+        {if !hasMore && !loading}
+            <div class="flin-infinite-scroll__end" aria-live="polite">
+                <svg class="flin-infinite-scroll__end-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M8 12h8" />
+                </svg>
+                <span class="flin-infinite-scroll__text">{endText}</span>
+            </div>
+        {/if}
+    {/if}
+</div>
+
+<style scoped>
+.flin-infinite-scroll {
+    position: relative;
+    width: 100%;
+    overflow-y: auto;
+    font-family: var(--flin-font-sans);
+}
+
+.flin-infinite-scroll__content {
+    width: 100%;
+}
+
+.flin-infinite-scroll__sentinel {
+    height: 1px;
+    width: 100%;
+    visibility: hidden;
+}
+
+.flin-infinite-scroll__loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-6);
+}
+
+.flin-infinite-scroll__spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--flin-neutral-200);
+    border-top-color: var(--flin-primary);
+    border-radius: 50%;
+    animation: flin-infinite-scroll-spin 0.8s linear infinite;
+}
+
+@keyframes flin-infinite-scroll-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.flin-infinite-scroll__text {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.flin-infinite-scroll__end {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-6);
+}
+
+.flin-infinite-scroll__end-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--flin-fg-muted);
+    opacity: 0.5;
+}
+
+/* Inverse mode (load from top, like chat) */
+.flin-infinite-scroll--inverse {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.flin-infinite-scroll--inverse .flin-infinite-scroll__content {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+/* Custom scrollbar */
+.flin-infinite-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.flin-infinite-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.flin-infinite-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--flin-neutral-300);
+    border-radius: var(--flin-radius-full);
+}
+
+.flin-infinite-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: var(--flin-neutral-400);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-infinite-scroll__spinner {
+    border-color: var(--flin-neutral-700);
+    border-top-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .flin-infinite-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .flin-infinite-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: var(--flin-neutral-500);
+}
+</style>

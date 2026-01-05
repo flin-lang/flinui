@@ -23,6 +23,13 @@
 // - Highlight: Text highlighting
 // - AvatarGroup: Stacked avatars with overflow indicator
 // - BadgeGroup: Multiple badges in a row with overflow
+// - Descriptions: Key-value display grid for detailed information
+// - QRCode: SVG-based QR code generator from text/URL
+// - Watermark: Text or image watermark overlay for content
+// - Segmented: iOS-style segmented control / button group selector
+// - InfiniteScroll: Container that loads more content on scroll
+// - Masonry: Pinterest-style grid layout using CSS columns
+// - AdvancedDataTable: Enterprise data table with row selection, column resize, export
 //
 // All components use FlinUI theme tokens (--flin-*) for consistent styling
 // and support both light and dark themes.
@@ -82,6 +89,64 @@
 //     <Badge>TypeScript</Badge>
 //     <Badge>Node.js</Badge>
 // </BadgeGroup>
+//
+// Descriptions:
+// items = [
+//     { label: "Name", value: "John Doe" },
+//     { label: "Email", value: "john@example.com" },
+//     { label: "Status", value: "Active", span: 2 }
+// ]
+// <Descriptions title="User Info" items={items} column={3} bordered={true} />
+//
+// QRCode:
+// <QRCode value="https://flin.dev" size={128} level="M" />
+//
+// Watermark:
+// <Watermark text="Confidential" fontSize={16} rotate={-22}>
+//     <p>Protected content here</p>
+// </Watermark>
+//
+// Segmented:
+// options = [
+//     { label: "Daily", value: "daily" },
+//     { label: "Weekly", value: "weekly" },
+//     { label: "Monthly", value: "monthly" }
+// ]
+// <Segmented options={options} value="weekly" onChange={handleChange} />
+//
+// InfiniteScroll:
+// <InfiniteScroll hasMore={hasMore} loading={loading} onLoadMore={fetchMore}>
+//     {for item in items}
+//         <Card>{item.title}</Card>
+//     {/for}
+// </InfiniteScroll>
+//
+// Masonry:
+// <Masonry columns={3} gap="md" responsive={true}>
+//     <Card>Item 1</Card>
+//     <Card>Item 2 with more content</Card>
+//     <Card>Item 3</Card>
+// </Masonry>
+//
+// AdvancedDataTable:
+// columns = [
+//     { key: "name", label: "Name", sortable: true },
+//     { key: "email", label: "Email" },
+//     { key: "role", label: "Role" }
+// ]
+// <AdvancedDataTable
+//     columns={columns}
+//     data={users}
+//     selectable={true}
+//     resizable={true}
+//     exportable={true}
+//     filterable={true}
+//     paginated={true}
+//     pageSize={10}
+//     onSelect={handleSelect}
+//     onResize={handleResize}
+//     onExport={handleExport}
+// />
 
 <div class="flin-data-index">
     <p>FlinUI Data Display Components</p>

@@ -1,0 +1,102 @@
+// FlinUI Masonry Component
+// Pinterest-style grid layout using CSS columns
+
+// Props with defaults
+columns = props.columns || 3
+gap = props.gap || "md"
+minColumnWidth = props.minColumnWidth || "250px"
+responsive = props.responsive || true
+
+// Compute gap value
+gapValue = match gap {
+    "none" -> "0"
+    "xs" -> "var(--flin-space-1)"
+    "sm" -> "var(--flin-space-2)"
+    "md" -> "var(--flin-space-4)"
+    "lg" -> "var(--flin-space-6)"
+    "xl" -> "var(--flin-space-8)"
+    _ -> "var(--flin-space-4)"
+}
+
+// Compute responsive class
+responsiveClass = match responsive {
+    true -> " flin-masonry--responsive"
+    _ -> ""
+}
+
+<div class={"flin-masonry" ++ responsiveClass}
+     style={"--masonry-columns: " ++ columns ++ "; --masonry-gap: " ++ gapValue ++ "; --masonry-min-width: " ++ minColumnWidth}
+     role="list">
+    {children}
+</div>
+
+<style scoped>
+.flin-masonry {
+    column-count: var(--masonry-columns);
+    column-gap: var(--masonry-gap);
+    width: 100%;
+    font-family: var(--flin-font-sans);
+}
+
+/* Each direct child is a masonry item */
+.flin-masonry > :global(*) {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: var(--masonry-gap);
+    display: inline-block;
+    width: 100%;
+}
+
+/* Remove margin from last items to avoid extra spacing */
+.flin-masonry > :global(*:last-child) {
+    margin-bottom: 0;
+}
+
+/* Responsive breakpoints */
+.flin-masonry--responsive {
+    column-count: auto;
+    column-width: var(--masonry-min-width);
+}
+
+/* Fixed column counts at different breakpoints when not using auto */
+@media (max-width: 1200px) {
+    .flin-masonry:not(.flin-masonry--responsive) {
+        column-count: min(var(--masonry-columns), 4);
+    }
+}
+
+@media (max-width: 992px) {
+    .flin-masonry:not(.flin-masonry--responsive) {
+        column-count: min(var(--masonry-columns), 3);
+    }
+}
+
+@media (max-width: 768px) {
+    .flin-masonry:not(.flin-masonry--responsive) {
+        column-count: min(var(--masonry-columns), 2);
+    }
+}
+
+@media (max-width: 480px) {
+    .flin-masonry:not(.flin-masonry--responsive),
+    .flin-masonry--responsive {
+        column-count: 1;
+    }
+}
+
+/* Animation support for items */
+.flin-masonry > :global(.flin-masonry-item) {
+    animation: flin-masonry-fade-in var(--flin-transition-normal) ease-out;
+}
+
+@keyframes flin-masonry-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>

@@ -1,0 +1,712 @@
+// Tour.flin - FlinUI Onboarding Tour Component
+// A step-by-step guided tour for onboarding users with spotlight effects
+
+// Props with defaults
+steps = props.steps || []
+open = props.open || false
+currentStep = props.currentStep || 0
+onClose = props.onClose || nil
+onStepChange = props.onStepChange || nil
+onComplete = props.onComplete || nil
+showProgress = props.showProgress || true
+showSkip = props.showSkip || true
+showArrow = props.showArrow || true
+maskClosable = props.maskClosable || false
+nextLabel = props.nextLabel || "Next"
+prevLabel = props.prevLabel || "Previous"
+skipLabel = props.skipLabel || "Skip"
+finishLabel = props.finishLabel || "Finish"
+spotlightPadding = props.spotlightPadding || 8
+scrollBehavior = props.scrollBehavior || "smooth"
+
+// State
+isVisible = open
+isExiting = false
+activeStep = currentStep
+targetRect = nil
+popoverPosition = "bottom"
+spotlightStyle = ""
+popoverStyle = ""
+
+// Watch for prop changes
+onUpdate = {
+    if open != isVisible {
+        if open {
+            isVisible = true
+            isExiting = false
+            activeStep = currentStep
+            highlightTarget()
+        } else {
+            handleClose()
+        }
+    }
+
+    if currentStep != activeStep && isVisible {
+        activeStep = currentStep
+        highlightTarget()
+    }
+}
+
+// Initialize when opened
+onMount = {
+    if open {
+        highlightTarget()
+    }
+}
+
+// Highlight the target element
+highlightTarget = {
+    if steps.length == 0 || activeStep >= steps.length { return }
+
+    step = steps[activeStep]
+    if !step.target { return }
+
+    // Find target element
+    targetEl = document.querySelector(step.target)
+    if !targetEl {
+        // If target not found, show centered popover
+        targetRect = nil
+        updatePopoverPosition()
+        return
+    }
+
+    // Scroll target into view
+    targetEl.scrollIntoView({
+        behavior: scrollBehavior,
+        block: "center",
+        inline: "center"
+    })
+
+    // Get target position after scroll
+    setTimeout({
+        rect = targetEl.getBoundingClientRect()
+        targetRect = {
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+            bottom: rect.bottom,
+            right: rect.right
+        }
+        updateSpotlight()
+        updatePopoverPosition()
+    }, 100)
+}
+
+// Update spotlight position
+updateSpotlight = {
+    if !targetRect {
+        spotlightStyle = ""
+        return
+    }
+
+    spotlightStyle = `
+        top: ${targetRect.top - spotlightPadding}px;
+        left: ${targetRect.left - spotlightPadding}px;
+        width: ${targetRect.width + spotlightPadding * 2}px;
+        height: ${targetRect.height + spotlightPadding * 2}px;
+    `
+}
+
+// Calculate optimal popover position
+updatePopoverPosition = {
+    if !targetRect {
+        // Center the popover if no target
+        popoverPosition = "center"
+        popoverStyle = `
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        `
+        return
+    }
+
+    // Calculate available space
+    viewportHeight = window.innerHeight
+    viewportWidth = window.innerWidth
+
+    spaceAbove = targetRect.top
+    spaceBelow = viewportHeight - targetRect.bottom
+    spaceLeft = targetRect.left
+    spaceRight = viewportWidth - targetRect.right
+
+    popoverWidth = 320
+    popoverHeight = 200
+
+    // Determine best position
+    if spaceBelow >= popoverHeight + 20 {
+        popoverPosition = "bottom"
+        popoverStyle = `
+            top: ${targetRect.bottom + spotlightPadding + 12}px;
+            left: ${Math.max(16, Math.min(targetRect.left + targetRect.width / 2 - popoverWidth / 2, viewportWidth - popoverWidth - 16))}px;
+        `
+    } else if spaceAbove >= popoverHeight + 20 {
+        popoverPosition = "top"
+        popoverStyle = `
+            top: ${targetRect.top - spotlightPadding - popoverHeight - 12}px;
+            left: ${Math.max(16, Math.min(targetRect.left + targetRect.width / 2 - popoverWidth / 2, viewportWidth - popoverWidth - 16))}px;
+        `
+    } else if spaceRight >= popoverWidth + 20 {
+        popoverPosition = "right"
+        popoverStyle = `
+            top: ${Math.max(16, Math.min(targetRect.top + targetRect.height / 2 - popoverHeight / 2, viewportHeight - popoverHeight - 16))}px;
+            left: ${targetRect.right + spotlightPadding + 12}px;
+        `
+    } else {
+        popoverPosition = "left"
+        popoverStyle = `
+            top: ${Math.max(16, Math.min(targetRect.top + targetRect.height / 2 - popoverHeight / 2, viewportHeight - popoverHeight - 16))}px;
+            left: ${targetRect.left - spotlightPadding - popoverWidth - 12}px;
+        `
+    }
+}
+
+// Handle window resize
+handleResize = {
+    if isVisible {
+        highlightTarget()
+    }
+}
+
+// Handle close
+handleClose = {
+    isExiting = true
+    setTimeout({
+        isVisible = false
+        isExiting = false
+        targetRect = nil
+
+        if onClose {
+            onClose()
+        }
+    }, 200)
+}
+
+// Handle mask click
+handleMaskClick = {
+    if maskClosable {
+        handleClose()
+    }
+}
+
+// Handle next step
+handleNext = {
+    if activeStep < steps.length - 1 {
+        newStep = activeStep + 1
+        activeStep = newStep
+
+        if onStepChange {
+            onStepChange({ step: newStep, direction: "next" })
+        }
+
+        highlightTarget()
+    } else {
+        // Last step - complete tour
+        if onComplete {
+            onComplete()
+        }
+        handleClose()
+    }
+}
+
+// Handle previous step
+handlePrev = {
+    if activeStep > 0 {
+        newStep = activeStep - 1
+        activeStep = newStep
+
+        if onStepChange {
+            onStepChange({ step: newStep, direction: "prev" })
+        }
+
+        highlightTarget()
+    }
+}
+
+// Handle skip
+handleSkip = {
+    handleClose()
+}
+
+// Handle keyboard navigation
+handleKeyDown = |e| {
+    if e.key == "Escape" {
+        handleClose()
+    }
+    if e.key == "ArrowRight" || e.key == "Enter" {
+        handleNext()
+    }
+    if e.key == "ArrowLeft" {
+        handlePrev()
+    }
+}
+
+// Get current step data
+currentStepData = steps.length > activeStep ? steps[activeStep] : nil
+isLastStep = activeStep == steps.length - 1
+isFirstStep = activeStep == 0
+
+// Computed classes
+exitingClass = match isExiting { true -> " tour--exiting", _ -> "" }
+positionClass = " tour-popover--" ++ popoverPosition
+
+{if isVisible}
+    <div
+        class={"flin-tour" ++ exitingClass}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Guided tour"
+        onkeydown={handleKeyDown}
+        tabindex="-1"
+    >
+        <!-- Mask overlay -->
+        <div
+            class="tour-mask"
+            onclick={handleMaskClick}
+            aria-hidden="true"
+        >
+            <!-- SVG mask with cutout for spotlight -->
+            <svg class="tour-mask-svg" width="100%" height="100%">
+                <defs>
+                    <mask id="tour-spotlight-mask">
+                        <rect x="0" y="0" width="100%" height="100%" fill="white"></rect>
+                        {targetRect ? (
+                            <rect
+                                x={targetRect.left - spotlightPadding}
+                                y={targetRect.top - spotlightPadding}
+                                width={targetRect.width + spotlightPadding * 2}
+                                height={targetRect.height + spotlightPadding * 2}
+                                rx="8"
+                                fill="black"
+                            ></rect>
+                        ) : nil}
+                    </mask>
+                </defs>
+                <rect
+                    x="0"
+                    y="0"
+                    width="100%"
+                    height="100%"
+                    fill="rgba(0, 0, 0, 0.5)"
+                    mask="url(#tour-spotlight-mask)"
+                ></rect>
+            </svg>
+        </div>
+
+        <!-- Spotlight highlight -->
+        {targetRect ? (
+            <div
+                class="tour-spotlight"
+                style={spotlightStyle}
+                aria-hidden="true"
+            ></div>
+        ) : nil}
+
+        <!-- Popover content -->
+        {currentStepData ? (
+            <div
+                class={"tour-popover" ++ positionClass}
+                style={popoverStyle}
+                role="alertdialog"
+                aria-labelledby="tour-title"
+                aria-describedby="tour-content"
+            >
+                {showArrow && targetRect ? (
+                    <div class="tour-arrow"></div>
+                ) : nil}
+
+                <div class="tour-popover-content">
+                    {currentStepData.title ? (
+                        <h3 id="tour-title" class="tour-title">{currentStepData.title}</h3>
+                    ) : nil}
+
+                    {currentStepData.content ? (
+                        <div id="tour-content" class="tour-content">
+                            {currentStepData.content}
+                        </div>
+                    ) : nil}
+
+                    {currentStepData.image ? (
+                        <div class="tour-image">
+                            <img src={currentStepData.image} alt="" />
+                        </div>
+                    ) : nil}
+                </div>
+
+                <div class="tour-footer">
+                    {showProgress ? (
+                        <div class="tour-progress">
+                            <span class="tour-progress-text">
+                                {activeStep + 1} / {steps.length}
+                            </span>
+                            <div class="tour-progress-dots">
+                                {steps.map(|_, index| {
+                                    dotActiveClass = match index == activeStep { true -> " tour-dot--active", _ -> "" }
+                                    dotCompletedClass = match index < activeStep { true -> " tour-dot--completed", _ -> "" }
+
+                                    <button
+                                        key={index}
+                                        class={"tour-dot" ++ dotActiveClass ++ dotCompletedClass}
+                                        onclick={() => {
+                                            activeStep = index
+                                            if onStepChange {
+                                                onStepChange({ step: index, direction: index > activeStep ? "next" : "prev" })
+                                            }
+                                            highlightTarget()
+                                        }}
+                                        aria-label={"Go to step " ++ (index + 1)}
+                                        aria-current={index == activeStep ? "step" : nil}
+                                    ></button>
+                                })}
+                            </div>
+                        </div>
+                    ) : nil}
+
+                    <div class="tour-actions">
+                        {showSkip && !isLastStep ? (
+                            <button
+                                class="tour-button tour-button--skip"
+                                onclick={handleSkip}
+                            >
+                                {skipLabel}
+                            </button>
+                        ) : nil}
+
+                        {!isFirstStep ? (
+                            <button
+                                class="tour-button tour-button--prev"
+                                onclick={handlePrev}
+                            >
+                                {prevLabel}
+                            </button>
+                        ) : nil}
+
+                        <button
+                            class="tour-button tour-button--next"
+                            onclick={handleNext}
+                        >
+                            {isLastStep ? finishLabel : nextLabel}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        ) : nil}
+    </div>
+{/if}
+
+<style scoped>
+.flin-tour {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    animation: tourFadeIn var(--flin-transition-fast) ease-out;
+}
+
+.flin-tour:focus {
+    outline: none;
+}
+
+@keyframes tourFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.tour--exiting {
+    animation: tourFadeOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes tourFadeOut {
+    to {
+        opacity: 0;
+    }
+}
+
+/* Mask */
+.tour-mask {
+    position: absolute;
+    inset: 0;
+}
+
+.tour-mask-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Spotlight */
+.tour-spotlight {
+    position: fixed;
+    border-radius: var(--flin-radius-lg);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    transition: all var(--flin-transition-normal) ease-out;
+}
+
+/* Popover */
+.tour-popover {
+    position: fixed;
+    width: 320px;
+    max-width: calc(100vw - 32px);
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-xl);
+    z-index: 10001;
+    animation: tourPopoverIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes tourPopoverIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tour-popover--center {
+    animation: tourPopoverCenterIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes tourPopoverCenterIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Arrow */
+.tour-arrow {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: var(--flin-bg);
+    transform: rotate(45deg);
+    box-shadow: -2px -2px 5px rgba(0, 0, 0, 0.06);
+}
+
+.tour-popover--bottom .tour-arrow {
+    top: -6px;
+    left: 50%;
+    margin-left: -6px;
+}
+
+.tour-popover--top .tour-arrow {
+    bottom: -6px;
+    left: 50%;
+    margin-left: -6px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.06);
+}
+
+.tour-popover--left .tour-arrow {
+    right: -6px;
+    top: 50%;
+    margin-top: -6px;
+    box-shadow: 2px -2px 5px rgba(0, 0, 0, 0.06);
+}
+
+.tour-popover--right .tour-arrow {
+    left: -6px;
+    top: 50%;
+    margin-top: -6px;
+    box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.06);
+}
+
+/* Content */
+.tour-popover-content {
+    padding: var(--flin-space-4);
+}
+
+.tour-title {
+    margin: 0 0 var(--flin-space-2);
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.tour-content {
+    font-size: var(--flin-text-sm);
+    line-height: 1.6;
+    color: var(--flin-fg-muted);
+}
+
+.tour-image {
+    margin-top: var(--flin-space-3);
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+}
+
+.tour-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Footer */
+.tour-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+    background-color: var(--flin-neutral-50);
+    border-radius: 0 0 var(--flin-radius-lg) var(--flin-radius-lg);
+}
+
+/* Progress */
+.tour-progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.tour-progress-text {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-500);
+}
+
+.tour-progress-dots {
+    display: flex;
+    gap: var(--flin-space-1);
+}
+
+.tour-dot {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    background-color: var(--flin-neutral-300);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast), transform var(--flin-transition-fast);
+}
+
+.tour-dot:hover {
+    background-color: var(--flin-neutral-400);
+}
+
+.tour-dot--active {
+    background-color: var(--flin-primary);
+    transform: scale(1.2);
+}
+
+.tour-dot--completed {
+    background-color: var(--flin-primary);
+    opacity: 0.5;
+}
+
+/* Actions */
+.tour-actions {
+    display: flex;
+    gap: var(--flin-space-2);
+}
+
+.tour-button {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.tour-button--skip {
+    background: transparent;
+    border: none;
+    color: var(--flin-neutral-500);
+}
+
+.tour-button--skip:hover {
+    color: var(--flin-neutral-700);
+}
+
+.tour-button--prev {
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    color: var(--flin-fg);
+}
+
+.tour-button--prev:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.tour-button--next {
+    background-color: var(--flin-primary);
+    border: 1px solid var(--flin-primary);
+    color: white;
+}
+
+.tour-button--next:hover {
+    background-color: var(--flin-primary-dark);
+    border-color: var(--flin-primary-dark);
+}
+
+/* Dark theme */
+[data-theme="dark"] .tour-popover {
+    background-color: var(--flin-neutral-800);
+    border: 1px solid var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .tour-arrow {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .tour-footer {
+    background-color: var(--flin-neutral-850);
+    border-top-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .tour-dot {
+    background-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .tour-dot:hover {
+    background-color: var(--flin-neutral-500);
+}
+
+[data-theme="dark"] .tour-button--prev {
+    background-color: var(--flin-neutral-700);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .tour-button--prev:hover {
+    background-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .tour-button--skip:hover {
+    color: var(--flin-neutral-300);
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+    .tour-popover {
+        width: calc(100vw - 32px);
+    }
+
+    .tour-footer {
+        flex-direction: column;
+        gap: var(--flin-space-3);
+    }
+
+    .tour-progress {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .tour-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+</style>

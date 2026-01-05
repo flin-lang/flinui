@@ -22,6 +22,12 @@
 // - PageContainer: Full page layout with optional sidebar
 // - Collapse: Collapsible content panel with animation
 //
+// Utility Components:
+// - Affix: Sticky positioning wrapper that fixes on scroll threshold
+// - BackTop: Scroll to top button with visibility threshold
+// - ScrollArea: Custom scrollbar container with styled thumb/track
+// - Splitter: Resizable split panes with draggable dividers
+//
 // Usage:
 // <PageContainer sidebar={<Navigation />} sidebarPosition="left">
 //     <Header title="Dashboard" description="Welcome back" sticky={true}>
@@ -52,6 +58,25 @@
 //     <Button variant="primary">Get Started</Button>
 //     <Button variant="outline">Learn More</Button>
 // </Hero>
+//
+// Affix Example:
+// <Affix offsetTop={64} onChange={handleAffixChange}>
+//     <Sidebar />
+// </Affix>
+//
+// BackTop Example:
+// <BackTop visibilityHeight={400} onClick={handleBackTop} />
+//
+// ScrollArea Example:
+// <ScrollArea maxHeight="400px" orientation="vertical">
+//     <LongContent />
+// </ScrollArea>
+//
+// Splitter Example:
+// <Splitter direction="horizontal" sizes={[30, 70]} minSizes={[20, 30]} onResize={handleResize}>
+//     <Sidebar />
+//     <MainContent />
+// </Splitter>
 //
 // All components use FlinUI theme tokens (CSS variables --flin-*)
 // for consistent styling across your application.

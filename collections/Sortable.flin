@@ -1,0 +1,477 @@
+// Sortable.flin - FlinUI Reorderable List Container
+// A container that allows items to be reordered via drag and drop
+
+// Props with defaults
+items = props.items || []
+onReorder = props.onReorder || nil
+handle = props.handle || false
+disabled = props.disabled || false
+direction = props.direction || "vertical"
+animation = props.animation || 200
+renderItem = props.renderItem || nil
+keyExtractor = props.keyExtractor || |item, index| (item.id || index)
+group = props.group || nil
+ghostClass = props.ghostClass || ""
+dragClass = props.dragClass || ""
+
+// State
+draggedIndex = nil
+dragOverIndex = nil
+isDragging = false
+draggedItem = nil
+localItems = items
+
+// Sync items from props
+onUpdate = {
+    if items != localItems && !isDragging {
+        localItems = items
+    }
+}
+
+// Handle drag start
+handleDragStart = |index, e| {
+    if disabled { return }
+
+    isDragging = true
+    draggedIndex = index
+    draggedItem = localItems[index]
+
+    // Set transfer data
+    e.dataTransfer.effectAllowed = "move"
+    e.dataTransfer.setData("application/json", JSON.stringify({
+        item: draggedItem,
+        index: index,
+        group: group
+    }))
+
+    // Add visual feedback after a small delay (for ghost image)
+    setTimeout({
+        e.target.classList.add("sortable-item--dragging")
+    }, 0)
+}
+
+// Handle drag end
+handleDragEnd = |index, e| {
+    isDragging = false
+    draggedIndex = nil
+    dragOverIndex = nil
+    draggedItem = nil
+
+    e.target.classList.remove("sortable-item--dragging")
+}
+
+// Handle drag over
+handleDragOver = |index, e| {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+
+    if index != dragOverIndex {
+        dragOverIndex = index
+    }
+}
+
+// Handle drag enter
+handleDragEnter = |index, e| {
+    e.preventDefault()
+    dragOverIndex = index
+}
+
+// Handle drag leave
+handleDragLeave = |index, e| {
+    // Only clear if leaving the item entirely
+    if !e.currentTarget.contains(e.relatedTarget) {
+        if dragOverIndex == index {
+            dragOverIndex = nil
+        }
+    }
+}
+
+// Handle drop
+handleDrop = |targetIndex, e| {
+    e.preventDefault()
+
+    if draggedIndex == nil || draggedIndex == targetIndex { return }
+
+    // Reorder items
+    newItems = [...localItems]
+    draggedItem = newItems.splice(draggedIndex, 1)[0]
+    newItems.splice(targetIndex, 0, draggedItem)
+
+    localItems = newItems
+
+    if onReorder {
+        onReorder({
+            items: newItems,
+            fromIndex: draggedIndex,
+            toIndex: targetIndex,
+            item: draggedItem
+        })
+    }
+
+    // Reset state
+    draggedIndex = nil
+    dragOverIndex = nil
+    isDragging = false
+    draggedItem = nil
+}
+
+// Handle external drop (from another sortable group)
+handleExternalDrop = |targetIndex, e| {
+    if !group { return }
+
+    try {
+        data = JSON.parse(e.dataTransfer.getData("application/json"))
+
+        if data.group && data.group == group && data.item {
+            // External item from same group
+            newItems = [...localItems]
+            newItems.splice(targetIndex, 0, data.item)
+            localItems = newItems
+
+            if onReorder {
+                onReorder({
+                    items: newItems,
+                    fromIndex: -1,
+                    toIndex: targetIndex,
+                    item: data.item,
+                    external: true
+                })
+            }
+        }
+    } catch {
+        // Invalid data, ignore
+    }
+}
+
+// Keyboard navigation
+handleKeyDown = |index, e| {
+    if disabled { return }
+
+    if e.key == "ArrowUp" || e.key == "ArrowLeft" {
+        e.preventDefault()
+        if index > 0 {
+            moveItem(index, index - 1)
+        }
+    }
+
+    if e.key == "ArrowDown" || e.key == "ArrowRight" {
+        e.preventDefault()
+        if index < localItems.length - 1 {
+            moveItem(index, index + 1)
+        }
+    }
+
+    if e.key == "Home" {
+        e.preventDefault()
+        moveItem(index, 0)
+    }
+
+    if e.key == "End" {
+        e.preventDefault()
+        moveItem(index, localItems.length - 1)
+    }
+}
+
+// Move item helper
+moveItem = |fromIndex, toIndex| {
+    newItems = [...localItems]
+    item = newItems.splice(fromIndex, 1)[0]
+    newItems.splice(toIndex, 0, item)
+    localItems = newItems
+
+    if onReorder {
+        onReorder({
+            items: newItems,
+            fromIndex: fromIndex,
+            toIndex: toIndex,
+            item: item
+        })
+    }
+
+    // Focus the moved item
+    setTimeout({
+        focusItem(toIndex)
+    }, animation)
+}
+
+// Focus item by index
+focusItem = |index| {
+    item = document.querySelector(`[data-sortable-index="${index}"]`)
+    if item {
+        item.focus()
+    }
+}
+
+// Default item renderer
+defaultRenderItem = |item, index| {
+    <div class="sortable-item-content">
+        {item.label || item.title || item.name || JSON.stringify(item)}
+    </div>
+}
+
+// Get render function
+itemRenderer = renderItem || defaultRenderItem
+
+// Computed classes
+directionClass = match direction {
+    "horizontal" -> " sortable--horizontal"
+    _ -> " sortable--vertical"
+}
+disabledClass = match disabled { true -> " sortable--disabled", _ -> "" }
+draggingClass = match isDragging { true -> " sortable--dragging", _ -> "" }
+
+<div
+    class={"flin-sortable" ++ directionClass ++ disabledClass ++ draggingClass}
+    role="listbox"
+    aria-label="Sortable list"
+    aria-orientation={direction}
+    data-sortable-group={group}
+>
+    {localItems.map(|item, index| {
+        key = keyExtractor(item, index)
+        isDraggedOver = dragOverIndex == index && draggedIndex != index
+        isBeingDragged = draggedIndex == index
+
+        itemDragOverClass = match isDraggedOver { true -> " sortable-item--drag-over", _ -> "" }
+        itemDraggingClass = match isBeingDragged { true -> " " ++ dragClass, _ -> "" }
+
+        <div
+            key={key}
+            class={"sortable-item" ++ itemDragOverClass ++ itemDraggingClass}
+            draggable={!disabled && !handle}
+            ondragstart={|e| handleDragStart(index, e)}
+            ondragend={|e| handleDragEnd(index, e)}
+            ondragover={|e| handleDragOver(index, e)}
+            ondragenter={|e| handleDragEnter(index, e)}
+            ondragleave={|e| handleDragLeave(index, e)}
+            ondrop={|e| handleDrop(index, e)}
+            onkeydown={|e| handleKeyDown(index, e)}
+            role="option"
+            tabindex={disabled ? -1 : 0}
+            aria-selected={isBeingDragged}
+            aria-grabbed={isBeingDragged}
+            data-sortable-index={index}
+        >
+            {handle ? (
+                <div
+                    class="sortable-handle"
+                    draggable={!disabled}
+                    ondragstart={|e| handleDragStart(index, e)}
+                    aria-label="Drag handle"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="9" cy="5" r="1.5"></circle>
+                        <circle cx="15" cy="5" r="1.5"></circle>
+                        <circle cx="9" cy="12" r="1.5"></circle>
+                        <circle cx="15" cy="12" r="1.5"></circle>
+                        <circle cx="9" cy="19" r="1.5"></circle>
+                        <circle cx="15" cy="19" r="1.5"></circle>
+                    </svg>
+                </div>
+            ) : nil}
+
+            <div class="sortable-item-body">
+                {itemRenderer(item, index)}
+            </div>
+
+            {isDraggedOver && draggedIndex < index ? (
+                <div class="sortable-drop-indicator sortable-drop-indicator--after"></div>
+            ) : nil}
+
+            {isDraggedOver && draggedIndex > index ? (
+                <div class="sortable-drop-indicator sortable-drop-indicator--before"></div>
+            ) : nil}
+        </div>
+    })}
+
+    {localItems.length == 0 ? (
+        <div class="sortable-empty">
+            <span>No items to display</span>
+        </div>
+    ) : nil}
+</div>
+
+<style scoped>
+.flin-sortable {
+    display: flex;
+    gap: var(--flin-space-2);
+    width: 100%;
+}
+
+.sortable--vertical {
+    flex-direction: column;
+}
+
+.sortable--horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.sortable--disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Sortable item */
+.sortable-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    cursor: grab;
+    user-select: none;
+    transition: transform var(--flin-transition-fast), box-shadow var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.sortable-item:hover {
+    background-color: var(--flin-neutral-50);
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.sortable-item:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+/* Dragging state */
+.sortable-item--dragging,
+.sortable--dragging .sortable-item[aria-grabbed="true"] {
+    opacity: 0.5;
+    cursor: grabbing;
+    box-shadow: var(--flin-shadow-lg);
+    transform: scale(1.02);
+    z-index: 100;
+}
+
+/* Drag over state */
+.sortable-item--drag-over {
+    background-color: rgba(var(--flin-primary-rgb), 0.05);
+}
+
+/* Handle */
+.sortable-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--flin-neutral-400);
+    cursor: grab;
+    flex-shrink: 0;
+    border-radius: var(--flin-radius-sm);
+    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.sortable-handle:hover {
+    color: var(--flin-neutral-600);
+    background-color: var(--flin-neutral-100);
+}
+
+.sortable-handle:active {
+    cursor: grabbing;
+}
+
+/* Item body */
+.sortable-item-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.sortable-item-content {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+}
+
+/* Drop indicators */
+.sortable-drop-indicator {
+    position: absolute;
+    background-color: var(--flin-primary);
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.sortable--vertical .sortable-drop-indicator {
+    left: 0;
+    right: 0;
+    height: 3px;
+}
+
+.sortable--vertical .sortable-drop-indicator--before {
+    top: -5px;
+}
+
+.sortable--vertical .sortable-drop-indicator--after {
+    bottom: -5px;
+}
+
+.sortable--horizontal .sortable-drop-indicator {
+    top: 0;
+    bottom: 0;
+    width: 3px;
+}
+
+.sortable--horizontal .sortable-drop-indicator--before {
+    left: -5px;
+}
+
+.sortable--horizontal .sortable-drop-indicator--after {
+    right: -5px;
+}
+
+/* Empty state */
+.sortable-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-8);
+    color: var(--flin-neutral-400);
+    font-size: var(--flin-text-sm);
+    border: 2px dashed var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+}
+
+/* Animation for reordering */
+.sortable-item {
+    animation: sortableItemEnter var(--flin-transition-fast) ease-out;
+}
+
+@keyframes sortableItemEnter {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .sortable-item {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .sortable-item:hover {
+    background-color: var(--flin-neutral-750);
+}
+
+[data-theme="dark"] .sortable-item--drag-over {
+    background-color: rgba(var(--flin-primary-rgb), 0.1);
+}
+
+[data-theme="dark"] .sortable-handle:hover {
+    background-color: var(--flin-neutral-700);
+    color: var(--flin-neutral-300);
+}
+
+[data-theme="dark"] .sortable-empty {
+    border-color: var(--flin-neutral-700);
+    color: var(--flin-neutral-500);
+}
+</style>

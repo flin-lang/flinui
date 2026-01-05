@@ -1,0 +1,389 @@
+// FlinUI Splitter Component
+// Resizable split panes with draggable divider
+// Props: direction (horizontal/vertical), sizes (array), minSizes (array), onResize (fn)
+
+// Props with defaults
+direction = props.direction || "horizontal"
+sizes = props.sizes || [50, 50]
+minSizes = props.minSizes || [10, 10]
+onResize = props.onResize
+collapsible = props.collapsible || false
+
+// State management
+currentSizes = [...sizes]
+isDragging = false
+activeIndex = 0
+startPos = 0
+startSizes = []
+containerSize = 0
+
+// Direction classes
+directionClass = match direction {
+    "vertical" -> " flin-splitter--vertical",
+    _ -> " flin-splitter--horizontal"
+}
+
+draggingClass = match isDragging { true -> " flin-splitter--dragging", _ -> "" }
+
+// Calculate pane count
+paneCount = currentSizes.length
+
+// Get container size
+getContainerSize = {
+    container = document.querySelector(".flin-splitter")
+    {if container}
+        {if direction == "horizontal"}
+            containerSize = container.clientWidth
+        {else}
+            containerSize = container.clientHeight
+        {/if}
+    {/if}
+}
+
+// Handle divider mouse down
+handleDividerMouseDown = {
+    index = parseInt(event.target.dataset.index)
+
+    isDragging = true
+    activeIndex = index
+    startSizes = [...currentSizes]
+
+    {if direction == "horizontal"}
+        startPos = event.clientX
+    {else}
+        startPos = event.clientY
+    {/if}
+
+    getContainerSize()
+
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
+    document.body.style.cursor = direction == "horizontal" ? "col-resize" : "row-resize"
+    document.body.style.userSelect = "none"
+
+    event.preventDefault()
+}
+
+// Handle mouse move during drag
+handleMouseMove = {
+    {if !isDragging}
+        return
+    {/if}
+
+    currentPos = match direction {
+        "horizontal" -> event.clientX,
+        _ -> event.clientY
+    }
+
+    delta = currentPos - startPos
+    deltaPercent = (delta / containerSize) * 100
+
+    newSize1 = startSizes[activeIndex] + deltaPercent
+    newSize2 = startSizes[activeIndex + 1] - deltaPercent
+
+    // Apply minimum size constraints
+    minSize1 = minSizes[activeIndex] || 10
+    minSize2 = minSizes[activeIndex + 1] || 10
+
+    {if newSize1 >= minSize1 && newSize2 >= minSize2}
+        currentSizes[activeIndex] = newSize1
+        currentSizes[activeIndex + 1] = newSize2
+
+        // Update pane styles
+        updatePaneStyles()
+    {/if}
+}
+
+// Handle mouse up
+handleMouseUp = {
+    isDragging = false
+
+    document.removeEventListener("mousemove", handleMouseMove)
+    document.removeEventListener("mouseup", handleMouseUp)
+    document.body.style.cursor = ""
+    document.body.style.userSelect = ""
+
+    // Trigger callback
+    {if onResize}
+        onResize(currentSizes)
+    {/if}
+}
+
+// Handle double click to collapse/expand
+handleDividerDoubleClick = {
+    {if !collapsible}
+        return
+    {/if}
+
+    index = parseInt(event.target.dataset.index)
+    minSize = minSizes[index] || 10
+
+    {if currentSizes[index] <= minSize}
+        // Expand: reset to initial size
+        currentSizes[index] = sizes[index]
+        currentSizes[index + 1] = sizes[index + 1]
+    {else}
+        // Collapse: minimize first pane
+        totalSize = currentSizes[index] + currentSizes[index + 1]
+        currentSizes[index] = minSize
+        currentSizes[index + 1] = totalSize - minSize
+    {/if}
+
+    updatePaneStyles()
+
+    {if onResize}
+        onResize(currentSizes)
+    {/if}
+}
+
+// Update pane styles
+updatePaneStyles = {
+    panes = document.querySelectorAll(".flin-splitter__pane")
+
+    {for i in 0..panes.length}
+        pane = panes[i]
+        {if pane}
+            {if direction == "horizontal"}
+                pane.style.width = currentSizes[i] + "%"
+                pane.style.height = "100%"
+            {else}
+                pane.style.height = currentSizes[i] + "%"
+                pane.style.width = "100%"
+            {/if}
+        {/if}
+    {/for}
+}
+
+// Handle keyboard navigation on divider
+handleDividerKeyDown = {
+    index = parseInt(event.target.dataset.index)
+    step = 1 // Move by 1%
+
+    {if event.shiftKey}
+        step = 5 // Larger step with shift
+    {/if}
+
+    moved = false
+
+    {if direction == "horizontal"}
+        {if event.key == "ArrowLeft"}
+            newSize1 = currentSizes[index] - step
+            newSize2 = currentSizes[index + 1] + step
+            moved = true
+        {else if event.key == "ArrowRight"}
+            newSize1 = currentSizes[index] + step
+            newSize2 = currentSizes[index + 1] - step
+            moved = true
+        {/if}
+    {else}
+        {if event.key == "ArrowUp"}
+            newSize1 = currentSizes[index] - step
+            newSize2 = currentSizes[index + 1] + step
+            moved = true
+        {else if event.key == "ArrowDown"}
+            newSize1 = currentSizes[index] + step
+            newSize2 = currentSizes[index + 1] - step
+            moved = true
+        {/if}
+    {/if}
+
+    {if moved}
+        event.preventDefault()
+
+        minSize1 = minSizes[index] || 10
+        minSize2 = minSizes[index + 1] || 10
+
+        {if newSize1 >= minSize1 && newSize2 >= minSize2}
+            currentSizes[index] = newSize1
+            currentSizes[index + 1] = newSize2
+            updatePaneStyles()
+
+            {if onResize}
+                onResize(currentSizes)
+            {/if}
+        {/if}
+    {/if}
+}
+
+// Initialize on mount
+onMount = {
+    updatePaneStyles()
+
+    // Handle window resize
+    window.addEventListener("resize", {
+        getContainerSize()
+    })
+}
+
+// Build pane style strings
+getPaneStyle = fn(index) {
+    {if direction == "horizontal"}
+        return "width: " ++ currentSizes[index] ++ "%; height: 100%;"
+    {else}
+        return "height: " ++ currentSizes[index] ++ "%; width: 100%;"
+    {/if}
+}
+
+<div class={"flin-splitter" ++ directionClass ++ draggingClass}>
+    {for i in 0..paneCount}
+        <div class="flin-splitter__pane" style={getPaneStyle(i)}>
+            <slot name={"pane" ++ i}>
+                {children[i]}
+            </slot>
+        </div>
+
+        {if i < paneCount - 1}
+            <div
+                class="flin-splitter__divider"
+                data-index={i}
+                mousedown={handleDividerMouseDown}
+                dblclick={handleDividerDoubleClick}
+                keydown={handleDividerKeyDown}
+                role="separator"
+                aria-valuenow={currentSizes[i]}
+                aria-valuemin={minSizes[i] || 10}
+                aria-valuemax={100 - (minSizes[i + 1] || 10)}
+                aria-orientation={direction}
+                tabindex="0"
+            >
+                <div class="flin-splitter__divider-handle">
+                    <svg
+                        class="flin-splitter__divider-icon"
+                        width="8"
+                        height="20"
+                        viewBox="0 0 8 20"
+                        fill="none"
+                        aria-hidden="true"
+                    >
+                        {if direction == "horizontal"}
+                            <circle cx="2" cy="4" r="1.5" fill="currentColor"/>
+                            <circle cx="6" cy="4" r="1.5" fill="currentColor"/>
+                            <circle cx="2" cy="10" r="1.5" fill="currentColor"/>
+                            <circle cx="6" cy="10" r="1.5" fill="currentColor"/>
+                            <circle cx="2" cy="16" r="1.5" fill="currentColor"/>
+                            <circle cx="6" cy="16" r="1.5" fill="currentColor"/>
+                        {else}
+                            <circle cx="4" cy="2" r="1.5" fill="currentColor"/>
+                            <circle cx="4" cy="6" r="1.5" fill="currentColor"/>
+                            <circle cx="10" cy="2" r="1.5" fill="currentColor"/>
+                            <circle cx="10" cy="6" r="1.5" fill="currentColor"/>
+                            <circle cx="16" cy="2" r="1.5" fill="currentColor"/>
+                            <circle cx="16" cy="6" r="1.5" fill="currentColor"/>
+                        {/if}
+                    </svg>
+                </div>
+            </div>
+        {/if}
+    {/for}
+</div>
+
+<style scoped>
+.flin-splitter {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.flin-splitter--horizontal {
+    flex-direction: row;
+}
+
+.flin-splitter--vertical {
+    flex-direction: column;
+}
+
+.flin-splitter--dragging {
+    user-select: none;
+}
+
+/* Panes */
+.flin-splitter__pane {
+    overflow: auto;
+    min-width: 0;
+    min-height: 0;
+}
+
+/* Divider */
+.flin-splitter__divider {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--flin-neutral-200);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.flin-splitter--horizontal .flin-splitter__divider {
+    width: 8px;
+    cursor: col-resize;
+}
+
+.flin-splitter--vertical .flin-splitter__divider {
+    height: 8px;
+    cursor: row-resize;
+}
+
+.flin-splitter__divider:hover {
+    background-color: var(--flin-primary-light);
+}
+
+.flin-splitter__divider:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: -2px;
+    background-color: var(--flin-primary-light);
+}
+
+.flin-splitter--dragging .flin-splitter__divider {
+    background-color: var(--flin-primary);
+}
+
+/* Divider handle */
+.flin-splitter__divider-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-neutral-400);
+    transition: color var(--flin-transition-fast);
+}
+
+.flin-splitter__divider:hover .flin-splitter__divider-handle {
+    color: var(--flin-primary);
+}
+
+.flin-splitter__divider-icon {
+    pointer-events: none;
+}
+
+.flin-splitter--vertical .flin-splitter__divider-icon {
+    transform: rotate(90deg);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-splitter__divider {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-splitter__divider:hover {
+    background-color: var(--flin-primary-dark);
+}
+
+[data-theme="dark"] .flin-splitter__divider-handle {
+    color: var(--flin-neutral-500);
+}
+
+[data-theme="dark"] .flin-splitter__divider:hover .flin-splitter__divider-handle {
+    color: var(--flin-primary-light);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .flin-splitter--horizontal .flin-splitter__divider {
+        width: 12px; /* Larger touch target on mobile */
+    }
+
+    .flin-splitter--vertical .flin-splitter__divider {
+        height: 12px;
+    }
+}
+</style>

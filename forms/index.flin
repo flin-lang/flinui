@@ -28,6 +28,17 @@
 // OTPInput         - One-time password input with auto-focus
 //
 // ============================================================================
+// ENTERPRISE COMPONENTS (NEW)
+// ============================================================================
+//
+// RichTextEditor   - WYSIWYG editor with toolbar (bold, italic, lists, links)
+// DateRangePicker  - Two date inputs with start/end validation and presets
+// MultiSelect      - Multi-selection with tags, search, and create new
+// ImageCropper     - Image upload with crop area and aspect ratio support
+// Mentions         - Input with @user mentions dropdown
+// InputMask        - Masked input for phone, credit card, date formats
+//
+// ============================================================================
 // USAGE EXAMPLES
 // ============================================================================
 //
@@ -155,6 +166,91 @@
 //         type="number"
 //         onComplete={handleOTPVerification}
 //     />
+// </FormField>
+//
+// ============================================================================
+// ENTERPRISE COMPONENT EXAMPLES
+// ============================================================================
+//
+// Rich text editor:
+// -----------------
+// <FormField label="Description">
+//     <RichTextEditor
+//         value={description}
+//         placeholder="Write your content..."
+//         minHeight="150px"
+//         maxHeight="400px"
+//         onChange={handleContentChange}
+//     />
+// </FormField>
+//
+// Date range picker:
+// ------------------
+// <FormField label="Select Date Range">
+//     <DateRangePicker
+//         startDate={startDate}
+//         endDate={endDate}
+//         minDate="2024-01-01"
+//         showPresets={true}
+//         onChange={handleDateRangeChange}
+//     />
+// </FormField>
+//
+// Multi-select with create:
+// -------------------------
+// <FormField label="Select Tags">
+//     <MultiSelect
+//         value={selectedTags}
+//         options={availableTags}
+//         placeholder="Choose tags..."
+//         allowCreate={true}
+//         maxItems={5}
+//         onChange={handleTagsChange}
+//         onCreate={handleCreateTag}
+//     />
+// </FormField>
+//
+// Image cropper:
+// --------------
+// <FormField label="Profile Picture">
+//     <ImageCropper
+//         aspectRatio="1:1"
+//         maxFileSize={5242880}
+//         outputFormat="image/jpeg"
+//         outputQuality={0.9}
+//         onCrop={handleCroppedImage}
+//     />
+// </FormField>
+//
+// Mentions input:
+// ---------------
+// <FormField label="Comment">
+//     <Mentions
+//         value={comment}
+//         users={teamMembers}
+//         placeholder="Type @ to mention someone..."
+//         maxMentions={5}
+//         onMention={handleMention}
+//         onChange={handleCommentChange}
+//     />
+// </FormField>
+//
+// Input masks:
+// ------------
+// <FormField label="Phone Number">
+//     <InputMask mask="phone" placeholder="(555) 123-4567" onChange={handlePhoneChange} />
+// </FormField>
+//
+// <FormField label="Credit Card">
+//     <InputMask mask="credit-card" onComplete={handleCardComplete} />
+// </FormField>
+//
+// <FormField label="Date of Birth">
+//     <InputMask mask="date" placeholder="MM/DD/YYYY" />
+// </FormField>
+//
+// <FormField label="Custom Format">
+//     <InputMask mask="AA-9999" placeholder="XX-0000" />
 // </FormField>
 //
 // ============================================================================

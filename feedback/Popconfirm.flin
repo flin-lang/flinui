@@ -1,0 +1,530 @@
+// Popconfirm.flin - FlinUI Confirmation Popover Component
+// A confirmation popover that appears before executing actions
+
+// Props with defaults
+title = props.title || "Are you sure?"
+description = props.description || ""
+onConfirm = props.onConfirm || nil
+onCancel = props.onCancel || nil
+confirmText = props.confirmText || "Yes"
+cancelText = props.cancelText || "No"
+confirmVariant = props.confirmVariant || "primary"
+position = props.position || "top"
+disabled = props.disabled || false
+icon = props.icon || "warning"
+showCancel = props.showCancel || true
+
+// State
+isOpen = false
+isExiting = false
+
+// Handle open
+handleOpen = {
+    if disabled { return }
+    isOpen = true
+    isExiting = false
+}
+
+// Handle close
+handleClose = {
+    isExiting = true
+    setTimeout({
+        isOpen = false
+        isExiting = false
+    }, 150)
+}
+
+// Handle confirm
+handleConfirm = {
+    if onConfirm {
+        onConfirm()
+    }
+    handleClose()
+}
+
+// Handle cancel
+handleCancel = {
+    if onCancel {
+        onCancel()
+    }
+    handleClose()
+}
+
+// Handle click outside
+handleClickOutside = {
+    handleClose()
+}
+
+// Handle keyboard
+handleKeyDown = |e| {
+    if e.key == "Escape" {
+        handleCancel()
+    }
+    if e.key == "Enter" {
+        handleConfirm()
+    }
+}
+
+// Get icon SVG
+iconSvg = match icon {
+    "warning" -> `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </svg>`
+    "danger" -> `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="15" y1="9" x2="9" y2="15"></line>
+        <line x1="9" y1="9" x2="15" y2="15"></line>
+    </svg>`
+    "info" -> `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+    </svg>`
+    "question" -> `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </svg>`
+    _ -> ""
+}
+
+// Confirm button variant class
+confirmVariantClass = match confirmVariant {
+    "danger" -> " popconfirm-button--danger"
+    "success" -> " popconfirm-button--success"
+    _ -> " popconfirm-button--primary"
+}
+
+// Icon variant class
+iconVariantClass = match icon {
+    "danger" -> " popconfirm-icon--danger"
+    "warning" -> " popconfirm-icon--warning"
+    "info" -> " popconfirm-icon--info"
+    _ -> ""
+}
+
+// Position class
+positionClass = match position {
+    "top" -> "popconfirm-top"
+    "bottom" -> "popconfirm-bottom"
+    "left" -> "popconfirm-left"
+    "right" -> "popconfirm-right"
+    "top-start" -> "popconfirm-top-start"
+    "top-end" -> "popconfirm-top-end"
+    "bottom-start" -> "popconfirm-bottom-start"
+    "bottom-end" -> "popconfirm-bottom-end"
+    _ -> "popconfirm-top"
+}
+
+// Exiting class
+exitingClass = match isExiting { true -> " popconfirm--exiting", _ -> "" }
+
+// Disabled class
+disabledClass = match disabled { true -> " popconfirm-wrapper--disabled", _ -> "" }
+
+<div class={"flin-popconfirm-wrapper" ++ disabledClass}>
+    <!-- Trigger slot -->
+    <div
+        class="popconfirm-trigger"
+        onclick={handleOpen}
+        role="button"
+        tabindex={disabled ? -1 : 0}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+    >
+        <slot name="trigger">
+            {children}
+        </slot>
+    </div>
+
+    {if isOpen}
+        <!-- Backdrop -->
+        <div
+            class="popconfirm-backdrop"
+            onclick={handleClickOutside}
+            aria-hidden="true"
+        ></div>
+
+        <!-- Popconfirm panel -->
+        <div
+            class={"flin-popconfirm " ++ positionClass ++ exitingClass}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="popconfirm-title"
+            aria-describedby={description ? "popconfirm-desc" : nil}
+            onkeydown={handleKeyDown}
+            tabindex="-1"
+        >
+            <div class="popconfirm-arrow"></div>
+
+            <div class="popconfirm-content">
+                {iconSvg ? (
+                    <div class={"popconfirm-icon" ++ iconVariantClass} innerHTML={iconSvg}></div>
+                ) : nil}
+
+                <div class="popconfirm-text">
+                    <div id="popconfirm-title" class="popconfirm-title">{title}</div>
+                    {description ? (
+                        <div id="popconfirm-desc" class="popconfirm-description">{description}</div>
+                    ) : nil}
+                </div>
+            </div>
+
+            <div class="popconfirm-actions">
+                {showCancel ? (
+                    <button
+                        class="popconfirm-button popconfirm-button--cancel"
+                        onclick={handleCancel}
+                        type="button"
+                    >
+                        {cancelText}
+                    </button>
+                ) : nil}
+
+                <button
+                    class={"popconfirm-button" ++ confirmVariantClass}
+                    onclick={handleConfirm}
+                    type="button"
+                >
+                    {confirmText}
+                </button>
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-popconfirm-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.flin-popconfirm-wrapper--disabled {
+    cursor: not-allowed;
+}
+
+.flin-popconfirm-wrapper--disabled .popconfirm-trigger {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.popconfirm-trigger {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.popconfirm-trigger:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+    border-radius: var(--flin-radius-sm);
+}
+
+/* Backdrop */
+.popconfirm-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9997;
+}
+
+/* Popconfirm panel */
+.flin-popconfirm {
+    position: absolute;
+    z-index: 9998;
+    min-width: 220px;
+    max-width: 320px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+    animation: popconfirmFadeIn var(--flin-transition-fast) ease-out;
+}
+
+@keyframes popconfirmFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.popconfirm--exiting {
+    animation: popconfirmFadeOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes popconfirmFadeOut {
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+/* Position variants */
+.popconfirm-top {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: var(--flin-space-2);
+}
+
+.popconfirm-top-start {
+    bottom: 100%;
+    left: 0;
+    margin-bottom: var(--flin-space-2);
+}
+
+.popconfirm-top-end {
+    bottom: 100%;
+    right: 0;
+    margin-bottom: var(--flin-space-2);
+}
+
+.popconfirm-bottom {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: var(--flin-space-2);
+}
+
+.popconfirm-bottom-start {
+    top: 100%;
+    left: 0;
+    margin-top: var(--flin-space-2);
+}
+
+.popconfirm-bottom-end {
+    top: 100%;
+    right: 0;
+    margin-top: var(--flin-space-2);
+}
+
+.popconfirm-left {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: var(--flin-space-2);
+}
+
+.popconfirm-right {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: var(--flin-space-2);
+}
+
+/* Arrow */
+.popconfirm-arrow {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    transform: rotate(45deg);
+}
+
+.popconfirm-top .popconfirm-arrow,
+.popconfirm-top-start .popconfirm-arrow,
+.popconfirm-top-end .popconfirm-arrow {
+    bottom: -6px;
+    left: 50%;
+    margin-left: -5px;
+    border-top: none;
+    border-left: none;
+}
+
+.popconfirm-top-start .popconfirm-arrow {
+    left: 20px;
+    margin-left: 0;
+}
+
+.popconfirm-top-end .popconfirm-arrow {
+    left: auto;
+    right: 20px;
+    margin-left: 0;
+}
+
+.popconfirm-bottom .popconfirm-arrow,
+.popconfirm-bottom-start .popconfirm-arrow,
+.popconfirm-bottom-end .popconfirm-arrow {
+    top: -6px;
+    left: 50%;
+    margin-left: -5px;
+    border-bottom: none;
+    border-right: none;
+}
+
+.popconfirm-bottom-start .popconfirm-arrow {
+    left: 20px;
+    margin-left: 0;
+}
+
+.popconfirm-bottom-end .popconfirm-arrow {
+    left: auto;
+    right: 20px;
+    margin-left: 0;
+}
+
+.popconfirm-left .popconfirm-arrow {
+    right: -6px;
+    top: 50%;
+    margin-top: -5px;
+    border-left: none;
+    border-bottom: none;
+}
+
+.popconfirm-right .popconfirm-arrow {
+    left: -6px;
+    top: 50%;
+    margin-top: -5px;
+    border-right: none;
+    border-top: none;
+}
+
+/* Content */
+.popconfirm-content {
+    display: flex;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+}
+
+.popconfirm-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 2px;
+    color: var(--flin-warning);
+}
+
+.popconfirm-icon--danger {
+    color: var(--flin-error);
+}
+
+.popconfirm-icon--warning {
+    color: var(--flin-warning);
+}
+
+.popconfirm-icon--info {
+    color: var(--flin-info);
+}
+
+.popconfirm-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.popconfirm-title {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+    line-height: 1.4;
+}
+
+.popconfirm-description {
+    margin-top: var(--flin-space-1);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    line-height: 1.5;
+}
+
+/* Actions */
+.popconfirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-100);
+    background-color: var(--flin-neutral-50);
+    border-radius: 0 0 var(--flin-radius-lg) var(--flin-radius-lg);
+}
+
+.popconfirm-button {
+    padding: var(--flin-space-1) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.popconfirm-button--cancel {
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    color: var(--flin-fg);
+}
+
+.popconfirm-button--cancel:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.popconfirm-button--primary {
+    background-color: var(--flin-primary);
+    border: 1px solid var(--flin-primary);
+    color: white;
+}
+
+.popconfirm-button--primary:hover {
+    background-color: var(--flin-primary-dark);
+    border-color: var(--flin-primary-dark);
+}
+
+.popconfirm-button--danger {
+    background-color: var(--flin-error);
+    border: 1px solid var(--flin-error);
+    color: white;
+}
+
+.popconfirm-button--danger:hover {
+    background-color: var(--flin-error-dark);
+    border-color: var(--flin-error-dark);
+}
+
+.popconfirm-button--success {
+    background-color: var(--flin-success);
+    border: 1px solid var(--flin-success);
+    color: white;
+}
+
+.popconfirm-button--success:hover {
+    background-color: var(--flin-success-dark);
+    border-color: var(--flin-success-dark);
+}
+
+/* Focus states */
+.popconfirm-button:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.flin-popconfirm:focus {
+    outline: none;
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-popconfirm {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .popconfirm-arrow {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .popconfirm-actions {
+    background-color: var(--flin-neutral-850);
+    border-top-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .popconfirm-button--cancel {
+    background-color: var(--flin-neutral-700);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .popconfirm-button--cancel:hover {
+    background-color: var(--flin-neutral-600);
+}
+</style>

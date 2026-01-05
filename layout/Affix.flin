@@ -1,0 +1,187 @@
+// FlinUI Affix Component
+// Sticky positioning wrapper that becomes fixed when scrolled past threshold
+// Props: offsetTop (number), offsetBottom (number), target (scroll container selector)
+
+// Props with defaults
+offsetTop = props.offsetTop || 0
+offsetBottom = props.offsetBottom || null
+target = props.target || null
+onChange = props.onChange
+
+// State management
+isFixed = false
+affixStyle = ""
+placeholderStyle = ""
+originalRect = null
+scrollContainer = null
+
+// Initialize the component
+initAffix = {
+    // Get the scroll container (window or custom target)
+    {if target}
+        scrollContainer = document.querySelector(target)
+    {else}
+        scrollContainer = window
+    {/if}
+
+    // Store original element position
+    affixEl = document.querySelector(".flin-affix-content")
+    {if affixEl}
+        rect = affixEl.getBoundingClientRect()
+        originalRect = {
+            top: rect.top + window.scrollY,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height
+        }
+    {/if}
+}
+
+// Handle scroll events
+handleScroll = {
+    {if !originalRect}
+        return
+    {/if}
+
+    scrollTop = match target {
+        null -> window.scrollY,
+        _ -> scrollContainer.scrollTop
+    }
+
+    containerTop = match target {
+        null -> 0,
+        _ -> scrollContainer.getBoundingClientRect().top
+    }
+
+    wasFixed = isFixed
+
+    // Check if should be fixed at top
+    {if offsetBottom == null}
+        shouldFix = scrollTop > originalRect.top - offsetTop
+
+        {if shouldFix && !isFixed}
+            isFixed = true
+            affixStyle = "position: fixed; top: " ++ offsetTop ++ "px; left: " ++ originalRect.left ++ "px; width: " ++ originalRect.width ++ "px; z-index: 1000;"
+            placeholderStyle = "height: " ++ originalRect.height ++ "px;"
+        {else if !shouldFix && isFixed}
+            isFixed = false
+            affixStyle = ""
+            placeholderStyle = ""
+        {/if}
+    {else}
+        // Bottom offset mode
+        viewportHeight = window.innerHeight
+        shouldFix = scrollTop + viewportHeight < originalRect.top + originalRect.height + offsetBottom
+
+        {if shouldFix && !isFixed}
+            isFixed = true
+            affixStyle = "position: fixed; bottom: " ++ offsetBottom ++ "px; left: " ++ originalRect.left ++ "px; width: " ++ originalRect.width ++ "px; z-index: 1000;"
+            placeholderStyle = "height: " ++ originalRect.height ++ "px;"
+        {else if !shouldFix && isFixed}
+            isFixed = false
+            affixStyle = ""
+            placeholderStyle = ""
+        {/if}
+    {/if}
+
+    // Trigger onChange callback
+    {if onChange && wasFixed != isFixed}
+        onChange(isFixed)
+    {/if}
+}
+
+// Handle resize events
+handleResize = {
+    // Recalculate original position on resize
+    {if !isFixed}
+        affixEl = document.querySelector(".flin-affix-content")
+        {if affixEl}
+            rect = affixEl.getBoundingClientRect()
+            originalRect = {
+                top: rect.top + window.scrollY,
+                left: rect.left,
+                width: rect.width,
+                height: rect.height
+            }
+        {/if}
+    {/if}
+}
+
+// Setup event listeners on mount
+onMount = {
+    initAffix()
+
+    {if target && scrollContainer}
+        scrollContainer.addEventListener("scroll", handleScroll)
+    {else}
+        window.addEventListener("scroll", handleScroll)
+    {/if}
+
+    window.addEventListener("resize", handleResize)
+
+    // Initial check
+    handleScroll()
+}
+
+// Cleanup on unmount
+onUnmount = {
+    {if target && scrollContainer}
+        scrollContainer.removeEventListener("scroll", handleScroll)
+    {else}
+        window.removeEventListener("scroll", handleScroll)
+    {/if}
+
+    window.removeEventListener("resize", handleResize)
+}
+
+// Build class string
+fixedClass = match isFixed { true -> " flin-affix--fixed", _ -> "" }
+
+<div class="flin-affix">
+    <div class="flin-affix-placeholder" style={placeholderStyle}></div>
+    <div class={"flin-affix-content" ++ fixedClass} style={affixStyle}>
+        {children}
+    </div>
+</div>
+
+<style scoped>
+.flin-affix {
+    position: relative;
+}
+
+.flin-affix-placeholder {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.flin-affix-content {
+    transition: none;
+}
+
+.flin-affix--fixed {
+    box-shadow: var(--flin-shadow-md);
+    background-color: var(--flin-bg);
+}
+
+/* Animation when becoming fixed */
+@keyframes affixFadeIn {
+    from {
+        opacity: 0.8;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.flin-affix--fixed {
+    animation: affixFadeIn var(--flin-transition-fast) ease-out;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-affix--fixed {
+    background-color: var(--flin-neutral-900);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+</style>

@@ -37,6 +37,21 @@
 // Sheet - Mobile-optimized bottom sheet with drag gestures and snap points
 // Usage: <Sheet open={showSheet} snapPoints={[0.5, 1.0]} showHandle={true} onClose={closeSheet}>Content here</Sheet>
 
+// Result - Success/error/info result page with icon, title, subtitle, and action buttons
+// Usage: <Result status="success" title="Payment Complete" subTitle="Your order has been placed">
+//            <Button variant="primary">Go to Orders</Button>
+//            <Button variant="outline">Continue Shopping</Button>
+//        </Result>
+
+// Tour - Step-by-step onboarding guide with spotlight effects
+// Usage: <Tour open={showTour} steps={[{ target: "#feature", title: "New Feature", content: "Try this out!" }]} onClose={closeTour} />
+
+// Popconfirm - Confirmation popover before actions
+// Usage: <Popconfirm title="Delete this item?" onConfirm={handleDelete} confirmVariant="danger"><Button>Delete</Button></Popconfirm>
+
+// HoverCard - Rich preview card on hover
+// Usage: <HoverCard><slot name="trigger">@username</slot><slot name="content"><UserProfile /></slot></HoverCard>
+
 <div class="flinui-feedback-components">
     {children}
 </div>

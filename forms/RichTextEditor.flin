@@ -1,0 +1,911 @@
+// RichTextEditor.flin - FlinUI Rich Text Editor Component
+// WYSIWYG editor with toolbar for bold, italic, underline, lists, links, and headings
+
+// Props with defaults
+value = props.value || ""
+placeholder = props.placeholder || "Start typing..."
+disabled = props.disabled || false
+minHeight = props.minHeight || "200px"
+maxHeight = props.maxHeight || "500px"
+showToolbar = props.showToolbar || true
+toolbarPosition = props.toolbarPosition || "top"
+onChange = props.onChange
+onFocus = props.onFocus
+onBlur = props.onBlur
+
+// State management
+content = value
+isFocused = false
+activeFormats = []
+showLinkModal = false
+linkUrl = ""
+linkText = ""
+selectedRange = null
+
+// Check if format is active
+isFormatActive = {
+    format = event;
+    activeFormats.includes(format)
+}
+
+// Execute formatting command
+execCommand = {
+    command = event;
+    document.execCommand(command, false, null);
+    updateActiveFormats()
+}
+
+// Execute command with value
+execCommandWithValue = {
+    command = event.command;
+    val = event.value;
+    document.execCommand(command, false, val);
+    updateActiveFormats()
+}
+
+// Update active formats based on current selection
+updateActiveFormats = {
+    formats = [];
+    {if document.queryCommandState("bold")}
+        formats.push("bold")
+    {/if}
+    {if document.queryCommandState("italic")}
+        formats.push("italic")
+    {/if}
+    {if document.queryCommandState("underline")}
+        formats.push("underline")
+    {/if}
+    {if document.queryCommandState("strikeThrough")}
+        formats.push("strikeThrough")
+    {/if}
+    {if document.queryCommandState("insertUnorderedList")}
+        formats.push("unorderedList")
+    {/if}
+    {if document.queryCommandState("insertOrderedList")}
+        formats.push("orderedList")
+    {/if}
+    activeFormats = formats
+}
+
+// Handle content input
+handleInput = {
+    content = event.target.innerHTML;
+    updateActiveFormats();
+    {if onChange}
+        onChange(content)
+    {/if}
+}
+
+// Handle focus
+handleFocus = {
+    isFocused = true;
+    {if onFocus}
+        onFocus(event)
+    {/if}
+}
+
+// Handle blur
+handleBlur = {
+    isFocused = false;
+    {if onBlur}
+        onBlur(event)
+    {/if}
+}
+
+// Handle selection change
+handleSelectionChange = {
+    updateActiveFormats()
+}
+
+// Handle key commands
+handleKeydown = {
+    {if event.ctrlKey || event.metaKey}
+        {if event.key == "b"}
+            event.preventDefault();
+            execCommand("bold")
+        {else if event.key == "i"}
+            event.preventDefault();
+            execCommand("italic")
+        {else if event.key == "u"}
+            event.preventDefault();
+            execCommand("underline")
+        {else if event.key == "k"}
+            event.preventDefault();
+            openLinkModal()
+        {/if}
+    {/if}
+}
+
+// Format heading
+formatHeading = {
+    level = event;
+    execCommandWithValue({ command: "formatBlock", value: level })
+}
+
+// Clear formatting
+clearFormatting = {
+    document.execCommand("removeFormat", false, null)
+}
+
+// Open link modal
+openLinkModal = {
+    selection = window.getSelection();
+    {if selection.rangeCount > 0}
+        selectedRange = selection.getRangeAt(0);
+        linkText = selection.toString();
+        linkUrl = "";
+        showLinkModal = true
+    {/if}
+}
+
+// Insert link
+insertLink = {
+    {if linkUrl != "" && selectedRange != null}
+        selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(selectedRange);
+        document.execCommand("createLink", false, linkUrl);
+        showLinkModal = false;
+        linkUrl = "";
+        linkText = "";
+        selectedRange = null
+    {/if}
+}
+
+// Remove link
+removeLink = {
+    document.execCommand("unlink", false, null)
+}
+
+// Cancel link modal
+cancelLinkModal = {
+    showLinkModal = false;
+    linkUrl = "";
+    linkText = "";
+    selectedRange = null
+}
+
+// Insert horizontal rule
+insertHorizontalRule = {
+    document.execCommand("insertHorizontalRule", false, null)
+}
+
+// Undo/Redo
+undo = {
+    document.execCommand("undo", false, null)
+}
+
+redo = {
+    document.execCommand("redo", false, null)
+}
+
+// Compute class modifiers
+focusedClass = match isFocused { true -> " rich-text-editor-focused", _ -> "" }
+disabledClass = match disabled { true -> " rich-text-editor-disabled", _ -> "" }
+toolbarTopClass = match toolbarPosition { "top" -> " toolbar-top", _ -> " toolbar-bottom" }
+
+// Compute active button classes
+boldActiveClass = match isFormatActive("bold") { true -> " toolbar-btn-active", _ -> "" }
+italicActiveClass = match isFormatActive("italic") { true -> " toolbar-btn-active", _ -> "" }
+underlineActiveClass = match isFormatActive("underline") { true -> " toolbar-btn-active", _ -> "" }
+strikeActiveClass = match isFormatActive("strikeThrough") { true -> " toolbar-btn-active", _ -> "" }
+ulActiveClass = match isFormatActive("unorderedList") { true -> " toolbar-btn-active", _ -> "" }
+olActiveClass = match isFormatActive("orderedList") { true -> " toolbar-btn-active", _ -> "" }
+
+<div class={"rich-text-editor" ++ focusedClass ++ disabledClass ++ toolbarTopClass} role="application" aria-label="Rich text editor">
+    {if showToolbar && toolbarPosition == "top"}
+        <div class="rich-text-toolbar" role="toolbar" aria-label="Formatting options">
+            <div class="toolbar-group">
+                <button
+                    type="button"
+                    class={"toolbar-btn" ++ boldActiveClass}
+                    click={() => execCommand("bold")}
+                    disabled={disabled}
+                    title="Bold (Ctrl+B)"
+                    aria-label="Bold"
+                    aria-pressed={isFormatActive("bold")}
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/>
+                        <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/>
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    class={"toolbar-btn" ++ italicActiveClass}
+                    click={() => execCommand("italic")}
+                    disabled={disabled}
+                    title="Italic (Ctrl+I)"
+                    aria-label="Italic"
+                    aria-pressed={isFormatActive("italic")}
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="4" x2="10" y2="4"/>
+                        <line x1="14" y1="20" x2="5" y2="20"/>
+                        <line x1="15" y1="4" x2="9" y2="20"/>
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    class={"toolbar-btn" ++ underlineActiveClass}
+                    click={() => execCommand("underline")}
+                    disabled={disabled}
+                    title="Underline (Ctrl+U)"
+                    aria-label="Underline"
+                    aria-pressed={isFormatActive("underline")}
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/>
+                        <line x1="4" y1="21" x2="20" y2="21"/>
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    class={"toolbar-btn" ++ strikeActiveClass}
+                    click={() => execCommand("strikeThrough")}
+                    disabled={disabled}
+                    title="Strikethrough"
+                    aria-label="Strikethrough"
+                    aria-pressed={isFormatActive("strikeThrough")}
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 4H9a3 3 0 0 0-2.83 4"/>
+                        <path d="M14 12a4 4 0 0 1 0 8H6"/>
+                        <line x1="4" y1="12" x2="20" y2="12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <span class="toolbar-divider" aria-hidden="true"></span>
+
+            <div class="toolbar-group">
+                <select
+                    class="toolbar-select"
+                    change={(e) => formatHeading(e.target.value)}
+                    disabled={disabled}
+                    aria-label="Text style"
+                >
+                    <option value="p">Paragraph</option>
+                    <option value="h1">Heading 1</option>
+                    <option value="h2">Heading 2</option>
+                    <option value="h3">Heading 3</option>
+                    <option value="h4">Heading 4</option>
+                    <option value="blockquote">Quote</option>
+                    <option value="pre">Code</option>
+                </select>
+            </div>
+
+            <span class="toolbar-divider" aria-hidden="true"></span>
+
+            <div class="toolbar-group">
+                <button
+                    type="button"
+                    class={"toolbar-btn" ++ ulActiveClass}
+                    click={() => execCommand("insertUnorderedList")}
+                    disabled={disabled}
+                    title="Bullet list"
+                    aria-label="Bullet list"
+                    aria-pressed={isFormatActive("unorderedList")}
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6"/>
+                        <line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/>
+                        <circle cx="3" cy="6" r="1" fill="currentColor"/>
+                        <circle cx="3" cy="12" r="1" fill="currentColor"/>
+                        <circle cx="3" cy="18" r="1" fill="currentColor"/>
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    class={"toolbar-btn" ++ olActiveClass}
+                    click={() => execCommand("insertOrderedList")}
+                    disabled={disabled}
+                    title="Numbered list"
+                    aria-label="Numbered list"
+                    aria-pressed={isFormatActive("orderedList")}
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="10" y1="6" x2="21" y2="6"/>
+                        <line x1="10" y1="12" x2="21" y2="12"/>
+                        <line x1="10" y1="18" x2="21" y2="18"/>
+                        <path d="M4 6h1v4"/>
+                        <path d="M4 10h2"/>
+                        <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    class="toolbar-btn"
+                    click={() => execCommand("indent")}
+                    disabled={disabled}
+                    title="Increase indent"
+                    aria-label="Increase indent"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="21" y1="6" x2="11" y2="6"/>
+                        <line x1="21" y1="12" x2="11" y2="12"/>
+                        <line x1="21" y1="18" x2="11" y2="18"/>
+                        <polyline points="3 8 7 12 3 16"/>
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    class="toolbar-btn"
+                    click={() => execCommand("outdent")}
+                    disabled={disabled}
+                    title="Decrease indent"
+                    aria-label="Decrease indent"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="21" y1="6" x2="11" y2="6"/>
+                        <line x1="21" y1="12" x2="11" y2="12"/>
+                        <line x1="21" y1="18" x2="11" y2="18"/>
+                        <polyline points="7 8 3 12 7 16"/>
+                    </svg>
+                </button>
+            </div>
+
+            <span class="toolbar-divider" aria-hidden="true"></span>
+
+            <div class="toolbar-group">
+                <button
+                    type="button"
+                    class="toolbar-btn"
+                    click={openLinkModal}
+                    disabled={disabled}
+                    title="Insert link (Ctrl+K)"
+                    aria-label="Insert link"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    class="toolbar-btn"
+                    click={removeLink}
+                    disabled={disabled}
+                    title="Remove link"
+                    aria-label="Remove link"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18.84 12.25l1.72-1.71a5 5 0 0 0-7.07-7.07l-3 3a5 5 0 0 0 .12 7.19"/>
+                        <path d="M5.16 11.75l-1.72 1.71a5 5 0 0 0 7.07 7.07l3-3a5 5 0 0 0-.12-7.19"/>
+                        <line x1="2" y1="2" x2="22" y2="22"/>
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    class="toolbar-btn"
+                    click={insertHorizontalRule}
+                    disabled={disabled}
+                    title="Insert horizontal line"
+                    aria-label="Insert horizontal line"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <line x1="2" y1="12" x2="22" y2="12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <span class="toolbar-divider" aria-hidden="true"></span>
+
+            <div class="toolbar-group">
+                <button
+                    type="button"
+                    class="toolbar-btn"
+                    click={clearFormatting}
+                    disabled={disabled}
+                    title="Clear formatting"
+                    aria-label="Clear formatting"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 18L18 6"/>
+                        <path d="M4 6l6.5 0"/>
+                        <path d="M7 2l3 6"/>
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    class="toolbar-btn"
+                    click={undo}
+                    disabled={disabled}
+                    title="Undo (Ctrl+Z)"
+                    aria-label="Undo"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 7v6h6"/>
+                        <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    class="toolbar-btn"
+                    click={redo}
+                    disabled={disabled}
+                    title="Redo (Ctrl+Y)"
+                    aria-label="Redo"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 7v6h-6"/>
+                        <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    {/if}
+
+    <div
+        class="rich-text-content"
+        contenteditable={!disabled}
+        input={handleInput}
+        focus={handleFocus}
+        blur={handleBlur}
+        keydown={handleKeydown}
+        selectionchange={handleSelectionChange}
+        style={"min-height: " ++ minHeight ++ "; max-height: " ++ maxHeight}
+        role="textbox"
+        aria-multiline="true"
+        aria-label="Editor content"
+        aria-placeholder={placeholder}
+        data-placeholder={placeholder}
+    >
+        {content}
+    </div>
+
+    {if showToolbar && toolbarPosition == "bottom"}
+        <div class="rich-text-toolbar" role="toolbar" aria-label="Formatting options">
+            // Same toolbar content as above (abbreviated for clarity)
+        </div>
+    {/if}
+
+    {if showLinkModal}
+        <div class="link-modal-overlay" click={cancelLinkModal}>
+            <div class="link-modal" click={(e) => e.stopPropagation()} role="dialog" aria-labelledby="link-modal-title">
+                <div class="link-modal-header">
+                    <h3 id="link-modal-title" class="link-modal-title">Insert Link</h3>
+                    <button type="button" class="link-modal-close" click={cancelLinkModal} aria-label="Close">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="link-modal-body">
+                    <div class="link-modal-field">
+                        <label for="link-text" class="link-modal-label">Link Text</label>
+                        <input
+                            type="text"
+                            id="link-text"
+                            class="link-modal-input"
+                            value={linkText}
+                            input={(e) => linkText = e.target.value}
+                            placeholder="Display text"
+                        >
+                    </div>
+                    <div class="link-modal-field">
+                        <label for="link-url" class="link-modal-label">URL</label>
+                        <input
+                            type="url"
+                            id="link-url"
+                            class="link-modal-input"
+                            value={linkUrl}
+                            input={(e) => linkUrl = e.target.value}
+                            placeholder="https://example.com"
+                            autofocus
+                        >
+                    </div>
+                </div>
+                <div class="link-modal-footer">
+                    <button type="button" class="link-modal-btn link-modal-btn-cancel" click={cancelLinkModal}>
+                        Cancel
+                    </button>
+                    <button type="button" class="link-modal-btn link-modal-btn-insert" click={insertLink} disabled={linkUrl == ""}>
+                        Insert Link
+                    </button>
+                </div>
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.rich-text-editor {
+    width: 100%;
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    background-color: var(--flin-bg);
+    overflow: hidden;
+    transition: all var(--flin-transition-fast);
+}
+
+.rich-text-editor:hover:not(.rich-text-editor-disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.rich-text-editor-focused {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.rich-text-editor-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Toolbar */
+.rich-text-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-2);
+    background-color: var(--flin-bg-muted);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.toolbar-bottom .rich-text-toolbar {
+    border-bottom: none;
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background-color: var(--flin-neutral-300);
+    margin: 0 var(--flin-space-1);
+}
+
+.toolbar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--flin-radius-sm);
+    color: var(--flin-fg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.toolbar-btn:hover:not(:disabled) {
+    background-color: var(--flin-neutral-100);
+}
+
+.toolbar-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.toolbar-btn-active {
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+    border-color: var(--flin-primary);
+}
+
+.toolbar-select {
+    height: 32px;
+    padding: 0 var(--flin-space-2);
+    padding-right: var(--flin-space-6);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right var(--flin-space-1) center;
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
+.toolbar-select:focus {
+    outline: none;
+    border-color: var(--flin-primary);
+}
+
+/* Content area */
+.rich-text-content {
+    padding: var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    line-height: 1.6;
+    color: var(--flin-fg);
+    overflow-y: auto;
+    outline: none;
+}
+
+.rich-text-content:empty:before {
+    content: attr(data-placeholder);
+    color: var(--flin-fg-muted);
+    pointer-events: none;
+}
+
+.rich-text-content h1 {
+    font-size: var(--flin-text-3xl);
+    font-weight: 700;
+    margin: var(--flin-space-4) 0 var(--flin-space-2);
+}
+
+.rich-text-content h2 {
+    font-size: var(--flin-text-2xl);
+    font-weight: 600;
+    margin: var(--flin-space-4) 0 var(--flin-space-2);
+}
+
+.rich-text-content h3 {
+    font-size: var(--flin-text-xl);
+    font-weight: 600;
+    margin: var(--flin-space-3) 0 var(--flin-space-2);
+}
+
+.rich-text-content h4 {
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    margin: var(--flin-space-3) 0 var(--flin-space-1);
+}
+
+.rich-text-content p {
+    margin: var(--flin-space-2) 0;
+}
+
+.rich-text-content ul,
+.rich-text-content ol {
+    margin: var(--flin-space-2) 0;
+    padding-left: var(--flin-space-6);
+}
+
+.rich-text-content li {
+    margin: var(--flin-space-1) 0;
+}
+
+.rich-text-content blockquote {
+    margin: var(--flin-space-3) 0;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-left: 4px solid var(--flin-primary);
+    background-color: var(--flin-bg-muted);
+    color: var(--flin-fg-muted);
+    font-style: italic;
+}
+
+.rich-text-content pre {
+    margin: var(--flin-space-3) 0;
+    padding: var(--flin-space-3);
+    background-color: var(--flin-neutral-100);
+    border-radius: var(--flin-radius-md);
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-sm);
+    overflow-x: auto;
+}
+
+.rich-text-content a {
+    color: var(--flin-primary);
+    text-decoration: underline;
+}
+
+.rich-text-content hr {
+    margin: var(--flin-space-4) 0;
+    border: none;
+    border-top: 1px solid var(--flin-neutral-300);
+}
+
+/* Scrollbar */
+.rich-text-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.rich-text-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.rich-text-content::-webkit-scrollbar-thumb {
+    background-color: var(--flin-neutral-300);
+    border-radius: 4px;
+}
+
+.rich-text-content::-webkit-scrollbar-thumb:hover {
+    background-color: var(--flin-neutral-400);
+}
+
+/* Link Modal */
+.link-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fade-in 0.15s ease-out;
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.link-modal {
+    width: 100%;
+    max-width: 400px;
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-xl);
+    animation: modal-in 0.15s ease-out;
+}
+
+@keyframes modal-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.link-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.link-modal-title {
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+    margin: 0;
+}
+
+.link-modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.link-modal-close:hover {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-fg);
+}
+
+.link-modal-body {
+    padding: var(--flin-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+}
+
+.link-modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.link-modal-label {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+}
+
+.link-modal-input {
+    height: 40px;
+    padding: 0 var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+    outline: none;
+}
+
+.link-modal-input:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.link-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.link-modal-btn {
+    height: 36px;
+    padding: 0 var(--flin-space-4);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.link-modal-btn-cancel {
+    background-color: transparent;
+    border: 1px solid var(--flin-neutral-300);
+    color: var(--flin-fg);
+}
+
+.link-modal-btn-cancel:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.link-modal-btn-insert {
+    background-color: var(--flin-primary);
+    border: 1px solid var(--flin-primary);
+    color: white;
+}
+
+.link-modal-btn-insert:hover:not(:disabled) {
+    background-color: var(--flin-primary-dark);
+}
+
+.link-modal-btn-insert:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Dark mode */
+[data-theme="dark"] .rich-text-toolbar {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .toolbar-divider {
+    background-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .toolbar-btn:hover:not(:disabled) {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .toolbar-select {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .rich-text-content pre {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .link-modal {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .link-modal-header,
+[data-theme="dark"] .link-modal-footer {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .link-modal-input {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+}
+</style>

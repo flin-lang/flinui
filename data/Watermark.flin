@@ -1,0 +1,125 @@
+// FlinUI Watermark Component
+// Text or image watermark overlay for content protection
+
+// Props with defaults
+text = props.text || ""
+image = props.image || ""
+fontSize = props.fontSize || 16
+fontColor = props.fontColor || "rgba(0, 0, 0, 0.1)"
+rotate = props.rotate || -22
+gap = props.gap || 100
+offsetX = props.offsetX || 0
+offsetY = props.offsetY || 0
+zIndex = props.zIndex || 9
+fullscreen = props.fullscreen || false
+
+// Computed values
+hasText = text != ""
+hasImage = image != ""
+hasWatermark = hasText || hasImage
+
+// Generate unique ID for pattern
+patternId = "flin-watermark-" ++ (text + image)
+
+// Calculate pattern dimensions
+patternWidth = gap + fontSize * 8
+patternHeight = gap + fontSize * 2
+
+<div class={"flin-watermark" ++ (if fullscreen { " flin-watermark--fullscreen" } else { "" })}>
+    <div class="flin-watermark__content">
+        {children}
+    </div>
+
+    {if hasWatermark}
+        <div class="flin-watermark__layer"
+             style={"--watermark-z-index: " ++ zIndex}
+             aria-hidden="true">
+            <svg class="flin-watermark__svg" width="100%" height="100%">
+                <defs>
+                    <pattern id={patternId}
+                             width={patternWidth}
+                             height={patternHeight}
+                             patternUnits="userSpaceOnUse"
+                             patternTransform={"rotate(" ++ rotate ++ ")"}>
+                        {if hasImage}
+                            <image href={image}
+                                   x={offsetX}
+                                   y={offsetY}
+                                   width={fontSize * 4}
+                                   height={fontSize * 4}
+                                   opacity="0.1"
+                                   preserveAspectRatio="xMidYMid meet" />
+                        {/if}
+                        {if hasText}
+                            <text x={offsetX + (if hasImage { fontSize * 4.5 } else { 0 })}
+                                  y={offsetY + fontSize}
+                                  fill={fontColor}
+                                  font-size={fontSize}
+                                  font-family="var(--flin-font-sans)"
+                                  font-weight="500">
+                                {text}
+                            </text>
+                        {/if}
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill={"url(#" ++ patternId ++ ")"} />
+            </svg>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-watermark {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.flin-watermark__content {
+    position: relative;
+    z-index: 1;
+}
+
+.flin-watermark__layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--watermark-z-index);
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.flin-watermark__svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Fullscreen variant - covers entire viewport */
+.flin-watermark--fullscreen {
+    position: static;
+}
+
+.flin-watermark--fullscreen .flin-watermark__layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* Prevent watermark selection and interaction */
+.flin-watermark__layer * {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Print styles - optionally hide watermark when printing */
+@media print {
+    .flin-watermark__layer {
+        display: none;
+    }
+}
+</style>

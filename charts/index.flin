@@ -1,6 +1,6 @@
 // FlinUI Charts Package
 // SVG-based chart components for data visualization
-// Version 1.0.0
+// Version 2.0.0
 
 // ============================================================================
 // FLINUI CHARTS
@@ -10,13 +10,19 @@
 // All charts use SVG rendering with CSS animations.
 //
 // Components:
-//   BarChart     - Vertical/horizontal bar charts
-//   LineChart    - Line charts with multiple series
-//   PieChart     - Pie and donut charts
-//   AreaChart    - Filled area charts (stacked/overlay)
-//   SparkLine    - Compact inline trend charts
-//   ChartLegend  - Shared legend component
-//   ChartTooltip - Shared tooltip component
+//   BarChart      - Vertical/horizontal bar charts
+//   LineChart     - Line charts with multiple series
+//   PieChart      - Pie and donut charts
+//   AreaChart     - Filled area charts (stacked/overlay)
+//   SparkLine     - Compact inline trend charts
+//   ChartLegend   - Shared legend component
+//   ChartTooltip  - Shared tooltip component
+//   HeatmapChart  - Activity/intensity grid (GitHub contributions style)
+//   GanttChart    - Project timeline/scheduling view
+//   ScatterChart  - X-Y coordinate point distribution
+//   RadarChart    - Multi-axis spider chart for comparisons
+//   DonutChart    - Pie chart with center hole and content
+//   TreemapChart  - Hierarchical area/rectangle visualization
 //
 // Usage:
 //   <BarChart
@@ -46,12 +52,29 @@
 //       donut={true}
 //   />
 //
+//   <DonutChart
+//       data={[{ label: "Complete", value: 75 }, { label: "Remaining", value: 25 }]}
+//       centerLabel="Progress"
+//       centerValue="75%"
+//   />
+//
+//   <HeatmapChart
+//       data={contributions}
+//       colorScheme="green"
+//       title="Activity"
+//   />
+//
+//   <RadarChart
+//       data={[{ name: "Skills", values: [80, 90, 70, 85, 75] }]}
+//       labels={["Speed", "Power", "Technique", "Stamina", "Mental"]}
+//   />
+//
 //   <SparkLine data={[10, 15, 8, 20, 25, 18]} variant="success" />
 //
 // ============================================================================
 
-version = "1.0.0"
-componentCount = 7
+version = "2.0.0"
+componentCount = 13
 category = "charts"
 
 // Chart component exports
@@ -70,6 +93,12 @@ category = "charts"
         <li><strong>SparkLine</strong> - Compact inline charts for trends</li>
         <li><strong>ChartLegend</strong> - Interactive legend for any chart</li>
         <li><strong>ChartTooltip</strong> - Positioned tooltips for data points</li>
+        <li><strong>HeatmapChart</strong> - Activity/intensity grid visualization (GitHub style)</li>
+        <li><strong>GanttChart</strong> - Project timeline and scheduling view</li>
+        <li><strong>ScatterChart</strong> - X-Y coordinate point distribution with trend lines</li>
+        <li><strong>RadarChart</strong> - Multi-axis spider/radar chart for comparisons</li>
+        <li><strong>DonutChart</strong> - Pie chart with center hole and dynamic content</li>
+        <li><strong>TreemapChart</strong> - Hierarchical area/rectangle visualization</li>
     </ul>
 
     <h3>Features</h3>

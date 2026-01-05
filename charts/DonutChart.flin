@@ -1,0 +1,481 @@
+// FlinUI DonutChart Component
+// SVG-based donut chart with arc segments, center content, and animations
+
+// Props with defaults
+data = props.data || []  // Array of { label, value, color? }
+width = props.width || 300
+height = props.height || 300
+innerRadius = props.innerRadius || 60  // Percentage of outer radius (0-100)
+showLabels = props.showLabels || true
+showLegend = props.showLegend || true
+showPercentages = props.showPercentages || true
+showValues = props.showValues || false
+animated = props.animated || true
+title = props.title || ""
+subtitle = props.subtitle || ""
+centerLabel = props.centerLabel || ""
+centerValue = props.centerValue || ""
+padAngle = props.padAngle || 2  // Gap between segments in degrees
+cornerRadius = props.cornerRadius || 4
+
+// Calculate total
+total = data.reduce((sum, item) => sum + item.value, 0)
+
+// Calculate dimensions
+chartSize = Math.min(width, height)
+outerRadius = chartSize / 2 - 30
+innerRadiusPixels = outerRadius * (innerRadius / 100)
+centerX = width / 2
+centerY = height / 2
+
+// Default colors
+defaultColors = [
+    "var(--flin-primary)",
+    "var(--flin-success)",
+    "var(--flin-warning)",
+    "var(--flin-danger)",
+    "var(--flin-info)",
+    "#8b5cf6",
+    "#ec4899",
+    "#14b8a6"
+]
+
+getSliceColor = {
+    index = args.index
+    item = args.item
+    {if item.color}
+        color = item.color
+    {else}
+        color = defaultColors[index % defaultColors.length]
+    {/if}
+    color
+}
+
+// Convert degrees to radians
+degToRad = {
+    deg = args.deg
+    (deg * Math.PI) / 180
+}
+
+// Calculate arc path with rounded corners
+arcPath = {
+    startAngle = args.startAngle
+    endAngle = args.endAngle
+    outerR = args.outerR
+    innerR = args.innerR
+
+    // Apply padding
+    actualStartAngle = startAngle + padAngle / 2
+    actualEndAngle = endAngle - padAngle / 2
+
+    startRad = degToRad({ deg: actualStartAngle })
+    endRad = degToRad({ deg: actualEndAngle })
+
+    // Outer arc points
+    x1 = centerX + outerR * Math.cos(startRad)
+    y1 = centerY + outerR * Math.sin(startRad)
+    x2 = centerX + outerR * Math.cos(endRad)
+    y2 = centerY + outerR * Math.sin(endRad)
+
+    // Inner arc points
+    x3 = centerX + innerR * Math.cos(endRad)
+    y3 = centerY + innerR * Math.sin(endRad)
+    x4 = centerX + innerR * Math.cos(startRad)
+    y4 = centerY + innerR * Math.sin(startRad)
+
+    // Large arc flag
+    largeArc = (actualEndAngle - actualStartAngle) > 180 ? 1 : 0
+
+    // Build path
+    path = "M " ++ x1 ++ " " ++ y1 ++
+           " A " ++ outerR ++ " " ++ outerR ++ " 0 " ++ largeArc ++ " 1 " ++ x2 ++ " " ++ y2 ++
+           " L " ++ x3 ++ " " ++ y3 ++
+           " A " ++ innerR ++ " " ++ innerR ++ " 0 " ++ largeArc ++ " 0 " ++ x4 ++ " " ++ y4 ++
+           " Z"
+    path
+}
+
+// Calculate slices
+calculateSlices = {
+    slices = []
+    startAngle = -90  // Start from top
+
+    {for item, index in data}
+        percentage = total > 0 ? (item.value / total) * 100 : 0
+        angle = (percentage / 100) * 360
+        endAngle = startAngle + angle
+
+        // Mid angle for label positioning
+        midAngle = startAngle + angle / 2
+        midRad = degToRad({ deg: midAngle })
+
+        // Label position (between inner and outer radius)
+        labelRadius = (outerRadius + innerRadiusPixels) / 2
+        labelX = centerX + labelRadius * Math.cos(midRad)
+        labelY = centerY + labelRadius * Math.sin(midRad)
+
+        // External label position
+        extLabelRadius = outerRadius + 25
+        extLabelX = centerX + extLabelRadius * Math.cos(midRad)
+        extLabelY = centerY + extLabelRadius * Math.sin(midRad)
+
+        // Generate path
+        path = arcPath({
+            startAngle: startAngle,
+            endAngle: endAngle,
+            outerR: outerRadius,
+            innerR: innerRadiusPixels
+        })
+
+        slices = slices.concat([{
+            path: path,
+            color: getSliceColor({ index: index, item: item }),
+            item: item,
+            percentage: percentage,
+            startAngle: startAngle,
+            endAngle: endAngle,
+            midAngle: midAngle,
+            labelX: labelX,
+            labelY: labelY,
+            extLabelX: extLabelX,
+            extLabelY: extLabelY
+        }])
+
+        startAngle = endAngle
+    {/for}
+
+    slices
+}
+
+slices = calculateSlices()
+
+// Hover state
+hoveredIndex = null
+
+handleSliceHover = {
+    hoveredIndex = event.index
+}
+
+handleSliceLeave = {
+    hoveredIndex = null
+}
+
+<div class="flin-donut" style="--chart-width: {width}px; --chart-height: {height}px;">
+    {if title || subtitle}
+        <div class="flin-donut__header">
+            {if title}
+                <h3 class="flin-donut__title">{title}</h3>
+            {/if}
+            {if subtitle}
+                <p class="flin-donut__subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <svg
+        class="flin-donut__svg"
+        viewBox="0 0 {width} {height}"
+        role="img"
+        aria-label={title || "Donut chart"}
+    >
+        // Slices
+        <g class="flin-donut__slices">
+            {for slice, index in slices}
+                sliceAnimatedClass = match animated { true -> " flin-donut__slice--animated", _ -> "" }
+                sliceActiveClass = match hoveredIndex == index { true -> " flin-donut__slice--active", _ -> "" }
+                <path
+                    class={"flin-donut__slice" ++ sliceAnimatedClass ++ sliceActiveClass}
+                    d={slice.path}
+                    fill={slice.color}
+                    style="--slice-index: {index}; --slice-angle: {slice.endAngle - slice.startAngle};"
+                    mouseenter={handleSliceHover.bind({ index: index })}
+                    mouseleave={handleSliceLeave}
+                />
+            {/for}
+        </g>
+
+        // Percentage labels (external)
+        {if showPercentages}
+            <g class="flin-donut__percentages">
+                {for slice, index in slices}
+                    {if slice.percentage > 5}
+                        percentActiveClass = match hoveredIndex == index { true -> " flin-donut__percentage--active", _ -> "" }
+                        <text
+                            class={"flin-donut__percentage" ++ percentActiveClass}
+                            x={slice.extLabelX}
+                            y={slice.extLabelY}
+                            text-anchor="middle"
+                            dominant-baseline="middle"
+                        >
+                            {Math.round(slice.percentage)}%
+                        </text>
+                    {/if}
+                {/for}
+            </g>
+        {/if}
+
+        // Center content
+        <g class="flin-donut__center">
+            {if centerLabel || centerValue}
+                {if centerValue}
+                    <text
+                        class="flin-donut__center-value"
+                        x={centerX}
+                        y={centerY - 5}
+                        text-anchor="middle"
+                        dominant-baseline="middle"
+                    >
+                        {centerValue}
+                    </text>
+                {/if}
+                {if centerLabel}
+                    <text
+                        class="flin-donut__center-label"
+                        x={centerX}
+                        y={centerY + 15}
+                        text-anchor="middle"
+                        dominant-baseline="middle"
+                    >
+                        {centerLabel}
+                    </text>
+                {/if}
+            {else if hoveredIndex != null}
+                // Show hovered item info in center
+                <text
+                    class="flin-donut__center-value"
+                    x={centerX}
+                    y={centerY - 10}
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                >
+                    {slices[hoveredIndex].item.value}
+                </text>
+                <text
+                    class="flin-donut__center-label"
+                    x={centerX}
+                    y={centerY + 10}
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                >
+                    {slices[hoveredIndex].item.label}
+                </text>
+            {else}
+                // Show total when nothing hovered
+                <text
+                    class="flin-donut__center-value"
+                    x={centerX}
+                    y={centerY - 5}
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                >
+                    {total}
+                </text>
+                <text
+                    class="flin-donut__center-label"
+                    x={centerX}
+                    y={centerY + 15}
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                >
+                    Total
+                </text>
+            {/if}
+        </g>
+    </svg>
+
+    // Legend
+    {if showLegend}
+        <div class="flin-donut__legend">
+            {for slice, index in slices}
+                legendActiveClass = match hoveredIndex == index { true -> " flin-donut__legend-item--active", _ -> "" }
+                <div
+                    class={"flin-donut__legend-item" ++ legendActiveClass}
+                    mouseenter={handleSliceHover.bind({ index: index })}
+                    mouseleave={handleSliceLeave}
+                >
+                    <span
+                        class="flin-donut__legend-color"
+                        style="--legend-color: {slice.color};"
+                    ></span>
+                    <span class="flin-donut__legend-label">{slice.item.label}</span>
+                    {if showValues}
+                        <span class="flin-donut__legend-value">{slice.item.value}</span>
+                    {/if}
+                </div>
+            {/for}
+        </div>
+    {/if}
+
+    // Tooltip
+    {if hoveredIndex != null}
+        <div class="flin-donut__tooltip">
+            <span class="flin-donut__tooltip-label">{slices[hoveredIndex].item.label}</span>
+            <span class="flin-donut__tooltip-value">
+                {slices[hoveredIndex].item.value} ({Math.round(slices[hoveredIndex].percentage)}%)
+            </span>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-donut {
+    position: relative;
+    width: var(--chart-width);
+    font-family: var(--flin-font-sans);
+}
+
+.flin-donut__header {
+    margin-bottom: var(--flin-space-3);
+    text-align: center;
+}
+
+.flin-donut__title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.flin-donut__subtitle {
+    margin: var(--flin-space-1) 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.flin-donut__svg {
+    display: block;
+    overflow: visible;
+}
+
+.flin-donut__slice {
+    cursor: pointer;
+    transition: transform var(--flin-transition-fast), filter var(--flin-transition-fast);
+    transform-origin: center;
+}
+
+.flin-donut__slice:hover,
+.flin-donut__slice--active {
+    transform: scale(1.05);
+    filter: brightness(1.05);
+}
+
+.flin-donut__slice--animated {
+    opacity: 0;
+    animation: flin-donut-reveal 0.6s ease-out forwards;
+    animation-delay: calc(var(--slice-index) * 0.1s);
+}
+
+@keyframes flin-donut-reveal {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.flin-donut__percentage {
+    font-size: 11px;
+    font-weight: 600;
+    fill: var(--flin-fg-muted);
+    pointer-events: none;
+    transition: fill var(--flin-transition-fast);
+}
+
+.flin-donut__percentage--active {
+    fill: var(--flin-fg);
+}
+
+.flin-donut__center-value {
+    font-size: var(--flin-text-2xl);
+    font-weight: 700;
+    fill: var(--flin-fg);
+}
+
+.flin-donut__center-label {
+    font-size: var(--flin-text-sm);
+    fill: var(--flin-fg-muted);
+}
+
+.flin-donut__legend {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-4);
+}
+
+.flin-donut__legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.flin-donut__legend-item:hover,
+.flin-donut__legend-item--active {
+    background-color: var(--flin-neutral-100);
+}
+
+.flin-donut__legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--flin-radius-sm);
+    background-color: var(--legend-color);
+    flex-shrink: 0;
+}
+
+.flin-donut__legend-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    flex: 1;
+}
+
+.flin-donut__legend-value {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+}
+
+.flin-donut__tooltip {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    box-shadow: var(--flin-shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.flin-donut__tooltip-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.flin-donut__tooltip-value {
+    font-size: var(--flin-text-base);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-donut__legend-item:hover,
+[data-theme="dark"] .flin-donut__legend-item--active {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .flin-donut__tooltip {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+</style>
