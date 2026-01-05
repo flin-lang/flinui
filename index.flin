@@ -23,7 +23,7 @@
 //
 // BASIC (18 components)
 //   Button, Input, Textarea, Select, Checkbox, Radio, Switch, Slider
-//   Text, Link, Icon (287+ Lucide icons), Image, Avatar, Badge, Tag
+//   Text, Link, Icon (1572 Lucide icons - auto-routed to 14 category files), Image, Avatar, Badge, Tag
 //   IconButton, CloseButton, ButtonGroup
 //
 // LAYOUT (21 components)
