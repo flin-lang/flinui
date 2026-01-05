@@ -26,8 +26,11 @@ handleKeydown = {
     }
 }
 
+// Computed class
+activeClass = match isActive { true -> " flin-tab--active", _ -> "" }
+
 <button
-    class={"flin-tab" ++ {if isActive { " flin-tab--active" } else { "" }}}
+    class={"flin-tab" ++ activeClass}
     role="tab"
     aria-selected={isActive}
     aria-disabled={disabled}

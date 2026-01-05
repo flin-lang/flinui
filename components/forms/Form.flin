@@ -23,8 +23,11 @@ handleSubmit = {
     {/if}
 }
 
+// Compute class modifiers
+disabledClass = match disabled { true -> " form-disabled", _ -> "" }
+
 <form
-    class={"flin-form " ++ gapClass ++ {if disabled { " form-disabled" } else { "" }}}
+    class={"flin-form " ++ gapClass ++ disabledClass}
     submit={handleSubmit}
     novalidate
 >

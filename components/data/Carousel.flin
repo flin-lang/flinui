@@ -179,12 +179,14 @@ startAutoplay()
             touchend={handleTouchEnd}
         >
             {for item, index in items}
+                slideActiveClass = match index == currentIndex { true -> " flin-carousel__slide--active", _ -> "" }
+                slideOpacity = match index == currentIndex { true -> "1", _ -> "0" }
                 <div
-                    class={"flin-carousel__slide" ++ {if index == currentIndex { " flin-carousel__slide--active" } else { "" }}}
+                    class={"flin-carousel__slide" ++ slideActiveClass}
                     role="group"
                     aria-roledescription="slide"
                     aria-label="Slide {index + 1} of {totalSlides}"
-                    style={animation == "fade" ? "--slide-opacity: " ++ {if index == currentIndex { "1" } else { "0" }} ++ ";" : ""}
+                    style={animation == "fade" ? "--slide-opacity: " ++ slideOpacity ++ ";" : ""}
                 >
                     {if item.image}
                         <img
@@ -247,9 +249,10 @@ startAutoplay()
     {if showIndicators && totalSlides > 1}
         <div class="flin-carousel__indicators" role="tablist">
             {for item, index in items}
+                indicatorActiveClass = match index == currentIndex { true -> " flin-carousel__indicator--active", _ -> "" }
                 <button
                     type="button"
-                    class={"flin-carousel__indicator" ++ {if index == currentIndex { " flin-carousel__indicator--active" } else { "" }}}
+                    class={"flin-carousel__indicator" ++ indicatorActiveClass}
                     click={goToSlide.bind({ index: index })}
                     role="tab"
                     aria-selected={index == currentIndex}
@@ -263,9 +266,10 @@ startAutoplay()
     {if showThumbnails && totalSlides > 1}
         <div class="flin-carousel__thumbnails">
             {for item, index in items}
+                thumbnailActiveClass = match index == currentIndex { true -> " flin-carousel__thumbnail--active", _ -> "" }
                 <button
                     type="button"
-                    class={"flin-carousel__thumbnail" ++ {if index == currentIndex { " flin-carousel__thumbnail--active" } else { "" }}}
+                    class={"flin-carousel__thumbnail" ++ thumbnailActiveClass}
                     click={goToSlide.bind({ index: index })}
                     aria-label="Go to slide {index + 1}"
                 >

@@ -150,8 +150,11 @@ placementClass = match placement {
     </div>
 
     {if isVisible}
+        {
+            exitingClass = match isExiting { true -> " menu-exiting", _ -> "" }
+        }
         <div
-            class={"flin-menu " ++ placementClass ++ {if isExiting { " menu-exiting" } else { "" }}}
+            class={"flin-menu " ++ placementClass ++ exitingClass}
             role="menu"
             aria-orientation="vertical"
             tabindex="-1"
@@ -162,11 +165,12 @@ placementClass = match placement {
                     {if item.divider}
                         <li class="menu-divider" role="separator"></li>
                     {else}
+                        {
+                            itemDisabledClass = match item.disabled { true -> " menu-item--disabled", _ -> "" }
+                            itemFocusedClass = match index == focusedIndex { true -> " menu-item--focused", _ -> "" }
+                        }
                         <li
-                            class={"menu-item" ++
-                                {if item.disabled { " menu-item--disabled" } else { "" }} ++
-                                {if index == focusedIndex { " menu-item--focused" } else { "" }}
-                            }
+                            class={"menu-item" ++ itemDisabledClass ++ itemFocusedClass}
                             role="menuitem"
                             tabindex={if item.disabled { "-1" } else { "0" }}
                             aria-disabled={item.disabled}

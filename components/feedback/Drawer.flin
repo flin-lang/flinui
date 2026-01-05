@@ -51,15 +51,19 @@ sizeClass = match size {
     _ -> "drawer-md"
 }
 
+// Computed classes for animation states
+backdropClosingClass = match isClosing { true -> " drawer-backdrop-closing", _ -> "" }
+drawerClosingClass = match isClosing { true -> " drawer-closing", _ -> "" }
+
 {if open}
     <div
-        class={"flin-drawer-backdrop" ++ {if isClosing { " drawer-backdrop-closing" } else { "" }}}
+        class={"flin-drawer-backdrop" ++ backdropClosingClass}
         click={handleBackdropClick}
         aria-hidden="true"
     ></div>
 
     <div
-        class={"flin-drawer " ++ positionClass ++ " " ++ sizeClass ++ {if isClosing { " drawer-closing" } else { "" }}}
+        class={"flin-drawer " ++ positionClass ++ " " ++ sizeClass ++ drawerClosingClass}
         role="dialog"
         aria-modal="true"
         aria-labelledby="drawer-title"

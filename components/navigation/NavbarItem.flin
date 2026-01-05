@@ -20,10 +20,13 @@ handleKeydown = {
     }
 }
 
+// Computed class
+activeClass = match active { true -> " flin-navbar-item--active", _ -> "" }
+
 {if isLink}
     <a
         href={href}
-        class={"flin-navbar-item" ++ {if active { " flin-navbar-item--active" } else { "" }}}
+        class={"flin-navbar-item" ++ activeClass}
         role="menuitem"
         aria-current={if active { "page" } else { none }}
         tabindex={if disabled { -1 } else { 0 }}
@@ -32,7 +35,7 @@ handleKeydown = {
     </a>
 {else}
     <button
-        class={"flin-navbar-item" ++ {if active { " flin-navbar-item--active" } else { "" }}}
+        class={"flin-navbar-item" ++ activeClass}
         click={onClick}
         keydown={handleKeydown}
         disabled={disabled}

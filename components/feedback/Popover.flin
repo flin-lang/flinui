@@ -55,6 +55,9 @@ positionClass = match position {
     _ -> "popover-bottom"
 }
 
+// Computed class for exit animation
+exitingClass = match isExiting { true -> " popover-exiting", _ -> "" }
+
 <div class="flin-popover-wrapper">
     <div
         class="popover-trigger"
@@ -67,7 +70,7 @@ positionClass = match position {
 
     {if isVisible}
         <div
-            class={"flin-popover " ++ positionClass ++ {if isExiting { " popover-exiting" } else { "" }}}
+            class={"flin-popover " ++ positionClass ++ exitingClass}
             role="dialog"
             aria-modal="false"
             tabindex="-1"

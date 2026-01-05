@@ -41,9 +41,12 @@ iconPath = match variant {
     _ -> "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 }
 
+// Computed class for exit animation
+exitingClass = match isExiting { true -> " notification-exiting", _ -> "" }
+
 {if visible}
     <div
-        class={"flin-notification " ++ variantClass ++ {if isExiting { " notification-exiting" } else { "" }}}
+        class={"flin-notification " ++ variantClass ++ exitingClass}
         role="alert"
         aria-live="polite"
     >
@@ -76,8 +79,10 @@ iconPath = match variant {
             {if actions.length > 0}
                 <div class="notification-actions">
                     {for action in actions}
+                        // Computed class for primary action styling
+                        primaryClass = match action.primary { true -> " notification-action-primary", _ -> "" }
                         <button
-                            class={"notification-action" ++ {if action.primary { " notification-action-primary" } else { "" }}}
+                            class={"notification-action" ++ primaryClass}
                             click={action.onClick}
                             type="button"
                         >

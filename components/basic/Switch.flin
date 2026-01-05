@@ -8,7 +8,15 @@ disabled = props.disabled || false
 onChange = props.onChange
 
 // Computed classes
-switchClass = "switch" ++ {if checked { " switch-checked" } else { "" }} ++ {if disabled { " switch-disabled" } else { "" }}
+checkedClass = match checked {
+    true -> " switch-checked"
+    _ -> ""
+}
+disabledClass = match disabled {
+    true -> " switch-disabled"
+    _ -> ""
+}
+switchClass = "switch" ++ checkedClass ++ disabledClass
 
 <label class={switchClass}>
     <input

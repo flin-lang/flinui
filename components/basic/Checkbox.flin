@@ -8,7 +8,15 @@ disabled = props.disabled || false
 onChange = props.onChange
 
 // Computed classes
-checkboxClass = "checkbox" ++ {if checked { " checkbox-checked" } else { "" }} ++ {if disabled { " checkbox-disabled" } else { "" }}
+checkedClass = match checked {
+    true -> " checkbox-checked"
+    _ -> ""
+}
+disabledClass = match disabled {
+    true -> " checkbox-disabled"
+    _ -> ""
+}
+checkboxClass = "checkbox" ++ checkedClass ++ disabledClass
 
 <label class={checkboxClass}>
     <input

@@ -25,8 +25,23 @@ onError = {
 }
 
 // Computed styles
-sizeStyle = {if width != "" { "width: " ++ width ++ ";" } else { "" }} ++ {if height != "" { "height: " ++ height ++ ";" } else { "" }}
+widthStyle = match width != "" {
+    true -> "width: " ++ width ++ ";"
+    _ -> ""
+}
+heightStyle = match height != "" {
+    true -> "height: " ++ height ++ ";"
+    _ -> ""
+}
+sizeStyle = widthStyle ++ heightStyle
 imgStyle = "object-fit: " ++ objectFit ++ ";"
+
+// Compute loading class
+loadingClass = match isLoading {
+    true -> " image-loading"
+    _ -> ""
+}
+imageClass = "image" ++ loadingClass
 
 <div class="image-wrapper" style={sizeStyle}>
     {if isLoading}
@@ -46,7 +61,7 @@ imgStyle = "object-fit: " ++ objectFit ++ ";"
         </div>
     {else}
         <img
-            class={"image" ++ {if isLoading { " image-loading" } else { "" }}}
+            class={imageClass}
             src={src}
             alt={alt}
             loading={loading}

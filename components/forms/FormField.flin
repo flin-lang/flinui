@@ -13,7 +13,10 @@ fieldId = "field-" ++ Math.random().toString(36).substr(2, 9)
 // Determine field state
 hasError = error != ""
 
-<div class={"form-field" ++ {if hasError { " form-field-error" } else { "" }}}>
+// Compute class modifiers
+errorClass = match hasError { true -> " form-field-error", _ -> "" }
+
+<div class={"form-field" ++ errorClass}>
     {if label != ""}
         <label class="form-field-label" for={fieldId}>
             {label}

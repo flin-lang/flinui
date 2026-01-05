@@ -34,8 +34,11 @@ positionClass = match position {
     _ -> "flin-sidebar--left"
 }
 
+// Computed collapsed class
+collapsedClass = match isCollapsed { true -> " flin-sidebar--collapsed", _ -> "" }
+
 <aside
-    class={"flin-sidebar " ++ positionClass ++ {if isCollapsed { " flin-sidebar--collapsed" } else { "" }}}
+    class={"flin-sidebar " ++ positionClass ++ collapsedClass}
     style="--sidebar-width: {width}; --sidebar-collapsed-width: {collapsedWidth};"
     role="navigation"
     aria-label="Sidebar navigation"

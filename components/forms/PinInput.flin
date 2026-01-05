@@ -156,11 +156,17 @@ handleBlur = {
     focusedIndex = -1
 }
 
-<div class={"pin-input" ++ {if disabled { " pin-input-disabled" } else { "" }} ++ {if isComplete { " pin-input-complete" } else { "" }}} role="group" aria-label="PIN input">
+// Compute class modifiers
+disabledClass = match disabled { true -> " pin-input-disabled", _ -> "" }
+completeClass = match isComplete { true -> " pin-input-complete", _ -> "" }
+
+<div class={"pin-input" ++ disabledClass ++ completeClass} role="group" aria-label="PIN input">
     {for i in range(0, validLength)}
+        digitFocusedClass = match focusedIndex == i { true -> " pin-input-digit-focused", _ -> "" }
+        digitFilledClass = match digits[i] != "" { true -> " pin-input-digit-filled", _ -> "" }
         <input
             type="text"
-            class={"pin-input-digit" ++ {if focusedIndex == i { " pin-input-digit-focused" } else { "" }} ++ {if digits[i] != "" { " pin-input-digit-filled" } else { "" }}}
+            class={"pin-input-digit" ++ digitFocusedClass ++ digitFilledClass}
             maxlength="1"
             inputmode={inputMode}
             pattern={inputPattern}

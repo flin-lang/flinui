@@ -59,7 +59,10 @@ closeDropdown = {
     isOpen = false
 }
 
-<div class={"color-picker" ++ {if disabled { " color-picker-disabled" } else { "" }}} blur={closeDropdown}>
+// Compute class modifiers
+disabledClass = match disabled { true -> " color-picker-disabled", _ -> "" }
+
+<div class={"color-picker" ++ disabledClass} blur={closeDropdown}>
     <button
         type="button"
         class="color-picker-trigger"
@@ -79,9 +82,10 @@ closeDropdown = {
         <div class="color-picker-dropdown" role="dialog" aria-label="Color picker">
             <div class="color-picker-presets">
                 {for color in presets}
+                    presetActiveClass = match color == value { true -> " color-picker-preset-active", _ -> "" }
                     <button
                         type="button"
-                        class={"color-picker-preset" ++ {if color == value { " color-picker-preset-active" } else { "" }}}
+                        class={"color-picker-preset" ++ presetActiveClass}
                         style={"background-color: " ++ color}
                         data-color={color}
                         click={selectPreset}

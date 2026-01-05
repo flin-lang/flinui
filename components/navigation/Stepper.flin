@@ -73,10 +73,11 @@ sizeClass = match size {
             status = getStepStatus({step: step, index: index})
             isClickable = status == "completed" || index <= currentStep
             isLast = index == steps.length - 1
+            clickableClass = match isClickable { true -> " flin-stepper__step--clickable", _ -> "" }
         }
 
         <div
-            class={"flin-stepper__step " ++ "flin-stepper__step--" ++ status ++ {if isClickable { " flin-stepper__step--clickable" } else { "" }}}
+            class={"flin-stepper__step " ++ "flin-stepper__step--" ++ status ++ clickableClass}
             data-step-index={index}
         >
             {if showConnectors && !isLast}

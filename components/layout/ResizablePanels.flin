@@ -231,12 +231,17 @@ handleDividerDoubleClick = {
 // Initialize
 initializeSizes()
 
-<div class={"flin-resizable" ++ " flin-resizable--" ++ direction ++ {if isDragging { " flin-resizable--dragging" } else { "" }}}>
+// Pre-compute dragging class
+draggingClass = match isDragging { true -> " flin-resizable--dragging", _ -> "" }
+
+<div class={"flin-resizable" ++ " flin-resizable--" ++ direction ++ draggingClass}>
     {for panel, index in panels}
         // Panel
+        panelCollapsedClass = match isCollapsed({ index: index }) { true -> " flin-resizable__panel--collapsed", _ -> "" }
+        panelSizeValue = match isCollapsed({ index: index }) { true -> "0", _ -> panelSizes[index] }
         <div
-            class={"flin-resizable__panel" ++ {if isCollapsed({ index: index }) { " flin-resizable__panel--collapsed" } else { "" }}}
-            style={"--panel-size: " ++ {if isCollapsed({ index: index }) { "0" } else { panelSizes[index] }} ++ "%;"}
+            class={"flin-resizable__panel" ++ panelCollapsedClass}
+            style={"--panel-size: " ++ panelSizeValue ++ "%;"}
         >
             <div class="flin-resizable__content">
                 {panel.content}
@@ -271,8 +276,9 @@ initializeSizes()
 
         // Resizer (between panels)
         {if index < panels.length - 1}
+            dividerActiveClass = match activeResizer == index { true -> " flin-resizable__divider--active", _ -> "" }
             <div
-                class={"flin-resizable__divider" ++ {if activeResizer == index { " flin-resizable__divider--active" } else { "" }}}
+                class={"flin-resizable__divider" ++ dividerActiveClass}
                 style="--divider-size: {dividerSize}px;"
                 mousedown={handleResizeStart.bind({ index: index })}
                 touchstart={handleTouchStart.bind({ index: index })}

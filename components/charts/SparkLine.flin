@@ -112,8 +112,11 @@ areaPath = linePath ++ " L " ++ scaleX({ index: normalizedData.length - 1, total
 minIndex = values.indexOf(minValue)
 maxIndex = values.indexOf(maxValue)
 
+// Pre-compute animated class
+sparkAnimatedClass = match animated { true -> " flin-sparkline--animated", _ -> "" }
+
 <svg
-    class={"flin-sparkline" ++ {if animated { " flin-sparkline--animated" } else { "" }}}
+    class={"flin-sparkline" ++ sparkAnimatedClass}
     viewBox="0 0 {width} {height}"
     width={width}
     height={height}

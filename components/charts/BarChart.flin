@@ -119,6 +119,10 @@ gridLines = []
             // Bars
             <g class="flin-barchart__bars">
                 {for item, index in data}
+                    // Pre-compute conditional classes
+                    activeClass = match hoveredIndex == index { true -> " flin-barchart__bar-group--active", _ -> "" }
+                    animatedClass = match animated { true -> " flin-barchart__bar--animated", _ -> "" }
+
                     {if isVertical}
                         // Vertical bars
                         barX = index * (barThickness + barSpacing)
@@ -126,12 +130,12 @@ gridLines = []
                         barY = chartHeight - barHeight
 
                         <g
-                            class={"flin-barchart__bar-group" ++ {if hoveredIndex == index { " flin-barchart__bar-group--active" } else { "" }}}
+                            class={"flin-barchart__bar-group" ++ activeClass}
                             mouseenter={handleBarHover.bind({ index: index })}
                             mouseleave={handleBarLeave}
                         >
                             <rect
-                                class={"flin-barchart__bar" ++ {if animated { " flin-barchart__bar--animated" } else { "" }}}
+                                class={"flin-barchart__bar" ++ animatedClass}
                                 x={barX}
                                 y={barY}
                                 width={barThickness}
@@ -156,12 +160,12 @@ gridLines = []
                         barWidth = (item.value / maxValue) * chartWidth
 
                         <g
-                            class={"flin-barchart__bar-group" ++ {if hoveredIndex == index { " flin-barchart__bar-group--active" } else { "" }}}
+                            class={"flin-barchart__bar-group" ++ activeClass}
                             mouseenter={handleBarHover.bind({ index: index })}
                             mouseleave={handleBarLeave}
                         >
                             <rect
-                                class={"flin-barchart__bar" ++ {if animated { " flin-barchart__bar--animated" } else { "" }}}
+                                class={"flin-barchart__bar" ++ animatedClass}
                                 x="0"
                                 y={barY}
                                 width={barWidth}

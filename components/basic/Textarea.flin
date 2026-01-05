@@ -11,7 +11,15 @@ onInput = props.onInput
 onChange = props.onChange
 
 // Computed classes
-textareaClass = "textarea" ++ {if error != "" { " textarea-error" } else { "" }} ++ {if disabled { " textarea-disabled" } else { "" }}
+errorClass = match error != "" {
+    true -> " textarea-error"
+    _ -> ""
+}
+disabledClass = match disabled {
+    true -> " textarea-disabled"
+    _ -> ""
+}
+textareaClass = "textarea" ++ errorClass ++ disabledClass
 
 <div class="textarea-wrapper">
     <textarea

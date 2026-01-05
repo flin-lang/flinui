@@ -21,8 +21,13 @@ handleKeydown = {
     }
 }
 
+// Computed classes
+fixedClass = match fixed { true -> " flin-navbar--fixed", _ -> "" }
+transparentClass = match transparent { true -> " flin-navbar--transparent", _ -> "" }
+mobileOpenClass = match mobileMenuOpen { true -> " flin-navbar--mobile-open", _ -> "" }
+
 <nav
-    class={"flin-navbar" ++ {if fixed { " flin-navbar--fixed" } else { "" }} ++ {if transparent { " flin-navbar--transparent" } else { "" }} ++ {if mobileMenuOpen { " flin-navbar--mobile-open" } else { "" }}}
+    class={"flin-navbar" ++ fixedClass ++ transparentClass ++ mobileOpenClass}
     style="--navbar-height: {height};"
     role="navigation"
     aria-label="Main navigation"

@@ -14,7 +14,11 @@ onChange = props.onChange
 progress = ((value - min) / (max - min)) * 100
 
 // Computed classes
-sliderClass = "slider" ++ {if disabled { " slider-disabled" } else { "" }}
+disabledClass = match disabled {
+    true -> " slider-disabled"
+    _ -> ""
+}
+sliderClass = "slider" ++ disabledClass
 
 <div class={sliderClass}>
     <div class="slider-track-wrapper">

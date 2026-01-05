@@ -194,8 +194,10 @@ filterCommands()
                     {/if}
 
                     {for cmd, index in filteredCommands}
+                        // Computed class for selected state
+                        selectedClass = match index == selectedIndex { true -> " flin-command-palette__item--selected", _ -> "" }
                         <div
-                            class={"flin-command-palette__item" ++ {if index == selectedIndex { " flin-command-palette__item--selected" } else { "" }}}
+                            class={"flin-command-palette__item" ++ selectedClass}
                             role="option"
                             aria-selected={index == selectedIndex}
                             click={handleItemClick.bind({ index: index })}

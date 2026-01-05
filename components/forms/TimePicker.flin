@@ -40,7 +40,12 @@ handleChange = {
     {/if}
 }
 
-<div class={"time-picker" ++ {if focused { " time-picker-focused" } else { "" }} ++ {if !isValid { " time-picker-error" } else { "" }} ++ {if disabled { " time-picker-disabled" } else { "" }}}>
+// Compute class modifiers
+focusedClass = match focused { true -> " time-picker-focused", _ -> "" }
+errorClass = match isValid { false -> " time-picker-error", _ -> "" }
+disabledClass = match disabled { true -> " time-picker-disabled", _ -> "" }
+
+<div class={"time-picker" ++ focusedClass ++ errorClass ++ disabledClass}>
     <div class="time-picker-input-wrapper">
         <input
             type="time"

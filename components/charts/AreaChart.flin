@@ -260,14 +260,16 @@ handleSeriesLeave = {
                 series = processedData[i]
                 seriesColor = getSeriesColor({ index: i, series: series })
                 baseline = stacked && i > 0 ? processedData[i - 1].values : null
+                seriesActiveClass = match hoveredSeries == i { true -> " flin-areachart__series--active", _ -> "" }
+                areaAnimatedClass = match animated { true -> " flin-areachart__area--animated", _ -> "" }
 
                 <g
-                    class={"flin-areachart__series" ++ {if hoveredSeries == i { " flin-areachart__series--active" } else { "" }}}
+                    class={"flin-areachart__series" ++ seriesActiveClass}
                     mouseenter={handleSeriesHover.bind({ index: i })}
                     mouseleave={handleSeriesLeave}
                 >
                     <path
-                        class={"flin-areachart__area" ++ {if animated { " flin-areachart__area--animated" } else { "" }}}
+                        class={"flin-areachart__area" ++ areaAnimatedClass}
                         d={generateAreaPath({ values: series.values, baseline: baseline, curved: curved })}
                         fill="url(#flin-area-gradient-{i})"
                         style="--area-index: {i};"
@@ -329,8 +331,9 @@ handleSeriesLeave = {
     {if showLegend && data.length > 1}
         <div class="flin-areachart__legend">
             {for series, index in data}
+                legendActiveClass = match hoveredSeries == index { true -> " flin-areachart__legend-item--active", _ -> "" }
                 <div
-                    class={"flin-areachart__legend-item" ++ {if hoveredSeries == index { " flin-areachart__legend-item--active" } else { "" }}}
+                    class={"flin-areachart__legend-item" ++ legendActiveClass}
                     mouseenter={handleSeriesHover.bind({ index: index })}
                     mouseleave={handleSeriesLeave}
                 >

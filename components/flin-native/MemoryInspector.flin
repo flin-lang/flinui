@@ -291,10 +291,12 @@ renderValue = {
     {/if}
 
     // Column headers
+    keyHeaderActiveClass = match sortBy == "key" { true -> " flin-memory-inspector__column-header--active", _ -> "" }
+    sizeHeaderActiveClass = match sortBy == "size" { true -> " flin-memory-inspector__column-header--active", _ -> "" }
     <div class="flin-memory-inspector__columns">
         <button
             type="button"
-            class={"flin-memory-inspector__column-header" ++ {if sortBy == "key" { " flin-memory-inspector__column-header--active" } else { "" }}}
+            class={"flin-memory-inspector__column-header" ++ keyHeaderActiveClass}
             click={toggleSort.bind({ column: "key" })}
         >
             Key
@@ -311,7 +313,7 @@ renderValue = {
         <span class="flin-memory-inspector__column-header">Value</span>
         <button
             type="button"
-            class={"flin-memory-inspector__column-header flin-memory-inspector__column-header--right" ++ {if sortBy == "size" { " flin-memory-inspector__column-header--active" } else { "" }}}
+            class={"flin-memory-inspector__column-header flin-memory-inspector__column-header--right" ++ sizeHeaderActiveClass}
             click={toggleSort.bind({ column: "size" })}
         >
             Size
@@ -351,9 +353,10 @@ renderValue = {
                 value = database[key]
                 valueSize = JSON.stringify(value).length
                 isSelected = selectedKey == key
+                itemSelectedClass = match isSelected { true -> " flin-memory-inspector__item--selected", _ -> "" }
 
                 <div
-                    class={"flin-memory-inspector__item" ++ {if isSelected { " flin-memory-inspector__item--selected" } else { "" }}}
+                    class={"flin-memory-inspector__item" ++ itemSelectedClass}
                     click={selectKey.bind({ key: key })}
                 >
                     <div class="flin-memory-inspector__item-key">

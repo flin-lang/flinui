@@ -50,16 +50,24 @@ handleKeydown = {
     }
 }
 
+// Computed classes for nav
+noLabelsClass = match !showLabels { true -> " flin-bottomnav--no-labels", _ -> "" }
+safeAreaClass = match safeArea { true -> " flin-bottomnav--safe-area", _ -> "" }
+
 <nav
-    class={"flin-bottomnav" ++ {if !showLabels { " flin-bottomnav--no-labels" } else { "" }} ++ {if safeArea { " flin-bottomnav--safe-area" } else { "" }}}
+    class={"flin-bottomnav" ++ noLabelsClass ++ safeAreaClass}
     role="navigation"
     aria-label="Bottom navigation"
     keydown={handleKeydown}
 >
     <div class="flin-bottomnav__container">
         {items.map((item, index) ->
+            {
+                itemActiveClass = match index == currentIndex { true -> " flin-bottomnav__item--active", _ -> "" }
+                itemDisabledClass = match item.disabled { true -> " flin-bottomnav__item--disabled", _ -> "" }
+            }
             <button
-                class={"flin-bottomnav__item" ++ {if index == currentIndex { " flin-bottomnav__item--active" } else { "" }} ++ {if item.disabled { " flin-bottomnav__item--disabled" } else { "" }}}
+                class={"flin-bottomnav__item" ++ itemActiveClass ++ itemDisabledClass}
                 click={() -> handleItemClick({ itemIndex: index, onClick: item.onClick })}
                 disabled={item.disabled || false}
                 aria-label={item.label}

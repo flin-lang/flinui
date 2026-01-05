@@ -45,15 +45,19 @@ sizeClass = match size {
     _ -> "modal-md"
 }
 
+// Computed classes for animation states
+backdropClosingClass = match isClosing { true -> " modal-backdrop-closing", _ -> "" }
+modalClosingClass = match isClosing { true -> " modal-closing", _ -> "" }
+
 {if open}
     <div
-        class={"flin-modal-backdrop" ++ {if isClosing { " modal-backdrop-closing" } else { "" }}}
+        class={"flin-modal-backdrop" ++ backdropClosingClass}
         click={handleBackdropClick}
         aria-hidden="true"
     ></div>
 
     <div
-        class={"flin-modal " ++ sizeClass ++ {if isClosing { " modal-closing" } else { "" }}}
+        class={"flin-modal " ++ sizeClass ++ modalClosingClass}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"

@@ -24,8 +24,20 @@ variantClass = match variant {
     _ -> "btn-primary"
 }
 
+// Pre-compute full class string
+loadingClass = match loading {
+    true -> " btn-loading"
+    _ -> ""
+}
+labelHiddenClass = match loading {
+    true -> " btn-label-hidden"
+    _ -> ""
+}
+btnClass = "btn " ++ variantClass ++ " " ++ sizeClass ++ loadingClass
+labelClass = "btn-label" ++ labelHiddenClass
+
 <button
-    class={"btn " ++ variantClass ++ " " ++ sizeClass ++ {if loading { " btn-loading" } else { "" }}}
+    class={btnClass}
     disabled={disabled || loading}
     click={onClick}
     aria-busy={loading}
@@ -33,7 +45,7 @@ variantClass = match variant {
     {if loading}
         <span class="btn-spinner" aria-hidden="true"></span>
     {/if}
-    <span class={"btn-label" ++ {if loading { " btn-label-hidden" } else { "" }}}>
+    <span class={labelClass}>
         {label}
     </span>
 </button>

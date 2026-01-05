@@ -86,8 +86,10 @@ isActive = {
     aria-label="Chart legend"
 >
     {for item, index in items}
+        clickableClass = match clickable { true -> " flin-legend__item--clickable", _ -> "" }
+        inactiveClass = match !isActive({ index: index }) { true -> " flin-legend__item--inactive", _ -> "" }
         <div
-            class={"flin-legend__item" ++ {if clickable { " flin-legend__item--clickable" } else { "" }} ++ {if !isActive({ index: index }) { " flin-legend__item--inactive" } else { "" }}}
+            class={"flin-legend__item" ++ clickableClass ++ inactiveClass}
             role="listitem"
             click={handleClick.bind({ index: index })}
             mouseenter={handleHover.bind({ index: index })}

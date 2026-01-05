@@ -10,7 +10,15 @@ error = props.error || ""
 onChange = props.onChange
 
 // Computed classes
-selectClass = "select" ++ {if error != "" { " select-error" } else { "" }} ++ {if disabled { " select-disabled" } else { "" }}
+errorClass = match error != "" {
+    true -> " select-error"
+    _ -> ""
+}
+disabledClass = match disabled {
+    true -> " select-disabled"
+    _ -> ""
+}
+selectClass = "select" ++ errorClass ++ disabledClass
 
 <div class="select-wrapper">
     <select

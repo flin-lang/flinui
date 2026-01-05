@@ -259,8 +259,12 @@ handleDateSelect = {
         </button>
     </div>
 
+    // Compute class modifiers for weekdays and grid
+    weekNumbersClass = match showWeekNumbers { true -> " flin-calendar__weekdays--with-numbers", _ -> "" }
+    gridWeekNumbersClass = match showWeekNumbers { true -> " flin-calendar__grid--with-numbers", _ -> "" }
+
     // Weekday headers
-    <div class={"flin-calendar__weekdays" ++ {if showWeekNumbers { " flin-calendar__weekdays--with-numbers" } else { "" }}}>
+    <div class={"flin-calendar__weekdays" ++ weekNumbersClass}>
         {if showWeekNumbers}
             <div class="flin-calendar__weekday flin-calendar__weekday--week">W</div>
         {/if}
@@ -270,7 +274,7 @@ handleDateSelect = {
     </div>
 
     // Calendar grid
-    <div class={"flin-calendar__grid" ++ {if showWeekNumbers { " flin-calendar__grid--with-numbers" } else { "" }}}>
+    <div class={"flin-calendar__grid" ++ gridWeekNumbersClass}>
         {for day, index in calendarDays}
             // Week number at start of each row
             {if showWeekNumbers && index % 7 == 0}
@@ -281,9 +285,16 @@ handleDateSelect = {
 
             dateEvents = getEventsForDate({ date: day.date })
 
+            // Compute day class modifiers
+            otherMonthClass = match day.isCurrentMonth { false -> " flin-calendar__day--other-month", _ -> "" }
+            todayClass = match isToday({ date: day.date }) { true -> " flin-calendar__day--today", _ -> "" }
+            selectedClass = match isSelected({ date: day.date }) { true -> " flin-calendar__day--selected", _ -> "" }
+            dayDisabledClass = match isDisabled({ date: day.date }) { true -> " flin-calendar__day--disabled", _ -> "" }
+            hasEventsClass = match dateEvents.length > 0 { true -> " flin-calendar__day--has-events", _ -> "" }
+
             <button
                 type="button"
-                class={"flin-calendar__day" ++ {if !day.isCurrentMonth { " flin-calendar__day--other-month" } else { "" }} ++ {if isToday({ date: day.date }) { " flin-calendar__day--today" } else { "" }} ++ {if isSelected({ date: day.date }) { " flin-calendar__day--selected" } else { "" }} ++ {if isDisabled({ date: day.date }) { " flin-calendar__day--disabled" } else { "" }} ++ {if dateEvents.length > 0 { " flin-calendar__day--has-events" } else { "" }}}
+                class={"flin-calendar__day" ++ otherMonthClass ++ todayClass ++ selectedClass ++ dayDisabledClass ++ hasEventsClass}
                 click={handleDateSelect.bind({ day: day })}
                 disabled={isDisabled({ date: day.date })}
                 aria-label={day.date.toDateString()}

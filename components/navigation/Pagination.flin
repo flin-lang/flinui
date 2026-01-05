@@ -161,8 +161,11 @@ variantClass = match variant {
                     ...
                 </span>
             {else}
+                {
+                    pageActiveClass = match pageNum == currentPage { true -> " flin-pagination__page--active", _ -> "" }
+                }
                 <button
-                    class={"flin-pagination__page" ++ {if pageNum == currentPage { " flin-pagination__page--active" } else { "" }}}
+                    class={"flin-pagination__page" ++ pageActiveClass}
                     click={goToPage({ page: pageNum })}
                     aria-label={"Go to page " ++ pageNum}
                     aria-current={if pageNum == currentPage { "page" } else { none }}

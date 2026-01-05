@@ -22,10 +22,14 @@ handleKeydown = {
     }
 }
 
+// Computed classes
+activeClass = match active { true -> " flin-sidebar-item--active", _ -> "" }
+disabledClass = match disabled { true -> " flin-sidebar-item--disabled", _ -> "" }
+
 {if isLink}
     <a
         href={href}
-        class={"flin-sidebar-item" ++ {if active { " flin-sidebar-item--active" } else { "" }} ++ {if disabled { " flin-sidebar-item--disabled" } else { "" }}}
+        class={"flin-sidebar-item" ++ activeClass ++ disabledClass}
         aria-current={if active { "page" } else { none }}
         tabindex={if disabled { -1 } else { 0 }}
     >
@@ -45,7 +49,7 @@ handleKeydown = {
     </a>
 {else}
     <button
-        class={"flin-sidebar-item" ++ {if active { " flin-sidebar-item--active" } else { "" }}}
+        class={"flin-sidebar-item" ++ activeClass}
         click={onClick}
         keydown={handleKeydown}
         disabled={disabled}

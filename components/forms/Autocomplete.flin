@@ -103,7 +103,10 @@ clearInput = {
     isOpen = true
 }
 
-<div class={"autocomplete" ++ {if disabled { " autocomplete-disabled" } else { "" }}}>
+// Compute class modifiers
+disabledClass = match disabled { true -> " autocomplete-disabled", _ -> "" }
+
+<div class={"autocomplete" ++ disabledClass}>
     <div class="autocomplete-input-wrapper">
         <svg class="autocomplete-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
@@ -144,8 +147,10 @@ clearInput = {
     {if isOpen && filteredOptions.length > 0}
         <ul class="autocomplete-dropdown" id="autocomplete-listbox" role="listbox">
             {for option, index in filteredOptions}
+                highlightedClass = match index == highlightedIndex { true -> " autocomplete-option-highlighted", _ -> "" }
+                selectedClass = match (option.value || option) == value { true -> " autocomplete-option-selected", _ -> "" }
                 <li
-                    class={"autocomplete-option" ++ {if index == highlightedIndex { " autocomplete-option-highlighted" } else { "" }} ++ {if (option.value || option) == value { " autocomplete-option-selected" } else { "" }}}
+                    class={"autocomplete-option" ++ highlightedClass ++ selectedClass}
                     role="option"
                     aria-selected={index == highlightedIndex}
                     data-value={option.value || option}

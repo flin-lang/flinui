@@ -155,8 +155,10 @@ handleSliceLeave = {
     >
         <g class="flin-piechart__slices">
             {for slice, index in slices}
+                sliceAnimatedClass = match animated { true -> " flin-piechart__slice--animated", _ -> "" }
+                sliceActiveClass = match hoveredIndex == index { true -> " flin-piechart__slice--active", _ -> "" }
                 <path
-                    class={"flin-piechart__slice" ++ {if animated { " flin-piechart__slice--animated" } else { "" }} ++ {if hoveredIndex == index { " flin-piechart__slice--active" } else { "" }}}
+                    class={"flin-piechart__slice" ++ sliceAnimatedClass ++ sliceActiveClass}
                     d={slice.path}
                     fill={slice.color}
                     style="--slice-index: {index}; --slice-angle: {slice.angle}; --slice-start: {slice.startAngle};"
@@ -190,8 +192,9 @@ handleSliceLeave = {
             <g class="flin-piechart__percentages">
                 {for slice, index in slices}
                     {if slice.percentage > 3}
+                        percentActiveClass = match hoveredIndex == index { true -> " flin-piechart__percentage--active", _ -> "" }
                         <text
-                            class={"flin-piechart__percentage" ++ {if hoveredIndex == index { " flin-piechart__percentage--active" } else { "" }}}
+                            class={"flin-piechart__percentage" ++ percentActiveClass}
                             x={slice.extLabelX}
                             y={slice.extLabelY}
                             text-anchor="middle"
@@ -246,8 +249,9 @@ handleSliceLeave = {
     {if showLegend}
         <div class="flin-piechart__legend">
             {for slice, index in slices}
+                legendActiveClass = match hoveredIndex == index { true -> " flin-piechart__legend-item--active", _ -> "" }
                 <div
-                    class={"flin-piechart__legend-item" ++ {if hoveredIndex == index { " flin-piechart__legend-item--active" } else { "" }}}
+                    class={"flin-piechart__legend-item" ++ legendActiveClass}
                     mouseenter={handleSliceHover.bind({ index: index })}
                     mouseleave={handleSliceLeave}
                 >

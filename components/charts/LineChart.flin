@@ -225,6 +225,7 @@ handlePointLeave = {
             {for series, seriesIndex in data}
                 linePath = generatePath({ values: series.values, curved: curved })
                 seriesColor = getSeriesColor({ index: seriesIndex, series: series })
+                animatedClass = match animated { true -> " flin-linechart__line--animated", _ -> "" }
 
                 <g class="flin-linechart__series">
                     // Area fill
@@ -238,7 +239,7 @@ handlePointLeave = {
 
                     // Line
                     <path
-                        class={"flin-linechart__line" ++ {if animated { " flin-linechart__line--animated" } else { "" }}}
+                        class={"flin-linechart__line" ++ animatedClass}
                         d={linePath}
                         fill="none"
                         stroke={seriesColor}
@@ -250,8 +251,9 @@ handlePointLeave = {
                     // Points
                     {if showPoints}
                         {for point, pointIndex in series.values}
+                            pointActiveClass = match hoveredPoint && hoveredPoint.seriesIndex == seriesIndex && hoveredPoint.pointIndex == pointIndex { true -> " flin-linechart__point--active", _ -> "" }
                             <circle
-                                class={"flin-linechart__point" ++ {if hoveredPoint && hoveredPoint.seriesIndex == seriesIndex && hoveredPoint.pointIndex == pointIndex { " flin-linechart__point--active" } else { "" }}}
+                                class={"flin-linechart__point" ++ pointActiveClass}
                                 cx={scaleX({ value: point.x })}
                                 cy={scaleY({ value: point.y })}
                                 r={pointRadius}

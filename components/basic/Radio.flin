@@ -10,7 +10,15 @@ disabled = props.disabled || false
 onChange = props.onChange
 
 // Computed classes
-radioClass = "radio" ++ {if checked { " radio-checked" } else { "" }} ++ {if disabled { " radio-disabled" } else { "" }}
+checkedClass = match checked {
+    true -> " radio-checked"
+    _ -> ""
+}
+disabledClass = match disabled {
+    true -> " radio-disabled"
+    _ -> ""
+}
+radioClass = "radio" ++ checkedClass ++ disabledClass
 
 <label class={radioClass}>
     <input

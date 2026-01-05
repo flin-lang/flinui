@@ -18,12 +18,16 @@ maxWidth = match size {
 }
 
 // Compute padding class
-paddingClass = "flin-container-p-" + padding
+paddingClass = "flin-container-p-" ++ padding
 
 // Compute centered class
-containerClass = "flin-container " + paddingClass + {if centered { " flin-container-centered" } else { "" }}
+centeredClass = match centered {
+    true -> " flin-container-centered"
+    _ -> ""
+}
+containerClass = "flin-container " ++ paddingClass ++ centeredClass
 
-<div class={containerClass} style="max-width: {maxWidth};">
+<div class={containerClass} style={"max-width: " ++ maxWidth}>
     {children}
 </div>
 

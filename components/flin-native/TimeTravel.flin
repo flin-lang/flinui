@@ -205,7 +205,10 @@ handleSliderChange = {
 prevSnapshot = currentIndex > 0 ? history[currentIndex - 1] : null
 diff = prevSnapshot ? calculateDiff({ oldVal: prevSnapshot.value, newVal: currentSnapshot.value }) : null
 
-<div class={"flin-timetravel" ++ {if compact { " flin-timetravel--compact" } else { "" }}}>
+// Pre-compute compact class
+compactClass = match compact { true -> " flin-timetravel--compact", _ -> "" }
+
+<div class={"flin-timetravel" ++ compactClass}>
     // Header
     <div class="flin-timetravel__header">
         <div class="flin-timetravel__title">
@@ -228,8 +231,10 @@ diff = prevSnapshot ? calculateDiff({ oldVal: prevSnapshot.value, newVal: curren
         <div class="flin-timetravel__timeline-container">
             <div class="flin-timetravel__timeline" click={handleTimelineClick}>
                 {for snapshot, index in history}
+                    pointActiveClass = match index == currentIndex { true -> " flin-timetravel__timeline-point--active", _ -> "" }
+                    pointPastClass = match index < currentIndex { true -> " flin-timetravel__timeline-point--past", _ -> "" }
                     <div
-                        class={"flin-timetravel__timeline-point" ++ {if index == currentIndex { " flin-timetravel__timeline-point--active" } else { "" }} ++ {if index < currentIndex { " flin-timetravel__timeline-point--past" } else { "" }}}
+                        class={"flin-timetravel__timeline-point" ++ pointActiveClass ++ pointPastClass}
                         style="--point-position: {(index / (history.length - 1)) * 100}%;"
                         title={formatTimestamp({ timestamp: snapshot.timestamp })}
                     />
@@ -281,9 +286,10 @@ diff = prevSnapshot ? calculateDiff({ oldVal: prevSnapshot.value, newVal: curren
                 </svg>
             </button>
 
+            playingClass = match isPlaying { true -> " flin-timetravel__btn--playing", _ -> "" }
             <button
                 type="button"
-                class={"flin-timetravel__btn flin-timetravel__btn--play" ++ {if isPlaying { " flin-timetravel__btn--playing" } else { "" }}}
+                class={"flin-timetravel__btn flin-timetravel__btn--play" ++ playingClass}
                 click={togglePlayback}
                 aria-label={isPlaying ? "Pause" : "Play"}
                 title={isPlaying ? "Pause" : "Play"}

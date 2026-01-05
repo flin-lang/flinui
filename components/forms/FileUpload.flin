@@ -113,9 +113,13 @@ clearAll = {
     files = []
 }
 
-<div class={"file-upload" ++ {if disabled { " file-upload-disabled" } else { "" }}}>
+// Compute class modifiers
+disabledClass = match disabled { true -> " file-upload-disabled", _ -> "" }
+draggingClass = match isDragging { true -> " file-upload-dragging", _ -> "" }
+
+<div class={"file-upload" ++ disabledClass}>
     <div
-        class={"file-upload-dropzone" ++ {if isDragging { " file-upload-dragging" } else { "" }}}
+        class={"file-upload-dropzone" ++ draggingClass}
         dragenter={handleDragEnter}
         dragleave={handleDragLeave}
         dragover={handleDragOver}

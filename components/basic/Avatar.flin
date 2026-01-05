@@ -54,7 +54,14 @@ bgColorClass = match bgColorIndex {
     _ -> "avatar-bg-cyan"
 }
 
-<div class={"avatar " ++ sizeClass ++ " " ++ {if !showImage { bgColorClass } else { "" }}} role="img" aria-label={alt}>
+// Compute background class
+bgClass = match showImage {
+    false -> bgColorClass
+    _ -> ""
+}
+avatarClass = "avatar " ++ sizeClass ++ " " ++ bgClass
+
+<div class={avatarClass} role="img" aria-label={alt}>
     {if showImage}
         <img
             class="avatar-image"

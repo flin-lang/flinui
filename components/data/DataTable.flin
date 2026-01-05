@@ -178,8 +178,10 @@ tableClass = tableClass + " " + (if bordered { "flin-datatable__table--bordered"
             <thead class="flin-datatable__head">
                 <tr>
                     {for column in columns}
+                        sortableClass = match sortable && column.sortable != false { true -> " flin-datatable__header--sortable", _ -> "" }
+                        activeClass = match sortColumn == (column.key || column.field) { true -> " flin-datatable__header--active", _ -> "" }
                         <th
-                            class={"flin-datatable__header" ++ {if sortable && column.sortable != false { " flin-datatable__header--sortable" } else { "" }} ++ {if sortColumn == (column.key || column.field) { " flin-datatable__header--active" } else { "" }}}
+                            class={"flin-datatable__header" ++ sortableClass ++ activeClass}
                             data-column={column.key || column.field}
                             click={if sortable && column.sortable != false { handleSort } else { none }}
                             style={if column.width { "width: " ++ column.width } else { "" }}

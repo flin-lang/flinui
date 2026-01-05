@@ -11,7 +11,15 @@ onInput = props.onInput
 onChange = props.onChange
 
 // Computed classes
-inputClass = "input" ++ {if error != "" { " input-error" } else { "" }} ++ {if disabled { " input-disabled" } else { "" }}
+errorClass = match error != "" {
+    true -> " input-error"
+    _ -> ""
+}
+disabledClass = match disabled {
+    true -> " input-disabled"
+    _ -> ""
+}
+inputClass = "input" ++ errorClass ++ disabledClass
 
 <div class="input-wrapper">
     <input

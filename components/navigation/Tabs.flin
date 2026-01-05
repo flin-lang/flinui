@@ -45,8 +45,11 @@ sizeClass = match size {
     _ -> "flin-tabs--md"
 }
 
+// Computed full width class
+fullWidthClass = match fullWidth { true -> " flin-tabs--full-width", _ -> "" }
+
 <div
-    class={"flin-tabs " ++ variantClass ++ " " ++ sizeClass ++ {if fullWidth { " flin-tabs--full-width" } else { "" }}}
+    class={"flin-tabs " ++ variantClass ++ " " ++ sizeClass ++ fullWidthClass}
     role="tablist"
     aria-label="Tabs"
     keydown={handleKeydown}

@@ -41,8 +41,11 @@ themeClass = match theme {
     _ -> ""
 }
 
+// Pre-compute visible class
+visibleClass = match visible { true -> " flin-chart-tooltip--visible", _ -> "" }
+
 <div
-    class={"flin-chart-tooltip" ++ " " ++ themeClass ++ " flin-chart-tooltip--" ++ computedPosition ++ {if visible { " flin-chart-tooltip--visible" } else { "" }}}
+    class={"flin-chart-tooltip" ++ " " ++ themeClass ++ " flin-chart-tooltip--" ++ computedPosition ++ visibleClass}
     style="--tooltip-x: {x}px; --tooltip-y: {y}px; --tooltip-offset: {offset}px;"
     role="tooltip"
     aria-hidden={!visible}
