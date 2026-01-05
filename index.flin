@@ -1,12 +1,12 @@
 // FlinUI - Official Component Library for FLIN
-// 185 production-ready components. No npm install. No dependencies. Just FLIN.
+// 166 production-ready components. No npm install. No dependencies. Just FLIN.
 // Version 1.5.0
 
 // ============================================================================
 // FLINUI COMPONENT LIBRARY
 // ============================================================================
 //
-// 185 production-ready components for building modern web applications.
+// 166 production-ready components for building modern web applications.
 // All components use theme tokens for consistent styling and dark mode support.
 //
 // Usage:
@@ -86,7 +86,7 @@
 //   index.flin - Theme provider
 
 version = "1.5.0"
-componentCount = 185
+componentCount = 166
 categories = ["basic", "layout", "data", "forms", "feedback", "navigation", "charts", "typography", "collections", "templates", "flin-native"]
 
 <div class="flinui-root">
