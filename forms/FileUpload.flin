@@ -1,0 +1,440 @@
+// FileUpload.flin - FlinUI File Upload Component
+// A drag-and-drop file upload with preview, progress, and validation
+
+// Props with defaults
+accept = props.accept || "*/*"
+multiple = props.multiple || false
+maxSize = props.maxSize || 10485760  // 10MB default
+disabled = props.disabled || false
+onUpload = props.onUpload
+
+// State management
+files = []
+isDragging = false
+uploadProgress = 0
+errorMessage = ""
+isUploading = false
+
+// Format file size for display
+formatSize = {
+    size = event;
+    {if size < 1024}
+        size ++ " B"
+    {else if size < 1048576}
+        (size / 1024).toFixed(1) ++ " KB"
+    {else}
+        (size / 1048576).toFixed(1) ++ " MB"
+    {/if}
+}
+
+// Validate file
+validateFile = {
+    file = event;
+    // Check file size
+    {if file.size > maxSize}
+        errorMessage = file.name ++ " exceeds maximum size of " ++ formatSize(maxSize);
+        false
+    {else}
+        errorMessage = "";
+        true
+    {/if}
+}
+
+// Handle file selection
+handleFiles = {
+    selectedFiles = event.target.files || event.dataTransfer.files;
+    newFiles = [];
+
+    {for file in selectedFiles}
+        {if validateFile(file)}
+            newFiles.push({
+                file: file,
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                preview: {if file.type.startsWith("image/") { URL.createObjectURL(file) } else { "" }}
+            })
+        {/if}
+    {/for}
+
+    {if multiple}
+        files = files.concat(newFiles)
+    {else}
+        files = newFiles.slice(0, 1)
+    {/if}
+
+    {if onUpload && files.length > 0}
+        onUpload(files)
+    {/if}
+}
+
+// Handle drag events
+handleDragEnter = {
+    event.preventDefault();
+    {if !disabled}
+        isDragging = true
+    {/if}
+}
+
+handleDragLeave = {
+    event.preventDefault();
+    isDragging = false
+}
+
+handleDragOver = {
+    event.preventDefault()
+}
+
+handleDrop = {
+    event.preventDefault();
+    isDragging = false;
+    {if !disabled}
+        handleFiles(event)
+    {/if}
+}
+
+// Remove file from list
+removeFile = {
+    index = event.target.dataset.index;
+    {if files[index].preview}
+        URL.revokeObjectURL(files[index].preview)
+    {/if}
+    files.splice(index, 1);
+    files = [...files]
+}
+
+// Clear all files
+clearAll = {
+    {for file in files}
+        {if file.preview}
+            URL.revokeObjectURL(file.preview)
+        {/if}
+    {/for}
+    files = []
+}
+
+// Compute class modifiers
+disabledClass = match disabled { true -> " file-upload-disabled", _ -> "" }
+draggingClass = match isDragging { true -> " file-upload-dragging", _ -> "" }
+
+<div class={"file-upload" ++ disabledClass}>
+    <div
+        class={"file-upload-dropzone" ++ draggingClass}
+        dragenter={handleDragEnter}
+        dragleave={handleDragLeave}
+        dragover={handleDragOver}
+        drop={handleDrop}
+    >
+        <input
+            type="file"
+            class="file-upload-input"
+            accept={accept}
+            multiple={multiple}
+            disabled={disabled}
+            change={handleFiles}
+            id="file-upload-input"
+        >
+        <label for="file-upload-input" class="file-upload-label">
+            <svg class="file-upload-icon" width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                <rect x="4" y="8" width="32" height="28" rx="3" stroke="currentColor" stroke-width="2"/>
+                <path d="M4 16H36" stroke="currentColor" stroke-width="2"/>
+                <path d="M20 24V32" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16 28L20 24L24 28" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="11" cy="12" r="1.5" fill="currentColor"/>
+                <circle cx="17" cy="12" r="1.5" fill="currentColor"/>
+                <circle cx="23" cy="12" r="1.5" fill="currentColor"/>
+            </svg>
+            <div class="file-upload-text">
+                <span class="file-upload-title">
+                    {if isDragging}
+                        Drop files here
+                    {else}
+                        <span class="file-upload-link">Click to upload</span> or drag and drop
+                    {/if}
+                </span>
+                <span class="file-upload-hint">
+                    {if accept != "*/*"}
+                        {accept}
+                    {else}
+                        Any file type
+                    {/if}
+                    {if maxSize}
+                        up to {formatSize(maxSize)}
+                    {/if}
+                </span>
+            </div>
+        </label>
+    </div>
+
+    {if errorMessage != ""}
+        <div class="file-upload-error" role="alert">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M8 4.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="8" cy="11.5" r="1" fill="currentColor"/>
+            </svg>
+            <span>{errorMessage}</span>
+        </div>
+    {/if}
+
+    {if files.length > 0}
+        <div class="file-upload-list">
+            <div class="file-upload-list-header">
+                <span>{files.length} file{if files.length > 1}s{/if} selected</span>
+                <button type="button" class="file-upload-clear" click={clearAll}>
+                    Clear all
+                </button>
+            </div>
+            {for file, index in files}
+                <div class="file-upload-item">
+                    {if file.preview != ""}
+                        <img src={file.preview} class="file-upload-preview" alt={file.name}>
+                    {else}
+                        <div class="file-upload-file-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M14 2V8H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    {/if}
+                    <div class="file-upload-item-info">
+                        <span class="file-upload-item-name">{file.name}</span>
+                        <span class="file-upload-item-size">{formatSize(file.size)}</span>
+                    </div>
+                    <button
+                        type="button"
+                        class="file-upload-item-remove"
+                        data-index={index}
+                        click={removeFile}
+                        aria-label={"Remove " ++ file.name}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+            {/for}
+        </div>
+    {/if}
+
+    {if isUploading}
+        <div class="file-upload-progress">
+            <div class="file-upload-progress-bar" style={"width: " ++ uploadProgress ++ "%"}></div>
+            <span class="file-upload-progress-text">{uploadProgress}%</span>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.file-upload {
+    width: 100%;
+}
+
+.file-upload-dropzone {
+    position: relative;
+    border: 2px dashed var(--flin-neutral-300);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-space-8);
+    text-align: center;
+    transition: all var(--flin-transition-fast);
+    background-color: var(--flin-bg);
+}
+
+.file-upload-dropzone:hover {
+    border-color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+}
+
+.file-upload-dragging {
+    border-color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+    border-style: solid;
+}
+
+.file-upload-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    pointer-events: none;
+}
+
+.file-upload-icon {
+    color: var(--flin-fg-muted);
+}
+
+.file-upload-dragging .file-upload-icon {
+    color: var(--flin-primary);
+}
+
+.file-upload-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.file-upload-title {
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+}
+
+.file-upload-link {
+    color: var(--flin-primary);
+    font-weight: 500;
+}
+
+.file-upload-hint {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Error message */
+.file-upload-error {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background-color: var(--flin-danger-light);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-danger);
+}
+
+/* File list */
+.file-upload-list {
+    margin-top: var(--flin-space-3);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+}
+
+.file-upload-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background-color: var(--flin-bg-muted);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.file-upload-clear {
+    background: none;
+    border: none;
+    color: var(--flin-danger);
+    font-size: var(--flin-text-sm);
+    cursor: pointer;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.file-upload-clear:hover {
+    background-color: var(--flin-danger-light);
+}
+
+.file-upload-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.file-upload-preview {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: var(--flin-radius-md);
+}
+
+.file-upload-file-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-fg-muted);
+}
+
+.file-upload-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.file-upload-item-name {
+    display: block;
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-upload-item-size {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+.file-upload-item-remove {
+    background: none;
+    border: none;
+    padding: var(--flin-space-1);
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    border-radius: var(--flin-radius-sm);
+    transition: all var(--flin-transition-fast);
+}
+
+.file-upload-item-remove:hover {
+    color: var(--flin-danger);
+    background-color: var(--flin-danger-light);
+}
+
+/* Progress bar */
+.file-upload-progress {
+    position: relative;
+    margin-top: var(--flin-space-3);
+    height: 8px;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.file-upload-progress-bar {
+    height: 100%;
+    background-color: var(--flin-primary);
+    transition: width var(--flin-transition-normal);
+}
+
+.file-upload-progress-text {
+    position: absolute;
+    right: 0;
+    top: -20px;
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+/* Disabled state */
+.file-upload-disabled .file-upload-dropzone {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.file-upload-disabled .file-upload-input {
+    cursor: not-allowed;
+}
+</style>

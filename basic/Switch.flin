@@ -1,0 +1,123 @@
+// Switch.flin - FlinUI Toggle Switch Component
+// An accessible toggle switch with smooth animations
+
+// Props with defaults
+checked = props.checked || false
+label = props.label || ""
+disabled = props.disabled || false
+onChange = props.onChange
+
+// Computed classes
+checkedClass = match checked {
+    true -> " switch-checked"
+    _ -> ""
+}
+disabledClass = match disabled {
+    true -> " switch-disabled"
+    _ -> ""
+}
+switchClass = "switch" ++ checkedClass ++ disabledClass
+
+<label class={switchClass}>
+    <input
+        type="checkbox"
+        class="switch-input"
+        checked={checked}
+        disabled={disabled}
+        change={onChange}
+        role="switch"
+        aria-checked={checked}
+    >
+    <span class="switch-track" aria-hidden="true">
+        <span class="switch-thumb"></span>
+    </span>
+    {if label != ""}
+        <span class="switch-label">{label}</span>
+    {/if}
+</label>
+
+<style scoped>
+.switch {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.switch-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.switch-track {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background-color: var(--flin-neutral-300);
+    border-radius: var(--flin-radius-full);
+    transition: background-color var(--flin-transition-fast);
+    flex-shrink: 0;
+}
+
+.switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: var(--flin-radius-full);
+    box-shadow: var(--flin-shadow-sm);
+    transition: transform var(--flin-transition-fast);
+}
+
+.switch:hover:not(.switch-disabled) .switch-track {
+    background-color: var(--flin-neutral-400);
+}
+
+.switch-input:focus-visible + .switch-track {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.switch-checked .switch-track {
+    background-color: var(--flin-primary);
+}
+
+.switch-checked:hover:not(.switch-disabled) .switch-track {
+    background-color: var(--flin-primary-hover);
+}
+
+.switch-checked .switch-thumb {
+    transform: translateX(20px);
+}
+
+.switch-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    line-height: 1.4;
+}
+
+.switch-disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.switch-disabled .switch-track {
+    background-color: var(--flin-neutral-200);
+}
+
+.switch-disabled .switch-label {
+    color: var(--flin-fg-muted);
+}
+</style>

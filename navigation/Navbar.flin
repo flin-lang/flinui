@@ -1,0 +1,200 @@
+// Navbar.flin - FlinUI Navigation Bar Component
+// A responsive navigation bar with fixed positioning and transparency options
+
+// Props with defaults
+fixed = props.fixed || false
+transparent = props.transparent || false
+height = props.height || "64px"
+
+// Internal state for mobile menu
+mobileMenuOpen = false
+
+// Toggle mobile menu
+toggleMobile = {
+    mobileMenuOpen = !mobileMenuOpen
+}
+
+// Handle keyboard navigation
+handleKeydown = {
+    if event.key == "Escape" {
+        mobileMenuOpen = false
+    }
+}
+
+// Computed classes
+fixedClass = match fixed { true -> " flin-navbar--fixed", _ -> "" }
+transparentClass = match transparent { true -> " flin-navbar--transparent", _ -> "" }
+mobileOpenClass = match mobileMenuOpen { true -> " flin-navbar--mobile-open", _ -> "" }
+
+<nav
+    class={"flin-navbar" ++ fixedClass ++ transparentClass ++ mobileOpenClass}
+    style="--navbar-height: {height};"
+    role="navigation"
+    aria-label="Main navigation"
+    keydown={handleKeydown}
+>
+    <div class="flin-navbar__container">
+        {children}
+    </div>
+
+    // Mobile menu toggle button
+    <button
+        class="flin-navbar__toggle"
+        click={toggleMobile}
+        aria-expanded={mobileMenuOpen}
+        aria-label={if mobileMenuOpen { "Close menu" } else { "Open menu" }}
+    >
+        <span class="flin-navbar__toggle-icon">
+            <span class="flin-navbar__toggle-line"></span>
+            <span class="flin-navbar__toggle-line"></span>
+            <span class="flin-navbar__toggle-line"></span>
+        </span>
+    </button>
+
+    // Mobile menu overlay
+    {if mobileMenuOpen}
+        <div class="flin-navbar__overlay" click={toggleMobile}></div>
+    {/if}
+</nav>
+
+<style scoped>
+.flin-navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: var(--navbar-height);
+    padding: 0 var(--flin-space-4);
+    background-color: var(--flin-bg);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    transition: background-color var(--flin-transition-normal),
+                box-shadow var(--flin-transition-normal);
+    z-index: 1000;
+}
+
+.flin-navbar--fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.flin-navbar--transparent {
+    background-color: transparent;
+    border-bottom: none;
+}
+
+.flin-navbar--transparent:not(.flin-navbar--scrolled) {
+    box-shadow: none;
+}
+
+.flin-navbar__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    gap: var(--flin-space-6);
+}
+
+/* Mobile toggle button */
+.flin-navbar__toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.flin-navbar__toggle:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.flin-navbar__toggle:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.flin-navbar__toggle-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 14px;
+    gap: 4px;
+}
+
+.flin-navbar__toggle-line {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--flin-fg);
+    border-radius: 1px;
+    transition: transform var(--flin-transition-fast),
+                opacity var(--flin-transition-fast);
+}
+
+/* Mobile menu open state for hamburger icon */
+.flin-navbar--mobile-open .flin-navbar__toggle-line:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+}
+
+.flin-navbar--mobile-open .flin-navbar__toggle-line:nth-child(2) {
+    opacity: 0;
+}
+
+.flin-navbar--mobile-open .flin-navbar__toggle-line:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Mobile overlay */
+.flin-navbar__overlay {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn var(--flin-transition-fast);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .flin-navbar__toggle {
+        display: flex;
+    }
+
+    .flin-navbar__container {
+        flex-wrap: wrap;
+    }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-navbar {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-navbar__toggle:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+/* When fixed, add spacing to body */
+body:has(.flin-navbar--fixed) {
+    padding-top: var(--navbar-height);
+}
+</style>

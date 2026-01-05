@@ -1,0 +1,151 @@
+// Highlight.flin - FlinUI Highlight Component
+// Text highlighting component for emphasizing search terms or keywords
+
+// Props with defaults
+query = props.query || ""
+text = props.text || ""
+color = props.color || "yellow"
+
+// Computed color class
+colorClass = match color {
+    "green" -> "highlight-green"
+    "blue" -> "highlight-blue"
+    "red" -> "highlight-red"
+    "purple" -> "highlight-purple"
+    _ -> "highlight-yellow"
+}
+
+// Helper function to escape regex special characters
+escapeRegex = (str) -> {
+    str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+// Function to highlight matches
+highlightText = () -> {
+    if query == "" || text == "" {
+        return text
+    }
+
+    // Create case-insensitive regex with global flag
+    escapedQuery = escapeRegex(query)
+    regex = new RegExp(escapedQuery, "gi")
+
+    // Split text by matches while preserving the matched text
+    parts = []
+    lastIndex = 0
+
+    text.matchAll(regex).forEach((match) -> {
+        // Add text before match
+        if match.index > lastIndex {
+            parts.push({
+                text: text.slice(lastIndex, match.index),
+                isMatch: false
+            })
+        }
+
+        // Add matched text
+        parts.push({
+            text: match[0],
+            isMatch: true
+        })
+
+        lastIndex = match.index + match[0].length
+    })
+
+    // Add remaining text
+    if lastIndex < text.length {
+        parts.push({
+            text: text.slice(lastIndex),
+            isMatch: false
+        })
+    }
+
+    return parts
+}
+
+// Get highlighted parts
+parts = highlightText()
+
+<span class="highlight-wrapper">
+    {if typeof parts == "string"}
+        {parts}
+    {else}
+        {parts.map((part) -> {
+            if part.isMatch {
+                <mark class={"highlight " ++ colorClass}>{part.text}</mark>
+            } else {
+                {part.text}
+            }
+        })}
+    {/if}
+</span>
+
+<style scoped>
+.highlight-wrapper {
+    font-family: var(--flin-font-sans);
+    line-height: 1.6;
+}
+
+.highlight {
+    padding: 0.1em 0.2em;
+    border-radius: var(--flin-radius-sm);
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+/* Yellow variant (default - like marker highlighter) */
+.highlight-yellow {
+    background-color: #fef08a;
+    color: var(--flin-neutral-900);
+}
+
+/* Green variant */
+.highlight-green {
+    background-color: #86efac;
+    color: var(--flin-neutral-900);
+}
+
+/* Blue variant */
+.highlight-blue {
+    background-color: #93c5fd;
+    color: var(--flin-neutral-900);
+}
+
+/* Red variant */
+.highlight-red {
+    background-color: #fca5a5;
+    color: var(--flin-neutral-900);
+}
+
+/* Purple variant */
+.highlight-purple {
+    background-color: #d8b4fe;
+    color: var(--flin-neutral-900);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .highlight-yellow {
+    background-color: #854d0e;
+    color: #fef08a;
+}
+
+[data-theme="dark"] .highlight-green {
+    background-color: #14532d;
+    color: #86efac;
+}
+
+[data-theme="dark"] .highlight-blue {
+    background-color: #1e3a8a;
+    color: #93c5fd;
+}
+
+[data-theme="dark"] .highlight-red {
+    background-color: #7f1d1d;
+    color: #fca5a5;
+}
+
+[data-theme="dark"] .highlight-purple {
+    background-color: #581c87;
+    color: #d8b4fe;
+}
+</style>

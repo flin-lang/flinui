@@ -1,0 +1,90 @@
+// FlinUI Skeleton Component
+// Loading placeholder with different variants and animation
+
+// Props with defaults
+width = props.width || "100%"
+height = props.height || "1rem"
+variant = props.variant || "rect"
+animate = props.animate || true
+
+// Compute dimensions based on variant
+computedWidth = match variant {
+    "circle" -> height
+    "text" -> width
+    "rect" -> width
+    _ -> width
+}
+
+computedHeight = match variant {
+    "text" -> "1em"
+    _ -> height
+}
+
+borderRadius = match variant {
+    "circle" -> "50%"
+    "text" -> "var(--flin-radius-sm)"
+    "rect" -> "var(--flin-radius-md)"
+    _ -> "var(--flin-radius-md)"
+}
+
+<div class="flin-skeleton {if animate { 'flin-skeleton--animated' }}"
+     style="--skeleton-width: {computedWidth}; --skeleton-height: {computedHeight}; --skeleton-radius: {borderRadius};"
+     aria-hidden="true">
+</div>
+
+<style scoped>
+.flin-skeleton {
+    display: inline-block;
+    width: var(--skeleton-width);
+    height: var(--skeleton-height);
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--skeleton-radius);
+    position: relative;
+    overflow: hidden;
+}
+
+.flin-skeleton--animated::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--flin-neutral-100) 50%,
+        transparent 100%
+    );
+    animation: flin-skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes flin-skeleton-shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Text variant styling */
+.flin-skeleton[style*="text"] {
+    display: block;
+    margin-bottom: var(--flin-space-2);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-skeleton {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-skeleton--animated::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--flin-neutral-600) 50%,
+        transparent 100%
+    );
+}
+</style>

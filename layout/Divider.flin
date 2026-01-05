@@ -1,0 +1,69 @@
+// FlinUI Divider Component
+// Visual separator for content sections
+// Props: orientation (horizontal/vertical), color (CSS color), thickness (1-4), spacing (1-16)
+
+orientation = props.orientation || "horizontal"
+color = props.color || "var(--flin-neutral-200)"
+thickness = props.thickness || 1
+spacing = props.spacing || 4
+
+// Build class string
+orientationClass = "flin-divider-" + orientation
+thicknessClass = "flin-divider-thick-" + thickness
+spacingClass = "flin-divider-space-" + spacing
+
+dividerClass = "flin-divider " + orientationClass + " " + thicknessClass + " " + spacingClass
+
+// Custom color style
+dividerStyle = "background-color: " + color + ";"
+
+<div class={dividerClass} style={dividerStyle} role="separator" aria-orientation={orientation}></div>
+
+<style scoped>
+.flin-divider {
+    flex-shrink: 0;
+}
+
+/* Horizontal divider (default) */
+.flin-divider-horizontal {
+    width: 100%;
+    height: 1px;
+}
+
+/* Vertical divider */
+.flin-divider-vertical {
+    height: 100%;
+    width: 1px;
+    align-self: stretch;
+}
+
+/* Thickness variants */
+.flin-divider-thick-1.flin-divider-horizontal { height: 1px; }
+.flin-divider-thick-2.flin-divider-horizontal { height: 2px; }
+.flin-divider-thick-3.flin-divider-horizontal { height: 3px; }
+.flin-divider-thick-4.flin-divider-horizontal { height: 4px; }
+
+.flin-divider-thick-1.flin-divider-vertical { width: 1px; }
+.flin-divider-thick-2.flin-divider-vertical { width: 2px; }
+.flin-divider-thick-3.flin-divider-vertical { width: 3px; }
+.flin-divider-thick-4.flin-divider-vertical { width: 4px; }
+
+/* Spacing (margin) variants */
+.flin-divider-space-1.flin-divider-horizontal { margin-top: var(--flin-space-1); margin-bottom: var(--flin-space-1); }
+.flin-divider-space-2.flin-divider-horizontal { margin-top: var(--flin-space-2); margin-bottom: var(--flin-space-2); }
+.flin-divider-space-3.flin-divider-horizontal { margin-top: var(--flin-space-3); margin-bottom: var(--flin-space-3); }
+.flin-divider-space-4.flin-divider-horizontal { margin-top: var(--flin-space-4); margin-bottom: var(--flin-space-4); }
+.flin-divider-space-6.flin-divider-horizontal { margin-top: var(--flin-space-6); margin-bottom: var(--flin-space-6); }
+.flin-divider-space-8.flin-divider-horizontal { margin-top: var(--flin-space-8); margin-bottom: var(--flin-space-8); }
+.flin-divider-space-12.flin-divider-horizontal { margin-top: var(--flin-space-12); margin-bottom: var(--flin-space-12); }
+.flin-divider-space-16.flin-divider-horizontal { margin-top: var(--flin-space-16); margin-bottom: var(--flin-space-16); }
+
+.flin-divider-space-1.flin-divider-vertical { margin-left: var(--flin-space-1); margin-right: var(--flin-space-1); }
+.flin-divider-space-2.flin-divider-vertical { margin-left: var(--flin-space-2); margin-right: var(--flin-space-2); }
+.flin-divider-space-3.flin-divider-vertical { margin-left: var(--flin-space-3); margin-right: var(--flin-space-3); }
+.flin-divider-space-4.flin-divider-vertical { margin-left: var(--flin-space-4); margin-right: var(--flin-space-4); }
+.flin-divider-space-6.flin-divider-vertical { margin-left: var(--flin-space-6); margin-right: var(--flin-space-6); }
+.flin-divider-space-8.flin-divider-vertical { margin-left: var(--flin-space-8); margin-right: var(--flin-space-8); }
+.flin-divider-space-12.flin-divider-vertical { margin-left: var(--flin-space-12); margin-right: var(--flin-space-12); }
+.flin-divider-space-16.flin-divider-vertical { margin-left: var(--flin-space-16); margin-right: var(--flin-space-16); }
+</style>

@@ -1,0 +1,161 @@
+// Tabs.flin - FlinUI Tabs Component
+// A tabbed navigation component with multiple variants
+
+// Props with defaults
+value = props.value || ""
+variant = props.variant || "line"
+onChange = props.onChange
+fullWidth = props.fullWidth || false
+size = props.size || "md"
+
+// Internal state for active tab
+activeTab = value
+
+// Handle tab selection
+selectTab = {
+    activeTab = event.value
+    if onChange {
+        onChange(event.value)
+    }
+}
+
+// Handle keyboard navigation
+handleKeydown = {
+    match event.key {
+        "ArrowLeft" -> focusPreviousTab()
+        "ArrowRight" -> focusNextTab()
+        "Home" -> focusFirstTab()
+        "End" -> focusLastTab()
+        _ -> {}
+    }
+}
+
+// Variant class
+variantClass = match variant {
+    "enclosed" -> "flin-tabs--enclosed"
+    "soft" -> "flin-tabs--soft"
+    "pills" -> "flin-tabs--pills"
+    _ -> "flin-tabs--line"
+}
+
+// Size class
+sizeClass = match size {
+    "sm" -> "flin-tabs--sm"
+    "lg" -> "flin-tabs--lg"
+    _ -> "flin-tabs--md"
+}
+
+// Computed full width class
+fullWidthClass = match fullWidth { true -> " flin-tabs--full-width", _ -> "" }
+
+<div
+    class={"flin-tabs " ++ variantClass ++ " " ++ sizeClass ++ fullWidthClass}
+    role="tablist"
+    aria-label="Tabs"
+    keydown={handleKeydown}
+    data-active-tab={activeTab}
+>
+    <div class="flin-tabs__list">
+        {children}
+    </div>
+    <div class="flin-tabs__indicator"></div>
+</div>
+
+<style scoped>
+.flin-tabs {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.flin-tabs__list {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    position: relative;
+}
+
+.flin-tabs--full-width .flin-tabs__list {
+    width: 100%;
+}
+
+.flin-tabs--full-width .flin-tabs__list > * {
+    flex: 1;
+}
+
+/* Size variants */
+.flin-tabs--sm .flin-tabs__list {
+    gap: 0;
+}
+
+.flin-tabs--lg .flin-tabs__list {
+    gap: var(--flin-space-2);
+}
+
+/* Line variant (default) */
+.flin-tabs--line {
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.flin-tabs--line .flin-tabs__list {
+    margin-bottom: -1px;
+}
+
+.flin-tabs--line .flin-tabs__indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background-color: var(--flin-primary);
+    transition: left var(--flin-transition-normal),
+                width var(--flin-transition-normal);
+}
+
+/* Enclosed variant */
+.flin-tabs--enclosed {
+    background-color: var(--flin-neutral-100);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-space-1);
+}
+
+.flin-tabs--enclosed .flin-tabs__list {
+    gap: 0;
+}
+
+/* Soft variant */
+.flin-tabs--soft .flin-tabs__list {
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-1);
+    background-color: var(--flin-neutral-100);
+    border-radius: var(--flin-radius-lg);
+}
+
+/* Pills variant */
+.flin-tabs--pills .flin-tabs__list {
+    gap: var(--flin-space-2);
+}
+
+/* Responsive styles */
+@media (max-width: 640px) {
+    .flin-tabs__list {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .flin-tabs__list::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-tabs--line {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-tabs--enclosed,
+[data-theme="dark"] .flin-tabs--soft .flin-tabs__list {
+    background-color: var(--flin-neutral-800);
+}
+</style>

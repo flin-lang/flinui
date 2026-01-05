@@ -1,0 +1,136 @@
+// FlinUI Code Component
+// Code display with syntax highlighting support, line numbers, and inline mode
+
+// Props with defaults
+language = props.language || ""
+showLineNumbers = props.showLineNumbers || false
+inline = props.inline || false
+
+<div class="flin-code-wrapper {if inline { 'flin-code--inline' }}">
+    {if !inline}
+        {if language != ""}
+            <div class="flin-code__header">
+                <span class="flin-code__language">{language}</span>
+            </div>
+        {/if}
+        <pre class="flin-code {if showLineNumbers { 'flin-code--numbered' }}">
+            <code class="flin-code__content" data-language={language}>
+                {children}
+            </code>
+        </pre>
+    {else}
+        <code class="flin-code__inline">
+            {children}
+        </code>
+    {/if}
+</div>
+
+<style scoped>
+.flin-code-wrapper {
+    position: relative;
+    margin: var(--flin-space-4) 0;
+}
+
+.flin-code-wrapper.flin-code--inline {
+    display: inline;
+    margin: 0;
+}
+
+.flin-code__header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background-color: var(--flin-neutral-800);
+    border-top-left-radius: var(--flin-radius-lg);
+    border-top-right-radius: var(--flin-radius-lg);
+    border-bottom: 1px solid var(--flin-neutral-700);
+}
+
+.flin-code__language {
+    font-size: var(--flin-text-xs);
+    font-family: var(--flin-font-mono);
+    color: var(--flin-neutral-400);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.flin-code {
+    margin: 0;
+    padding: var(--flin-space-4);
+    background-color: var(--flin-neutral-900);
+    border-radius: var(--flin-radius-lg);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.flin-code__header + .flin-code {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.flin-code__content {
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-100);
+    line-height: 1.6;
+    white-space: pre;
+    tab-size: 4;
+}
+
+/* Line numbers */
+.flin-code--numbered {
+    counter-reset: line;
+}
+
+.flin-code--numbered .flin-code__content {
+    display: block;
+}
+
+.flin-code--numbered .flin-code__content::before {
+    counter-increment: line;
+    content: counter(line);
+    display: inline-block;
+    width: 2em;
+    margin-right: var(--flin-space-4);
+    text-align: right;
+    color: var(--flin-neutral-600);
+    user-select: none;
+}
+
+/* Inline code */
+.flin-code__inline {
+    display: inline;
+    padding: 0.2em 0.4em;
+    font-family: var(--flin-font-mono);
+    font-size: 0.875em;
+    color: var(--flin-danger);
+    background-color: var(--flin-neutral-100);
+    border-radius: var(--flin-radius-sm);
+}
+
+/* Scrollbar styling */
+.flin-code::-webkit-scrollbar {
+    height: 8px;
+}
+
+.flin-code::-webkit-scrollbar-track {
+    background: var(--flin-neutral-800);
+    border-radius: var(--flin-radius-full);
+}
+
+.flin-code::-webkit-scrollbar-thumb {
+    background: var(--flin-neutral-600);
+    border-radius: var(--flin-radius-full);
+}
+
+.flin-code::-webkit-scrollbar-thumb:hover {
+    background: var(--flin-neutral-500);
+}
+
+/* Dark theme adjustments for inline */
+[data-theme="dark"] .flin-code__inline {
+    background-color: var(--flin-neutral-800);
+    color: var(--flin-danger-light);
+}
+</style>

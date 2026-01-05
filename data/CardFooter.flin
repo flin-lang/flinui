@@ -1,0 +1,39 @@
+// FlinUI CardFooter Component
+// Footer section for Card component with alignment options
+
+// Props with defaults
+align = props.align || "right"
+
+// Compute justify-content based on align
+computedAlign = match align {
+    "left" -> "flex-start"
+    "center" -> "center"
+    "right" -> "flex-end"
+    "between" -> "space-between"
+    _ -> "flex-end"
+}
+
+<div class="flin-card-footer" style="--footer-align: {computedAlign};">
+    {children}
+</div>
+
+<style scoped>
+.flin-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: var(--footer-align);
+    gap: var(--flin-space-3);
+    padding-top: var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+    margin-top: var(--flin-space-4);
+}
+
+.flin-card-footer:empty {
+    display: none;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-card-footer {
+    border-top-color: var(--flin-neutral-700);
+}
+</style>

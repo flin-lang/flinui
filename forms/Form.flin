@@ -1,0 +1,98 @@
+// Form.flin - FlinUI Form Component
+// A form container with submit handling, validation, and flexible layout
+
+// Props with defaults
+onSubmit = props.submit
+gap = props.gap || "md"
+disabled = props.disabled || false
+
+// Map gap sizes
+gapClass = match gap {
+    "none" -> "form-gap-none"
+    "sm" -> "form-gap-sm"
+    "lg" -> "form-gap-lg"
+    "xl" -> "form-gap-xl"
+    _ -> "form-gap-md"
+}
+
+// Handle form submission with prevention of default
+handleSubmit = {
+    event.preventDefault();
+    {if !disabled && onSubmit}
+        onSubmit(event)
+    {/if}
+}
+
+// Compute class modifiers
+disabledClass = match disabled { true -> " form-disabled", _ -> "" }
+
+<form
+    class={"flin-form " ++ gapClass ++ disabledClass}
+    submit={handleSubmit}
+    novalidate
+>
+    <fieldset class="form-fieldset" disabled={disabled}>
+        {children}
+    </fieldset>
+</form>
+
+<style scoped>
+.flin-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.form-fieldset {
+    display: flex;
+    flex-direction: column;
+    border: none;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+}
+
+/* Gap variants */
+.form-gap-none .form-fieldset {
+    gap: 0;
+}
+
+.form-gap-sm .form-fieldset {
+    gap: var(--flin-space-2);
+}
+
+.form-gap-md .form-fieldset {
+    gap: var(--flin-space-4);
+}
+
+.form-gap-lg .form-fieldset {
+    gap: var(--flin-space-6);
+}
+
+.form-gap-xl .form-fieldset {
+    gap: var(--flin-space-8);
+}
+
+/* Disabled state */
+.form-disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.form-fieldset:disabled {
+    cursor: not-allowed;
+}
+
+/* Form validation visual feedback */
+.flin-form:has(:invalid:not(:focus):not(:placeholder-shown)) .form-submit-btn {
+    opacity: 0.7;
+}
+
+/* Responsive layout */
+@media (max-width: 640px) {
+    .form-gap-lg .form-fieldset,
+    .form-gap-xl .form-fieldset {
+        gap: var(--flin-space-4);
+    }
+}
+</style>

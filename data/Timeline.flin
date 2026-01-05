@@ -1,0 +1,315 @@
+// FlinUI Timeline Component
+// An event timeline component for displaying chronological events
+
+// Props with defaults
+items = props.items || []
+variant = props.variant || "vertical"
+alternating = props.alternating || false
+
+// Status color mapping
+getStatusColor = fn(status) {
+    match status {
+        "success" -> "var(--flin-success)"
+        "warning" -> "var(--flin-warning)"
+        "error" -> "var(--flin-error)"
+        "info" -> "var(--flin-info)"
+        _ -> "var(--flin-primary)"
+    }
+}
+
+// Build timeline class
+timelineClass = "flin-timeline flin-timeline--{variant}"
+timelineClass = if alternating { timelineClass + " flin-timeline--alternating" } else { timelineClass }
+
+<div class={timelineClass}>
+    {for item, index in items {
+        itemPosition = if alternating && variant == "vertical" {
+            if index % 2 == 0 { "left" } else { "right" }
+        } else {
+            "left"
+        }
+
+        statusColor = getStatusColor(item.status || "default")
+
+        <div class="flin-timeline__item flin-timeline__item--{itemPosition}"
+             style="--timeline-status-color: {statusColor};">
+
+            <div class="flin-timeline__marker">
+                {if item.icon {
+                    <span class="flin-timeline__icon">{item.icon}</span>
+                } else {
+                    <span class="flin-timeline__dot"></span>
+                }}
+            </div>
+
+            <div class="flin-timeline__content">
+                {if item.date {
+                    <div class="flin-timeline__date">{item.date}</div>
+                }}
+
+                {if item.title {
+                    <h4 class="flin-timeline__title">{item.title}</h4>
+                }}
+
+                {if item.description {
+                    <p class="flin-timeline__description">{item.description}</p>
+                }}
+
+                {if item.status {
+                    <span class="flin-timeline__status flin-timeline__status--{item.status}">
+                        {item.status}
+                    </span>
+                }}
+            </div>
+        </div>
+    }}
+</div>
+
+<style scoped>
+.flin-timeline {
+    position: relative;
+    padding: var(--flin-space-4) 0;
+}
+
+/* Vertical variant (default) */
+.flin-timeline--vertical {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-6);
+}
+
+/* Horizontal variant */
+.flin-timeline--horizontal {
+    display: flex;
+    flex-direction: row;
+    gap: var(--flin-space-6);
+    overflow-x: auto;
+    padding-bottom: var(--flin-space-2);
+}
+
+/* Timeline item */
+.flin-timeline__item {
+    position: relative;
+    display: flex;
+    gap: var(--flin-space-4);
+    align-items: flex-start;
+}
+
+/* Vertical layout */
+.flin-timeline--vertical .flin-timeline__item {
+    padding-left: var(--flin-space-8);
+}
+
+/* Alternating layout */
+.flin-timeline--alternating .flin-timeline__item--right {
+    flex-direction: row-reverse;
+    padding-left: 0;
+    padding-right: var(--flin-space-8);
+}
+
+.flin-timeline--alternating .flin-timeline__item--right .flin-timeline__content {
+    text-align: right;
+}
+
+/* Horizontal layout */
+.flin-timeline--horizontal .flin-timeline__item {
+    flex-direction: column;
+    min-width: 250px;
+    padding-left: 0;
+}
+
+/* Timeline marker (dot/icon container) */
+.flin-timeline__marker {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    background-color: var(--flin-bg);
+    border: 2px solid var(--timeline-status-color, var(--flin-primary));
+    border-radius: 50%;
+    z-index: 2;
+}
+
+/* Timeline dot */
+.flin-timeline__dot {
+    width: 12px;
+    height: 12px;
+    background-color: var(--timeline-status-color, var(--flin-primary));
+    border-radius: 50%;
+}
+
+/* Timeline icon */
+.flin-timeline__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-text-sm);
+    color: var(--timeline-status-color, var(--flin-primary));
+}
+
+/* Connecting line - Vertical */
+.flin-timeline--vertical .flin-timeline__item::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    bottom: -24px;
+    width: 2px;
+    background-color: var(--flin-neutral-200);
+    z-index: 1;
+}
+
+/* Last item - no line */
+.flin-timeline--vertical .flin-timeline__item:last-child::before {
+    display: none;
+}
+
+/* Alternating right items */
+.flin-timeline--alternating .flin-timeline__item--right::before {
+    left: auto;
+    right: 15px;
+}
+
+/* Connecting line - Horizontal */
+.flin-timeline--horizontal .flin-timeline__item::before {
+    content: "";
+    position: absolute;
+    left: 32px;
+    top: 15px;
+    right: -24px;
+    height: 2px;
+    background-color: var(--flin-neutral-200);
+    z-index: 1;
+}
+
+.flin-timeline--horizontal .flin-timeline__item:last-child::before {
+    display: none;
+}
+
+/* Timeline content */
+.flin-timeline__content {
+    flex: 1;
+    padding-top: 4px;
+}
+
+.flin-timeline--horizontal .flin-timeline__content {
+    padding-top: var(--flin-space-2);
+}
+
+/* Date */
+.flin-timeline__date {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    margin-bottom: var(--flin-space-1);
+    font-weight: 500;
+}
+
+/* Title */
+.flin-timeline__title {
+    font-size: var(--flin-text-base);
+    font-weight: 600;
+    color: var(--flin-fg);
+    margin: 0 0 var(--flin-space-2) 0;
+    line-height: 1.4;
+}
+
+/* Description */
+.flin-timeline__description {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    margin: 0 0 var(--flin-space-2) 0;
+    line-height: 1.5;
+}
+
+/* Status badge */
+.flin-timeline__status {
+    display: inline-block;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-weight: 600;
+    border-radius: var(--flin-radius-md);
+    text-transform: capitalize;
+}
+
+.flin-timeline__status--success {
+    background-color: var(--flin-success-bg);
+    color: var(--flin-success);
+}
+
+.flin-timeline__status--warning {
+    background-color: var(--flin-warning-bg);
+    color: var(--flin-warning);
+}
+
+.flin-timeline__status--error {
+    background-color: var(--flin-error-bg);
+    color: var(--flin-error);
+}
+
+.flin-timeline__status--info {
+    background-color: var(--flin-info-bg);
+    color: var(--flin-info);
+}
+
+/* Empty state */
+.flin-timeline:empty::after {
+    content: "No timeline events";
+    display: block;
+    text-align: center;
+    padding: var(--flin-space-8);
+    color: var(--flin-fg-muted);
+    font-size: var(--flin-text-sm);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-timeline__item::before {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-timeline__marker {
+    background-color: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .flin-timeline__status--success {
+    background-color: rgba(34, 197, 94, 0.15);
+}
+
+[data-theme="dark"] .flin-timeline__status--warning {
+    background-color: rgba(251, 191, 36, 0.15);
+}
+
+[data-theme="dark"] .flin-timeline__status--error {
+    background-color: rgba(239, 68, 68, 0.15);
+}
+
+[data-theme="dark"] .flin-timeline__status--info {
+    background-color: rgba(59, 130, 246, 0.15);
+}
+
+/* Responsive behavior */
+@media (max-width: 640px) {
+    /* Disable alternating on small screens */
+    .flin-timeline--alternating .flin-timeline__item--right {
+        flex-direction: row;
+        padding-left: var(--flin-space-8);
+        padding-right: 0;
+    }
+
+    .flin-timeline--alternating .flin-timeline__item--right .flin-timeline__content {
+        text-align: left;
+    }
+
+    .flin-timeline--alternating .flin-timeline__item--right::before {
+        left: 15px;
+        right: auto;
+    }
+
+    /* Reduce gaps */
+    .flin-timeline--vertical {
+        gap: var(--flin-space-4);
+    }
+}
+</style>

@@ -1,0 +1,92 @@
+// FlinUI Forms - Index
+// Advanced form components with validation, accessibility, and rich interactions
+
+// ============================================================================
+// FORM COMPONENTS
+// ============================================================================
+//
+// Form             - Form container with submit handling and gap control
+// FormField        - Labeled field wrapper with validation states
+// FormError        - Error message display with icon
+// FormHelp         - Subtle help text for inputs
+//
+// ============================================================================
+// INPUT COMPONENTS
+// ============================================================================
+//
+// DatePicker       - Date selection with calendar
+// TimePicker       - Time selection with clock
+// ColorPicker      - Color selection with presets and custom input
+// FileUpload       - Drag-and-drop file upload with preview
+// Autocomplete     - Searchable dropdown with keyboard navigation
+// PinInput         - Multi-digit PIN/OTP input (4-6 digits)
+//
+// ============================================================================
+// USAGE EXAMPLES
+// ============================================================================
+//
+// Basic form with validation:
+// ---------------------------
+// <Form submit={handleSubmit} gap="lg">
+//     <FormField label="Email" required error={emailError}>
+//         <Input type="email" value={email} />
+//     </FormField>
+//     <FormField label="Password" required helpText="At least 8 characters">
+//         <Input type="password" value={password} />
+//     </FormField>
+//     <Button type="submit">Sign In</Button>
+// </Form>
+//
+// Date and time pickers:
+// ----------------------
+// <FormField label="Event Date">
+//     <DatePicker value={date} min="2024-01-01" max="2025-12-31" />
+// </FormField>
+// <FormField label="Start Time">
+//     <TimePicker value={time} step="900" />  // 15-minute intervals
+// </FormField>
+//
+// Color picker with presets:
+// --------------------------
+// <FormField label="Theme Color">
+//     <ColorPicker
+//         value={color}
+//         presets={["#ff0000", "#00ff00", "#0000ff"]}
+//         onChange={handleColorChange}
+//     />
+// </FormField>
+//
+// File upload:
+// ------------
+// <FormField label="Profile Picture">
+//     <FileUpload
+//         accept="image/*"
+//         maxSize={5242880}  // 5MB
+//         onUpload={handleUpload}
+//     />
+// </FormField>
+//
+// Autocomplete:
+// -------------
+// <FormField label="Country">
+//     <Autocomplete
+//         value={country}
+//         options={countries}
+//         placeholder="Search countries..."
+//         onSelect={handleSelect}
+//     />
+// </FormField>
+//
+// PIN input:
+// ----------
+// <FormField label="Verification Code">
+//     <PinInput
+//         length={6}
+//         type="number"
+//         onComplete={handleVerification}
+//     />
+// </FormField>
+//
+// ============================================================================
+
+// Component references (FLIN auto-discovers components in directory)

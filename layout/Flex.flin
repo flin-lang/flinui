@@ -1,0 +1,73 @@
+// FlinUI Flex Component
+// Flexible flexbox container with full control
+// Props: direction (row/column/row-reverse/column-reverse), wrap (nowrap/wrap/wrap-reverse), gap (1-16), align, justify
+
+direction = props.direction || "row"
+wrap = props.wrap || "nowrap"
+gap = props.gap || 0
+align = props.align || "stretch"
+justify = props.justify || "start"
+inline = props.inline || false
+
+// Build class string
+directionClass = "flin-flex-dir-" + direction
+wrapClass = "flin-flex-wrap-" + wrap
+gapClass = {if gap > 0 { "flin-flex-gap-" + gap } else { "" }}
+alignClass = "flin-flex-align-" + align
+justifyClass = "flin-flex-justify-" + justify
+inlineClass = {if inline { "flin-flex-inline" } else { "" }}
+
+flexClass = "flin-flex " + directionClass + " " + wrapClass + " " + gapClass + " " + alignClass + " " + justifyClass + " " + inlineClass
+
+<div class={flexClass}>
+    {children}
+</div>
+
+<style scoped>
+.flin-flex {
+    display: flex;
+    box-sizing: border-box;
+}
+
+.flin-flex-inline {
+    display: inline-flex;
+}
+
+/* Direction */
+.flin-flex-dir-row { flex-direction: row; }
+.flin-flex-dir-column { flex-direction: column; }
+.flin-flex-dir-row-reverse { flex-direction: row-reverse; }
+.flin-flex-dir-column-reverse { flex-direction: column-reverse; }
+
+/* Wrap */
+.flin-flex-wrap-nowrap { flex-wrap: nowrap; }
+.flin-flex-wrap-wrap { flex-wrap: wrap; }
+.flin-flex-wrap-wrap-reverse { flex-wrap: wrap-reverse; }
+
+/* Gap variants */
+.flin-flex-gap-1 { gap: var(--flin-space-1); }
+.flin-flex-gap-2 { gap: var(--flin-space-2); }
+.flin-flex-gap-3 { gap: var(--flin-space-3); }
+.flin-flex-gap-4 { gap: var(--flin-space-4); }
+.flin-flex-gap-5 { gap: calc(var(--flin-space-4) + var(--flin-space-1)); }
+.flin-flex-gap-6 { gap: var(--flin-space-6); }
+.flin-flex-gap-8 { gap: var(--flin-space-8); }
+.flin-flex-gap-10 { gap: calc(var(--flin-space-8) + var(--flin-space-2)); }
+.flin-flex-gap-12 { gap: var(--flin-space-12); }
+.flin-flex-gap-16 { gap: var(--flin-space-16); }
+
+/* Align items (cross axis) */
+.flin-flex-align-start { align-items: flex-start; }
+.flin-flex-align-center { align-items: center; }
+.flin-flex-align-end { align-items: flex-end; }
+.flin-flex-align-stretch { align-items: stretch; }
+.flin-flex-align-baseline { align-items: baseline; }
+
+/* Justify content (main axis) */
+.flin-flex-justify-start { justify-content: flex-start; }
+.flin-flex-justify-center { justify-content: center; }
+.flin-flex-justify-end { justify-content: flex-end; }
+.flin-flex-justify-between { justify-content: space-between; }
+.flin-flex-justify-around { justify-content: space-around; }
+.flin-flex-justify-evenly { justify-content: space-evenly; }
+</style>

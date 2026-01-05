@@ -1,0 +1,52 @@
+// FlinUI Kbd Component
+// Keyboard key display for showing keyboard shortcuts
+
+<kbd class="flin-kbd">
+    {children}
+</kbd>
+
+<style scoped>
+.flin-kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5em;
+    height: 1.75em;
+    padding: 0 0.4em;
+    font-family: var(--flin-font-mono);
+    font-size: 0.8em;
+    font-weight: 500;
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+    border: 1px solid var(--flin-neutral-300);
+    border-bottom-width: 2px;
+    border-radius: var(--flin-radius-sm);
+    box-shadow: 0 1px 0 var(--flin-neutral-400);
+    white-space: nowrap;
+    user-select: none;
+    vertical-align: middle;
+}
+
+/* Hover effect for interactive feel */
+.flin-kbd:hover {
+    background-color: var(--flin-neutral-200);
+}
+
+/* Pressed state */
+.flin-kbd:active {
+    transform: translateY(1px);
+    box-shadow: none;
+    border-bottom-width: 1px;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-kbd {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-600);
+    box-shadow: 0 1px 0 var(--flin-neutral-500);
+}
+
+[data-theme="dark"] .flin-kbd:hover {
+    background-color: var(--flin-neutral-700);
+}
+</style>

@@ -1,0 +1,125 @@
+// FlinUI - Official Component Library for FLIN
+// 94 production-ready components. No npm install. No dependencies. Just FLIN.
+// Version 1.2.0
+
+// ============================================================================
+// FLINUI COMPONENT LIBRARY
+// ============================================================================
+//
+// 94 production-ready components for building modern web applications.
+// All components use theme tokens for consistent styling and dark mode support.
+//
+// Usage:
+//   Components are auto-imported when used in .flin files.
+//   Just use <Button>, <Card>, <Modal>, etc.
+//
+// Theme:
+//   Include theme/tokens.flin to get CSS variables.
+//   Use data-theme="dark" on root element for dark mode.
+//
+// ============================================================================
+
+// Component Categories:
+//
+// BASIC (15 components)
+//   Button, Input, Textarea, Select, Checkbox, Radio, Switch, Slider
+//   Text, Link, Icon, Image, Avatar, Badge, Tag
+//
+// LAYOUT (11 components)
+//   Container, Stack, Grid, Flex, Box, Divider, Spacer, Center
+//   AspectRatio, Wrap, ResizablePanels
+//
+// DATA DISPLAY (17 components)
+//   Card, CardHeader, CardBody, CardFooter, Table, List, ListItem
+//   Progress, Spinner, Skeleton, Empty, Code, Kbd, Stat, Accordion
+//   Calendar, Carousel
+//
+// FORMS (10 components)
+//   Form, FormField, FormError, FormHelp, DatePicker, TimePicker
+//   ColorPicker, FileUpload, Autocomplete, PinInput
+//
+// FEEDBACK (11 components)
+//   Alert, Toast, Modal, ModalHeader, ModalBody, ModalFooter
+//   Drawer, Popover, Tooltip, Notification, CommandPalette
+//
+// NAVIGATION (14 components)
+//   Navbar, NavbarBrand, NavbarMenu, NavbarItem, Sidebar, SidebarItem
+//   Tabs, Tab, Breadcrumb, Pagination, Menu, Stepper, BottomNav, SkipNav
+//
+// CHARTS (7 components) - NEW!
+//   BarChart, LineChart, PieChart, AreaChart, SparkLine
+//   ChartLegend, ChartTooltip
+//
+// FLIN-NATIVE (2 components) - UNIQUE TO FLIN!
+//   TimeTravel - Navigate through variable history (memory-native)
+//   MemoryInspector - Visual FlinDB debugger (zero-config persistence)
+//
+// THEME (8 files)
+//   tokens.flin - Design tokens and CSS variables
+//   variables.flin - CSS custom properties
+//   dark.flin - Dark mode support
+//   animations.flin - Animation utilities
+//   responsive.flin - Responsive breakpoints
+//   shadows.flin - Shadow system
+//   custom.flin - Theme customization
+//   index.flin - Theme provider
+
+version = "1.2.0"
+componentCount = 94
+categories = ["basic", "layout", "data", "forms", "feedback", "navigation", "charts", "flin-native"]
+
+<div class="flinui-root">
+    <h1>FlinUI v{version}</h1>
+    <p>{componentCount} production-ready components</p>
+
+    <h2>Getting Started</h2>
+    <pre><code>
+// Just use components directly - they auto-import!
+&lt;Button label="Click me" variant="primary" /&gt;
+&lt;Input placeholder="Enter text" value={name} /&gt;
+
+&lt;Card&gt;
+    &lt;CardHeader title="Welcome" /&gt;
+    &lt;CardBody&gt;Content here&lt;/CardBody&gt;
+&lt;/Card&gt;
+
+&lt;Modal open={showModal} title="Confirm"&gt;
+    &lt;ModalBody&gt;Are you sure?&lt;/ModalBody&gt;
+    &lt;ModalFooter&gt;
+        &lt;Button label="Cancel" variant="secondary" /&gt;
+        &lt;Button label="Confirm" variant="primary" /&gt;
+    &lt;/ModalFooter&gt;
+&lt;/Modal&gt;
+    </code></pre>
+</div>
+
+<style>
+.flinui-root {
+    font-family: var(--flin-font-sans);
+    padding: var(--flin-space-8);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.flinui-root h1 {
+    color: var(--flin-primary);
+    margin-bottom: var(--flin-space-2);
+}
+
+.flinui-root h2 {
+    margin-top: var(--flin-space-8);
+    color: var(--flin-fg);
+}
+
+.flinui-root pre {
+    background: var(--flin-bg-muted);
+    padding: var(--flin-space-4);
+    border-radius: var(--flin-radius-lg);
+    overflow-x: auto;
+}
+
+.flinui-root code {
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-sm);
+}
+</style>

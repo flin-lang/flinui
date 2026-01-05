@@ -1,0 +1,357 @@
+// FlinUI Custom Themes
+// TH-06: Create and apply custom themes
+
+// ============================================================================
+// CUSTOM THEME CREATION
+// ============================================================================
+
+/// Creates a custom theme with user-defined design tokens
+/// @param name - Theme name identifier
+/// @param colors - Custom color palette (optional)
+/// @param typography - Custom typography settings (optional)
+/// @param spacing - Custom spacing scale (optional)
+/// @param shadows - Custom shadow scale (optional)
+/// @param radius - Custom border radius values (optional)
+/// @returns Theme object with all tokens
+createTheme = fn(config) {
+    theme = {
+        name: config.name || "custom",
+        colors: config.colors || {},
+        typography: config.typography || {},
+        spacing: config.spacing || {},
+        shadows: config.shadows || {},
+        radius: config.radius || {},
+        animations: config.animations || {},
+        breakpoints: config.breakpoints || {}
+    }
+
+    // Merge with defaults from base theme
+    mergedTheme = mergeWithDefaults(theme)
+
+    mergedTheme
+}
+
+/// Merges custom theme with default tokens
+mergeWithDefaults = fn(customTheme) {
+    // Default theme tokens (from tokens.flin)
+    defaults = {
+        colors: {
+            primary: "#3b82f6",
+            primaryHover: "#2563eb",
+            primaryActive: "#1d4ed8",
+            primaryLight: "#dbeafe",
+            secondary: "#6b7280",
+            success: "#10b981",
+            warning: "#f59e0b",
+            danger: "#ef4444",
+            info: "#06b6d4",
+            bg: "#ffffff",
+            bgMuted: "#f4f4f5",
+            fg: "#18181b",
+            fgMuted: "#71717a"
+        },
+        typography: {
+            fontSans: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+            fontMono: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
+            textXs: "0.75rem",
+            textSm: "0.875rem",
+            textBase: "1rem",
+            textLg: "1.125rem",
+            textXl: "1.25rem",
+            text2xl: "1.5rem",
+            text3xl: "1.875rem",
+            text4xl: "2.25rem"
+        },
+        spacing: {
+            space1: "0.25rem",
+            space2: "0.5rem",
+            space3: "0.75rem",
+            space4: "1rem",
+            space6: "1.5rem",
+            space8: "2rem",
+            space12: "3rem",
+            space16: "4rem"
+        },
+        radius: {
+            sm: "0.125rem",
+            md: "0.375rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+        }
+    }
+
+    // Merge custom with defaults
+    merged = {
+        name: customTheme.name,
+        colors: { ...defaults.colors, ...customTheme.colors },
+        typography: { ...defaults.typography, ...customTheme.typography },
+        spacing: { ...defaults.spacing, ...customTheme.spacing },
+        radius: { ...defaults.radius, ...customTheme.radius },
+        shadows: customTheme.shadows,
+        animations: customTheme.animations,
+        breakpoints: customTheme.breakpoints
+    }
+
+    merged
+}
+
+/// Applies a custom theme to the document
+/// @param theme - Theme object created by createTheme()
+applyTheme = fn(theme) {
+    // Set data-theme attribute
+    // JavaScript: document.documentElement.setAttribute('data-theme', theme.name)
+
+    // Apply all custom CSS variables
+    applyColorVariables(theme.colors)
+    applyTypographyVariables(theme.typography)
+    applySpacingVariables(theme.spacing)
+    applyRadiusVariables(theme.radius)
+
+    if theme.shadows {
+        applyShadowVariables(theme.shadows)
+    }
+
+    true
+}
+
+/// Apply color CSS variables
+applyColorVariables = fn(colors) {
+    // JavaScript implementation:
+    // const root = document.documentElement;
+    // Object.entries(colors).forEach(([key, value]) => {
+    //     root.style.setProperty(`--flin-${key}`, value);
+    // });
+
+    true
+}
+
+/// Apply typography CSS variables
+applyTypographyVariables = fn(typography) {
+    // JavaScript: Apply --flin-font-*, --flin-text-* variables
+    true
+}
+
+/// Apply spacing CSS variables
+applySpacingVariables = fn(spacing) {
+    // JavaScript: Apply --flin-space-* variables
+    true
+}
+
+/// Apply radius CSS variables
+applyRadiusVariables = fn(radius) {
+    // JavaScript: Apply --flin-radius-* variables
+    true
+}
+
+/// Apply shadow CSS variables
+applyShadowVariables = fn(shadows) {
+    // JavaScript: Apply --flin-shadow-* variables
+    true
+}
+
+/// Get the currently active theme
+getCurrentTheme = fn() {
+    // JavaScript: document.documentElement.getAttribute('data-theme') || 'default'
+    "default"
+}
+
+/// Remove custom theme and revert to default
+resetTheme = fn() {
+    // JavaScript: document.documentElement.removeAttribute('data-theme')
+    // Clear all custom CSS variable overrides
+    true
+}
+
+// ============================================================================
+// PRESET CUSTOM THEMES
+// ============================================================================
+
+/// Ocean theme - Blue and teal color scheme
+oceanTheme = createTheme({
+    name: "ocean",
+    colors: {
+        primary: "#0891b2",
+        primaryHover: "#0e7490",
+        primaryActive: "#155e75",
+        primaryLight: "#cffafe",
+        secondary: "#06b6d4",
+        bg: "#f0fdfa",
+        bgMuted: "#ccfbf1",
+        fg: "#134e4a",
+        fgMuted: "#14b8a6"
+    }
+})
+
+/// Forest theme - Green and earth tones
+forestTheme = createTheme({
+    name: "forest",
+    colors: {
+        primary: "#059669",
+        primaryHover: "#047857",
+        primaryActive: "#065f46",
+        primaryLight: "#d1fae5",
+        secondary: "#10b981",
+        success: "#22c55e",
+        bg: "#f0fdf4",
+        bgMuted: "#dcfce7",
+        fg: "#14532d",
+        fgMuted: "#16a34a"
+    }
+})
+
+/// Sunset theme - Warm orange and purple
+sunsetTheme = createTheme({
+    name: "sunset",
+    colors: {
+        primary: "#f97316",
+        primaryHover: "#ea580c",
+        primaryActive: "#c2410c",
+        primaryLight: "#ffedd5",
+        secondary: "#a855f7",
+        bg: "#fff7ed",
+        bgMuted: "#fed7aa",
+        fg: "#7c2d12",
+        fgMuted: "#c2410c"
+    }
+})
+
+/// Midnight theme - Dark purple and blue
+midnightTheme = createTheme({
+    name: "midnight",
+    colors: {
+        primary: "#6366f1",
+        primaryHover: "#4f46e5",
+        primaryActive: "#4338ca",
+        primaryLight: "#e0e7ff",
+        secondary: "#8b5cf6",
+        bg: "#1e1b4b",
+        bgMuted: "#312e81",
+        fg: "#e0e7ff",
+        fgMuted: "#a5b4fc"
+    }
+})
+
+/// Rose theme - Pink and red accents
+roseTheme = createTheme({
+    name: "rose",
+    colors: {
+        primary: "#f43f5e",
+        primaryHover: "#e11d48",
+        primaryActive: "#be123c",
+        primaryLight: "#ffe4e6",
+        secondary: "#ec4899",
+        bg: "#fff1f2",
+        bgMuted: "#fecdd3",
+        fg: "#881337",
+        fgMuted: "#be123c"
+    }
+})
+
+// ============================================================================
+// THEME UTILITIES
+// ============================================================================
+
+/// List of all available preset themes
+availableThemes = [
+    "default",
+    "ocean",
+    "forest",
+    "sunset",
+    "midnight",
+    "rose"
+]
+
+/// Get a preset theme by name
+getThemeByName = fn(name) {
+    if name == "ocean" { oceanTheme }
+    else if name == "forest" { forestTheme }
+    else if name == "sunset" { sunsetTheme }
+    else if name == "midnight" { midnightTheme }
+    else if name == "rose" { roseTheme }
+    else { null }
+}
+
+/// Apply a preset theme by name
+applyThemeByName = fn(name) {
+    theme = getThemeByName(name)
+    if theme {
+        applyTheme(theme)
+    } else {
+        resetTheme()
+    }
+}
+
+<style>
+/* Theme transition for smooth switching */
+:root {
+    transition: background-color var(--flin-transition-normal),
+                color var(--flin-transition-normal);
+}
+
+/* Ocean Theme */
+[data-theme="ocean"] {
+    --flin-primary: #0891b2;
+    --flin-primary-hover: #0e7490;
+    --flin-primary-active: #155e75;
+    --flin-primary-light: #cffafe;
+    --flin-secondary: #06b6d4;
+    --flin-bg: #f0fdfa;
+    --flin-bg-muted: #ccfbf1;
+    --flin-fg: #134e4a;
+    --flin-fg-muted: #14b8a6;
+}
+
+/* Forest Theme */
+[data-theme="forest"] {
+    --flin-primary: #059669;
+    --flin-primary-hover: #047857;
+    --flin-primary-active: #065f46;
+    --flin-primary-light: #d1fae5;
+    --flin-secondary: #10b981;
+    --flin-success: #22c55e;
+    --flin-bg: #f0fdf4;
+    --flin-bg-muted: #dcfce7;
+    --flin-fg: #14532d;
+    --flin-fg-muted: #16a34a;
+}
+
+/* Sunset Theme */
+[data-theme="sunset"] {
+    --flin-primary: #f97316;
+    --flin-primary-hover: #ea580c;
+    --flin-primary-active: #c2410c;
+    --flin-primary-light: #ffedd5;
+    --flin-secondary: #a855f7;
+    --flin-bg: #fff7ed;
+    --flin-bg-muted: #fed7aa;
+    --flin-fg: #7c2d12;
+    --flin-fg-muted: #c2410c;
+}
+
+/* Midnight Theme */
+[data-theme="midnight"] {
+    --flin-primary: #6366f1;
+    --flin-primary-hover: #4f46e5;
+    --flin-primary-active: #4338ca;
+    --flin-primary-light: #e0e7ff;
+    --flin-secondary: #8b5cf6;
+    --flin-bg: #1e1b4b;
+    --flin-bg-muted: #312e81;
+    --flin-fg: #e0e7ff;
+    --flin-fg-muted: #a5b4fc;
+}
+
+/* Rose Theme */
+[data-theme="rose"] {
+    --flin-primary: #f43f5e;
+    --flin-primary-hover: #e11d48;
+    --flin-primary-active: #be123c;
+    --flin-primary-light: #ffe4e6;
+    --flin-secondary: #ec4899;
+    --flin-bg: #fff1f2;
+    --flin-bg-muted: #fecdd3;
+    --flin-fg: #881337;
+    --flin-fg-muted: #be123c;
+}
+</style>

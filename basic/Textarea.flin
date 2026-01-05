@@ -1,0 +1,98 @@
+// Textarea.flin - FlinUI Textarea Component
+// A multi-line text input with auto-resize capability
+
+// Props with defaults
+value = props.value || ""
+placeholder = props.placeholder || ""
+rows = props.rows || 4
+disabled = props.disabled || false
+error = props.error || ""
+onInput = props.onInput
+onChange = props.onChange
+
+// Computed classes
+errorClass = match error != "" {
+    true -> " textarea-error"
+    _ -> ""
+}
+disabledClass = match disabled {
+    true -> " textarea-disabled"
+    _ -> ""
+}
+textareaClass = "textarea" ++ errorClass ++ disabledClass
+
+<div class="textarea-wrapper">
+    <textarea
+        class={textareaClass}
+        rows={rows}
+        placeholder={placeholder}
+        disabled={disabled}
+        input={onInput}
+        change={onChange}
+        aria-invalid={error != ""}
+    >{value}</textarea>
+    {if error != ""}
+        <span class="textarea-error-msg" role="alert">
+            {error}
+        </span>
+    {/if}
+</div>
+
+<style scoped>
+.textarea-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+    width: 100%;
+}
+
+.textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+    outline: none;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.textarea::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.textarea:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.textarea:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.textarea:disabled {
+    background-color: var(--flin-bg-muted);
+    color: var(--flin-fg-muted);
+    cursor: not-allowed;
+    resize: none;
+}
+
+.textarea-error {
+    border-color: var(--flin-danger);
+}
+
+.textarea-error:focus {
+    border-color: var(--flin-danger);
+    box-shadow: 0 0 0 3px var(--flin-danger-light);
+}
+
+.textarea-error-msg {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-danger);
+}
+</style>

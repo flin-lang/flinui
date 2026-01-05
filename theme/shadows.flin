@@ -1,0 +1,297 @@
+// FlinUI Shadow Tokens
+// TH-10: Comprehensive shadow system for depth and elevation
+
+// ============================================================================
+// SHADOW SCALE
+// ============================================================================
+
+/// Shadow tokens for creating depth and elevation
+/// Based on Material Design elevation system
+
+// Light theme shadows (default)
+shadowNone = "none"
+shadowSm = "0 1px 2px 0 rgb(0 0 0 / 0.05)"
+shadowMd = "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)"
+shadowLg = "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)"
+shadowXl = "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
+shadow2xl = "0 25px 50px -12px rgb(0 0 0 / 0.25)"
+
+// Special shadows
+shadowInner = "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)"
+
+// Colored shadows for emphasis
+shadowPrimary = "0 10px 15px -3px rgb(59 130 246 / 0.4), 0 4px 6px -4px rgb(59 130 246 / 0.3)"
+shadowSuccess = "0 10px 15px -3px rgb(16 185 129 / 0.4), 0 4px 6px -4px rgb(16 185 129 / 0.3)"
+shadowWarning = "0 10px 15px -3px rgb(245 158 11 / 0.4), 0 4px 6px -4px rgb(245 158 11 / 0.3)"
+shadowDanger = "0 10px 15px -3px rgb(239 68 68 / 0.4), 0 4px 6px -4px rgb(239 68 68 / 0.3)"
+
+// Dark theme shadows (stronger for contrast)
+shadowDarkSm = "0 1px 2px 0 rgb(0 0 0 / 0.3)"
+shadowDarkMd = "0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3)"
+shadowDarkLg = "0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3)"
+shadowDarkXl = "0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.4)"
+shadowDark2xl = "0 25px 50px -12px rgb(0 0 0 / 0.6)"
+
+// ============================================================================
+// ELEVATION HELPERS
+// ============================================================================
+
+/// Get shadow for a specific elevation level (0-5)
+/// @param level - Elevation level (0 = none, 5 = highest)
+/// @returns Shadow CSS value
+getShadowByElevation = fn(level) {
+    if level == 0 { shadowNone }
+    else if level == 1 { shadowSm }
+    else if level == 2 { shadowMd }
+    else if level == 3 { shadowLg }
+    else if level == 4 { shadowXl }
+    else if level == 5 { shadow2xl }
+    else { shadowMd }
+}
+
+/// Get dark mode shadow for elevation level
+getShadowByElevationDark = fn(level) {
+    if level == 0 { shadowNone }
+    else if level == 1 { shadowDarkSm }
+    else if level == 2 { shadowDarkMd }
+    else if level == 3 { shadowDarkLg }
+    else if level == 4 { shadowDarkXl }
+    else if level == 5 { shadowDark2xl }
+    else { shadowDarkMd }
+}
+
+/// Get colored shadow for a variant
+/// @param variant - Color variant (primary, success, warning, danger)
+/// @returns Shadow CSS value
+getColoredShadow = fn(variant) {
+    if variant == "primary" { shadowPrimary }
+    else if variant == "success" { shadowSuccess }
+    else if variant == "warning" { shadowWarning }
+    else if variant == "danger" { shadowDanger }
+    else { shadowMd }
+}
+
+// ============================================================================
+// SHADOW PRESETS FOR COMMON UI ELEMENTS
+// ============================================================================
+
+/// Shadow presets for specific component types
+
+// Cards
+shadowCard = shadowMd
+shadowCardHover = shadowLg
+shadowCardActive = shadowSm
+
+// Modals and dialogs
+shadowModal = shadow2xl
+shadowDialog = shadowXl
+
+// Dropdowns and menus
+shadowDropdown = shadowLg
+shadowMenu = shadowMd
+
+// Popovers and tooltips
+shadowPopover = shadowLg
+shadowTooltip = shadowSm
+
+// Buttons (subtle depth)
+shadowButton = shadowSm
+shadowButtonHover = shadowMd
+
+// Inputs (very subtle)
+shadowInput = shadowSm
+shadowInputFocus = shadowMd
+
+// Floating action buttons
+shadowFab = shadowLg
+shadowFabHover = shadowXl
+
+// Navigation elements
+shadowNav = shadowSm
+shadowNavbar = shadowMd
+shadowSidebar = shadowLg
+
+<style>
+/* Shadow CSS Variables */
+:root {
+    /* Base shadow scale */
+    --flin-shadow-none: none;
+    --flin-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --flin-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --flin-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --flin-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --flin-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    --flin-shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+
+    /* Colored shadows */
+    --flin-shadow-primary: 0 10px 15px -3px rgb(59 130 246 / 0.4), 0 4px 6px -4px rgb(59 130 246 / 0.3);
+    --flin-shadow-success: 0 10px 15px -3px rgb(16 185 129 / 0.4), 0 4px 6px -4px rgb(16 185 129 / 0.3);
+    --flin-shadow-warning: 0 10px 15px -3px rgb(245 158 11 / 0.4), 0 4px 6px -4px rgb(245 158 11 / 0.3);
+    --flin-shadow-danger: 0 10px 15px -3px rgb(239 68 68 / 0.4), 0 4px 6px -4px rgb(239 68 68 / 0.3);
+
+    /* Component-specific shadows */
+    --flin-shadow-card: var(--flin-shadow-md);
+    --flin-shadow-card-hover: var(--flin-shadow-lg);
+    --flin-shadow-modal: var(--flin-shadow-2xl);
+    --flin-shadow-dropdown: var(--flin-shadow-lg);
+    --flin-shadow-button: var(--flin-shadow-sm);
+    --flin-shadow-input: var(--flin-shadow-sm);
+    --flin-shadow-nav: var(--flin-shadow-sm);
+}
+
+/* Dark theme shadows - stronger for better contrast */
+[data-theme="dark"] {
+    --flin-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --flin-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --flin-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+    --flin-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+    --flin-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.6);
+    --flin-shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.2);
+
+    /* Colored shadows are slightly brighter in dark mode */
+    --flin-shadow-primary: 0 10px 15px -3px rgb(96 165 250 / 0.5), 0 4px 6px -4px rgb(96 165 250 / 0.4);
+    --flin-shadow-success: 0 10px 15px -3px rgb(34 197 94 / 0.5), 0 4px 6px -4px rgb(34 197 94 / 0.4);
+    --flin-shadow-warning: 0 10px 15px -3px rgb(251 191 36 / 0.5), 0 4px 6px -4px rgb(251 191 36 / 0.4);
+    --flin-shadow-danger: 0 10px 15px -3px rgb(248 113 113 / 0.5), 0 4px 6px -4px rgb(248 113 113 / 0.4);
+}
+
+/* Utility classes for shadows */
+.flin-shadow-none {
+    box-shadow: var(--flin-shadow-none);
+}
+
+.flin-shadow-sm {
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.flin-shadow-md {
+    box-shadow: var(--flin-shadow-md);
+}
+
+.flin-shadow-lg {
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.flin-shadow-xl {
+    box-shadow: var(--flin-shadow-xl);
+}
+
+.flin-shadow-2xl {
+    box-shadow: var(--flin-shadow-2xl);
+}
+
+.flin-shadow-inner {
+    box-shadow: var(--flin-shadow-inner);
+}
+
+/* Colored shadow utilities */
+.flin-shadow-primary {
+    box-shadow: var(--flin-shadow-primary);
+}
+
+.flin-shadow-success {
+    box-shadow: var(--flin-shadow-success);
+}
+
+.flin-shadow-warning {
+    box-shadow: var(--flin-shadow-warning);
+}
+
+.flin-shadow-danger {
+    box-shadow: var(--flin-shadow-danger);
+}
+
+/* Interactive shadow transitions */
+.flin-shadow-transition {
+    transition: box-shadow var(--flin-transition-normal);
+}
+
+/* Hover shadow utilities */
+.flin-hover-shadow-sm:hover {
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.flin-hover-shadow-md:hover {
+    box-shadow: var(--flin-shadow-md);
+}
+
+.flin-hover-shadow-lg:hover {
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.flin-hover-shadow-xl:hover {
+    box-shadow: var(--flin-shadow-xl);
+}
+
+/* Elevation levels (semantic naming) */
+.flin-elevation-0 {
+    box-shadow: var(--flin-shadow-none);
+}
+
+.flin-elevation-1 {
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.flin-elevation-2 {
+    box-shadow: var(--flin-shadow-md);
+}
+
+.flin-elevation-3 {
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.flin-elevation-4 {
+    box-shadow: var(--flin-shadow-xl);
+}
+
+.flin-elevation-5 {
+    box-shadow: var(--flin-shadow-2xl);
+}
+
+/* Glow effect (combining shadow with color) */
+.flin-glow-primary {
+    box-shadow: 0 0 20px rgb(59 130 246 / 0.5);
+}
+
+.flin-glow-success {
+    box-shadow: 0 0 20px rgb(16 185 129 / 0.5);
+}
+
+.flin-glow-warning {
+    box-shadow: 0 0 20px rgb(245 158 11 / 0.5);
+}
+
+.flin-glow-danger {
+    box-shadow: 0 0 20px rgb(239 68 68 / 0.5);
+}
+
+/* Inset shadows for pressed/active states */
+.flin-shadow-inset-sm {
+    box-shadow: inset 0 1px 2px 0 rgb(0 0 0 / 0.1);
+}
+
+.flin-shadow-inset-md {
+    box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.1);
+}
+
+/* Layered shadow for extra depth */
+.flin-shadow-layered {
+    box-shadow:
+        0 1px 3px 0 rgb(0 0 0 / 0.1),
+        0 4px 6px -1px rgb(0 0 0 / 0.1),
+        0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* Neumorphism effect */
+.flin-shadow-neumorphism {
+    box-shadow:
+        8px 8px 16px rgb(0 0 0 / 0.1),
+        -8px -8px 16px rgb(255 255 255 / 0.7);
+}
+
+[data-theme="dark"] .flin-shadow-neumorphism {
+    box-shadow:
+        8px 8px 16px rgb(0 0 0 / 0.4),
+        -8px -8px 16px rgb(255 255 255 / 0.05);
+}
+</style>

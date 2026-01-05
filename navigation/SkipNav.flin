@@ -1,0 +1,173 @@
+// SkipNav.flin - FlinUI Skip Navigation Component
+// An accessibility component that allows keyboard users to skip to main content
+// Meets WCAG 2.1 Level A success criterion 2.4.1 (Bypass Blocks)
+
+// Props with defaults
+targetId = props.targetId || "main-content"
+label = props.label || "Skip to main content"
+onClick = props.onClick
+
+// Handle skip navigation click
+handleSkip = (event) => {
+    // Prevent default anchor behavior
+    event.preventDefault()
+
+    // Find the target element
+    targetElement = document.getElementById(targetId)
+
+    if (targetElement) {
+        // Set focus to the target element
+        targetElement.setAttribute("tabindex", "-1")
+        targetElement.focus()
+
+        // Scroll to the target element smoothly
+        targetElement.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        })
+
+        // Remove tabindex after focus (clean up)
+        targetElement.addEventListener("blur", () => {
+            targetElement.removeAttribute("tabindex")
+        }, { once: true })
+    }
+
+    // Call optional onClick handler
+    if (onClick) {
+        onClick(event)
+    }
+}
+
+<a
+    href={"#" + targetId}
+    class="flin-skipnav"
+    click={handleSkip}
+    aria-label={label}
+>
+    {label}
+</a>
+
+<style scoped>
+.flin-skipnav {
+    /* Positioning - fixed at top-left of viewport */
+    position: fixed;
+    top: var(--flin-space-2);
+    left: var(--flin-space-2);
+    z-index: 9999;
+
+    /* Visual hiding by default */
+    transform: translateY(-200%);
+
+    /* Typography */
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    line-height: 1.5;
+    text-decoration: none;
+
+    /* Layout */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-2) var(--flin-space-4);
+
+    /* Colors - High contrast for visibility */
+    color: var(--flin-white);
+    background-color: var(--flin-primary);
+
+    /* Border and shape */
+    border: 2px solid var(--flin-primary-hover);
+    border-radius: var(--flin-radius-md);
+
+    /* Shadow for depth when visible */
+    box-shadow: var(--flin-shadow-lg);
+
+    /* Transitions */
+    transition: transform var(--flin-transition-base),
+                background-color var(--flin-transition-fast),
+                border-color var(--flin-transition-fast),
+                box-shadow var(--flin-transition-fast);
+
+    /* Ensure it's above other content */
+    outline: none;
+}
+
+/* Show on focus (keyboard navigation) */
+.flin-skipnav:focus,
+.flin-skipnav:focus-visible {
+    transform: translateY(0);
+    outline: 3px solid var(--flin-primary-active);
+    outline-offset: 3px;
+}
+
+/* Hover state (only visible when focused) */
+.flin-skipnav:focus:hover {
+    background-color: var(--flin-primary-hover);
+    border-color: var(--flin-primary-active);
+    box-shadow: var(--flin-shadow-xl);
+}
+
+/* Active state */
+.flin-skipnav:active {
+    background-color: var(--flin-primary-active);
+    transform: translateY(0) scale(0.98);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-skipnav {
+    color: var(--flin-neutral-900);
+    background-color: var(--flin-primary-light);
+    border-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .flin-skipnav:focus,
+[data-theme="dark"] .flin-skipnav:focus-visible {
+    outline-color: var(--flin-primary-light);
+}
+
+[data-theme="dark"] .flin-skipnav:focus:hover {
+    background-color: var(--flin-primary);
+    border-color: var(--flin-primary-hover);
+}
+
+[data-theme="dark"] .flin-skipnav:active {
+    background-color: var(--flin-primary-hover);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .flin-skipnav {
+        border-width: 3px;
+    }
+
+    .flin-skipnav:focus,
+    .flin-skipnav:focus-visible {
+        outline-width: 4px;
+        outline-offset: 4px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .flin-skipnav {
+        transition: none;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .flin-skipnav {
+        top: var(--flin-space-1);
+        left: var(--flin-space-1);
+        font-size: var(--flin-text-xs);
+        padding: var(--flin-space-1-5) var(--flin-space-3);
+    }
+}
+
+/* Print styles - hide skip nav in print */
+@media print {
+    .flin-skipnav {
+        display: none;
+    }
+}
+</style>

@@ -1,0 +1,112 @@
+// Input.flin - FlinUI Input Component
+// A text input with validation states and various types
+
+// Props with defaults
+value = props.value || ""
+placeholder = props.placeholder || ""
+type = props.type || "text"
+disabled = props.disabled || false
+error = props.error || ""
+onInput = props.onInput
+onChange = props.onChange
+
+// Computed classes
+errorClass = match error != "" {
+    true -> " input-error"
+    _ -> ""
+}
+disabledClass = match disabled {
+    true -> " input-disabled"
+    _ -> ""
+}
+inputClass = "input" ++ errorClass ++ disabledClass
+
+<div class="input-wrapper">
+    <input
+        type={type}
+        class={inputClass}
+        value={value}
+        placeholder={placeholder}
+        disabled={disabled}
+        input={onInput}
+        change={onChange}
+        aria-invalid={error != ""}
+        aria-describedby={if error != "" { "input-error-msg" } else { "" }}
+    >
+    {if error != ""}
+        <span class="input-error-msg" id="input-error-msg" role="alert">
+            {error}
+        </span>
+    {/if}
+</div>
+
+<style scoped>
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+    width: 100%;
+}
+
+.input {
+    width: 100%;
+    height: 40px;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+    outline: none;
+}
+
+.input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.input:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.input:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.input:disabled {
+    background-color: var(--flin-bg-muted);
+    color: var(--flin-fg-muted);
+    cursor: not-allowed;
+}
+
+.input-error {
+    border-color: var(--flin-danger);
+}
+
+.input-error:focus {
+    border-color: var(--flin-danger);
+    box-shadow: 0 0 0 3px var(--flin-danger-light);
+}
+
+.input-error-msg {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-danger);
+}
+
+/* Type-specific styles */
+input[type="password"] {
+    letter-spacing: 0.125em;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+</style>

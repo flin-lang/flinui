@@ -1,0 +1,81 @@
+// FlinUI Box Component
+// Utility container with spacing, background, border, and shadow
+// Props: padding (1-16), margin (1-16), bg (color), border (bool/color), radius (none/sm/md/lg/xl/full), shadow (none/sm/md/lg/xl)
+
+padding = props.padding || 0
+margin = props.margin || 0
+bg = props.bg || "transparent"
+border = props.border || false
+borderColor = props.borderColor || "var(--flin-neutral-200)"
+borderWidth = props.borderWidth || "1px"
+radius = props.radius || "none"
+shadow = props.shadow || "none"
+
+// Build class string
+paddingClass = {if padding > 0 { "flin-box-p-" + padding } else { "" }}
+marginClass = {if margin > 0 { "flin-box-m-" + margin } else { "" }}
+radiusClass = "flin-box-radius-" + radius
+shadowClass = "flin-box-shadow-" + shadow
+borderClass = {if border { "flin-box-border" } else { "" }}
+
+boxClass = "flin-box " + paddingClass + " " + marginClass + " " + radiusClass + " " + shadowClass + " " + borderClass
+
+// Build style string for custom colors
+borderStyle = {if border { "border-color: " + borderColor + "; border-width: " + borderWidth + ";" } else { "" }}
+bgStyle = {if bg != "transparent" { "background-color: " + bg + ";" } else { "" }}
+boxStyle = bgStyle + borderStyle
+
+<div class={boxClass} style={boxStyle}>
+    {children}
+</div>
+
+<style scoped>
+.flin-box {
+    box-sizing: border-box;
+}
+
+.flin-box-border {
+    border-style: solid;
+    border-color: var(--flin-neutral-200);
+    border-width: 1px;
+}
+
+/* Padding variants */
+.flin-box-p-1 { padding: var(--flin-space-1); }
+.flin-box-p-2 { padding: var(--flin-space-2); }
+.flin-box-p-3 { padding: var(--flin-space-3); }
+.flin-box-p-4 { padding: var(--flin-space-4); }
+.flin-box-p-5 { padding: calc(var(--flin-space-4) + var(--flin-space-1)); }
+.flin-box-p-6 { padding: var(--flin-space-6); }
+.flin-box-p-8 { padding: var(--flin-space-8); }
+.flin-box-p-10 { padding: calc(var(--flin-space-8) + var(--flin-space-2)); }
+.flin-box-p-12 { padding: var(--flin-space-12); }
+.flin-box-p-16 { padding: var(--flin-space-16); }
+
+/* Margin variants */
+.flin-box-m-1 { margin: var(--flin-space-1); }
+.flin-box-m-2 { margin: var(--flin-space-2); }
+.flin-box-m-3 { margin: var(--flin-space-3); }
+.flin-box-m-4 { margin: var(--flin-space-4); }
+.flin-box-m-5 { margin: calc(var(--flin-space-4) + var(--flin-space-1)); }
+.flin-box-m-6 { margin: var(--flin-space-6); }
+.flin-box-m-8 { margin: var(--flin-space-8); }
+.flin-box-m-10 { margin: calc(var(--flin-space-8) + var(--flin-space-2)); }
+.flin-box-m-12 { margin: var(--flin-space-12); }
+.flin-box-m-16 { margin: var(--flin-space-16); }
+
+/* Border radius variants */
+.flin-box-radius-none { border-radius: 0; }
+.flin-box-radius-sm { border-radius: var(--flin-radius-sm); }
+.flin-box-radius-md { border-radius: var(--flin-radius-md); }
+.flin-box-radius-lg { border-radius: var(--flin-radius-lg); }
+.flin-box-radius-xl { border-radius: var(--flin-radius-xl); }
+.flin-box-radius-full { border-radius: var(--flin-radius-full); }
+
+/* Shadow variants */
+.flin-box-shadow-none { box-shadow: none; }
+.flin-box-shadow-sm { box-shadow: var(--flin-shadow-sm); }
+.flin-box-shadow-md { box-shadow: var(--flin-shadow-md); }
+.flin-box-shadow-lg { box-shadow: var(--flin-shadow-lg); }
+.flin-box-shadow-xl { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
+</style>

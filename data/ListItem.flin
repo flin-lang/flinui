@@ -1,0 +1,88 @@
+// FlinUI ListItem Component
+// Individual list item with icon, click handler, and active state
+
+// Props with defaults
+icon = props.icon || ""
+active = props.active || false
+
+// Check if clickable
+isClickable = props.onClick != none
+
+<li class="flin-list-item {if active { 'flin-list-item--active' }} {if isClickable { 'flin-list-item--clickable' }}"
+    click={if isClickable { props.onClick }}>
+    {if icon != ""}
+        <span class="flin-list-item__icon">
+            {icon}
+        </span>
+    {/if}
+    <span class="flin-list-item__content">
+        {children}
+    </span>
+</li>
+
+<style scoped>
+.flin-list-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    color: var(--flin-fg);
+    font-size: var(--flin-text-base);
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast),
+                color var(--flin-transition-fast);
+}
+
+.flin-list-item--clickable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.flin-list-item--clickable:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.flin-list-item--clickable:active {
+    background-color: var(--flin-neutral-200);
+}
+
+.flin-list-item--active {
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.flin-list-item--active.flin-list-item--clickable:hover {
+    background-color: var(--flin-primary-light);
+}
+
+.flin-list-item__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: var(--flin-fg-muted);
+}
+
+.flin-list-item--active .flin-list-item__icon {
+    color: var(--flin-primary);
+}
+
+.flin-list-item__content {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-list-item--clickable:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .flin-list-item--clickable:active {
+    background-color: var(--flin-neutral-700);
+}
+</style>

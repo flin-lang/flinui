@@ -1,0 +1,73 @@
+// FlinUI Basic Components
+// A collection of fundamental UI building blocks
+//
+// COMPONENTS:
+// -----------
+// 1. Button   - Versatile button with variants (primary/secondary/danger/success/warning),
+//               sizes (sm/md/lg), loading state, and disabled state
+//
+// 2. Input    - Text input with types (text/password/email/number), error states,
+//               placeholder, and validation support
+//
+// 3. Textarea - Multi-line text input with configurable rows and error states
+//
+// 4. Select   - Dropdown select with options array, placeholder, and custom styling
+//
+// 5. Checkbox - Accessible checkbox with custom styling and label support
+//
+// 6. Radio    - Radio button for single selection within a group
+//
+// 7. Switch   - Toggle switch with smooth animations
+//
+// 8. Slider   - Range slider with min/max/step and optional value display
+//
+// 9. Text     - Typography component with size (xs/sm/base/lg/xl/2xl),
+//               weight (normal/medium/semibold/bold), and color options
+//
+// 10. Link    - Accessible link with external link support (opens new tab with security attrs)
+//
+// 11. Icon    - SVG icon placeholder with built-in icons and size variants
+//
+// 12. Image   - Image with loading skeleton, error handling, and lazy loading
+//
+// 13. Avatar  - User avatar with image support and initials fallback
+//
+// 14. Badge   - Small status indicator with variants (default/success/warning/danger/info)
+//
+// 15. Tag     - Removable tag/chip component with variants
+//
+// USAGE:
+// ------
+// All components use FlinUI theme tokens (CSS variables --flin-*).
+// Import the theme first: <link href="flinui/theme/tokens.flin">
+//
+// Then use components directly (auto-imported in FLIN):
+//   <Button label="Click me" variant="primary" />
+//   <Input value={email} type="email" placeholder="Enter email" />
+//   <Avatar name="John Doe" size="lg" />
+//
+// See individual component files for full prop documentation.
+
+<div class="flinui-basic-info">
+    <h2>FlinUI Basic Components</h2>
+    <p>15 production-ready components for building beautiful interfaces.</p>
+</div>
+
+<style scoped>
+.flinui-basic-info {
+    font-family: var(--flin-font-sans);
+    padding: var(--flin-space-4);
+    background: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-md);
+}
+
+.flinui-basic-info h2 {
+    margin: 0 0 var(--flin-space-2) 0;
+    color: var(--flin-fg);
+}
+
+.flinui-basic-info p {
+    margin: 0;
+    color: var(--flin-fg-muted);
+}
+</style>

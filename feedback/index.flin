@@ -1,0 +1,43 @@
+// FlinUI Feedback Components Index
+// Export all feedback components for easy importing
+
+// Alert - Displays important messages with variant-based styling
+// Usage: <Alert variant="success" title="Success!" dismissible={true}>Your changes have been saved.</Alert>
+
+// Toast - Temporary notifications that auto-dismiss
+// Usage: <Toast variant="info" title="New message" message="You have a new notification" position="top-right" />
+
+// Modal - Dialog overlay for important content
+// Usage: <Modal open={showModal} title="Confirm Action" size="md" onClose={closeModal}>...</Modal>
+
+// ModalHeader - Header section for Modal
+// Usage: <ModalHeader title="Edit Profile" subtitle="Update your information" onClose={closeModal} />
+
+// ModalBody - Main content area for Modal
+// Usage: <ModalBody padding="lg">...</ModalBody>
+
+// ModalFooter - Footer section with action buttons
+// Usage: <ModalFooter align="right"><Button>Cancel</Button><Button variant="primary">Save</Button></ModalFooter>
+
+// Drawer - Slide-out panel from screen edges
+// Usage: <Drawer open={showDrawer} position="right" title="Settings" onClose={closeDrawer}>...</Drawer>
+
+// Popover - Floating panel on click/hover
+// Usage: <Popover trigger="click" position="bottom"><slot name="trigger"><Button>Open</Button></slot>Content here</Popover>
+
+// Tooltip - Small informational popup on hover
+// Usage: <Tooltip content="This is helpful info" position="top"><Button>Hover me</Button></Tooltip>
+
+// Notification - Rich notification with avatar and actions
+// Usage: <Notification variant="info" title="New Comment" message="John replied to your post" avatar="..." timestamp="2 min ago" />
+
+<div class="flinui-feedback-components">
+    {children}
+</div>
+
+<style scoped>
+.flinui-feedback-components {
+    /* Container for feedback components - provides stacking context */
+    position: relative;
+}
+</style>

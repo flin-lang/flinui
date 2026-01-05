@@ -1,0 +1,505 @@
+// FlinUI Carousel Component
+// Image and content slider with navigation, autoplay, and indicators
+
+// Props with defaults
+items = props.items || []  // Array of { content, image?, title?, description? }
+autoplay = props.autoplay || false
+autoplayInterval = props.autoplayInterval || 5000
+showArrows = props.showArrows || true
+showIndicators = props.showIndicators || true
+showThumbnails = props.showThumbnails || false
+loop = props.loop || true
+pauseOnHover = props.pauseOnHover || true
+animation = props.animation || "slide"  // slide, fade
+slidesPerView = props.slidesPerView || 1
+gap = props.gap || 0
+onChange = props.onChange
+
+// State
+currentIndex = 0
+isPlaying = autoplay
+isPaused = false
+touchStartX = null
+touchDelta = 0
+isTransitioning = false
+
+// Calculate total slides
+totalSlides = items.length
+maxIndex = totalSlides - slidesPerView
+
+// Timer for autoplay
+autoplayTimer = null
+
+// Start autoplay
+startAutoplay = {
+    {if autoplay && !isPaused}
+        autoplayTimer = setInterval({
+            goToNext()
+        }, autoplayInterval)
+    {/if}
+}
+
+// Stop autoplay
+stopAutoplay = {
+    {if autoplayTimer}
+        clearInterval(autoplayTimer)
+        autoplayTimer = null
+    {/if}
+}
+
+// Go to specific slide
+goToSlide = {
+    index = args.index
+
+    {if isTransitioning}
+        return
+    {/if}
+
+    newIndex = index
+
+    // Handle looping
+    {if loop}
+        {if newIndex < 0}
+            newIndex = maxIndex
+        {else if newIndex > maxIndex}
+            newIndex = 0
+        {/if}
+    {else}
+        newIndex = Math.max(0, Math.min(maxIndex, newIndex))
+    {/if}
+
+    isTransitioning = true
+    currentIndex = newIndex
+
+    // Reset transition flag after animation
+    setTimeout({
+        isTransitioning = false
+    }, 400)
+
+    {if onChange}
+        onChange({ index: currentIndex, item: items[currentIndex] })
+    {/if}
+}
+
+// Navigation handlers
+goToPrev = {
+    goToSlide({ index: currentIndex - 1 })
+}
+
+goToNext = {
+    goToSlide({ index: currentIndex + 1 })
+}
+
+// Mouse handlers for pause on hover
+handleMouseEnter = {
+    {if pauseOnHover && autoplay}
+        isPaused = true
+        stopAutoplay()
+    {/if}
+}
+
+handleMouseLeave = {
+    {if pauseOnHover && autoplay}
+        isPaused = false
+        startAutoplay()
+    {/if}
+}
+
+// Touch handlers for swipe
+handleTouchStart = {
+    touchStartX = event.touches[0].clientX
+    stopAutoplay()
+}
+
+handleTouchMove = {
+    {if touchStartX != null}
+        touchDelta = event.touches[0].clientX - touchStartX
+    {/if}
+}
+
+handleTouchEnd = {
+    {if touchStartX != null}
+        {if Math.abs(touchDelta) > 50}
+            {if touchDelta > 0}
+                goToPrev()
+            {else}
+                goToNext()
+            {/if}
+        {/if}
+
+        touchStartX = null
+        touchDelta = 0
+
+        {if autoplay && !isPaused}
+            startAutoplay()
+        {/if}
+    {/if}
+}
+
+// Keyboard navigation
+handleKeydown = {
+    key = event.key
+
+    {if key == "ArrowLeft"}
+        goToPrev()
+    {else if key == "ArrowRight"}
+        goToNext()
+    {/if}
+}
+
+// Calculate transform
+transformValue = animation == "slide"
+    ? "translateX(calc(-" ++ currentIndex ++ " * (100% / " ++ slidesPerView ++ " + " ++ gap ++ "px)))"
+    : "none"
+
+// Check navigation availability
+canGoPrev = loop || currentIndex > 0
+canGoNext = loop || currentIndex < maxIndex
+
+// Initialize autoplay
+startAutoplay()
+
+<div
+    class={"flin-carousel" ++ " flin-carousel--" ++ animation}
+    mouseenter={handleMouseEnter}
+    mouseleave={handleMouseLeave}
+    keydown={handleKeydown}
+    tabindex="0"
+    role="region"
+    aria-roledescription="carousel"
+    aria-label="Image carousel"
+>
+    // Main viewport
+    <div class="flin-carousel__viewport">
+        <div
+            class="flin-carousel__track"
+            style="--slides-per-view: {slidesPerView}; --gap: {gap}px; transform: {transformValue};"
+            touchstart={handleTouchStart}
+            touchmove={handleTouchMove}
+            touchend={handleTouchEnd}
+        >
+            {for item, index in items}
+                slideActiveClass = match index == currentIndex { true -> " flin-carousel__slide--active", _ -> "" }
+                slideOpacity = match index == currentIndex { true -> "1", _ -> "0" }
+                <div
+                    class={"flin-carousel__slide" ++ slideActiveClass}
+                    role="group"
+                    aria-roledescription="slide"
+                    aria-label="Slide {index + 1} of {totalSlides}"
+                    style={animation == "fade" ? "--slide-opacity: " ++ slideOpacity ++ ";" : ""}
+                >
+                    {if item.image}
+                        <img
+                            class="flin-carousel__image"
+                            src={item.image}
+                            alt={item.title || "Slide " ++ (index + 1)}
+                            draggable="false"
+                        >
+                    {/if}
+
+                    {if item.content}
+                        <div class="flin-carousel__content">
+                            {item.content}
+                        </div>
+                    {/if}
+
+                    {if item.title || item.description}
+                        <div class="flin-carousel__caption">
+                            {if item.title}
+                                <h3 class="flin-carousel__title">{item.title}</h3>
+                            {/if}
+                            {if item.description}
+                                <p class="flin-carousel__description">{item.description}</p>
+                            {/if}
+                        </div>
+                    {/if}
+                </div>
+            {/for}
+        </div>
+    </div>
+
+    // Navigation arrows
+    {if showArrows && totalSlides > 1}
+        <button
+            type="button"
+            class="flin-carousel__arrow flin-carousel__arrow--prev"
+            click={goToPrev}
+            disabled={!canGoPrev}
+            aria-label="Previous slide"
+        >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+
+        <button
+            type="button"
+            class="flin-carousel__arrow flin-carousel__arrow--next"
+            click={goToNext}
+            disabled={!canGoNext}
+            aria-label="Next slide"
+        >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+    {/if}
+
+    // Indicators
+    {if showIndicators && totalSlides > 1}
+        <div class="flin-carousel__indicators" role="tablist">
+            {for item, index in items}
+                indicatorActiveClass = match index == currentIndex { true -> " flin-carousel__indicator--active", _ -> "" }
+                <button
+                    type="button"
+                    class={"flin-carousel__indicator" ++ indicatorActiveClass}
+                    click={goToSlide.bind({ index: index })}
+                    role="tab"
+                    aria-selected={index == currentIndex}
+                    aria-label="Go to slide {index + 1}"
+                />
+            {/for}
+        </div>
+    {/if}
+
+    // Thumbnails
+    {if showThumbnails && totalSlides > 1}
+        <div class="flin-carousel__thumbnails">
+            {for item, index in items}
+                thumbnailActiveClass = match index == currentIndex { true -> " flin-carousel__thumbnail--active", _ -> "" }
+                <button
+                    type="button"
+                    class={"flin-carousel__thumbnail" ++ thumbnailActiveClass}
+                    click={goToSlide.bind({ index: index })}
+                    aria-label="Go to slide {index + 1}"
+                >
+                    {if item.image}
+                        <img
+                            src={item.image}
+                            alt=""
+                            draggable="false"
+                        >
+                    {else}
+                        <span>{index + 1}</span>
+                    {/if}
+                </button>
+            {/for}
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-carousel {
+    position: relative;
+    width: 100%;
+    font-family: var(--flin-font-sans);
+    outline: none;
+}
+
+.flin-carousel:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 4px;
+}
+
+.flin-carousel__viewport {
+    overflow: hidden;
+    border-radius: var(--flin-radius-lg);
+}
+
+.flin-carousel__track {
+    display: flex;
+    gap: var(--gap);
+    transition: transform 0.4s ease-in-out;
+}
+
+.flin-carousel--fade .flin-carousel__track {
+    display: block;
+    position: relative;
+}
+
+.flin-carousel__slide {
+    flex: 0 0 calc(100% / var(--slides-per-view));
+    min-width: 0;
+    position: relative;
+}
+
+.flin-carousel--fade .flin-carousel__slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: var(--slide-opacity);
+    transition: opacity 0.4s ease-in-out;
+}
+
+.flin-carousel--fade .flin-carousel__slide--active {
+    position: relative;
+}
+
+.flin-carousel__image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    aspect-ratio: 16 / 9;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.flin-carousel__content {
+    width: 100%;
+}
+
+.flin-carousel__caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--flin-space-6);
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    color: white;
+}
+
+.flin-carousel__title {
+    margin: 0 0 var(--flin-space-2);
+    font-size: var(--flin-text-xl);
+    font-weight: 600;
+}
+
+.flin-carousel__description {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+    opacity: 0.9;
+}
+
+.flin-carousel__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-full);
+    color: var(--flin-fg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    z-index: 10;
+    box-shadow: var(--flin-shadow-md);
+}
+
+.flin-carousel__arrow:hover:not(:disabled) {
+    background-color: var(--flin-neutral-100);
+}
+
+.flin-carousel__arrow:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.flin-carousel__arrow--prev {
+    left: var(--flin-space-4);
+}
+
+.flin-carousel__arrow--next {
+    right: var(--flin-space-4);
+}
+
+.flin-carousel__indicators {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-4);
+}
+
+.flin-carousel__indicator {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    background-color: var(--flin-neutral-300);
+    border: none;
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.flin-carousel__indicator:hover {
+    background-color: var(--flin-neutral-400);
+}
+
+.flin-carousel__indicator--active {
+    width: 24px;
+    background-color: var(--flin-primary);
+}
+
+.flin-carousel__thumbnails {
+    display: flex;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-4);
+    overflow-x: auto;
+    padding: var(--flin-space-1);
+}
+
+.flin-carousel__thumbnail {
+    flex: 0 0 auto;
+    width: 64px;
+    height: 48px;
+    padding: 0;
+    background-color: var(--flin-neutral-100);
+    border: 2px solid transparent;
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.flin-carousel__thumbnail:hover {
+    border-color: var(--flin-neutral-300);
+}
+
+.flin-carousel__thumbnail--active {
+    border-color: var(--flin-primary);
+}
+
+.flin-carousel__thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.flin-carousel__thumbnail span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg-muted);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-carousel__arrow {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-carousel__arrow:hover:not(:disabled) {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-carousel__indicator {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-carousel__indicator:hover {
+    background-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .flin-carousel__thumbnail {
+    background-color: var(--flin-neutral-800);
+}
+</style>

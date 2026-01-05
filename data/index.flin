@@ -1,0 +1,75 @@
+// FlinUI Data Display Components
+// A comprehensive set of components for displaying data and content
+//
+// Components included:
+// - Card: Container with header, body, footer sections
+// - CardHeader: Card title area
+// - CardBody: Card content area
+// - CardFooter: Card action area
+// - Table: Basic data table with variants
+// - DataTable: Advanced sortable/filterable data table with pagination
+// - List: Ordered/unordered lists
+// - ListItem: Individual list items
+// - Progress: Progress bars with variants
+// - Spinner: Loading spinners
+// - Skeleton: Loading placeholders
+// - Stat: Statistics display cards
+// - Accordion: Collapsible content sections
+// - Code: Syntax-highlighted code blocks
+// - Kbd: Keyboard key indicators
+// - Empty: Empty state placeholders
+// - Tree: Hierarchical tree view
+// - Timeline: Event timeline display
+// - Highlight: Text highlighting
+//
+// All components use FlinUI theme tokens (--flin-*) for consistent styling
+// and support both light and dark themes.
+//
+// Example usage:
+//
+// Card:
+// <Card elevated={true}>
+//     <CardHeader title="Card Title" subtitle="Optional subtitle" />
+//     <CardBody>Your content here</CardBody>
+//     <CardFooter>
+//         <Button>Action</Button>
+//     </CardFooter>
+// </Card>
+//
+// DataTable:
+// columns = [
+//     { key: "name", label: "Name", sortable: true },
+//     { key: "email", label: "Email", filterable: true },
+//     { key: "status", label: "Status" }
+// ]
+// <DataTable columns={columns} data={users} paginated={true} pageSize={10} />
+//
+// Tree:
+// treeItems = [
+//     { id: "1", label: "Documents", children: [
+//         { id: "1-1", label: "report.pdf" },
+//         { id: "1-2", label: "notes.txt" }
+//     ]}
+// ]
+// <Tree items={treeItems} expandable={true} selectable={true} />
+//
+// Timeline:
+// events = [
+//     { title: "Order placed", time: "9:00 AM", status: "completed" },
+//     { title: "Processing", time: "10:30 AM", status: "current" },
+//     { title: "Shipped", time: "Pending", status: "pending" }
+// ]
+// <Timeline items={events} variant="vertical" />
+//
+// Highlight:
+// <Highlight text="Search results with highlighted terms" query="highlighted" color="yellow" />
+
+<div class="flin-data-index">
+    <p>FlinUI Data Display Components</p>
+</div>
+
+<style scoped>
+.flin-data-index {
+    display: none;
+}
+</style>

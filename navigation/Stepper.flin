@@ -1,0 +1,519 @@
+// Stepper.flin - FlinUI Stepper Component
+// A step navigation/wizard component for multi-step processes
+
+// Props with defaults
+steps = props.steps || []
+activeStep = props.activeStep || 0
+orientation = props.orientation || "horizontal"
+variant = props.variant || "numbered"
+onChange = props.onChange
+showConnectors = props.showConnectors !== false
+size = props.size || "md"
+
+// Internal state
+currentStep = activeStep
+
+// Handle step click (if clickable)
+handleStepClick = {
+    stepIndex = event.stepIndex
+    stepData = steps[stepIndex]
+
+    // Only allow clicking on completed or current steps
+    if stepData.status == "completed" || stepIndex <= currentStep {
+        currentStep = stepIndex
+        if onChange {
+            onChange(stepIndex)
+        }
+    }
+}
+
+// Get step status (completed, active, pending, error)
+getStepStatus = {
+    step = event.step
+    index = event.index
+
+    if step.status {
+        return step.status
+    } else if index < currentStep {
+        return "completed"
+    } else if index == currentStep {
+        return "active"
+    } else {
+        return "pending"
+    }
+}
+
+// Orientation class
+orientationClass = match orientation {
+    "vertical" -> "flin-stepper--vertical"
+    _ -> "flin-stepper--horizontal"
+}
+
+// Variant class
+variantClass = match variant {
+    "simple" -> "flin-stepper--simple"
+    "icon" -> "flin-stepper--icon"
+    _ -> "flin-stepper--numbered"
+}
+
+// Size class
+sizeClass = match size {
+    "sm" -> "flin-stepper--sm"
+    "lg" -> "flin-stepper--lg"
+    _ -> "flin-stepper--md"
+}
+
+<div
+    class={"flin-stepper " ++ orientationClass ++ " " ++ variantClass ++ " " ++ sizeClass}
+    role="navigation"
+    aria-label="Progress steps"
+>
+    {for step, index in steps}
+        {
+            status = getStepStatus({step: step, index: index})
+            isClickable = status == "completed" || index <= currentStep
+            isLast = index == steps.length - 1
+            clickableClass = match isClickable { true -> " flin-stepper__step--clickable", _ -> "" }
+        }
+
+        <div
+            class={"flin-stepper__step " ++ "flin-stepper__step--" ++ status ++ clickableClass}
+            data-step-index={index}
+        >
+            {if showConnectors && !isLast}
+                <div class="flin-stepper__connector"></div>
+            {/if}
+
+            <div
+                class="flin-stepper__step-button"
+                click={if isClickable { handleStepClick } else { null }}
+                role={if isClickable { "button" } else { null }}
+                tabindex={if isClickable { 0 } else { -1 }}
+                aria-current={if status == "active" { "step" } else { null }}
+            >
+                <div class="flin-stepper__indicator">
+                    {if status == "completed"}
+                        <svg class="flin-stepper__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    {/if}
+
+                    {if status == "error"}
+                        <svg class="flin-stepper__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    {/if}
+
+                    {if status != "completed" && status != "error"}
+                        {if variant == "icon" && step.icon}
+                            <svg class="flin-stepper__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={step.icon} />
+                            </svg>
+                        {/if}
+
+                        {if variant != "icon" || !step.icon}
+                            <span class="flin-stepper__number">{index + 1}</span>
+                        {/if}
+                    {/if}
+                </div>
+
+                <div class="flin-stepper__content">
+                    <div class="flin-stepper__label">{step.label}</div>
+                    {if step.description}
+                        <div class="flin-stepper__description">{step.description}</div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    {/for}
+</div>
+
+<style scoped>
+.flin-stepper {
+    display: flex;
+    width: 100%;
+}
+
+/* Horizontal orientation */
+.flin-stepper--horizontal {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.flin-stepper--horizontal .flin-stepper__step {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.flin-stepper--horizontal .flin-stepper__connector {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    right: -50%;
+    height: 2px;
+    background-color: var(--flin-neutral-200);
+    z-index: 0;
+    transition: background-color var(--flin-transition-normal);
+}
+
+.flin-stepper--horizontal .flin-stepper__step:last-child .flin-stepper__connector {
+    display: none;
+}
+
+.flin-stepper--horizontal .flin-stepper__step--completed .flin-stepper__connector,
+.flin-stepper--horizontal .flin-stepper__step--active .flin-stepper__connector {
+    background-color: var(--flin-primary);
+}
+
+.flin-stepper--horizontal .flin-stepper__step-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.flin-stepper--horizontal .flin-stepper__content {
+    text-align: center;
+    max-width: 120px;
+}
+
+/* Vertical orientation */
+.flin-stepper--vertical {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.flin-stepper--vertical .flin-stepper__step {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    padding-bottom: var(--flin-space-6);
+}
+
+.flin-stepper--vertical .flin-stepper__step:last-child {
+    padding-bottom: 0;
+}
+
+.flin-stepper--vertical .flin-stepper__connector {
+    position: absolute;
+    top: 40px;
+    left: 20px;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--flin-neutral-200);
+    z-index: 0;
+    transition: background-color var(--flin-transition-normal);
+}
+
+.flin-stepper--vertical .flin-stepper__step:last-child .flin-stepper__connector {
+    display: none;
+}
+
+.flin-stepper--vertical .flin-stepper__step--completed .flin-stepper__connector,
+.flin-stepper--vertical .flin-stepper__step--active .flin-stepper__connector {
+    background-color: var(--flin-primary);
+}
+
+.flin-stepper--vertical .flin-stepper__step-button {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+}
+
+.flin-stepper--vertical .flin-stepper__content {
+    flex: 1;
+    padding-top: var(--flin-space-1);
+}
+
+/* Step button */
+.flin-stepper__step-button {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: default;
+    position: relative;
+    z-index: 1;
+}
+
+.flin-stepper__step--clickable .flin-stepper__step-button {
+    cursor: pointer;
+}
+
+.flin-stepper__step--clickable .flin-stepper__step-button:hover .flin-stepper__indicator {
+    transform: scale(1.05);
+}
+
+.flin-stepper__step--clickable .flin-stepper__step-button:focus {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+    border-radius: var(--flin-radius-md);
+}
+
+/* Indicator (circle with number/icon) */
+.flin-stepper__indicator {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-neutral-600);
+    font-weight: 600;
+    transition: all var(--flin-transition-normal);
+    flex-shrink: 0;
+}
+
+.flin-stepper__step--active .flin-stepper__indicator {
+    background-color: var(--flin-primary);
+    color: white;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.flin-stepper__step--completed .flin-stepper__indicator {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.flin-stepper__step--error .flin-stepper__indicator {
+    background-color: var(--flin-danger);
+    color: white;
+}
+
+.flin-stepper__step--pending .flin-stepper__indicator {
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-neutral-600);
+}
+
+/* Icon and number */
+.flin-stepper__icon {
+    width: 20px;
+    height: 20px;
+}
+
+.flin-stepper__number {
+    font-size: var(--flin-text-base);
+    line-height: 1;
+}
+
+/* Content (label and description) */
+.flin-stepper__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.flin-stepper__label {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-neutral-700);
+    transition: color var(--flin-transition-normal);
+}
+
+.flin-stepper__step--active .flin-stepper__label {
+    color: var(--flin-primary);
+}
+
+.flin-stepper__step--completed .flin-stepper__label {
+    color: var(--flin-neutral-900);
+}
+
+.flin-stepper__step--error .flin-stepper__label {
+    color: var(--flin-danger);
+}
+
+.flin-stepper__step--pending .flin-stepper__label {
+    color: var(--flin-neutral-500);
+}
+
+.flin-stepper__description {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-500);
+    line-height: 1.4;
+}
+
+/* Size variants */
+.flin-stepper--sm .flin-stepper__indicator {
+    width: 32px;
+    height: 32px;
+}
+
+.flin-stepper--sm .flin-stepper__icon {
+    width: 16px;
+    height: 16px;
+}
+
+.flin-stepper--sm .flin-stepper__number {
+    font-size: var(--flin-text-sm);
+}
+
+.flin-stepper--sm .flin-stepper__label {
+    font-size: var(--flin-text-xs);
+}
+
+.flin-stepper--sm .flin-stepper__description {
+    font-size: 11px;
+}
+
+.flin-stepper--sm.flin-stepper--horizontal .flin-stepper__connector {
+    top: 16px;
+}
+
+.flin-stepper--sm.flin-stepper--vertical .flin-stepper__connector {
+    left: 16px;
+    top: 32px;
+}
+
+.flin-stepper--lg .flin-stepper__indicator {
+    width: 48px;
+    height: 48px;
+}
+
+.flin-stepper--lg .flin-stepper__icon {
+    width: 24px;
+    height: 24px;
+}
+
+.flin-stepper--lg .flin-stepper__number {
+    font-size: var(--flin-text-lg);
+}
+
+.flin-stepper--lg .flin-stepper__label {
+    font-size: var(--flin-text-base);
+}
+
+.flin-stepper--lg .flin-stepper__description {
+    font-size: var(--flin-text-sm);
+}
+
+.flin-stepper--lg.flin-stepper--horizontal .flin-stepper__connector {
+    top: 24px;
+}
+
+.flin-stepper--lg.flin-stepper--vertical .flin-stepper__connector {
+    left: 24px;
+    top: 48px;
+}
+
+/* Simple variant - no numbers, just dots */
+.flin-stepper--simple .flin-stepper__indicator {
+    width: 12px;
+    height: 12px;
+}
+
+.flin-stepper--simple.flin-stepper--horizontal .flin-stepper__connector {
+    top: 6px;
+}
+
+.flin-stepper--simple.flin-stepper--vertical .flin-stepper__connector {
+    left: 6px;
+    top: 18px;
+}
+
+.flin-stepper--simple.flin-stepper--sm .flin-stepper__indicator {
+    width: 10px;
+    height: 10px;
+}
+
+.flin-stepper--simple.flin-stepper--lg .flin-stepper__indicator {
+    width: 16px;
+    height: 16px;
+}
+
+/* Responsive styles */
+@media (max-width: 640px) {
+    .flin-stepper--horizontal {
+        flex-direction: column;
+    }
+
+    .flin-stepper--horizontal .flin-stepper__step {
+        align-items: flex-start;
+        padding-bottom: var(--flin-space-6);
+    }
+
+    .flin-stepper--horizontal .flin-stepper__step:last-child {
+        padding-bottom: 0;
+    }
+
+    .flin-stepper--horizontal .flin-stepper__step-button {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: var(--flin-space-3);
+    }
+
+    .flin-stepper--horizontal .flin-stepper__content {
+        text-align: left;
+        max-width: none;
+        padding-top: var(--flin-space-1);
+    }
+
+    .flin-stepper--horizontal .flin-stepper__connector {
+        top: 40px;
+        left: 20px;
+        right: auto;
+        bottom: 0;
+        width: 2px;
+        height: auto;
+    }
+
+    .flin-stepper--horizontal.flin-stepper--sm .flin-stepper__connector {
+        top: 32px;
+        left: 16px;
+    }
+
+    .flin-stepper--horizontal.flin-stepper--lg .flin-stepper__connector {
+        top: 48px;
+        left: 24px;
+    }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-stepper__indicator {
+    background-color: var(--flin-neutral-700);
+    color: var(--flin-neutral-400);
+}
+
+[data-theme="dark"] .flin-stepper__step--active .flin-stepper__indicator {
+    background-color: var(--flin-primary);
+    color: white;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+[data-theme="dark"] .flin-stepper__step--completed .flin-stepper__indicator {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+[data-theme="dark"] .flin-stepper__step--pending .flin-stepper__indicator {
+    background-color: var(--flin-neutral-700);
+    color: var(--flin-neutral-500);
+}
+
+[data-theme="dark"] .flin-stepper__connector {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-stepper__label {
+    color: var(--flin-neutral-300);
+}
+
+[data-theme="dark"] .flin-stepper__step--active .flin-stepper__label {
+    color: var(--flin-primary-light);
+}
+
+[data-theme="dark"] .flin-stepper__step--completed .flin-stepper__label {
+    color: var(--flin-neutral-100);
+}
+
+[data-theme="dark"] .flin-stepper__step--pending .flin-stepper__label {
+    color: var(--flin-neutral-500);
+}
+
+[data-theme="dark"] .flin-stepper__description {
+    color: var(--flin-neutral-500);
+}
+</style>

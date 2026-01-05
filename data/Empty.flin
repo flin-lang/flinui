@@ -1,0 +1,93 @@
+// FlinUI Empty Component
+// Empty state display with icon, title, and description
+
+// Props with defaults
+icon = props.icon || ""
+title = props.title || "No data"
+description = props.description || ""
+
+<div class="flin-empty">
+    {if icon != ""}
+        <div class="flin-empty__icon">
+            {icon}
+        </div>
+    {else}
+        <div class="flin-empty__icon flin-empty__icon--default">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+        </div>
+    {/if}
+
+    <h3 class="flin-empty__title">{title}</h3>
+
+    {if description != ""}
+        <p class="flin-empty__description">{description}</p>
+    {/if}
+
+    {if children}
+        <div class="flin-empty__action">
+            {children}
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-12) var(--flin-space-4);
+    text-align: center;
+}
+
+.flin-empty__icon {
+    margin-bottom: var(--flin-space-4);
+    color: var(--flin-neutral-400);
+}
+
+.flin-empty__icon--default {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    background-color: var(--flin-neutral-100);
+    border-radius: 50%;
+}
+
+.flin-empty__icon--default svg {
+    width: 40px;
+    height: 40px;
+}
+
+.flin-empty__title {
+    margin: 0 0 var(--flin-space-2) 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.flin-empty__description {
+    margin: 0 0 var(--flin-space-6) 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    max-width: 320px;
+    line-height: 1.5;
+}
+
+.flin-empty__action {
+    display: flex;
+    gap: var(--flin-space-3);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-empty__icon--default {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .flin-empty__icon {
+    color: var(--flin-neutral-500);
+}
+</style>

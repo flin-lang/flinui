@@ -1,0 +1,312 @@
+// BottomNav.flin - FlinUI Bottom Navigation Component
+// A mobile-optimized bottom navigation bar for quick access to main app sections
+
+// Props with defaults
+items = props.items || []
+activeIndex = props.activeIndex || 0
+showLabels = props.showLabels !== false  // Show labels by default
+onChange = props.onChange
+safeArea = props.safeArea !== false  // Enable safe area insets by default
+
+// Internal state for active item
+currentIndex = activeIndex
+
+// Handle item click
+handleItemClick = {
+    itemIndex = event.itemIndex
+    currentIndex = itemIndex
+
+    if onChange {
+        onChange(itemIndex)
+    }
+
+    // Execute the item's onClick if provided
+    if event.onClick {
+        event.onClick()
+    }
+}
+
+// Handle keyboard navigation
+handleKeydown = {
+    match event.key {
+        "ArrowLeft" -> {
+            if currentIndex > 0 {
+                handleItemClick({ itemIndex: currentIndex - 1, onClick: items[currentIndex - 1].onClick })
+            }
+        }
+        "ArrowRight" -> {
+            if currentIndex < (items.length - 1) {
+                handleItemClick({ itemIndex: currentIndex + 1, onClick: items[currentIndex + 1].onClick })
+            }
+        }
+        "Home" -> {
+            handleItemClick({ itemIndex: 0, onClick: items[0].onClick })
+        }
+        "End" -> {
+            lastIndex = items.length - 1
+            handleItemClick({ itemIndex: lastIndex, onClick: items[lastIndex].onClick })
+        }
+        _ -> {}
+    }
+}
+
+// Computed classes for nav
+noLabelsClass = match !showLabels { true -> " flin-bottomnav--no-labels", _ -> "" }
+safeAreaClass = match safeArea { true -> " flin-bottomnav--safe-area", _ -> "" }
+
+<nav
+    class={"flin-bottomnav" ++ noLabelsClass ++ safeAreaClass}
+    role="navigation"
+    aria-label="Bottom navigation"
+    keydown={handleKeydown}
+>
+    <div class="flin-bottomnav__container">
+        {items.map((item, index) ->
+            {
+                itemActiveClass = match index == currentIndex { true -> " flin-bottomnav__item--active", _ -> "" }
+                itemDisabledClass = match item.disabled { true -> " flin-bottomnav__item--disabled", _ -> "" }
+            }
+            <button
+                class={"flin-bottomnav__item" ++ itemActiveClass ++ itemDisabledClass}
+                click={() -> handleItemClick({ itemIndex: index, onClick: item.onClick })}
+                disabled={item.disabled || false}
+                aria-label={item.label}
+                aria-current={if index == currentIndex { "page" } else { none }}
+                tabindex={if item.disabled { -1 } else { 0 }}
+            >
+                {if item.icon}
+                    <span class="flin-bottomnav__icon" aria-hidden="true">
+                        {item.icon}
+
+                        {if item.badge}
+                            <span class="flin-bottomnav__badge" aria-label="{item.badge} notifications">
+                                {if item.badge > 99 { "99+" } else { item.badge }}
+                            </span>
+                        {/if}
+                    </span>
+                {/if}
+
+                {if showLabels && item.label}
+                    <span class="flin-bottomnav__label">
+                        {item.label}
+                    </span>
+                {/if}
+            </button>
+        )}
+    </div>
+</nav>
+
+<style scoped>
+.flin-bottomnav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-color: var(--flin-bg);
+    border-top: 1px solid var(--flin-neutral-200);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    transition: transform var(--flin-transition-normal);
+}
+
+.flin-bottomnav__container {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 100%;
+    height: 56px;
+    margin: 0 auto;
+}
+
+/* Safe area insets for modern mobile devices (notch, home indicator) */
+.flin-bottomnav--safe-area {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.flin-bottomnav--safe-area .flin-bottomnav__container {
+    padding-bottom: calc(env(safe-area-inset-bottom) * 0.5);
+}
+
+/* Navigation item */
+.flin-bottomnav__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-1);
+    flex: 1;
+    min-width: 0;
+    padding: var(--flin-space-2);
+    background: none;
+    border: none;
+    color: var(--flin-fg-muted);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    cursor: pointer;
+    transition: color var(--flin-transition-fast),
+                background-color var(--flin-transition-fast),
+                transform var(--flin-transition-fast);
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.flin-bottomnav__item:hover:not(:disabled):not(.flin-bottomnav__item--disabled) {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-50);
+}
+
+.flin-bottomnav__item:active:not(:disabled):not(.flin-bottomnav__item--disabled) {
+    transform: scale(0.95);
+}
+
+.flin-bottomnav__item:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: -2px;
+    z-index: 1;
+}
+
+/* Active state */
+.flin-bottomnav__item--active {
+    color: var(--flin-primary);
+}
+
+.flin-bottomnav__item--active::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 2px;
+    background-color: var(--flin-primary);
+    border-radius: 0 0 2px 2px;
+}
+
+/* Disabled state */
+.flin-bottomnav__item:disabled,
+.flin-bottomnav__item--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Icon container */
+.flin-bottomnav__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.flin-bottomnav__icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Active icon animation */
+.flin-bottomnav__item--active .flin-bottomnav__icon {
+    animation: iconBounce 0.3s ease-out;
+}
+
+@keyframes iconBounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+/* Badge */
+.flin-bottomnav__badge {
+    position: absolute;
+    top: -4px;
+    right: -8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    color: white;
+    background-color: var(--flin-danger);
+    border-radius: var(--flin-radius-full);
+    border: 2px solid var(--flin-bg);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Label */
+.flin-bottomnav__label {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+/* No labels variant - icons only */
+.flin-bottomnav--no-labels .flin-bottomnav__container {
+    height: 48px;
+}
+
+.flin-bottomnav--no-labels .flin-bottomnav__item {
+    padding: var(--flin-space-3);
+}
+
+/* Limit items to max 5 for good UX */
+.flin-bottomnav__item:nth-child(n+6) {
+    display: none;
+}
+
+/* Responsive adjustments */
+@media (min-width: 640px) {
+    .flin-bottomnav__container {
+        max-width: 480px;
+    }
+}
+
+/* Larger screens - consider hiding or adjusting */
+@media (min-width: 1024px) {
+    .flin-bottomnav {
+        display: none;  /* Typically bottom nav is for mobile only */
+    }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-bottomnav {
+    background-color: var(--flin-neutral-900);
+    border-top-color: var(--flin-neutral-700);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .flin-bottomnav__item:hover:not(:disabled):not(.flin-bottomnav__item--disabled) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .flin-bottomnav__badge {
+    border-color: var(--flin-neutral-900);
+}
+
+/* Accessibility - respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .flin-bottomnav,
+    .flin-bottomnav__item,
+    .flin-bottomnav__icon {
+        animation: none;
+        transition: none;
+    }
+}
+
+/* Print - hide bottom nav */
+@media print {
+    .flin-bottomnav {
+        display: none;
+    }
+}
+</style>

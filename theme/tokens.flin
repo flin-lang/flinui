@@ -1,0 +1,271 @@
+// FlinUI Theme Tokens
+// Design tokens for consistent styling across all components
+
+// ============================================================================
+// COLOR TOKENS
+// ============================================================================
+
+// Primary Colors
+primaryColor = "#3b82f6"
+primaryHover = "#2563eb"
+primaryActive = "#1d4ed8"
+primaryLight = "#dbeafe"
+
+// Secondary Colors
+secondaryColor = "#6b7280"
+secondaryHover = "#4b5563"
+secondaryActive = "#374151"
+secondaryLight = "#f3f4f6"
+
+// Success Colors
+successColor = "#10b981"
+successHover = "#059669"
+successActive = "#047857"
+successLight = "#d1fae5"
+
+// Warning Colors
+warningColor = "#f59e0b"
+warningHover = "#d97706"
+warningActive = "#b45309"
+warningLight = "#fef3c7"
+
+// Danger Colors
+dangerColor = "#ef4444"
+dangerHover = "#dc2626"
+dangerActive = "#b91c1c"
+dangerLight = "#fee2e2"
+
+// Info Colors
+infoColor = "#06b6d4"
+infoHover = "#0891b2"
+infoActive = "#0e7490"
+infoLight = "#cffafe"
+
+// Neutral Colors
+neutral50 = "#fafafa"
+neutral100 = "#f4f4f5"
+neutral200 = "#e4e4e7"
+neutral300 = "#d4d4d8"
+neutral400 = "#a1a1aa"
+neutral500 = "#71717a"
+neutral600 = "#52525b"
+neutral700 = "#3f3f46"
+neutral800 = "#27272a"
+neutral900 = "#18181b"
+
+// Background & Foreground
+bgColor = "#ffffff"
+bgMuted = "#f4f4f5"
+fgColor = "#18181b"
+fgMuted = "#71717a"
+
+// ============================================================================
+// TYPOGRAPHY TOKENS
+// ============================================================================
+
+// Font Family
+fontSans = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+fontMono = "'JetBrains Mono', 'Fira Code', Consolas, monospace"
+
+// Font Sizes
+textXs = "0.75rem"
+textSm = "0.875rem"
+textBase = "1rem"
+textLg = "1.125rem"
+textXl = "1.25rem"
+text2xl = "1.5rem"
+text3xl = "1.875rem"
+text4xl = "2.25rem"
+
+// Font Weights
+fontNormal = "400"
+fontMedium = "500"
+fontSemibold = "600"
+fontBold = "700"
+
+// Line Heights
+leadingTight = "1.25"
+leadingNormal = "1.5"
+leadingRelaxed = "1.75"
+
+// ============================================================================
+// SPACING TOKENS
+// ============================================================================
+
+space0 = "0"
+space1 = "0.25rem"
+space2 = "0.5rem"
+space3 = "0.75rem"
+space4 = "1rem"
+space5 = "1.25rem"
+space6 = "1.5rem"
+space8 = "2rem"
+space10 = "2.5rem"
+space12 = "3rem"
+space16 = "4rem"
+space20 = "5rem"
+space24 = "6rem"
+
+// ============================================================================
+// BORDER RADIUS
+// ============================================================================
+
+radiusNone = "0"
+radiusSm = "0.125rem"
+radiusMd = "0.375rem"
+radiusLg = "0.5rem"
+radiusXl = "0.75rem"
+radius2xl = "1rem"
+radiusFull = "9999px"
+
+// ============================================================================
+// SHADOWS
+// ============================================================================
+
+shadowSm = "0 1px 2px 0 rgb(0 0 0 / 0.05)"
+shadowMd = "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)"
+shadowLg = "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)"
+shadowXl = "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
+
+// ============================================================================
+// TRANSITIONS
+// ============================================================================
+
+transitionFast = "150ms cubic-bezier(0.4, 0, 0.2, 1)"
+transitionNormal = "200ms cubic-bezier(0.4, 0, 0.2, 1)"
+transitionSlow = "300ms cubic-bezier(0.4, 0, 0.2, 1)"
+
+// ============================================================================
+// BREAKPOINTS
+// ============================================================================
+
+breakpointSm = "640px"
+breakpointMd = "768px"
+breakpointLg = "1024px"
+breakpointXl = "1280px"
+breakpoint2xl = "1536px"
+
+// Export theme as CSS custom properties
+<style>
+:root {
+    /* Primary */
+    --flin-primary: #3b82f6;
+    --flin-primary-hover: #2563eb;
+    --flin-primary-active: #1d4ed8;
+    --flin-primary-light: #dbeafe;
+
+    /* Secondary */
+    --flin-secondary: #6b7280;
+    --flin-secondary-hover: #4b5563;
+    --flin-secondary-light: #f3f4f6;
+
+    /* Success */
+    --flin-success: #10b981;
+    --flin-success-hover: #059669;
+    --flin-success-light: #d1fae5;
+
+    /* Warning */
+    --flin-warning: #f59e0b;
+    --flin-warning-hover: #d97706;
+    --flin-warning-light: #fef3c7;
+
+    /* Danger */
+    --flin-danger: #ef4444;
+    --flin-danger-hover: #dc2626;
+    --flin-danger-light: #fee2e2;
+
+    /* Info */
+    --flin-info: #06b6d4;
+    --flin-info-hover: #0891b2;
+    --flin-info-light: #cffafe;
+
+    /* Neutral */
+    --flin-neutral-50: #fafafa;
+    --flin-neutral-100: #f4f4f5;
+    --flin-neutral-200: #e4e4e7;
+    --flin-neutral-300: #d4d4d8;
+    --flin-neutral-400: #a1a1aa;
+    --flin-neutral-500: #71717a;
+    --flin-neutral-600: #52525b;
+    --flin-neutral-700: #3f3f46;
+    --flin-neutral-800: #27272a;
+    --flin-neutral-900: #18181b;
+
+    /* Background & Foreground */
+    --flin-bg: #ffffff;
+    --flin-bg-muted: #f4f4f5;
+    --flin-fg: #18181b;
+    --flin-fg-muted: #71717a;
+
+    /* Typography */
+    --flin-font-sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --flin-font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+    /* Font Sizes */
+    --flin-text-xs: 0.75rem;
+    --flin-text-sm: 0.875rem;
+    --flin-text-base: 1rem;
+    --flin-text-lg: 1.125rem;
+    --flin-text-xl: 1.25rem;
+    --flin-text-2xl: 1.5rem;
+    --flin-text-3xl: 1.875rem;
+    --flin-text-4xl: 2.25rem;
+
+    /* Spacing */
+    --flin-space-1: 0.25rem;
+    --flin-space-2: 0.5rem;
+    --flin-space-3: 0.75rem;
+    --flin-space-4: 1rem;
+    --flin-space-6: 1.5rem;
+    --flin-space-8: 2rem;
+    --flin-space-12: 3rem;
+    --flin-space-16: 4rem;
+
+    /* Border Radius */
+    --flin-radius-sm: 0.125rem;
+    --flin-radius-md: 0.375rem;
+    --flin-radius-lg: 0.5rem;
+    --flin-radius-xl: 0.75rem;
+    --flin-radius-full: 9999px;
+
+    /* Shadows */
+    --flin-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --flin-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --flin-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    /* Transitions */
+    --flin-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --flin-transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    --flin-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --flin-bg: #18181b;
+    --flin-bg-muted: #27272a;
+    --flin-fg: #fafafa;
+    --flin-fg-muted: #a1a1aa;
+    --flin-neutral-50: #18181b;
+    --flin-neutral-100: #27272a;
+    --flin-neutral-200: #3f3f46;
+    --flin-neutral-800: #e4e4e7;
+    --flin-neutral-900: #fafafa;
+}
+
+/* Base Styles */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    line-height: 1.5;
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+</style>

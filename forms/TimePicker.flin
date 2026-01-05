@@ -1,0 +1,181 @@
+// TimePicker.flin - FlinUI Time Picker Component
+// A styled time input with min/max validation, step control, and clock icon
+
+// Props with defaults
+value = props.value || ""
+min = props.min || ""
+max = props.max || ""
+step = props.step || 60  // Default step: 1 minute (60 seconds)
+disabled = props.disabled || false
+onChange = props.onChange
+onBlur = props.onBlur
+
+// Track focus state for styling
+focused = false
+
+// Validation state
+isValid = true
+errorMessage = ""
+
+// Validate time range
+validateTime = {
+    {if value != "" && min != "" && value < min}
+        isValid = false;
+        errorMessage = "Time must be after " ++ min
+    {else if value != "" && max != "" && value > max}
+        isValid = false;
+        errorMessage = "Time must be before " ++ max
+    {else}
+        isValid = true;
+        errorMessage = ""
+    {/if}
+}
+
+// Handle change
+handleChange = {
+    value = event.target.value;
+    validateTime();
+    {if onChange}
+        onChange(event)
+    {/if}
+}
+
+// Compute class modifiers
+focusedClass = match focused { true -> " time-picker-focused", _ -> "" }
+errorClass = match isValid { false -> " time-picker-error", _ -> "" }
+disabledClass = match disabled { true -> " time-picker-disabled", _ -> "" }
+
+<div class={"time-picker" ++ focusedClass ++ errorClass ++ disabledClass}>
+    <div class="time-picker-input-wrapper">
+        <input
+            type="time"
+            class="time-picker-input"
+            value={value}
+            min={min}
+            max={max}
+            step={step}
+            disabled={disabled}
+            change={handleChange}
+            focus={focused = true}
+            blur={focused = false; {if onBlur} onBlur(event) {/if}}
+            aria-invalid={!isValid}
+            aria-describedby={if !isValid { "time-picker-error" } else { "" }}
+        >
+        <span class="time-picker-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M9 5V9L12 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+    </div>
+    {if !isValid && errorMessage != ""}
+        <span class="time-picker-error-msg" id="time-picker-error" role="alert">
+            {errorMessage}
+        </span>
+    {/if}
+</div>
+
+<style scoped>
+.time-picker {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+    width: 100%;
+}
+
+.time-picker-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.time-picker-input {
+    width: 100%;
+    height: 40px;
+    padding: var(--flin-space-2) var(--flin-space-10) var(--flin-space-2) var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+    outline: none;
+    cursor: pointer;
+}
+
+/* Style the time picker indicator */
+.time-picker-input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.time-picker-input:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.time-picker-focused .time-picker-input {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.time-picker-icon {
+    position: absolute;
+    right: var(--flin-space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--flin-fg-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--flin-transition-fast);
+}
+
+.time-picker-focused .time-picker-icon {
+    color: var(--flin-primary);
+}
+
+/* Disabled state */
+.time-picker-disabled .time-picker-input {
+    background-color: var(--flin-bg-muted);
+    color: var(--flin-fg-muted);
+    cursor: not-allowed;
+}
+
+.time-picker-disabled .time-picker-icon {
+    color: var(--flin-neutral-400);
+}
+
+/* Error state */
+.time-picker-error .time-picker-input {
+    border-color: var(--flin-danger);
+}
+
+.time-picker-error.time-picker-focused .time-picker-input {
+    box-shadow: 0 0 0 3px var(--flin-danger-light);
+}
+
+.time-picker-error .time-picker-icon {
+    color: var(--flin-danger);
+}
+
+.time-picker-error-msg {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-danger);
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .time-picker-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+/* Step indicator for seconds precision */
+.time-picker[data-step="1"] .time-picker-input {
+    font-variant-numeric: tabular-nums;
+}
+</style>

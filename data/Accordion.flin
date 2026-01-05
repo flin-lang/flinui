@@ -1,0 +1,134 @@
+// FlinUI Accordion Component
+// Expandable/collapsible content section with title and toggle
+
+// Props with defaults
+title = props.title || "Accordion"
+defaultOpen = props.defaultOpen || false
+
+// Internal state for open/close
+isOpen = defaultOpen
+
+// Toggle function that also calls onToggle prop if provided
+toggleAccordion = {
+    isOpen = !isOpen;
+    if props.onToggle {
+        props.onToggle(isOpen)
+    }
+}
+
+<div class="flin-accordion {if isOpen { 'flin-accordion--open' }}">
+    <button class="flin-accordion__header"
+            type="button"
+            aria-expanded={isOpen}
+            click={toggleAccordion}>
+        <span class="flin-accordion__title">{title}</span>
+        <span class="flin-accordion__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 9l-7 7-7-7" />
+            </svg>
+        </span>
+    </button>
+
+    <div class="flin-accordion__content">
+        <div class="flin-accordion__body">
+            {children}
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.flin-accordion {
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    background-color: var(--flin-bg);
+    overflow: hidden;
+}
+
+.flin-accordion__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--flin-space-4);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.flin-accordion__header:hover {
+    background-color: var(--flin-neutral-50);
+}
+
+.flin-accordion__header:focus {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: -2px;
+}
+
+.flin-accordion__title {
+    font-size: var(--flin-text-base);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.flin-accordion__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: var(--flin-fg-muted);
+    transition: transform var(--flin-transition-normal);
+}
+
+.flin-accordion__icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.flin-accordion--open .flin-accordion__icon {
+    transform: rotate(180deg);
+}
+
+.flin-accordion__content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--flin-transition-normal);
+}
+
+.flin-accordion--open .flin-accordion__content {
+    grid-template-rows: 1fr;
+}
+
+.flin-accordion__body {
+    overflow: hidden;
+}
+
+.flin-accordion--open .flin-accordion__body {
+    padding: 0 var(--flin-space-4) var(--flin-space-4);
+}
+
+/* Border top for content when open */
+.flin-accordion--open .flin-accordion__content::before {
+    content: "";
+    display: block;
+    height: 1px;
+    background-color: var(--flin-neutral-200);
+    margin: 0 var(--flin-space-4);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .flin-accordion {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-accordion__header:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .flin-accordion--open .flin-accordion__content::before {
+    background-color: var(--flin-neutral-700);
+}
+</style>

@@ -1,0 +1,313 @@
+// ColorPicker.flin - FlinUI Color Picker Component
+// A color selector with presets, custom color input, and visual preview
+
+// Props with defaults
+value = props.value || "#3b82f6"
+presets = props.presets || [
+    "#ef4444", "#f97316", "#f59e0b", "#eab308", "#84cc16",
+    "#22c55e", "#10b981", "#14b8a6", "#06b6d4", "#0ea5e9",
+    "#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#d946ef",
+    "#ec4899", "#f43f5e", "#78716c", "#27272a", "#ffffff"
+]
+disabled = props.disabled || false
+onChange = props.onChange
+
+// Track states
+isOpen = false
+customColor = value
+
+// Handle preset click
+selectPreset = {
+    value = event.target.dataset.color;
+    customColor = value;
+    {if onChange}
+        onChange(value)
+    {/if}
+}
+
+// Handle custom color change
+handleCustomChange = {
+    value = event.target.value;
+    customColor = value;
+    {if onChange}
+        onChange(value)
+    {/if}
+}
+
+// Handle text input change
+handleTextChange = {
+    customInput = event.target.value;
+    // Validate hex color format
+    {if customInput.match(/^#[0-9A-Fa-f]{6}$/)}
+        value = customInput;
+        customColor = customInput;
+        {if onChange}
+            onChange(customInput)
+        {/if}
+    {/if}
+}
+
+// Toggle dropdown
+toggleOpen = {
+    {if !disabled}
+        isOpen = !isOpen
+    {/if}
+}
+
+// Close on outside click
+closeDropdown = {
+    isOpen = false
+}
+
+// Compute class modifiers
+disabledClass = match disabled { true -> " color-picker-disabled", _ -> "" }
+
+<div class={"color-picker" ++ disabledClass} blur={closeDropdown}>
+    <button
+        type="button"
+        class="color-picker-trigger"
+        click={toggleOpen}
+        disabled={disabled}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+    >
+        <span class="color-picker-preview" style={"background-color: " ++ value}></span>
+        <span class="color-picker-value">{value}</span>
+        <svg class="color-picker-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </button>
+
+    {if isOpen}
+        <div class="color-picker-dropdown" role="dialog" aria-label="Color picker">
+            <div class="color-picker-presets">
+                {for color in presets}
+                    presetActiveClass = match color == value { true -> " color-picker-preset-active", _ -> "" }
+                    <button
+                        type="button"
+                        class={"color-picker-preset" ++ presetActiveClass}
+                        style={"background-color: " ++ color}
+                        data-color={color}
+                        click={selectPreset}
+                        aria-label={"Select color " ++ color}
+                    >
+                        {if color == value}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                                <path d="M2 6L5 9L10 3" stroke={if color == "#ffffff" || color == "#eab308" { "#000" } else { "#fff" }} stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {/if}
+                    </button>
+                {/for}
+            </div>
+
+            <div class="color-picker-custom">
+                <label class="color-picker-custom-label">Custom color</label>
+                <div class="color-picker-custom-inputs">
+                    <input
+                        type="color"
+                        class="color-picker-native"
+                        value={customColor}
+                        change={handleCustomChange}
+                    >
+                    <input
+                        type="text"
+                        class="color-picker-text"
+                        value={value}
+                        placeholder="#000000"
+                        maxlength="7"
+                        input={handleTextChange}
+                    >
+                </div>
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.color-picker {
+    position: relative;
+    display: inline-flex;
+    width: 100%;
+}
+
+.color-picker-trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    height: 40px;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.color-picker-trigger:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.color-picker-trigger:focus {
+    outline: none;
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.color-picker-preview {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--flin-radius-sm);
+    border: 1px solid var(--flin-neutral-200);
+    flex-shrink: 0;
+}
+
+.color-picker-value {
+    flex: 1;
+    text-align: left;
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-sm);
+    text-transform: uppercase;
+}
+
+.color-picker-chevron {
+    color: var(--flin-fg-muted);
+    transition: transform var(--flin-transition-fast);
+}
+
+.color-picker-trigger[aria-expanded="true"] .color-picker-chevron {
+    transform: rotate(180deg);
+}
+
+/* Dropdown */
+.color-picker-dropdown {
+    position: absolute;
+    top: calc(100% + var(--flin-space-2));
+    left: 0;
+    width: 100%;
+    min-width: 240px;
+    padding: var(--flin-space-3);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+    z-index: 50;
+    animation: color-picker-open 0.15s ease-out;
+}
+
+@keyframes color-picker-open {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Presets grid */
+.color-picker-presets {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--flin-space-2);
+    margin-bottom: var(--flin-space-3);
+}
+
+.color-picker-preset {
+    aspect-ratio: 1;
+    width: 100%;
+    border: 2px solid transparent;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--flin-transition-fast);
+}
+
+.color-picker-preset:hover {
+    transform: scale(1.1);
+}
+
+.color-picker-preset:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--flin-bg), 0 0 0 4px var(--flin-primary);
+}
+
+.color-picker-preset-active {
+    border-color: var(--flin-fg);
+    box-shadow: 0 0 0 2px var(--flin-bg);
+}
+
+/* Custom color section */
+.color-picker-custom {
+    padding-top: var(--flin-space-3);
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.color-picker-custom-label {
+    display: block;
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+    margin-bottom: var(--flin-space-2);
+}
+
+.color-picker-custom-inputs {
+    display: flex;
+    gap: var(--flin-space-2);
+}
+
+.color-picker-native {
+    width: 40px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.color-picker-native::-webkit-color-swatch-wrapper {
+    padding: 2px;
+}
+
+.color-picker-native::-webkit-color-swatch {
+    border: none;
+    border-radius: var(--flin-radius-sm);
+}
+
+.color-picker-text {
+    flex: 1;
+    height: 36px;
+    padding: var(--flin-space-2);
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    text-transform: uppercase;
+}
+
+.color-picker-text:focus {
+    outline: none;
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+/* Disabled state */
+.color-picker-disabled .color-picker-trigger {
+    background-color: var(--flin-bg-muted);
+    color: var(--flin-fg-muted);
+    cursor: not-allowed;
+}
+
+.color-picker-disabled .color-picker-preview {
+    opacity: 0.5;
+}
+</style>

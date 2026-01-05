@@ -1,0 +1,115 @@
+// Checkbox.flin - FlinUI Checkbox Component
+// An accessible checkbox with label and custom styling
+
+// Props with defaults
+checked = props.checked || false
+label = props.label || ""
+disabled = props.disabled || false
+onChange = props.onChange
+
+// Computed classes
+checkedClass = match checked {
+    true -> " checkbox-checked"
+    _ -> ""
+}
+disabledClass = match disabled {
+    true -> " checkbox-disabled"
+    _ -> ""
+}
+checkboxClass = "checkbox" ++ checkedClass ++ disabledClass
+
+<label class={checkboxClass}>
+    <input
+        type="checkbox"
+        class="checkbox-input"
+        checked={checked}
+        disabled={disabled}
+        change={onChange}
+    >
+    <span class="checkbox-control" aria-hidden="true">
+        {if checked}
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        {/if}
+    </span>
+    {if label != ""}
+        <span class="checkbox-label">{label}</span>
+    {/if}
+</label>
+
+<style scoped>
+.checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.checkbox-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.checkbox-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-sm);
+    background-color: var(--flin-bg);
+    transition: all var(--flin-transition-fast);
+    flex-shrink: 0;
+}
+
+.checkbox:hover:not(.checkbox-disabled) .checkbox-control {
+    border-color: var(--flin-primary);
+}
+
+.checkbox-input:focus-visible + .checkbox-control {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.checkbox-checked .checkbox-control {
+    background-color: var(--flin-primary);
+    border-color: var(--flin-primary);
+    color: white;
+}
+
+.checkbox-checked:hover:not(.checkbox-disabled) .checkbox-control {
+    background-color: var(--flin-primary-hover);
+    border-color: var(--flin-primary-hover);
+}
+
+.checkbox-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    line-height: 1.4;
+}
+
+.checkbox-disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.checkbox-disabled .checkbox-control {
+    background-color: var(--flin-bg-muted);
+}
+
+.checkbox-disabled .checkbox-label {
+    color: var(--flin-fg-muted);
+}
+</style>

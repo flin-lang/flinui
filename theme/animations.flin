@@ -1,0 +1,413 @@
+// FlinUI Animation Tokens
+// TH-09: Animation and transition tokens
+
+// ============================================================================
+// TRANSITION DURATIONS
+// ============================================================================
+
+durationFast = "150ms"
+durationNormal = "200ms"
+durationSlow = "300ms"
+durationSlowest = "500ms"
+durationInstant = "50ms"
+durationVerySlow = "700ms"
+
+// ============================================================================
+// EASING FUNCTIONS
+// ============================================================================
+
+// Standard easing curves
+easeDefault = "cubic-bezier(0.4, 0, 0.2, 1)"
+easeIn = "cubic-bezier(0.4, 0, 1, 1)"
+easeOut = "cubic-bezier(0, 0, 0.2, 1)"
+easeInOut = "cubic-bezier(0.4, 0, 0.2, 1)"
+
+// Special easing effects
+easeBounce = "cubic-bezier(0.68, -0.55, 0.265, 1.55)"
+easeElastic = "cubic-bezier(0.68, -0.6, 0.32, 1.6)"
+easeSmooth = "cubic-bezier(0.25, 0.1, 0.25, 1)"
+easeSharp = "cubic-bezier(0.4, 0, 0.6, 1)"
+
+// Advanced easing curves
+easeInQuad = "cubic-bezier(0.55, 0.085, 0.68, 0.53)"
+easeOutQuad = "cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+easeInOutQuad = "cubic-bezier(0.455, 0.03, 0.515, 0.955)"
+
+easeInCubic = "cubic-bezier(0.55, 0.055, 0.675, 0.19)"
+easeOutCubic = "cubic-bezier(0.215, 0.61, 0.355, 1)"
+easeInOutCubic = "cubic-bezier(0.645, 0.045, 0.355, 1)"
+
+easeInQuart = "cubic-bezier(0.895, 0.03, 0.685, 0.22)"
+easeOutQuart = "cubic-bezier(0.165, 0.84, 0.44, 1)"
+easeInOutQuart = "cubic-bezier(0.77, 0, 0.175, 1)"
+
+// ============================================================================
+// ANIMATION TIMING HELPERS
+// ============================================================================
+
+/// Get transition string for a property
+/// @param property - CSS property to transition
+/// @param duration - Duration (fast, normal, slow)
+/// @param easing - Easing function
+getTransition = fn(property, duration, easing) {
+    durationValue = getDuration(duration || "normal")
+    easingValue = easing || easeDefault
+    property + " " + durationValue + " " + easingValue
+}
+
+/// Get duration value by name
+getDuration = fn(name) {
+    if name == "instant" { durationInstant }
+    else if name == "fast" { durationFast }
+    else if name == "normal" { durationNormal }
+    else if name == "slow" { durationSlow }
+    else if name == "slowest" { durationSlowest }
+    else if name == "very-slow" { durationVerySlow }
+    else { durationNormal }
+}
+
+// Common Transition Presets
+transitionAll = "all 200ms cubic-bezier(0.4, 0, 0.2, 1)"
+transitionColors = "color, background-color, border-color 150ms cubic-bezier(0.4, 0, 0.2, 1)"
+transitionOpacity = "opacity 150ms cubic-bezier(0.4, 0, 0.2, 1)"
+transitionTransform = "transform 200ms cubic-bezier(0.4, 0, 0.2, 1)"
+transitionShadow = "box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1)"
+
+<style>
+/* Animation CSS Variables */
+:root {
+    /* Durations */
+    --flin-duration-instant: 50ms;
+    --flin-duration-fast: 150ms;
+    --flin-duration-normal: 200ms;
+    --flin-duration-slow: 300ms;
+    --flin-duration-slowest: 500ms;
+    --flin-duration-very-slow: 700ms;
+
+    /* Standard Easings */
+    --flin-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+    --flin-ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --flin-ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --flin-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Special Easings */
+    --flin-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --flin-ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+    --flin-ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+    --flin-ease-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+
+    /* Quadratic Easings */
+    --flin-ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+    --flin-ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --flin-ease-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
+
+    /* Cubic Easings */
+    --flin-ease-in-cubic: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+    --flin-ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+    --flin-ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
+
+    /* Quartic Easings */
+    --flin-ease-in-quart: cubic-bezier(0.895, 0.03, 0.685, 0.22);
+    --flin-ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+    --flin-ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
+
+    /* Transition presets */
+    --flin-transition-all: all var(--flin-duration-normal) var(--flin-ease-default);
+    --flin-transition-colors: color, background-color, border-color var(--flin-duration-fast) var(--flin-ease-default);
+    --flin-transition-opacity: opacity var(--flin-duration-fast) var(--flin-ease-default);
+    --flin-transition-transform: transform var(--flin-duration-normal) var(--flin-ease-default);
+    --flin-transition-shadow: box-shadow var(--flin-duration-normal) var(--flin-ease-default);
+}
+
+/* Common Keyframe Animations */
+
+/* Fade animations */
+@keyframes flin-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes flin-fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Scale animations */
+@keyframes flin-scale-in {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes flin-scale-out {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.95); opacity: 0; }
+}
+
+/* Slide animations */
+@keyframes flin-slide-in-up {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes flin-slide-in-down {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes flin-slide-in-left {
+    from { transform: translateX(-10px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes flin-slide-in-right {
+    from { transform: translateX(10px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Slide out animations */
+@keyframes flin-slide-out-up {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(-10px); opacity: 0; }
+}
+
+@keyframes flin-slide-out-down {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(10px); opacity: 0; }
+}
+
+/* Bounce animation */
+@keyframes flin-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Pulse animation */
+@keyframes flin-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Spin animation */
+@keyframes flin-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Ping animation (for notifications) */
+@keyframes flin-ping {
+    75%, 100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* Shake animation (for errors) */
+@keyframes flin-shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+/* Skeleton loading animation */
+@keyframes flin-skeleton {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+}
+
+/* Zoom animations */
+@keyframes flin-zoom-in {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes flin-zoom-out {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0); opacity: 0; }
+}
+
+/* Rotate animations */
+@keyframes flin-rotate-in {
+    from { transform: rotate(-180deg) scale(0.5); opacity: 0; }
+    to { transform: rotate(0deg) scale(1); opacity: 1; }
+}
+
+@keyframes flin-rotate-out {
+    from { transform: rotate(0deg) scale(1); opacity: 1; }
+    to { transform: rotate(180deg) scale(0.5); opacity: 0; }
+}
+
+/* Flip animations */
+@keyframes flin-flip {
+    0% { transform: perspective(400px) rotateY(0); }
+    100% { transform: perspective(400px) rotateY(360deg); }
+}
+
+@keyframes flin-flip-in-x {
+    from { transform: perspective(400px) rotateX(-90deg); opacity: 0; }
+    to { transform: perspective(400px) rotateX(0); opacity: 1; }
+}
+
+@keyframes flin-flip-in-y {
+    from { transform: perspective(400px) rotateY(-90deg); opacity: 0; }
+    to { transform: perspective(400px) rotateY(0); opacity: 1; }
+}
+
+/* Swing animation */
+@keyframes flin-swing {
+    20% { transform: rotate(15deg); }
+    40% { transform: rotate(-10deg); }
+    60% { transform: rotate(5deg); }
+    80% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* Wiggle animation */
+@keyframes flin-wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+}
+
+/* Heartbeat animation */
+@keyframes flin-heartbeat {
+    0%, 100% { transform: scale(1); }
+    10%, 30% { transform: scale(0.9); }
+    20%, 40% { transform: scale(1.1); }
+}
+
+/* Glow animation */
+@keyframes flin-glow {
+    0%, 100% { box-shadow: 0 0 5px currentColor; }
+    50% { box-shadow: 0 0 20px currentColor; }
+}
+
+/* Progress bar animation */
+@keyframes flin-progress {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Utility classes for animations */
+.flin-animate-fade-in {
+    animation: flin-fade-in var(--flin-duration-normal) var(--flin-ease-out) forwards;
+}
+
+.flin-animate-fade-out {
+    animation: flin-fade-out var(--flin-duration-normal) var(--flin-ease-in) forwards;
+}
+
+.flin-animate-scale-in {
+    animation: flin-scale-in var(--flin-duration-normal) var(--flin-ease-out) forwards;
+}
+
+.flin-animate-slide-in-up {
+    animation: flin-slide-in-up var(--flin-duration-normal) var(--flin-ease-out) forwards;
+}
+
+.flin-animate-slide-in-down {
+    animation: flin-slide-in-down var(--flin-duration-normal) var(--flin-ease-out) forwards;
+}
+
+.flin-animate-bounce {
+    animation: flin-bounce 1s var(--flin-ease-in-out) infinite;
+}
+
+.flin-animate-pulse {
+    animation: flin-pulse 2s var(--flin-ease-in-out) infinite;
+}
+
+.flin-animate-spin {
+    animation: flin-spin 1s linear infinite;
+}
+
+.flin-animate-ping {
+    animation: flin-ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.flin-animate-shake {
+    animation: flin-shake 0.5s var(--flin-ease-in-out);
+}
+
+.flin-animate-zoom-in {
+    animation: flin-zoom-in var(--flin-duration-normal) var(--flin-ease-out) forwards;
+}
+
+.flin-animate-zoom-out {
+    animation: flin-zoom-out var(--flin-duration-normal) var(--flin-ease-in) forwards;
+}
+
+.flin-animate-rotate-in {
+    animation: flin-rotate-in var(--flin-duration-slow) var(--flin-ease-out) forwards;
+}
+
+.flin-animate-flip {
+    animation: flin-flip 1s var(--flin-ease-in-out);
+}
+
+.flin-animate-flip-in-x {
+    animation: flin-flip-in-x var(--flin-duration-normal) var(--flin-ease-out) forwards;
+}
+
+.flin-animate-flip-in-y {
+    animation: flin-flip-in-y var(--flin-duration-normal) var(--flin-ease-out) forwards;
+}
+
+.flin-animate-swing {
+    animation: flin-swing 1s var(--flin-ease-in-out);
+}
+
+.flin-animate-wiggle {
+    animation: flin-wiggle 0.5s var(--flin-ease-in-out) infinite;
+}
+
+.flin-animate-heartbeat {
+    animation: flin-heartbeat 1.5s var(--flin-ease-in-out) infinite;
+}
+
+.flin-animate-glow {
+    animation: flin-glow 2s var(--flin-ease-in-out) infinite;
+}
+
+/* Animation delay utilities */
+.flin-delay-100 {
+    animation-delay: 100ms;
+}
+
+.flin-delay-200 {
+    animation-delay: 200ms;
+}
+
+.flin-delay-300 {
+    animation-delay: 300ms;
+}
+
+.flin-delay-500 {
+    animation-delay: 500ms;
+}
+
+.flin-delay-1000 {
+    animation-delay: 1000ms;
+}
+
+/* Animation iteration utilities */
+.flin-animate-once {
+    animation-iteration-count: 1;
+}
+
+.flin-animate-twice {
+    animation-iteration-count: 2;
+}
+
+.flin-animate-infinite {
+    animation-iteration-count: infinite;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+</style>

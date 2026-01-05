@@ -1,0 +1,117 @@
+// FlinUI Charts Package
+// SVG-based chart components for data visualization
+// Version 1.0.0
+
+// ============================================================================
+// FLINUI CHARTS
+// ============================================================================
+//
+// Native FLIN chart components - no external dependencies!
+// All charts use SVG rendering with CSS animations.
+//
+// Components:
+//   BarChart     - Vertical/horizontal bar charts
+//   LineChart    - Line charts with multiple series
+//   PieChart     - Pie and donut charts
+//   AreaChart    - Filled area charts (stacked/overlay)
+//   SparkLine    - Compact inline trend charts
+//   ChartLegend  - Shared legend component
+//   ChartTooltip - Shared tooltip component
+//
+// Usage:
+//   <BarChart
+//       data={[
+//           { label: "Jan", value: 100 },
+//           { label: "Feb", value: 150 },
+//           { label: "Mar", value: 120 }
+//       ]}
+//       width={400}
+//       height={300}
+//   />
+//
+//   <LineChart
+//       data={[
+//           { name: "Sales", values: [{ x: 1, y: 100 }, { x: 2, y: 150 }] },
+//           { name: "Costs", values: [{ x: 1, y: 80 }, { x: 2, y: 90 }] }
+//       ]}
+//       showArea={true}
+//   />
+//
+//   <PieChart
+//       data={[
+//           { label: "Desktop", value: 60 },
+//           { label: "Mobile", value: 30 },
+//           { label: "Tablet", value: 10 }
+//       ]}
+//       donut={true}
+//   />
+//
+//   <SparkLine data={[10, 15, 8, 20, 25, 18]} variant="success" />
+//
+// ============================================================================
+
+version = "1.0.0"
+componentCount = 7
+category = "charts"
+
+// Chart component exports
+// Components are auto-imported when used in .flin files
+
+<div class="flinui-charts-info">
+    <h2>FlinUI Charts v{version}</h2>
+    <p>{componentCount} chart components for data visualization</p>
+
+    <h3>Available Components</h3>
+    <ul>
+        <li><strong>BarChart</strong> - Vertical and horizontal bar charts with animations</li>
+        <li><strong>LineChart</strong> - Multi-series line charts with curves and areas</li>
+        <li><strong>PieChart</strong> - Pie and donut charts with legends</li>
+        <li><strong>AreaChart</strong> - Stacked and overlay area charts</li>
+        <li><strong>SparkLine</strong> - Compact inline charts for trends</li>
+        <li><strong>ChartLegend</strong> - Interactive legend for any chart</li>
+        <li><strong>ChartTooltip</strong> - Positioned tooltips for data points</li>
+    </ul>
+
+    <h3>Features</h3>
+    <ul>
+        <li>Pure SVG rendering - no Canvas or WebGL required</li>
+        <li>CSS-based animations with smooth transitions</li>
+        <li>Responsive sizing with viewBox</li>
+        <li>Dark mode support via CSS variables</li>
+        <li>Accessibility with ARIA labels</li>
+        <li>Interactive hover states and tooltips</li>
+        <li>Zero external dependencies</li>
+    </ul>
+</div>
+
+<style scoped>
+.flinui-charts-info {
+    font-family: var(--flin-font-sans);
+    padding: var(--flin-space-6);
+    max-width: 600px;
+}
+
+.flinui-charts-info h2 {
+    color: var(--flin-primary);
+    margin-bottom: var(--flin-space-2);
+}
+
+.flinui-charts-info h3 {
+    margin-top: var(--flin-space-6);
+    color: var(--flin-fg);
+}
+
+.flinui-charts-info ul {
+    margin: var(--flin-space-2) 0;
+    padding-left: var(--flin-space-6);
+}
+
+.flinui-charts-info li {
+    margin-bottom: var(--flin-space-2);
+    color: var(--flin-fg-muted);
+}
+
+.flinui-charts-info strong {
+    color: var(--flin-fg);
+}
+</style>

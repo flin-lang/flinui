@@ -1,0 +1,117 @@
+// FlinUI Navigation Components
+// A comprehensive set of navigation components for building app interfaces
+//
+// Components included:
+// - Navbar: Responsive top navigation bar
+// - NavbarBrand: Logo/brand area for navbar
+// - NavbarMenu: Container for navigation items
+// - NavbarItem: Individual nav links/buttons
+// - Sidebar: Collapsible side navigation
+// - SidebarItem: Individual sidebar links
+// - Tabs: Tabbed navigation with multiple variants
+// - Tab: Individual tab within Tabs
+// - Breadcrumb: Hierarchical page location
+// - Pagination: Page navigation controls
+// - Menu: Dropdown menu with keyboard navigation
+// - Stepper: Step-by-step progress navigation
+// - BottomNav: Mobile-optimized bottom navigation bar
+// - LinkBox: Clickable card/box wrapper
+// - SkipNav: Accessibility skip navigation link
+//
+// All components use FlinUI theme tokens (--flin-*) for consistent styling
+// and support both light and dark themes.
+//
+// Example usage:
+//
+// Navbar:
+// <Navbar fixed={true}>
+//     <NavbarBrand href="/">
+//         <img src="/logo.svg" alt="Logo" />
+//         My App
+//     </NavbarBrand>
+//     <NavbarMenu align="right">
+//         <NavbarItem href="/" active={true}>Home</NavbarItem>
+//         <NavbarItem href="/about">About</NavbarItem>
+//         <NavbarItem href="/contact">Contact</NavbarItem>
+//     </NavbarMenu>
+// </Navbar>
+//
+// Sidebar:
+// <Sidebar collapsed={false} position="left">
+//     <SidebarItem icon={<HomeIcon />} href="/" active={true}>
+//         Dashboard
+//     </SidebarItem>
+//     <SidebarItem icon={<UsersIcon />} href="/users">
+//         Users
+//     </SidebarItem>
+// </Sidebar>
+//
+// Tabs:
+// <Tabs value="tab1" variant="line" onChange={handleChange}>
+//     <Tab value="tab1" label="First Tab" />
+//     <Tab value="tab2" label="Second Tab" />
+//     <Tab value="tab3" label="Third Tab" />
+// </Tabs>
+//
+// Breadcrumb:
+// items = [
+//     { label: "Products", href: "/products" },
+//     { label: "Electronics", href: "/products/electronics" },
+//     { label: "Phones", href: "/products/electronics/phones" }
+// ]
+// <Breadcrumb items={items} separator=">" />
+//
+// Pagination:
+// <Pagination
+//     page={currentPage}
+//     total={totalPages}
+//     siblingCount={1}
+//     onChange={handlePageChange}
+// />
+//
+// BottomNav:
+// navItems = [
+//     { icon: <HomeIcon />, label: "Home", onClick: () -> navigate("/") },
+//     { icon: <SearchIcon />, label: "Search", onClick: () -> navigate("/search") },
+//     { icon: <BellIcon />, label: "Notifications", onClick: () -> navigate("/notifications"), badge: 5 },
+//     { icon: <UserIcon />, label: "Profile", onClick: () -> navigate("/profile") }
+// ]
+// <BottomNav items={navItems} activeIndex={0} showLabels={true} />
+//
+// Menu:
+// menuItems = [
+//     { label: "Edit", onClick: () -> handleEdit() },
+//     { label: "Duplicate", onClick: () -> handleDuplicate() },
+//     { divider: true },
+//     { label: "Delete", onClick: () -> handleDelete(), variant: "danger" }
+// ]
+// <Menu open={menuOpen} items={menuItems} onClose={() -> menuOpen = false} />
+//
+// Stepper:
+// steps = [
+//     { label: "Account", description: "Create your account" },
+//     { label: "Profile", description: "Set up your profile" },
+//     { label: "Complete", description: "Review and finish" }
+// ]
+// <Stepper steps={steps} activeStep={currentStep} onChange={handleStepChange} />
+//
+// LinkBox:
+// <LinkBox href="/products/1" hoverEffect="lift">
+//     <Card>Product details...</Card>
+// </LinkBox>
+//
+// SkipNav (place at the top of your app):
+// <SkipNav targetId="main-content" label="Skip to main content" />
+// <main id="main-content">
+//     <!-- Your main content -->
+// </main>
+
+<div class="flin-navigation-index">
+    <p>FlinUI Navigation Components</p>
+</div>
+
+<style scoped>
+.flin-navigation-index {
+    display: none;
+}
+</style>

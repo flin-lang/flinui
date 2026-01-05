@@ -1,0 +1,98 @@
+// FlinUI AspectRatio Component
+// Maintains consistent aspect ratio for content
+// Props: ratio (16/9, 4/3, 1/1, 3/2, 2/3, 21/9, or custom like "16/10"), maxWidth (CSS value)
+
+ratio = props.ratio || "16/9"
+maxWidth = props.maxWidth || "100%"
+
+// Parse ratio to CSS aspect-ratio value
+aspectValue = match ratio {
+    "16/9" -> "16 / 9"
+    "4/3" -> "4 / 3"
+    "1/1" -> "1 / 1"
+    "3/2" -> "3 / 2"
+    "2/3" -> "2 / 3"
+    "21/9" -> "21 / 9"
+    "9/16" -> "9 / 16"
+    "3/4" -> "3 / 4"
+    _ -> ratio
+}
+
+// Build style
+aspectStyle = "aspect-ratio: " + aspectValue + "; max-width: " + maxWidth + ";"
+
+<div class="flin-aspect-ratio" style={aspectStyle}>
+    <div class="flin-aspect-ratio-content">
+        {children}
+    </div>
+</div>
+
+<style scoped>
+.flin-aspect-ratio {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.flin-aspect-ratio-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Make images and videos fill the container */
+.flin-aspect-ratio-content > img,
+.flin-aspect-ratio-content > video,
+.flin-aspect-ratio-content > iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Alternative object-fit options */
+.flin-aspect-ratio.flin-aspect-contain .flin-aspect-ratio-content > img,
+.flin-aspect-ratio.flin-aspect-contain .flin-aspect-ratio-content > video,
+.flin-aspect-ratio.flin-aspect-contain .flin-aspect-ratio-content > iframe {
+    object-fit: contain;
+}
+
+.flin-aspect-ratio.flin-aspect-fill .flin-aspect-ratio-content > img,
+.flin-aspect-ratio.flin-aspect-fill .flin-aspect-ratio-content > video,
+.flin-aspect-ratio.flin-aspect-fill .flin-aspect-ratio-content > iframe {
+    object-fit: fill;
+}
+
+/* Fallback for browsers without aspect-ratio support */
+@supports not (aspect-ratio: 1 / 1) {
+    .flin-aspect-ratio {
+        position: relative;
+        height: 0;
+    }
+
+    .flin-aspect-ratio[style*="16 / 9"] {
+        padding-bottom: 56.25%;
+    }
+
+    .flin-aspect-ratio[style*="4 / 3"] {
+        padding-bottom: 75%;
+    }
+
+    .flin-aspect-ratio[style*="1 / 1"] {
+        padding-bottom: 100%;
+    }
+
+    .flin-aspect-ratio[style*="3 / 2"] {
+        padding-bottom: 66.67%;
+    }
+
+    .flin-aspect-ratio[style*="21 / 9"] {
+        padding-bottom: 42.86%;
+    }
+}
+</style>

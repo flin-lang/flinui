@@ -1,0 +1,46 @@
+// FlinUI CardBody Component
+// Main content area for Card component
+
+// Props with defaults
+padding = props.padding || "none"
+
+// Compute padding value
+computedPadding = match padding {
+    "none" -> "0"
+    "sm" -> "var(--flin-space-2)"
+    "md" -> "var(--flin-space-4)"
+    "lg" -> "var(--flin-space-6)"
+    _ -> "0"
+}
+
+<div class="flin-card-body" style="--body-padding: {computedPadding};">
+    {children}
+</div>
+
+<style scoped>
+.flin-card-body {
+    padding: var(--body-padding);
+    color: var(--flin-fg);
+    font-size: var(--flin-text-base);
+    line-height: 1.6;
+}
+
+.flin-card-body:empty {
+    display: none;
+}
+
+/* Prose-like content styling */
+.flin-card-body p {
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.flin-card-body p:last-child {
+    margin-bottom: 0;
+}
+
+.flin-card-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--flin-radius-md);
+}
+</style>
