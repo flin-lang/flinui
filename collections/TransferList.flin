@@ -7,258 +7,79 @@ sourceTitle = props.sourceTitle || "Available"
 targetTitle = props.targetTitle || "Selected"
 searchable = props.searchable || true
 disabled = props.disabled || false
-onChange = props.onChange || nil
+onChange = props.onChange || ""
 
 // State
-sourceSelected = []
-targetSelected = []
 sourceSearch = ""
 targetSearch = ""
 
-// Computed - filtered items
-filteredSourceItems = sourceItems
-filteredTargetItems = targetItems
+// Computed classes
+disabledClass = match disabled { true -> " transfer-list--disabled", _ -> "" }
 
-// CSS classes
-containerClass = "transfer-list {disabled ? 'transfer-list--disabled' : ''}"
-panelClass = "transfer-list-panel"
-headerClass = "transfer-list-header"
-searchClass = "transfer-list-search"
-listClass = "transfer-list-items"
-itemClass = "transfer-list-item"
-itemSelectedClass = "transfer-list-item transfer-list-item--selected"
-actionsClass = "transfer-list-actions"
-buttonClass = "transfer-list-button"
-buttonDisabledClass = "transfer-list-button transfer-list-button--disabled"
-checkboxClass = "transfer-list-checkbox"
-checkboxCheckedClass = "transfer-list-checkbox transfer-list-checkbox--checked"
-
-// Check if item is selected
-isSourceSelected = |item| sourceSelected.includes(item.value)
-isTargetSelected = |item| targetSelected.includes(item.value)
-
-// Handlers
-handleSourceSelect = |item| {
-    if disabled { return }
-
-    if isSourceSelected(item) {
-        sourceSelected = sourceSelected.filter(|v| v != item.value)
-    } else {
-        sourceSelected = [...sourceSelected, item.value]
-    }
-}
-
-handleTargetSelect = |item| {
-    if disabled { return }
-
-    if isTargetSelected(item) {
-        targetSelected = targetSelected.filter(|v| v != item.value)
-    } else {
-        targetSelected = [...targetSelected, item.value]
-    }
-}
-
-handleSelectAllSource = {
-    if sourceSelected.length == filteredSourceItems.length {
-        sourceSelected = []
-    } else {
-        sourceSelected = filteredSourceItems.map(|i| i.value)
-    }
-}
-
-handleSelectAllTarget = {
-    if targetSelected.length == filteredTargetItems.length {
-        targetSelected = []
-    } else {
-        targetSelected = filteredTargetItems.map(|i| i.value)
-    }
-}
-
-handleMoveToTarget = {
-    if sourceSelected.length == 0 { return }
-
-    itemsToMove = sourceItems.filter(|i| sourceSelected.includes(i.value))
-    newSourceItems = sourceItems.filter(|i| !sourceSelected.includes(i.value))
-    newTargetItems = [...targetItems, ...itemsToMove]
-
-    sourceSelected = []
-
-    if onChange {
-        onChange({
-            sourceItems: newSourceItems,
-            targetItems: newTargetItems
-        })
-    }
-}
-
-handleMoveToSource = {
-    if targetSelected.length == 0 { return }
-
-    itemsToMove = targetItems.filter(|i| targetSelected.includes(i.value))
-    newTargetItems = targetItems.filter(|i| !targetSelected.includes(i.value))
-    newSourceItems = [...sourceItems, ...itemsToMove]
-
-    targetSelected = []
-
-    if onChange {
-        onChange({
-            sourceItems: newSourceItems,
-            targetItems: newTargetItems
-        })
-    }
-}
-
-handleMoveAllToTarget = {
-    if sourceItems.length == 0 { return }
-
-    newTargetItems = [...targetItems, ...sourceItems]
-
-    sourceSelected = []
-
-    if onChange {
-        onChange({
-            sourceItems: [],
-            targetItems: newTargetItems
-        })
-    }
-}
-
-handleMoveAllToSource = {
-    if targetItems.length == 0 { return }
-
-    newSourceItems = [...sourceItems, ...targetItems]
-
-    targetSelected = []
-
-    if onChange {
-        onChange({
-            sourceItems: newSourceItems,
-            targetItems: []
-        })
-    }
-}
-
-handleSourceSearch = |e| {
-    sourceSearch = e.target.value
-}
-
-handleTargetSearch = |e| {
-    targetSearch = e.target.value
-}
-
-// Button states
-canMoveToTarget = sourceSelected.length > 0 && !disabled
-canMoveToSource = targetSelected.length > 0 && !disabled
-canMoveAllToTarget = sourceItems.length > 0 && !disabled
-canMoveAllToSource = targetItems.length > 0 && !disabled
-
-<div class={containerClass}>
-    <!-- Source Panel -->
-    <div class={panelClass}>
-        <div class={headerClass}>
-            <span class="transfer-list-checkbox-wrapper" onClick={handleSelectAllSource}>
-                <span class={sourceSelected.length == filteredSourceItems.length && filteredSourceItems.length > 0 ? checkboxCheckedClass : checkboxClass}>
-                    {sourceSelected.length == filteredSourceItems.length && filteredSourceItems.length > 0 ? (
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                    ) : sourceSelected.length > 0 ? (
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    ) : nil}
-                </span>
+<div class={"flin-transfer-list" ++ disabledClass}>
+    <div class="transfer-list-panel">
+        <div class="transfer-list-header">
+            <span class="transfer-list-checkbox">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
             </span>
             <span class="transfer-list-title">{sourceTitle}</span>
-            <span class="transfer-list-count">{sourceSelected.length}/{sourceItems.length}</span>
+            <span class="transfer-list-count">2/5</span>
         </div>
 
-        {searchable ? (
-            <div class={searchClass}>
+        {if searchable}
+            <div class="transfer-list-search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input
-                    type="text"
-                    placeholder="Search..."
-                    value={sourceSearch}
-                    onInput={handleSourceSearch}
-                    disabled={disabled}
-                />
+                <input type="text" placeholder="Search..." />
             </div>
-        ) : nil}
+        {/if}
 
-        <div class={listClass}>
-            {filteredSourceItems.length > 0 ? (
-                filteredSourceItems.map(|item| (
-                    <div
-                        key={item.value}
-                        class={isSourceSelected(item) ? itemSelectedClass : itemClass}
-                        onClick={() => handleSourceSelect(item)}
-                    >
-                        <span class={isSourceSelected(item) ? checkboxCheckedClass : checkboxClass}>
-                            {isSourceSelected(item) ? (
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                            ) : nil}
-                        </span>
-                        <span class="transfer-list-item-label">{item.label}</span>
-                    </div>
-                ))
-            ) : (
-                <div class="transfer-list-empty">No items</div>
-            )}
+        <div class="transfer-list-items">
+            <div class="transfer-list-item transfer-list-item--selected">
+                <span class="transfer-list-checkbox transfer-list-checkbox--checked">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </span>
+                <span class="transfer-list-item-label">Item 1</span>
+            </div>
+            <div class="transfer-list-item">
+                <span class="transfer-list-checkbox"></span>
+                <span class="transfer-list-item-label">Item 2</span>
+            </div>
+            <div class="transfer-list-item transfer-list-item--selected">
+                <span class="transfer-list-checkbox transfer-list-checkbox--checked">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </span>
+                <span class="transfer-list-item-label">Item 3</span>
+            </div>
         </div>
     </div>
 
-    <!-- Actions -->
-    <div class={actionsClass}>
-        <button
-            type="button"
-            class={canMoveAllToTarget ? buttonClass : buttonDisabledClass}
-            onClick={handleMoveAllToTarget}
-            disabled={!canMoveAllToTarget}
-            title="Move all to {targetTitle}"
-        >
+    <div class="transfer-list-actions">
+        <button type="button" class="transfer-list-button" title="Move all right">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="13 17 18 12 13 7"></polyline>
                 <polyline points="6 17 11 12 6 7"></polyline>
             </svg>
         </button>
-
-        <button
-            type="button"
-            class={canMoveToTarget ? buttonClass : buttonDisabledClass}
-            onClick={handleMoveToTarget}
-            disabled={!canMoveToTarget}
-            title="Move selected to {targetTitle}"
-        >
+        <button type="button" class="transfer-list-button" title="Move selected right">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
         </button>
-
-        <button
-            type="button"
-            class={canMoveToSource ? buttonClass : buttonDisabledClass}
-            onClick={handleMoveToSource}
-            disabled={!canMoveToSource}
-            title="Move selected to {sourceTitle}"
-        >
+        <button type="button" class="transfer-list-button" title="Move selected left">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
         </button>
-
-        <button
-            type="button"
-            class={canMoveAllToSource ? buttonClass : buttonDisabledClass}
-            onClick={handleMoveAllToSource}
-            disabled={!canMoveAllToSource}
-            title="Move all to {sourceTitle}"
-        >
+        <button type="button" class="transfer-list-button transfer-list-button--disabled" title="Move all left">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="11 17 6 12 11 7"></polyline>
                 <polyline points="18 17 13 12 18 7"></polyline>
@@ -266,69 +87,31 @@ canMoveAllToSource = targetItems.length > 0 && !disabled
         </button>
     </div>
 
-    <!-- Target Panel -->
-    <div class={panelClass}>
-        <div class={headerClass}>
-            <span class="transfer-list-checkbox-wrapper" onClick={handleSelectAllTarget}>
-                <span class={targetSelected.length == filteredTargetItems.length && filteredTargetItems.length > 0 ? checkboxCheckedClass : checkboxClass}>
-                    {targetSelected.length == filteredTargetItems.length && filteredTargetItems.length > 0 ? (
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                    ) : targetSelected.length > 0 ? (
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                    ) : nil}
-                </span>
-            </span>
+    <div class="transfer-list-panel">
+        <div class="transfer-list-header">
+            <span class="transfer-list-checkbox"></span>
             <span class="transfer-list-title">{targetTitle}</span>
-            <span class="transfer-list-count">{targetSelected.length}/{targetItems.length}</span>
+            <span class="transfer-list-count">0/0</span>
         </div>
 
-        {searchable ? (
-            <div class={searchClass}>
+        {if searchable}
+            <div class="transfer-list-search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input
-                    type="text"
-                    placeholder="Search..."
-                    value={targetSearch}
-                    onInput={handleTargetSearch}
-                    disabled={disabled}
-                />
+                <input type="text" placeholder="Search..." />
             </div>
-        ) : nil}
+        {/if}
 
-        <div class={listClass}>
-            {filteredTargetItems.length > 0 ? (
-                filteredTargetItems.map(|item| (
-                    <div
-                        key={item.value}
-                        class={isTargetSelected(item) ? itemSelectedClass : itemClass}
-                        onClick={() => handleTargetSelect(item)}
-                    >
-                        <span class={isTargetSelected(item) ? checkboxCheckedClass : checkboxClass}>
-                            {isTargetSelected(item) ? (
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                            ) : nil}
-                        </span>
-                        <span class="transfer-list-item-label">{item.label}</span>
-                    </div>
-                ))
-            ) : (
-                <div class="transfer-list-empty">No items</div>
-            )}
+        <div class="transfer-list-items">
+            <div class="transfer-list-empty">No items</div>
         </div>
     </div>
 </div>
 
 <style scoped>
-.transfer-list {
+.flin-transfer-list {
     display: flex;
     align-items: stretch;
     gap: 16px;
@@ -418,11 +201,6 @@ canMoveAllToSource = targetItems.length > 0 && !disabled
 }
 
 .transfer-list-item--selected {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    cursor: pointer;
     background: rgba(var(--flin-primary-rgb), 0.1);
 }
 
@@ -444,14 +222,7 @@ canMoveAllToSource = targetItems.length > 0 && !disabled
 }
 
 .transfer-list-checkbox--checked {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    border: 2px solid var(--flin-primary);
-    border-radius: 3px;
-    flex-shrink: 0;
+    border-color: var(--flin-primary);
     background: var(--flin-primary);
     color: white;
 }
@@ -508,16 +279,42 @@ canMoveAllToSource = targetItems.length > 0 && !disabled
 }
 
 .transfer-list-button--disabled {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border: 1px solid var(--flin-neutral-200);
-    border-radius: var(--flin-radius-sm);
     background: var(--flin-neutral-50);
     color: var(--flin-neutral-300);
     cursor: not-allowed;
+    border-color: var(--flin-neutral-200);
+}
+
+/* Dark theme */
+[data-theme="dark"] .transfer-list-panel {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .transfer-list-header {
+    background: var(--flin-neutral-850);
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .transfer-list-search {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .transfer-list-item:hover {
+    background: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .transfer-list-checkbox {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .transfer-list-button {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .transfer-list-button:hover {
+    background: var(--flin-neutral-700);
 }
 </style>

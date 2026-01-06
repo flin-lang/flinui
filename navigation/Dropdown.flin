@@ -1,122 +1,24 @@
 // Dropdown.flin - FlinUI Dropdown Component
-// Dropdown menu component with click trigger, icons, and keyboard navigation
+// Dropdown menu component with click trigger
 
 // Props with defaults
-items = props.items || []
 placement = props.placement || "bottom-start"
 offset = props.offset || 8
 disabled = props.disabled || false
-closeOnSelect = props.closeOnSelect || true
 
 // Internal state
 isOpen = false
-isExiting = false
-focusedIndex = -1
 
 // Handle trigger click
 handleTriggerClick = {
-    {if !disabled}
-        {if isOpen}
-            handleClose()
-        {else}
-            isOpen = true;
-            focusedIndex = -1
-        {/if}
-    {/if}
-}
-
-// Handle close with animation
-handleClose = {
-    isExiting = true;
-    setTimeout({
-        isOpen = false;
-        isExiting = false;
-        focusedIndex = -1
-    }, 150)
+    if !disabled {
+        isOpen = !isOpen
+    }
 }
 
 // Handle click outside
 handleBackdropClick = {
-    handleClose()
-}
-
-// Handle item click
-handleItemClick = { item ->
-    {if !item.disabled && !item.divider}
-        {if item.onClick}
-            item.onClick()
-        {/if}
-        {if closeOnSelect}
-            handleClose()
-        {/if}
-    {/if}
-}
-
-// Handle keyboard navigation
-handleKeyDown = {
-    match event.key {
-        "Escape" -> handleClose()
-        "ArrowDown" -> {
-            event.preventDefault();
-            focusNextItem()
-        }
-        "ArrowUp" -> {
-            event.preventDefault();
-            focusPreviousItem()
-        }
-        "Home" -> {
-            event.preventDefault();
-            focusFirstItem()
-        }
-        "End" -> {
-            event.preventDefault();
-            focusLastItem()
-        }
-        "Enter" | " " -> {
-            event.preventDefault();
-            {if focusedIndex >= 0 && focusedIndex < items.length}
-                handleItemClick(items[focusedIndex])
-            {/if}
-        }
-        _ -> {}
-    }
-}
-
-// Keyboard navigation helpers
-focusNextItem = {
-    loop i from focusedIndex + 1 to items.length {
-        {if !items[i].disabled && !items[i].divider}
-            focusedIndex = i;
-            break
-        {/if}
-    }
-}
-
-focusPreviousItem = {
-    loop i from focusedIndex - 1 to -1 step -1 {
-        {if !items[i].disabled && !items[i].divider}
-            focusedIndex = i;
-            break
-        {/if}
-    }
-}
-
-focusFirstItem = {
-    loop i from 0 to items.length {
-        {if !items[i].disabled && !items[i].divider}
-            focusedIndex = i;
-            break
-        {/if}
-    }
-}
-
-focusLastItem = {
-    loop i from items.length - 1 to -1 step -1 {
-        {if !items[i].disabled && !items[i].divider}
-            focusedIndex = i;
-            break
-        {/if}
-    }
+    isOpen = false
 }
 
 // Placement class
@@ -133,9 +35,6 @@ placementClass = match placement {
 
 // Disabled class
 disabledClass = match disabled { true -> " dropdown-disabled", _ -> "" }
-
-// Exiting class
-exitingClass = match isExiting { true -> " dropdown-menu-exiting", _ -> "" }
 
 <div class={"flin-dropdown" ++ disabledClass}>
     <div
@@ -156,63 +55,18 @@ exitingClass = match isExiting { true -> " dropdown-menu-exiting", _ -> "" }
         ></div>
 
         <div
-            class={"dropdown-menu " ++ placementClass ++ exitingClass}
+            class={"dropdown-menu " ++ placementClass}
             role="menu"
             aria-orientation="vertical"
             tabindex="-1"
-            keydown={handleKeyDown}
             style={"--dropdown-offset: " ++ offset ++ "px"}
         >
-            <ul class="dropdown-list" role="none">
-                {loop item, index in items}
-                    {if item.divider}
-                        <li class="dropdown-divider" role="separator"></li>
-                    {else}
-                        {
-                            itemDisabledClass = match item.disabled { true -> " dropdown-item-disabled", _ -> "" }
-                            itemFocusedClass = match index == focusedIndex { true -> " dropdown-item-focused", _ -> "" }
-                            itemVariantClass = match item.variant {
-                                "danger" -> " dropdown-item-danger"
-                                "warning" -> " dropdown-item-warning"
-                                _ -> ""
-                            }
-                        }
-                        <li
-                            class={"dropdown-item" ++ itemDisabledClass ++ itemFocusedClass ++ itemVariantClass}
-                            role="menuitem"
-                            tabindex={match item.disabled { true -> "-1", _ -> "0" }}
-                            aria-disabled={item.disabled}
-                            click={{handleItemClick(item)}}
-                            mouseenter={{if !item.disabled { focusedIndex = index }}}
-                        >
-                            {if item.icon}
-                                <span class="dropdown-item-icon" aria-hidden="true">
-                                    {item.icon}
-                                </span>
-                            {/if}
-                            <span class="dropdown-item-label">
-                                {item.label}
-                            </span>
-                            {if item.shortcut}
-                                <span class="dropdown-item-shortcut" aria-label="Keyboard shortcut">
-                                    {item.shortcut}
-                                </span>
-                            {/if}
-                            {if item.badge}
-                                <span class="dropdown-item-badge">
-                                    {item.badge}
-                                </span>
-                            {/if}
-                        </li>
-                    {/if}
-                {/loop}
-            </ul>
+            {children}
         </div>
     {/if}
 </div>
 
 <style scoped>
-/* Dropdown Wrapper */
 .flin-dropdown {
     position: relative;
     display: inline-block;
@@ -223,7 +77,6 @@ exitingClass = match isExiting { true -> " dropdown-menu-exiting", _ -> "" }
     opacity: 0.5;
 }
 
-/* Trigger */
 .dropdown-trigger {
     cursor: pointer;
     display: inline-flex;
@@ -234,7 +87,6 @@ exitingClass = match isExiting { true -> " dropdown-menu-exiting", _ -> "" }
     cursor: not-allowed;
 }
 
-/* Backdrop */
 .dropdown-backdrop {
     position: fixed;
     inset: 0;
@@ -242,7 +94,6 @@ exitingClass = match isExiting { true -> " dropdown-menu-exiting", _ -> "" }
     background-color: transparent;
 }
 
-/* Menu Panel */
 .dropdown-menu {
     position: absolute;
     z-index: 9998;
@@ -255,37 +106,8 @@ exitingClass = match isExiting { true -> " dropdown-menu-exiting", _ -> "" }
     max-height: 320px;
     overflow-y: auto;
     padding: var(--flin-space-2);
-    animation: dropdownFadeIn var(--flin-transition-fast) ease-out;
 }
 
-@keyframes dropdownFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-8px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.dropdown-menu-exiting {
-    animation: dropdownFadeOut var(--flin-transition-fast) ease-in forwards;
-}
-
-@keyframes dropdownFadeOut {
-    to {
-        opacity: 0;
-        transform: translateY(-8px) scale(0.95);
-    }
-}
-
-/* Focus styling */
-.dropdown-menu:focus {
-    outline: none;
-}
-
-/* Placement Variants */
 .dropdown-bottom-start {
     top: calc(100% + var(--dropdown-offset));
     left: 0;
@@ -328,185 +150,8 @@ exitingClass = match isExiting { true -> " dropdown-menu-exiting", _ -> "" }
     top: 0;
 }
 
-/* List */
-.dropdown-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-space-1);
-}
-
-/* Item */
-.dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-3);
-    padding: var(--flin-space-2) var(--flin-space-3);
-    border-radius: var(--flin-radius-md);
-    font-size: var(--flin-text-sm);
-    line-height: 1.5;
-    color: var(--flin-fg);
-    cursor: pointer;
-    transition: all var(--flin-transition-fast);
-    user-select: none;
-    -webkit-user-select: none;
-    outline: none;
-}
-
-.dropdown-item:hover:not(.dropdown-item-disabled),
-.dropdown-item-focused:not(.dropdown-item-disabled) {
-    background-color: var(--flin-neutral-100);
-}
-
-.dropdown-item:active:not(.dropdown-item-disabled) {
-    background-color: var(--flin-neutral-200);
-}
-
-/* Disabled Item */
-.dropdown-item-disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-/* Danger Variant */
-.dropdown-item-danger {
-    color: var(--flin-danger);
-}
-
-.dropdown-item-danger:hover:not(.dropdown-item-disabled),
-.dropdown-item-danger.dropdown-item-focused:not(.dropdown-item-disabled) {
-    background-color: var(--flin-danger-light);
-}
-
-/* Warning Variant */
-.dropdown-item-warning {
-    color: var(--flin-warning);
-}
-
-.dropdown-item-warning:hover:not(.dropdown-item-disabled),
-.dropdown-item-warning.dropdown-item-focused:not(.dropdown-item-disabled) {
-    background-color: var(--flin-warning-light);
-}
-
-/* Item Icon */
-.dropdown-item-icon {
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--flin-fg-muted);
-}
-
-.dropdown-item:hover .dropdown-item-icon,
-.dropdown-item-focused .dropdown-item-icon {
-    color: inherit;
-}
-
-/* Item Label */
-.dropdown-item-label {
-    flex: 1;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Item Shortcut */
-.dropdown-item-shortcut {
-    flex-shrink: 0;
-    font-size: var(--flin-text-xs);
-    color: var(--flin-fg-muted);
-    font-family: var(--flin-font-mono);
-    background-color: var(--flin-neutral-100);
-    padding: 2px 6px;
-    border-radius: var(--flin-radius-sm);
-}
-
-/* Item Badge */
-.dropdown-item-badge {
-    flex-shrink: 0;
-    font-size: var(--flin-text-xs);
-    font-weight: 600;
-    color: white;
-    background-color: var(--flin-primary);
-    padding: 2px 8px;
-    border-radius: var(--flin-radius-full);
-}
-
-/* Divider */
-.dropdown-divider {
-    height: 1px;
-    background-color: var(--flin-neutral-200);
-    margin: var(--flin-space-1) 0;
-}
-
-/* Focus visible styling */
-.dropdown-item:focus-visible {
-    background-color: var(--flin-neutral-100);
-    box-shadow: 0 0 0 2px var(--flin-primary);
-}
-
-/* Scrollbar styling */
-.dropdown-menu::-webkit-scrollbar {
-    width: 6px;
-}
-
-.dropdown-menu::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.dropdown-menu::-webkit-scrollbar-thumb {
-    background-color: var(--flin-neutral-300);
-    border-radius: 3px;
-}
-
-/* Dark theme support */
 [data-theme="dark"] .dropdown-menu {
     background-color: var(--flin-neutral-800);
     border-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .dropdown-item:hover:not(.dropdown-item-disabled),
-[data-theme="dark"] .dropdown-item-focused:not(.dropdown-item-disabled) {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .dropdown-item:active:not(.dropdown-item-disabled) {
-    background-color: var(--flin-neutral-600);
-}
-
-[data-theme="dark"] .dropdown-item-shortcut {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .dropdown-divider {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .dropdown-item-danger:hover:not(.dropdown-item-disabled),
-[data-theme="dark"] .dropdown-item-danger.dropdown-item-focused:not(.dropdown-item-disabled) {
-    background-color: rgba(239, 68, 68, 0.15);
-}
-
-[data-theme="dark"] .dropdown-item-warning:hover:not(.dropdown-item-disabled),
-[data-theme="dark"] .dropdown-item-warning.dropdown-item-focused:not(.dropdown-item-disabled) {
-    background-color: rgba(245, 158, 11, 0.15);
-}
-
-[data-theme="dark"] .dropdown-menu::-webkit-scrollbar-thumb {
-    background-color: var(--flin-neutral-600);
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-    .dropdown-menu {
-        min-width: 160px;
-        max-width: calc(100vw - 32px);
-    }
 }
 </style>

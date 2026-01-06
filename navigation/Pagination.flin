@@ -1,135 +1,69 @@
 // Pagination.flin - FlinUI Pagination Component
-// Navigation for paginated content with page numbers and controls
+// Navigation for paginated content
 
 // Props with defaults
-page = props.page || 1
-total = props.total || 1
-siblingCount = props.siblingCount || 1
+currentPage = props.currentPage || 1
+totalPages = props.totalPages || 1
 onChange = props.onChange
 showFirstLast = props.showFirstLast || true
 showPrevNext = props.showPrevNext || true
 size = props.size || "md"
 variant = props.variant || "default"
 
-// Ensure page is within valid range
-currentPage = match {
-    page < 1 -> 1
-    page > total -> total
-    _ -> page
-}
-
-// Calculate page range to display
-leftSibling = max(currentPage - siblingCount, 1)
-rightSibling = min(currentPage + siblingCount, total)
-
-// Should show left dots
-showLeftDots = leftSibling > 2
-
-// Should show right dots
-showRightDots = rightSibling < total - 1
-
-// Generate page numbers array
-generatePageNumbers = {
-    pages = []
-
-    // Always show first page
-    if total > 0 {
-        pages = pages ++ [1]
-    }
-
-    // Left dots
-    if showLeftDots {
-        pages = pages ++ ["..."]
-    }
-
-    // Sibling pages
-    {for i in range(leftSibling, rightSibling + 1)}
-        if i > 1 && i < total {
-            pages = pages ++ [i]
-        }
-    {/for}
-
-    // Right dots
-    if showRightDots {
-        pages = pages ++ ["..."]
-    }
-
-    // Always show last page
-    if total > 1 {
-        pages = pages ++ [total]
-    }
-
-    pages
-}
-
-pageNumbers = generatePageNumbers()
-
-// Navigation functions
-goToPage = {
-    if onChange && event.page >= 1 && event.page <= total {
-        onChange(event.page)
-    }
-}
-
+// Navigation handlers
 goToPrevious = {
-    if currentPage > 1 {
-        goToPage({ page: currentPage - 1 })
+    if currentPage > 1 && onChange {
+        onChange(currentPage - 1)
     }
 }
 
 goToNext = {
-    if currentPage < total {
-        goToPage({ page: currentPage + 1 })
+    if currentPage < totalPages && onChange {
+        onChange(currentPage + 1)
     }
 }
 
 goToFirst = {
-    goToPage({ page: 1 })
+    if onChange {
+        onChange(1)
+    }
 }
 
 goToLast = {
-    goToPage({ page: total })
-}
-
-// Handle keyboard navigation
-handleKeydown = {
-    match event.key {
-        "ArrowLeft" -> goToPrevious()
-        "ArrowRight" -> goToNext()
-        "Home" -> goToFirst()
-        "End" -> goToLast()
-        _ -> {}
+    if onChange {
+        onChange(totalPages)
     }
 }
 
 // Size class
 sizeClass = match size {
-    "sm" -> "flin-pagination--sm"
-    "lg" -> "flin-pagination--lg"
-    _ -> "flin-pagination--md"
+    "sm" -> " flin-pagination--sm"
+    "lg" -> " flin-pagination--lg"
+    _ -> " flin-pagination--md"
 }
 
 // Variant class
 variantClass = match variant {
-    "outline" -> "flin-pagination--outline"
-    "ghost" -> "flin-pagination--ghost"
-    _ -> "flin-pagination--default"
+    "outline" -> " flin-pagination--outline"
+    "ghost" -> " flin-pagination--ghost"
+    _ -> " flin-pagination--default"
 }
 
+// Computed disabled states
+prevDisabled = currentPage == 1
+nextDisabled = currentPage == totalPages
+
 <nav
-    class={"flin-pagination " ++ sizeClass ++ " " ++ variantClass}
+    class={"flin-pagination" ++ sizeClass ++ variantClass}
     aria-label="Pagination"
     role="navigation"
-    keydown={handleKeydown}
 >
-    // First page button
     {if showFirstLast}
         <button
             class="flin-pagination__btn flin-pagination__btn--first"
             click={goToFirst}
-            disabled={currentPage == 1}
+            disabled={prevDisabled}
             aria-label="Go to first page"
-            title="First page"
         >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="11 17 6 12 11 7"></polyline>
@@ -138,14 +72,12 @@ variantClass = match variant {
         </button>
     {/if}
 
-    // Previous button
     {if showPrevNext}
         <button
             class="flin-pagination__btn flin-pagination__btn--prev"
             click={goToPrevious}
-            disabled={currentPage == 1}
+            disabled={prevDisabled}
             aria-label="Go to previous page"
-            title="Previous page"
         >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="15 18 9 12 15 6"></polyline>
@@ -153,37 +85,18 @@ variantClass = match variant {
         </button>
     {/if}
 
-    // Page numbers
     <div class="flin-pagination__pages">
-        {for pageNum in pageNumbers}
-            {if pageNum == "..."}
-                <span class="flin-pagination__ellipsis" aria-hidden="true">
-                    ...
-                </span>
-            {else}
-                {
-                    pageActiveClass = match pageNum == currentPage { true -> " flin-pagination__page--active", _ -> "" }
-                }
-                <button
-                    class={"flin-pagination__page" ++ pageActiveClass}
-                    click={goToPage({ page: pageNum })}
-                    aria-label={"Go to page " ++ pageNum}
-                    aria-current={if pageNum == currentPage { "page" } else { none }}
-                >
-                    {pageNum}
-                </button>
-            {/if}
-        {/for}
+        <span class="flin-pagination__info">
+            {currentPage} / {totalPages}
+        </span>
     </div>
 
-    // Next button
     {if showPrevNext}
         <button
             class="flin-pagination__btn flin-pagination__btn--next"
             click={goToNext}
-            disabled={currentPage == total}
+            disabled={nextDisabled}
             aria-label="Go to next page"
-            title="Next page"
         >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -191,14 +104,12 @@ variantClass = match variant {
         </button>
     {/if}
 
-    // Last page button
     {if showFirstLast}
         <button
             class="flin-pagination__btn flin-pagination__btn--last"
             click={goToLast}
-            disabled={currentPage == total}
+            disabled={nextDisabled}
             aria-label="Go to last page"
-            title="Last page"
         >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="13 17 18 12 13 7"></polyline>
@@ -214,7 +125,6 @@ variantClass = match variant {
     align-items: center;
     gap: var(--flin-space-1);
     user-select: none;
-    -webkit-user-select: none;
 }
 
 .flin-pagination__pages {
@@ -223,9 +133,13 @@ variantClass = match variant {
     gap: var(--flin-space-1);
 }
 
-/* Base button styles */
-.flin-pagination__btn,
-.flin-pagination__page {
+.flin-pagination__info {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    padding: 0 var(--flin-space-2);
+}
+
+.flin-pagination__btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -237,8 +151,7 @@ variantClass = match variant {
     transition: all var(--flin-transition-fast);
 }
 
-.flin-pagination__btn:focus-visible,
-.flin-pagination__page:focus-visible {
+.flin-pagination__btn:focus-visible {
     outline: 2px solid var(--flin-primary);
     outline-offset: 2px;
 }
@@ -253,163 +166,64 @@ variantClass = match variant {
     height: 16px;
 }
 
-/* Size: Small */
-.flin-pagination--sm .flin-pagination__btn,
-.flin-pagination--sm .flin-pagination__page {
+.flin-pagination--sm .flin-pagination__btn {
     min-width: 28px;
     height: 28px;
-    font-size: var(--flin-text-xs);
 }
 
-.flin-pagination--sm .flin-pagination__btn svg {
-    width: 14px;
-    height: 14px;
-}
-
-/* Size: Medium (default) */
-.flin-pagination--md .flin-pagination__btn,
-.flin-pagination--md .flin-pagination__page {
+.flin-pagination--md .flin-pagination__btn {
     min-width: 36px;
     height: 36px;
-    font-size: var(--flin-text-sm);
 }
 
-/* Size: Large */
-.flin-pagination--lg .flin-pagination__btn,
-.flin-pagination--lg .flin-pagination__page {
+.flin-pagination--lg .flin-pagination__btn {
     min-width: 44px;
     height: 44px;
-    font-size: var(--flin-text-base);
 }
 
-.flin-pagination--lg .flin-pagination__btn svg {
-    width: 20px;
-    height: 20px;
-}
-
-/* Variant: Default */
-.flin-pagination--default .flin-pagination__btn,
-.flin-pagination--default .flin-pagination__page {
+.flin-pagination--default .flin-pagination__btn {
     background-color: var(--flin-bg);
     color: var(--flin-fg-muted);
     border: 1px solid var(--flin-neutral-200);
 }
 
-.flin-pagination--default .flin-pagination__btn:hover:not(:disabled),
-.flin-pagination--default .flin-pagination__page:hover:not(.flin-pagination__page--active) {
+.flin-pagination--default .flin-pagination__btn:hover:not(:disabled) {
     background-color: var(--flin-neutral-100);
     color: var(--flin-fg);
 }
 
-.flin-pagination--default .flin-pagination__page--active {
-    background-color: var(--flin-primary);
-    color: white;
-    border-color: var(--flin-primary);
-}
-
-/* Variant: Outline */
-.flin-pagination--outline .flin-pagination__btn,
-.flin-pagination--outline .flin-pagination__page {
+.flin-pagination--outline .flin-pagination__btn {
     background-color: transparent;
     color: var(--flin-fg-muted);
     border: 1px solid var(--flin-neutral-200);
 }
 
-.flin-pagination--outline .flin-pagination__btn:hover:not(:disabled),
-.flin-pagination--outline .flin-pagination__page:hover:not(.flin-pagination__page--active) {
+.flin-pagination--outline .flin-pagination__btn:hover:not(:disabled) {
     border-color: var(--flin-primary);
     color: var(--flin-primary);
 }
 
-.flin-pagination--outline .flin-pagination__page--active {
-    background-color: transparent;
-    color: var(--flin-primary);
-    border-color: var(--flin-primary);
-}
-
-/* Variant: Ghost */
-.flin-pagination--ghost .flin-pagination__btn,
-.flin-pagination--ghost .flin-pagination__page {
+.flin-pagination--ghost .flin-pagination__btn {
     background-color: transparent;
     color: var(--flin-fg-muted);
     border: none;
 }
 
-.flin-pagination--ghost .flin-pagination__btn:hover:not(:disabled),
-.flin-pagination--ghost .flin-pagination__page:hover:not(.flin-pagination__page--active) {
+.flin-pagination--ghost .flin-pagination__btn:hover:not(:disabled) {
     background-color: var(--flin-neutral-100);
     color: var(--flin-fg);
 }
 
-.flin-pagination--ghost .flin-pagination__page--active {
-    background-color: var(--flin-primary-light);
-    color: var(--flin-primary);
-}
-
-/* Ellipsis */
-.flin-pagination__ellipsis {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 36px;
-    height: 36px;
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg-muted);
-}
-
-.flin-pagination--sm .flin-pagination__ellipsis {
-    min-width: 28px;
-    height: 28px;
-}
-
-.flin-pagination--lg .flin-pagination__ellipsis {
-    min-width: 44px;
-    height: 44px;
-}
-
-/* Responsive styles */
-@media (max-width: 640px) {
-    .flin-pagination {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: var(--flin-space-2);
-    }
-
-    .flin-pagination__pages {
-        order: 3;
-        width: 100%;
-        justify-content: center;
-    }
-
-    /* Hide some page numbers on mobile */
-    .flin-pagination__page:not(.flin-pagination__page--active):not(:first-child):not(:last-child) {
-        display: none;
-    }
-}
-
-/* Dark theme support */
-[data-theme="dark"] .flin-pagination--default .flin-pagination__btn,
-[data-theme="dark"] .flin-pagination--default .flin-pagination__page {
+[data-theme="dark"] .flin-pagination--default .flin-pagination__btn {
     background-color: var(--flin-neutral-800);
     border-color: var(--flin-neutral-700);
 }
 
-[data-theme="dark"] .flin-pagination--default .flin-pagination__btn:hover:not(:disabled),
-[data-theme="dark"] .flin-pagination--default .flin-pagination__page:hover:not(.flin-pagination__page--active) {
+[data-theme="dark"] .flin-pagination--default .flin-pagination__btn:hover:not(:disabled) {
     background-color: var(--flin-neutral-700);
 }
 
-[data-theme="dark"] .flin-pagination--outline .flin-pagination__btn,
-[data-theme="dark"] .flin-pagination--outline .flin-pagination__page {
-    border-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-pagination--ghost .flin-pagination__btn:hover:not(:disabled),
-[data-theme="dark"] .flin-pagination--ghost .flin-pagination__page:hover:not(.flin-pagination__page--active) {
+[data-theme="dark"] .flin-pagination--ghost .flin-pagination__btn:hover:not(:disabled) {
     background-color: var(--flin-neutral-800);
-}
-
-[data-theme="dark"] .flin-pagination--ghost .flin-pagination__page--active {
-    background-color: rgba(59, 130, 246, 0.15);
 }
 </style>

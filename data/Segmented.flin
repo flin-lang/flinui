@@ -2,7 +2,6 @@
 // iOS-style segmented control / button group selector
 
 // Props with defaults
-options = props.options || []
 value = props.value || ""
 disabled = props.disabled || false
 size = props.size || "md"
@@ -11,47 +10,6 @@ onChange = props.onChange
 
 // State
 selectedValue = value
-
-// Event handler
-handleSelect = (optionValue) => {
-    {if disabled}
-        return
-    {/if}
-
-    selectedValue = optionValue
-
-    {if onChange}
-        onChange(optionValue)
-    {/if}
-}
-
-// Handle keyboard navigation
-handleKeyDown = (event, currentIndex) => {
-    {if disabled}
-        return
-    {/if}
-
-    newIndex = currentIndex
-
-    {if event.key == "ArrowLeft" || event.key == "ArrowUp"}
-        event.preventDefault()
-        newIndex = if currentIndex > 0 { currentIndex - 1 } else { options.length - 1 }
-    {/if}
-
-    {if event.key == "ArrowRight" || event.key == "ArrowDown"}
-        event.preventDefault()
-        newIndex = if currentIndex < options.length - 1 { currentIndex + 1 } else { 0 }
-    {/if}
-
-    {if event.key == "Enter" || event.key == " "}
-        event.preventDefault()
-        handleSelect(options[currentIndex].value)
-    {/if}
-
-    {if newIndex != currentIndex}
-        handleSelect(options[newIndex].value)
-    {/if}
-}
 
 // Compute size class
 sizeClass = match size {
@@ -73,42 +31,15 @@ disabledClass = match disabled {
     _ -> ""
 }
 
-// Find selected index for indicator positioning
-selectedIndex = 0
-{for option, i in options}
-    {if option.value == selectedValue}
-        selectedIndex = i
-    {/if}
-{/for}
-
 <div class={"flin-segmented " ++ sizeClass ++ blockClass ++ disabledClass}
      role="tablist"
      aria-label="Segmented control">
 
     <!-- Sliding indicator background -->
-    <div class="flin-segmented__indicator"
-         style={"--segment-count: " ++ options.length ++ "; --selected-index: " ++ selectedIndex}>
-    </div>
+    <div class="flin-segmented__indicator"></div>
 
-    <!-- Options -->
-    {for option, index in options}
-        <button class={"flin-segmented__option" ++ (if option.value == selectedValue { " flin-segmented__option--selected" } else { "" }) ++ (if option.disabled { " flin-segmented__option--disabled" } else { "" })}
-                type="button"
-                role="tab"
-                aria-selected={option.value == selectedValue}
-                aria-controls={option.value}
-                tabindex={if option.value == selectedValue { "0" } else { "-1" }}
-                disabled={disabled || option.disabled}
-                click={handleSelect(option.value)}
-                keydown={(e) => handleKeyDown(e, index)}>
-
-            {if option.icon}
-                <span class="flin-segmented__icon">{option.icon}</span>
-            {/if}
-
-            <span class="flin-segmented__label">{option.label}</span>
-        </button>
-    {/for}
+    <!-- Options slot - parent provides button children -->
+    <slot></slot>
 </div>
 
 <style scoped>
@@ -128,11 +59,11 @@ selectedIndex = 0
     top: var(--flin-space-1);
     bottom: var(--flin-space-1);
     left: var(--flin-space-1);
-    width: calc((100% - var(--flin-space-2)) / var(--segment-count));
+    width: calc((100% - var(--flin-space-2)) / var(--segment-count, 3));
     background-color: var(--flin-bg);
     border-radius: var(--flin-radius-md);
     box-shadow: var(--flin-shadow-sm);
-    transform: translateX(calc(var(--selected-index) * 100%));
+    transform: translateX(calc(var(--selected-index, 0) * 100%));
     transition: transform var(--flin-transition-normal);
     z-index: 0;
 }
@@ -208,7 +139,7 @@ selectedIndex = 0
     top: 2px;
     bottom: 2px;
     left: 2px;
-    width: calc((100% - 4px) / var(--segment-count));
+    width: calc((100% - 4px) / var(--segment-count, 3));
 }
 
 .flin-segmented--lg .flin-segmented__option {

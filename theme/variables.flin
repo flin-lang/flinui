@@ -1,340 +1,147 @@
 // FlinUI CSS Variables
-// TH-07: Complete CSS variable system with getters and setters
+// TH-07: Complete CSS variable system reference
 
 // ============================================================================
 // CSS VARIABLE REFERENCE
 // ============================================================================
 
-/// Complete list of all FlinUI CSS variables organized by category
+// This file documents all FlinUI CSS variables organized by category
+// Use these CSS variable names directly in your FLIN components
 
 // Color Variables
-cssVariables = {
-    // Primary colors
-    primary: "--flin-primary",
-    primaryHover: "--flin-primary-hover",
-    primaryActive: "--flin-primary-active",
-    primaryLight: "--flin-primary-light",
+cssVarPrimary = "--flin-primary"
+cssVarPrimaryHover = "--flin-primary-hover"
+cssVarPrimaryActive = "--flin-primary-active"
+cssVarPrimaryLight = "--flin-primary-light"
 
-    // Secondary colors
-    secondary: "--flin-secondary",
-    secondaryHover: "--flin-secondary-hover",
-    secondaryLight: "--flin-secondary-light",
+cssVarSecondary = "--flin-secondary"
+cssVarSecondaryHover = "--flin-secondary-hover"
+cssVarSecondaryLight = "--flin-secondary-light"
 
-    // Success colors
-    success: "--flin-success",
-    successHover: "--flin-success-hover",
-    successLight: "--flin-success-light",
+cssVarSuccess = "--flin-success"
+cssVarSuccessHover = "--flin-success-hover"
+cssVarSuccessLight = "--flin-success-light"
 
-    // Warning colors
-    warning: "--flin-warning",
-    warningHover: "--flin-warning-hover",
-    warningLight: "--flin-warning-light",
+cssVarWarning = "--flin-warning"
+cssVarWarningHover = "--flin-warning-hover"
+cssVarWarningLight = "--flin-warning-light"
 
-    // Danger colors
-    danger: "--flin-danger",
-    dangerHover: "--flin-danger-hover",
-    dangerLight: "--flin-danger-light",
+cssVarDanger = "--flin-danger"
+cssVarDangerHover = "--flin-danger-hover"
+cssVarDangerLight = "--flin-danger-light"
 
-    // Info colors
-    info: "--flin-info",
-    infoHover: "--flin-info-hover",
-    infoLight: "--flin-info-light",
+cssVarInfo = "--flin-info"
+cssVarInfoHover = "--flin-info-hover"
+cssVarInfoLight = "--flin-info-light"
 
-    // Neutral colors
-    neutral50: "--flin-neutral-50",
-    neutral100: "--flin-neutral-100",
-    neutral200: "--flin-neutral-200",
-    neutral300: "--flin-neutral-300",
-    neutral400: "--flin-neutral-400",
-    neutral500: "--flin-neutral-500",
-    neutral600: "--flin-neutral-600",
-    neutral700: "--flin-neutral-700",
-    neutral800: "--flin-neutral-800",
-    neutral900: "--flin-neutral-900",
+// Neutral colors
+cssVarNeutral50 = "--flin-neutral-50"
+cssVarNeutral100 = "--flin-neutral-100"
+cssVarNeutral200 = "--flin-neutral-200"
+cssVarNeutral300 = "--flin-neutral-300"
+cssVarNeutral400 = "--flin-neutral-400"
+cssVarNeutral500 = "--flin-neutral-500"
+cssVarNeutral600 = "--flin-neutral-600"
+cssVarNeutral700 = "--flin-neutral-700"
+cssVarNeutral800 = "--flin-neutral-800"
+cssVarNeutral900 = "--flin-neutral-900"
 
-    // Background & Foreground
-    bg: "--flin-bg",
-    bgMuted: "--flin-bg-muted",
-    fg: "--flin-fg",
-    fgMuted: "--flin-fg-muted",
+// Background & Foreground
+cssVarBg = "--flin-bg"
+cssVarBgMuted = "--flin-bg-muted"
+cssVarFg = "--flin-fg"
+cssVarFgMuted = "--flin-fg-muted"
 
-    // Typography
-    fontSans: "--flin-font-sans",
-    fontMono: "--flin-font-mono",
-    textXs: "--flin-text-xs",
-    textSm: "--flin-text-sm",
-    textBase: "--flin-text-base",
-    textLg: "--flin-text-lg",
-    textXl: "--flin-text-xl",
-    text2xl: "--flin-text-2xl",
-    text3xl: "--flin-text-3xl",
-    text4xl: "--flin-text-4xl",
+// Typography
+cssVarFontSans = "--flin-font-sans"
+cssVarFontMono = "--flin-font-mono"
+cssVarTextXs = "--flin-text-xs"
+cssVarTextSm = "--flin-text-sm"
+cssVarTextBase = "--flin-text-base"
+cssVarTextLg = "--flin-text-lg"
+cssVarTextXl = "--flin-text-xl"
+cssVarText2xl = "--flin-text-2xl"
+cssVarText3xl = "--flin-text-3xl"
+cssVarText4xl = "--flin-text-4xl"
 
-    // Spacing
-    space1: "--flin-space-1",
-    space2: "--flin-space-2",
-    space3: "--flin-space-3",
-    space4: "--flin-space-4",
-    space6: "--flin-space-6",
-    space8: "--flin-space-8",
-    space12: "--flin-space-12",
-    space16: "--flin-space-16",
+// Spacing
+cssVarSpace1 = "--flin-space-1"
+cssVarSpace2 = "--flin-space-2"
+cssVarSpace3 = "--flin-space-3"
+cssVarSpace4 = "--flin-space-4"
+cssVarSpace6 = "--flin-space-6"
+cssVarSpace8 = "--flin-space-8"
+cssVarSpace12 = "--flin-space-12"
+cssVarSpace16 = "--flin-space-16"
 
-    // Border Radius
-    radiusSm: "--flin-radius-sm",
-    radiusMd: "--flin-radius-md",
-    radiusLg: "--flin-radius-lg",
-    radiusXl: "--flin-radius-xl",
-    radiusFull: "--flin-radius-full",
+// Border Radius
+cssVarRadiusSm = "--flin-radius-sm"
+cssVarRadiusMd = "--flin-radius-md"
+cssVarRadiusLg = "--flin-radius-lg"
+cssVarRadiusXl = "--flin-radius-xl"
+cssVarRadiusFull = "--flin-radius-full"
 
-    // Shadows
-    shadowNone: "--flin-shadow-none",
-    shadowSm: "--flin-shadow-sm",
-    shadowMd: "--flin-shadow-md",
-    shadowLg: "--flin-shadow-lg",
-    shadowXl: "--flin-shadow-xl",
-    shadow2xl: "--flin-shadow-2xl",
-    shadowInner: "--flin-shadow-inner",
+// Shadows
+cssVarShadowNone = "--flin-shadow-none"
+cssVarShadowSm = "--flin-shadow-sm"
+cssVarShadowMd = "--flin-shadow-md"
+cssVarShadowLg = "--flin-shadow-lg"
+cssVarShadowXl = "--flin-shadow-xl"
+cssVarShadow2xl = "--flin-shadow-2xl"
+cssVarShadowInner = "--flin-shadow-inner"
 
-    // Transitions
-    transitionFast: "--flin-transition-fast",
-    transitionNormal: "--flin-transition-normal",
-    transitionSlow: "--flin-transition-slow",
-    transitionAll: "--flin-transition-all",
-    transitionColors: "--flin-transition-colors",
-    transitionOpacity: "--flin-transition-opacity",
-    transitionTransform: "--flin-transition-transform",
-    transitionShadow: "--flin-transition-shadow",
+// Transitions
+cssVarTransitionFast = "--flin-transition-fast"
+cssVarTransitionNormal = "--flin-transition-normal"
+cssVarTransitionSlow = "--flin-transition-slow"
+cssVarTransitionAll = "--flin-transition-all"
+cssVarTransitionColors = "--flin-transition-colors"
+cssVarTransitionOpacity = "--flin-transition-opacity"
+cssVarTransitionTransform = "--flin-transition-transform"
+cssVarTransitionShadow = "--flin-transition-shadow"
 
-    // Animation Durations
-    durationFast: "--flin-duration-fast",
-    durationNormal: "--flin-duration-normal",
-    durationSlow: "--flin-duration-slow",
-    durationSlowest: "--flin-duration-slowest",
+// Animation Durations
+cssVarDurationFast = "--flin-duration-fast"
+cssVarDurationNormal = "--flin-duration-normal"
+cssVarDurationSlow = "--flin-duration-slow"
+cssVarDurationSlowest = "--flin-duration-slowest"
 
-    // Easing Functions
-    easeDefault: "--flin-ease-default",
-    easeIn: "--flin-ease-in",
-    easeOut: "--flin-ease-out",
-    easeInOut: "--flin-ease-in-out",
-    easeBounce: "--flin-ease-bounce",
-    easeElastic: "--flin-ease-elastic",
+// Easing Functions
+cssVarEaseDefault = "--flin-ease-default"
+cssVarEaseIn = "--flin-ease-in"
+cssVarEaseOut = "--flin-ease-out"
+cssVarEaseInOut = "--flin-ease-in-out"
+cssVarEaseBounce = "--flin-ease-bounce"
+cssVarEaseElastic = "--flin-ease-elastic"
 
-    // Breakpoints (for JS usage)
-    breakpointSm: "--flin-breakpoint-sm",
-    breakpointMd: "--flin-breakpoint-md",
-    breakpointLg: "--flin-breakpoint-lg",
-    breakpointXl: "--flin-breakpoint-xl",
-    breakpoint2xl: "--flin-breakpoint-2xl",
+// Breakpoints (for JS usage)
+cssVarBreakpointSm = "--flin-breakpoint-sm"
+cssVarBreakpointMd = "--flin-breakpoint-md"
+cssVarBreakpointLg = "--flin-breakpoint-lg"
+cssVarBreakpointXl = "--flin-breakpoint-xl"
+cssVarBreakpoint2xl = "--flin-breakpoint-2xl"
 
-    // Containers
-    containerSm: "--flin-container-sm",
-    containerMd: "--flin-container-md",
-    containerLg: "--flin-container-lg",
-    containerXl: "--flin-container-xl",
-    container2xl: "--flin-container-2xl",
+// Containers
+cssVarContainerSm = "--flin-container-sm"
+cssVarContainerMd = "--flin-container-md"
+cssVarContainerLg = "--flin-container-lg"
+cssVarContainerXl = "--flin-container-xl"
+cssVarContainer2xl = "--flin-container-2xl"
 
-    // Fluid Typography
-    fluidTextSm: "--flin-fluid-text-sm",
-    fluidTextBase: "--flin-fluid-text-base",
-    fluidTextLg: "--flin-fluid-text-lg",
-    fluidTextXl: "--flin-fluid-text-xl",
-    fluidText2xl: "--flin-fluid-text-2xl",
-    fluidText3xl: "--flin-fluid-text-3xl",
-    fluidText4xl: "--flin-fluid-text-4xl",
+// Fluid Typography
+cssVarFluidTextSm = "--flin-fluid-text-sm"
+cssVarFluidTextBase = "--flin-fluid-text-base"
+cssVarFluidTextLg = "--flin-fluid-text-lg"
+cssVarFluidTextXl = "--flin-fluid-text-xl"
+cssVarFluidText2xl = "--flin-fluid-text-2xl"
+cssVarFluidText3xl = "--flin-fluid-text-3xl"
+cssVarFluidText4xl = "--flin-fluid-text-4xl"
 
-    // Fluid Spacing
-    fluidSpace1: "--flin-fluid-space-1",
-    fluidSpace2: "--flin-fluid-space-2",
-    fluidSpace4: "--flin-fluid-space-4",
-    fluidSpace8: "--flin-fluid-space-8"
-}
-
-// ============================================================================
-// CSS VARIABLE UTILITIES
-// ============================================================================
-
-/// Set a CSS variable on the document root
-/// @param name - Variable name (with or without -- prefix)
-/// @param value - Variable value
-setCSSVariable = fn(name, value) {
-    // Ensure -- prefix
-    varName = if name.startsWith("--") { name } else { "--" + name }
-
-    // JavaScript implementation:
-    // document.documentElement.style.setProperty(varName, value);
-
-    true
-}
-
-/// Get a CSS variable value from the document root
-/// @param name - Variable name (with or without -- prefix)
-/// @returns Variable value as string
-getCSSVariable = fn(name) {
-    // Ensure -- prefix
-    varName = if name.startsWith("--") { name } else { "--" + name }
-
-    // JavaScript implementation:
-    // return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-
-    ""
-}
-
-/// Set multiple CSS variables at once
-/// @param variables - Object with variable names and values
-setCSSVariables = fn(variables) {
-    // JavaScript implementation:
-    // Object.entries(variables).forEach(([key, value]) => {
-    //     setCSSVariable(key, value);
-    // });
-
-    true
-}
-
-/// Get multiple CSS variables at once
-/// @param names - Array of variable names
-/// @returns Object with variable names and values
-getCSSVariables = fn(names) {
-    // JavaScript implementation:
-    // return names.reduce((acc, name) => {
-    //     acc[name] = getCSSVariable(name);
-    //     return acc;
-    // }, {});
-
-    {}
-}
-
-/// Remove a CSS variable (reset to inherited value)
-/// @param name - Variable name (with or without -- prefix)
-removeCSSVariable = fn(name) {
-    // Ensure -- prefix
-    varName = if name.startsWith("--") { name } else { "--" + name }
-
-    // JavaScript implementation:
-    // document.documentElement.style.removeProperty(varName);
-
-    true
-}
-
-/// Reset all FlinUI CSS variables to their defaults
-resetCSSVariables = fn() {
-    // JavaScript implementation:
-    // const root = document.documentElement;
-    // Object.values(cssVariables).forEach(varName => {
-    //     root.style.removeProperty(varName);
-    // });
-
-    true
-}
-
-/// Get all FlinUI CSS variables as an object
-getAllCSSVariables = fn() {
-    // JavaScript implementation:
-    // const root = document.documentElement;
-    // const computed = getComputedStyle(root);
-    // return Object.entries(cssVariables).reduce((acc, [key, varName]) => {
-    //     acc[key] = computed.getPropertyValue(varName).trim();
-    //     return acc;
-    // }, {});
-
-    {}
-}
-
-/// Check if a CSS variable is defined
-hasCSSVariable = fn(name) {
-    varName = if name.startsWith("--") { name } else { "--" + name }
-    value = getCSSVariable(varName)
-    value != ""
-}
-
-// ============================================================================
-// SCOPED VARIABLE UTILITIES
-// ============================================================================
-
-/// Set a CSS variable on a specific element
-/// @param element - DOM element selector or reference
-/// @param name - Variable name
-/// @param value - Variable value
-setScopedCSSVariable = fn(element, name, value) {
-    varName = if name.startsWith("--") { name } else { "--" + name }
-
-    // JavaScript implementation:
-    // const el = typeof element === 'string' ? document.querySelector(element) : element;
-    // if (el) el.style.setProperty(varName, value);
-
-    true
-}
-
-/// Get a CSS variable from a specific element
-/// @param element - DOM element selector or reference
-/// @param name - Variable name
-getScopedCSSVariable = fn(element, name) {
-    varName = if name.startsWith("--") { name } else { "--" + name }
-
-    // JavaScript implementation:
-    // const el = typeof element === 'string' ? document.querySelector(element) : element;
-    // return el ? getComputedStyle(el).getPropertyValue(varName).trim() : '';
-
-    ""
-}
-
-// ============================================================================
-// REACTIVE VARIABLE WATCHERS
-// ============================================================================
-
-/// Watch for changes to a CSS variable
-/// @param name - Variable name to watch
-/// @param callback - Function to call when variable changes
-watchCSSVariable = fn(name, callback) {
-    // JavaScript implementation using MutationObserver:
-    // const observer = new MutationObserver((mutations) => {
-    //     const currentValue = getCSSVariable(name);
-    //     callback(currentValue);
-    // });
-    // observer.observe(document.documentElement, {
-    //     attributes: true,
-    //     attributeFilter: ['style']
-    // });
-    // return observer; // Return to allow cleanup
-
-    null
-}
-
-/// Stop watching a CSS variable
-unwatchCSSVariable = fn(observer) {
-    // JavaScript implementation:
-    // if (observer) observer.disconnect();
-
-    true
-}
-
-// ============================================================================
-// HELPER UTILITIES
-// ============================================================================
-
-/// Convert CSS variable to inline style value
-/// @param varName - CSS variable name
-/// @returns String for use in style attribute
-toInlineStyle = fn(varName) {
-    "var(" + varName + ")"
-}
-
-/// Create a CSS variable reference for use in templates
-/// @param key - Variable key from cssVariables object
-varRef = fn(key) {
-    if cssVariables[key] {
-        "var(" + cssVariables[key] + ")"
-    } else {
-        ""
-    }
-}
-
-/// Print all CSS variables (for debugging)
-debugCSSVariables = fn() {
-    allVars = getAllCSSVariables()
-    // JavaScript: console.table(allVars)
-    allVars
-}
+// Fluid Spacing
+cssVarFluidSpace1 = "--flin-fluid-space-1"
+cssVarFluidSpace2 = "--flin-fluid-space-2"
+cssVarFluidSpace4 = "--flin-fluid-space-4"
+cssVarFluidSpace8 = "--flin-fluid-space-8"
 
 <style>
 /* Ensure CSS variables are accessible from JavaScript */

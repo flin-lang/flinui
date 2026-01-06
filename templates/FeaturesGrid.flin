@@ -1,365 +1,103 @@
 // FeaturesGrid.flin - Feature showcase grid
 
 // Props
-features = props.features || [] // [{icon, title, description, link, linkText}]
-columns = props.columns || 3 // 2 | 3 | 4
-variant = props.variant || "default" // "default" | "cards" | "minimal" | "icons"
-title = props.title || nil
-subtitle = props.subtitle || nil
-alignment = props.alignment || "center" // "left" | "center"
-iconSize = props.iconSize || "medium" // "small" | "medium" | "large"
-showLinks = props.showLinks ?? true
-children = props.children || nil
-
-// Computed
-gridClass = "features-grid features-grid--" ++ columns ++ " features-grid--" ++ variant ++ " features-grid--align-" ++ alignment
-iconClass = "feature-icon feature-icon--" ++ iconSize
+title = props.title || "Features"
+subtitle = props.subtitle || ""
+columns = props.columns || 3
+variant = props.variant || "default"
 
 <section class="features-section">
-    // Header
-    {if title || subtitle then
+    {if title != ""}
         <div class="features-header">
-            {if title then <h2 class="features-title">{title}</h2>}
-            {if subtitle then <p class="features-subtitle">{subtitle}</p>}
+            <h2 class="features-title">{title}</h2>
+            {if subtitle != ""}
+                <p class="features-subtitle">{subtitle}</p>
+            {/if}
         </div>
-    }
+    {/if}
 
-    // Grid
-    <div class={gridClass}>
-        {features.map { feature ->
-            <div class="feature-item" key={feature.title || feature.id}>
-                // Icon
-                {if feature.icon then
-                    <div class={iconClass}>
-                        {if feature.iconType == "image" then
-                            <img src={feature.icon} alt="" class="icon-image" />
-                        else
-                            <span class="icon-emoji">{feature.icon}</span>
-                        }
-                    </div>
-                }
-
-                // Content
-                <div class="feature-content">
-                    {if feature.title then
-                        <h3 class="feature-title">{feature.title}</h3>
-                    }
-                    {if feature.description then
-                        <p class="feature-description">{feature.description}</p>
-                    }
-                    {if showLinks && feature.link then
-                        <a href={feature.link} class="feature-link">
-                            {feature.linkText || "Learn more"}
-                            <span class="link-arrow">→</span>
-                        </a>
-                    }
-                </div>
-            </div>
-        }}
+    <div class="features-grid">
+        <div class="feature-item">
+            <div class="feature-icon">1</div>
+            <h3 class="feature-title">Feature One</h3>
+            <p class="feature-description">Description of the first feature.</p>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">2</div>
+            <h3 class="feature-title">Feature Two</h3>
+            <p class="feature-description">Description of the second feature.</p>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">3</div>
+            <h3 class="feature-title">Feature Three</h3>
+            <p class="feature-description">Description of the third feature.</p>
+        </div>
     </div>
-
-    // Custom content (e.g., CTA button)
-    {if children then
-        <div class="features-footer">
-            {children}
-        </div>
-    }
 </section>
 
 <style scoped>
 .features-section {
-    padding: var(--flin-spacing-12) var(--flin-spacing-6);
+    padding: var(--flin-space-16) var(--flin-space-6);
+    background: var(--flin-bg);
 }
 
-/* Header */
 .features-header {
     text-align: center;
-    margin-bottom: var(--flin-spacing-12);
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-bottom: var(--flin-space-12);
 }
 
 .features-title {
-    font-size: var(--flin-font-size-3xl);
-    font-weight: var(--flin-font-weight-bold);
-    color: var(--flin-color-gray-900);
-    margin: 0 0 var(--flin-spacing-4) 0;
+    font-size: var(--flin-text-3xl);
+    font-weight: 700;
+    color: var(--flin-fg);
+    margin: 0 0 var(--flin-space-4) 0;
 }
 
 .features-subtitle {
-    font-size: var(--flin-font-size-lg);
-    color: var(--flin-color-gray-600);
+    font-size: var(--flin-text-lg);
+    color: var(--flin-fg-muted);
     margin: 0;
-    line-height: 1.7;
 }
 
-/* Grid */
 .features-grid {
     display: grid;
-    gap: var(--flin-spacing-8);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--flin-space-6);
     max-width: 1200px;
     margin: 0 auto;
 }
 
-.features-grid--2 {
-    grid-template-columns: repeat(2, 1fr);
-}
-
-.features-grid--3 {
-    grid-template-columns: repeat(3, 1fr);
-}
-
-.features-grid--4 {
-    grid-template-columns: repeat(4, 1fr);
-}
-
-/* Alignment */
-.features-grid--align-center .feature-item {
+.feature-item {
+    background: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-space-6);
     text-align: center;
 }
 
-.features-grid--align-center .feature-icon {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.features-grid--align-left .feature-item {
-    text-align: left;
-}
-
-/* Feature item - Default variant */
-.features-grid--default .feature-item {
-    padding: var(--flin-spacing-4);
-}
-
-/* Feature item - Cards variant */
-.features-grid--cards .feature-item {
-    background: var(--flin-color-white);
-    border: 1px solid var(--flin-color-gray-200);
-    border-radius: var(--flin-radius-xl);
-    padding: var(--flin-spacing-6);
-    transition: all var(--flin-transition-fast);
-}
-
-.features-grid--cards .feature-item:hover {
-    border-color: var(--flin-color-gray-300);
-    box-shadow: var(--flin-shadow-lg);
-    transform: translateY(-2px);
-}
-
-/* Feature item - Minimal variant */
-.features-grid--minimal .feature-item {
-    padding: var(--flin-spacing-2);
-}
-
-.features-grid--minimal .feature-icon {
-    margin-bottom: var(--flin-spacing-2);
-}
-
-.features-grid--minimal .feature-title {
-    font-size: var(--flin-font-size-base);
-    margin-bottom: var(--flin-spacing-1);
-}
-
-.features-grid--minimal .feature-description {
-    font-size: var(--flin-font-size-sm);
-}
-
-/* Feature item - Icons variant */
-.features-grid--icons .feature-item {
-    display: flex;
-    gap: var(--flin-spacing-4);
-    text-align: left;
-}
-
-.features-grid--icons .feature-icon {
-    flex-shrink: 0;
-}
-
-.features-grid--icons .feature-content {
-    flex: 1;
-}
-
-/* Icon */
 .feature-icon {
-    margin-bottom: var(--flin-spacing-4);
-}
-
-.feature-icon--small {
-    width: 40px;
-    height: 40px;
-}
-
-.feature-icon--medium {
-    width: 56px;
-    height: 56px;
-}
-
-.feature-icon--large {
-    width: 72px;
-    height: 72px;
-}
-
-.feature-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--flin-primary-light);
+    color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--flin-color-primary-50);
-    border-radius: var(--flin-radius-lg);
+    font-weight: 700;
+    margin: 0 auto var(--flin-space-4);
 }
 
-.icon-emoji {
-    font-size: 1.5em;
-}
-
-.feature-icon--small .icon-emoji {
-    font-size: 1.25em;
-}
-
-.feature-icon--large .icon-emoji {
-    font-size: 2em;
-}
-
-.icon-image {
-    width: 60%;
-    height: 60%;
-    object-fit: contain;
-}
-
-/* Content */
-.feature-content {
-    flex: 1;
-}
-
-.feature-title {
-    font-size: var(--flin-font-size-lg);
-    font-weight: var(--flin-font-weight-semibold);
-    color: var(--flin-color-gray-900);
-    margin: 0 0 var(--flin-spacing-2) 0;
+.feature-item .feature-title {
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+    margin: 0 0 var(--flin-space-2) 0;
 }
 
 .feature-description {
-    font-size: var(--flin-font-size-base);
-    color: var(--flin-color-gray-600);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
     margin: 0;
-    line-height: 1.6;
 }
-
-.feature-link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--flin-spacing-1);
-    margin-top: var(--flin-spacing-3);
-    font-size: var(--flin-font-size-sm);
-    font-weight: var(--flin-font-weight-medium);
-    color: var(--flin-color-primary-600);
-    text-decoration: none;
-    transition: all var(--flin-transition-fast);
-}
-
-.feature-link:hover {
-    color: var(--flin-color-primary-700);
-    gap: var(--flin-spacing-2);
-}
-
-.link-arrow {
-    transition: transform var(--flin-transition-fast);
-}
-
-.feature-link:hover .link-arrow {
-    transform: translateX(2px);
-}
-
-/* Footer */
-.features-footer {
-    text-align: center;
-    margin-top: var(--flin-spacing-10);
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-    .features-grid--4 {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .features-section {
-        padding: var(--flin-spacing-8) var(--flin-spacing-4);
-    }
-
-    .features-grid--3,
-    .features-grid--4 {
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--flin-spacing-6);
-    }
-
-    .features-title {
-        font-size: var(--flin-font-size-2xl);
-    }
-
-    .features-header {
-        margin-bottom: var(--flin-spacing-8);
-    }
-
-    .features-grid--icons .feature-item {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .features-grid--icons .feature-icon {
-        margin-left: auto;
-        margin-right: auto;
-    }
-}
-
-@media (max-width: 480px) {
-    .features-grid--2,
-    .features-grid--3,
-    .features-grid--4 {
-        grid-template-columns: 1fr;
-    }
-
-    .features-grid--align-center .feature-item,
-    .features-grid--align-left .feature-item {
-        text-align: center;
-    }
-
-    .features-grid--align-center .feature-icon,
-    .features-grid--align-left .feature-icon {
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .features-grid--cards .feature-item {
-        padding: var(--flin-spacing-5);
-    }
-}
-
-/* Animations */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.feature-item {
-    animation: fadeInUp 0.5s ease-out;
-    animation-fill-mode: both;
-}
-
-.feature-item:nth-child(1) { animation-delay: 0.1s; }
-.feature-item:nth-child(2) { animation-delay: 0.15s; }
-.feature-item:nth-child(3) { animation-delay: 0.2s; }
-.feature-item:nth-child(4) { animation-delay: 0.25s; }
-.feature-item:nth-child(5) { animation-delay: 0.3s; }
-.feature-item:nth-child(6) { animation-delay: 0.35s; }
-.feature-item:nth-child(7) { animation-delay: 0.4s; }
-.feature-item:nth-child(8) { animation-delay: 0.45s; }
 </style>

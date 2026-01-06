@@ -2,34 +2,13 @@
 // Displays the current page location within a navigational hierarchy
 
 // Props with defaults
-items = props.items || []
 separator = props.separator || "/"
-maxItems = props.maxItems || 0
 showHome = props.showHome || true
 homeHref = props.homeHref || "/"
 homeLabel = props.homeLabel || "Home"
 
-// Compute whether to collapse items
-shouldCollapse = maxItems > 0 && items.length > maxItems
-
-// Collapsed state
-isExpanded = false
-
-// Toggle expanded
-toggleExpanded = {
-    isExpanded = !isExpanded
-}
-
-// Get visible items based on collapse state
-visibleItems = match {
-    !shouldCollapse -> items
-    isExpanded -> items
-    _ -> [items[0], "...", items[items.length - 1]]
-}
-
 <nav class="flin-breadcrumb" aria-label="Breadcrumb">
     <ol class="flin-breadcrumb__list">
-        // Home item
         {if showHome}
             <li class="flin-breadcrumb__item">
                 <a
@@ -58,42 +37,7 @@ visibleItems = match {
                 </span>
             </li>
         {/if}
-
-        // Breadcrumb items
-        {for item, index in items}
-            <li class="flin-breadcrumb__item">
-                {if item == "..."}
-                    // Ellipsis for collapsed items
-                    <button
-                        class="flin-breadcrumb__ellipsis"
-                        click={toggleExpanded}
-                        aria-label="Show all breadcrumb items"
-                        title="Show all"
-                    >
-                        <span>...</span>
-                    </button>
-                {else if index == items.length - 1}
-                    // Current page (last item)
-                    <span
-                        class="flin-breadcrumb__current"
-                        aria-current="page"
-                    >
-                        {item.label}
-                    </span>
-                {else}
-                    // Link item
-                    <a
-                        href={item.href}
-                        class="flin-breadcrumb__link"
-                    >
-                        {item.label}
-                    </a>
-                    <span class="flin-breadcrumb__separator" aria-hidden="true">
-                        {separator}
-                    </span>
-                {/if}
-            </li>
-        {/for}
+        {children}
     </ol>
 </nav>
 
@@ -168,41 +112,11 @@ visibleItems = match {
     padding: var(--flin-space-1) var(--flin-space-1);
 }
 
-.flin-breadcrumb__ellipsis {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg-muted);
-    background: none;
-    border: none;
-    border-radius: var(--flin-radius-sm);
-    cursor: pointer;
-    transition: color var(--flin-transition-fast),
-                background-color var(--flin-transition-fast);
-}
-
-.flin-breadcrumb__ellipsis:hover {
-    color: var(--flin-fg);
-    background-color: var(--flin-neutral-100);
-}
-
-.flin-breadcrumb__ellipsis:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
-}
-
-/* Responsive styles */
 @media (max-width: 640px) {
     .flin-breadcrumb__list {
         overflow-x: auto;
         flex-wrap: nowrap;
-        -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
-        -ms-overflow-style: none;
         padding: var(--flin-space-1) 0;
     }
 
@@ -215,9 +129,7 @@ visibleItems = match {
     }
 }
 
-/* Dark theme support */
-[data-theme="dark"] .flin-breadcrumb__link:hover,
-[data-theme="dark"] .flin-breadcrumb__ellipsis:hover {
+[data-theme="dark"] .flin-breadcrumb__link:hover {
     background-color: var(--flin-neutral-800);
 }
 </style>

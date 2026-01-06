@@ -3,21 +3,30 @@
 
 // Props with defaults
 message = props.message || ""
-icon = props.icon !== false  // Default to true, show icon unless explicitly false
+showIcon = props.showIcon || true
 
-// Only render if there's a message
-{if message != ""}
-    <div class="form-error" role="alert" aria-live="assertive">
-        {if icon}
-            <svg class="form-error-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M8 4.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                <circle cx="8" cy="11.5" r="1" fill="currentColor"/>
-            </svg>
-        {/if}
-        <span class="form-error-message">{message}</span>
-    </div>
-{/if}
+// Computed class for icon visibility
+iconClass = match showIcon {
+    true -> ""
+    _ -> " form-error-no-icon"
+}
+
+// Computed class for visibility
+visibilityClass = match message != "" {
+    true -> ""
+    _ -> " form-error-hidden"
+}
+
+<div class={"form-error" ++ iconClass ++ visibilityClass} role="alert" aria-live="assertive">
+    {if showIcon}
+        <svg class="form-error-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 4.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="8" cy="11.5" r="1" fill="currentColor"/>
+        </svg>
+    {/if}
+    <span class="form-error-message">{message}</span>
+</div>
 
 <style scoped>
 .form-error {
@@ -65,6 +74,16 @@ icon = props.icon !== false  // Default to true, show icon unless explicitly fal
 /* Multiple errors container */
 .form-error + .form-error {
     margin-top: var(--flin-space-2);
+}
+
+/* Hidden state */
+.form-error-hidden {
+    display: none;
+}
+
+/* No icon variant */
+.form-error-no-icon .form-error-icon {
+    display: none;
 }
 
 /* Dark mode adjustment */

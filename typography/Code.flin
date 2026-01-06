@@ -6,8 +6,8 @@ color = props.color || ""
 fontSize = props.fontSize || ""
 
 // Build style string
-colorPart = {if color != "" { "color: " ++ color ++ ";" } else { "" }}
-fontSizePart = {if fontSize != "" { "font-size: " ++ fontSize ++ ";" } else { "" }}
+colorPart = if color != "" { "color: " ++ color ++ ";" } else { "" }
+fontSizePart = if fontSize != "" { "font-size: " ++ fontSize ++ ";" } else { "" }
 codeStyle = colorPart ++ fontSizePart
 
 <code class="inline-code" style={codeStyle}>

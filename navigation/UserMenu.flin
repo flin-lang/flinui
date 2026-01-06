@@ -1,168 +1,26 @@
 // UserMenu.flin - FlinUI User Menu Component
-// A dropdown user menu for navigation bars with avatar, status indicator, and actions
+// A dropdown user menu for navigation bars with avatar
 
 // Props with defaults
-user = props.user || { name: "", email: "", avatar: "", role: "" }
-menuItems = props.menuItems || []
-showStatus = props.showStatus || false
-status = props.status || "offline"
-notificationCount = props.notificationCount || 0
-onSignOut = props.onSignOut || nil
+userName = props.userName || ""
+userEmail = props.userEmail || ""
+userAvatar = props.userAvatar || ""
 position = props.position || "bottom-end"
 
 // Internal state
 isOpen = false
-isExiting = false
-focusedIndex = -1
-avatarError = false
 
 // Handle trigger click
 handleTriggerClick = {
-    {if isOpen}
-        handleClose()
-    {else}
-        isOpen = true;
-        focusedIndex = -1
-    {/if}
-}
-
-// Handle close with animation
-handleClose = {
-    isExiting = true;
-    setTimeout({
-        isOpen = false;
-        isExiting = false;
-        focusedIndex = -1
-    }, 150)
+    isOpen = !isOpen
 }
 
 // Handle backdrop click
 handleBackdropClick = {
-    handleClose()
+    isOpen = false
 }
 
-// Handle menu item click
-handleItemClick = { item ->
-    {if !item.disabled && !item.divider}
-        {if item.onClick}
-            item.onClick()
-        {/if}
-        handleClose()
-    {/if}
-}
-
-// Handle sign out
-handleSignOut = {
-    {if onSignOut}
-        onSignOut()
-    {/if}
-    handleClose()
-}
-
-// Handle keyboard navigation
-handleKeyDown = {
-    match event.key {
-        "Escape" -> handleClose()
-        "ArrowDown" -> {
-            event.preventDefault();
-            focusNextItem()
-        }
-        "ArrowUp" -> {
-            event.preventDefault();
-            focusPreviousItem()
-        }
-        "Home" -> {
-            event.preventDefault();
-            focusFirstItem()
-        }
-        "End" -> {
-            event.preventDefault();
-            focusLastItem()
-        }
-        "Enter" | " " -> {
-            event.preventDefault();
-            {if focusedIndex >= 0 && focusedIndex < menuItems.length}
-                handleItemClick(menuItems[focusedIndex])
-            {/if}
-        }
-        _ -> {}
-    }
-}
-
-// Keyboard navigation helpers
-focusNextItem = {
-    loop i from focusedIndex + 1 to menuItems.length {
-        {if !menuItems[i].disabled && !menuItems[i].divider}
-            focusedIndex = i;
-            break
-        {/if}
-    }
-}
-
-focusPreviousItem = {
-    loop i from focusedIndex - 1 to -1 step -1 {
-        {if !menuItems[i].disabled && !menuItems[i].divider}
-            focusedIndex = i;
-            break
-        {/if}
-    }
-}
-
-focusFirstItem = {
-    loop i from 0 to menuItems.length {
-        {if !menuItems[i].disabled && !menuItems[i].divider}
-            focusedIndex = i;
-            break
-        {/if}
-    }
-}
-
-focusLastItem = {
-    loop i from menuItems.length - 1 to -1 step -1 {
-        {if !menuItems[i].disabled && !menuItems[i].divider}
-            focusedIndex = i;
-            break
-        {/if}
-    }
-}
-
-// Handle avatar image error
-onAvatarError = {
-    avatarError = true
-}
-
-// Generate initials from user name
-initials = {if user.name != "" {
-    words = user.name.split(" ")
-    {if words.length > 1 {
-        words[0][0] ++ words[words.length - 1][0]
-    } else {
-        user.name[0]
-    }}
-} else {
-    "?"
-}}
-
-// Determine whether to show avatar image or initials
-showAvatarImage = user.avatar != "" && !avatarError
-
-// Generate deterministic background color from name
-bgColorIndex = {if user.name != "" {
-    (user.name.charCodeAt(0) + user.name.length) % 6
-} else {
-    0
-}}
-
-avatarBgClass = match bgColorIndex {
-    0 -> "usermenu-avatar-bg-blue"
-    1 -> "usermenu-avatar-bg-green"
-    2 -> "usermenu-avatar-bg-purple"
-    3 -> "usermenu-avatar-bg-orange"
-    4 -> "usermenu-avatar-bg-pink"
-    _ -> "usermenu-avatar-bg-cyan"
-}
-
-// Computed classes
+// Position class
 positionClass = match position {
     "bottom-start" -> "usermenu-bottom-start"
     "bottom" -> "usermenu-bottom"
@@ -172,45 +30,25 @@ positionClass = match position {
     _ -> "usermenu-bottom-end"
 }
 
-exitingClass = match isExiting { true -> " usermenu-panel-exiting", _ -> "" }
-
-statusClass = match status {
-    "online" -> "usermenu-status-online"
-    "away" -> "usermenu-status-away"
-    "busy" -> "usermenu-status-busy"
-    _ -> "usermenu-status-offline"
-}
-
 <div class="flin-usermenu">
     <button
         class="usermenu-trigger"
         click={handleTriggerClick}
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        aria-label={"User menu for " ++ user.name}
+        aria-label={"User menu for " ++ userName}
     >
-        <div class={"usermenu-avatar" ++ {if !showAvatarImage { " " ++ avatarBgClass } else { "" }}}>
-            {if showAvatarImage}
+        <div class="usermenu-avatar">
+            {if userAvatar}
                 <img
                     class="usermenu-avatar-image"
-                    src={user.avatar}
-                    alt={user.name}
-                    error={onAvatarError}
+                    src={userAvatar}
+                    alt={userName}
                 >
             {else}
-                <span class="usermenu-avatar-initials">{initials}</span>
-            {/if}
-
-            {if showStatus}
-                <span class={"usermenu-status-indicator " ++ statusClass} aria-label={status}></span>
+                <span class="usermenu-avatar-initials">?</span>
             {/if}
         </div>
-
-        {if notificationCount > 0}
-            <span class="usermenu-notification-badge" aria-label={notificationCount ++ " notifications"}>
-                {if notificationCount > 99 { "99+" } else { notificationCount }}
-            </span>
-        {/if}
     </button>
 
     {if isOpen}
@@ -221,122 +59,46 @@ statusClass = match status {
         ></div>
 
         <div
-            class={"usermenu-panel " ++ positionClass ++ exitingClass}
+            class={"usermenu-panel " ++ positionClass}
             role="menu"
             aria-orientation="vertical"
             tabindex="-1"
-            keydown={handleKeyDown}
         >
-            // User info header
             <div class="usermenu-header">
-                <div class={"usermenu-header-avatar" ++ {if !showAvatarImage { " " ++ avatarBgClass } else { "" }}}>
-                    {if showAvatarImage}
+                <div class="usermenu-header-avatar">
+                    {if userAvatar}
                         <img
                             class="usermenu-avatar-image"
-                            src={user.avatar}
-                            alt={user.name}
+                            src={userAvatar}
+                            alt={userName}
                         >
                     {else}
-                        <span class="usermenu-avatar-initials usermenu-avatar-initials-lg">{initials}</span>
+                        <span class="usermenu-avatar-initials">?</span>
                     {/if}
                 </div>
                 <div class="usermenu-header-info">
-                    <span class="usermenu-header-name">{user.name}</span>
-                    {if user.email != ""}
-                        <span class="usermenu-header-email">{user.email}</span>
-                    {else if user.role != ""}
-                        <span class="usermenu-header-role">{user.role}</span>
+                    <span class="usermenu-header-name">{userName}</span>
+                    {if userEmail}
+                        <span class="usermenu-header-email">{userEmail}</span>
                     {/if}
                 </div>
-                {if showStatus}
-                    <div class="usermenu-header-status">
-                        <span class={"usermenu-status-dot " ++ statusClass}></span>
-                        <span class="usermenu-status-text">
-                            {match status {
-                                "online" -> "Online"
-                                "away" -> "Away"
-                                "busy" -> "Do not disturb"
-                                _ -> "Offline"
-                            }}
-                        </span>
-                    </div>
-                {/if}
             </div>
 
-            // Menu items
-            {if menuItems.length > 0}
-                <div class="usermenu-divider"></div>
-                <ul class="usermenu-list" role="none">
-                    {loop item, index in menuItems}
-                        {if item.divider}
-                            <li class="usermenu-divider" role="separator"></li>
-                        {else}
-                            {
-                                itemDisabledClass = match item.disabled { true -> " usermenu-item-disabled", _ -> "" }
-                                itemFocusedClass = match index == focusedIndex { true -> " usermenu-item-focused", _ -> "" }
-                                itemVariantClass = match item.variant {
-                                    "danger" -> " usermenu-item-danger"
-                                    "warning" -> " usermenu-item-warning"
-                                    _ -> ""
-                                }
-                            }
-                            <li
-                                class={"usermenu-item" ++ itemDisabledClass ++ itemFocusedClass ++ itemVariantClass}
-                                role="menuitem"
-                                tabindex={match item.disabled { true -> "-1", _ -> "0" }}
-                                aria-disabled={item.disabled}
-                                click={{handleItemClick(item)}}
-                                mouseenter={{if !item.disabled { focusedIndex = index }}}
-                            >
-                                {if item.icon}
-                                    <span class="usermenu-item-icon" aria-hidden="true">
-                                        {item.icon}
-                                    </span>
-                                {/if}
-                                <span class="usermenu-item-label">
-                                    {item.label}
-                                </span>
-                                {if item.badge}
-                                    <span class="usermenu-item-badge">
-                                        {item.badge}
-                                    </span>
-                                {/if}
-                            </li>
-                        {/if}
-                    {/loop}
-                </ul>
-            {/if}
+            <div class="usermenu-divider"></div>
 
-            // Sign out button
-            {if onSignOut}
-                <div class="usermenu-divider"></div>
-                <button
-                    class="usermenu-signout"
-                    click={handleSignOut}
-                    role="menuitem"
-                >
-                    <span class="usermenu-signout-icon" aria-hidden="true">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                    </span>
-                    <span>Sign out</span>
-                </button>
-            {/if}
+            <div class="usermenu-content">
+                {children}
+            </div>
         </div>
     {/if}
 </div>
 
 <style scoped>
-/* User Menu Wrapper */
 .flin-usermenu {
     position: relative;
     display: inline-block;
 }
 
-/* Trigger Button */
 .usermenu-trigger {
     position: relative;
     display: inline-flex;
@@ -359,7 +121,6 @@ statusClass = match status {
     outline-offset: 2px;
 }
 
-/* Avatar in trigger */
 .usermenu-avatar {
     position: relative;
     display: flex;
@@ -385,94 +146,8 @@ statusClass = match status {
     font-weight: 600;
     text-transform: uppercase;
     user-select: none;
-    -webkit-user-select: none;
-    color: inherit;
 }
 
-.usermenu-avatar-initials-lg {
-    font-size: var(--flin-text-base);
-}
-
-/* Avatar background colors */
-.usermenu-avatar-bg-blue {
-    background-color: var(--flin-primary-light);
-    color: var(--flin-primary);
-}
-
-.usermenu-avatar-bg-green {
-    background-color: var(--flin-success-light);
-    color: var(--flin-success);
-}
-
-.usermenu-avatar-bg-purple {
-    background-color: #ede9fe;
-    color: #7c3aed;
-}
-
-.usermenu-avatar-bg-orange {
-    background-color: var(--flin-warning-light);
-    color: #c2410c;
-}
-
-.usermenu-avatar-bg-pink {
-    background-color: #fce7f3;
-    color: #db2777;
-}
-
-.usermenu-avatar-bg-cyan {
-    background-color: var(--flin-info-light);
-    color: var(--flin-info);
-}
-
-/* Status Indicator on Avatar */
-.usermenu-status-indicator {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 10px;
-    height: 10px;
-    border-radius: var(--flin-radius-full);
-    border: 2px solid var(--flin-bg);
-}
-
-.usermenu-status-online {
-    background-color: var(--flin-success);
-}
-
-.usermenu-status-away {
-    background-color: var(--flin-warning);
-}
-
-.usermenu-status-busy {
-    background-color: var(--flin-danger);
-}
-
-.usermenu-status-offline {
-    background-color: var(--flin-neutral-400);
-}
-
-/* Notification Badge */
-.usermenu-notification-badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--flin-font-sans);
-    font-size: 10px;
-    font-weight: 600;
-    color: white;
-    background-color: var(--flin-danger);
-    border-radius: var(--flin-radius-full);
-    border: 2px solid var(--flin-bg);
-    line-height: 1;
-}
-
-/* Backdrop */
 .usermenu-backdrop {
     position: fixed;
     inset: 0;
@@ -480,7 +155,6 @@ statusClass = match status {
     background-color: transparent;
 }
 
-/* Panel */
 .usermenu-panel {
     position: absolute;
     z-index: 9998;
@@ -491,36 +165,12 @@ statusClass = match status {
     min-width: 240px;
     max-width: 320px;
     overflow: hidden;
-    animation: usermenuFadeIn var(--flin-transition-fast) ease-out;
-}
-
-@keyframes usermenuFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-8px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.usermenu-panel-exiting {
-    animation: usermenuFadeOut var(--flin-transition-fast) ease-in forwards;
-}
-
-@keyframes usermenuFadeOut {
-    to {
-        opacity: 0;
-        transform: translateY(-8px) scale(0.95);
-    }
 }
 
 .usermenu-panel:focus {
     outline: none;
 }
 
-/* Position Variants */
 .usermenu-bottom-end {
     top: calc(100% + 8px);
     right: 0;
@@ -553,7 +203,6 @@ statusClass = match status {
     transform: translateX(-50%);
 }
 
-/* Header Section */
 .usermenu-header {
     padding: var(--flin-space-4);
     display: flex;
@@ -593,8 +242,7 @@ statusClass = match status {
     text-overflow: ellipsis;
 }
 
-.usermenu-header-email,
-.usermenu-header-role {
+.usermenu-header-email {
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-sm);
     color: var(--flin-fg-muted);
@@ -603,170 +251,16 @@ statusClass = match status {
     text-overflow: ellipsis;
 }
 
-.usermenu-header-status {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--flin-space-2);
-    padding: var(--flin-space-1) var(--flin-space-3);
-    background-color: var(--flin-neutral-100);
-    border-radius: var(--flin-radius-full);
-    margin-top: var(--flin-space-1);
-}
-
-.usermenu-status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: var(--flin-radius-full);
-}
-
-.usermenu-status-text {
-    font-family: var(--flin-font-sans);
-    font-size: var(--flin-text-xs);
-    color: var(--flin-fg-muted);
-}
-
-/* Divider */
 .usermenu-divider {
     height: 1px;
     background-color: var(--flin-neutral-200);
     margin: 0;
 }
 
-/* Menu List */
-.usermenu-list {
-    list-style: none;
-    margin: 0;
+.usermenu-content {
     padding: var(--flin-space-2);
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-space-1);
 }
 
-/* Menu Item */
-.usermenu-item {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-3);
-    padding: var(--flin-space-2) var(--flin-space-3);
-    border-radius: var(--flin-radius-md);
-    font-family: var(--flin-font-sans);
-    font-size: var(--flin-text-sm);
-    line-height: 1.5;
-    color: var(--flin-fg);
-    cursor: pointer;
-    transition: all var(--flin-transition-fast);
-    user-select: none;
-    -webkit-user-select: none;
-    outline: none;
-}
-
-.usermenu-item:hover:not(.usermenu-item-disabled),
-.usermenu-item-focused:not(.usermenu-item-disabled) {
-    background-color: var(--flin-neutral-100);
-}
-
-.usermenu-item:active:not(.usermenu-item-disabled) {
-    background-color: var(--flin-neutral-200);
-}
-
-.usermenu-item-disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-.usermenu-item-danger {
-    color: var(--flin-danger);
-}
-
-.usermenu-item-danger:hover:not(.usermenu-item-disabled),
-.usermenu-item-danger.usermenu-item-focused:not(.usermenu-item-disabled) {
-    background-color: var(--flin-danger-light);
-}
-
-.usermenu-item-warning {
-    color: var(--flin-warning);
-}
-
-.usermenu-item-warning:hover:not(.usermenu-item-disabled),
-.usermenu-item-warning.usermenu-item-focused:not(.usermenu-item-disabled) {
-    background-color: var(--flin-warning-light);
-}
-
-.usermenu-item-icon {
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--flin-fg-muted);
-}
-
-.usermenu-item:hover .usermenu-item-icon,
-.usermenu-item-focused .usermenu-item-icon {
-    color: inherit;
-}
-
-.usermenu-item-label {
-    flex: 1;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.usermenu-item-badge {
-    flex-shrink: 0;
-    font-size: var(--flin-text-xs);
-    font-weight: 600;
-    color: white;
-    background-color: var(--flin-primary);
-    padding: 2px 8px;
-    border-radius: var(--flin-radius-full);
-}
-
-/* Sign Out Button */
-.usermenu-signout {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--flin-space-2);
-    width: 100%;
-    padding: var(--flin-space-3);
-    background: none;
-    border: none;
-    font-family: var(--flin-font-sans);
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg-muted);
-    cursor: pointer;
-    transition: all var(--flin-transition-fast);
-}
-
-.usermenu-signout:hover {
-    background-color: var(--flin-neutral-100);
-    color: var(--flin-danger);
-}
-
-.usermenu-signout:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: -2px;
-}
-
-.usermenu-signout-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Focus visible styling */
-.usermenu-item:focus-visible {
-    background-color: var(--flin-neutral-100);
-    box-shadow: 0 0 0 2px var(--flin-primary);
-}
-
-/* Dark theme support */
 [data-theme="dark"] .usermenu-trigger:hover {
     background-color: var(--flin-neutral-800);
 }
@@ -776,67 +270,7 @@ statusClass = match status {
     border-color: var(--flin-neutral-700);
 }
 
-[data-theme="dark"] .usermenu-status-indicator {
-    border-color: var(--flin-neutral-800);
-}
-
-[data-theme="dark"] .usermenu-notification-badge {
-    border-color: var(--flin-neutral-800);
-}
-
-[data-theme="dark"] .usermenu-header-status {
-    background-color: var(--flin-neutral-700);
-}
-
 [data-theme="dark"] .usermenu-divider {
     background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .usermenu-item:hover:not(.usermenu-item-disabled),
-[data-theme="dark"] .usermenu-item-focused:not(.usermenu-item-disabled) {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .usermenu-item:active:not(.usermenu-item-disabled) {
-    background-color: var(--flin-neutral-600);
-}
-
-[data-theme="dark"] .usermenu-item-danger:hover:not(.usermenu-item-disabled),
-[data-theme="dark"] .usermenu-item-danger.usermenu-item-focused:not(.usermenu-item-disabled) {
-    background-color: rgba(239, 68, 68, 0.15);
-}
-
-[data-theme="dark"] .usermenu-item-warning:hover:not(.usermenu-item-disabled),
-[data-theme="dark"] .usermenu-item-warning.usermenu-item-focused:not(.usermenu-item-disabled) {
-    background-color: rgba(245, 158, 11, 0.15);
-}
-
-[data-theme="dark"] .usermenu-signout:hover {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .usermenu-avatar-bg-purple {
-    background-color: rgba(139, 92, 246, 0.2);
-}
-
-[data-theme="dark"] .usermenu-avatar-bg-pink {
-    background-color: rgba(236, 72, 153, 0.2);
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-    .usermenu-panel {
-        min-width: 200px;
-        max-width: calc(100vw - 32px);
-    }
-
-    .usermenu-header {
-        padding: var(--flin-space-3);
-    }
-
-    .usermenu-header-avatar {
-        width: 48px;
-        height: 48px;
-    }
 }
 </style>

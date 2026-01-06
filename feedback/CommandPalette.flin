@@ -4,256 +4,99 @@
 // Props with defaults
 open = props.open || false
 placeholder = props.placeholder || "Type a command or search..."
-commands = props.commands || []  // Array of { id, label, shortcut?, icon?, group?, action }
-recentCommands = props.recentCommands || []
-maxResults = props.maxResults || 8
-showRecent = props.showRecent || true
 onSelect = props.onSelect
 onClose = props.onClose
-onSearch = props.onSearch
 
 // State
 query = ""
 selectedIndex = 0
-filteredCommands = commands
-
-// Filter commands based on query
-filterCommands = {
-    searchQuery = query.toLowerCase().trim()
-
-    {if searchQuery == ""}
-        {if showRecent && recentCommands.length > 0}
-            filteredCommands = recentCommands.slice(0, maxResults)
-        {else}
-            filteredCommands = commands.slice(0, maxResults)
-        {/if}
-    {else}
-        // Filter and score commands
-        matches = []
-        {for cmd in commands}
-            label = cmd.label.toLowerCase()
-            keywords = cmd.keywords ? cmd.keywords.join(" ").toLowerCase() : ""
-            searchText = label + " " + keywords
-
-            {if searchText.includes(searchQuery)}
-                // Calculate score (exact match > starts with > contains)
-                score = 0
-                {if label == searchQuery}
-                    score = 100
-                {else if label.startsWith(searchQuery)}
-                    score = 75
-                {else if label.includes(searchQuery)}
-                    score = 50
-                {else}
-                    score = 25
-                {/if}
-
-                matches = matches.concat([{ ...cmd, score: score }])
-            {/if}
-        {/for}
-
-        // Sort by score and limit
-        filteredCommands = matches
-            .sort((a, b) => b.score - a.score)
-            .slice(0, maxResults)
-    {/if}
-
-    // Reset selection
-    selectedIndex = 0
-}
 
 // Handle input change
 handleInput = {
-    query = event.target.value
-    filterCommands()
-
-    {if onSearch}
-        onSearch(query)
-    {/if}
+    selectedIndex = 0
 }
 
 // Handle keyboard navigation
 handleKeydown = {
-    key = event.key
-
-    {if key == "ArrowDown"}
-        event.preventDefault()
-        selectedIndex = (selectedIndex + 1) % filteredCommands.length
-    {else if key == "ArrowUp"}
-        event.preventDefault()
-        selectedIndex = (selectedIndex - 1 + filteredCommands.length) % filteredCommands.length
-    {else if key == "Enter"}
-        event.preventDefault()
-        {if filteredCommands.length > 0}
-            selectCommand(filteredCommands[selectedIndex])
-        {/if}
-    {else if key == "Escape"}
-        closePanel()
-    {/if}
-}
-
-// Select a command
-selectCommand = {
-    cmd = args.cmd
-
-    {if cmd.action}
-        cmd.action()
-    {/if}
-
-    {if onSelect}
-        onSelect(cmd)
-    {/if}
-
-    closePanel()
+    selectedIndex = 0
 }
 
 // Close the palette
 closePanel = {
     query = ""
     selectedIndex = 0
-    filteredCommands = showRecent && recentCommands.length > 0 ? recentCommands : commands.slice(0, maxResults)
-
-    {if onClose}
-        onClose()
-    {/if}
+    if onClose { onClose() }
 }
 
 // Handle backdrop click
 handleBackdropClick = {
-    closePanel()
+    query = ""
+    selectedIndex = 0
+    if onClose { onClose() }
 }
 
-// Handle item click
-handleItemClick = {
-    index = event.index
-    selectCommand({ cmd: filteredCommands[index] })
+// Handle escape key
+handleKeyDown = {
+    query = ""
+    selectedIndex = 0
+    if onClose { onClose() }
 }
 
-// Handle item hover
-handleItemHover = {
-    index = event.index
-    selectedIndex = index
-}
+// Display class
+displayClass = match open { true -> "flin-command-palette__backdrop", _ -> "flin-command-palette__backdrop flin-command-palette__backdrop--hidden" }
 
-// Group commands by group property
-groupedCommands = {
-    groups = {}
+<div class={displayClass} click={handleBackdropClick}>
+    <div class="flin-command-palette" role="dialog" aria-modal="true" aria-label="Command palette">
+        <div class="flin-command-palette__header">
+            <svg class="flin-command-palette__search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input
+                type="text"
+                class="flin-command-palette__input"
+                value={query}
+                placeholder={placeholder}
+                input={handleInput}
+                keydown={handleKeyDown}
+                aria-label="Command search"
+            />
+            <kbd class="flin-command-palette__esc">ESC</kbd>
+        </div>
 
-    {for cmd in filteredCommands}
-        group = cmd.group || "Commands"
-        {if !groups[group]}
-            groups[group] = []
-        {/if}
-        groups[group] = groups[group].concat([cmd])
-    {/for}
-
-    groups
-}
-
-// Initialize
-filterCommands()
-
-{if open}
-    <div class="flin-command-palette__backdrop" click={handleBackdropClick}>
-        <div class="flin-command-palette" click={(e) => e.stopPropagation()}>
-            // Search input
-            <div class="flin-command-palette__header">
-                <svg class="flin-command-palette__search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="flin-command-palette__content" id="command-list" role="listbox">
+            <div class="flin-command-palette__empty">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <circle cx="11" cy="11" r="8"/>
                     <path d="M21 21l-4.35-4.35"/>
                 </svg>
-                <input
-                    type="text"
-                    class="flin-command-palette__input"
-                    value={query}
-                    placeholder={placeholder}
-                    input={handleInput}
-                    keydown={handleKeydown}
-                    autofocus
-                    aria-label="Command search"
-                    aria-autocomplete="list"
-                    aria-controls="command-list"
-                />
-                <kbd class="flin-command-palette__esc">ESC</kbd>
+                <span>Type to search commands</span>
             </div>
+            {children}
+        </div>
 
-            // Results list
-            <div class="flin-command-palette__content" id="command-list" role="listbox">
-                {if filteredCommands.length == 0}
-                    <div class="flin-command-palette__empty">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <circle cx="11" cy="11" r="8"/>
-                            <path d="M21 21l-4.35-4.35"/>
-                        </svg>
-                        <span>No commands found for "{query}"</span>
-                    </div>
-                {else}
-                    // Show label for recent commands
-                    {if query == "" && showRecent && recentCommands.length > 0}
-                        <div class="flin-command-palette__group-label">Recent</div>
-                    {/if}
-
-                    {for cmd, index in filteredCommands}
-                        // Computed class for selected state
-                        selectedClass = match index == selectedIndex { true -> " flin-command-palette__item--selected", _ -> "" }
-                        <div
-                            class={"flin-command-palette__item" ++ selectedClass}
-                            role="option"
-                            aria-selected={index == selectedIndex}
-                            click={handleItemClick.bind({ index: index })}
-                            mouseenter={handleItemHover.bind({ index: index })}
-                        >
-                            {if cmd.icon}
-                                <span class="flin-command-palette__item-icon" aria-hidden="true">
-                                    {cmd.icon}
-                                </span>
-                            {else}
-                                <span class="flin-command-palette__item-icon flin-command-palette__item-icon--default" aria-hidden="true">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="9 18 15 12 9 6"/>
-                                    </svg>
-                                </span>
-                            {/if}
-
-                            <span class="flin-command-palette__item-label">{cmd.label}</span>
-
-                            {if cmd.description}
-                                <span class="flin-command-palette__item-desc">{cmd.description}</span>
-                            {/if}
-
-                            {if cmd.shortcut}
-                                <div class="flin-command-palette__item-shortcut">
-                                    {for key in cmd.shortcut.split("+")}
-                                        <kbd class="flin-command-palette__kbd">{key}</kbd>
-                                    {/for}
-                                </div>
-                            {/if}
-                        </div>
-                    {/for}
-                {/if}
+        <div class="flin-command-palette__footer">
+            <div class="flin-command-palette__hint">
+                <kbd class="flin-command-palette__kbd flin-command-palette__kbd--small">arrow</kbd>
+                <span>navigate</span>
             </div>
-
-            // Footer
-            <div class="flin-command-palette__footer">
-                <div class="flin-command-palette__hint">
-                    <kbd class="flin-command-palette__kbd flin-command-palette__kbd--small">↑</kbd>
-                    <kbd class="flin-command-palette__kbd flin-command-palette__kbd--small">↓</kbd>
-                    <span>navigate</span>
-                </div>
-                <div class="flin-command-palette__hint">
-                    <kbd class="flin-command-palette__kbd flin-command-palette__kbd--small">↵</kbd>
-                    <span>select</span>
-                </div>
-                <div class="flin-command-palette__hint">
-                    <kbd class="flin-command-palette__kbd flin-command-palette__kbd--small">esc</kbd>
-                    <span>close</span>
-                </div>
+            <div class="flin-command-palette__hint">
+                <kbd class="flin-command-palette__kbd flin-command-palette__kbd--small">enter</kbd>
+                <span>select</span>
+            </div>
+            <div class="flin-command-palette__hint">
+                <kbd class="flin-command-palette__kbd flin-command-palette__kbd--small">esc</kbd>
+                <span>close</span>
             </div>
         </div>
     </div>
-{/if}
+</div>
 
 <style scoped>
+.flin-command-palette__backdrop--hidden {
+    display: none;
+}
+
 .flin-command-palette__backdrop {
     position: fixed;
     inset: 0;
@@ -383,10 +226,6 @@ filterCommands()
     height: 24px;
     color: var(--flin-fg-muted);
     flex-shrink: 0;
-}
-
-.flin-command-palette__item-icon--default {
-    opacity: 0.5;
 }
 
 .flin-command-palette__item-label {

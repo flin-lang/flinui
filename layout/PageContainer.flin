@@ -7,27 +7,27 @@ sidebarWidth = props.sidebarWidth || "280px"
 maxWidth = props.maxWidth || "full"
 
 // Check for slots
-hasSidebar = props.sidebar != null
-hasHeader = props.header != null
-hasFooter = props.footer != null
+hasSidebar = props.sidebar != none
+hasHeader = props.header != none
+hasFooter = props.footer != none
 
 // Build class strings
 positionClass = match sidebarPosition {
-    "right" -> " flin-page-sidebar-right"
+    "right" -> " flin-page-sidebar-right",
     _ -> " flin-page-sidebar-left"
 }
 
 maxWidthClass = match maxWidth {
-    "sm" -> " flin-page-max-sm"
-    "md" -> " flin-page-max-md"
-    "lg" -> " flin-page-max-lg"
-    "xl" -> " flin-page-max-xl"
-    "full" -> ""
+    "sm" -> " flin-page-max-sm",
+    "md" -> " flin-page-max-md",
+    "lg" -> " flin-page-max-lg",
+    "xl" -> " flin-page-max-xl",
+    "full" -> "",
     _ -> ""
 }
 
 hasSidebarClass = match hasSidebar {
-    true -> " flin-page-has-sidebar"
+    true -> " flin-page-has-sidebar",
     _ -> ""
 }
 
@@ -37,20 +37,20 @@ pageClass = "flin-page-container" ++ positionClass ++ maxWidthClass ++ hasSideba
 sidebarStyle = "--flin-sidebar-width: " ++ sidebarWidth ++ ";"
 
 <div class={pageClass} style={sidebarStyle}>
-    {if hasHeader {
+    {if hasHeader}
         <header class="flin-page-header">
             {props.header}
         </header>
-    }}
+    {/if}
 
     <div class="flin-page-body">
-        {if hasSidebar {
+        {if hasSidebar}
             <aside class="flin-page-sidebar">
                 <div class="flin-page-sidebar-content">
                     {props.sidebar}
                 </div>
             </aside>
-        }}
+        {/if}
 
         <main class="flin-page-main">
             <div class="flin-page-main-content">
@@ -59,11 +59,11 @@ sidebarStyle = "--flin-sidebar-width: " ++ sidebarWidth ++ ";"
         </main>
     </div>
 
-    {if hasFooter {
+    {if hasFooter}
         <footer class="flin-page-footer">
             {props.footer}
         </footer>
-    }}
+    {/if}
 </div>
 
 <style scoped>

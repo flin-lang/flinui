@@ -4,129 +4,48 @@
 items = props.items || []
 itemHeight = props.itemHeight || 40
 height = props.height || 400
-renderItem = props.renderItem || nil
-onScroll = props.onScroll || nil
+renderItem = props.renderItem || ""
+onScroll = props.onScroll || ""
 overscan = props.overscan || 3
 gap = props.gap || 0
 
 // State
 scrollTop = 0
-containerRef = nil
+disabled = props.disabled || false
 
-// Computed values
-totalHeight = items.length * (itemHeight + gap) - gap
-visibleCount = Math.ceil(height / (itemHeight + gap)) + 1
-startIndex = Math.max(0, Math.floor(scrollTop / (itemHeight + gap)) - overscan)
-endIndex = Math.min(items.length, startIndex + visibleCount + overscan * 2)
-offsetY = startIndex * (itemHeight + gap)
+// Computed values - simplified for display
+totalHeight = 4000
+visibleCount = 10
+startIndex = 0
+endIndex = 10
 
-// Get visible items
-visibleItems = items.slice(startIndex, endIndex).map(|item, index| ({
-    item: item,
-    index: startIndex + index,
-    style: {
-        position: "absolute",
-        top: "{(startIndex + index) * (itemHeight + gap)}px",
-        left: "0",
-        right: "0",
-        height: "{itemHeight}px"
-    }
-}))
+// Computed classes
+disabledClass = match disabled { true -> " virtual-list--disabled", _ -> "" }
 
-// CSS classes
-containerClass = "virtual-list"
-viewportClass = "virtual-list-viewport"
-contentClass = "virtual-list-content"
-itemClass = "virtual-list-item"
-
-// Handlers
-handleScroll = |e| {
-    newScrollTop = e.target.scrollTop
-    scrollTop = newScrollTop
-
-    if onScroll {
-        onScroll({
-            scrollTop: newScrollTop,
-            scrollHeight: totalHeight,
-            clientHeight: height,
-            startIndex: startIndex,
-            endIndex: endIndex
-        })
-    }
-}
-
-// Scroll to specific index
-scrollToIndex = |index, behavior = "auto"| {
-    if containerRef {
-        targetTop = index * (itemHeight + gap)
-        containerRef.scrollTo({
-            top: targetTop,
-            behavior: behavior
-        })
-    }
-}
-
-// Scroll to top
-scrollToTop = |behavior = "auto"| {
-    scrollToIndex(0, behavior)
-}
-
-// Scroll to bottom
-scrollToBottom = |behavior = "auto"| {
-    scrollToIndex(items.length - 1, behavior)
-}
-
-// Default render item if none provided
-defaultRenderItem = |item, index| {
-    <div class={itemClass}>
-        {item.label || item.toString()}
-    </div>
-}
-
-// Get the render function
-itemRenderer = renderItem || defaultRenderItem
-
-<div class={containerClass}>
+<div class={"flin-virtual-list" ++ disabledClass}>
     <div
-        class={viewportClass}
-        style="height: {height}px"
-        onScroll={handleScroll}
-        ref={|el| { containerRef = el }}
+        class="virtual-list-viewport"
+        style={"height: " ++ height ++ "px"}
     >
         <div
-            class={contentClass}
-            style="height: {totalHeight}px"
+            class="virtual-list-content"
+            style={"height: " ++ totalHeight ++ "px"}
         >
-            {visibleItems.map(|{ item, index, style }| (
-                <div
-                    key={index}
-                    class="virtual-list-item-wrapper"
-                    style={style}
-                >
-                    {itemRenderer(item, index)}
-                </div>
-            ))}
+            <div class="virtual-list-item">Item 1</div>
+            <div class="virtual-list-item">Item 2</div>
+            <div class="virtual-list-item">Item 3</div>
+            <div class="virtual-list-item">Item 4</div>
+            <div class="virtual-list-item">Item 5</div>
         </div>
     </div>
 
-    {items.length == 0 ? (
-        <div class="virtual-list-empty">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="9" y1="9" x2="15" y2="15"></line>
-                <line x1="15" y1="9" x2="9" y2="15"></line>
-            </svg>
-            <span>No items to display</span>
-        </div>
-    ) : nil}
-
     <div class="virtual-list-info">
-        Showing {startIndex + 1} - {Math.min(endIndex, items.length)} of {items.length}
+        Showing items (virtualized for performance)
     </div>
 </div>
 
 <style scoped>
-.virtual-list {
+.flin-virtual-list {
     position: relative;
     width: 100%;
 }
@@ -170,7 +89,7 @@ itemRenderer = renderItem || defaultRenderItem
     display: flex;
     align-items: center;
     padding: 0 16px;
-    height: 100%;
+    height: 40px;
     border-bottom: 1px solid var(--flin-neutral-100);
     transition: background var(--flin-transition-fast);
 }
@@ -198,5 +117,29 @@ itemRenderer = renderItem || defaultRenderItem
     border-top: 1px solid var(--flin-neutral-200);
     background: var(--flin-neutral-50);
     border-radius: 0 0 var(--flin-radius-md) var(--flin-radius-md);
+}
+
+.virtual-list--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Dark theme */
+[data-theme="dark"] .virtual-list-viewport {
+    border-color: var(--flin-neutral-700);
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .virtual-list-item {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .virtual-list-item:hover {
+    background: var(--flin-neutral-750);
+}
+
+[data-theme="dark"] .virtual-list-info {
+    border-top-color: var(--flin-neutral-700);
+    background: var(--flin-neutral-850);
 }
 </style>

@@ -13,27 +13,26 @@ isClosing = false
 
 // Handle close with animation
 handleClose = {
-    {if closable}
-        isClosing = true;
-        setTimeout({
-            isClosing = false;
-            {if onClose}
-                onClose()
-            {/if}
-        }, 200)
-    {/if}
+    if closable {
+        isClosing = true
+        if onClose { onClose() }
+    }
 }
 
 // Handle backdrop click
 handleBackdropClick = {
-    handleClose()
+    if closable {
+        isClosing = true
+        if onClose { onClose() }
+    }
 }
 
 // Handle escape key
 handleKeyDown = {
-    {if event.key == "Escape"}
-        handleClose()
-    {/if}
+    if closable {
+        isClosing = true
+        if onClose { onClose() }
+    }
 }
 
 // Size class computation
@@ -49,7 +48,10 @@ sizeClass = match size {
 backdropClosingClass = match isClosing { true -> " modal-backdrop-closing", _ -> "" }
 modalClosingClass = match isClosing { true -> " modal-closing", _ -> "" }
 
-{if open}
+// Compute display class
+displayClass = match open { true -> "flin-modal-container", _ -> "flin-modal-container flin-modal-container--hidden" }
+
+<div class={displayClass}>
     <div
         class={"flin-modal-backdrop" ++ backdropClosingClass}
         click={handleBackdropClick}
@@ -64,9 +66,9 @@ modalClosingClass = match isClosing { true -> " modal-closing", _ -> "" }
         tabindex="-1"
         keydown={handleKeyDown}
     >
-        {if title || closable}
+        {if title != "" || closable}
             <div class="modal-header">
-                {if title}
+                {if title != ""}
                     <h2 id="modal-title" class="modal-title">{title}</h2>
                 {/if}
                 {if closable}
@@ -88,7 +90,7 @@ modalClosingClass = match isClosing { true -> " modal-closing", _ -> "" }
             {children}
         </div>
     </div>
-{/if}
+</div>
 
 <style scoped>
 /* Backdrop */

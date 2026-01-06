@@ -3,73 +3,35 @@
 
 // Props with defaults
 icon = props.icon
-href = props.href
+href = props.href || "#"
 active = props.active || false
-onClick = props.onClick
 disabled = props.disabled || false
-badge = props.badge  // Optional badge/notification count
-
-// Determine if this is a link or button
-isLink = href != none
-
-// Handle keyboard navigation
-handleKeydown = {
-    if event.key == "Enter" || event.key == " " {
-        if onClick {
-            event.preventDefault
-            onClick()
-        }
-    }
-}
+badge = props.badge
 
 // Computed classes
 activeClass = match active { true -> " flin-sidebar-item--active", _ -> "" }
 disabledClass = match disabled { true -> " flin-sidebar-item--disabled", _ -> "" }
+ariaCurrent = match active { true -> "page", _ -> "" }
 
-{if isLink}
-    <a
-        href={href}
-        class={"flin-sidebar-item" ++ activeClass ++ disabledClass}
-        aria-current={if active { "page" } else { none }}
-        tabindex={if disabled { -1 } else { 0 }}
-    >
-        {if icon}
-            <span class="flin-sidebar-item__icon" aria-hidden="true">
-                {icon}
-            </span>
-        {/if}
-        <span class="flin-sidebar-item__label">
-            {children}
+<a
+    href={href}
+    class={"flin-sidebar-item" ++ activeClass ++ disabledClass}
+    aria-current={ariaCurrent}
+>
+    {if icon}
+        <span class="flin-sidebar-item__icon" aria-hidden="true">
+            {icon}
         </span>
-        {if badge}
-            <span class="flin-sidebar-item__badge" aria-label="{badge} notifications">
-                {badge}
-            </span>
-        {/if}
-    </a>
-{else}
-    <button
-        class={"flin-sidebar-item" ++ activeClass}
-        click={onClick}
-        keydown={handleKeydown}
-        disabled={disabled}
-        tabindex={if disabled { -1 } else { 0 }}
-    >
-        {if icon}
-            <span class="flin-sidebar-item__icon" aria-hidden="true">
-                {icon}
-            </span>
-        {/if}
-        <span class="flin-sidebar-item__label">
-            {children}
+    {/if}
+    <span class="flin-sidebar-item__label">
+        {children}
+    </span>
+    {if badge}
+        <span class="flin-sidebar-item__badge">
+            {badge}
         </span>
-        {if badge}
-            <span class="flin-sidebar-item__badge" aria-label="{badge} notifications">
-                {badge}
-            </span>
-        {/if}
-    </button>
-{/if}
+    {/if}
+</a>
 
 <style scoped>
 .flin-sidebar-item {
@@ -93,7 +55,7 @@ disabledClass = match disabled { true -> " flin-sidebar-item--disabled", _ -> ""
     min-height: 44px;
 }
 
-.flin-sidebar-item:hover:not(:disabled):not(.flin-sidebar-item--disabled) {
+.flin-sidebar-item:hover:not(.flin-sidebar-item--disabled) {
     color: var(--flin-fg);
     background-color: var(--flin-neutral-100);
 }
@@ -113,14 +75,12 @@ disabledClass = match disabled { true -> " flin-sidebar-item--disabled", _ -> ""
     color: var(--flin-primary);
 }
 
-.flin-sidebar-item:disabled,
 .flin-sidebar-item--disabled {
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;
 }
 
-/* Icon */
 .flin-sidebar-item__icon {
     display: flex;
     align-items: center;
@@ -135,17 +95,13 @@ disabledClass = match disabled { true -> " flin-sidebar-item--disabled", _ -> ""
     height: 100%;
 }
 
-/* Label */
 .flin-sidebar-item__label {
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: opacity var(--flin-transition-fast),
-                width var(--flin-transition-fast);
 }
 
-/* Badge */
 .flin-sidebar-item__badge {
     display: inline-flex;
     align-items: center;
@@ -161,7 +117,6 @@ disabledClass = match disabled { true -> " flin-sidebar-item--disabled", _ -> ""
     flex-shrink: 0;
 }
 
-/* Collapsed state (when sidebar is collapsed) */
 .flin-sidebar--collapsed .flin-sidebar-item {
     justify-content: center;
     padding: var(--flin-space-3);
@@ -180,47 +135,11 @@ disabledClass = match disabled { true -> " flin-sidebar-item--disabled", _ -> ""
     font-size: 10px;
 }
 
-.flin-sidebar--collapsed .flin-sidebar-item {
-    position: relative;
-}
-
-/* Tooltip on hover when collapsed */
-.flin-sidebar--collapsed .flin-sidebar-item::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: var(--flin-space-2) var(--flin-space-3);
-    background-color: var(--flin-neutral-800);
-    color: white;
-    font-size: var(--flin-text-sm);
-    border-radius: var(--flin-radius-md);
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity var(--flin-transition-fast),
-                visibility var(--flin-transition-fast);
-    margin-left: var(--flin-space-2);
-    z-index: 1000;
-    pointer-events: none;
-}
-
-.flin-sidebar--collapsed .flin-sidebar-item:hover::after {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Dark theme support */
-[data-theme="dark"] .flin-sidebar-item:hover:not(:disabled):not(.flin-sidebar-item--disabled) {
+[data-theme="dark"] .flin-sidebar-item:hover:not(.flin-sidebar-item--disabled) {
     background-color: var(--flin-neutral-800);
 }
 
 [data-theme="dark"] .flin-sidebar-item--active {
     background-color: rgba(59, 130, 246, 0.15);
-}
-
-[data-theme="dark"] .flin-sidebar--collapsed .flin-sidebar-item::after {
-    background-color: var(--flin-neutral-700);
 }
 </style>

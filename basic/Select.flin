@@ -34,10 +34,10 @@ selectClass = "select" ++ errorClass ++ disabledClass
         {/if}
         {for option in options}
             <option
-                value={option.value || option}
-                selected={value == (option.value || option)}
+                value={option}
+                selected={value == option}
             >
-                {option.label || option}
+                {option}
             </option>
         {/for}
     </select>

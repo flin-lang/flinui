@@ -3,7 +3,7 @@
 
 // Props with defaults
 query = props.query || ""
-text = props.text || ""
+highlightText = props.text || ""
 highlightColor = props.highlightColor || "yellow"
 
 // Color class mapping
@@ -19,15 +19,17 @@ colorClass = match highlightColor {
 // Build full class string for marks
 markClass = "highlight__mark " ++ colorClass
 
-// Split text by query and render with highlights
-// If query is empty, just render the text as-is
-{if query == ""}
-    <span class="highlight">{text}</span>
-{else}
-    <span class="highlight">
-        {splitAndHighlight(text, query, markClass)}
-    </span>
-{/if}
+// Pre-compute whether we have a query
+hasQuery = query != ""
+
+// Render component - if query is empty, just render the text as-is
+<span class="highlight">
+    {if hasQuery}
+        <mark class={markClass}>{highlightText}</mark>
+    {else}
+        {highlightText}
+    {/if}
+</span>
 
 <style scoped>
 .highlight {

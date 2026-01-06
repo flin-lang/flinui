@@ -9,94 +9,11 @@ loadingText = props.loadingText || "Loading..."
 endText = props.endText || "No more items"
 onLoadMore = props.onLoadMore
 inverse = props.inverse || false
-scrollableTarget = props.scrollableTarget || ""
-initialLoad = props.initialLoad || true
 
-// State
-isLoading = loading
-hasTriggered = false
+// Computed class
+inverseClass = match inverse { true -> " flin-infinite-scroll--inverse", _ -> "" }
 
-// Intersection observer reference
-observerRef = null
-sentinelRef = null
-
-// Handle intersection (when sentinel becomes visible)
-handleIntersection = (entries) => {
-    entry = entries[0]
-
-    {if entry.isIntersecting && hasMore && !isLoading && !hasTriggered}
-        hasTriggered = true
-
-        {if onLoadMore}
-            onLoadMore()
-        {/if}
-    {/if}
-}
-
-// Reset trigger when loading completes
-{if !loading && hasTriggered}
-    hasTriggered = false
-{/if}
-
-// Setup intersection observer on mount
-onMount = () => {
-    {if sentinelRef}
-        options = {
-            root: if scrollableTarget != "" { document.querySelector(scrollableTarget) } else { null },
-            rootMargin: threshold ++ "px",
-            threshold: 0
-        }
-
-        observerRef = new IntersectionObserver(handleIntersection, options)
-        observerRef.observe(sentinelRef)
-    {/if}
-
-    // Initial load if enabled
-    {if initialLoad && hasMore && onLoadMore}
-        onLoadMore()
-    {/if}
-}
-
-// Cleanup on unmount
-onUnmount = () => {
-    {if observerRef}
-        observerRef.disconnect()
-    {/if}
-}
-
-// Manual scroll handler as fallback
-handleScroll = (event) => {
-    {if !hasMore || isLoading}
-        return
-    {/if}
-
-    container = event.target
-
-    {if inverse}
-        // For inverse scroll (chat-like), check if near top
-        nearTop = container.scrollTop < threshold
-
-        {if nearTop && !hasTriggered}
-            hasTriggered = true
-            {if onLoadMore}
-                onLoadMore()
-            {/if}
-        {/if}
-    {else}
-        // Normal scroll, check if near bottom
-        nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold
-
-        {if nearBottom && !hasTriggered}
-            hasTriggered = true
-            {if onLoadMore}
-                onLoadMore()
-            {/if}
-        {/if}
-    {/if}
-}
-
-<div class={"flin-infinite-scroll" ++ (if inverse { " flin-infinite-scroll--inverse" } else { "" })}
-     scroll={handleScroll}
+<div class={"flin-infinite-scroll" ++ inverseClass}
      role="feed"
      aria-busy={loading}>
 
@@ -114,29 +31,29 @@ handleScroll = (event) => {
     {/if}
 
     <div class="flin-infinite-scroll__content">
-        {children}
+        <slot></slot>
     </div>
 
     {if !inverse}
         <!-- Sentinel element for intersection observer -->
-        <div class="flin-infinite-scroll__sentinel" ref={sentinelRef}></div>
+        <div class="flin-infinite-scroll__sentinel"></div>
+    {/if}
 
-        {if loading}
-            <div class="flin-infinite-scroll__loader" aria-live="polite">
-                <div class="flin-infinite-scroll__spinner"></div>
-                <span class="flin-infinite-scroll__text">{loadingText}</span>
-            </div>
-        {/if}
+    {if !inverse && loading}
+        <div class="flin-infinite-scroll__loader" aria-live="polite">
+            <div class="flin-infinite-scroll__spinner"></div>
+            <span class="flin-infinite-scroll__text">{loadingText}</span>
+        </div>
+    {/if}
 
-        {if !hasMore && !loading}
-            <div class="flin-infinite-scroll__end" aria-live="polite">
-                <svg class="flin-infinite-scroll__end-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M8 12h8" />
-                </svg>
-                <span class="flin-infinite-scroll__text">{endText}</span>
-            </div>
-        {/if}
+    {if !inverse && !hasMore && !loading}
+        <div class="flin-infinite-scroll__end" aria-live="polite">
+            <svg class="flin-infinite-scroll__end-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M8 12h8" />
+            </svg>
+            <span class="flin-infinite-scroll__text">{endText}</span>
+        </div>
     {/if}
 </div>
 

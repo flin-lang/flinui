@@ -12,17 +12,11 @@ showTimeout = none
 
 // Handle mouse enter
 handleMouseEnter = {
-    showTimeout = setTimeout({
-        isVisible = true
-    }, delay)
+    isVisible = true
 }
 
 // Handle mouse leave
 handleMouseLeave = {
-    {if showTimeout}
-        clearTimeout(showTimeout);
-        showTimeout = none
-    {/if}
     isVisible = false
 }
 
@@ -54,7 +48,7 @@ positionClass = match position {
         {children}
     </div>
 
-    {if isVisible && content}
+    {if isVisible && content != ""}
         <div
             id="tooltip-content"
             class={"flin-tooltip " ++ positionClass}

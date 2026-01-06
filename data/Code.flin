@@ -6,19 +6,24 @@ language = props.language || ""
 showLineNumbers = props.showLineNumbers || false
 inline = props.inline || false
 
-<div class="flin-code-wrapper {if inline { 'flin-code--inline' }}">
+// Pre-compute classes
+wrapperClass = match inline { true -> "flin-code-wrapper flin-code--inline", _ -> "flin-code-wrapper" }
+preClass = match showLineNumbers { true -> "flin-code flin-code--numbered", _ -> "flin-code" }
+
+<div class={wrapperClass}>
+    {if !inline && language != ""}
+        <div class="flin-code__header">
+            <span class="flin-code__language">{language}</span>
+        </div>
+    {/if}
     {if !inline}
-        {if language != ""}
-            <div class="flin-code__header">
-                <span class="flin-code__language">{language}</span>
-            </div>
-        {/if}
-        <pre class="flin-code {if showLineNumbers { 'flin-code--numbered' }}">
+        <pre class={preClass}>
             <code class="flin-code__content" data-language={language}>
                 {children}
             </code>
         </pre>
-    {else}
+    {/if}
+    {if inline}
         <code class="flin-code__inline">
             {children}
         </code>

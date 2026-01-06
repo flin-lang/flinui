@@ -1,181 +1,61 @@
 // TagsInput.flin - FlinUI Tags Input Component
-// Multi-tag input with add/remove functionality
+// Input for managing multiple tags/chips
 
 // Props with defaults
-value = props.value || []
+tags = props.tags || []
 placeholder = props.placeholder || "Add tag..."
-maxTags = props.maxTags
-allowDuplicates = props.allowDuplicates || false
-validateTag = props.validateTag
-onChange = props.onChange
-onRemove = props.onRemove
 disabled = props.disabled || false
-size = props.size || "md"
-
-// Internal state
-tags = [...value]
-inputValue = ""
-isFocused = false
-
-// Size classes
-sizeClass = match size {
-    "sm" -> "tags-input-sm"
-    "lg" -> "tags-input-lg"
-    _ -> "tags-input-md"
-}
-
-// Check if can add more tags
-canAddMore = maxTags == null || tags.length < maxTags
-
-// Normalize tag (trim whitespace)
-normalizeTag = {
-    tag = event;
-    tag.trim()
-}
-
-// Check if tag is valid
-isValidTag = {
-    tag = event;
-    normalized = normalizeTag(tag);
-
-    {if normalized.length == 0}
-        false
-    {else if !allowDuplicates && tags.includes(normalized)}
-        false
-    {else if validateTag}
-        validateTag(normalized)
-    {else}
-        true
-    {/if}
-}
-
-// Add a tag
-addTag = {
-    tag = normalizeTag(inputValue);
-
-    {if isValidTag(tag) && canAddMore}
-        tags = [...tags, tag];
-        inputValue = "";
-        {if onChange}
-            onChange(tags)
-        {/if}
-    {/if}
-}
-
-// Remove a tag by index
-removeTag = {
-    index = event;
-    removedTag = tags[index];
-    tags = tags.filter((_, i) => i != index);
-
-    {if onRemove}
-        onRemove(removedTag, index)
-    {/if}
-    {if onChange}
-        onChange(tags)
-    {/if}
-}
-
-// Handle input change
-handleInput = {
-    inputValue = event.target.value
-}
-
-// Handle keydown
-handleKeydown = {
-    {if event.key == "Enter" || event.key == ","}
-        event.preventDefault();
-        addTag()
-    {else if event.key == "Backspace" && inputValue == "" && tags.length > 0}
-        removeTag(tags.length - 1)
-    {/if}
-}
-
-// Handle blur - add tag if there's input
-handleBlur = {
-    isFocused = false;
-    {if inputValue.trim().length > 0}
-        addTag()
-    {/if}
-}
-
-// Handle focus
-handleFocus = {
-    isFocused = true
-}
-
-// Handle tag click to remove
-handleTagRemove = {
-    index = parseInt(event.currentTarget.dataset.index);
-    {if !disabled}
-        removeTag(index)
-    {/if}
-}
+maxTags = props.maxTags || 10
+onChange = props.onChange
 
 // Compute classes
-disabledClass = match disabled { true -> " tags-input-disabled", _ -> "" }
-focusedClass = match isFocused { true -> " tags-input-focused", _ -> "" }
-containerClass = "tags-input " ++ sizeClass ++ disabledClass ++ focusedClass
+disabledClass = match disabled {
+    true -> " tags-input-disabled"
+    _ -> ""
+}
+containerClass = "tags-input" ++ disabledClass
 
-<div class={containerClass} click={() => document.querySelector(".tags-input-field")?.focus()}>
+<div class={containerClass}>
     <div class="tags-input-tags">
-        {for i, tag in tags}
-            <span class="tags-input-tag" data-index={i}>
+        {for tag in tags}
+            <span class="tags-input-tag">
                 <span class="tags-input-tag-text">{tag}</span>
-                {if !disabled}
-                    <button
-                        type="button"
-                        class="tags-input-tag-remove"
-                        click={handleTagRemove}
-                        data-index={i}
-                        aria-label={"Remove " ++ tag}
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M18 6L6 18M6 6l12 12"/>
-                        </svg>
-                    </button>
-                {/if}
+                <button type="button" class="tags-input-tag-remove" aria-label="Remove tag">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
             </span>
         {/for}
-        {if canAddMore && !disabled}
-            <input
-                type="text"
-                class="tags-input-field"
-                value={inputValue}
-                placeholder={tags.length == 0 ? placeholder : ""}
-                disabled={disabled}
-                input={handleInput}
-                keydown={handleKeydown}
-                focus={handleFocus}
-                blur={handleBlur}
-                aria-label="Add tag"
-            >
-        {/if}
     </div>
-    {if maxTags != null}
-        <span class="tags-input-count">{tags.length}/{maxTags}</span>
-    {/if}
+    <input
+        type="text"
+        class="tags-input-field"
+        placeholder={placeholder}
+        disabled={disabled}
+        change={onChange}
+    >
 </div>
 
 <style scoped>
 .tags-input {
     display: flex;
-    align-items: flex-start;
+    flex-wrap: wrap;
+    align-items: center;
     gap: var(--flin-space-2);
-    padding: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
     border: 1px solid var(--flin-neutral-300);
     border-radius: var(--flin-radius-md);
     background-color: var(--flin-bg);
-    cursor: text;
-    transition: all var(--flin-transition-fast);
     min-height: 40px;
+    transition: all var(--flin-transition-fast);
 }
 
 .tags-input:hover:not(.tags-input-disabled) {
     border-color: var(--flin-neutral-400);
 }
 
-.tags-input-focused {
+.tags-input:focus-within {
     border-color: var(--flin-primary);
     box-shadow: 0 0 0 3px var(--flin-primary-light);
 }
@@ -184,9 +64,6 @@ containerClass = "tags-input " ++ sizeClass ++ disabledClass ++ focusedClass
     display: flex;
     flex-wrap: wrap;
     gap: var(--flin-space-1);
-    flex: 1;
-    min-width: 0;
-    align-items: center;
 }
 
 .tags-input-tag {
@@ -196,26 +73,13 @@ containerClass = "tags-input " ++ sizeClass ++ disabledClass ++ focusedClass
     padding: var(--flin-space-1) var(--flin-space-2);
     background-color: var(--flin-primary-light);
     color: var(--flin-primary);
-    border-radius: var(--flin-radius-sm);
-    font-family: var(--flin-font-sans);
+    border-radius: var(--flin-radius-full);
     font-size: var(--flin-text-sm);
     font-weight: 500;
-    max-width: 100%;
-    animation: tag-appear 0.15s ease-out;
-}
-
-@keyframes tag-appear {
-    from {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
 }
 
 .tags-input-tag-text {
+    max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -225,16 +89,15 @@ containerClass = "tags-input " ++ sizeClass ++ disabledClass ++ focusedClass
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
     width: 16px;
     height: 16px;
     background: transparent;
     border: none;
     color: var(--flin-primary);
     cursor: pointer;
-    border-radius: var(--flin-radius-sm);
+    border-radius: 50%;
+    padding: 0;
     transition: all var(--flin-transition-fast);
-    flex-shrink: 0;
 }
 
 .tags-input-tag-remove:hover {
@@ -249,76 +112,17 @@ containerClass = "tags-input " ++ sizeClass ++ disabledClass ++ focusedClass
 
 .tags-input-field {
     flex: 1;
-    min-width: 80px;
-    padding: var(--flin-space-1) 0;
+    min-width: 120px;
+    border: none;
+    outline: none;
+    background: transparent;
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-base);
     color: var(--flin-fg);
-    background: transparent;
-    border: none;
-    outline: none;
 }
 
 .tags-input-field::placeholder {
     color: var(--flin-fg-muted);
-}
-
-.tags-input-count {
-    font-size: var(--flin-text-xs);
-    color: var(--flin-fg-muted);
-    white-space: nowrap;
-    padding-top: var(--flin-space-1);
-}
-
-/* Size variants */
-.tags-input-sm {
-    padding: var(--flin-space-1);
-    min-height: 32px;
-}
-
-.tags-input-sm .tags-input-tag {
-    font-size: var(--flin-text-xs);
-    padding: 2px var(--flin-space-1);
-}
-
-.tags-input-sm .tags-input-field {
-    font-size: var(--flin-text-sm);
-    padding: 2px 0;
-}
-
-.tags-input-sm .tags-input-tag-remove {
-    width: 14px;
-    height: 14px;
-}
-
-.tags-input-sm .tags-input-tag-remove svg {
-    width: 10px;
-    height: 10px;
-}
-
-.tags-input-lg {
-    padding: var(--flin-space-3);
-    min-height: 48px;
-}
-
-.tags-input-lg .tags-input-tag {
-    font-size: var(--flin-text-base);
-    padding: var(--flin-space-1) var(--flin-space-3);
-}
-
-.tags-input-lg .tags-input-field {
-    font-size: var(--flin-text-lg);
-    padding: var(--flin-space-1) 0;
-}
-
-.tags-input-lg .tags-input-tag-remove {
-    width: 18px;
-    height: 18px;
-}
-
-.tags-input-lg .tags-input-tag-remove svg {
-    width: 14px;
-    height: 14px;
 }
 
 /* Disabled state */
@@ -328,12 +132,11 @@ containerClass = "tags-input " ++ sizeClass ++ disabledClass ++ focusedClass
     border-color: var(--flin-neutral-200);
 }
 
-.tags-input-disabled .tags-input-tag {
-    background-color: var(--flin-neutral-200);
-    color: var(--flin-fg-muted);
-}
-
 .tags-input-disabled .tags-input-field {
     cursor: not-allowed;
+}
+
+.tags-input-disabled .tags-input-tag {
+    opacity: 0.6;
 }
 </style>

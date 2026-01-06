@@ -6,12 +6,12 @@
 // ============================================================================
 
 // Standard breakpoints (mobile-first)
-breakpointXs = "0px"        // Extra small devices (portrait phones)
-breakpointSm = "640px"      // Small devices (landscape phones)
-breakpointMd = "768px"      // Medium devices (tablets)
-breakpointLg = "1024px"     // Large devices (desktops)
-breakpointXl = "1280px"     // Extra large devices (large desktops)
-breakpoint2xl = "1536px"    // 2X large devices (larger desktops)
+breakpointXs = "0px"
+breakpointSm = "640px"
+breakpointMd = "768px"
+breakpointLg = "1024px"
+breakpointXl = "1280px"
+breakpoint2xl = "1536px"
 
 // Container Max Widths
 containerSm = "640px"
@@ -36,81 +36,10 @@ fluidSpace4 = "clamp(1rem, 0.8rem + 1vw, 1.5rem)"
 fluidSpace8 = "clamp(2rem, 1.6rem + 2vw, 3rem)"
 
 // ============================================================================
-// MEDIA QUERY HELPERS
+// REACTIVE BREAKPOINT STATE
 // ============================================================================
 
-/// Check if viewport matches a breakpoint
-/// @param breakpoint - Breakpoint name (xs, sm, md, lg, xl, 2xl)
-/// @returns Boolean indicating if viewport is at or above breakpoint
-matchesBreakpoint = fn(breakpoint) {
-    // JavaScript implementation:
-    // const breakpoints = {
-    //     xs: 0,
-    //     sm: 640,
-    //     md: 768,
-    //     lg: 1024,
-    //     xl: 1280,
-    //     '2xl': 1536
-    // };
-    // return window.innerWidth >= breakpoints[breakpoint];
-
-    false
-}
-
-/// Get current breakpoint
-/// @returns Current breakpoint name (xs, sm, md, lg, xl, 2xl)
-getCurrentBreakpoint = fn() {
-    // JavaScript implementation:
-    // const width = window.innerWidth;
-    // if (width >= 1536) return '2xl';
-    // if (width >= 1280) return 'xl';
-    // if (width >= 1024) return 'lg';
-    // if (width >= 768) return 'md';
-    // if (width >= 640) return 'sm';
-    // return 'xs';
-
-    "md"
-}
-
-/// Check if viewport is between two breakpoints
-/// @param min - Minimum breakpoint (inclusive)
-/// @param max - Maximum breakpoint (exclusive)
-isBetweenBreakpoints = fn(min, max) {
-    // JavaScript: return matchesBreakpoint(min) && !matchesBreakpoint(max);
-    false
-}
-
-/// Media query generator
-/// @param breakpoint - Breakpoint name
-/// @param type - 'min' (default) or 'max'
-/// @returns Media query string
-mediaQuery = fn(breakpoint, type) {
-    queryType = type || "min"
-    breakpointValue = getBreakpointValue(breakpoint)
-
-    if queryType == "min" {
-        "(min-width: " + breakpointValue + ")"
-    } else {
-        "(max-width: " + breakpointValue + ")"
-    }
-}
-
-/// Get breakpoint pixel value
-getBreakpointValue = fn(breakpoint) {
-    if breakpoint == "xs" { breakpointXs }
-    else if breakpoint == "sm" { breakpointSm }
-    else if breakpoint == "md" { breakpointMd }
-    else if breakpoint == "lg" { breakpointLg }
-    else if breakpoint == "xl" { breakpointXl }
-    else if breakpoint == "2xl" { breakpoint2xl }
-    else { "768px" }
-}
-
-// ============================================================================
-// REACTIVE BREAKPOINT HOOK
-// ============================================================================
-
-/// Reactive breakpoint state (updates on window resize)
+// Current breakpoint state (updates on window resize via JS)
 currentBreakpoint = "md"
 isXs = false
 isSm = false
@@ -118,53 +47,6 @@ isMd = true
 isLg = false
 isXl = false
 is2xl = false
-
-/// Use breakpoint - reactive helper that updates on window resize
-/// @returns Object with current breakpoint info
-useBreakpoint = fn() {
-    // JavaScript implementation:
-    // const updateBreakpoint = () => {
-    //     const bp = getCurrentBreakpoint();
-    //     currentBreakpoint = bp;
-    //     isXs = bp === 'xs';
-    //     isSm = bp === 'sm';
-    //     isMd = bp === 'md';
-    //     isLg = bp === 'lg';
-    //     isXl = bp === 'xl';
-    //     is2xl = bp === '2xl';
-    // };
-    //
-    // window.addEventListener('resize', updateBreakpoint);
-    // updateBreakpoint();
-
-    {
-        current: currentBreakpoint,
-        isXs: isXs,
-        isSm: isSm,
-        isMd: isMd,
-        isLg: isLg,
-        isXl: isXl,
-        is2xl: is2xl,
-        matches: matchesBreakpoint
-    }
-}
-
-/// Check if device is mobile (xs or sm)
-isMobile = fn() {
-    bp = getCurrentBreakpoint()
-    bp == "xs" || bp == "sm"
-}
-
-/// Check if device is tablet (md)
-isTablet = fn() {
-    getCurrentBreakpoint() == "md"
-}
-
-/// Check if device is desktop (lg or larger)
-isDesktop = fn() {
-    bp = getCurrentBreakpoint()
-    bp == "lg" || bp == "xl" || bp == "2xl"
-}
 
 <style>
 /* Responsive CSS Variables */

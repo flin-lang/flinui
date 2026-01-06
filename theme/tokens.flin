@@ -201,7 +201,8 @@ breakpoint2xl = "1536px"
     --flin-font-sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --flin-font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
 
-    /* Font Sizes */
+    /* Font Sizes - Extended */
+    --flin-text-2xs: 0.625rem;
     --flin-text-xs: 0.75rem;
     --flin-text-sm: 0.875rem;
     --flin-text-base: 1rem;
@@ -210,33 +211,380 @@ breakpoint2xl = "1536px"
     --flin-text-2xl: 1.5rem;
     --flin-text-3xl: 1.875rem;
     --flin-text-4xl: 2.25rem;
+    --flin-text-5xl: 3rem;
+    --flin-text-6xl: 3.75rem;
+    --flin-text-7xl: 4.5rem;
+    --flin-text-8xl: 6rem;
+    --flin-text-9xl: 8rem;
 
-    /* Spacing */
+    /* Font Weights - Complete */
+    --flin-font-thin: 100;
+    --flin-font-extralight: 200;
+    --flin-font-light: 300;
+    --flin-font-normal: 400;
+    --flin-font-medium: 500;
+    --flin-font-semibold: 600;
+    --flin-font-bold: 700;
+    --flin-font-extrabold: 800;
+    --flin-font-black: 900;
+
+    /* Line Heights - Numeric */
+    --flin-leading-3: 0.75rem;
+    --flin-leading-4: 1rem;
+    --flin-leading-5: 1.25rem;
+    --flin-leading-6: 1.5rem;
+    --flin-leading-7: 1.75rem;
+    --flin-leading-8: 2rem;
+    --flin-leading-9: 2.25rem;
+    --flin-leading-10: 2.5rem;
+
+    /* Line Heights - Named */
+    --flin-leading-none: 1;
+    --flin-leading-tight: 1.25;
+    --flin-leading-snug: 1.375;
+    --flin-leading-normal: 1.5;
+    --flin-leading-relaxed: 1.625;
+    --flin-leading-loose: 2;
+
+    /* Letter Spacing */
+    --flin-tracking-tighter: -0.05em;
+    --flin-tracking-tight: -0.025em;
+    --flin-tracking-normal: 0em;
+    --flin-tracking-wide: 0.025em;
+    --flin-tracking-wider: 0.05em;
+    --flin-tracking-widest: 0.1em;
+
+    /* Spacing - Complete Tailwind Scale */
+    --flin-space-0: 0;
+    --flin-space-px: 1px;
+    --flin-space-0-5: 0.125rem;
     --flin-space-1: 0.25rem;
+    --flin-space-1-5: 0.375rem;
     --flin-space-2: 0.5rem;
+    --flin-space-2-5: 0.625rem;
     --flin-space-3: 0.75rem;
+    --flin-space-3-5: 0.875rem;
     --flin-space-4: 1rem;
+    --flin-space-5: 1.25rem;
     --flin-space-6: 1.5rem;
+    --flin-space-7: 1.75rem;
     --flin-space-8: 2rem;
+    --flin-space-9: 2.25rem;
+    --flin-space-10: 2.5rem;
+    --flin-space-11: 2.75rem;
     --flin-space-12: 3rem;
+    --flin-space-14: 3.5rem;
     --flin-space-16: 4rem;
+    --flin-space-18: 4.5rem;
+    --flin-space-20: 5rem;
+    --flin-space-24: 6rem;
+    --flin-space-28: 7rem;
+    --flin-space-32: 8rem;
+    --flin-space-36: 9rem;
+    --flin-space-40: 10rem;
+    --flin-space-44: 11rem;
+    --flin-space-48: 12rem;
+    --flin-space-52: 13rem;
+    --flin-space-56: 14rem;
+    --flin-space-60: 15rem;
+    --flin-space-64: 16rem;
+    --flin-space-72: 18rem;
+    --flin-space-80: 20rem;
+    --flin-space-96: 24rem;
 
-    /* Border Radius */
+    /* Spacing - Named Aliases (Tailwind/Chakra compatible) */
+    --flin-space-xs: 0.25rem;
+    --flin-space-sm: 0.5rem;
+    --flin-space-md: 1rem;
+    --flin-space-lg: 1.5rem;
+    --flin-space-xl: 2rem;
+    --flin-space-2xl: 3rem;
+    --flin-space-3xl: 4rem;
+    --flin-space-4xl: 6rem;
+
+    /* Sizing - Complete Scale */
+    --flin-size-0: 0;
+    --flin-size-px: 1px;
+    --flin-size-0-5: 0.125rem;
+    --flin-size-1: 0.25rem;
+    --flin-size-1-5: 0.375rem;
+    --flin-size-2: 0.5rem;
+    --flin-size-2-5: 0.625rem;
+    --flin-size-3: 0.75rem;
+    --flin-size-3-5: 0.875rem;
+    --flin-size-4: 1rem;
+    --flin-size-5: 1.25rem;
+    --flin-size-6: 1.5rem;
+    --flin-size-7: 1.75rem;
+    --flin-size-8: 2rem;
+    --flin-size-9: 2.25rem;
+    --flin-size-10: 2.5rem;
+    --flin-size-11: 2.75rem;
+    --flin-size-12: 3rem;
+    --flin-size-14: 3.5rem;
+    --flin-size-16: 4rem;
+    --flin-size-20: 5rem;
+    --flin-size-24: 6rem;
+    --flin-size-28: 7rem;
+    --flin-size-32: 8rem;
+    --flin-size-36: 9rem;
+    --flin-size-40: 10rem;
+    --flin-size-44: 11rem;
+    --flin-size-48: 12rem;
+    --flin-size-52: 13rem;
+    --flin-size-56: 14rem;
+    --flin-size-60: 15rem;
+    --flin-size-64: 16rem;
+    --flin-size-72: 18rem;
+    --flin-size-80: 20rem;
+    --flin-size-96: 24rem;
+
+    /* Sizing - Named */
+    --flin-size-xs: 20rem;
+    --flin-size-sm: 24rem;
+    --flin-size-md: 28rem;
+    --flin-size-lg: 32rem;
+    --flin-size-xl: 36rem;
+    --flin-size-2xl: 42rem;
+    --flin-size-3xl: 48rem;
+    --flin-size-4xl: 56rem;
+    --flin-size-5xl: 64rem;
+    --flin-size-6xl: 72rem;
+    --flin-size-7xl: 80rem;
+
+    /* Sizing - Special */
+    --flin-size-full: 100%;
+    --flin-size-screen: 100vw;
+    --flin-size-screen-h: 100vh;
+    --flin-size-min: min-content;
+    --flin-size-max: max-content;
+    --flin-size-fit: fit-content;
+
+    /* Sizing - Fractional */
+    --flin-size-1-2: 50%;
+    --flin-size-1-3: 33.333333%;
+    --flin-size-2-3: 66.666667%;
+    --flin-size-1-4: 25%;
+    --flin-size-3-4: 75%;
+    --flin-size-1-5: 20%;
+    --flin-size-2-5: 40%;
+    --flin-size-3-5: 60%;
+    --flin-size-4-5: 80%;
+    --flin-size-1-6: 16.666667%;
+    --flin-size-5-6: 83.333333%;
+
+    /* Border Radius - Complete */
+    --flin-radius-none: 0;
     --flin-radius-sm: 0.125rem;
+    --flin-radius-DEFAULT: 0.25rem;
     --flin-radius-md: 0.375rem;
     --flin-radius-lg: 0.5rem;
     --flin-radius-xl: 0.75rem;
+    --flin-radius-2xl: 1rem;
+    --flin-radius-3xl: 1.5rem;
     --flin-radius-full: 9999px;
 
-    /* Shadows */
+    /* Shadows - Complete */
+    --flin-shadow-none: none;
+    --flin-shadow-2xs: 0 1px rgb(0 0 0 / 0.05);
+    --flin-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.05);
     --flin-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --flin-shadow-DEFAULT: 0 1px 3px rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     --flin-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --flin-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --flin-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --flin-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    --flin-shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+
+    /* Z-Index - Numeric */
+    --flin-z-0: 0;
+    --flin-z-10: 10;
+    --flin-z-20: 20;
+    --flin-z-30: 30;
+    --flin-z-40: 40;
+    --flin-z-50: 50;
+    --flin-z-auto: auto;
+
+    /* Z-Index - Semantic */
+    --flin-z-dropdown: 100;
+    --flin-z-sticky: 200;
+    --flin-z-fixed: 300;
+    --flin-z-modal-backdrop: 400;
+    --flin-z-modal: 500;
+    --flin-z-popover: 600;
+    --flin-z-tooltip: 700;
+    --flin-z-toast: 800;
+    --flin-z-navbar: 1000;
+    --flin-z-max: 9999;
+
+    /* Opacity */
+    --flin-opacity-0: 0;
+    --flin-opacity-5: 0.05;
+    --flin-opacity-10: 0.1;
+    --flin-opacity-20: 0.2;
+    --flin-opacity-25: 0.25;
+    --flin-opacity-30: 0.3;
+    --flin-opacity-40: 0.4;
+    --flin-opacity-50: 0.5;
+    --flin-opacity-60: 0.6;
+    --flin-opacity-70: 0.7;
+    --flin-opacity-75: 0.75;
+    --flin-opacity-80: 0.8;
+    --flin-opacity-90: 0.9;
+    --flin-opacity-95: 0.95;
+    --flin-opacity-100: 1;
+
+    /* Blur */
+    --flin-blur-none: 0;
+    --flin-blur-sm: 4px;
+    --flin-blur-DEFAULT: 8px;
+    --flin-blur-md: 12px;
+    --flin-blur-lg: 16px;
+    --flin-blur-xl: 24px;
+    --flin-blur-2xl: 40px;
+    --flin-blur-3xl: 64px;
+
+    /* Containers */
+    --flin-container-xs: 20rem;
+    --flin-container-sm: 24rem;
+    --flin-container-md: 28rem;
+    --flin-container-lg: 32rem;
+    --flin-container-xl: 36rem;
+    --flin-container-2xl: 42rem;
+    --flin-container-3xl: 48rem;
+    --flin-container-4xl: 56rem;
+    --flin-container-5xl: 64rem;
+    --flin-container-6xl: 72rem;
+    --flin-container-7xl: 80rem;
+    --flin-container-full: 100%;
+
+    /* Container - Screen Based (for responsive containers) */
+    --flin-container-screen-sm: 640px;
+    --flin-container-screen-md: 768px;
+    --flin-container-screen-lg: 1024px;
+    --flin-container-screen-xl: 1280px;
+    --flin-container-screen-2xl: 1536px;
+
+    /* Breakpoints */
+    --flin-breakpoint-xs: 0px;
+    --flin-breakpoint-sm: 640px;
+    --flin-breakpoint-md: 768px;
+    --flin-breakpoint-lg: 1024px;
+    --flin-breakpoint-xl: 1280px;
+    --flin-breakpoint-2xl: 1536px;
 
     /* Transitions */
     --flin-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
     --flin-transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
     --flin-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       AFRICAN DUSK THEME — FLIN Brand Identity
+       ═══════════════════════════════════════════════════════════════════════════ */
+
+    /* Background Hierarchy (dark theme first) */
+    --flin-bg-deep: #0a0a0f;
+    --flin-bg-surface: #12121a;
+    --flin-bg-elevated: #1a1a25;
+    --flin-bg-hover: #22222f;
+    --flin-bg-active: #2a2a3a;
+
+    /* Text Hierarchy */
+    --flin-text-primary: #f5f5f7;
+    --flin-text-secondary: #a0a0b0;
+    --flin-text-muted: #606070;
+    --flin-text-inverse: #0a0a0f;
+
+    /* Brand Accent - Gold (Primary) */
+    --flin-accent-gold: #d4a853;
+    --flin-accent-gold-bright: #f5d78e;
+    --flin-accent-gold-dim: #b8923d;
+    --flin-accent-gold-muted: rgba(212, 168, 83, 0.2);
+
+    /* Brand Accent - Violet (Secondary) */
+    --flin-accent-violet: #8b5cf6;
+    --flin-accent-violet-bright: #a78bfa;
+    --flin-accent-violet-dim: #6d44c4;
+    --flin-accent-violet-muted: rgba(139, 92, 246, 0.2);
+
+    /* Brand Accent - Cyan (Tertiary) */
+    --flin-accent-cyan: #22d3ee;
+    --flin-accent-cyan-bright: #67e8f9;
+    --flin-accent-cyan-dim: #06b6d4;
+    --flin-accent-cyan-muted: rgba(34, 211, 238, 0.2);
+
+    /* Semantic Accents */
+    --flin-accent-emerald: #34d399;
+    --flin-accent-rose: #f472b6;
+    --flin-accent-orange: #fb923c;
+    --flin-accent-blue: #60a5fa;
+
+    /* Borders */
+    --flin-border-subtle: rgba(255, 255, 255, 0.06);
+    --flin-border-medium: rgba(255, 255, 255, 0.1);
+    --flin-border-strong: rgba(255, 255, 255, 0.15);
+    --flin-border-accent: var(--flin-accent-gold);
+
+    /* Gradients */
+    --flin-gradient-gold: linear-gradient(135deg, #d4a853 0%, #f5d78e 50%, #d4a853 100%);
+    --flin-gradient-violet: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+    --flin-gradient-cyan: linear-gradient(135deg, #22d3ee 0%, #67e8f9 100%);
+    --flin-gradient-mesh:
+        radial-gradient(at 40% 20%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, rgba(212, 168, 83, 0.1) 0px, transparent 50%),
+        radial-gradient(at 0% 50%, rgba(34, 211, 238, 0.08) 0px, transparent 50%);
+
+    /* Glows */
+    --flin-glow-gold: rgba(212, 168, 83, 0.3);
+    --flin-glow-violet: rgba(139, 92, 246, 0.3);
+    --flin-glow-cyan: rgba(34, 211, 238, 0.3);
+
+    /* Display Font */
+    --flin-font-display: 'Instrument Serif', Georgia, serif;
+    --flin-font-body: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    /* Durations */
+    --flin-duration-instant: 50ms;
+    --flin-duration-fast: 150ms;
+    --flin-duration-normal: 300ms;
+    --flin-duration-slow: 500ms;
+    --flin-duration-slower: 700ms;
+    --flin-duration-slowest: 1000ms;
+
+    /* Easings */
+    --flin-ease-linear: linear;
+    --flin-ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --flin-ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --flin-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --flin-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --flin-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Component-specific Radius */
+    --flin-radius-button: 8px;
+    --flin-radius-card: 20px;
+    --flin-radius-modal: 24px;
+    --flin-radius-badge: 100px;
+    --flin-radius-input: 8px;
+    --flin-radius-icon: 14px;
+
+    /* Special Shadows */
+    --flin-shadow-card:
+        0 4px 6px -1px rgba(0, 0, 0, 0.2),
+        0 20px 50px -12px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --flin-shadow-dropdown: 0 10px 40px rgba(0, 0, 0, 0.3);
+    --flin-shadow-card-hover: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+
+    /* Glow Shadows */
+    --flin-shadow-glow-gold: 0 8px 30px rgba(212, 168, 83, 0.3);
+    --flin-shadow-glow-violet: 0 8px 30px rgba(139, 92, 246, 0.3);
+    --flin-shadow-glow-cyan: 0 8px 30px rgba(34, 211, 238, 0.3);
+
+    /* Fluid Typography */
+    --flin-text-hero: clamp(3rem, 10vw, 7rem);
+    --flin-text-display: clamp(2rem, 5vw, 3.5rem);
+    --flin-text-title: clamp(1.5rem, 4vw, 2.5rem);
+    --flin-text-subtitle: clamp(1.1rem, 2.5vw, 1.5rem);
 }
 
 /* Dark Theme */

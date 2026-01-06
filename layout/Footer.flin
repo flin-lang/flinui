@@ -1,58 +1,27 @@
 // FlinUI Footer Component
-// Page footer with columns, links, and social icons
-// Props: columns (array of {title, links}), copyright (string), socialLinks (array), variant (simple/columns)
+// Page footer with copyright and social links
+// Props: copyright (string), variant (simple/columns)
 
-columns = props.columns || []
 copyright = props.copyright || ""
-socialLinks = props.socialLinks || []
-variant = props.variant || "columns"
+variant = props.variant || "simple"
 
 // Build class string
 variantClass = match variant {
-    "simple" -> " flin-footer-simple"
-    "columns" -> " flin-footer-columns"
-    _ -> " flin-footer-columns"
+    "simple" -> " flin-footer-simple",
+    "columns" -> " flin-footer-columns",
+    _ -> " flin-footer-simple"
 }
 
 footerClass = "flin-footer" ++ variantClass
 
 // Check content availability
-hasColumns = columns.length > 0
-hasSocialLinks = socialLinks.length > 0
 hasCopyright = copyright != ""
 
 <footer class={footerClass}>
-    {if variant == "columns" && hasColumns {
-        <div class="flin-footer-columns-grid">
-            {for column in columns {
-                <div class="flin-footer-column">
-                    <h4 class="flin-footer-column-title">{column.title}</h4>
-                    <ul class="flin-footer-links">
-                        {for link in column.links {
-                            <li class="flin-footer-link-item">
-                                <a href={link.href} class="flin-footer-link">{link.label}</a>
-                            </li>
-                        }}
-                    </ul>
-                </div>
-            }}
-        </div>
-    }}
-
     <div class="flin-footer-bottom">
-        {if hasSocialLinks {
-            <div class="flin-footer-social">
-                {for social in socialLinks {
-                    <a href={social.href} class="flin-footer-social-link" aria-label={social.label} target="_blank" rel="noopener noreferrer">
-                        <span class="flin-footer-social-icon">{social.icon}</span>
-                    </a>
-                }}
-            </div>
-        }}
-
-        {if hasCopyright {
+        {if hasCopyright}
             <p class="flin-footer-copyright">{copyright}</p>
-        }}
+        {/if}
 
         {children}
     </div>

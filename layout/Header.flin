@@ -9,12 +9,12 @@ bordered = props.bordered || true
 
 // Build class string
 stickyClass = match sticky {
-    true -> " flin-header-sticky"
+    true -> " flin-header-sticky",
     _ -> ""
 }
 
 borderedClass = match bordered {
-    true -> " flin-header-bordered"
+    true -> " flin-header-bordered",
     _ -> ""
 }
 
@@ -27,12 +27,12 @@ hasDescription = description != ""
 <header class={headerClass}>
     <div class="flin-header-content">
         <div class="flin-header-text">
-            {if hasTitle {
+            {if hasTitle}
                 <h1 class="flin-header-title">{title}</h1>
-            }}
-            {if hasDescription {
+            {/if}
+            {if hasDescription}
                 <p class="flin-header-description">{description}</p>
-            }}
+            {/if}
         </div>
         <div class="flin-header-actions">
             {children}

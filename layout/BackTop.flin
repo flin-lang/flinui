@@ -1,113 +1,31 @@
 // FlinUI BackTop Component
 // Scroll to top button that appears after scrolling down
-// Props: visibilityHeight (number), target (scroll container selector), onClick (fn)
+// Props: visibilityHeight (number), onClick (fn)
 
 // Props with defaults
 visibilityHeight = props.visibilityHeight || 400
-target = props.target || null
 onClick = props.onClick
-duration = props.duration || 300
 
-// State management
-isVisible = false
-scrollContainer = null
-
-// Initialize component
-initBackTop = {
-    {if target}
-        scrollContainer = document.querySelector(target)
-    {else}
-        scrollContainer = window
-    {/if}
-}
-
-// Handle scroll events
-handleScroll = {
-    scrollTop = match target {
-        null -> window.scrollY,
-        _ -> scrollContainer.scrollTop
-    }
-
-    isVisible = scrollTop >= visibilityHeight
-}
-
-// Smooth scroll to top
-scrollToTop = {
-    startTime = null
-    startPosition = match target {
-        null -> window.scrollY,
-        _ -> scrollContainer.scrollTop
-    }
-
-    // Easing function (ease-out cubic)
-    easeOutCubic = fn(t) {
-        return 1 - Math.pow(1 - t, 3)
-    }
-
-    animateScroll = fn(currentTime) {
-        {if startTime == null}
-            startTime = currentTime
-        {/if}
-
-        elapsed = currentTime - startTime
-        progress = Math.min(elapsed / duration, 1)
-        easedProgress = easeOutCubic(progress)
-
-        newPosition = startPosition * (1 - easedProgress)
-
-        {if target}
-            scrollContainer.scrollTop = newPosition
-        {else}
-            window.scrollTo(0, newPosition)
-        {/if}
-
-        {if progress < 1}
-            requestAnimationFrame(animateScroll)
-        {/if}
-    }
-
-    requestAnimationFrame(animateScroll)
-
-    // Trigger callback
-    {if onClick}
-        onClick()
-    {/if}
-}
+// State management - simulated scroll state
+isVisible = props.isVisible || false
 
 // Handle click
 handleClick = {
-    scrollToTop()
+    // Trigger callback
+    if onClick {
+        onClick()
+    }
 }
 
 // Handle keyboard
 handleKeyDown = {
-    {if event.key == "Enter" || event.key == " "}
+    if event.key == "Enter" || event.key == " " {
         event.preventDefault()
-        scrollToTop()
-    {/if}
-}
-
-// Setup event listeners on mount
-onMount = {
-    initBackTop()
-
-    {if target && scrollContainer}
-        scrollContainer.addEventListener("scroll", handleScroll, { passive: true })
-    {else}
-        window.addEventListener("scroll", handleScroll, { passive: true })
-    {/if}
-
-    // Initial check
-    handleScroll()
-}
-
-// Cleanup on unmount
-onUnmount = {
-    {if target && scrollContainer}
-        scrollContainer.removeEventListener("scroll", handleScroll)
-    {else}
-        window.removeEventListener("scroll", handleScroll)
-    {/if}
+        // Trigger callback (same logic as handleClick)
+        if onClick {
+            onClick()
+        }
+    }
 }
 
 // Build class string
@@ -120,7 +38,7 @@ visibleClass = match isVisible { true -> " flin-backtop--visible", _ -> "" }
     type="button"
     aria-label="Scroll to top"
     title="Back to top"
-    tabindex={if isVisible { 0 } else { -1 }}
+    tabindex={match isVisible { true -> "0", _ -> "-1" }}
 >
     <svg
         class="flin-backtop__icon"

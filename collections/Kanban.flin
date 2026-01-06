@@ -3,227 +3,20 @@
 
 // Props with defaults
 columns = props.columns || []
-onMove = props.onMove || nil
-onColumnAdd = props.onColumnAdd || nil
-onColumnEdit = props.onColumnEdit || nil
-onColumnDelete = props.onColumnDelete || nil
-onCardAdd = props.onCardAdd || nil
-onCardEdit = props.onCardEdit || nil
-onCardDelete = props.onCardDelete || nil
-renderCard = props.renderCard || nil
+onMove = props.onMove || ""
+onColumnAdd = props.onColumnAdd || ""
+onColumnEdit = props.onColumnEdit || ""
+onColumnDelete = props.onColumnDelete || ""
+onCardAdd = props.onCardAdd || ""
+onCardEdit = props.onCardEdit || ""
+onCardDelete = props.onCardDelete || ""
 allowColumnAdd = props.allowColumnAdd || false
 allowCardAdd = props.allowCardAdd || true
 columnWidth = props.columnWidth || 300
-maxColumnHeight = props.maxColumnHeight || nil
 disabled = props.disabled || false
 
 // State
-localColumns = columns
-draggedCard = nil
-draggedFromColumn = nil
-dragOverColumn = nil
-dragOverIndex = nil
 isDragging = false
-
-// Sync columns from props
-onUpdate = {
-    if columns != localColumns && !isDragging {
-        localColumns = columns
-    }
-}
-
-// Handle card drag start
-handleCardDragStart = |columnId, cardIndex, card, e| {
-    if disabled { return }
-
-    isDragging = true
-    draggedCard = card
-    draggedFromColumn = columnId
-
-    e.dataTransfer.effectAllowed = "move"
-    e.dataTransfer.setData("application/json", JSON.stringify({
-        card: card,
-        fromColumn: columnId,
-        fromIndex: cardIndex
-    }))
-
-    setTimeout({
-        e.target.classList.add("kanban-card--dragging")
-    }, 0)
-}
-
-// Handle card drag end
-handleCardDragEnd = |e| {
-    isDragging = false
-    draggedCard = nil
-    draggedFromColumn = nil
-    dragOverColumn = nil
-    dragOverIndex = nil
-
-    e.target.classList.remove("kanban-card--dragging")
-}
-
-// Handle column drag over
-handleColumnDragOver = |columnId, e| {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = "move"
-    dragOverColumn = columnId
-}
-
-// Handle card drag over (for positioning)
-handleCardDragOver = |columnId, cardIndex, e| {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = "move"
-
-    dragOverColumn = columnId
-
-    // Calculate if we're in the top or bottom half
-    rect = e.currentTarget.getBoundingClientRect()
-    y = e.clientY - rect.top
-    dragOverIndex = y < rect.height / 2 ? cardIndex : cardIndex + 1
-}
-
-// Handle drop on column
-handleColumnDrop = |columnId, e| {
-    e.preventDefault()
-
-    if !draggedCard { return }
-
-    // Get the column's cards
-    targetColumn = localColumns.find(|col| col.id == columnId)
-    if !targetColumn { return }
-
-    // Calculate target index
-    targetIndex = dragOverIndex != nil ? dragOverIndex : targetColumn.items.length
-
-    // Don't move if dropping in same position
-    if draggedFromColumn == columnId {
-        sourceIndex = targetColumn.items.findIndex(|item| item.id == draggedCard.id)
-        if sourceIndex == targetIndex || sourceIndex == targetIndex - 1 {
-            resetDragState()
-            return
-        }
-    }
-
-    // Update local state
-    newColumns = localColumns.map(|col| {
-        if col.id == draggedFromColumn {
-            // Remove from source column
-            return {
-                ...col,
-                items: col.items.filter(|item| item.id != draggedCard.id)
-            }
-        }
-        if col.id == columnId {
-            // Add to target column
-            newItems = [...col.items]
-            // Adjust index if moving within same column and moving down
-            adjustedIndex = targetIndex
-            if draggedFromColumn == columnId {
-                sourceIndex = col.items.findIndex(|item| item.id == draggedCard.id)
-                if sourceIndex < targetIndex {
-                    adjustedIndex = targetIndex - 1
-                }
-            }
-            newItems.splice(adjustedIndex, 0, draggedCard)
-            return {
-                ...col,
-                items: newItems
-            }
-        }
-        return col
-    })
-
-    localColumns = newColumns
-
-    // Notify parent
-    if onMove {
-        onMove({
-            card: draggedCard,
-            fromColumn: draggedFromColumn,
-            toColumn: columnId,
-            toIndex: targetIndex,
-            columns: newColumns
-        })
-    }
-
-    resetDragState()
-}
-
-// Reset drag state
-resetDragState = {
-    isDragging = false
-    draggedCard = nil
-    draggedFromColumn = nil
-    dragOverColumn = nil
-    dragOverIndex = nil
-}
-
-// Handle add card to column
-handleAddCard = |columnId| {
-    if onCardAdd {
-        onCardAdd({ columnId: columnId })
-    }
-}
-
-// Handle edit card
-handleEditCard = |columnId, card| {
-    if onCardEdit {
-        onCardEdit({ columnId: columnId, card: card })
-    }
-}
-
-// Handle delete card
-handleDeleteCard = |columnId, card| {
-    if onCardDelete {
-        // Remove card from local state
-        newColumns = localColumns.map(|col| {
-            if col.id == columnId {
-                return {
-                    ...col,
-                    items: col.items.filter(|item| item.id != card.id)
-                }
-            }
-            return col
-        })
-        localColumns = newColumns
-
-        onCardDelete({ columnId: columnId, card: card, columns: newColumns })
-    }
-}
-
-// Handle add column
-handleAddColumn = {
-    if onColumnAdd {
-        onColumnAdd()
-    }
-}
-
-// Default card renderer
-defaultRenderCard = |card, columnId| {
-    <div class="kanban-card-content">
-        <div class="kanban-card-title">{card.title || card.name || "Untitled"}</div>
-        {card.description ? (
-            <div class="kanban-card-description">{card.description}</div>
-        ) : nil}
-        {card.labels && card.labels.length > 0 ? (
-            <div class="kanban-card-labels">
-                {card.labels.map(|label| (
-                    <span
-                        key={label.id || label}
-                        class="kanban-card-label"
-                        style="background-color: {label.color || 'var(--flin-primary)'}"
-                    >
-                        {label.name || label}
-                    </span>
-                ))}
-            </div>
-        ) : nil}
-    </div>
-}
-
-// Get card renderer
-cardRenderer = renderCard || defaultRenderCard
 
 // Computed classes
 disabledClass = match disabled { true -> " kanban--disabled", _ -> "" }
@@ -231,144 +24,121 @@ draggingClass = match isDragging { true -> " kanban--dragging", _ -> "" }
 
 <div class={"flin-kanban" ++ disabledClass ++ draggingClass}>
     <div class="kanban-board">
-        {localColumns.map(|column| {
-            isOver = dragOverColumn == column.id
-            columnOverClass = match isOver { true -> " kanban-column--drag-over", _ -> "" }
-
-            <div
-                key={column.id}
-                class={"kanban-column" ++ columnOverClass}
-                style="width: {columnWidth}px; {maxColumnHeight ? 'max-height: ' ++ maxColumnHeight ++ 'px' : ''}"
-                ondragover={|e| handleColumnDragOver(column.id, e)}
-                ondrop={|e| handleColumnDrop(column.id, e)}
-            >
-                <div class="kanban-column-header">
-                    <div class="kanban-column-title">
-                        <span class="kanban-column-name">{column.title || column.name}</span>
-                        <span class="kanban-column-count">{column.items.length}</span>
-                    </div>
-
-                    {onColumnEdit || onColumnDelete ? (
-                        <div class="kanban-column-actions">
-                            {onColumnEdit ? (
-                                <button
-                                    class="kanban-column-action"
-                                    onclick={|e| { e.stopPropagation(); onColumnEdit({ column: column }) }}
-                                    aria-label="Edit column"
-                                >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                    </svg>
-                                </button>
-                            ) : nil}
-                            {onColumnDelete ? (
-                                <button
-                                    class="kanban-column-action kanban-column-action--danger"
-                                    onclick={|e| { e.stopPropagation(); onColumnDelete({ column: column }) }}
-                                    aria-label="Delete column"
-                                >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    </svg>
-                                </button>
-                            ) : nil}
-                        </div>
-                    ) : nil}
+        <div class="kanban-column" style={"width: " ++ columnWidth ++ "px"}>
+            <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                    <span class="kanban-column-name">To Do</span>
+                    <span class="kanban-column-count">3</span>
                 </div>
-
-                <div class="kanban-column-body">
-                    {column.items.map(|card, cardIndex| {
-                        isCardDragged = draggedCard && draggedCard.id == card.id
-                        cardDraggingClass = match isCardDragged { true -> " kanban-card--dragging", _ -> "" }
-                        showDropBefore = isOver && dragOverIndex == cardIndex && !isCardDragged
-
-                        <div key={card.id}>
-                            {showDropBefore ? (
-                                <div class="kanban-drop-indicator"></div>
-                            ) : nil}
-
-                            <div
-                                class={"kanban-card" ++ cardDraggingClass}
-                                draggable={!disabled}
-                                ondragstart={|e| handleCardDragStart(column.id, cardIndex, card, e)}
-                                ondragend={handleCardDragEnd}
-                                ondragover={|e| handleCardDragOver(column.id, cardIndex, e)}
-                                role="article"
-                                tabindex="0"
-                                aria-grabbed={isCardDragged}
-                            >
-                                {cardRenderer(card, column.id)}
-
-                                {onCardEdit || onCardDelete ? (
-                                    <div class="kanban-card-actions">
-                                        {onCardEdit ? (
-                                            <button
-                                                class="kanban-card-action"
-                                                onclick={|e| { e.stopPropagation(); handleEditCard(column.id, card) }}
-                                                aria-label="Edit card"
-                                            >
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                                </svg>
-                                            </button>
-                                        ) : nil}
-                                        {onCardDelete ? (
-                                            <button
-                                                class="kanban-card-action kanban-card-action--danger"
-                                                onclick={|e| { e.stopPropagation(); handleDeleteCard(column.id, card) }}
-                                                aria-label="Delete card"
-                                            >
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                </svg>
-                                            </button>
-                                        ) : nil}
-                                    </div>
-                                ) : nil}
-                            </div>
-                        </div>
-                    })}
-
-                    {isOver && dragOverIndex >= column.items.length ? (
-                        <div class="kanban-drop-indicator"></div>
-                    ) : nil}
-
-                    {column.items.length == 0 && !isOver ? (
-                        <div class="kanban-column-empty">
-                            Drop cards here
-                        </div>
-                    ) : nil}
+                <div class="kanban-column-actions">
+                    <button class="kanban-column-action">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
                 </div>
-
-                {allowCardAdd ? (
-                    <div class="kanban-column-footer">
-                        <button
-                            class="kanban-add-card"
-                            onclick={() => handleAddCard(column.id)}
-                            aria-label="Add card to {column.title}"
-                        >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            <span>Add card</span>
-                        </button>
-                    </div>
-                ) : nil}
             </div>
-        })}
 
-        {allowColumnAdd ? (
+            <div class="kanban-column-body">
+                <div class="kanban-card" role="article" tabindex="0">
+                    <div class="kanban-card-content">
+                        <div class="kanban-card-title">Task 1</div>
+                        <div class="kanban-card-description">This is a sample task</div>
+                        <div class="kanban-card-labels">
+                            <span class="kanban-card-label" style="background-color: var(--flin-primary)">Feature</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kanban-card kanban-card--dragging" role="article" tabindex="0">
+                    <div class="kanban-card-content">
+                        <div class="kanban-card-title">Task 2</div>
+                        <div class="kanban-card-description">Being dragged</div>
+                    </div>
+                </div>
+
+                <div class="kanban-card" role="article" tabindex="0">
+                    <div class="kanban-card-content">
+                        <div class="kanban-card-title">Task 3</div>
+                    </div>
+                </div>
+            </div>
+
+            {if allowCardAdd}
+                <div class="kanban-column-footer">
+                    <button class="kanban-add-card">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Add card</span>
+                    </button>
+                </div>
+            {/if}
+        </div>
+
+        <div class="kanban-column kanban-column--drag-over" style={"width: " ++ columnWidth ++ "px"}>
+            <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                    <span class="kanban-column-name">In Progress</span>
+                    <span class="kanban-column-count">1</span>
+                </div>
+            </div>
+
+            <div class="kanban-column-body">
+                <div class="kanban-drop-indicator"></div>
+                <div class="kanban-card" role="article" tabindex="0">
+                    <div class="kanban-card-content">
+                        <div class="kanban-card-title">Working on it</div>
+                        <div class="kanban-card-labels">
+                            <span class="kanban-card-label" style="background-color: var(--flin-warning)">WIP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {if allowCardAdd}
+                <div class="kanban-column-footer">
+                    <button class="kanban-add-card">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Add card</span>
+                    </button>
+                </div>
+            {/if}
+        </div>
+
+        <div class="kanban-column" style={"width: " ++ columnWidth ++ "px"}>
+            <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                    <span class="kanban-column-name">Done</span>
+                    <span class="kanban-column-count">0</span>
+                </div>
+            </div>
+
+            <div class="kanban-column-body">
+                <div class="kanban-column-empty">Drop cards here</div>
+            </div>
+
+            {if allowCardAdd}
+                <div class="kanban-column-footer">
+                    <button class="kanban-add-card">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Add card</span>
+                    </button>
+                </div>
+            {/if}
+        </div>
+
+        {if allowColumnAdd}
             <div class="kanban-add-column">
-                <button
-                    class="kanban-add-column-button"
-                    onclick={handleAddColumn}
-                    aria-label="Add column"
-                >
+                <button class="kanban-add-column-button">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -376,7 +146,7 @@ draggingClass = match isDragging { true -> " kanban--dragging", _ -> "" }
                     <span>Add column</span>
                 </button>
             </div>
-        ) : nil}
+        {/if}
     </div>
 </div>
 
@@ -475,11 +245,6 @@ draggingClass = match isDragging { true -> " kanban--dragging", _ -> "" }
 .kanban-column-action:hover {
     background-color: var(--flin-neutral-200);
     color: var(--flin-neutral-700);
-}
-
-.kanban-column-action--danger:hover {
-    background-color: var(--flin-error-100);
-    color: var(--flin-error);
 }
 
 /* Column body */
@@ -596,46 +361,6 @@ draggingClass = match isDragging { true -> " kanban--dragging", _ -> "" }
     border-radius: var(--flin-radius-full);
 }
 
-/* Card actions */
-.kanban-card-actions {
-    position: absolute;
-    top: var(--flin-space-2);
-    right: var(--flin-space-2);
-    display: flex;
-    gap: var(--flin-space-1);
-    opacity: 0;
-    transition: opacity var(--flin-transition-fast);
-}
-
-.kanban-card:hover .kanban-card-actions {
-    opacity: 1;
-}
-
-.kanban-card-action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
-    border-radius: var(--flin-radius-sm);
-    color: var(--flin-neutral-500);
-    cursor: pointer;
-    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast), border-color var(--flin-transition-fast);
-}
-
-.kanban-card-action:hover {
-    background-color: var(--flin-neutral-100);
-    color: var(--flin-neutral-700);
-}
-
-.kanban-card-action--danger:hover {
-    background-color: var(--flin-error-100);
-    border-color: var(--flin-error);
-    color: var(--flin-error);
-}
-
 /* Drop indicator */
 .kanban-drop-indicator {
     height: 3px;
@@ -702,10 +427,6 @@ draggingClass = match isDragging { true -> " kanban--dragging", _ -> "" }
     background-color: var(--flin-neutral-700);
 }
 
-[data-theme="dark"] .kanban-column-body {
-    scrollbar-color: var(--flin-neutral-600) transparent;
-}
-
 [data-theme="dark"] .kanban-column-empty {
     border-color: var(--flin-neutral-700);
     color: var(--flin-neutral-500);
@@ -722,15 +443,6 @@ draggingClass = match isDragging { true -> " kanban--dragging", _ -> "" }
 [data-theme="dark"] .kanban-card {
     background-color: var(--flin-neutral-850);
     border-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .kanban-card-action {
-    background-color: var(--flin-neutral-850);
-    border-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .kanban-card-action:hover {
-    background-color: var(--flin-neutral-700);
 }
 
 [data-theme="dark"] .kanban-add-column-button {

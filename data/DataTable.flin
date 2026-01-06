@@ -2,147 +2,65 @@
 // Sortable and filterable data table with pagination support
 
 // Props with defaults
-columns = props.columns || []
-data = props.data || []
 sortable = props.sortable || false
 filterable = props.filterable || false
 paginated = props.paginated || false
 pageSize = props.pageSize || 10
 striped = props.striped || false
-hoverable = props.hoverable || true
+hoverable = props.hoverable ?? true
 bordered = props.bordered || false
 onSort = props.onSort
 onFilter = props.onFilter
 onPageChange = props.onPageChange
 
 // State management
-sortColumn = null
+sortColumn = ""
 sortDirection = "asc"
 filterValue = ""
 currentPage = 1
-
-// Filter data based on search
-filterData = {
-    {if filterValue == ""}
-        filteredData = data
-    {else}
-        query = filterValue.toLowerCase()
-        filteredData = data.filter(row => {
-            // Search across all column values
-            {for col in columns}
-                cellValue = row[col.key] || row[col.field] || ""
-                {if cellValue.toString().toLowerCase().includes(query)}
-                    return true
-                {/if}
-            {/for}
-            return false
-        })
-    {/if}
-}
-
-// Sort data
-sortData = {
-    {if sortColumn}
-        sortedData = [...filteredData].sort((a, b) => {
-            aVal = a[sortColumn]
-            bVal = b[sortColumn]
-
-            // Handle different data types
-            {if typeof aVal == "number" && typeof bVal == "number"}
-                comparison = aVal - bVal
-            {else}
-                aStr = (aVal || "").toString().toLowerCase()
-                bStr = (bVal || "").toString().toLowerCase()
-                comparison = aStr < bStr ? -1 : aStr > bStr ? 1 : 0
-            {/if}
-
-            return sortDirection == "asc" ? comparison : -comparison
-        })
-    {else}
-        sortedData = filteredData
-    {/if}
-}
-
-// Paginate data
-paginateData = {
-    {if paginated}
-        startIndex = (currentPage - 1) * pageSize
-        endIndex = startIndex + pageSize
-        displayData = sortedData.slice(startIndex, endIndex)
-        totalPages = Math.ceil(sortedData.length / pageSize)
-    {else}
-        displayData = sortedData
-        totalPages = 1
-    {/if}
-}
-
-// Handle column sort
-handleSort = {
-    column = event.target.dataset.column
-
-    {if column}
-        {if sortColumn == column}
-            // Toggle direction if same column
-            sortDirection = sortDirection == "asc" ? "desc" : "asc"
-        {else}
-            // New column, start with ascending
-            sortColumn = column
-            sortDirection = "asc"
-        {/if}
-
-        {if onSort}
-            onSort({ column: sortColumn, direction: sortDirection })
-        {/if}
-    {/if}
-}
+totalPages = 1
 
 // Handle filter input
 handleFilter = {
     filterValue = event.target.value
-    currentPage = 1 // Reset to first page when filtering
-
-    {if onFilter}
+    currentPage = 1
+    if onFilter {
         onFilter(filterValue)
-    {/if}
+    }
 }
 
-// Handle page change
-handlePageChange = {
-    newPage = event.page
-    {if newPage >= 1 && newPage <= totalPages}
-        currentPage = newPage
-
-        {if onPageChange}
-            onPageChange(currentPage)
-        {/if}
-    {/if}
+clearFilter = {
+    filterValue = ""
+    currentPage = 1
 }
 
+// Handle page navigation
 goToPrevious = {
-    {if currentPage > 1}
-        handlePageChange({ page: currentPage - 1 })
-    {/if}
+    if currentPage > 1 {
+        currentPage = currentPage - 1
+        if onPageChange {
+            onPageChange(currentPage)
+        }
+    }
 }
 
 goToNext = {
-    {if currentPage < totalPages}
-        handlePageChange({ page: currentPage + 1 })
-    {/if}
+    if currentPage < totalPages {
+        currentPage = currentPage + 1
+        if onPageChange {
+            onPageChange(currentPage)
+        }
+    }
 }
 
-// Initialize data processing
-filterData()
-sortData()
-paginateData()
-
 // Build table class string
-tableClass = "flin-datatable__table"
-tableClass = tableClass + " " + (if striped { "flin-datatable__table--striped" } else { "" })
-tableClass = tableClass + " " + (if hoverable { "flin-datatable__table--hoverable" } else { "" })
-tableClass = tableClass + " " + (if bordered { "flin-datatable__table--bordered" } else { "" })
+stripedClass = match striped { true -> " flin-datatable__table--striped", _ -> "" }
+hoverableClass = match hoverable { true -> " flin-datatable__table--hoverable", _ -> "" }
+borderedClass = match bordered { true -> " flin-datatable__table--bordered", _ -> "" }
+tableClass = "flin-datatable__table" ++ stripedClass ++ hoverableClass ++ borderedClass
 
 <div class="flin-datatable">
-    // Filter input
+    <!-- Filter input -->
     {if filterable}
         <div class="flin-datatable__filter">
             <svg class="flin-datatable__filter-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -156,12 +74,12 @@ tableClass = tableClass + " " + (if bordered { "flin-datatable__table--bordered"
                 placeholder="Filter table..."
                 input={handleFilter}
                 aria-label="Filter table data"
-            >
+            />
             {if filterValue != ""}
                 <button
                     type="button"
                     class="flin-datatable__filter-clear"
-                    click={filterValue = ""}
+                    click={clearFilter}
                     aria-label="Clear filter"
                 >
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -172,91 +90,25 @@ tableClass = tableClass + " " + (if bordered { "flin-datatable__table--bordered"
         </div>
     {/if}
 
-    // Table wrapper
+    <!-- Table wrapper -->
     <div class="flin-datatable__wrapper">
         <table class={tableClass}>
             <thead class="flin-datatable__head">
                 <tr>
-                    {for column in columns}
-                        sortableClass = match sortable && column.sortable != false { true -> " flin-datatable__header--sortable", _ -> "" }
-                        activeClass = match sortColumn == (column.key || column.field) { true -> " flin-datatable__header--active", _ -> "" }
-                        <th
-                            class={"flin-datatable__header" ++ sortableClass ++ activeClass}
-                            data-column={column.key || column.field}
-                            click={if sortable && column.sortable != false { handleSort } else { none }}
-                            style={if column.width { "width: " ++ column.width } else { "" }}
-                        >
-                            <div class="flin-datatable__header-content">
-                                <span>{column.label || column.title}</span>
-                                {if sortable && column.sortable != false}
-                                    <span class="flin-datatable__sort-indicator">
-                                        {if sortColumn == (column.key || column.field)}
-                                            {if sortDirection == "asc"}
-                                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-label="Sorted ascending">
-                                                    <path d="M6 3L9 7H3L6 3Z" fill="currentColor"/>
-                                                </svg>
-                                            {else}
-                                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-label="Sorted descending">
-                                                    <path d="M6 9L3 5H9L6 9Z" fill="currentColor"/>
-                                                </svg>
-                                            {/if}
-                                        {else}
-                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-label="Sortable">
-                                                <path d="M6 2L8 5H4L6 2Z" fill="currentColor" opacity="0.3"/>
-                                                <path d="M6 10L4 7H8L6 10Z" fill="currentColor" opacity="0.3"/>
-                                            </svg>
-                                        {/if}
-                                    </span>
-                                {/if}
-                            </div>
-                        </th>
-                    {/for}
+                    <slot name="header"></slot>
                 </tr>
             </thead>
             <tbody class="flin-datatable__body">
-                {if displayData.length > 0}
-                    {for row, rowIndex in displayData}
-                        <tr class="flin-datatable__row">
-                            {for column in columns}
-                                <td class="flin-datatable__cell">
-                                    {if column.render}
-                                        {column.render(row[column.key || column.field], row, rowIndex)}
-                                    {else}
-                                        {row[column.key || column.field]}
-                                    {/if}
-                                </td>
-                            {/for}
-                        </tr>
-                    {/for}
-                {else}
-                    <tr>
-                        <td class="flin-datatable__empty" colspan={columns.length}>
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
-                                <path d="M3 9h18M9 3v18" stroke="currentColor" stroke-width="1.5"/>
-                            </svg>
-                            <span>
-                                {if filterValue != ""}
-                                    No results found for "{filterValue}"
-                                {else}
-                                    No data available
-                                {/if}
-                            </span>
-                        </td>
-                    </tr>
-                {/if}
+                <slot></slot>
             </tbody>
         </table>
     </div>
 
-    // Pagination controls
-    {if paginated && displayData.length > 0}
+    <!-- Pagination controls -->
+    {if paginated}
         <div class="flin-datatable__pagination">
             <div class="flin-datatable__pagination-info">
-                Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, sortedData.length)} of {sortedData.length} entries
-                {if filterValue != ""}
-                    (filtered from {data.length} total)
-                {/if}
+                Page {currentPage} of {totalPages}
             </div>
 
             <div class="flin-datatable__pagination-controls">
@@ -391,7 +243,6 @@ tableClass = tableClass + " " + (if bordered { "flin-datatable__table--bordered"
     color: var(--flin-fg);
     white-space: nowrap;
     user-select: none;
-    -webkit-user-select: none;
 }
 
 .flin-datatable__header--sortable {
@@ -424,9 +275,6 @@ tableClass = tableClass + " " + (if bordered { "flin-datatable__table--bordered"
 }
 
 /* Table body */
-.flin-datatable__body {
-}
-
 .flin-datatable__row {
     transition: background-color var(--flin-transition-fast);
 }

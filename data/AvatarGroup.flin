@@ -12,15 +12,11 @@ isExpanded = false
 
 // Handle hover expand
 handleMouseEnter = {
-    {if expandOnHover}
-        isExpanded = true
-    {/if}
+    if expandOnHover { isExpanded = true }
 }
 
 handleMouseLeave = {
-    {if expandOnHover}
-        isExpanded = false
-    {/if}
+    if expandOnHover { isExpanded = false }
 }
 
 // Size classes
@@ -67,26 +63,7 @@ overlapOffset = match spacing {
     style={"--avatar-size: " ++ avatarSize ++ "; --avatar-overlap: " ++ overlapOffset}
 >
     <div class="avatar-group-stack">
-        {loop avatar, index in children}
-            {if index < max}
-                <div
-                    class="avatar-group-item"
-                    style={"z-index: " ++ (max - index)}
-                    aria-hidden={index >= max}
-                >
-                    {avatar}
-                </div>
-            {/if}
-        {/loop}
-
-        {if children.length > max}
-            {
-                overflowCount = children.length - max
-            }
-            <div class="avatar-group-overflow" style={"z-index: 0"}>
-                <span class="overflow-count">+{overflowCount}</span>
-            </div>
-        {/if}
+        <slot></slot>
     </div>
 </div>
 

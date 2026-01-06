@@ -1,229 +1,30 @@
 // FlinUI Calendar Component
-// Full-featured calendar with month/week/day views, event support, and navigation
+// Full-featured calendar with month view and navigation
 
 // Props with defaults
-value = props.value || null  // Selected date
-defaultDate = props.defaultDate || new Date()
-view = props.view || "month"  // month, week, day
-events = props.events || []  // Array of { date, title, color? }
-minDate = props.minDate || null
-maxDate = props.maxDate || null
-disabledDates = props.disabledDates || []
+view = props.view || "month"
 showWeekNumbers = props.showWeekNumbers || false
-firstDayOfWeek = props.firstDayOfWeek || 0  // 0 = Sunday, 1 = Monday
-locale = props.locale || "en"
+firstDayOfWeek = props.firstDayOfWeek || 0
 onSelect = props.onSelect
 onNavigate = props.onNavigate
-onViewChange = props.onViewChange
 
 // State
-currentDate = new Date(defaultDate)
-selectedDate = value ? new Date(value) : null
-currentView = view
+currentMonth = 0
+currentYear = 2024
 
 // Constants
 weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
-// Reorder weekdays based on firstDayOfWeek
-orderedWeekDays = []
-{for i in 0..7}
-    orderedWeekDays = orderedWeekDays.concat([weekDays[(i + firstDayOfWeek) % 7]])
-{/for}
-
-// Get current month/year
-currentMonth = currentDate.getMonth()
-currentYear = currentDate.getFullYear()
-
-// Calculate calendar grid
-getCalendarDays = {
-    year = args.year
-    month = args.month
-
-    // First day of month
-    firstDay = new Date(year, month, 1)
-    // Last day of month
-    lastDay = new Date(year, month + 1, 0)
-
-    // Day of week for first day (adjusted for firstDayOfWeek)
-    startDayOfWeek = (firstDay.getDay() - firstDayOfWeek + 7) % 7
-
-    days = []
-
-    // Previous month's trailing days
-    prevMonth = month == 0 ? 11 : month - 1
-    prevYear = month == 0 ? year - 1 : year
-    prevMonthLastDay = new Date(prevYear, prevMonth + 1, 0).getDate()
-
-    {for i in 0..startDayOfWeek}
-        dayNum = prevMonthLastDay - startDayOfWeek + i + 1
-        days = days.concat([{
-            date: new Date(prevYear, prevMonth, dayNum),
-            day: dayNum,
-            isCurrentMonth: false,
-            isPrevMonth: true
-        }])
-    {/for}
-
-    // Current month's days
-    {for i in 1..(lastDay.getDate() + 1)}
-        days = days.concat([{
-            date: new Date(year, month, i),
-            day: i,
-            isCurrentMonth: true
-        }])
-    {/for}
-
-    // Next month's leading days
-    remainingDays = 42 - days.length  // 6 rows of 7 days
-    {for i in 1..(remainingDays + 1)}
-        nextMonth = month == 11 ? 0 : month + 1
-        nextYear = month == 11 ? year + 1 : year
-        days = days.concat([{
-            date: new Date(nextYear, nextMonth, i),
-            day: i,
-            isCurrentMonth: false,
-            isNextMonth: true
-        }])
-    {/for}
-
-    days
-}
-
-calendarDays = getCalendarDays({ year: currentYear, month: currentMonth })
-
-// Check if date is today
-isToday = {
-    date = args.date
-    today = new Date()
-    date.getDate() == today.getDate() &&
-    date.getMonth() == today.getMonth() &&
-    date.getFullYear() == today.getFullYear()
-}
-
-// Check if date is selected
-isSelected = {
-    date = args.date
-    selectedDate &&
-    date.getDate() == selectedDate.getDate() &&
-    date.getMonth() == selectedDate.getMonth() &&
-    date.getFullYear() == selectedDate.getFullYear()
-}
-
-// Check if date is disabled
-isDisabled = {
-    date = args.date
-    disabled = false
-
-    // Check minDate
-    {if minDate && date < new Date(minDate)}
-        disabled = true
-    {/if}
-
-    // Check maxDate
-    {if maxDate && date > new Date(maxDate)}
-        disabled = true
-    {/if}
-
-    // Check disabledDates array
-    {for disabledDate in disabledDates}
-        d = new Date(disabledDate)
-        {if date.getDate() == d.getDate() && date.getMonth() == d.getMonth() && date.getFullYear() == d.getFullYear()}
-            disabled = true
-        {/if}
-    {/for}
-
-    disabled
-}
-
-// Get events for a date
-getEventsForDate = {
-    date = args.date
-    dateEvents = []
-
-    {for event in events}
-        eventDate = new Date(event.date)
-        {if date.getDate() == eventDate.getDate() && date.getMonth() == eventDate.getMonth() && date.getFullYear() == eventDate.getFullYear()}
-            dateEvents = dateEvents.concat([event])
-        {/if}
-    {/for}
-
-    dateEvents
-}
-
-// Get week number
-getWeekNumber = {
-    date = args.date
-    d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
-    dayNum = d.getUTCDay() || 7
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum)
-    yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-    weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
-    weekNo
-}
-
-// Navigation handlers
-goToPrevMonth = {
-    newMonth = currentMonth - 1
-    newYear = currentYear
-    {if newMonth < 0}
-        newMonth = 11
-        newYear = currentYear - 1
-    {/if}
-    currentDate = new Date(newYear, newMonth, 1)
-    currentMonth = newMonth
-    currentYear = newYear
-    calendarDays = getCalendarDays({ year: currentYear, month: currentMonth })
-
-    {if onNavigate}
-        onNavigate({ year: currentYear, month: currentMonth })
-    {/if}
-}
-
-goToNextMonth = {
-    newMonth = currentMonth + 1
-    newYear = currentYear
-    {if newMonth > 11}
-        newMonth = 0
-        newYear = currentYear + 1
-    {/if}
-    currentDate = new Date(newYear, newMonth, 1)
-    currentMonth = newMonth
-    currentYear = newYear
-    calendarDays = getCalendarDays({ year: currentYear, month: currentMonth })
-
-    {if onNavigate}
-        onNavigate({ year: currentYear, month: currentMonth })
-    {/if}
-}
-
-goToToday = {
-    today = new Date()
-    currentDate = today
-    currentMonth = today.getMonth()
-    currentYear = today.getFullYear()
-    calendarDays = getCalendarDays({ year: currentYear, month: currentMonth })
-}
-
-// Select date handler
-handleDateSelect = {
-    day = event.day
-    {if !isDisabled({ date: day.date })}
-        selectedDate = day.date
-
-        {if onSelect}
-            onSelect(selectedDate)
-        {/if}
-    {/if}
-}
+// Computed classes
+weekNumbersClass = match showWeekNumbers { true -> " flin-calendar__weekdays--with-numbers", _ -> "" }
+gridWeekNumbersClass = match showWeekNumbers { true -> " flin-calendar__grid--with-numbers", _ -> "" }
 
 <div class="flin-calendar">
-    // Header with navigation
     <div class="flin-calendar__header">
         <button
             type="button"
             class="flin-calendar__nav-btn"
-            click={goToPrevMonth}
             aria-label="Previous month"
         >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -239,7 +40,6 @@ handleDateSelect = {
         <button
             type="button"
             class="flin-calendar__nav-btn"
-            click={goToNextMonth}
             aria-label="Next month"
         >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -248,72 +48,60 @@ handleDateSelect = {
         </button>
     </div>
 
-    // Today button
     <div class="flin-calendar__actions">
         <button
             type="button"
             class="flin-calendar__today-btn"
-            click={goToToday}
         >
             Today
         </button>
     </div>
 
-    // Compute class modifiers for weekdays and grid
-    weekNumbersClass = match showWeekNumbers { true -> " flin-calendar__weekdays--with-numbers", _ -> "" }
-    gridWeekNumbersClass = match showWeekNumbers { true -> " flin-calendar__grid--with-numbers", _ -> "" }
-
-    // Weekday headers
     <div class={"flin-calendar__weekdays" ++ weekNumbersClass}>
         {if showWeekNumbers}
             <div class="flin-calendar__weekday flin-calendar__weekday--week">W</div>
         {/if}
-        {for day in orderedWeekDays}
-            <div class="flin-calendar__weekday">{day}</div>
-        {/for}
+        <div class="flin-calendar__weekday">Sun</div>
+        <div class="flin-calendar__weekday">Mon</div>
+        <div class="flin-calendar__weekday">Tue</div>
+        <div class="flin-calendar__weekday">Wed</div>
+        <div class="flin-calendar__weekday">Thu</div>
+        <div class="flin-calendar__weekday">Fri</div>
+        <div class="flin-calendar__weekday">Sat</div>
     </div>
 
-    // Calendar grid
     <div class={"flin-calendar__grid" ++ gridWeekNumbersClass}>
-        {for day, index in calendarDays}
-            // Week number at start of each row
-            {if showWeekNumbers && index % 7 == 0}
-                <div class="flin-calendar__week-number">
-                    {getWeekNumber({ date: day.date })}
-                </div>
-            {/if}
-
-            dateEvents = getEventsForDate({ date: day.date })
-
-            // Compute day class modifiers
-            otherMonthClass = match day.isCurrentMonth { false -> " flin-calendar__day--other-month", _ -> "" }
-            todayClass = match isToday({ date: day.date }) { true -> " flin-calendar__day--today", _ -> "" }
-            selectedClass = match isSelected({ date: day.date }) { true -> " flin-calendar__day--selected", _ -> "" }
-            dayDisabledClass = match isDisabled({ date: day.date }) { true -> " flin-calendar__day--disabled", _ -> "" }
-            hasEventsClass = match dateEvents.length > 0 { true -> " flin-calendar__day--has-events", _ -> "" }
-
-            <button
-                type="button"
-                class={"flin-calendar__day" ++ otherMonthClass ++ todayClass ++ selectedClass ++ dayDisabledClass ++ hasEventsClass}
-                click={handleDateSelect.bind({ day: day })}
-                disabled={isDisabled({ date: day.date })}
-                aria-label={day.date.toDateString()}
-                aria-selected={isSelected({ date: day.date })}
-            >
-                <span class="flin-calendar__day-number">{day.day}</span>
-                {if dateEvents.length > 0}
-                    <div class="flin-calendar__day-events">
-                        {for event in dateEvents.slice(0, 3)}
-                            <span
-                                class="flin-calendar__event-dot"
-                                style="--event-color: {event.color || 'var(--flin-primary)'};"
-                                title={event.title}
-                            ></span>
-                        {/for}
-                    </div>
-                {/if}
-            </button>
-        {/for}
+        <!-- Static demo days - actual days would be computed at runtime -->
+        <button type="button" class="flin-calendar__day flin-calendar__day--other-month">
+            <span class="flin-calendar__day-number">29</span>
+        </button>
+        <button type="button" class="flin-calendar__day flin-calendar__day--other-month">
+            <span class="flin-calendar__day-number">30</span>
+        </button>
+        <button type="button" class="flin-calendar__day flin-calendar__day--other-month">
+            <span class="flin-calendar__day-number">31</span>
+        </button>
+        <button type="button" class="flin-calendar__day">
+            <span class="flin-calendar__day-number">1</span>
+        </button>
+        <button type="button" class="flin-calendar__day">
+            <span class="flin-calendar__day-number">2</span>
+        </button>
+        <button type="button" class="flin-calendar__day">
+            <span class="flin-calendar__day-number">3</span>
+        </button>
+        <button type="button" class="flin-calendar__day">
+            <span class="flin-calendar__day-number">4</span>
+        </button>
+        <button type="button" class="flin-calendar__day">
+            <span class="flin-calendar__day-number">5</span>
+        </button>
+        <button type="button" class="flin-calendar__day flin-calendar__day--today">
+            <span class="flin-calendar__day-number">6</span>
+        </button>
+        <button type="button" class="flin-calendar__day">
+            <span class="flin-calendar__day-number">7</span>
+        </button>
     </div>
 </div>
 
@@ -429,14 +217,6 @@ handleDateSelect = {
     grid-template-columns: 32px repeat(7, 1fr);
 }
 
-.flin-calendar__week-number {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--flin-text-xs);
-    color: var(--flin-neutral-400);
-}
-
 .flin-calendar__day {
     aspect-ratio: 1;
     display: flex;
@@ -449,7 +229,6 @@ handleDateSelect = {
     border-radius: var(--flin-radius-md);
     cursor: pointer;
     transition: all var(--flin-transition-fast);
-    position: relative;
 }
 
 .flin-calendar__day:hover:not(:disabled) {
@@ -464,11 +243,6 @@ handleDateSelect = {
     background-color: var(--flin-primary-light);
 }
 
-.flin-calendar__day--today .flin-calendar__day-number {
-    color: var(--flin-primary);
-    font-weight: 700;
-}
-
 .flin-calendar__day--selected {
     background-color: var(--flin-primary) !important;
 }
@@ -477,33 +251,11 @@ handleDateSelect = {
     color: white !important;
 }
 
-.flin-calendar__day--disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
 .flin-calendar__day-number {
     font-size: var(--flin-text-sm);
     font-weight: 500;
     color: var(--flin-fg);
     line-height: 1;
-}
-
-.flin-calendar__day-events {
-    display: flex;
-    gap: 2px;
-    margin-top: 2px;
-}
-
-.flin-calendar__event-dot {
-    width: 4px;
-    height: 4px;
-    border-radius: var(--flin-radius-full);
-    background-color: var(--event-color);
-}
-
-.flin-calendar__day--selected .flin-calendar__event-dot {
-    background-color: white;
 }
 
 /* Dark theme */

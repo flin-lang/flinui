@@ -12,18 +12,18 @@ radius = props.radius || "none"
 shadow = props.shadow || "none"
 
 // Build class string
-paddingClass = {if padding > 0 { "flin-box-p-" + padding } else { "" }}
-marginClass = {if margin > 0 { "flin-box-m-" + margin } else { "" }}
-radiusClass = "flin-box-radius-" + radius
-shadowClass = "flin-box-shadow-" + shadow
-borderClass = {if border { "flin-box-border" } else { "" }}
+paddingClass = if padding > 0 { "flin-box-p-" ++ padding } else { "" }
+marginClass = if margin > 0 { "flin-box-m-" ++ margin } else { "" }
+radiusClass = "flin-box-radius-" ++ radius
+shadowClass = "flin-box-shadow-" ++ shadow
+borderClass = if border { "flin-box-border" } else { "" }
 
-boxClass = "flin-box " + paddingClass + " " + marginClass + " " + radiusClass + " " + shadowClass + " " + borderClass
+boxClass = "flin-box " ++ paddingClass ++ " " ++ marginClass ++ " " ++ radiusClass ++ " " ++ shadowClass ++ " " ++ borderClass
 
 // Build style string for custom colors
-borderStyle = {if border { "border-color: " + borderColor + "; border-width: " + borderWidth + ";" } else { "" }}
-bgStyle = {if bg != "transparent" { "background-color: " + bg + ";" } else { "" }}
-boxStyle = bgStyle + borderStyle
+borderStyle = if border { "border-color: " ++ borderColor ++ "; border-width: " ++ borderWidth ++ ";" } else { "" }
+bgStyle = if bg != "transparent" { "background-color: " ++ bg ++ ";" } else { "" }
+boxStyle = bgStyle ++ borderStyle
 
 <div class={boxClass} style={boxStyle}>
     {children}

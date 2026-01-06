@@ -4,183 +4,36 @@
 // Props with defaults
 draggable = props.draggable || true
 disabled = props.disabled || false
-data = props.data || nil
-onDragStart = props.onDragStart || nil
-onDragEnd = props.onDragEnd || nil
-onDrop = props.onDrop || nil
-onDragOver = props.onDragOver || nil
-onDragEnter = props.onDragEnter || nil
-onDragLeave = props.onDragLeave || nil
 dropEffect = props.dropEffect || "move"
-dragImage = props.dragImage || nil
-dragImageOffset = props.dragImageOffset || { x: 0, y: 0 }
+children = props.children
 
 // State
 isDragging = false
 isDragOver = false
-dropPosition = nil
-
-// Generate unique ID for this instance
-instanceId = "drag-" ++ Math.random().toString(36).substr(2, 9)
-
-// Handle drag start
-handleDragStart = |e| {
-    if disabled { return }
-
-    isDragging = true
-
-    // Set transfer data
-    if data {
-        e.dataTransfer.setData("application/json", JSON.stringify(data))
-        e.dataTransfer.setData("text/plain", data.id || instanceId)
-    }
-
-    e.dataTransfer.effectAllowed = dropEffect
-
-    // Custom drag image
-    if dragImage {
-        e.dataTransfer.setDragImage(dragImage, dragImageOffset.x, dragImageOffset.y)
-    }
-
-    if onDragStart {
-        onDragStart({ event: e, data: data, id: instanceId })
-    }
-}
-
-// Handle drag end
-handleDragEnd = |e| {
-    isDragging = false
-    isDragOver = false
-    dropPosition = nil
-
-    if onDragEnd {
-        onDragEnd({ event: e, data: data, id: instanceId, dropEffect: e.dataTransfer.dropEffect })
-    }
-}
-
-// Handle drag over (for drop targets)
-handleDragOver = |e| {
-    if disabled { return }
-
-    e.preventDefault()
-    e.dataTransfer.dropEffect = dropEffect
-
-    // Calculate drop position
-    rect = e.currentTarget.getBoundingClientRect()
-    y = e.clientY - rect.top
-    dropPosition = y < rect.height / 2 ? "before" : "after"
-
-    if onDragOver {
-        onDragOver({ event: e, position: dropPosition })
-    }
-}
-
-// Handle drag enter
-handleDragEnter = |e| {
-    if disabled { return }
-
-    e.preventDefault()
-    isDragOver = true
-
-    if onDragEnter {
-        onDragEnter({ event: e })
-    }
-}
-
-// Handle drag leave
-handleDragLeave = |e| {
-    // Only trigger if actually leaving the element (not entering a child)
-    if !e.currentTarget.contains(e.relatedTarget) {
-        isDragOver = false
-        dropPosition = nil
-
-        if onDragLeave {
-            onDragLeave({ event: e })
-        }
-    }
-}
-
-// Handle drop
-handleDrop = |e| {
-    if disabled { return }
-
-    e.preventDefault()
-    isDragOver = false
-
-    // Get transferred data
-    droppedData = nil
-    try {
-        jsonData = e.dataTransfer.getData("application/json")
-        if jsonData {
-            droppedData = JSON.parse(jsonData)
-        }
-    } catch {
-        droppedData = e.dataTransfer.getData("text/plain")
-    }
-
-    if onDrop {
-        onDrop({
-            event: e,
-            data: droppedData,
-            position: dropPosition,
-            targetData: data,
-            targetId: instanceId
-        })
-    }
-
-    dropPosition = nil
-}
-
-// Keyboard support for accessibility
-handleKeyDown = |e| {
-    if disabled { return }
-
-    // Space or Enter to start drag simulation
-    if e.key == " " || e.key == "Enter" {
-        if onDragStart {
-            onDragStart({ event: e, data: data, id: instanceId, keyboard: true })
-        }
-    }
-}
+dropPosition = ""
 
 // Computed classes
 draggingClass = match isDragging { true -> " drag-drop--dragging", _ -> "" }
 dragOverClass = match isDragOver { true -> " drag-drop--drag-over", _ -> "" }
 disabledClass = match disabled { true -> " drag-drop--disabled", _ -> "" }
-positionClass = match dropPosition {
-    "before" -> " drag-drop--drop-before"
-    "after" -> " drag-drop--drop-after"
-    _ -> ""
-}
+beforeClass = match dropPosition { "before" -> " drag-drop--drop-before", _ -> "" }
+afterClass = match dropPosition { "after" -> " drag-drop--drop-after", _ -> "" }
 
 <div
-    class={"flin-drag-drop" ++ draggingClass ++ dragOverClass ++ disabledClass ++ positionClass}
-    draggable={draggable && !disabled}
-    ondragstart={handleDragStart}
-    ondragend={handleDragEnd}
-    ondragover={handleDragOver}
-    ondragenter={handleDragEnter}
-    ondragleave={handleDragLeave}
-    ondrop={handleDrop}
-    onkeydown={handleKeyDown}
+    class={"flin-drag-drop" ++ draggingClass ++ dragOverClass ++ disabledClass ++ beforeClass ++ afterClass}
     role="button"
-    tabindex={disabled ? -1 : 0}
-    aria-grabbed={isDragging}
-    aria-dropeffect={dropEffect}
-    aria-disabled={disabled}
-    data-drag-id={instanceId}
+    tabindex="0"
 >
     <div class="drag-drop-content">
         {children}
     </div>
 
-    {isDragOver && dropPosition == "before" ? (
-        <div class="drag-drop-indicator drag-drop-indicator--before" aria-hidden="true"></div>
-    ) : nil}
-
-    {isDragOver && dropPosition == "after" ? (
-        <div class="drag-drop-indicator drag-drop-indicator--after" aria-hidden="true"></div>
-    ) : nil}
+    {if isDragOver && dropPosition == "before"}
+        <div class="drag-drop-indicator drag-drop-indicator--before"></div>
+    {/if}
+    {if isDragOver && dropPosition == "after"}
+        <div class="drag-drop-indicator drag-drop-indicator--after"></div>
+    {/if}
 </div>
 
 <style scoped>
@@ -275,7 +128,7 @@ positionClass = match dropPosition {
     margin-bottom: -2px;
 }
 
-/* Ghost element style hint (applied via JS when dragging) */
+/* Ghost element style hint */
 .drag-drop-ghost {
     background-color: var(--flin-bg);
     border: 2px dashed var(--flin-primary);

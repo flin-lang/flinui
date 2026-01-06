@@ -41,31 +41,6 @@ easeInQuart = "cubic-bezier(0.895, 0.03, 0.685, 0.22)"
 easeOutQuart = "cubic-bezier(0.165, 0.84, 0.44, 1)"
 easeInOutQuart = "cubic-bezier(0.77, 0, 0.175, 1)"
 
-// ============================================================================
-// ANIMATION TIMING HELPERS
-// ============================================================================
-
-/// Get transition string for a property
-/// @param property - CSS property to transition
-/// @param duration - Duration (fast, normal, slow)
-/// @param easing - Easing function
-getTransition = fn(property, duration, easing) {
-    durationValue = getDuration(duration || "normal")
-    easingValue = easing || easeDefault
-    property + " " + durationValue + " " + easingValue
-}
-
-/// Get duration value by name
-getDuration = fn(name) {
-    if name == "instant" { durationInstant }
-    else if name == "fast" { durationFast }
-    else if name == "normal" { durationNormal }
-    else if name == "slow" { durationSlow }
-    else if name == "slowest" { durationSlowest }
-    else if name == "very-slow" { durationVerySlow }
-    else { durationNormal }
-}
-
 // Common Transition Presets
 transitionAll = "all 200ms cubic-bezier(0.4, 0, 0.2, 1)"
 transitionColors = "color, background-color, border-color 150ms cubic-bezier(0.4, 0, 0.2, 1)"

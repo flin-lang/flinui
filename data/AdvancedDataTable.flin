@@ -1,10 +1,9 @@
 // FlinUI AdvancedDataTable Component
 // Enhanced DataTable with enterprise features: row selection, column resize, export
-// Props: columns, data, selectable, resizable, exportable, onSelect, onResize, onExport
 
 // Props with defaults
 columns = props.columns || []
-data = props.data || []
+dataItems = props.data || []
 selectable = props.selectable || false
 resizable = props.resizable || false
 exportable = props.exportable || false
@@ -23,547 +22,174 @@ onFilter = props.onFilter
 onPageChange = props.onPageChange
 
 // State management
-sortColumn = null
+sortColumn = ""
 sortDirection = "asc"
 filterValue = ""
 currentPage = 1
 selectedRows = []
 selectAll = false
-columnWidths = {}
-resizingColumn = null
-startX = 0
-startWidth = 0
 exportMenuOpen = false
 
-// Initialize column widths
-initColumnWidths = {
-    {for col in columns}
-        key = col.key || col.field
-        columnWidths[key] = col.width || "auto"
-    {/for}
+// Total pages calculation
+totalItems = 0
+totalPages = 1
+startIndex = 0
+endIndex = 10
+
+// Computed classes
+stripedClass = match striped {
+    true -> " advanced-table--striped"
+    _ -> ""
 }
 
-initColumnWidths()
-
-// Filter data based on search
-filterData = {
-    {if filterValue == ""}
-        filteredData = data
-    {else}
-        query = filterValue.toLowerCase()
-        filteredData = data.filter(row => {
-            {for col in columns}
-                cellValue = row[col.key || col.field] || ""
-                {if cellValue.toString().toLowerCase().includes(query)}
-                    return true
-                {/if}
-            {/for}
-            return false
-        })
-    {/if}
+hoverableClass = match hoverable {
+    true -> " advanced-table--hoverable"
+    _ -> ""
 }
 
-// Sort data
-sortData = {
-    {if sortColumn}
-        sortedData = [...filteredData].sort((a, b) => {
-            aVal = a[sortColumn]
-            bVal = b[sortColumn]
+borderedClass = match bordered {
+    true -> " advanced-table--bordered"
+    _ -> ""
+}
 
-            {if typeof aVal == "number" && typeof bVal == "number"}
-                comparison = aVal - bVal
-            {else}
-                aStr = (aVal || "").toString().toLowerCase()
-                bStr = (bVal || "").toString().toLowerCase()
-                comparison = aStr < bStr ? -1 : aStr > bStr ? 1 : 0
+tableClass = "advanced-table" ++ stripedClass ++ hoverableClass ++ borderedClass
+
+// Sort direction indicator
+sortAscClass = match sortDirection {
+    "asc" -> " sort-indicator--asc"
+    _ -> ""
+}
+
+sortDescClass = match sortDirection {
+    "desc" -> " sort-indicator--desc"
+    _ -> ""
+}
+
+// Export menu class
+exportMenuClass = match exportMenuOpen {
+    true -> " export-menu--open"
+    _ -> ""
+}
+
+<div class="advanced-table-container">
+    {if filterable || exportable}
+        <div class="advanced-table__toolbar">
+            {if filterable}
+                <div class="advanced-table__search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <input
+                        class="advanced-table__search-input"
+                        placeholder="Search..."
+                        value={filterValue}
+                    />
+                </div>
             {/if}
 
-            return sortDirection == "asc" ? comparison : -comparison
-        })
-    {else}
-        sortedData = filteredData
-    {/if}
-}
-
-// Paginate data
-paginateData = {
-    {if paginated}
-        startIndex = (currentPage - 1) * pageSize
-        endIndex = startIndex + pageSize
-        displayData = sortedData.slice(startIndex, endIndex)
-        totalPages = Math.ceil(sortedData.length / pageSize)
-    {else}
-        displayData = sortedData
-        totalPages = 1
-    {/if}
-}
-
-// Handle column sort
-handleSort = {
-    column = event.target.closest("[data-column]")?.dataset.column
-
-    {if column}
-        {if sortColumn == column}
-            sortDirection = sortDirection == "asc" ? "desc" : "asc"
-        {else}
-            sortColumn = column
-            sortDirection = "asc"
-        {/if}
-
-        {if onSort}
-            onSort({ column: sortColumn, direction: sortDirection })
-        {/if}
-    {/if}
-}
-
-// Handle filter input
-handleFilter = {
-    filterValue = event.target.value
-    currentPage = 1
-
-    // Clear selection when filtering
-    selectedRows = []
-    selectAll = false
-
-    {if onFilter}
-        onFilter(filterValue)
-    {/if}
-}
-
-// Handle page change
-goToPrevious = {
-    {if currentPage > 1}
-        currentPage = currentPage - 1
-        {if onPageChange}
-            onPageChange(currentPage)
-        {/if}
-    {/if}
-}
-
-goToNext = {
-    {if currentPage < totalPages}
-        currentPage = currentPage + 1
-        {if onPageChange}
-            onPageChange(currentPage)
-        {/if}
-    {/if}
-}
-
-// Row selection handlers
-handleSelectAll = {
-    selectAll = !selectAll
-
-    {if selectAll}
-        selectedRows = displayData.map((row, index) => index)
-    {else}
-        selectedRows = []
-    {/if}
-
-    {if onSelect}
-        onSelect(selectedRows.map(i => displayData[i]))
-    {/if}
-}
-
-handleRowSelect = {
-    rowIndex = parseInt(event.target.closest("[data-row-index]")?.dataset.rowIndex)
-
-    {if selectedRows.includes(rowIndex)}
-        selectedRows = selectedRows.filter(i => i != rowIndex)
-    {else}
-        selectedRows = [...selectedRows, rowIndex]
-    {/if}
-
-    // Update selectAll state
-    selectAll = selectedRows.length == displayData.length
-
-    {if onSelect}
-        onSelect(selectedRows.map(i => displayData[i]))
-    {/if}
-}
-
-// Column resize handlers
-handleResizeStart = {
-    column = event.target.dataset.column
-
-    resizingColumn = column
-    startX = event.clientX
-
-    header = event.target.closest("th")
-    startWidth = header.offsetWidth
-
-    document.addEventListener("mousemove", handleResizeMove)
-    document.addEventListener("mouseup", handleResizeEnd)
-    document.body.style.cursor = "col-resize"
-    document.body.style.userSelect = "none"
-
-    event.preventDefault()
-}
-
-handleResizeMove = {
-    {if resizingColumn}
-        deltaX = event.clientX - startX
-        newWidth = Math.max(50, startWidth + deltaX)
-        columnWidths[resizingColumn] = newWidth + "px"
-
-        // Update column header width
-        headers = document.querySelectorAll(".flin-advtable__header")
-        {for header in headers}
-            {if header.dataset.column == resizingColumn}
-                header.style.width = newWidth + "px"
-            {/if}
-        {/for}
-    {/if}
-}
-
-handleResizeEnd = {
-    {if resizingColumn && onResize}
-        onResize({ column: resizingColumn, width: columnWidths[resizingColumn] })
-    {/if}
-
-    resizingColumn = null
-    document.removeEventListener("mousemove", handleResizeMove)
-    document.removeEventListener("mouseup", handleResizeEnd)
-    document.body.style.cursor = ""
-    document.body.style.userSelect = ""
-}
-
-// Export handlers
-toggleExportMenu = {
-    exportMenuOpen = !exportMenuOpen
-}
-
-closeExportMenu = {
-    exportMenuOpen = false
-}
-
-exportToCSV = {
-    exportMenuOpen = false
-
-    // Build CSV content
-    headers = columns.map(col => col.label || col.title).join(",")
-    rows = sortedData.map(row => {
-        return columns.map(col => {
-            value = row[col.key || col.field] || ""
-            // Escape quotes and wrap in quotes if contains comma
-            escaped = value.toString().replace(/"/g, '""')
-            {if escaped.includes(",") || escaped.includes('"') || escaped.includes("\n")}
-                return '"' ++ escaped ++ '"'
-            {else}
-                return escaped
-            {/if}
-        }).join(",")
-    }).join("\n")
-
-    csvContent = headers ++ "\n" ++ rows
-
-    // Trigger download
-    blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    link = document.createElement("a")
-    link.href = URL.createObjectURL(blob)
-    link.download = "export.csv"
-    link.click()
-
-    {if onExport}
-        onExport({ format: "csv", data: sortedData })
-    {/if}
-}
-
-exportToJSON = {
-    exportMenuOpen = false
-
-    // Build JSON content
-    jsonContent = JSON.stringify(sortedData, null, 2)
-
-    // Trigger download
-    blob = new Blob([jsonContent], { type: "application/json" })
-    link = document.createElement("a")
-    link.href = URL.createObjectURL(blob)
-    link.download = "export.json"
-    link.click()
-
-    {if onExport}
-        onExport({ format: "json", data: sortedData })
-    {/if}
-}
-
-// Initialize data processing
-filterData()
-sortData()
-paginateData()
-
-// Build table class string
-tableClass = "flin-advtable__table"
-tableClass = tableClass ++ match striped { true -> " flin-advtable__table--striped", _ -> "" }
-tableClass = tableClass ++ match hoverable { true -> " flin-advtable__table--hoverable", _ -> "" }
-tableClass = tableClass ++ match bordered { true -> " flin-advtable__table--bordered", _ -> "" }
-
-// Check if indeterminate (some but not all selected)
-isIndeterminate = selectedRows.length > 0 && selectedRows.length < displayData.length
-
-<div class="flin-advtable">
-    // Toolbar
-    <div class="flin-advtable__toolbar">
-        // Filter input
-        {if filterable}
-            <div class="flin-advtable__filter">
-                <svg class="flin-advtable__filter-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M11 11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-                <input
-                    type="text"
-                    class="flin-advtable__filter-input"
-                    value={filterValue}
-                    placeholder="Search..."
-                    input={handleFilter}
-                    aria-label="Search table"
-                >
-                {if filterValue != ""}
-                    <button
-                        type="button"
-                        class="flin-advtable__filter-clear"
-                        click={filterValue = ""; handleFilter({ target: { value: "" } })}
-                        aria-label="Clear search"
-                    >
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <path d="M3.5 3.5L10.5 10.5M10.5 3.5L3.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                        </svg>
-                    </button>
-                {/if}
-            </div>
-        {/if}
-
-        <div class="flin-advtable__toolbar-right">
-            // Selection info
-            {if selectable && selectedRows.length > 0}
-                <span class="flin-advtable__selection-info">
-                    {selectedRows.length} selected
-                </span>
-            {/if}
-
-            // Export button
             {if exportable}
-                <div class="flin-advtable__export">
+                <div class="advanced-table__export">
                     <button
-                        type="button"
-                        class="flin-advtable__export-btn"
-                        click={toggleExportMenu}
-                        aria-expanded={exportMenuOpen}
-                        aria-haspopup="menu"
+                        class="advanced-table__export-btn"
+                        click={exportMenuOpen = !exportMenuOpen}
                     >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                             <polyline points="7 10 12 15 17 10"/>
                             <line x1="12" y1="15" x2="12" y2="3"/>
                         </svg>
-                        <span>Export</span>
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                            <path d="M3 5L6 8L9 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        Export
                     </button>
-
                     {if exportMenuOpen}
-                        <div class="flin-advtable__export-menu" role="menu">
-                            <button
-                                type="button"
-                                class="flin-advtable__export-option"
-                                click={exportToCSV}
-                                role="menuitem"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <div class={"advanced-table__export-menu" ++ exportMenuClass}>
+                            <button class="advanced-table__export-option">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                                     <polyline points="14 2 14 8 20 8"/>
-                                    <line x1="16" y1="13" x2="8" y2="13"/>
-                                    <line x1="16" y1="17" x2="8" y2="17"/>
-                                    <line x1="10" y1="9" x2="8" y2="9"/>
                                 </svg>
-                                Export as CSV
+                                Export CSV
                             </button>
-                            <button
-                                type="button"
-                                class="flin-advtable__export-option"
-                                click={exportToJSON}
-                                role="menuitem"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <button class="advanced-table__export-option">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                                     <polyline points="14 2 14 8 20 8"/>
-                                    <path d="M8 13h2"/>
-                                    <path d="M8 17h2"/>
-                                    <path d="M14 13h2"/>
-                                    <path d="M14 17h2"/>
                                 </svg>
-                                Export as JSON
+                                Export JSON
                             </button>
                         </div>
-                        <div class="flin-advtable__export-backdrop" click={closeExportMenu}></div>
                     {/if}
                 </div>
             {/if}
         </div>
-    </div>
+    {/if}
 
-    // Table wrapper
-    <div class="flin-advtable__wrapper">
+    <div class="advanced-table__wrapper">
         <table class={tableClass}>
-            <thead class="flin-advtable__head">
-                <tr>
-                    // Checkbox column
+            <thead class="advanced-table__head">
+                <tr class="advanced-table__row advanced-table__row--header">
                     {if selectable}
-                        <th class="flin-advtable__header flin-advtable__header--checkbox">
-                            <label class="flin-advtable__checkbox-label">
-                                <input
-                                    type="checkbox"
-                                    class="flin-advtable__checkbox"
-                                    checked={selectAll}
-                                    change={handleSelectAll}
-                                    aria-label="Select all rows"
-                                    data-indeterminate={isIndeterminate}
-                                >
-                                <span class="flin-advtable__checkbox-mark"></span>
-                            </label>
+                        <th class="advanced-table__cell advanced-table__cell--checkbox">
+                            <input
+                                class="advanced-table__checkbox"
+                                checked={selectAll}
+                            />
                         </th>
                     {/if}
-
-                    // Data columns
-                    {for column in columns}
-                        sortableClass = match sortable && column.sortable != false { true -> " flin-advtable__header--sortable", _ -> "" }
-                        activeClass = match sortColumn == (column.key || column.field) { true -> " flin-advtable__header--active", _ -> "" }
-
-                        <th
-                            class={"flin-advtable__header" ++ sortableClass ++ activeClass}
-                            data-column={column.key || column.field}
-                            click={if sortable && column.sortable != false { handleSort } else { null }}
-                            style={"width: " ++ (columnWidths[column.key || column.field] || "auto")}
-                        >
-                            <div class="flin-advtable__header-content">
-                                <span class="flin-advtable__header-text">{column.label || column.title}</span>
-
-                                {if sortable && column.sortable != false}
-                                    <span class="flin-advtable__sort-indicator">
-                                        {if sortColumn == (column.key || column.field)}
-                                            {if sortDirection == "asc"}
-                                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-label="Sorted ascending">
-                                                    <path d="M6 3L9 7H3L6 3Z" fill="currentColor"/>
-                                                </svg>
-                                            {else}
-                                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-label="Sorted descending">
-                                                    <path d="M6 9L3 5H9L6 9Z" fill="currentColor"/>
-                                                </svg>
-                                            {/if}
-                                        {else}
-                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-label="Sortable">
-                                                <path d="M6 2L8 5H4L6 2Z" fill="currentColor" opacity="0.3"/>
-                                                <path d="M6 10L4 7H8L6 10Z" fill="currentColor" opacity="0.3"/>
-                                            </svg>
-                                        {/if}
-                                    </span>
-                                {/if}
-                            </div>
-
-                            {if resizable}
-                                <div
-                                    class="flin-advtable__resize-handle"
-                                    data-column={column.key || column.field}
-                                    mousedown={handleResizeStart}
-                                    aria-hidden="true"
-                                ></div>
+                    <th class="advanced-table__cell advanced-table__cell--header">
+                        <div class="advanced-table__header-content">
+                            <span>Column</span>
+                            {if sortable}
+                                <span class="advanced-table__sort">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="18 15 12 9 6 15"/>
+                                    </svg>
+                                </span>
                             {/if}
-                        </th>
-                    {/for}
+                        </div>
+                    </th>
                 </tr>
             </thead>
-            <tbody class="flin-advtable__body">
-                {if displayData.length > 0}
-                    {for row, rowIndex in displayData}
-                        selectedClass = match selectedRows.includes(rowIndex) { true -> " flin-advtable__row--selected", _ -> "" }
-
-                        <tr class={"flin-advtable__row" ++ selectedClass} data-row-index={rowIndex}>
-                            // Checkbox cell
-                            {if selectable}
-                                <td class="flin-advtable__cell flin-advtable__cell--checkbox">
-                                    <label class="flin-advtable__checkbox-label">
-                                        <input
-                                            type="checkbox"
-                                            class="flin-advtable__checkbox"
-                                            checked={selectedRows.includes(rowIndex)}
-                                            change={handleRowSelect}
-                                            aria-label={"Select row " ++ (rowIndex + 1)}
-                                        >
-                                        <span class="flin-advtable__checkbox-mark"></span>
-                                    </label>
-                                </td>
-                            {/if}
-
-                            // Data cells
-                            {for column in columns}
-                                <td class="flin-advtable__cell">
-                                    {if column.render}
-                                        {column.render(row[column.key || column.field], row, rowIndex)}
-                                    {else}
-                                        {row[column.key || column.field]}
-                                    {/if}
-                                </td>
-                            {/for}
-                        </tr>
-                    {/for}
-                {else}
-                    <tr>
-                        <td class="flin-advtable__empty" colspan={columns.length + (if selectable { 1 } else { 0 })}>
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
-                                <path d="M3 9h18M9 3v18" stroke="currentColor" stroke-width="1.5"/>
+            <tbody class="advanced-table__body">
+                <tr class="advanced-table__row advanced-table__row--empty">
+                    <td class="advanced-table__cell advanced-table__empty-cell" colspan="100">
+                        <div class="advanced-table__empty">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M9 17H7A5 5 0 0 1 7 7h2"/>
+                                <path d="M15 7h2a5 5 0 0 1 0 10h-2"/>
+                                <line x1="8" y1="12" x2="16" y2="12"/>
                             </svg>
-                            <span>
-                                {if filterValue != ""}
-                                    No results found for "{filterValue}"
-                                {else}
-                                    No data available
-                                {/if}
-                            </span>
-                        </td>
-                    </tr>
-                {/if}
+                            <span class="advanced-table__empty-text">No data available</span>
+                        </div>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
 
-    // Pagination
-    {if paginated && sortedData.length > 0}
-        <div class="flin-advtable__pagination">
-            <div class="flin-advtable__pagination-info">
-                Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, sortedData.length)} of {sortedData.length} entries
-                {if filterValue != ""}
-                    (filtered from {data.length} total)
-                {/if}
+    {if paginated}
+        <div class="advanced-table__pagination">
+            <div class="advanced-table__pagination-info">
+                Showing {startIndex + 1} to {endIndex} of {totalItems} entries
             </div>
-
-            <div class="flin-advtable__pagination-controls">
+            <div class="advanced-table__pagination-controls">
                 <button
-                    class="flin-advtable__pagination-btn"
-                    click={goToPrevious}
+                    class="advanced-table__pagination-btn"
                     disabled={currentPage == 1}
-                    aria-label="Previous page"
-                    title="Previous"
                 >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="15 18 9 12 15 6"></polyline>
+                        <polyline points="15 18 9 12 15 6"/>
                     </svg>
                 </button>
-
-                <span class="flin-advtable__pagination-text">
+                <span class="advanced-table__pagination-page">
                     Page {currentPage} of {totalPages}
                 </span>
-
                 <button
-                    class="flin-advtable__pagination-btn"
-                    click={goToNext}
+                    class="advanced-table__pagination-btn"
                     disabled={currentPage == totalPages}
-                    aria-label="Next page"
-                    title="Next"
                 >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="9 18 15 12 9 6"></polyline>
+                        <polyline points="9 18 15 12 9 6"/>
                     </svg>
                 </button>
             </div>
@@ -572,562 +198,281 @@ isIndeterminate = selectedRows.length > 0 && selectedRows.length < displayData.l
 </div>
 
 <style scoped>
-.flin-advtable {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-space-3);
+.advanced-table-container {
+    font-family: var(--flin-font-sans);
+    background: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
 }
 
-/* Toolbar */
-.flin-advtable__toolbar {
+.advanced-table__toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--flin-space-4);
-    flex-wrap: wrap;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    background: var(--flin-neutral-50);
 }
 
-.flin-advtable__toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-3);
-}
-
-/* Filter */
-.flin-advtable__filter {
-    position: relative;
-    max-width: 300px;
-    flex: 1;
-}
-
-.flin-advtable__filter-icon {
-    position: absolute;
-    left: var(--flin-space-3);
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--flin-fg-muted);
-    pointer-events: none;
-}
-
-.flin-advtable__filter-input {
-    width: 100%;
-    height: 36px;
-    padding: var(--flin-space-2) var(--flin-space-10);
-    font-family: var(--flin-font-sans);
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg);
-    background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-300);
-    border-radius: var(--flin-radius-md);
-    transition: all var(--flin-transition-fast);
-    outline: none;
-}
-
-.flin-advtable__filter-input::placeholder {
-    color: var(--flin-fg-muted);
-}
-
-.flin-advtable__filter-input:hover {
-    border-color: var(--flin-neutral-400);
-}
-
-.flin-advtable__filter-input:focus {
-    border-color: var(--flin-primary);
-    box-shadow: 0 0 0 3px var(--flin-primary-light);
-}
-
-.flin-advtable__filter-clear {
-    position: absolute;
-    right: var(--flin-space-2);
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    padding: var(--flin-space-1);
-    color: var(--flin-fg-muted);
-    cursor: pointer;
-    border-radius: var(--flin-radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--flin-transition-fast);
-}
-
-.flin-advtable__filter-clear:hover {
-    color: var(--flin-fg);
-    background-color: var(--flin-neutral-100);
-}
-
-/* Selection info */
-.flin-advtable__selection-info {
-    font-size: var(--flin-text-sm);
-    color: var(--flin-primary);
-    font-weight: 500;
-}
-
-/* Export */
-.flin-advtable__export {
-    position: relative;
-}
-
-.flin-advtable__export-btn {
+.advanced-table__search {
     display: flex;
     align-items: center;
     gap: var(--flin-space-2);
     padding: var(--flin-space-2) var(--flin-space-3);
-    font-family: var(--flin-font-sans);
-    font-size: var(--flin-text-sm);
-    font-weight: 500;
-    color: var(--flin-fg);
-    background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-300);
+    background: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-md);
+    min-width: 250px;
+}
+
+.advanced-table__search svg {
+    color: var(--flin-neutral-400);
+    flex-shrink: 0;
+}
+
+.advanced-table__search-input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    outline: none;
+}
+
+.advanced-table__export {
+    position: relative;
+}
+
+.advanced-table__export-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
     cursor: pointer;
     transition: all var(--flin-transition-fast);
 }
 
-.flin-advtable__export-btn:hover {
-    background-color: var(--flin-neutral-100);
-    border-color: var(--flin-neutral-400);
+.advanced-table__export-btn:hover {
+    border-color: var(--flin-neutral-300);
+    background: var(--flin-neutral-50);
 }
 
-.flin-advtable__export-btn:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
-}
-
-.flin-advtable__export-menu {
+.advanced-table__export-menu {
     position: absolute;
     top: 100%;
     right: 0;
     margin-top: var(--flin-space-1);
-    min-width: 180px;
-    background-color: var(--flin-bg);
+    background: var(--flin-bg);
     border: 1px solid var(--flin-neutral-200);
-    border-radius: var(--flin-radius-lg);
+    border-radius: var(--flin-radius-md);
     box-shadow: var(--flin-shadow-lg);
-    z-index: 50;
-    overflow: hidden;
-    animation: exportMenuFadeIn var(--flin-transition-fast) ease-out;
+    z-index: 10;
+    min-width: 150px;
 }
 
-@keyframes exportMenuFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-4px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.flin-advtable__export-option {
+.advanced-table__export-option {
     display: flex;
     align-items: center;
     gap: var(--flin-space-2);
     width: 100%;
-    padding: var(--flin-space-3);
-    font-family: var(--flin-font-sans);
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg);
+    padding: var(--flin-space-2) var(--flin-space-3);
     background: none;
     border: none;
-    text-align: left;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
     cursor: pointer;
-    transition: background-color var(--flin-transition-fast);
+    text-align: left;
 }
 
-.flin-advtable__export-option:hover {
-    background-color: var(--flin-neutral-100);
+.advanced-table__export-option:hover {
+    background: var(--flin-neutral-100);
 }
 
-.flin-advtable__export-option:focus-visible {
-    background-color: var(--flin-neutral-100);
-    outline: none;
-}
-
-.flin-advtable__export-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 40;
-}
-
-/* Table wrapper */
-.flin-advtable__wrapper {
-    width: 100%;
+.advanced-table__wrapper {
     overflow-x: auto;
-    border-radius: var(--flin-radius-lg);
 }
 
-.flin-advtable__table {
+.advanced-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: var(--flin-text-sm);
-    text-align: left;
 }
 
-/* Table head */
-.flin-advtable__head {
-    background-color: var(--flin-neutral-50);
-    border-bottom: 2px solid var(--flin-neutral-200);
+.advanced-table__head {
+    background: var(--flin-neutral-50);
 }
 
-.flin-advtable__header {
-    position: relative;
-    padding: var(--flin-space-3) var(--flin-space-4);
-    font-weight: 600;
-    color: var(--flin-fg);
-    white-space: nowrap;
-    user-select: none;
-}
-
-.flin-advtable__header--checkbox {
-    width: 48px;
-    padding: var(--flin-space-3) var(--flin-space-2);
-}
-
-.flin-advtable__header--sortable {
-    cursor: pointer;
-    transition: background-color var(--flin-transition-fast);
-}
-
-.flin-advtable__header--sortable:hover {
-    background-color: var(--flin-neutral-100);
-}
-
-.flin-advtable__header--active {
-    color: var(--flin-primary);
-}
-
-.flin-advtable__header-content {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-2);
-}
-
-.flin-advtable__header-text {
-    flex: 1;
-}
-
-.flin-advtable__sort-indicator {
-    display: inline-flex;
-    align-items: center;
-    color: var(--flin-fg-muted);
-}
-
-.flin-advtable__header--active .flin-advtable__sort-indicator {
-    color: var(--flin-primary);
-}
-
-/* Resize handle */
-.flin-advtable__resize-handle {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 4px;
-    height: 100%;
-    cursor: col-resize;
-    background-color: transparent;
-    transition: background-color var(--flin-transition-fast);
-}
-
-.flin-advtable__resize-handle:hover {
-    background-color: var(--flin-primary);
-}
-
-/* Checkbox */
-.flin-advtable__checkbox-label {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-.flin-advtable__checkbox {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.flin-advtable__checkbox-mark {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    background-color: var(--flin-bg);
-    border: 2px solid var(--flin-neutral-300);
-    border-radius: var(--flin-radius-sm);
-    transition: all var(--flin-transition-fast);
-}
-
-.flin-advtable__checkbox:checked + .flin-advtable__checkbox-mark {
-    background-color: var(--flin-primary);
-    border-color: var(--flin-primary);
-}
-
-.flin-advtable__checkbox:checked + .flin-advtable__checkbox-mark::after {
-    content: "";
-    width: 5px;
-    height: 9px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg) translateY(-1px);
-}
-
-.flin-advtable__checkbox[data-indeterminate="true"] + .flin-advtable__checkbox-mark {
-    background-color: var(--flin-primary);
-    border-color: var(--flin-primary);
-}
-
-.flin-advtable__checkbox[data-indeterminate="true"] + .flin-advtable__checkbox-mark::after {
-    content: "";
-    width: 8px;
-    height: 2px;
-    background-color: white;
-}
-
-.flin-advtable__checkbox:focus-visible + .flin-advtable__checkbox-mark {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
-}
-
-/* Table body */
-.flin-advtable__row {
-    transition: background-color var(--flin-transition-fast);
-}
-
-.flin-advtable__row--selected {
-    background-color: var(--flin-primary-light) !important;
-}
-
-.flin-advtable__cell {
-    padding: var(--flin-space-3) var(--flin-space-4);
-    color: var(--flin-fg);
+.advanced-table__row {
     border-bottom: 1px solid var(--flin-neutral-200);
 }
 
-.flin-advtable__cell--checkbox {
-    width: 48px;
-    padding: var(--flin-space-3) var(--flin-space-2);
-}
-
-.flin-advtable__body tr:last-child .flin-advtable__cell {
+.advanced-table__row:last-child {
     border-bottom: none;
 }
 
-/* Empty state */
-.flin-advtable__empty {
-    padding: var(--flin-space-12) var(--flin-space-4);
+.advanced-table--striped .advanced-table__row:nth-child(even) {
+    background: var(--flin-neutral-50);
+}
+
+.advanced-table--hoverable .advanced-table__row:hover {
+    background: var(--flin-neutral-100);
+}
+
+.advanced-table--bordered .advanced-table__cell {
+    border: 1px solid var(--flin-neutral-200);
+}
+
+.advanced-table__cell {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    text-align: left;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+}
+
+.advanced-table__cell--header {
+    font-weight: 600;
+    color: var(--flin-fg);
+    white-space: nowrap;
+}
+
+.advanced-table__cell--checkbox {
+    width: 40px;
     text-align: center;
-    color: var(--flin-fg-muted);
 }
 
-.flin-advtable__empty svg {
-    display: block;
-    margin: 0 auto var(--flin-space-3);
-    color: var(--flin-neutral-300);
-}
-
-.flin-advtable__empty span {
-    display: block;
-    font-size: var(--flin-text-base);
-}
-
-/* Table variants */
-.flin-advtable__table--striped .flin-advtable__body tr:nth-child(even) {
-    background-color: var(--flin-neutral-50);
-}
-
-.flin-advtable__table--hoverable .flin-advtable__row:hover {
-    background-color: var(--flin-neutral-100);
-}
-
-.flin-advtable__table--bordered {
-    border: 1px solid var(--flin-neutral-200);
-    border-radius: var(--flin-radius-lg);
-}
-
-.flin-advtable__table--bordered th,
-.flin-advtable__table--bordered td {
-    border: 1px solid var(--flin-neutral-200);
-}
-
-/* Pagination */
-.flin-advtable__pagination {
+.advanced-table__header-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--flin-space-3) 0;
-    gap: var(--flin-space-4);
-    flex-wrap: wrap;
+    gap: var(--flin-space-2);
 }
 
-.flin-advtable__pagination-info {
+.advanced-table__sort {
+    display: flex;
+    color: var(--flin-neutral-400);
+    cursor: pointer;
+}
+
+.advanced-table__sort:hover {
+    color: var(--flin-fg);
+}
+
+.advanced-table__checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.advanced-table__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-8);
+    color: var(--flin-neutral-400);
+}
+
+.advanced-table__empty svg {
+    opacity: 0.5;
+}
+
+.advanced-table__empty-text {
+    font-size: var(--flin-text-sm);
+}
+
+.advanced-table__empty-cell {
+    text-align: center;
+}
+
+.advanced-table__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+    background: var(--flin-neutral-50);
+}
+
+.advanced-table__pagination-info {
     font-size: var(--flin-text-sm);
     color: var(--flin-fg-muted);
 }
 
-.flin-advtable__pagination-controls {
+.advanced-table__pagination-controls {
     display: flex;
     align-items: center;
     gap: var(--flin-space-2);
 }
 
-.flin-advtable__pagination-btn {
-    display: inline-flex;
+.advanced-table__pagination-btn {
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    font-family: var(--flin-font-sans);
-    background-color: var(--flin-bg);
-    color: var(--flin-fg-muted);
+    width: 32px;
+    height: 32px;
+    background: var(--flin-bg);
     border: 1px solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-md);
+    color: var(--flin-fg-muted);
     cursor: pointer;
     transition: all var(--flin-transition-fast);
 }
 
-.flin-advtable__pagination-btn:hover:not(:disabled) {
-    background-color: var(--flin-neutral-100);
+.advanced-table__pagination-btn:hover:not(:disabled) {
+    border-color: var(--flin-neutral-300);
     color: var(--flin-fg);
 }
 
-.flin-advtable__pagination-btn:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
-}
-
-.flin-advtable__pagination-btn:disabled {
+.advanced-table__pagination-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.flin-advtable__pagination-text {
+.advanced-table__pagination-page {
     font-size: var(--flin-text-sm);
-    font-weight: 500;
     color: var(--flin-fg);
-    min-width: 100px;
-    text-align: center;
+    padding: 0 var(--flin-space-2);
 }
 
-/* Responsive styles */
-@media (max-width: 640px) {
-    .flin-advtable__toolbar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .flin-advtable__filter {
-        max-width: none;
-    }
-
-    .flin-advtable__toolbar-right {
-        justify-content: space-between;
-    }
-
-    .flin-advtable__pagination {
-        flex-direction: column;
-        align-items: stretch;
-        gap: var(--flin-space-3);
-    }
-
-    .flin-advtable__pagination-info {
-        text-align: center;
-    }
-
-    .flin-advtable__pagination-controls {
-        justify-content: center;
-    }
-}
-
-/* Dark theme support */
-[data-theme="dark"] .flin-advtable__head {
-    background-color: var(--flin-neutral-800);
-    border-bottom-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-advtable__header--sortable:hover {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-advtable__cell {
-    border-bottom-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-advtable__table--striped .flin-advtable__body tr:nth-child(even) {
-    background-color: var(--flin-neutral-800);
-}
-
-[data-theme="dark"] .flin-advtable__table--hoverable .flin-advtable__row:hover {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-advtable__row--selected {
-    background-color: rgba(59, 130, 246, 0.2) !important;
-}
-
-[data-theme="dark"] .flin-advtable__table--bordered {
+/* Dark theme */
+[data-theme="dark"] .advanced-table-container {
+    background: var(--flin-neutral-900);
     border-color: var(--flin-neutral-700);
 }
 
-[data-theme="dark"] .flin-advtable__table--bordered th,
-[data-theme="dark"] .flin-advtable__table--bordered td {
+[data-theme="dark"] .advanced-table__toolbar,
+[data-theme="dark"] .advanced-table__head,
+[data-theme="dark"] .advanced-table__pagination {
+    background: var(--flin-neutral-800);
     border-color: var(--flin-neutral-700);
 }
 
-[data-theme="dark"] .flin-advtable__filter-input {
-    background-color: var(--flin-neutral-800);
-    border-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-advtable__filter-input:hover {
+[data-theme="dark"] .advanced-table__search,
+[data-theme="dark"] .advanced-table__export-btn,
+[data-theme="dark"] .advanced-table__pagination-btn {
+    background: var(--flin-neutral-900);
     border-color: var(--flin-neutral-600);
 }
 
-[data-theme="dark"] .flin-advtable__filter-clear:hover {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-advtable__export-btn {
-    background-color: var(--flin-neutral-800);
-    border-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-advtable__export-btn:hover {
-    background-color: var(--flin-neutral-700);
+[data-theme="dark"] .advanced-table__export-menu {
+    background: var(--flin-neutral-800);
     border-color: var(--flin-neutral-600);
 }
 
-[data-theme="dark"] .flin-advtable__export-menu {
-    background-color: var(--flin-neutral-800);
+[data-theme="dark"] .advanced-table__row {
     border-color: var(--flin-neutral-700);
 }
 
-[data-theme="dark"] .flin-advtable__export-option:hover {
-    background-color: var(--flin-neutral-700);
+[data-theme="dark"] .advanced-table--striped .advanced-table__row:nth-child(even) {
+    background: var(--flin-neutral-800);
 }
 
-[data-theme="dark"] .flin-advtable__checkbox-mark {
-    background-color: var(--flin-neutral-800);
-    border-color: var(--flin-neutral-600);
-}
-
-[data-theme="dark"] .flin-advtable__pagination-btn {
-    background-color: var(--flin-neutral-800);
-    border-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-advtable__pagination-btn:hover:not(:disabled) {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-advtable__empty svg {
-    color: var(--flin-neutral-700);
+[data-theme="dark"] .advanced-table--hoverable .advanced-table__row:hover {
+    background: var(--flin-neutral-700);
 }
 </style>

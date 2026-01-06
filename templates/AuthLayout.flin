@@ -2,98 +2,77 @@
 
 // Props
 title = props.title || "Welcome"
-subtitle = props.subtitle || nil
-logo = props.logo || nil
+subtitle = props.subtitle || ""
+logo = props.logo || ""
 logoAlt = props.logoAlt || "Logo"
-backgroundImage = props.backgroundImage || nil
-backgroundColor = props.backgroundColor || nil
-variant = props.variant || "centered" // "centered" | "split"
-splitPosition = props.splitPosition || "right" // "left" | "right" (for split variant)
-children = props.children || nil
-footer = props.footer || nil
+backgroundImage = props.backgroundImage || ""
+backgroundColor = props.backgroundColor || ""
+variant = props.variant || "centered"
+splitPosition = props.splitPosition || "right"
+children = props.children
+footer = props.footer || ""
 showPattern = props.showPattern || true
 
 // Computed
-layoutClass = "auth-layout auth-layout--" ++ variant ++ (if splitPosition == "left" then " auth-layout--split-left" else "")
-backgroundStyle = if backgroundImage then
-    "background-image: url(" ++ backgroundImage ++ ");"
-else if backgroundColor then
-    "background-color: " ++ backgroundColor ++ ";"
-else
-    ""
+splitLeftClass = match splitPosition == "left" { true -> " auth-layout--split-left", _ -> "" }
+layoutClass = "auth-layout auth-layout--" ++ variant ++ splitLeftClass
 
 <div class={layoutClass}>
-    // Background/Image panel (for split variant)
-    {if variant == "split" then
-        <div class="auth-image-panel" style={backgroundStyle}>
-            {if showPattern && !backgroundImage then
+    {if variant == "split"}
+        <div class="auth-image-panel">
+            {if showPattern}
                 <div class="auth-pattern">
                     <div class="pattern-grid"></div>
                     <div class="pattern-gradient"></div>
                 </div>
-            }
+            {/if}
             <div class="auth-image-content">
                 <div class="auth-branding">
-                    {if logo then
+                    {if logo != ""}
                         <img src={logo} alt={logoAlt} class="auth-branding-logo" />
-                    }
+                    {/if}
                 </div>
                 <div class="auth-image-text">
                     <h2 class="auth-image-title">{title}</h2>
-                    {if subtitle then
+                    {if subtitle != ""}
                         <p class="auth-image-subtitle">{subtitle}</p>
-                    }
+                    {/if}
                 </div>
             </div>
         </div>
-    }
+    {/if}
 
-    // Main content panel
     <div class="auth-content-panel">
-        {if variant == "centered" && (backgroundImage || showPattern) then
-            <div class="auth-background" style={backgroundStyle}>
-                {if showPattern && !backgroundImage then
-                    <div class="auth-pattern">
-                        <div class="pattern-circles"></div>
-                    </div>
-                }
+        {if variant == "centered" && showPattern}
+            <div class="auth-background">
+                <div class="auth-pattern">
+                    <div class="pattern-circles"></div>
+                </div>
             </div>
-        }
+        {/if}
 
         <div class="auth-content-wrapper">
             <div class="auth-card">
-                // Header with logo (for centered variant)
-                {if variant == "centered" then
-                    <div class="auth-card-header">
-                        {if logo then
-                            <img src={logo} alt={logoAlt} class="auth-logo" />
-                        }
-                        <h1 class="auth-title">{title}</h1>
-                        {if subtitle then
-                            <p class="auth-subtitle">{subtitle}</p>
-                        }
-                    </div>
-                else
-                    <div class="auth-card-header auth-card-header--split">
-                        <h1 class="auth-title">{title}</h1>
-                        {if subtitle then
-                            <p class="auth-subtitle">{subtitle}</p>
-                        }
-                    </div>
-                }
+                <div class="auth-card-header">
+                    {if logo != "" && variant == "centered"}
+                        <img src={logo} alt={logoAlt} class="auth-logo" />
+                    {/if}
+                    <h1 class="auth-title">{title}</h1>
+                    {if subtitle != ""}
+                        <p class="auth-subtitle">{subtitle}</p>
+                    {/if}
+                </div>
 
-                // Form content
                 <div class="auth-card-body">
                     {children}
                 </div>
             </div>
 
-            // Footer
-            {if footer then
+            {if footer != ""}
                 <div class="auth-footer">
                     {footer}
                 </div>
-            }
+            {/if}
         </div>
     </div>
 </div>
@@ -105,7 +84,6 @@ else
     position: relative;
 }
 
-/* Centered variant */
 .auth-layout--centered {
     justify-content: center;
     align-items: center;
@@ -116,7 +94,7 @@ else
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: var(--flin-spacing-4);
+    padding: var(--flin-space-4);
 }
 
 .auth-layout--centered .auth-background {
@@ -125,9 +103,7 @@ else
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, var(--flin-color-primary-600) 0%, var(--flin-color-primary-800) 100%);
-    background-size: cover;
-    background-position: center;
+    background: linear-gradient(135deg, var(--flin-primary) 0%, var(--flin-primary-dark) 100%);
     z-index: 0;
 }
 
@@ -139,24 +115,23 @@ else
 }
 
 .auth-layout--centered .auth-card {
-    background: var(--flin-color-white);
+    background: var(--flin-bg);
     border-radius: var(--flin-radius-xl);
-    box-shadow: var(--flin-shadow-2xl);
-    padding: var(--flin-spacing-8);
+    box-shadow: var(--flin-shadow-xl);
+    padding: var(--flin-space-8);
 }
 
 .auth-layout--centered .auth-card-header {
     text-align: center;
-    margin-bottom: var(--flin-spacing-8);
+    margin-bottom: var(--flin-space-8);
 }
 
 .auth-layout--centered .auth-logo {
     height: 48px;
     width: auto;
-    margin-bottom: var(--flin-spacing-6);
+    margin-bottom: var(--flin-space-6);
 }
 
-/* Split variant */
 .auth-layout--split {
     flex-direction: row;
 }
@@ -168,13 +143,11 @@ else
 .auth-image-panel {
     flex: 1;
     position: relative;
-    background: linear-gradient(135deg, var(--flin-color-primary-600) 0%, var(--flin-color-primary-800) 100%);
-    background-size: cover;
-    background-position: center;
+    background: linear-gradient(135deg, var(--flin-primary) 0%, var(--flin-primary-dark) 100%);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: var(--flin-spacing-8);
+    padding: var(--flin-space-8);
     overflow: hidden;
 }
 
@@ -187,35 +160,23 @@ else
     height: 100%;
 }
 
-.auth-branding {
-    display: flex;
-    align-items: center;
-}
-
 .auth-branding-logo {
     height: 40px;
     width: auto;
     filter: brightness(0) invert(1);
 }
 
-.auth-image-text {
-    margin-top: auto;
-}
-
 .auth-image-title {
-    font-size: var(--flin-font-size-4xl);
-    font-weight: var(--flin-font-weight-bold);
-    color: var(--flin-color-white);
-    margin: 0 0 var(--flin-spacing-4) 0;
-    line-height: 1.2;
+    font-size: var(--flin-text-3xl);
+    font-weight: 700;
+    color: white;
+    margin: 0 0 var(--flin-space-4) 0;
 }
 
 .auth-image-subtitle {
-    font-size: var(--flin-font-size-lg);
+    font-size: var(--flin-text-lg);
     color: rgba(255, 255, 255, 0.8);
     margin: 0;
-    max-width: 400px;
-    line-height: 1.6;
 }
 
 .auth-layout--split .auth-content-panel {
@@ -223,8 +184,8 @@ else
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--flin-color-white);
-    padding: var(--flin-spacing-8);
+    background: var(--flin-bg);
+    padding: var(--flin-space-8);
 }
 
 .auth-layout--split .auth-content-wrapper {
@@ -232,56 +193,26 @@ else
     max-width: 400px;
 }
 
-.auth-layout--split .auth-card {
-    padding: 0;
-}
-
-.auth-card-header--split {
-    margin-bottom: var(--flin-spacing-8);
-}
-
-.auth-card-header--split .auth-title {
-    text-align: left;
-}
-
-.auth-card-header--split .auth-subtitle {
-    text-align: left;
-}
-
-/* Shared styles */
 .auth-title {
-    font-size: var(--flin-font-size-2xl);
-    font-weight: var(--flin-font-weight-bold);
-    color: var(--flin-color-gray-900);
-    margin: 0 0 var(--flin-spacing-2) 0;
+    font-size: var(--flin-text-2xl);
+    font-weight: 700;
+    color: var(--flin-fg);
+    margin: 0 0 var(--flin-space-2) 0;
 }
 
 .auth-subtitle {
-    font-size: var(--flin-font-size-base);
-    color: var(--flin-color-gray-500);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg-muted);
     margin: 0;
 }
 
-.auth-card-body {
-    width: 100%;
-}
-
 .auth-footer {
-    margin-top: var(--flin-spacing-6);
+    margin-top: var(--flin-space-6);
     text-align: center;
-    font-size: var(--flin-font-size-sm);
-    color: var(--flin-color-gray-500);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
 }
 
-.auth-layout--centered .auth-footer {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.auth-layout--centered .auth-footer a {
-    color: var(--flin-color-white);
-}
-
-/* Pattern backgrounds */
 .auth-pattern {
     position: absolute;
     top: 0;
@@ -294,10 +225,7 @@ else
 
 .pattern-grid {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background-image:
         linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
@@ -306,81 +234,17 @@ else
 
 .pattern-gradient {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
 }
 
-.pattern-circles {
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 100%;
-    height: 200%;
-    background:
-        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-}
-
-/* Responsive */
 @media (max-width: 1024px) {
     .auth-image-panel {
         display: none;
     }
 
     .auth-layout--split .auth-content-panel {
-        flex: none;
         width: 100%;
     }
-}
-
-@media (max-width: 768px) {
-    .auth-layout--centered .auth-card {
-        padding: var(--flin-spacing-6);
-    }
-
-    .auth-layout--split .auth-content-panel {
-        padding: var(--flin-spacing-4);
-    }
-
-    .auth-title {
-        font-size: var(--flin-font-size-xl);
-    }
-}
-
-@media (max-width: 480px) {
-    .auth-layout--centered .auth-content-wrapper {
-        max-width: 100%;
-    }
-
-    .auth-layout--centered .auth-card {
-        padding: var(--flin-spacing-5);
-        border-radius: var(--flin-radius-lg);
-    }
-
-    .auth-layout--centered .auth-logo {
-        height: 40px;
-    }
-
-    .auth-card-header {
-        margin-bottom: var(--flin-spacing-6);
-    }
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.auth-card {
-    animation: fadeIn 0.4s ease-out;
 }
 </style>

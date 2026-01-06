@@ -9,18 +9,18 @@ icon = props.icon || ""
 
 // Internal state for uncontrolled mode
 // If open prop is provided, use controlled mode; otherwise use internal state
-isControlled = open != null
+isControlled = open != none
 internalOpen = defaultOpen
 
 // Determine current open state
 isOpen = match isControlled {
-    true -> open
+    true -> open,
     _ -> internalOpen
 }
 
 // Build class strings
 openClass = match isOpen {
-    true -> " flin-collapse-open"
+    true -> " flin-collapse-open",
     _ -> ""
 }
 
@@ -31,7 +31,7 @@ hasIcon = icon != ""
 hasTitle = title != ""
 
 // Toggle handler
-handleToggle = fn() {
+handleToggle = {
     if !isControlled {
         internalOpen = !internalOpen
     }
@@ -41,13 +41,13 @@ handleToggle = fn() {
 }
 
 <div class={collapseClass}>
-    <button class="flin-collapse-header" onClick={handleToggle} aria-expanded={isOpen} type="button">
-        {if hasIcon {
+    <button class="flin-collapse-header" click={handleToggle} aria-expanded={isOpen} type="button">
+        {if hasIcon}
             <span class="flin-collapse-icon">{icon}</span>
-        }}
-        {if hasTitle {
+        {/if}
+        {if hasTitle}
             <span class="flin-collapse-title">{title}</span>
-        }}
+        {/if}
         <span class="flin-collapse-chevron">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

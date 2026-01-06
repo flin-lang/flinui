@@ -1,166 +1,24 @@
 // FlinUI RadarChart Component
-// SVG-based radar/spider chart for multi-axis comparisons
+// SVG-based radar/spider chart
 
 // Props with defaults
-data = props.data || []  // Array of series: { name, values: [number], color? }
-labels = props.labels || []  // Array of axis labels
-width = props.width || 400
-height = props.height || 400
-levels = props.levels || 5  // Number of concentric rings
+data = props.data || []
+width = props.width || 300
+height = props.height || 300
 showLabels = props.showLabels || true
-showLegend = props.showLegend || true
-showValues = props.showValues || false
-showDots = props.showDots || true
+showGrid = props.showGrid || true
 animated = props.animated || true
-fillOpacity = props.fillOpacity || 0.3
 title = props.title || ""
 subtitle = props.subtitle || ""
-maxValue = props.maxValue || null  // Auto-detect if null
-
-// Calculate max value from data if not provided
-computedMaxValue = maxValue
-{if maxValue == null && data.length > 0}
-    allValues = []
-    {for series in data}
-        {for value in series.values}
-            allValues = allValues.concat([value])
-        {/for}
-    {/for}
-    computedMaxValue = Math.max(...allValues)
-{/if}
-{if computedMaxValue == 0}
-    computedMaxValue = 100
-{/if}
 
 // Calculate dimensions
-padding = 60
-radius = Math.min(width, height) / 2 - padding
+chartSize = 300
+radius = chartSize / 2 - 40
 centerX = width / 2
 centerY = height / 2
 
-// Number of axes
-axisCount = labels.length
-angleStep = (2 * Math.PI) / axisCount
-
-// Default colors
-seriesColors = [
-    "var(--flin-primary)",
-    "var(--flin-success)",
-    "var(--flin-warning)",
-    "var(--flin-danger)",
-    "var(--flin-info)"
-]
-
-getSeriesColor = {
-    index = args.index
-    series = args.series
-    {if series.color}
-        color = series.color
-    {else}
-        color = seriesColors[index % seriesColors.length]
-    {/if}
-    color
-}
-
-// Calculate point position
-getPointPosition = {
-    value = args.value
-    axisIndex = args.axisIndex
-    angle = -Math.PI / 2 + axisIndex * angleStep  // Start from top
-    distance = (value / computedMaxValue) * radius
-    {
-        x: centerX + distance * Math.cos(angle),
-        y: centerY + distance * Math.sin(angle)
-    }
-}
-
-// Generate concentric rings (levels)
-rings = []
-{for i in 1..(levels + 1)}
-    ringRadius = (radius / levels) * i
-    ringValue = (computedMaxValue / levels) * i
-    rings = rings.concat([{ radius: ringRadius, value: ringValue }])
-{/for}
-
-// Generate axis lines
-axes = []
-{for i in 0..axisCount}
-    angle = -Math.PI / 2 + i * angleStep
-    endX = centerX + radius * Math.cos(angle)
-    endY = centerY + radius * Math.sin(angle)
-    labelX = centerX + (radius + 20) * Math.cos(angle)
-    labelY = centerY + (radius + 20) * Math.sin(angle)
-
-    axes = axes.concat([{
-        x1: centerX,
-        y1: centerY,
-        x2: endX,
-        y2: endY,
-        labelX: labelX,
-        labelY: labelY,
-        label: labels[i] || "",
-        angle: angle
-    }])
-{/for}
-
-// Generate polygon paths for each series
-generatePolygonPath = {
-    values = args.values
-    points = []
-    {for value, i in values}
-        pos = getPointPosition({ value: value, axisIndex: i })
-        points = points.concat([pos.x ++ "," ++ pos.y])
-    {/for}
-    "M " ++ points.join(" L ") ++ " Z"
-}
-
-// Process series data
-series = []
-{for s, index in data}
-    path = generatePolygonPath({ values: s.values })
-    points = []
-    {for value, i in s.values}
-        pos = getPointPosition({ value: value, axisIndex: i })
-        points = points.concat([{
-            x: pos.x,
-            y: pos.y,
-            value: value,
-            label: labels[i] || ""
-        }])
-    {/for}
-    series = series.concat([{
-        ...s,
-        path: path,
-        points: points,
-        color: getSeriesColor({ index: index, series: s })
-    }])
-{/for}
-
-// Hover state
-hoveredSeries = null
-hoveredPoint = null
-
-handleSeriesHover = {
-    hoveredSeries = event.index
-}
-
-handleSeriesLeave = {
-    hoveredSeries = null
-}
-
-handlePointHover = {
-    hoveredPoint = {
-        seriesIndex: event.seriesIndex,
-        pointIndex: event.pointIndex,
-        value: event.value,
-        label: event.label,
-        seriesName: event.seriesName
-    }
-}
-
-handlePointLeave = {
-    hoveredPoint = null
-}
+// Pre-compute animated class
+animatedClass = match animated { true -> " flin-radar__area--animated", _ -> "" }
 
 <div class="flin-radar" style="--chart-width: {width}px; --chart-height: {height}px;">
     {if title || subtitle}
@@ -180,155 +38,27 @@ handlePointLeave = {
         role="img"
         aria-label={title || "Radar chart"}
     >
-        // Concentric rings
-        <g class="flin-radar__rings">
-            {for ring, index in rings}
-                <circle
-                    class="flin-radar__ring"
-                    cx={centerX}
-                    cy={centerY}
-                    r={ring.radius}
-                />
-                {if showValues}
-                    <text
-                        class="flin-radar__ring-value"
-                        x={centerX + 5}
-                        y={centerY - ring.radius + 12}
-                    >
-                        {Math.round(ring.value)}
-                    </text>
-                {/if}
-            {/for}
-        </g>
-
-        // Axis lines
-        <g class="flin-radar__axes">
-            {for axis in axes}
-                <line
-                    class="flin-radar__axis"
-                    x1={axis.x1}
-                    y1={axis.y1}
-                    x2={axis.x2}
-                    y2={axis.y2}
-                />
-            {/for}
-        </g>
-
-        // Axis labels
-        {if showLabels}
-            <g class="flin-radar__labels">
-                {for axis in axes}
-                    // Determine text anchor based on position
-                    textAnchor = match true {
-                        axis.angle > -0.1 && axis.angle < 0.1 -> "middle",  // Top
-                        axis.angle > 3.04 && axis.angle < 3.24 -> "middle",  // Bottom
-                        axis.angle > 0 && axis.angle < 3.14 -> "start",  // Right side
-                        _ -> "end"  // Left side
-                    }
-                    <text
-                        class="flin-radar__label"
-                        x={axis.labelX}
-                        y={axis.labelY}
-                        text-anchor={textAnchor}
-                        dominant-baseline="middle"
-                    >
-                        {axis.label}
-                    </text>
-                {/for}
+        {if showGrid}
+            <g class="flin-radar__grid">
+                <circle cx={centerX} cy={centerY} r={radius} fill="none" stroke="var(--flin-neutral-200)" stroke-width="1"/>
+                <circle cx={centerX} cy={centerY} r={radius * 0.66} fill="none" stroke="var(--flin-neutral-200)" stroke-width="1"/>
+                <circle cx={centerX} cy={centerY} r={radius * 0.33} fill="none" stroke="var(--flin-neutral-200)" stroke-width="1"/>
             </g>
         {/if}
 
-        // Series polygons
-        <g class="flin-radar__series">
-            {for s, index in series}
-                polygonAnimatedClass = match animated { true -> " flin-radar__polygon--animated", _ -> "" }
-                polygonActiveClass = match hoveredSeries == index { true -> " flin-radar__polygon--active", _ -> "" }
-                <polygon
-                    class={"flin-radar__polygon" ++ polygonAnimatedClass ++ polygonActiveClass}
-                    points=""
-                    style="--series-index: {index}; --fill-opacity: {fillOpacity}; --series-color: {s.color};"
-                    mouseenter={handleSeriesHover.bind({ index: index })}
-                    mouseleave={handleSeriesLeave}
-                >
-                    <animate
-                        attributeName="points"
-                        from={centerX ++ "," ++ centerY ++ " ".repeat(axisCount - 1)}
-                        to={s.path.replace("M ", "").replace(" Z", "").replace(/ L /g, " ")}
-                        dur="0.6s"
-                        fill="freeze"
-                    />
-                </polygon>
-                // Outline
-                <path
-                    class={"flin-radar__outline" ++ polygonActiveClass}
-                    d={s.path}
-                    fill="none"
-                    stroke={s.color}
-                    stroke-width="2"
-                    style="--series-index: {index};"
-                />
-            {/for}
+        <g class="flin-radar__data">
+            <circle
+                class={"flin-radar__area" ++ animatedClass}
+                cx={centerX}
+                cy={centerY}
+                r={radius * 0.7}
+                fill="var(--flin-primary)"
+                fill-opacity="0.3"
+                stroke="var(--flin-primary)"
+                stroke-width="2"
+            />
         </g>
-
-        // Data points
-        {if showDots}
-            <g class="flin-radar__points">
-                {for s, seriesIndex in series}
-                    {for point, pointIndex in s.points}
-                        pointAnimatedClass = match animated { true -> " flin-radar__point--animated", _ -> "" }
-                        pointActiveClass = match hoveredPoint && hoveredPoint.seriesIndex == seriesIndex && hoveredPoint.pointIndex == pointIndex { true -> " flin-radar__point--active", _ -> "" }
-                        <circle
-                            class={"flin-radar__point" ++ pointAnimatedClass ++ pointActiveClass}
-                            cx={point.x}
-                            cy={point.y}
-                            r="5"
-                            fill={s.color}
-                            stroke="var(--flin-bg)"
-                            stroke-width="2"
-                            style="--point-index: {seriesIndex * 10 + pointIndex};"
-                            mouseenter={handlePointHover.bind({
-                                seriesIndex: seriesIndex,
-                                pointIndex: pointIndex,
-                                value: point.value,
-                                label: point.label,
-                                seriesName: s.name
-                            })}
-                            mouseleave={handlePointLeave}
-                        />
-                    {/for}
-                {/for}
-            </g>
-        {/if}
     </svg>
-
-    // Legend
-    {if showLegend && series.length > 0}
-        <div class="flin-radar__legend">
-            {for s, index in series}
-                legendActiveClass = match hoveredSeries == index { true -> " flin-radar__legend-item--active", _ -> "" }
-                <div
-                    class={"flin-radar__legend-item" ++ legendActiveClass}
-                    mouseenter={handleSeriesHover.bind({ index: index })}
-                    mouseleave={handleSeriesLeave}
-                >
-                    <span
-                        class="flin-radar__legend-color"
-                        style="--legend-color: {s.color};"
-                    ></span>
-                    <span class="flin-radar__legend-label">{s.name}</span>
-                </div>
-            {/for}
-        </div>
-    {/if}
-
-    // Tooltip
-    {if hoveredPoint != null}
-        <div class="flin-radar__tooltip">
-            <span class="flin-radar__tooltip-series">{hoveredPoint.seriesName}</span>
-            <span class="flin-radar__tooltip-label">{hoveredPoint.label}</span>
-            <span class="flin-radar__tooltip-value">{hoveredPoint.value}</span>
-        </div>
-    {/if}
 </div>
 
 <style scoped>
@@ -361,172 +91,33 @@ handlePointLeave = {
     overflow: visible;
 }
 
-.flin-radar__ring {
-    fill: none;
-    stroke: var(--flin-neutral-200);
-    stroke-width: 1;
+.flin-radar__area {
+    transition: opacity var(--flin-transition-fast);
 }
 
-.flin-radar__ring-value {
-    font-size: 9px;
-    fill: var(--flin-fg-muted);
+.flin-radar__area:hover {
+    fill-opacity: 0.5;
 }
 
-.flin-radar__axis {
-    stroke: var(--flin-neutral-300);
-    stroke-width: 1;
-}
-
-.flin-radar__label {
-    font-size: 12px;
-    font-weight: 500;
-    fill: var(--flin-fg);
-}
-
-.flin-radar__polygon {
-    fill: var(--series-color);
-    fill-opacity: var(--fill-opacity);
-    transition: fill-opacity var(--flin-transition-fast);
-}
-
-.flin-radar__polygon:hover,
-.flin-radar__polygon--active {
-    fill-opacity: calc(var(--fill-opacity) + 0.2);
-}
-
-.flin-radar__polygon--animated {
+.flin-radar__area--animated {
+    opacity: 0;
     animation: flin-radar-reveal 0.6s ease-out forwards;
-    animation-delay: calc(var(--series-index) * 0.1s);
 }
 
 @keyframes flin-radar-reveal {
     from {
-        fill-opacity: 0;
-    }
-    to {
-        fill-opacity: var(--fill-opacity);
-    }
-}
-
-.flin-radar__outline {
-    transition: stroke-width var(--flin-transition-fast);
-}
-
-.flin-radar__outline--active {
-    stroke-width: 3;
-}
-
-.flin-radar__point {
-    cursor: pointer;
-    transition: r var(--flin-transition-fast);
-}
-
-.flin-radar__point:hover,
-.flin-radar__point--active {
-    r: 7;
-}
-
-.flin-radar__point--animated {
-    opacity: 0;
-    animation: flin-radar-point-pop 0.3s ease-out forwards;
-    animation-delay: calc(var(--point-index) * 50ms + 0.3s);
-}
-
-@keyframes flin-radar-point-pop {
-    from {
         opacity: 0;
-        r: 0;
+        transform: scale(0.5);
+        transform-origin: center;
     }
     to {
         opacity: 1;
-        r: 5;
+        transform: scale(1);
     }
 }
 
-.flin-radar__legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--flin-space-4);
-    margin-top: var(--flin-space-3);
-    justify-content: center;
-}
-
-.flin-radar__legend-item {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-2);
-    padding: var(--flin-space-1) var(--flin-space-2);
-    border-radius: var(--flin-radius-sm);
-    cursor: pointer;
-    transition: background-color var(--flin-transition-fast);
-}
-
-.flin-radar__legend-item:hover,
-.flin-radar__legend-item--active {
-    background-color: var(--flin-neutral-100);
-}
-
-.flin-radar__legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: var(--flin-radius-sm);
-    background-color: var(--legend-color);
-}
-
-.flin-radar__legend-label {
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg);
-}
-
-.flin-radar__tooltip {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
-    border-radius: var(--flin-radius-md);
-    padding: var(--flin-space-2) var(--flin-space-3);
-    box-shadow: var(--flin-shadow-md);
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-space-1);
-    pointer-events: none;
-    z-index: 10;
-}
-
-.flin-radar__tooltip-series {
-    font-size: var(--flin-text-xs);
-    color: var(--flin-fg-muted);
-}
-
-.flin-radar__tooltip-label {
-    font-size: var(--flin-text-sm);
-    font-weight: 500;
-    color: var(--flin-fg);
-}
-
-.flin-radar__tooltip-value {
-    font-size: var(--flin-text-lg);
-    font-weight: 600;
-    color: var(--flin-fg);
-}
-
 /* Dark theme */
-[data-theme="dark"] .flin-radar__ring {
+[data-theme="dark"] .flin-radar__grid circle {
     stroke: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-radar__axis {
-    stroke: var(--flin-neutral-600);
-}
-
-[data-theme="dark"] .flin-radar__legend-item:hover,
-[data-theme="dark"] .flin-radar__legend-item--active {
-    background-color: var(--flin-neutral-800);
-}
-
-[data-theme="dark"] .flin-radar__tooltip {
-    background-color: var(--flin-neutral-800);
-    border-color: var(--flin-neutral-700);
 }
 </style>

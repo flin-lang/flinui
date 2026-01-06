@@ -1,0 +1,287 @@
+// FlinUI — Sidebar Component
+// ============================================================================
+// Collapsible side navigation with sections, icons, and badges
+//
+// USAGE:
+//   <Sidebar
+//       collapsed={false}
+//       position="left"
+//       width="280px"
+//   >
+//       <!-- Navigation content as children -->
+//   </Sidebar>
+//
+// PROPS:
+//   collapsed      - Icon-only mode (default: false)
+//   position       - "left" | "right" (default: "left")
+//   width          - Width when expanded (default: "280px")
+//   collapsedWidth - Width when collapsed (default: "72px")
+//
+// ============================================================================
+
+// Props with defaults
+collapsed = props.collapsed || false
+position = props.position || "left"
+width = props.width || "280px"
+collapsedWidth = props.collapsedWidth || "72px"
+
+// Position class
+positionClass = match position {
+    "right" -> " flin-sidebar-right",
+    _ -> " flin-sidebar-left"
+}
+
+// Collapsed class
+collapsedClass = match collapsed {
+    true -> " flin-sidebar-collapsed",
+    _ -> ""
+}
+
+// Build CSS custom property for width
+sidebarWidth = match collapsed {
+    true -> collapsedWidth,
+    _ -> width
+}
+
+// Build final class
+sidebarClass = "flin-sidebar" ++ positionClass ++ collapsedClass
+
+<aside class={sidebarClass} style={"--flin-sidebar-width: " ++ sidebarWidth}>
+    <div class="flin-sidebar-content">
+        {children}
+    </div>
+</aside>
+
+<style scoped>
+/* ────────────────────────────────────────────────────────────────────────
+   BASE SIDEBAR STYLES
+   ──────────────────────────────────────────────────────────────────────── */
+
+.flin-sidebar {
+    width: var(--flin-sidebar-width, 280px);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    background: var(--flin-sidebar-bg, var(--flin-bg-surface, #12121a));
+    padding: var(--flin-space-8, 2rem) 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: var(--flin-z-sticky, 200);
+}
+
+/* Scrollbar styling */
+.flin-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.flin-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.flin-sidebar::-webkit-scrollbar-thumb {
+    background: var(--flin-border-medium, rgba(255, 255, 255, 0.1));
+    border-radius: 3px;
+}
+
+.flin-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--flin-border-strong, rgba(255, 255, 255, 0.15));
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   POSITION VARIANTS
+   ──────────────────────────────────────────────────────────────────────── */
+
+.flin-sidebar-left {
+    left: 0;
+    border-right: 1px solid var(--flin-border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.flin-sidebar-right {
+    right: 0;
+    left: auto;
+    border-right: none;
+    border-left: 1px solid var(--flin-border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   COLLAPSED STATE
+   ──────────────────────────────────────────────────────────────────────── */
+
+.flin-sidebar-collapsed .flin-sidebar-item-label,
+.flin-sidebar-collapsed .flin-sidebar-section-title,
+.flin-sidebar-collapsed .flin-sidebar-item-badge {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.flin-sidebar-collapsed .flin-sidebar-item {
+    justify-content: center;
+    padding: var(--flin-space-2, 0.5rem);
+}
+
+.flin-sidebar-collapsed .flin-sidebar-content {
+    padding: 0 var(--flin-space-2, 0.5rem);
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   CONTENT
+   ──────────────────────────────────────────────────────────────────────── */
+
+.flin-sidebar-content {
+    padding: 0 var(--flin-space-4, 1rem);
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   SECTIONS
+   ──────────────────────────────────────────────────────────────────────── */
+
+.flin-sidebar-section {
+    margin-bottom: var(--flin-space-8, 2rem);
+}
+
+.flin-sidebar-section-title {
+    font-size: var(--flin-text-xs, 0.75rem);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--flin-text-muted, #606070);
+    padding: var(--flin-space-2, 0.5rem) var(--flin-space-4, 1rem);
+    margin: 0 0 var(--flin-space-2, 0.5rem) 0;
+    font-weight: 600;
+    transition: opacity 0.15s ease;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   ITEMS LIST
+   ──────────────────────────────────────────────────────────────────────── */
+
+.flin-sidebar-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.flin-sidebar-items li {
+    margin-bottom: 2px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   ITEM
+   ──────────────────────────────────────────────────────────────────────── */
+
+.flin-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2, 0.5rem);
+    padding: var(--flin-space-2, 0.5rem) var(--flin-space-4, 1rem);
+    color: var(--flin-text-secondary, #a0a0b0);
+    text-decoration: none;
+    border-radius: var(--flin-radius-md, 8px);
+    font-size: var(--flin-text-sm, 0.875rem);
+    font-weight: 500;
+    position: relative;
+    transition: all 0.15s ease;
+}
+
+.flin-sidebar-item:hover {
+    background: var(--flin-sidebar-item-hover, var(--flin-bg-hover, #22222f));
+    color: var(--flin-text-primary, #f5f5f7);
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   ACTIVE STATE
+   ──────────────────────────────────────────────────────────────────────── */
+
+.flin-sidebar-item.active {
+    background: var(--flin-sidebar-item-active, var(--flin-violet-muted, rgba(139, 92, 246, 0.2)));
+    color: var(--flin-sidebar-accent, var(--flin-violet, #8b5cf6));
+}
+
+/* Active indicator bar */
+.flin-sidebar-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: var(--flin-sidebar-accent, var(--flin-violet, #8b5cf6));
+    border-radius: 0 3px 3px 0;
+}
+
+.flin-sidebar-right .flin-sidebar-item.active::before {
+    left: auto;
+    right: 0;
+    border-radius: 3px 0 0 3px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   ICON
+   ──────────────────────────────────────────────────────────────────────── */
+
+.flin-sidebar-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.flin-sidebar-item-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   LABEL
+   ──────────────────────────────────────────────────────────────────────── */
+
+.flin-sidebar-item-label {
+    flex: 1;
+    transition: opacity 0.15s ease, width 0.15s ease;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   BADGE
+   ──────────────────────────────────────────────────────────────────────── */
+
+.flin-sidebar-item-badge {
+    font-size: var(--flin-text-xs, 0.75rem);
+    font-weight: 600;
+    padding: 2px 8px;
+    background: var(--flin-gold-muted, rgba(212, 168, 83, 0.2));
+    color: var(--flin-gold, #d4a853);
+    border-radius: 100px;
+    transition: opacity 0.15s ease, width 0.15s ease;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+   ──────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+    .flin-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .flin-sidebar-right {
+        transform: translateX(100%);
+    }
+
+    .flin-sidebar-open {
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .flin-sidebar {
+        width: 100%;
+        max-width: 320px;
+    }
+}
+</style>

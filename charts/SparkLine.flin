@@ -1,299 +1,80 @@
 // FlinUI SparkLine Component
-// Compact inline chart for displaying trends without axes or labels
+// Compact inline sparkline chart
 
 // Props with defaults
-data = props.data || []  // Array of numbers or { x, y } objects
-width = props.width || 120
-height = props.height || 32
-variant = props.variant || "primary"  // primary, success, warning, danger, info
-type = props.type || "line"  // line, area, bar
+data = props.data || []
+width = props.width || 100
+height = props.height || 30
+variant = props.variant || "line"
+color = props.color || "var(--flin-primary)"
 showEndpoint = props.showEndpoint || true
-showMinMax = props.showMinMax || false
 animated = props.animated || true
-curved = props.curved || true
-strokeWidth = props.strokeWidth || 2
-
-// Normalize data to array of values
-normalizedData = data.map((d, i) => {
-    {if typeof d == "number"}
-        { x: i, y: d }
-    {else}
-        d
-    {/if}
-})
-
-// Calculate bounds
-values = normalizedData.map(d => d.y)
-minValue = values.length > 0 ? Math.min(...values) : 0
-maxValue = values.length > 0 ? Math.max(...values) : 100
-range = maxValue - minValue || 1
-
-// Padding
-paddingX = 2
-paddingY = 4
-chartWidth = width - paddingX * 2
-chartHeight = height - paddingY * 2
-
-// Scale functions
-scaleX = {
-    index = args.index
-    total = args.total
-    paddingX + (index / (total - 1)) * chartWidth
-}
-
-scaleY = {
-    value = args.value
-    paddingY + chartHeight - ((value - minValue) / range) * chartHeight
-}
-
-// Get color based on variant
-variantColor = match variant {
-    "primary" -> "var(--flin-primary)"
-    "secondary" -> "var(--flin-secondary)"
-    "success" -> "var(--flin-success)"
-    "warning" -> "var(--flin-warning)"
-    "danger" -> "var(--flin-danger)"
-    "info" -> "var(--flin-info)"
-    _ -> "var(--flin-primary)"
-}
-
-// Trend detection for auto-coloring
-lastValue = values.length > 0 ? values[values.length - 1] : 0
-firstValue = values.length > 0 ? values[0] : 0
-trend = lastValue > firstValue ? "up" : lastValue < firstValue ? "down" : "neutral"
-
-trendColor = match trend {
-    "up" -> "var(--flin-success)"
-    "down" -> "var(--flin-danger)"
-    _ -> "var(--flin-neutral-400)"
-}
-
-// Generate line path
-generateLinePath = {
-    points = args.points
-
-    {if points.length < 2}
-        path = ""
-    {else if curved}
-        path = "M " ++ scaleX({ index: 0, total: points.length }) ++ " " ++ scaleY({ value: points[0].y })
-        {for i in 1..(points.length)}
-            p0 = points[Math.max(0, i - 2)]
-            p1 = points[i - 1]
-            p2 = points[i]
-            p3 = points[Math.min(points.length - 1, i + 1)]
-
-            x1 = scaleX({ index: i - 1, total: points.length })
-            y1 = scaleY({ value: p1.y })
-            x2 = scaleX({ index: i, total: points.length })
-            y2 = scaleY({ value: p2.y })
-
-            cp1x = x1 + (x2 - scaleX({ index: Math.max(0, i - 2), total: points.length })) / 6
-            cp1y = y1 + (y2 - scaleY({ value: p0.y })) / 6
-            cp2x = x2 - (scaleX({ index: Math.min(points.length - 1, i + 1), total: points.length }) - x1) / 6
-            cp2y = y2 - (scaleY({ value: p3.y }) - y1) / 6
-
-            path = path ++ " C " ++ cp1x ++ " " ++ cp1y ++ ", " ++ cp2x ++ " " ++ cp2y ++ ", " ++ x2 ++ " " ++ y2
-        {/for}
-    {else}
-        path = "M " ++ scaleX({ index: 0, total: points.length }) ++ " " ++ scaleY({ value: points[0].y })
-        {for i in 1..(points.length)}
-            path = path ++ " L " ++ scaleX({ index: i, total: points.length }) ++ " " ++ scaleY({ value: points[i].y })
-        {/for}
-    {/if}
-    path
-}
-
-linePath = generateLinePath({ points: normalizedData })
-
-// Generate area path
-areaPath = linePath ++ " L " ++ scaleX({ index: normalizedData.length - 1, total: normalizedData.length }) ++ " " ++ (height - paddingY) ++ " L " ++ paddingX ++ " " ++ (height - paddingY) ++ " Z"
-
-// Find min/max point indices
-minIndex = values.indexOf(minValue)
-maxIndex = values.indexOf(maxValue)
 
 // Pre-compute animated class
-sparkAnimatedClass = match animated { true -> " flin-sparkline--animated", _ -> "" }
+animatedClass = match animated { true -> " flin-sparkline__path--animated", _ -> "" }
 
-<svg
-    class={"flin-sparkline" ++ sparkAnimatedClass}
-    viewBox="0 0 {width} {height}"
-    width={width}
-    height={height}
-    role="img"
-    aria-label="Sparkline chart showing trend"
-    style="--spark-color: {variantColor}; --trend-color: {trendColor};"
->
-    <defs>
-        <linearGradient id="flin-spark-gradient-{props.id || 'default'}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color={variantColor} stop-opacity="0.3"/>
-            <stop offset="100%" stop-color={variantColor} stop-opacity="0"/>
-        </linearGradient>
-    </defs>
-
-    {if type == "line" || type == "area"}
-        // Area fill
-        {if type == "area"}
-            <path
-                class="flin-sparkline__area"
-                d={areaPath}
-                fill="url(#flin-spark-gradient-{props.id || 'default'})"
-            />
-        {/if}
-
-        // Line
+<div class="flin-sparkline" style="--sparkline-width: {width}px; --sparkline-height: {height}px;">
+    <svg
+        class="flin-sparkline__svg"
+        viewBox="0 0 {width} {height}"
+        role="img"
+        aria-label="Sparkline"
+    >
         <path
-            class="flin-sparkline__line"
-            d={linePath}
+            class={"flin-sparkline__path" ++ animatedClass}
+            d="M 0 20 L 25 15 L 50 18 L 75 10 L 100 12"
             fill="none"
-            stroke={variantColor}
-            stroke-width={strokeWidth}
+            stroke={color}
+            stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
         />
-
-        // Min/max markers
-        {if showMinMax}
-            <circle
-                class="flin-sparkline__point flin-sparkline__point--min"
-                cx={scaleX({ index: minIndex, total: normalizedData.length })}
-                cy={scaleY({ value: minValue })}
-                r="3"
-                fill="var(--flin-danger)"
-            />
-            <circle
-                class="flin-sparkline__point flin-sparkline__point--max"
-                cx={scaleX({ index: maxIndex, total: normalizedData.length })}
-                cy={scaleY({ value: maxValue })}
-                r="3"
-                fill="var(--flin-success)"
-            />
-        {/if}
-
-        // Endpoint marker
-        {if showEndpoint && normalizedData.length > 0}
+        {if showEndpoint}
             <circle
                 class="flin-sparkline__endpoint"
-                cx={scaleX({ index: normalizedData.length - 1, total: normalizedData.length })}
-                cy={scaleY({ value: lastValue })}
+                cx="100"
+                cy="12"
                 r="3"
-                fill={variantColor}
-                stroke="var(--flin-bg)"
-                stroke-width="1.5"
+                fill={color}
             />
         {/if}
-    {/if}
-
-    {if type == "bar"}
-        // Bar chart
-        barWidth = (chartWidth / normalizedData.length) * 0.8
-        barGap = (chartWidth / normalizedData.length) * 0.2
-
-        {for point, index in normalizedData}
-            barHeight = ((point.y - minValue) / range) * chartHeight
-            barX = paddingX + index * (barWidth + barGap)
-            barY = paddingY + chartHeight - barHeight
-
-            <rect
-                class="flin-sparkline__bar"
-                x={barX}
-                y={barY}
-                width={barWidth}
-                height={barHeight}
-                rx="1"
-                fill={variantColor}
-                style="--bar-index: {index};"
-            />
-        {/for}
-    {/if}
-</svg>
+    </svg>
+</div>
 
 <style scoped>
 .flin-sparkline {
-    display: inline-block;
-    vertical-align: middle;
+    display: inline-flex;
+    width: var(--sparkline-width);
+    height: var(--sparkline-height);
 }
 
-.flin-sparkline__line {
+.flin-sparkline__svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.flin-sparkline__path {
     vector-effect: non-scaling-stroke;
 }
 
-.flin-sparkline--animated .flin-sparkline__line {
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-    animation: flin-spark-draw 1s ease-out forwards;
+.flin-sparkline__path--animated {
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    animation: flin-sparkline-draw 1s ease-out forwards;
 }
 
-@keyframes flin-spark-draw {
+@keyframes flin-sparkline-draw {
     to {
         stroke-dashoffset: 0;
     }
 }
 
-.flin-sparkline__area {
-    opacity: 0.8;
-}
-
-.flin-sparkline--animated .flin-sparkline__area {
-    animation: flin-spark-fade 0.6s ease-out forwards;
-    opacity: 0;
-}
-
-@keyframes flin-spark-fade {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 0.8;
-    }
-}
-
-.flin-sparkline__point {
-    opacity: 0.8;
-}
-
 .flin-sparkline__endpoint {
-    animation: flin-spark-pulse 2s ease-in-out infinite;
+    transition: r var(--flin-transition-fast);
 }
 
-@keyframes flin-spark-pulse {
-    0%, 100% {
-        r: 3;
-        opacity: 1;
-    }
-    50% {
-        r: 4;
-        opacity: 0.8;
-    }
-}
-
-.flin-sparkline__bar {
-    transition: opacity var(--flin-transition-fast);
-}
-
-.flin-sparkline--animated .flin-sparkline__bar {
-    animation: flin-spark-bar 0.4s ease-out forwards;
-    animation-delay: calc(var(--bar-index) * 0.03s);
-    opacity: 0;
-    transform-origin: bottom;
-}
-
-@keyframes flin-spark-bar {
-    from {
-        opacity: 0;
-        transform: scaleY(0);
-    }
-    to {
-        opacity: 1;
-        transform: scaleY(1);
-    }
-}
-
-.flin-sparkline:hover .flin-sparkline__line {
-    stroke-width: 2.5;
-}
-
-.flin-sparkline:hover .flin-sparkline__bar {
-    opacity: 0.9;
+.flin-sparkline:hover .flin-sparkline__endpoint {
+    r: 4;
 }
 </style>

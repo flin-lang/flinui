@@ -1,21 +1,15 @@
 // NumberInput.flin - FlinUI Number Input Component
-// Numeric input with increment/decrement buttons and validation
+// Numeric input with increment/decrement buttons
 
 // Props with defaults
 value = props.value || 0
 min = props.min
 max = props.max
 step = props.step || 1
-precision = props.precision || 0
 disabled = props.disabled || false
 size = props.size || "md"
 placeholder = props.placeholder || ""
 onChange = props.onChange
-allowMouseWheel = props.allowMouseWheel || false
-
-// Internal state
-internalValue = value
-isFocused = false
 
 // Size classes
 sizeClass = match size {
@@ -24,122 +18,18 @@ sizeClass = match size {
     _ -> "number-input-md"
 }
 
-// Format value with precision
-formatValue = {
-    val = event;
-    {if precision > 0}
-        val.toFixed(precision)
-    {else}
-        Math.round(val).toString()
-    {/if}
-}
-
-// Clamp value within min/max bounds
-clampValue = {
-    val = event;
-    {if min != null && val < min}
-        val = min
-    {/if}
-    {if max != null && val > max}
-        val = max
-    {/if}
-    val
-}
-
-// Update value and trigger onChange
-updateValue = {
-    newVal = event;
-    newVal = clampValue(newVal);
-    internalValue = newVal;
-    {if onChange}
-        onChange(newVal)
-    {/if}
-}
-
-// Increment value
-handleIncrement = {
-    {if !disabled}
-        newVal = parseFloat(internalValue) + step;
-        updateValue(newVal)
-    {/if}
-}
-
-// Decrement value
-handleDecrement = {
-    {if !disabled}
-        newVal = parseFloat(internalValue) - step;
-        updateValue(newVal)
-    {/if}
-}
-
-// Handle direct input
-handleInput = {
-    inputVal = event.target.value;
-    {if inputVal == "" || inputVal == "-"}
-        internalValue = inputVal
-    {else}
-        parsed = parseFloat(inputVal);
-        {if !isNaN(parsed)}
-            internalValue = inputVal
-        {/if}
-    {/if}
-}
-
-// Handle blur - finalize value
-handleBlur = {
-    isFocused = false;
-    parsed = parseFloat(internalValue);
-    {if isNaN(parsed)}
-        internalValue = min != null ? min : 0
-    {else}
-        updateValue(parsed)
-    {/if}
-}
-
-// Handle focus
-handleFocus = {
-    isFocused = true;
-    event.target.select()
-}
-
-// Handle keyboard
-handleKeydown = {
-    {if event.key == "ArrowUp"}
-        event.preventDefault();
-        handleIncrement()
-    {else if event.key == "ArrowDown"}
-        event.preventDefault();
-        handleDecrement()
-    {/if}
-}
-
-// Handle mouse wheel
-handleWheel = {
-    {if allowMouseWheel && isFocused && !disabled}
-        event.preventDefault();
-        {if event.deltaY < 0}
-            handleIncrement()
-        {else}
-            handleDecrement()
-        {/if}
-    {/if}
-}
-
 // Compute classes
-disabledClass = match disabled { true -> " number-input-disabled", _ -> "" }
-focusedClass = match isFocused { true -> " number-input-focused", _ -> "" }
-containerClass = "number-input " ++ sizeClass ++ disabledClass ++ focusedClass
-
-// Check button states
-decrementDisabled = disabled || (min != null && parseFloat(internalValue) <= min)
-incrementDisabled = disabled || (max != null && parseFloat(internalValue) >= max)
+disabledClass = match disabled {
+    true -> " number-input-disabled"
+    _ -> ""
+}
+containerClass = "number-input " ++ sizeClass ++ disabledClass
 
 <div class={containerClass}>
     <button
         type="button"
         class="number-input-btn number-input-btn-decrement"
-        click={handleDecrement}
-        disabled={decrementDisabled}
+        disabled={disabled}
         tabindex="-1"
         aria-label="Decrease value"
     >
@@ -148,27 +38,21 @@ incrementDisabled = disabled || (max != null && parseFloat(internalValue) >= max
         </svg>
     </button>
     <input
-        type="text"
+        type="number"
         class="number-input-field"
-        value={internalValue}
+        value={value}
         placeholder={placeholder}
         disabled={disabled}
-        inputmode="decimal"
-        input={handleInput}
-        focus={handleFocus}
-        blur={handleBlur}
-        keydown={handleKeydown}
-        wheel={handleWheel}
-        aria-valuemin={min}
-        aria-valuemax={max}
-        aria-valuenow={internalValue}
+        min={min}
+        max={max}
+        step={step}
+        change={onChange}
         role="spinbutton"
     >
     <button
         type="button"
         class="number-input-btn number-input-btn-increment"
-        click={handleIncrement}
-        disabled={incrementDisabled}
+        disabled={disabled}
         tabindex="-1"
         aria-label="Increase value"
     >
@@ -193,7 +77,7 @@ incrementDisabled = disabled || (max != null && parseFloat(internalValue) >= max
     border-color: var(--flin-neutral-400);
 }
 
-.number-input-focused {
+.number-input:focus-within {
     border-color: var(--flin-primary);
     box-shadow: 0 0 0 3px var(--flin-primary-light);
 }

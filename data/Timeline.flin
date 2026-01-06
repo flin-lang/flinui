@@ -2,67 +2,15 @@
 // An event timeline component for displaying chronological events
 
 // Props with defaults
-items = props.items || []
 variant = props.variant || "vertical"
 alternating = props.alternating || false
 
-// Status color mapping
-getStatusColor = fn(status) {
-    match status {
-        "success" -> "var(--flin-success)"
-        "warning" -> "var(--flin-warning)"
-        "error" -> "var(--flin-error)"
-        "info" -> "var(--flin-info)"
-        _ -> "var(--flin-primary)"
-    }
-}
-
 // Build timeline class
-timelineClass = "flin-timeline flin-timeline--{variant}"
-timelineClass = if alternating { timelineClass + " flin-timeline--alternating" } else { timelineClass }
+alternatingClass = match alternating { true -> " flin-timeline--alternating", _ -> "" }
+timelineClass = "flin-timeline flin-timeline--" ++ variant ++ alternatingClass
 
 <div class={timelineClass}>
-    {for item, index in items {
-        itemPosition = if alternating && variant == "vertical" {
-            if index % 2 == 0 { "left" } else { "right" }
-        } else {
-            "left"
-        }
-
-        statusColor = getStatusColor(item.status || "default")
-
-        <div class="flin-timeline__item flin-timeline__item--{itemPosition}"
-             style="--timeline-status-color: {statusColor};">
-
-            <div class="flin-timeline__marker">
-                {if item.icon {
-                    <span class="flin-timeline__icon">{item.icon}</span>
-                } else {
-                    <span class="flin-timeline__dot"></span>
-                }}
-            </div>
-
-            <div class="flin-timeline__content">
-                {if item.date {
-                    <div class="flin-timeline__date">{item.date}</div>
-                }}
-
-                {if item.title {
-                    <h4 class="flin-timeline__title">{item.title}</h4>
-                }}
-
-                {if item.description {
-                    <p class="flin-timeline__description">{item.description}</p>
-                }}
-
-                {if item.status {
-                    <span class="flin-timeline__status flin-timeline__status--{item.status}">
-                        {item.status}
-                    </span>
-                }}
-            </div>
-        </div>
-    }}
+    <slot></slot>
 </div>
 
 <style scoped>

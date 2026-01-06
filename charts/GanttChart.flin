@@ -1,136 +1,38 @@
 // FlinUI GanttChart Component
-// SVG-based project timeline/scheduling visualization
+// Timeline-based Gantt chart for project management
 
 // Props with defaults
-data = props.data || []  // Array of { id, name, start, end, progress?, color?, dependencies?, group? }
+tasks = props.tasks || []
 width = props.width || 800
 height = props.height || 400
-rowHeight = props.rowHeight || 40
+showLabels = props.showLabels || true
 showProgress = props.showProgress || true
 showDependencies = props.showDependencies || true
-showToday = props.showToday || true
-showLabels = props.showLabels || true
 animated = props.animated || true
 title = props.title || ""
 subtitle = props.subtitle || ""
-startDate = props.startDate || null  // Auto-detect if null
-endDate = props.endDate || null  // Auto-detect if null
-dateFormat = props.dateFormat || "short"  // "short" (Jan 1), "long" (January 1, 2024)
-
-// Calculate date range from data if not provided
-allDates = []
-{for task in data}
-    {if task.start}
-        allDates = allDates.concat([new Date(task.start).getTime()])
-    {/if}
-    {if task.end}
-        allDates = allDates.concat([new Date(task.end).getTime()])
-    {/if}
-{/for}
-
-computedStartDate = startDate ? new Date(startDate) : new Date(Math.min(...allDates))
-computedEndDate = endDate ? new Date(endDate) : new Date(Math.max(...allDates))
-
-// Add padding to date range (1 week on each side)
-computedStartDate = new Date(computedStartDate.getTime() - 7 * 24 * 60 * 60 * 1000)
-computedEndDate = new Date(computedEndDate.getTime() + 7 * 24 * 60 * 60 * 1000)
-
-totalDays = Math.ceil((computedEndDate - computedStartDate) / (24 * 60 * 60 * 1000))
 
 // Calculate dimensions
-padding = { top: 60, right: 20, bottom: 30, left: 200 }
-chartWidth = width - padding.left - padding.right
-chartHeight = Math.max(height - padding.top - padding.bottom, data.length * rowHeight)
-
-dayWidth = chartWidth / totalDays
-
-// Default colors for tasks
-taskColors = [
-    "var(--flin-primary)",
-    "var(--flin-success)",
-    "var(--flin-info)",
-    "var(--flin-warning)",
-    "var(--flin-danger)"
-]
-
-getTaskColor = {
-    index = args.index
-    task = args.task
-    {if task.color}
-        color = task.color
-    {else}
-        color = taskColors[index % taskColors.length]
-    {/if}
-    color
-}
-
-// Convert date to X position
-dateToX = {
-    dateStr = args.date
-    date = new Date(dateStr)
-    days = (date - computedStartDate) / (24 * 60 * 60 * 1000)
-    days * dayWidth
-}
-
-// Format date for display
-formatDate = {
-    dateStr = args.date
-    date = new Date(dateStr)
-    {if dateFormat == "long"}
-        formatted = date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
-    {else}
-        formatted = date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-    {/if}
-    formatted
-}
-
-// Generate month markers
-monthMarkers = []
-currentDate = new Date(computedStartDate)
-currentDate.setDate(1)  // Start at first of month
-{while currentDate < computedEndDate}
-    x = dateToX({ date: currentDate.toISOString() })
-    monthMarkers = monthMarkers.concat([{
-        x: x,
-        label: currentDate.toLocaleDateString("en-US", { month: "short", year: "2-digit" })
-    }])
-    currentDate.setMonth(currentDate.getMonth() + 1)
-{/while}
-
-// Today line
-today = new Date()
-todayX = dateToX({ date: today.toISOString() })
-isTodayVisible = today >= computedStartDate && today <= computedEndDate
-
-// Process tasks
-tasks = []
-{for task, index in data}
-    startX = dateToX({ date: task.start })
-    endX = dateToX({ date: task.end })
-    taskWidth = endX - startX
-    y = index * rowHeight
-
-    tasks = tasks.concat([{
-        ...task,
-        index: index,
-        x: startX,
-        y: y,
-        width: taskWidth,
-        progress: task.progress || 0,
-        color: getTaskColor({ index: index, task: task })
-    }])
-{/for}
+paddingTop = 40
+paddingLeft = 150
+paddingRight = 20
+paddingBottom = 40
+chartWidth = width - paddingLeft - paddingRight
+chartHeight = height - paddingTop - paddingBottom
 
 // Hover state
-hoveredTask = null
+hoveredTask = -1
 
 handleTaskHover = {
-    hoveredTask = event.task
+    hoveredTask = event.index
 }
 
 handleTaskLeave = {
-    hoveredTask = null
+    hoveredTask = -1
 }
+
+// Pre-compute animated class
+animatedClass = match animated { true -> " flin-gantt__bar--animated", _ -> "" }
 
 <div class="flin-gantt" style="--chart-width: {width}px; --chart-height: {height}px;">
     {if title || subtitle}
@@ -144,202 +46,24 @@ handleTaskLeave = {
         </div>
     {/if}
 
-    <div class="flin-gantt__wrapper">
-        <svg
-            class="flin-gantt__svg"
-            viewBox="0 0 {width} {chartHeight + padding.top + padding.bottom}"
-            role="img"
-            aria-label={title || "Gantt chart"}
-        >
-            <defs>
-                <pattern id="flin-gantt-grid" width={dayWidth * 7} height={rowHeight} patternUnits="userSpaceOnUse">
-                    <line x1="0" y1="0" x2="0" y2={rowHeight} stroke="var(--flin-neutral-200)" stroke-width="1" />
-                </pattern>
-            </defs>
-
-            <g class="flin-gantt__container" transform="translate({padding.left}, {padding.top})">
-                // Background grid
-                <rect
-                    class="flin-gantt__grid-bg"
-                    x="0"
-                    y="0"
-                    width={chartWidth}
-                    height={chartHeight}
-                    fill="url(#flin-gantt-grid)"
-                />
-
-                // Row backgrounds
-                {for task, index in tasks}
-                    rowClass = match index % 2 { 0 -> "flin-gantt__row--even", _ -> "flin-gantt__row--odd" }
-                    <rect
-                        class={"flin-gantt__row " ++ rowClass}
-                        x="0"
-                        y={task.y}
-                        width={chartWidth}
-                        height={rowHeight}
-                    />
-                {/for}
-
-                // Month markers
-                <g class="flin-gantt__months">
-                    {for marker in monthMarkers}
-                        <line
-                            class="flin-gantt__month-line"
-                            x1={marker.x}
-                            y1="-30"
-                            x2={marker.x}
-                            y2={chartHeight}
-                        />
-                        <text
-                            class="flin-gantt__month-label"
-                            x={marker.x + 5}
-                            y="-15"
-                        >
-                            {marker.label}
-                        </text>
-                    {/for}
-                </g>
-
-                // Today line
-                {if showToday && isTodayVisible}
-                    <line
-                        class="flin-gantt__today-line"
-                        x1={todayX}
-                        y1="-30"
-                        x2={todayX}
-                        y2={chartHeight}
-                    />
-                    <text
-                        class="flin-gantt__today-label"
-                        x={todayX}
-                        y="-35"
-                        text-anchor="middle"
-                    >
-                        Today
-                    </text>
-                {/if}
-
-                // Dependencies
-                {if showDependencies}
-                    <g class="flin-gantt__dependencies">
-                        {for task in tasks}
-                            {if task.dependencies}
-                                {for depId in task.dependencies}
-                                    depTask = tasks.find(t => t.id == depId)
-                                    {if depTask}
-                                        <path
-                                            class="flin-gantt__dependency-line"
-                                            d={
-                                                "M " ++ (depTask.x + depTask.width) ++ " " ++ (depTask.y + rowHeight / 2) ++
-                                                " C " ++ (depTask.x + depTask.width + 20) ++ " " ++ (depTask.y + rowHeight / 2) ++
-                                                " " ++ (task.x - 20) ++ " " ++ (task.y + rowHeight / 2) ++
-                                                " " ++ task.x ++ " " ++ (task.y + rowHeight / 2)
-                                            }
-                                            fill="none"
-                                            marker-end="url(#flin-gantt-arrow)"
-                                        />
-                                    {/if}
-                                {/for}
-                            {/if}
-                        {/for}
-                    </g>
-                {/if}
-
-                // Task bars
-                <g class="flin-gantt__tasks">
-                    {for task in tasks}
-                        taskAnimatedClass = match animated { true -> " flin-gantt__task--animated", _ -> "" }
-                        taskActiveClass = match hoveredTask && hoveredTask.id == task.id { true -> " flin-gantt__task--active", _ -> "" }
-                        <g
-                            class={"flin-gantt__task" ++ taskAnimatedClass ++ taskActiveClass}
-                            style="--task-index: {task.index};"
-                            mouseenter={handleTaskHover.bind({ task: task })}
-                            mouseleave={handleTaskLeave}
-                        >
-                            // Task bar background
-                            <rect
-                                class="flin-gantt__task-bg"
-                                x={task.x}
-                                y={task.y + 8}
-                                width={task.width}
-                                height={rowHeight - 16}
-                                rx="4"
-                                fill={task.color}
-                                opacity="0.2"
-                            />
-                            // Progress bar
-                            {if showProgress && task.progress > 0}
-                                <rect
-                                    class="flin-gantt__task-progress"
-                                    x={task.x}
-                                    y={task.y + 8}
-                                    width={task.width * (task.progress / 100)}
-                                    height={rowHeight - 16}
-                                    rx="4"
-                                    fill={task.color}
-                                />
-                            {else}
-                                <rect
-                                    class="flin-gantt__task-bar"
-                                    x={task.x}
-                                    y={task.y + 8}
-                                    width={task.width}
-                                    height={rowHeight - 16}
-                                    rx="4"
-                                    fill={task.color}
-                                />
-                            {/if}
-                        </g>
-                    {/for}
-                </g>
-            </g>
-
-            // Task labels (left side)
-            {if showLabels}
-                <g class="flin-gantt__labels" transform="translate(0, {padding.top})">
-                    {for task in tasks}
-                        labelActiveClass = match hoveredTask && hoveredTask.id == task.id { true -> " flin-gantt__label--active", _ -> "" }
-                        <text
-                            class={"flin-gantt__label" ++ labelActiveClass}
-                            x={padding.left - 10}
-                            y={task.y + rowHeight / 2}
-                            text-anchor="end"
-                            dominant-baseline="middle"
-                        >
-                            {task.name}
-                        </text>
-                    {/for}
-                </g>
-            {/if}
-
-            // Arrow marker for dependencies
-            <defs>
-                <marker
-                    id="flin-gantt-arrow"
-                    markerWidth="8"
-                    markerHeight="8"
-                    refX="6"
-                    refY="3"
-                    orient="auto"
-                >
-                    <path d="M0,0 L0,6 L6,3 Z" fill="var(--flin-neutral-400)" />
-                </marker>
-            </defs>
-        </svg>
-    </div>
-
-    // Tooltip
-    {if hoveredTask != null}
-        <div class="flin-gantt__tooltip">
-            <span class="flin-gantt__tooltip-name">{hoveredTask.name}</span>
-            <span class="flin-gantt__tooltip-dates">
-                {formatDate({ date: hoveredTask.start })} - {formatDate({ date: hoveredTask.end })}
-            </span>
-            {if showProgress}
-                <span class="flin-gantt__tooltip-progress">{hoveredTask.progress}% complete</span>
-            {/if}
-        </div>
-    {/if}
+    <svg
+        class="flin-gantt__svg"
+        viewBox="0 0 {width} {height}"
+        role="img"
+        aria-label={title || "Gantt chart"}
+    >
+        <g class="flin-gantt__container" transform="translate({paddingLeft}, {paddingTop})">
+            <rect
+                class={"flin-gantt__bar" ++ animatedClass}
+                x="0"
+                y="0"
+                width="200"
+                height="30"
+                rx="4"
+                fill="var(--flin-primary)"
+            />
+        </g>
+    </svg>
 </div>
 
 <style scoped>
@@ -366,143 +90,31 @@ handleTaskLeave = {
     color: var(--flin-fg-muted);
 }
 
-.flin-gantt__wrapper {
-    overflow-x: auto;
-}
-
 .flin-gantt__svg {
     display: block;
-    min-width: 100%;
+    overflow: visible;
 }
 
-.flin-gantt__row--even {
-    fill: transparent;
-}
-
-.flin-gantt__row--odd {
-    fill: var(--flin-neutral-50);
-}
-
-.flin-gantt__month-line {
-    stroke: var(--flin-neutral-200);
-    stroke-width: 1;
-}
-
-.flin-gantt__month-label {
-    font-size: 11px;
-    font-weight: 500;
-    fill: var(--flin-fg-muted);
-}
-
-.flin-gantt__today-line {
-    stroke: var(--flin-danger);
-    stroke-width: 2;
-    stroke-dasharray: 4 4;
-}
-
-.flin-gantt__today-label {
-    font-size: 10px;
-    font-weight: 600;
-    fill: var(--flin-danger);
-}
-
-.flin-gantt__dependency-line {
-    stroke: var(--flin-neutral-400);
-    stroke-width: 1.5;
-}
-
-.flin-gantt__task {
+.flin-gantt__bar {
     cursor: pointer;
-    transition: transform var(--flin-transition-fast);
-}
-
-.flin-gantt__task:hover,
-.flin-gantt__task--active {
-    transform: translateY(-2px);
-}
-
-.flin-gantt__task--animated {
-    opacity: 0;
-    animation: flin-gantt-reveal 0.5s ease-out forwards;
-    animation-delay: calc(var(--task-index) * 0.1s);
-}
-
-@keyframes flin-gantt-reveal {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.flin-gantt__task-bar,
-.flin-gantt__task-progress {
     transition: filter var(--flin-transition-fast);
 }
 
-.flin-gantt__task:hover .flin-gantt__task-bar,
-.flin-gantt__task:hover .flin-gantt__task-progress {
+.flin-gantt__bar:hover {
     filter: brightness(1.1);
 }
 
-.flin-gantt__label {
-    font-size: 12px;
-    fill: var(--flin-fg);
-    transition: fill var(--flin-transition-fast);
+.flin-gantt__bar--animated {
+    animation: flin-gantt-bar-grow 0.6s ease-out forwards;
+    transform-origin: left;
 }
 
-.flin-gantt__label--active {
-    font-weight: 600;
-    fill: var(--flin-primary);
-}
-
-.flin-gantt__tooltip {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
-    border-radius: var(--flin-radius-md);
-    padding: var(--flin-space-2) var(--flin-space-3);
-    box-shadow: var(--flin-shadow-md);
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-space-1);
-    pointer-events: none;
-    z-index: 10;
-}
-
-.flin-gantt__tooltip-name {
-    font-size: var(--flin-text-sm);
-    font-weight: 600;
-    color: var(--flin-fg);
-}
-
-.flin-gantt__tooltip-dates {
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg-muted);
-}
-
-.flin-gantt__tooltip-progress {
-    font-size: var(--flin-text-xs);
-    color: var(--flin-success);
-    font-weight: 500;
-}
-
-/* Dark theme */
-[data-theme="dark"] .flin-gantt__row--odd {
-    fill: var(--flin-neutral-800);
-}
-
-[data-theme="dark"] .flin-gantt__month-line {
-    stroke: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-gantt__tooltip {
-    background-color: var(--flin-neutral-800);
-    border-color: var(--flin-neutral-700);
+@keyframes flin-gantt-bar-grow {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
 }
 </style>

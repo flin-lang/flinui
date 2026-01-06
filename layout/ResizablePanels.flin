@@ -2,312 +2,58 @@
 // Split pane layout with draggable dividers for resizable panels
 
 // Props with defaults
-direction = props.direction || "horizontal"  // horizontal, vertical
-panels = props.panels || []  // Array of { content, defaultSize?, minSize?, maxSize?, collapsible? }
-onResize = props.onResize
-onCollapse = props.onCollapse
+direction = props.direction || "horizontal"
 showDividerGrip = props.showDividerGrip || true
 dividerSize = props.dividerSize || 4
-autoSaveId = props.autoSaveId  // ID for localStorage persistence
 
 // State
-panelSizes = []
-collapsedPanels = []
 isDragging = false
-activeResizer = null
-startPosition = 0
-startSizes = []
-
-// Initialize panel sizes
-initializeSizes = {
-    sizes = []
-    remainingSize = 100
-
-    {for panel, index in panels}
-        {if panel.defaultSize}
-            sizes = sizes.concat([panel.defaultSize])
-            remainingSize = remainingSize - panel.defaultSize
-        {else}
-            sizes = sizes.concat([null])
-        {/if}
-    {/for}
-
-    // Distribute remaining size among panels without defaultSize
-    nullCount = sizes.filter(s => s == null).length
-    {if nullCount > 0}
-        defaultSize = remainingSize / nullCount
-        sizes = sizes.map(s => s == null ? defaultSize : s)
-    {/if}
-
-    // Normalize to 100%
-    total = sizes.reduce((a, b) => a + b, 0)
-    {if total != 100}
-        sizes = sizes.map(s => (s / total) * 100)
-    {/if}
-
-    // Load from storage if available
-    {if autoSaveId}
-        stored = localStorage.getItem("flin-panels-" + autoSaveId)
-        {if stored}
-            parsed = JSON.parse(stored)
-            {if parsed.sizes && parsed.sizes.length == panels.length}
-                sizes = parsed.sizes
-            {/if}
-            {if parsed.collapsed}
-                collapsedPanels = parsed.collapsed
-            {/if}
-        {/if}
-    {/if}
-
-    panelSizes = sizes
-}
-
-// Save sizes to storage
-saveSizes = {
-    {if autoSaveId}
-        localStorage.setItem("flin-panels-" + autoSaveId, JSON.stringify({
-            sizes: panelSizes,
-            collapsed: collapsedPanels
-        }))
-    {/if}
-}
-
-// Get container size
-getContainerSize = {
-    container = event.target.closest(".flin-resizable")
-    {if direction == "horizontal"}
-        size = container.offsetWidth
-    {else}
-        size = container.offsetHeight
-    {/if}
-    size
-}
-
-// Handle resize start
-handleResizeStart = {
-    resizerIndex = event.index
-    isDragging = true
-    activeResizer = resizerIndex
-
-    {if direction == "horizontal"}
-        startPosition = event.clientX
-    {else}
-        startPosition = event.clientY
-    {/if}
-
-    startSizes = [...panelSizes]
-
-    // Add global event listeners
-    document.addEventListener("mousemove", handleResizeMove)
-    document.addEventListener("mouseup", handleResizeEnd)
-    document.body.style.cursor = direction == "horizontal" ? "col-resize" : "row-resize"
-    document.body.style.userSelect = "none"
-}
-
-// Handle resize move
-handleResizeMove = {
-    {if !isDragging}
-        return
-    {/if}
-
-    {if direction == "horizontal"}
-        delta = event.clientX - startPosition
-    {else}
-        delta = event.clientY - startPosition
-    {/if}
-
-    // Get container size
-    container = document.querySelector(".flin-resizable")
-    containerSize = direction == "horizontal" ? container.offsetWidth : container.offsetHeight
-
-    // Calculate delta as percentage
-    deltaPercent = (delta / containerSize) * 100
-
-    // Update sizes
-    leftIndex = activeResizer
-    rightIndex = activeResizer + 1
-
-    newLeftSize = startSizes[leftIndex] + deltaPercent
-    newRightSize = startSizes[rightIndex] - deltaPercent
-
-    // Apply constraints
-    leftPanel = panels[leftIndex]
-    rightPanel = panels[rightIndex]
-
-    minLeft = leftPanel.minSize || 5
-    maxLeft = leftPanel.maxSize || 95
-    minRight = rightPanel.minSize || 5
-    maxRight = rightPanel.maxSize || 95
-
-    {if newLeftSize >= minLeft && newLeftSize <= maxLeft && newRightSize >= minRight && newRightSize <= maxRight}
-        newSizes = [...panelSizes]
-        newSizes[leftIndex] = newLeftSize
-        newSizes[rightIndex] = newRightSize
-        panelSizes = newSizes
-
-        {if onResize}
-            onResize({ sizes: panelSizes, resizerIndex: activeResizer })
-        {/if}
-    {/if}
-}
-
-// Handle resize end
-handleResizeEnd = {
-    isDragging = false
-    activeResizer = null
-    startPosition = 0
-    startSizes = []
-
-    document.removeEventListener("mousemove", handleResizeMove)
-    document.removeEventListener("mouseup", handleResizeEnd)
-    document.body.style.cursor = ""
-    document.body.style.userSelect = ""
-
-    saveSizes()
-}
-
-// Handle touch events
-handleTouchStart = {
-    resizerIndex = event.index
-    touch = event.touches[0]
-
-    handleResizeStart({
-        index: resizerIndex,
-        clientX: touch.clientX,
-        clientY: touch.clientY
-    })
-}
-
-handleTouchMove = {
-    touch = event.touches[0]
-    handleResizeMove({
-        clientX: touch.clientX,
-        clientY: touch.clientY
-    })
-}
-
-handleTouchEnd = {
-    handleResizeEnd()
-}
-
-// Handle panel collapse
-toggleCollapse = {
-    panelIndex = args.index
-
-    {if collapsedPanels.includes(panelIndex)}
-        // Expand
-        collapsedPanels = collapsedPanels.filter(i => i != panelIndex)
-    {else}
-        // Collapse
-        collapsedPanels = collapsedPanels.concat([panelIndex])
-    {/if}
-
-    {if onCollapse}
-        onCollapse({ index: panelIndex, collapsed: collapsedPanels.includes(panelIndex) })
-    {/if}
-
-    saveSizes()
-}
-
-// Check if panel is collapsed
-isCollapsed = {
-    index = args.index
-    collapsedPanels.includes(index)
-}
-
-// Handle double-click on divider to collapse
-handleDividerDoubleClick = {
-    resizerIndex = event.index
-
-    // Toggle collapse of the panel to the right
-    rightPanelIndex = resizerIndex + 1
-    rightPanel = panels[rightPanelIndex]
-
-    {if rightPanel && rightPanel.collapsible}
-        toggleCollapse({ index: rightPanelIndex })
-    {/if}
-}
-
-// Initialize
-initializeSizes()
 
 // Pre-compute dragging class
 draggingClass = match isDragging { true -> " flin-resizable--dragging", _ -> "" }
 
-<div class={"flin-resizable" ++ " flin-resizable--" ++ direction ++ draggingClass}>
-    {for panel, index in panels}
-        // Panel
-        panelCollapsedClass = match isCollapsed({ index: index }) { true -> " flin-resizable__panel--collapsed", _ -> "" }
-        panelSizeValue = match isCollapsed({ index: index }) { true -> "0", _ -> panelSizes[index] }
-        <div
-            class={"flin-resizable__panel" ++ panelCollapsedClass}
-            style={"--panel-size: " ++ panelSizeValue ++ "%;"}
-        >
-            <div class="flin-resizable__content">
-                {panel.content}
-            </div>
+// Direction class
+directionClass = " flin-resizable--" ++ direction
 
-            // Collapse button
-            {if panel.collapsible}
-                <button
-                    type="button"
-                    class="flin-resizable__collapse-btn"
-                    click={toggleCollapse.bind({ index: index })}
-                    aria-label={isCollapsed({ index: index }) ? "Expand panel" : "Collapse panel"}
-                >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        {if direction == "horizontal"}
-                            {if isCollapsed({ index: index })}
-                                <polyline points="9 18 15 12 9 6"/>
-                            {else}
-                                <polyline points="15 18 9 12 15 6"/>
-                            {/if}
-                        {else}
-                            {if isCollapsed({ index: index })}
-                                <polyline points="6 9 12 15 18 9"/>
-                            {else}
-                                <polyline points="18 15 12 9 6 15"/>
-                            {/if}
-                        {/if}
-                    </svg>
-                </button>
-            {/if}
+<div class={"flin-resizable" ++ directionClass ++ draggingClass}>
+    <div class="flin-resizable__panel">
+        <div class="flin-resizable__content">
+            {children}
         </div>
+    </div>
 
-        // Resizer (between panels)
-        {if index < panels.length - 1}
-            dividerActiveClass = match activeResizer == index { true -> " flin-resizable__divider--active", _ -> "" }
-            <div
-                class={"flin-resizable__divider" ++ dividerActiveClass}
-                style="--divider-size: {dividerSize}px;"
-                mousedown={handleResizeStart.bind({ index: index })}
-                touchstart={handleTouchStart.bind({ index: index })}
-                dblclick={handleDividerDoubleClick.bind({ index: index })}
-                role="separator"
-                aria-orientation={direction}
-                aria-valuenow={panelSizes[index]}
-                tabindex="0"
-            >
-                {if showDividerGrip}
-                    <div class="flin-resizable__grip">
-                        {if direction == "horizontal"}
-                            <svg width="6" height="20" viewBox="0 0 6 20">
-                                <circle cx="3" cy="4" r="1.5" fill="currentColor"/>
-                                <circle cx="3" cy="10" r="1.5" fill="currentColor"/>
-                                <circle cx="3" cy="16" r="1.5" fill="currentColor"/>
-                            </svg>
-                        {else}
-                            <svg width="20" height="6" viewBox="0 0 20 6">
-                                <circle cx="4" cy="3" r="1.5" fill="currentColor"/>
-                                <circle cx="10" cy="3" r="1.5" fill="currentColor"/>
-                                <circle cx="16" cy="3" r="1.5" fill="currentColor"/>
-                            </svg>
-                        {/if}
-                    </div>
+    <div
+        class="flin-resizable__divider"
+        style={"--divider-size: " ++ dividerSize ++ "px;"}
+        role="separator"
+        aria-orientation={direction}
+        tabindex="0"
+    >
+        {if showDividerGrip}
+            <div class="flin-resizable__grip">
+                {if direction == "horizontal"}
+                    <svg width="6" height="20" viewBox="0 0 6 20">
+                        <circle cx="3" cy="4" r="1.5" fill="currentColor"/>
+                        <circle cx="3" cy="10" r="1.5" fill="currentColor"/>
+                        <circle cx="3" cy="16" r="1.5" fill="currentColor"/>
+                    </svg>
+                {/if}
+                {if direction == "vertical"}
+                    <svg width="20" height="6" viewBox="0 0 20 6">
+                        <circle cx="4" cy="3" r="1.5" fill="currentColor"/>
+                        <circle cx="10" cy="3" r="1.5" fill="currentColor"/>
+                        <circle cx="16" cy="3" r="1.5" fill="currentColor"/>
+                    </svg>
                 {/if}
             </div>
         {/if}
-    {/for}
+    </div>
+
+    <div class="flin-resizable__panel">
+        <div class="flin-resizable__content">
+            <slot name="second"></slot>
+        </div>
+    </div>
 </div>
 
 <style scoped>
@@ -336,7 +82,7 @@ draggingClass = match isDragging { true -> " flin-resizable--dragging", _ -> "" 
 
 .flin-resizable__panel {
     position: relative;
-    flex: 0 0 var(--panel-size);
+    flex: 1;
     min-width: 0;
     min-height: 0;
     overflow: hidden;

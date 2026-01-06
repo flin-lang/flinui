@@ -173,12 +173,29 @@
  * - Screen reader announcements
  */
 
-// Export all collection components
-export { Combobox } from "./Combobox.flin"
-export { Listbox } from "./Listbox.flin"
-export { TreeView } from "./TreeView.flin"
-export { VirtualList } from "./VirtualList.flin"
-export { TransferList } from "./TransferList.flin"
-export { DragDrop } from "./DragDrop.flin"
-export { Sortable } from "./Sortable.flin"
-export { Kanban } from "./Kanban.flin"
+// Components are auto-imported when used in .flin files
+// Available: Combobox, Listbox, TreeView, VirtualList, TransferList, DragDrop, Sortable, Kanban
+
+<div class="flinui-collections-info">
+    <h2>FlinUI Collections</h2>
+    <p>8 advanced components for managing lists, trees, and data selection.</p>
+</div>
+
+<style scoped>
+.flinui-collections-info {
+    font-family: var(--flin-font-sans);
+    padding: var(--flin-space-4);
+    background: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-md);
+}
+
+.flinui-collections-info h2 {
+    margin: 0 0 var(--flin-space-2) 0;
+    color: var(--flin-fg);
+}
+
+.flinui-collections-info p {
+    margin: 0;
+    color: var(--flin-fg-muted);
+}
+</style>

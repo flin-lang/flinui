@@ -1,24 +1,15 @@
 // FlinUI ScrollArea Component
 // Custom scrollbar container with styled scrollbar, thumb, and track
-// Props: maxHeight (string), orientation (vertical/horizontal/both), hideDelay (number)
+// Props: maxHeight (string), orientation (vertical/horizontal/both), alwaysShow (bool)
 
 // Props with defaults
 maxHeight = props.maxHeight || "auto"
 maxWidth = props.maxWidth || "100%"
 orientation = props.orientation || "vertical"
-hideDelay = props.hideDelay || 1000
 alwaysShow = props.alwaysShow || false
-onScroll = props.onScroll
 
 // State management
-isScrolling = false
-scrollTimeout = null
-thumbVerticalDrag = false
-thumbHorizontalDrag = false
-startY = 0
-startX = 0
-startScrollTop = 0
-startScrollLeft = 0
+isScrolling = props.isScrolling || false
 
 // Get orientation classes
 orientationClass = match orientation {
@@ -30,217 +21,45 @@ orientationClass = match orientation {
 // Show scrollbar class
 showClass = match alwaysShow || isScrolling { true -> " flin-scrollarea--active", _ -> "" }
 
-// Handle scroll
-handleScroll = {
-    isScrolling = true
-
-    // Clear previous timeout
-    {if scrollTimeout}
-        clearTimeout(scrollTimeout)
-    {/if}
-
-    // Set timeout to hide scrollbar
-    {if !alwaysShow}
-        scrollTimeout = setTimeout({
-            isScrolling = false
-        }, hideDelay)
-    {/if}
-
-    // Update thumb positions
-    updateThumbPosition()
-
-    // Trigger callback
-    {if onScroll}
-        scrollArea = document.querySelector(".flin-scrollarea__viewport")
-        {if scrollArea}
-            onScroll({
-                scrollTop: scrollArea.scrollTop,
-                scrollLeft: scrollArea.scrollLeft,
-                scrollHeight: scrollArea.scrollHeight,
-                scrollWidth: scrollArea.scrollWidth
-            })
-        {/if}
-    {/if}
-}
-
-// Update thumb positions based on scroll
-updateThumbPosition = {
-    viewport = document.querySelector(".flin-scrollarea__viewport")
-    verticalThumb = document.querySelector(".flin-scrollarea__thumb--vertical")
-    horizontalThumb = document.querySelector(".flin-scrollarea__thumb--horizontal")
-
-    {if viewport && verticalThumb && (orientation == "vertical" || orientation == "both")}
-        scrollRatio = viewport.scrollTop / (viewport.scrollHeight - viewport.clientHeight)
-        thumbHeight = (viewport.clientHeight / viewport.scrollHeight) * 100
-        thumbTop = scrollRatio * (100 - thumbHeight)
-
-        verticalThumb.style.height = thumbHeight + "%"
-        verticalThumb.style.top = thumbTop + "%"
-
-        // Hide if no scroll needed
-        {if viewport.scrollHeight <= viewport.clientHeight}
-            verticalThumb.style.display = "none"
-        {else}
-            verticalThumb.style.display = "block"
-        {/if}
-    {/if}
-
-    {if viewport && horizontalThumb && (orientation == "horizontal" || orientation == "both")}
-        scrollRatio = viewport.scrollLeft / (viewport.scrollWidth - viewport.clientWidth)
-        thumbWidth = (viewport.clientWidth / viewport.scrollWidth) * 100
-        thumbLeft = scrollRatio * (100 - thumbWidth)
-
-        horizontalThumb.style.width = thumbWidth + "%"
-        horizontalThumb.style.left = thumbLeft + "%"
-
-        // Hide if no scroll needed
-        {if viewport.scrollWidth <= viewport.clientWidth}
-            horizontalThumb.style.display = "none"
-        {else}
-            horizontalThumb.style.display = "block"
-        {/if}
-    {/if}
-}
-
-// Vertical thumb drag handlers
-handleVerticalMouseDown = {
-    thumbVerticalDrag = true
-    startY = event.clientY
-    viewport = document.querySelector(".flin-scrollarea__viewport")
-    startScrollTop = viewport.scrollTop
-
-    document.addEventListener("mousemove", handleVerticalMouseMove)
-    document.addEventListener("mouseup", handleVerticalMouseUp)
-    event.preventDefault()
-}
-
-handleVerticalMouseMove = {
-    {if thumbVerticalDrag}
-        viewport = document.querySelector(".flin-scrollarea__viewport")
-        track = document.querySelector(".flin-scrollarea__track--vertical")
-
-        deltaY = event.clientY - startY
-        trackHeight = track.clientHeight
-        scrollRatio = deltaY / trackHeight
-        scrollDelta = scrollRatio * viewport.scrollHeight
-
-        viewport.scrollTop = startScrollTop + scrollDelta
-    {/if}
-}
-
-handleVerticalMouseUp = {
-    thumbVerticalDrag = false
-    document.removeEventListener("mousemove", handleVerticalMouseMove)
-    document.removeEventListener("mouseup", handleVerticalMouseUp)
-}
-
-// Horizontal thumb drag handlers
-handleHorizontalMouseDown = {
-    thumbHorizontalDrag = true
-    startX = event.clientX
-    viewport = document.querySelector(".flin-scrollarea__viewport")
-    startScrollLeft = viewport.scrollLeft
-
-    document.addEventListener("mousemove", handleHorizontalMouseMove)
-    document.addEventListener("mouseup", handleHorizontalMouseUp)
-    event.preventDefault()
-}
-
-handleHorizontalMouseMove = {
-    {if thumbHorizontalDrag}
-        viewport = document.querySelector(".flin-scrollarea__viewport")
-        track = document.querySelector(".flin-scrollarea__track--horizontal")
-
-        deltaX = event.clientX - startX
-        trackWidth = track.clientWidth
-        scrollRatio = deltaX / trackWidth
-        scrollDelta = scrollRatio * viewport.scrollWidth
-
-        viewport.scrollLeft = startScrollLeft + scrollDelta
-    {/if}
-}
-
-handleHorizontalMouseUp = {
-    thumbHorizontalDrag = false
-    document.removeEventListener("mousemove", handleHorizontalMouseMove)
-    document.removeEventListener("mouseup", handleHorizontalMouseUp)
-}
-
-// Track click handlers
-handleVerticalTrackClick = {
-    {if event.target.classList.contains("flin-scrollarea__track--vertical")}
-        viewport = document.querySelector(".flin-scrollarea__viewport")
-        track = event.target
-
-        rect = track.getBoundingClientRect()
-        clickRatio = (event.clientY - rect.top) / rect.height
-        viewport.scrollTop = clickRatio * (viewport.scrollHeight - viewport.clientHeight)
-    {/if}
-}
-
-handleHorizontalTrackClick = {
-    {if event.target.classList.contains("flin-scrollarea__track--horizontal")}
-        viewport = document.querySelector(".flin-scrollarea__viewport")
-        track = event.target
-
-        rect = track.getBoundingClientRect()
-        clickRatio = (event.clientX - rect.left) / rect.width
-        viewport.scrollLeft = clickRatio * (viewport.scrollWidth - viewport.clientWidth)
-    {/if}
-}
-
-// Initialize on mount
-onMount = {
-    updateThumbPosition()
-
-    // Observe content size changes
-    viewport = document.querySelector(".flin-scrollarea__viewport")
-    {if viewport}
-        resizeObserver = new ResizeObserver({
-            updateThumbPosition()
-        })
-        resizeObserver.observe(viewport)
-    {/if}
-}
-
 // Build style string
 viewportStyle = "max-height: " ++ maxHeight ++ "; max-width: " ++ maxWidth ++ ";"
+
+// Check if we need vertical scrollbar
+hasVertical = orientation == "vertical" || orientation == "both"
+
+// Check if we need horizontal scrollbar
+hasHorizontal = orientation == "horizontal" || orientation == "both"
 
 <div class={"flin-scrollarea" ++ orientationClass ++ showClass}>
     <div
         class="flin-scrollarea__viewport"
         style={viewportStyle}
-        scroll={handleScroll}
     >
         <div class="flin-scrollarea__content">
             {children}
         </div>
     </div>
 
-    {if orientation == "vertical" || orientation == "both"}
+    {if hasVertical}
         <div
             class="flin-scrollarea__track flin-scrollarea__track--vertical"
-            click={handleVerticalTrackClick}
             role="scrollbar"
             aria-orientation="vertical"
         >
             <div
                 class="flin-scrollarea__thumb flin-scrollarea__thumb--vertical"
-                mousedown={handleVerticalMouseDown}
             ></div>
         </div>
     {/if}
 
-    {if orientation == "horizontal" || orientation == "both"}
+    {if hasHorizontal}
         <div
             class="flin-scrollarea__track flin-scrollarea__track--horizontal"
-            click={handleHorizontalTrackClick}
             role="scrollbar"
             aria-orientation="horizontal"
         >
             <div
                 class="flin-scrollarea__thumb flin-scrollarea__thumb--horizontal"
-                mousedown={handleHorizontalMouseDown}
             ></div>
         </div>
     {/if}

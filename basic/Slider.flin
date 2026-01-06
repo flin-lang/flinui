@@ -3,15 +3,17 @@
 
 // Props with defaults
 value = props.value || 50
-min = props.min || 0
-max = props.max || 100
-step = props.step || 1
+minVal = props.min || 0
+maxVal = props.max || 100
+stepVal = props.step || 1
 disabled = props.disabled || false
 showValue = props.showValue || false
 onChange = props.onChange
 
 // Computed progress percentage for track fill
-progress = ((value - min) / (max - min)) * 100
+rangeVal = maxVal - minVal
+progressNum = value - minVal
+progress = if rangeVal > 0 { (progressNum * 100) / rangeVal } else { 0 }
 
 // Computed classes
 disabledClass = match disabled {
@@ -26,13 +28,13 @@ sliderClass = "slider" ++ disabledClass
             type="range"
             class="slider-input"
             value={value}
-            min={min}
-            max={max}
-            step={step}
+            min={minVal}
+            max={maxVal}
+            step={stepVal}
             disabled={disabled}
             input={onChange}
-            aria-valuemin={min}
-            aria-valuemax={max}
+            aria-valuemin={minVal}
+            aria-valuemax={maxVal}
             aria-valuenow={value}
         >
         <div class="slider-track">

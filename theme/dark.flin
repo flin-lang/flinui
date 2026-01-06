@@ -6,30 +6,8 @@
 
 // TH-05: Dark Mode Support
 
+// Dark mode state
 isDarkMode = false
-
-// Toggle dark mode
-toggleDarkMode = fn() {
-    isDarkMode = !isDarkMode
-    if isDarkMode {
-        // JavaScript: document.documentElement.setAttribute('data-theme', 'dark')
-    } else {
-        // JavaScript: document.documentElement.removeAttribute('data-theme')
-    }
-}
-
-// Detect system preference
-prefersDarkMode = fn() {
-    // JavaScript: window.matchMedia('(prefers-color-scheme: dark)').matches
-    false
-}
-
-// Auto-apply based on system preference
-initTheme = fn() {
-    if prefersDarkMode() {
-        isDarkMode = true
-    }
-}
 
 <style>
 /* Dark theme overrides - applied when [data-theme="dark"] on :root */

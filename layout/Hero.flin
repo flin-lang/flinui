@@ -11,22 +11,22 @@ overlay = props.overlay || false
 
 // Build class strings
 variantClass = match variant {
-    "centered" -> "flin-hero-centered"
-    "split" -> "flin-hero-split"
-    "full" -> "flin-hero-full"
+    "centered" -> "flin-hero-centered",
+    "split" -> "flin-hero-split",
+    "full" -> "flin-hero-full",
     _ -> "flin-hero-centered"
 }
 
 heightClass = match height {
-    "sm" -> " flin-hero-height-sm"
-    "md" -> " flin-hero-height-md"
-    "lg" -> " flin-hero-height-lg"
-    "full" -> " flin-hero-height-full"
+    "sm" -> " flin-hero-height-sm",
+    "md" -> " flin-hero-height-md",
+    "lg" -> " flin-hero-height-lg",
+    "full" -> " flin-hero-height-full",
     _ -> " flin-hero-height-md"
 }
 
 overlayClass = match overlay {
-    true -> " flin-hero-overlay"
+    true -> " flin-hero-overlay",
     _ -> ""
 }
 
@@ -35,50 +35,39 @@ heroClass = "flin-hero " ++ variantClass ++ heightClass ++ overlayClass
 // Background image style
 hasImage = image != ""
 backgroundStyle = match hasImage {
-    true -> "background-image: url(" ++ image ++ ");"
+    true -> "background-image: url(" ++ image ++ ");",
     _ -> ""
 }
 
 // Content checks
 hasTitle = title != ""
 hasSubtitle = subtitle != ""
+showOverlay = overlay && hasImage
+isSplit = variant == "split"
+showSplitImage = isSplit && hasImage
 
 <section class={heroClass} style={backgroundStyle}>
-    {if overlay && hasImage {
+    {if showOverlay}
         <div class="flin-hero-overlay-bg"></div>
-    }}
+    {/if}
 
     <div class="flin-hero-container">
-        {if variant == "split" {
-            <div class="flin-hero-content">
-                {if hasTitle {
-                    <h1 class="flin-hero-title">{title}</h1>
-                }}
-                {if hasSubtitle {
-                    <p class="flin-hero-subtitle">{subtitle}</p>
-                }}
-                <div class="flin-hero-actions">
-                    {children}
-                </div>
+        <div class="flin-hero-content">
+            {if hasTitle}
+                <h1 class="flin-hero-title">{title}</h1>
+            {/if}
+            {if hasSubtitle}
+                <p class="flin-hero-subtitle">{subtitle}</p>
+            {/if}
+            <div class="flin-hero-actions">
+                {children}
             </div>
-            {if hasImage {
-                <div class="flin-hero-image-container">
-                    <img src={image} alt="" class="flin-hero-image" />
-                </div>
-            }}
-        } else {
-            <div class="flin-hero-content">
-                {if hasTitle {
-                    <h1 class="flin-hero-title">{title}</h1>
-                }}
-                {if hasSubtitle {
-                    <p class="flin-hero-subtitle">{subtitle}</p>
-                }}
-                <div class="flin-hero-actions">
-                    {children}
-                </div>
+        </div>
+        {if showSplitImage}
+            <div class="flin-hero-image-container">
+                <img src={image} alt="" class="flin-hero-image" />
             </div>
-        }}
+        {/if}
     </div>
 </section>
 

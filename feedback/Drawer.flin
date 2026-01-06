@@ -13,25 +13,20 @@ isClosing = false
 
 // Handle close with animation
 handleClose = {
-    isClosing = true;
-    setTimeout({
-        isClosing = false;
-        {if onClose}
-            onClose()
-        {/if}
-    }, 300)
+    isClosing = true
+    if onClose { onClose() }
 }
 
 // Handle backdrop click
 handleBackdropClick = {
-    handleClose()
+    isClosing = true
+    if onClose { onClose() }
 }
 
 // Handle escape key
 handleKeyDown = {
-    {if event.key == "Escape"}
-        handleClose()
-    {/if}
+    isClosing = true
+    if onClose { onClose() }
 }
 
 // Position class
@@ -55,7 +50,10 @@ sizeClass = match size {
 backdropClosingClass = match isClosing { true -> " drawer-backdrop-closing", _ -> "" }
 drawerClosingClass = match isClosing { true -> " drawer-closing", _ -> "" }
 
-{if open}
+// Compute display class
+displayClass = match open { true -> "flin-drawer-container", _ -> "flin-drawer-container flin-drawer-container--hidden" }
+
+<div class={displayClass}>
     <div
         class={"flin-drawer-backdrop" ++ backdropClosingClass}
         click={handleBackdropClick}
@@ -71,7 +69,7 @@ drawerClosingClass = match isClosing { true -> " drawer-closing", _ -> "" }
         keydown={handleKeyDown}
     >
         <div class="drawer-header">
-            {if title}
+            {if title != ""}
                 <h2 id="drawer-title" class="drawer-title">{title}</h2>
             {/if}
             <button
@@ -90,7 +88,7 @@ drawerClosingClass = match isClosing { true -> " drawer-closing", _ -> "" }
             {children}
         </div>
     </div>
-{/if}
+</div>
 
 <style scoped>
 /* Backdrop */

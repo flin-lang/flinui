@@ -2,95 +2,20 @@
 // Hierarchical tree view for displaying nested data structures
 
 // Props with defaults
-items = props.items || []
-expandable = props.expandable !== false  // default true
+expandable = props.expandable ?? true
 selectable = props.selectable || false
 defaultExpanded = props.defaultExpanded || false
 
-// Internal state for expanded nodes (map of node id -> boolean)
-expandedNodes = {}
-
 // Internal state for selected node
-selectedNodeId = null
-
-// Initialize expanded state for all nodes with children
-initExpandedState = {
-    each items as node {
-        if node.children && node.children.length > 0 {
-            expandedNodes[node.id] = defaultExpanded
-        }
-    }
-}
-
-initExpandedState()
-
-// Toggle expand/collapse for a node
-toggleNode = (nodeId) => {
-    expandedNodes[nodeId] = !expandedNodes[nodeId]
-}
-
-// Handle node selection
-selectNode = (nodeId) => {
-    if selectable {
-        selectedNodeId = nodeId;
-        if props.onSelect {
-            props.onSelect(nodeId)
-        }
-    }
-}
-
-// Recursive function to render tree nodes
-renderNode = (node, level) => {
-    hasChildren = node.children && node.children.length > 0
-    isExpanded = expandedNodes[node.id] || false
-    isSelected = selectedNodeId == node.id
-
-    <div class="flin-tree__node">
-        <div class="flin-tree__node-content flin-tree__node-content--level-{level} {if isSelected { 'flin-tree__node-content--selected' }}"
-             style="padding-left: calc({level} * var(--flin-space-6))">
-
-            {if expandable && hasChildren {
-                <button class="flin-tree__toggle"
-                        type="button"
-                        click={() => toggleNode(node.id)}
-                        aria-label={if isExpanded { "Collapse" } else { "Expand" }}>
-                    <span class="flin-tree__toggle-icon {if isExpanded { 'flin-tree__toggle-icon--expanded' }}">
-                        ▶
-                    </span>
-                </button>
-            } else if expandable {
-                <span class="flin-tree__toggle-spacer"></span>
-            }}
-
-            <div class="flin-tree__label {if selectable { 'flin-tree__label--selectable' }}"
-                 click={() => selectNode(node.id)}>
-                {if node.icon {
-                    <span class="flin-tree__icon">{node.icon}</span>
-                }}
-                <span class="flin-tree__text">{node.label}</span>
-            </div>
-        </div>
-
-        {if hasChildren && isExpanded {
-            <div class="flin-tree__children">
-                {each node.children as child {
-                    renderNode(child, level + 1)
-                }}
-            </div>
-        }}
-    </div>
-}
+selectedNodeId = ""
 
 <div class="flin-tree">
-    {if items.length > 0 {
-        each items as node {
-            renderNode(node, 0)
-        }
-    } else {
+    <slot></slot>
+    {if !props.items}
         <div class="flin-tree__empty">
             No items to display
         </div>
-    }}
+    {/if}
 </div>
 
 <style scoped>

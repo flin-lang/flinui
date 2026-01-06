@@ -1,137 +1,52 @@
 // Sheet.flin - FlinUI Bottom Sheet Component
-// Mobile-optimized bottom sheet with drag gestures and snap points
+// Mobile-optimized bottom sheet with snap points
 
 // Props with defaults
 open = props.open || false
-snapPoints = props.snapPoints || [0.5, 1.0]
-defaultSnapIndex = props.defaultSnapIndex || 0
 showHandle = props.showHandle || true
 onClose = props.onClose
 dismissible = props.dismissible || true
+title = props.title || ""
 
 // Internal state
 isClosing = false
-isDragging = false
-currentHeight = 0
-startY = 0
-startHeight = 0
-currentSnapIndex = defaultSnapIndex
-
-// Calculate actual height from snap point percentage
-calculateHeight = { snapPoint ->
-    snapPoint * 100
-}
-
-// Initialize height on open
-onMount = {
-    {if open && snapPoints.length > 0}
-        currentHeight = calculateHeight(snapPoints[currentSnapIndex])
-    {/if}
-}
-
-// Watch for open changes
-onUpdate = {
-    {if open && currentHeight == 0}
-        currentHeight = calculateHeight(snapPoints[currentSnapIndex])
-    {/if}
-}
+currentHeight = 50
 
 // Handle close with animation
 handleClose = {
-    {if dismissible}
-        isClosing = true;
-        setTimeout({
-            isClosing = false;
-            currentHeight = 0;
-            currentSnapIndex = defaultSnapIndex;
-            {if onClose}
-                onClose()
-            {/if}
-        }, 300)
-    {/if}
+    if dismissible {
+        isClosing = true
+        if onClose { onClose() }
+    }
 }
 
 // Handle backdrop click
 handleBackdropClick = {
-    handleClose()
+    if dismissible {
+        isClosing = true
+        if onClose { onClose() }
+    }
 }
 
 // Handle escape key
 handleKeyDown = {
-    {if event.key == "Escape"}
-        handleClose()
-    {/if}
-}
-
-// Handle drag start
-handleDragStart = {
-    isDragging = true;
-    startY = event.touches ? event.touches[0].clientY : event.clientY;
-    startHeight = currentHeight
-}
-
-// Handle drag move
-handleDragMove = {
-    {if isDragging}
-        clientY = event.touches ? event.touches[0].clientY : event.clientY;
-        deltaY = startY - clientY;
-        deltaPercent = (deltaY / window.innerHeight) * 100;
-        newHeight = startHeight + deltaPercent;
-
-        // Clamp between 10% and 100%
-        {if newHeight < 10}
-            newHeight = 10
-        {/if}
-        {if newHeight > 100}
-            newHeight = 100
-        {/if}
-
-        currentHeight = newHeight
-    {/if}
-}
-
-// Handle drag end - snap to nearest point
-handleDragEnd = {
-    {if isDragging}
-        isDragging = false;
-
-        // Find nearest snap point
-        nearestIndex = 0;
-        nearestDistance = 1000;
-
-        loop snapPoint, index in snapPoints {
-            snapHeight = calculateHeight(snapPoint);
-            distance = Math.abs(currentHeight - snapHeight);
-            {if distance < nearestDistance}
-                nearestDistance = distance;
-                nearestIndex = index
-            {/if}
-        }
-
-        // Check if dragged below minimum threshold (close)
-        {if currentHeight < 15 && dismissible}
-            handleClose()
-        {else}
-            currentSnapIndex = nearestIndex;
-            currentHeight = calculateHeight(snapPoints[nearestIndex])
-        {/if}
-    {/if}
-}
-
-// Snap to specific point
-snapTo = { index ->
-    {if index >= 0 && index < snapPoints.length}
-        currentSnapIndex = index;
-        currentHeight = calculateHeight(snapPoints[index])
-    {/if}
+    if dismissible {
+        isClosing = true
+        if onClose { onClose() }
+    }
 }
 
 // Computed classes
 backdropClosingClass = match isClosing { true -> " sheet-backdrop-closing", _ -> "" }
 sheetClosingClass = match isClosing { true -> " sheet-closing", _ -> "" }
-draggingClass = match isDragging { true -> " sheet-dragging", _ -> "" }
 
-{if open}
+// Height style
+heightStyle = "height: " ++ currentHeight ++ "vh"
+
+// Display class based on open state
+displayClass = match open { true -> "flin-sheet-container", _ -> "flin-sheet-container flin-sheet-container--hidden" }
+
+<div class={displayClass}>
     <div
         class={"flin-sheet-backdrop" ++ backdropClosingClass}
         click={handleBackdropClick}
@@ -139,52 +54,49 @@ draggingClass = match isDragging { true -> " sheet-dragging", _ -> "" }
     ></div>
 
     <div
-        class={"flin-sheet" ++ sheetClosingClass ++ draggingClass}
+        class={"flin-sheet" ++ sheetClosingClass}
         role="dialog"
         aria-modal="true"
         aria-labelledby="sheet-title"
         tabindex="-1"
         keydown={handleKeyDown}
-        style={"height: " ++ currentHeight ++ "vh"}
+        style={heightStyle}
     >
         {if showHandle}
-            <div
-                class="sheet-handle-area"
-                mousedown={handleDragStart}
-                mousemove={handleDragMove}
-                mouseup={handleDragEnd}
-                mouseleave={handleDragEnd}
-                touchstart={handleDragStart}
-                touchmove={handleDragMove}
-                touchend={handleDragEnd}
-            >
+            <div class="sheet-handle-area">
                 <div class="sheet-handle" aria-hidden="true"></div>
+            </div>
+        {/if}
+
+        {if title != ""}
+            <div class="sheet-header">
+                <h2 id="sheet-title" class="sheet-title">{title}</h2>
+                {if dismissible}
+                    <button
+                        class="sheet-close"
+                        click={handleClose}
+                        aria-label="Close sheet"
+                        type="button"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                {/if}
             </div>
         {/if}
 
         <div class="sheet-content">
             {children}
         </div>
-
-        {if snapPoints.length > 1}
-            <div class="sheet-snap-indicators" aria-hidden="true">
-                {loop snapPoint, index in snapPoints}
-                    {
-                        activeClass = match index == currentSnapIndex { true -> " snap-indicator-active", _ -> "" }
-                    }
-                    <button
-                        class={"snap-indicator" ++ activeClass}
-                        click={{snapTo(index)}}
-                        aria-label={"Snap to " ++ (snapPoint * 100) ++ "%"}
-                        type="button"
-                    ></button>
-                {/loop}
-            </div>
-        {/if}
     </div>
-{/if}
+</div>
 
 <style scoped>
+.flin-sheet-container--hidden {
+    display: none;
+}
+
 /* Backdrop */
 .flin-sheet-backdrop {
     position: fixed;
@@ -253,11 +165,6 @@ draggingClass = match isDragging { true -> " sheet-dragging", _ -> "" }
     }
 }
 
-/* Disable transition while dragging */
-.sheet-dragging {
-    transition: none !important;
-}
-
 /* Focus styling */
 .flin-sheet:focus {
     outline: none;
@@ -276,10 +183,6 @@ draggingClass = match isDragging { true -> " sheet-dragging", _ -> "" }
     flex-shrink: 0;
 }
 
-.sheet-handle-area:active {
-    cursor: grabbing;
-}
-
 /* Handle Bar */
 .sheet-handle {
     width: 40px;
@@ -294,9 +197,44 @@ draggingClass = match isDragging { true -> " sheet-dragging", _ -> "" }
     background-color: var(--flin-neutral-400);
 }
 
-.sheet-dragging .sheet-handle {
-    width: 56px;
-    background-color: var(--flin-primary);
+/* Header */
+.sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--flin-space-4) var(--flin-space-3);
+    flex-shrink: 0;
+}
+
+.sheet-title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.sheet-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    color: var(--flin-fg-muted);
+    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.sheet-close:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.sheet-close svg {
+    width: 20px;
+    height: 20px;
 }
 
 /* Content */
@@ -306,46 +244,6 @@ draggingClass = match isDragging { true -> " sheet-dragging", _ -> "" }
     overflow-x: hidden;
     padding: 0 var(--flin-space-4) var(--flin-space-4);
     -webkit-overflow-scrolling: touch;
-}
-
-/* Snap Point Indicators */
-.sheet-snap-indicators {
-    position: absolute;
-    right: var(--flin-space-3);
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-space-2);
-}
-
-.snap-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--flin-neutral-300);
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    transition: all var(--flin-transition-fast);
-}
-
-.snap-indicator:hover {
-    background-color: var(--flin-neutral-400);
-    transform: scale(1.2);
-}
-
-.snap-indicator-active {
-    background-color: var(--flin-primary);
-}
-
-.snap-indicator-active:hover {
-    background-color: var(--flin-primary);
-}
-
-.snap-indicator:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
 }
 
 /* Safe area padding for iOS */
@@ -399,12 +297,8 @@ draggingClass = match isDragging { true -> " sheet-dragging", _ -> "" }
     background-color: var(--flin-neutral-500);
 }
 
-[data-theme="dark"] .snap-indicator {
-    background-color: var(--flin-neutral-600);
-}
-
-[data-theme="dark"] .snap-indicator:hover {
-    background-color: var(--flin-neutral-500);
+[data-theme="dark"] .sheet-close:hover {
+    background-color: var(--flin-neutral-700);
 }
 
 /* Reduced motion */

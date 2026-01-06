@@ -4,7 +4,7 @@
 // Props with defaults
 value = props.value || ""
 placeholder = props.placeholder || ""
-type = props.type || "text"
+inputType = props.inputType || "text"
 disabled = props.disabled || false
 error = props.error || ""
 onInput = props.onInput
@@ -23,7 +23,7 @@ inputClass = "input" ++ errorClass ++ disabledClass
 
 <div class="input-wrapper">
     <input
-        type={type}
+        type={inputType}
         class={inputClass}
         value={value}
         placeholder={placeholder}
@@ -31,7 +31,7 @@ inputClass = "input" ++ errorClass ++ disabledClass
         input={onInput}
         change={onChange}
         aria-invalid={error != ""}
-        aria-describedby={if error != "" { "input-error-msg" } else { "" }}
+        aria-describedby={match error != "" { true -> "input-error-msg", _ -> "" }}
     >
     {if error != ""}
         <span class="input-error-msg" id="input-error-msg" role="alert">

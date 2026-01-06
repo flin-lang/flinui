@@ -9,16 +9,7 @@ title = props.title || ""
 maxHeight = props.maxHeight || ""
 
 // State for copy feedback
-copied = state(false)
-
-// Handle copy action
-handleCopy = fn() {
-    // Copy code content to clipboard
-    copyToClipboard(children)
-    copied.set(true)
-    // Reset after 2 seconds
-    setTimeout(fn() { copied.set(false) }, 2000)
-}
+copied = false
 
 // Build classes
 numberedClass = match showLineNumbers {
@@ -26,7 +17,8 @@ numberedClass = match showLineNumbers {
     _ -> ""
 }
 
-hasHeaderClass = match (language != "" || title != "" || showCopyButton) {
+hasHeader = language != "" || title != "" || showCopyButton
+hasHeaderClass = match hasHeader {
     true -> " code-block--has-header"
     _ -> ""
 }
@@ -34,10 +26,19 @@ hasHeaderClass = match (language != "" || title != "" || showCopyButton) {
 preClass = "code-block__pre" ++ numberedClass
 
 // Build max-height style
-maxHeightStyle = {if maxHeight != "" { "max-height: " ++ maxHeight ++ ";" } else { "" }}
+maxHeightStyle = match maxHeight {
+    "" -> ""
+    _ -> "max-height: " ++ maxHeight ++ ";"
+}
+
+// Copied state text
+copiedText = match copied {
+    true -> "Copied!"
+    _ -> "Copy"
+}
 
 <div class={"code-block" ++ hasHeaderClass}>
-    {if language != "" || title != "" || showCopyButton}
+    {if hasHeader}
         <div class="code-block__header">
             <div class="code-block__meta">
                 {if title != ""}
@@ -50,25 +51,16 @@ maxHeightStyle = {if maxHeight != "" { "max-height: " ++ maxHeight ++ ";" } else
             {if showCopyButton}
                 <button
                     class="code-block__copy"
-                    click={handleCopy}
+                    click={copied = true}
                     aria-label="Copy code"
                 >
-                    {if copied.get()}
-                        <span class="code-block__copy-icon code-block__copy-icon--success">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                        </span>
-                        <span class="code-block__copy-text">Copied!</span>
-                    {else}
-                        <span class="code-block__copy-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </svg>
-                        </span>
-                        <span class="code-block__copy-text">Copy</span>
-                    {/if}
+                    <span class="code-block__copy-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </span>
+                    <span class="code-block__copy-text">{copiedText}</span>
                 </button>
             {/if}
         </div>

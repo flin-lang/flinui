@@ -1,143 +1,19 @@
-// ErrorPage.flin - Error pages (404, 500, etc.)
+// ErrorPage.flin - Error page template
 
 // Props
-code = props.code || 404 // 404 | 500 | 403 | 401 | 503
-title = props.title || nil
-description = props.description || nil
-backLink = props.backLink || nil // { href, text }
-showHomeButton = props.showHomeButton ?? true
+code = props.code || 404
+title = props.title || "Page Not Found"
+description = props.description || "Sorry, we could not find the page you are looking for."
 homeLink = props.homeLink || "/"
 homeText = props.homeText || "Go to Homepage"
-showIllustration = props.showIllustration ?? true
-showSupportLink = props.showSupportLink || false
-supportLink = props.supportLink || "/support"
-supportText = props.supportText || "Contact Support"
-variant = props.variant || "centered" // "centered" | "minimal" | "full"
-customIllustration = props.customIllustration || nil
-children = props.children || nil
 
-// Default content based on error code
-getDefaultContent = { errorCode ->
-    match errorCode {
-        404 -> {
-            title: "Page Not Found",
-            description: "Sorry, we couldn't find the page you're looking for. It might have been moved or deleted.",
-            illustration: "🔍"
-        }
-        500 -> {
-            title: "Server Error",
-            description: "Oops! Something went wrong on our end. Our team has been notified and is working on it.",
-            illustration: "⚠️"
-        }
-        403 -> {
-            title: "Access Denied",
-            description: "You don't have permission to access this page. Please contact your administrator if you think this is a mistake.",
-            illustration: "🚫"
-        }
-        401 -> {
-            title: "Unauthorized",
-            description: "Please sign in to access this page.",
-            illustration: "🔒"
-        }
-        503 -> {
-            title: "Service Unavailable",
-            description: "We're performing scheduled maintenance. Please check back soon.",
-            illustration: "🔧"
-        }
-        _ -> {
-            title: "Something Went Wrong",
-            description: "An unexpected error occurred. Please try again later.",
-            illustration: "❌"
-        }
-    }
-}
-
-defaultContent = getDefaultContent(code)
-displayTitle = title || defaultContent.title
-displayDescription = description || defaultContent.description
-displayIllustration = customIllustration || defaultContent.illustration
-
-// Computed
-pageClass = "error-page error-page--" ++ variant
-
-<div class={pageClass}>
-    <div class="error-container">
-        // Illustration
-        {if showIllustration then
-            <div class="error-illustration">
-                {if customIllustration && customIllustration.includes("/") then
-                    // It's an image URL
-                    <img src={customIllustration} alt="" class="illustration-image" />
-                else
-                    // It's an emoji or text
-                    <div class="illustration-emoji">
-                        <span class="emoji-bg">{displayIllustration}</span>
-                    </div>
-                }
-            </div>
-        }
-
-        // Error code
-        <div class="error-code">
-            <span class="code-number">{code}</span>
-        </div>
-
-        // Content
-        <div class="error-content">
-            <h1 class="error-title">{displayTitle}</h1>
-            <p class="error-description">{displayDescription}</p>
-        </div>
-
-        // Custom content slot
-        {if children then
-            <div class="error-custom">
-                {children}
-            </div>
-        }
-
-        // Actions
-        <div class="error-actions">
-            {if backLink then
-                <a href={backLink.href} class="error-btn error-btn--secondary">
-                    <span class="btn-icon">←</span>
-                    {backLink.text || "Go Back"}
-                </a>
-            }
-            {if showHomeButton then
-                <a href={homeLink} class="error-btn error-btn--primary">
-                    {homeText}
-                </a>
-            }
-        </div>
-
-        // Support link
-        {if showSupportLink then
-            <div class="error-support">
-                <p class="support-text">
-                    Need help?
-                    <a href={supportLink} class="support-link">{supportText}</a>
-                </p>
-            </div>
-        }
-
-        // Additional info (for 500 errors)
-        {if code == 500 || code == 503 then
-            <div class="error-info">
-                <p class="info-text">
-                    Error ID: <code class="error-id">{Math.random().toString(36).substr(2, 9).toUpperCase()}</code>
-                </p>
-            </div>
-        }
+<div class="error-page">
+    <div class="error-content">
+        <h1 class="error-code">{code}</h1>
+        <h2 class="error-title">{title}</h2>
+        <p class="error-description">{description}</p>
+        <a class="error-button" href={homeLink}>{homeText}</a>
     </div>
-
-    // Decorative background
-    {if variant == "full" then
-        <div class="error-background">
-            <div class="bg-shape bg-shape-1"></div>
-            <div class="bg-shape bg-shape-2"></div>
-            <div class="bg-shape bg-shape-3"></div>
-        </div>
-    }
 </div>
 
 <style scoped>
@@ -146,336 +22,48 @@ pageClass = "error-page error-page--" ++ variant
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--flin-spacing-6);
-    position: relative;
-    overflow: hidden;
+    background: var(--flin-bg);
+    padding: var(--flin-space-6);
 }
 
-/* Variants */
-.error-page--centered {
-    background: var(--flin-color-gray-50);
-}
-
-.error-page--minimal {
-    background: var(--flin-color-white);
-}
-
-.error-page--full {
-    background: linear-gradient(135deg, var(--flin-color-gray-50) 0%, var(--flin-color-gray-100) 100%);
-}
-
-/* Container */
-.error-container {
-    text-align: center;
-    max-width: 520px;
-    position: relative;
-    z-index: 1;
-}
-
-/* Illustration */
-.error-illustration {
-    margin-bottom: var(--flin-spacing-6);
-}
-
-.illustration-image {
-    max-width: 280px;
-    height: auto;
-}
-
-.illustration-emoji {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.emoji-bg {
-    font-size: 80px;
-    line-height: 1;
-    filter: grayscale(20%);
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
-/* Error code */
-.error-code {
-    margin-bottom: var(--flin-spacing-4);
-}
-
-.code-number {
-    font-size: 120px;
-    font-weight: var(--flin-font-weight-bold);
-    color: var(--flin-color-gray-200);
-    line-height: 1;
-    letter-spacing: -0.05em;
-}
-
-.error-page--minimal .code-number {
-    font-size: 80px;
-    color: var(--flin-color-gray-300);
-}
-
-.error-page--full .code-number {
-    font-size: 160px;
-    background: linear-gradient(135deg, var(--flin-color-gray-300) 0%, var(--flin-color-gray-200) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Content */
 .error-content {
-    margin-bottom: var(--flin-spacing-8);
+    text-align: center;
+    max-width: 400px;
+}
+
+.error-code {
+    font-size: 120px;
+    font-weight: 700;
+    color: var(--flin-primary);
+    line-height: 1;
+    margin: 0;
 }
 
 .error-title {
-    font-size: var(--flin-font-size-3xl);
-    font-weight: var(--flin-font-weight-bold);
-    color: var(--flin-color-gray-900);
-    margin: 0 0 var(--flin-spacing-4) 0;
-}
-
-.error-page--minimal .error-title {
-    font-size: var(--flin-font-size-2xl);
+    font-size: var(--flin-text-2xl);
+    font-weight: 600;
+    color: var(--flin-fg);
+    margin: var(--flin-space-4) 0;
 }
 
 .error-description {
-    font-size: var(--flin-font-size-lg);
-    color: var(--flin-color-gray-600);
-    margin: 0;
-    line-height: 1.7;
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg-muted);
+    margin: 0 0 var(--flin-space-6) 0;
 }
 
-.error-page--minimal .error-description {
-    font-size: var(--flin-font-size-base);
-}
-
-/* Custom content */
-.error-custom {
-    margin-bottom: var(--flin-spacing-8);
-}
-
-/* Actions */
-.error-actions {
-    display: flex;
-    justify-content: center;
-    gap: var(--flin-spacing-4);
-    margin-bottom: var(--flin-spacing-6);
-}
-
-.error-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--flin-spacing-2);
-    padding: var(--flin-spacing-3) var(--flin-spacing-6);
-    font-size: var(--flin-font-size-base);
-    font-weight: var(--flin-font-weight-medium);
+.error-button {
+    display: inline-block;
+    padding: var(--flin-space-3) var(--flin-space-6);
+    background: var(--flin-primary);
+    color: white;
     border-radius: var(--flin-radius-md);
     text-decoration: none;
-    transition: all var(--flin-transition-fast);
-    border: none;
-    cursor: pointer;
+    font-weight: 500;
+    transition: background-color var(--flin-transition-fast);
 }
 
-.error-btn--primary {
-    background: var(--flin-color-primary-600);
-    color: var(--flin-color-white);
-}
-
-.error-btn--primary:hover {
-    background: var(--flin-color-primary-700);
-    transform: translateY(-1px);
-    box-shadow: var(--flin-shadow-md);
-}
-
-.error-btn--secondary {
-    background: var(--flin-color-white);
-    color: var(--flin-color-gray-700);
-    border: 1px solid var(--flin-color-gray-300);
-}
-
-.error-btn--secondary:hover {
-    background: var(--flin-color-gray-50);
-    border-color: var(--flin-color-gray-400);
-}
-
-.btn-icon {
-    font-size: var(--flin-font-size-sm);
-}
-
-/* Support */
-.error-support {
-    margin-bottom: var(--flin-spacing-4);
-}
-
-.support-text {
-    font-size: var(--flin-font-size-sm);
-    color: var(--flin-color-gray-500);
-    margin: 0;
-}
-
-.support-link {
-    color: var(--flin-color-primary-600);
-    text-decoration: none;
-}
-
-.support-link:hover {
-    text-decoration: underline;
-}
-
-/* Error info */
-.error-info {
-    padding-top: var(--flin-spacing-4);
-    border-top: 1px solid var(--flin-color-gray-200);
-}
-
-.info-text {
-    font-size: var(--flin-font-size-sm);
-    color: var(--flin-color-gray-400);
-    margin: 0;
-}
-
-.error-id {
-    font-family: var(--flin-font-mono);
-    background: var(--flin-color-gray-100);
-    padding: 2px 6px;
-    border-radius: var(--flin-radius-sm);
-    font-size: var(--flin-font-size-xs);
-}
-
-/* Background decorations */
-.error-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.bg-shape {
-    position: absolute;
-    border-radius: var(--flin-radius-full);
-    opacity: 0.5;
-}
-
-.bg-shape-1 {
-    width: 400px;
-    height: 400px;
-    background: linear-gradient(135deg, var(--flin-color-primary-100) 0%, transparent 70%);
-    top: -100px;
-    right: -100px;
-}
-
-.bg-shape-2 {
-    width: 300px;
-    height: 300px;
-    background: linear-gradient(135deg, var(--flin-color-primary-100) 0%, transparent 70%);
-    bottom: -50px;
-    left: -50px;
-}
-
-.bg-shape-3 {
-    width: 200px;
-    height: 200px;
-    background: linear-gradient(135deg, var(--flin-color-gray-200) 0%, transparent 70%);
-    top: 50%;
-    left: 10%;
-    transform: translateY(-50%);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .error-page {
-        padding: var(--flin-spacing-4);
-    }
-
-    .code-number {
-        font-size: 80px;
-    }
-
-    .error-page--full .code-number {
-        font-size: 100px;
-    }
-
-    .emoji-bg {
-        font-size: 60px;
-    }
-
-    .error-title {
-        font-size: var(--flin-font-size-2xl);
-    }
-
-    .error-description {
-        font-size: var(--flin-font-size-base);
-    }
-
-    .error-actions {
-        flex-direction: column;
-    }
-
-    .error-btn {
-        width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .code-number {
-        font-size: 60px;
-    }
-
-    .error-page--full .code-number {
-        font-size: 80px;
-    }
-
-    .emoji-bg {
-        font-size: 48px;
-    }
-
-    .error-title {
-        font-size: var(--flin-font-size-xl);
-    }
-
-    .error-btn {
-        padding: var(--flin-spacing-3) var(--flin-spacing-4);
-        font-size: var(--flin-font-size-sm);
-    }
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.error-container {
-    animation: fadeIn 0.5s ease-out;
-}
-
-.error-code {
-    animation: fadeIn 0.5s ease-out 0.1s both;
-}
-
-.error-content {
-    animation: fadeIn 0.5s ease-out 0.2s both;
-}
-
-.error-actions {
-    animation: fadeIn 0.5s ease-out 0.3s both;
+.error-button:hover {
+    background: var(--flin-primary-dark);
 }
 </style>

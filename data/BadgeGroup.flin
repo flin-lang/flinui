@@ -11,9 +11,7 @@ isExpanded = false
 
 // Handle expansion toggle
 handleToggle = {
-    {if expandable}
-        isExpanded = !isExpanded
-    {/if}
+    if expandable { isExpanded = !isExpanded }
 }
 
 // Gap class
@@ -27,22 +25,8 @@ gapClass = match gap {
 // Expanded class
 expandedClass = match isExpanded { true -> " badge-group-expanded", _ -> "" }
 
-// Calculate visible badges and overflow
-visibleCount = match isExpanded {
-    true -> children.length
-    _ -> match children.length > max {
-        true -> max
-        _ -> children.length
-    }
-}
-
-overflowCount = match isExpanded {
-    true -> 0
-    _ -> match children.length > max {
-        true -> children.length - max
-        _ -> 0
-    }
-}
+// Expandable class for button styling
+expandableClass = match expandable { true -> " badge-overflow-expandable", _ -> "" }
 
 <div
     class={"flin-badge-group " ++ gapClass ++ expandedClass}
@@ -50,41 +34,8 @@ overflowCount = match isExpanded {
     aria-label="Badge group"
 >
     <div class="badge-group-items">
-        {loop badge, index in children}
-            {if index < visibleCount}
-                <div class="badge-group-item" aria-hidden={index >= visibleCount}>
-                    {badge}
-                </div>
-            {/if}
-        {/loop}
+        <slot></slot>
     </div>
-
-    {if overflowCount > 0}
-        {
-            expandableClass = match expandable { true -> " badge-overflow-expandable", _ -> "" }
-        }
-        <button
-            class={"badge-group-overflow" ++ expandableClass}
-            click={handleToggle}
-            aria-expanded={isExpanded}
-            aria-label={"Show " ++ overflowCount ++ " more badges"}
-            type="button"
-            disabled={!expandable}
-        >
-            <span class="overflow-text">+{overflowCount} more</span>
-        </button>
-    {/if}
-
-    {if isExpanded && children.length > max}
-        <button
-            class="badge-group-collapse"
-            click={handleToggle}
-            aria-label="Show fewer badges"
-            type="button"
-        >
-            <span class="collapse-text">Show less</span>
-        </button>
-    {/if}
 </div>
 
 <style scoped>

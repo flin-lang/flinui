@@ -1,50 +1,26 @@
 // NavbarItem.flin - FlinUI Navbar Item Component
-// Individual navigation link or button in the navbar
+// Individual navigation link in the navbar
 
 // Props with defaults
-href = props.href
+href = props.href || "#"
 active = props.active || false
-onClick = props.onClick
 disabled = props.disabled || false
-
-// Determine if this is a link or button
-isLink = href != none
-
-// Handle keyboard navigation
-handleKeydown = {
-    if event.key == "Enter" || event.key == " " {
-        if onClick {
-            event.preventDefault
-            onClick()
-        }
-    }
-}
 
 // Computed class
 activeClass = match active { true -> " flin-navbar-item--active", _ -> "" }
+disabledClass = match disabled { true -> " flin-navbar-item--disabled", _ -> "" }
 
-{if isLink}
-    <a
-        href={href}
-        class={"flin-navbar-item" ++ activeClass}
-        role="menuitem"
-        aria-current={if active { "page" } else { none }}
-        tabindex={if disabled { -1 } else { 0 }}
-    >
-        {children}
-    </a>
-{else}
-    <button
-        class={"flin-navbar-item" ++ activeClass}
-        click={onClick}
-        keydown={handleKeydown}
-        disabled={disabled}
-        role="menuitem"
-        tabindex={if disabled { -1 } else { 0 }}
-    >
-        {children}
-    </button>
-{/if}
+// Computed aria-current
+ariaCurrent = match active { true -> "page", _ -> "" }
+
+<a
+    href={href}
+    class={"flin-navbar-item" ++ activeClass ++ disabledClass}
+    role="menuitem"
+    aria-current={ariaCurrent}
+>
+    {children}
+</a>
 
 <style scoped>
 .flin-navbar-item {
@@ -66,7 +42,7 @@ activeClass = match active { true -> " flin-navbar-item--active", _ -> "" }
     white-space: nowrap;
 }
 
-.flin-navbar-item:hover:not(:disabled) {
+.flin-navbar-item:hover:not(.flin-navbar-item--disabled) {
     color: var(--flin-fg);
     background-color: var(--flin-neutral-100);
 }
@@ -85,12 +61,12 @@ activeClass = match active { true -> " flin-navbar-item--active", _ -> "" }
     background-color: var(--flin-primary-light);
 }
 
-.flin-navbar-item:disabled {
+.flin-navbar-item--disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    pointer-events: none;
 }
 
-/* Responsive styles */
 @media (max-width: 768px) {
     .flin-navbar-item {
         width: 100%;
@@ -100,18 +76,13 @@ activeClass = match active { true -> " flin-navbar-item--active", _ -> "" }
         font-size: var(--flin-text-base);
     }
 
-    .flin-navbar-item:hover:not(:disabled) {
-        background-color: var(--flin-neutral-100);
-    }
-
     .flin-navbar-item--active {
         background-color: var(--flin-primary-light);
         border-left: 3px solid var(--flin-primary);
     }
 }
 
-/* Dark theme support */
-[data-theme="dark"] .flin-navbar-item:hover:not(:disabled) {
+[data-theme="dark"] .flin-navbar-item:hover:not(.flin-navbar-item--disabled) {
     background-color: var(--flin-neutral-800);
 }
 

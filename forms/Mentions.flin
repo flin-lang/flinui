@@ -1,404 +1,36 @@
 // Mentions.flin - FlinUI Mentions Component
-// Input with @user mentions dropdown and rich text support
+// Input with @user mentions dropdown
 
 // Props with defaults
 value = props.value || ""
 placeholder = props.placeholder || "Type @ to mention someone..."
 users = props.users || []
 disabled = props.disabled || false
-maxMentions = props.maxMentions
-mentionTrigger = props.mentionTrigger || "@"
-allowSpaces = props.allowSpaces || false
-highlightMentions = props.highlightMentions || true
 onChange = props.onChange
-onMention = props.onMention
-onSearch = props.onSearch
-
-// State management
-content = value
-mentions = []
-isDropdownOpen = false
-searchQuery = ""
-filteredUsers = []
-highlightedIndex = -1
-cursorPosition = 0
-mentionStartIndex = -1
-isSearching = false
-
-// Parse existing mentions from value
-parseMentions = {
-    pattern = new RegExp(mentionTrigger ++ "\\[(.*?)\\]\\((.*?)\\)", "g");
-    found = [];
-    match = pattern.exec(content);
-    {while match != null}
-        found.push({
-            name: match[1],
-            id: match[2],
-            start: match.index,
-            end: match.index + match[0].length
-        });
-        match = pattern.exec(content)
-    {/while}
-    mentions = found
-}
-
-// Filter users based on search query
-filterUsers = {
-    query = searchQuery.toLowerCase();
-    {if query == ""}
-        filteredUsers = users.slice(0, 10)
-    {else}
-        filteredUsers = users.filter(user => {
-            name = (user.name || user.username || user).toLowerCase();
-            username = (user.username || "").toLowerCase();
-            name.includes(query) || username.includes(query)
-        }).slice(0, 10)
-    {/if}
-    highlightedIndex = filteredUsers.length > 0 ? 0 : -1;
-
-    {if onSearch}
-        isSearching = true;
-        onSearch(query, (results) => {
-            filteredUsers = results.slice(0, 10);
-            highlightedIndex = filteredUsers.length > 0 ? 0 : -1;
-            isSearching = false
-        })
-    {/if}
-}
-
-// Handle input change
-handleInput = {
-    newContent = event.target.value;
-    newCursor = event.target.selectionStart;
-
-    // Check if we should open mention dropdown
-    textBeforeCursor = newContent.slice(0, newCursor);
-    lastTrigger = textBeforeCursor.lastIndexOf(mentionTrigger);
-
-    {if lastTrigger >= 0}
-        textAfterTrigger = textBeforeCursor.slice(lastTrigger + 1);
-        // Check if there's no space after trigger (or allow spaces)
-        hasValidMention = allowSpaces || !textAfterTrigger.includes(" ");
-
-        {if hasValidMention}
-            searchQuery = textAfterTrigger;
-            mentionStartIndex = lastTrigger;
-            isDropdownOpen = true;
-            filterUsers()
-        {else}
-            isDropdownOpen = false;
-            mentionStartIndex = -1
-        {/if}
-    {else}
-        isDropdownOpen = false;
-        mentionStartIndex = -1
-    {/if}
-
-    content = newContent;
-    cursorPosition = newCursor;
-    parseMentions();
-
-    {if onChange}
-        onChange({
-            value: content,
-            mentions: mentions,
-            plainText: getPlainText()
-        })
-    {/if}
-}
-
-// Get plain text without mention markup
-getPlainText = {
-    pattern = new RegExp(mentionTrigger ++ "\\[(.*?)\\]\\((.*?)\\)", "g");
-    content.replace(pattern, mentionTrigger ++ "$1")
-}
-
-// Handle keyboard navigation
-handleKeydown = {
-    {if isDropdownOpen}
-        {if event.key == "ArrowDown"}
-            event.preventDefault();
-            {if highlightedIndex < filteredUsers.length - 1}
-                highlightedIndex = highlightedIndex + 1
-            {else}
-                highlightedIndex = 0
-            {/if}
-        {else if event.key == "ArrowUp"}
-            event.preventDefault();
-            {if highlightedIndex > 0}
-                highlightedIndex = highlightedIndex - 1
-            {else}
-                highlightedIndex = filteredUsers.length - 1
-            {/if}
-        {else if event.key == "Enter" && highlightedIndex >= 0}
-            event.preventDefault();
-            selectUser(filteredUsers[highlightedIndex])
-        {else if event.key == "Escape"}
-            event.preventDefault();
-            isDropdownOpen = false;
-            mentionStartIndex = -1
-        {else if event.key == "Tab" && highlightedIndex >= 0}
-            event.preventDefault();
-            selectUser(filteredUsers[highlightedIndex])
-        {/if}
-    {/if}
-}
-
-// Select a user to mention
-selectUser = {
-    user = event;
-    {if maxMentions != null && mentions.length >= maxMentions}
-        // Max mentions reached
-        isDropdownOpen = false;
-        return
-    {/if}
-
-    userName = user.name || user.username || user;
-    userId = user.id || user.username || user;
-
-    // Create mention markup: @[Name](id)
-    mentionText = mentionTrigger ++ "[" ++ userName ++ "](" ++ userId ++ ")";
-
-    // Replace trigger + search query with mention
-    beforeMention = content.slice(0, mentionStartIndex);
-    afterMention = content.slice(cursorPosition);
-    content = beforeMention ++ mentionText ++ " " ++ afterMention;
-
-    // Update cursor position
-    newCursorPos = mentionStartIndex + mentionText.length + 1;
-
-    // Close dropdown
-    isDropdownOpen = false;
-    mentionStartIndex = -1;
-    searchQuery = "";
-
-    // Parse new mentions
-    parseMentions();
-
-    {if onMention}
-        onMention(user, mentions)
-    {/if}
-
-    {if onChange}
-        onChange({
-            value: content,
-            mentions: mentions,
-            plainText: getPlainText()
-        })
-    {/if}
-
-    // Focus input and set cursor
-    setTimeout(() => {
-        input = document.querySelector(".mentions-input");
-        {if input}
-            input.focus();
-            input.setSelectionRange(newCursorPos, newCursorPos)
-        {/if}
-    }, 0)
-}
-
-// Handle focus
-handleFocus = {
-    // Check if we should show dropdown
-    textBeforeCursor = content.slice(0, cursorPosition);
-    lastTrigger = textBeforeCursor.lastIndexOf(mentionTrigger);
-
-    {if lastTrigger >= 0}
-        textAfterTrigger = textBeforeCursor.slice(lastTrigger + 1);
-        hasValidMention = allowSpaces || !textAfterTrigger.includes(" ");
-
-        {if hasValidMention}
-            searchQuery = textAfterTrigger;
-            mentionStartIndex = lastTrigger;
-            isDropdownOpen = true;
-            filterUsers()
-        {/if}
-    {/if}
-}
-
-// Handle blur
-handleBlur = {
-    // Delay to allow click on dropdown item
-    setTimeout(() => {
-        isDropdownOpen = false
-    }, 200)
-}
-
-// Handle click on dropdown item
-handleUserClick = {
-    user = event;
-    selectUser(user)
-}
-
-// Get display text with highlighted mentions
-getDisplayHtml = {
-    {if !highlightMentions}
-        content
-    {else}
-        pattern = new RegExp(mentionTrigger ++ "\\[(.*?)\\]\\((.*?)\\)", "g");
-        content.replace(pattern, "<span class='mention-highlight'>" ++ mentionTrigger ++ "$1</span>")
-    {/if}
-}
-
-// Remove a mention by index
-removeMention = {
-    index = event;
-    mention = mentions[index];
-    content = content.slice(0, mention.start) ++ content.slice(mention.end);
-    parseMentions();
-    {if onChange}
-        onChange({
-            value: content,
-            mentions: mentions,
-            plainText: getPlainText()
-        })
-    {/if}
-}
-
-// Clear all
-clearAll = {
-    content = "";
-    mentions = [];
-    isDropdownOpen = false;
-    {if onChange}
-        onChange({
-            value: "",
-            mentions: [],
-            plainText: ""
-        })
-    {/if}
-}
 
 // Compute classes
-disabledClass = match disabled { true -> " mentions-disabled", _ -> "" }
-openClass = match isDropdownOpen { true -> " mentions-open", _ -> "" }
-hasValueClass = match content != "" { true -> " mentions-has-value", _ -> "" }
+disabledClass = match disabled {
+    true -> " mentions-disabled"
+    _ -> ""
+}
+containerClass = "mentions" ++ disabledClass
 
-<div class={"mentions" ++ disabledClass ++ openClass ++ hasValueClass}>
+<div class={containerClass}>
     <div class="mentions-input-wrapper">
         <textarea
             class="mentions-input"
-            value={content}
             placeholder={placeholder}
             disabled={disabled}
-            input={handleInput}
-            keydown={handleKeydown}
-            focus={handleFocus}
-            blur={handleBlur}
-            rows="3"
-            role="textbox"
-            aria-multiline="true"
-            aria-haspopup="listbox"
-            aria-expanded={isDropdownOpen}
-            aria-controls="mentions-listbox"
-            aria-autocomplete="list"
-        ></textarea>
-
-        {if content != "" && !disabled}
-            <button
-                type="button"
-                class="mentions-clear"
-                click={clearAll}
-                aria-label="Clear all"
-            >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
-            </button>
-        {/if}
+            change={onChange}
+        >{value}</textarea>
     </div>
-
-    {if isDropdownOpen && filteredUsers.length > 0}
-        <div class="mentions-dropdown" role="listbox" id="mentions-listbox">
-            {if isSearching}
-                <div class="mentions-loading">
-                    <svg class="mentions-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" opacity="0.25"/>
-                        <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                    <span>Searching...</span>
-                </div>
-            {else}
-                {for user, index in filteredUsers}
-                    highlightedClass = match index == highlightedIndex { true -> " mentions-user-highlighted", _ -> "" }
-                    <div
-                        class={"mentions-user" ++ highlightedClass}
-                        click={() => handleUserClick(user)}
-                        mouseenter={() => highlightedIndex = index}
-                        role="option"
-                        aria-selected={index == highlightedIndex}
-                    >
-                        {if user.avatar}
-                            <img src={user.avatar} alt="" class="mentions-user-avatar">
-                        {else}
-                            <div class="mentions-user-avatar mentions-user-avatar-placeholder">
-                                {(user.name || user.username || user).charAt(0).toUpperCase()}
-                            </div>
-                        {/if}
-                        <div class="mentions-user-info">
-                            <span class="mentions-user-name">{user.name || user.username || user}</span>
-                            {if user.username && user.name}
-                                <span class="mentions-user-username">@{user.username}</span>
-                            {/if}
-                            {if user.title || user.role}
-                                <span class="mentions-user-title">{user.title || user.role}</span>
-                            {/if}
-                        </div>
-                        {if user.online != null}
-                            onlineClass = match user.online { true -> " mentions-status-online", _ -> "" }
-                            <span class={"mentions-user-status" ++ onlineClass}></span>
-                        {/if}
-                    </div>
-                {/for}
-            {/if}
-        </div>
-    {else if isDropdownOpen && searchQuery != "" && filteredUsers.length == 0 && !isSearching}
-        <div class="mentions-dropdown mentions-no-results">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="12" cy="8" r="4"/>
-                <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
-                <line x1="2" y1="2" x2="22" y2="22"/>
-            </svg>
-            <span>No users found for "{searchQuery}"</span>
-        </div>
-    {/if}
-
-    {if mentions.length > 0}
-        <div class="mentions-list">
-            <span class="mentions-list-label">Mentioned:</span>
-            {for mention, index in mentions}
-                <span class="mentions-list-tag">
-                    <span class="mentions-list-tag-name">{mentionTrigger}{mention.name}</span>
-                    {if !disabled}
-                        <button
-                            type="button"
-                            class="mentions-list-tag-remove"
-                            click={() => removeMention(index)}
-                            aria-label={"Remove mention " ++ mention.name}
-                        >
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                                <path d="M18 6L6 18M6 6l12 12"/>
-                            </svg>
-                        </button>
-                    {/if}
-                </span>
-            {/for}
-        </div>
-    {/if}
-
-    {if maxMentions != null}
-        <div class="mentions-counter">
-            {mentions.length}/{maxMentions} mentions
-        </div>
-    {/if}
-
-    <div class="mentions-hint">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 16v-4"/>
-            <path d="M12 8h.01"/>
-        </svg>
-        <span>Type {mentionTrigger} to mention someone</span>
+    <div class="mentions-dropdown" role="listbox">
+        {for user in users}
+            <div class="mentions-option" role="option">
+                <span class="mentions-avatar"></span>
+                <span class="mentions-name">{user}</span>
+            </div>
+        {/for}
     </div>
 </div>
 
@@ -406,323 +38,90 @@ hasValueClass = match content != "" { true -> " mentions-has-value", _ -> "" }
 .mentions {
     position: relative;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-space-2);
 }
 
 .mentions-input-wrapper {
-    position: relative;
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    background-color: var(--flin-bg);
+    transition: all var(--flin-transition-fast);
+}
+
+.mentions:hover:not(.mentions-disabled) .mentions-input-wrapper {
+    border-color: var(--flin-neutral-400);
+}
+
+.mentions-input-wrapper:focus-within {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
 }
 
 .mentions-input {
     width: 100%;
-    min-height: 80px;
+    min-height: 100px;
     padding: var(--flin-space-3);
-    padding-right: var(--flin-space-10);
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-base);
-    line-height: 1.5;
     color: var(--flin-fg);
-    background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-300);
-    border-radius: var(--flin-radius-md);
-    resize: vertical;
-    transition: all var(--flin-transition-fast);
+    background: transparent;
+    border: none;
     outline: none;
+    resize: vertical;
 }
 
 .mentions-input::placeholder {
     color: var(--flin-fg-muted);
 }
 
-.mentions-input:hover:not(:disabled) {
-    border-color: var(--flin-neutral-400);
-}
-
-.mentions-input:focus {
-    border-color: var(--flin-primary);
-    box-shadow: 0 0 0 3px var(--flin-primary-light);
-}
-
-.mentions-input:disabled {
-    background-color: var(--flin-bg-muted);
-    color: var(--flin-fg-muted);
-    cursor: not-allowed;
-}
-
-.mentions-clear {
-    position: absolute;
-    top: var(--flin-space-2);
-    right: var(--flin-space-2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    background: transparent;
-    border: none;
-    border-radius: var(--flin-radius-sm);
-    color: var(--flin-fg-muted);
-    cursor: pointer;
-    transition: all var(--flin-transition-fast);
-}
-
-.mentions-clear:hover {
-    background-color: var(--flin-neutral-100);
-    color: var(--flin-danger);
-}
-
-/* Dropdown */
 .mentions-dropdown {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 4px);
     left: 0;
-    width: 100%;
-    max-width: 320px;
-    max-height: 280px;
+    right: 0;
+    max-height: 200px;
     overflow-y: auto;
     background-color: var(--flin-bg);
     border: 1px solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-md);
     box-shadow: var(--flin-shadow-lg);
     z-index: 50;
-    padding: var(--flin-space-1);
-    animation: dropdown-open 0.1s ease-out;
+    display: none;
 }
 
-@keyframes dropdown-open {
-    from {
-        opacity: 0;
-        transform: translateY(-4px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.mentions-loading {
+.mentions-option {
     display: flex;
     align-items: center;
     gap: var(--flin-space-2);
-    padding: var(--flin-space-3);
-    color: var(--flin-fg-muted);
-    font-size: var(--flin-text-sm);
-}
-
-.mentions-spinner {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.mentions-user {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-3);
     padding: var(--flin-space-2) var(--flin-space-3);
-    border-radius: var(--flin-radius-sm);
     cursor: pointer;
     transition: background-color var(--flin-transition-fast);
 }
 
-.mentions-user:hover,
-.mentions-user-highlighted {
-    background-color: var(--flin-primary-light);
+.mentions-option:hover {
+    background-color: var(--flin-neutral-100);
 }
 
-.mentions-user-avatar {
-    width: 36px;
-    height: 36px;
+.mentions-avatar {
+    width: 24px;
+    height: 24px;
+    background-color: var(--flin-neutral-300);
     border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
 }
 
-.mentions-user-avatar-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--flin-primary);
-    color: white;
-    font-weight: 600;
+.mentions-name {
     font-size: var(--flin-text-sm);
-}
-
-.mentions-user-info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.mentions-user-name {
-    font-size: var(--flin-text-sm);
-    font-weight: 500;
     color: var(--flin-fg);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.mentions-user-username {
-    font-size: var(--flin-text-xs);
-    color: var(--flin-fg-muted);
-}
-
-.mentions-user-title {
-    font-size: var(--flin-text-xs);
-    color: var(--flin-fg-muted);
-}
-
-.mentions-user-status {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--flin-neutral-400);
-    flex-shrink: 0;
-}
-
-.mentions-status-online {
-    background-color: var(--flin-success);
-}
-
-.mentions-no-results {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--flin-space-2);
-    padding: var(--flin-space-6);
-    color: var(--flin-fg-muted);
-    font-size: var(--flin-text-sm);
-    text-align: center;
-}
-
-/* Mentions list */
-.mentions-list {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--flin-space-1);
-}
-
-.mentions-list-label {
-    font-size: var(--flin-text-xs);
-    color: var(--flin-fg-muted);
-    margin-right: var(--flin-space-1);
-}
-
-.mentions-list-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--flin-space-1);
-    padding: 2px var(--flin-space-2);
-    background-color: var(--flin-primary-light);
-    color: var(--flin-primary);
-    border-radius: var(--flin-radius-sm);
-    font-size: var(--flin-text-xs);
-    font-weight: 500;
-}
-
-.mentions-list-tag-name {
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.mentions-list-tag-remove {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    width: 14px;
-    height: 14px;
-    background: transparent;
-    border: none;
-    color: var(--flin-primary);
-    cursor: pointer;
-    border-radius: 2px;
-    transition: all var(--flin-transition-fast);
-}
-
-.mentions-list-tag-remove:hover {
-    background-color: var(--flin-primary);
-    color: white;
-}
-
-/* Counter */
-.mentions-counter {
-    font-size: var(--flin-text-xs);
-    color: var(--flin-fg-muted);
-    text-align: right;
-}
-
-/* Hint */
-.mentions-hint {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-1);
-    font-size: var(--flin-text-xs);
-    color: var(--flin-fg-muted);
-}
-
-/* Highlight in text */
-.mention-highlight {
-    background-color: var(--flin-primary-light);
-    color: var(--flin-primary);
-    padding: 0 2px;
-    border-radius: 2px;
-    font-weight: 500;
 }
 
 /* Disabled state */
-.mentions-disabled .mentions-input {
+.mentions-disabled .mentions-input-wrapper {
     background-color: var(--flin-bg-muted);
+    cursor: not-allowed;
+    border-color: var(--flin-neutral-200);
+}
+
+.mentions-disabled .mentions-input {
     color: var(--flin-fg-muted);
     cursor: not-allowed;
-}
-
-.mentions-disabled .mentions-list-tag {
-    background-color: var(--flin-neutral-200);
-    color: var(--flin-fg-muted);
-}
-
-/* Scrollbar */
-.mentions-dropdown::-webkit-scrollbar {
-    width: 6px;
-}
-
-.mentions-dropdown::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.mentions-dropdown::-webkit-scrollbar-thumb {
-    background-color: var(--flin-neutral-300);
-    border-radius: 3px;
-}
-
-.mentions-dropdown::-webkit-scrollbar-thumb:hover {
-    background-color: var(--flin-neutral-400);
-}
-
-/* Dark mode */
-[data-theme="dark"] .mentions-dropdown {
-    background-color: var(--flin-neutral-800);
-    border-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .mentions-user:hover,
-[data-theme="dark"] .mentions-user-highlighted {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .mentions-clear:hover {
-    background-color: var(--flin-neutral-700);
 }
 </style>

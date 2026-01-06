@@ -7,8 +7,8 @@ required = props.required || false
 error = props.error || ""
 helpText = props.helpText || ""
 
-// Generate unique ID for accessibility
-fieldId = "field-" ++ Math.random().toString(36).substr(2, 9)
+// Use a fixed prefix for accessibility
+fieldId = "field-input"
 
 // Determine field state
 hasError = error != ""

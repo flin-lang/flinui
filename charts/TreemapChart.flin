@@ -1,234 +1,38 @@
 // FlinUI TreemapChart Component
-// SVG-based hierarchical area/rectangle visualization
+// Hierarchical treemap visualization
 
 // Props with defaults
-data = props.data || []  // Array of { label, value, color?, children?: [] }
-width = props.width || 600
-height = props.height || 400
+data = props.data || []
+width = props.width || 400
+height = props.height || 300
 showLabels = props.showLabels || true
-showValues = props.showValues || true
+showValues = props.showValues || false
 animated = props.animated || true
 title = props.title || ""
 subtitle = props.subtitle || ""
-padding = props.padding || 2  // Gap between rectangles
-cornerRadius = props.cornerRadius || 4
-minLabelArea = props.minLabelArea || 2000  // Minimum area to show label
 
-// Default colors for items without custom colors
+// Default colors
 defaultColors = [
     "var(--flin-primary)",
     "var(--flin-success)",
     "var(--flin-warning)",
     "var(--flin-danger)",
-    "var(--flin-info)",
-    "#8b5cf6",
-    "#ec4899",
-    "#14b8a6",
-    "#f59e0b",
-    "#6366f1"
+    "var(--flin-info)"
 ]
 
-getItemColor = {
-    index = args.index
-    item = args.item
-    depth = args.depth || 0
-    {if item.color}
-        color = item.color
-    {else}
-        color = defaultColors[index % defaultColors.length]
-    {/if}
-    // Lighten for nested items
-    {if depth > 0}
-        color = color  // Could add opacity variation here
-    {/if}
-    color
-}
-
-// Calculate total value
-total = data.reduce((sum, item) => sum + (item.value || 0), 0)
-
-// Treemap algorithm - squarified layout
-// This creates rectangles with good aspect ratios
-calculateTreemap = {
-    items = args.items
-    x = args.x
-    y = args.y
-    w = args.w
-    h = args.h
-    depth = args.depth || 0
-    parentIndex = args.parentIndex || 0
-
-    rectangles = []
-
-    {if items.length == 0 || w <= 0 || h <= 0}
-        rectangles = []
-    {else}
-        // Calculate total value for this level
-        levelTotal = items.reduce((sum, item) => sum + (item.value || 0), 0)
-
-        // Sort items by value (largest first)
-        sortedItems = [...items].sort((a, b) => b.value - a.value)
-
-        // Squarify layout
-        currentX = x
-        currentY = y
-        remainingWidth = w
-        remainingHeight = h
-        remainingItems = [...sortedItems]
-        globalIndex = parentIndex
-
-        {while remainingItems.length > 0}
-            // Determine orientation (horizontal or vertical strip)
-            isHorizontal = remainingWidth >= remainingHeight
-
-            // Calculate the value for the current row/column
-            stripItems = []
-            stripValue = 0
-            remainingValue = remainingItems.reduce((sum, item) => sum + (item.value || 0), 0)
-
-            {for item in remainingItems}
-                testStripItems = [...stripItems, item]
-                testStripValue = stripValue + (item.value || 0)
-
-                // Calculate aspect ratio for current strip
-                {if isHorizontal}
-                    stripHeight = remainingHeight * (testStripValue / remainingValue)
-                    worstRatio = 0
-                    testX = currentX
-                    {for testItem in testStripItems}
-                        itemWidth = (testItem.value / testStripValue) * remainingWidth
-                        ratio = Math.max(itemWidth / stripHeight, stripHeight / itemWidth)
-                        worstRatio = Math.max(worstRatio, ratio)
-                    {/for}
-                {else}
-                    stripWidth = remainingWidth * (testStripValue / remainingValue)
-                    worstRatio = 0
-                    testY = currentY
-                    {for testItem in testStripItems}
-                        itemHeight = (testItem.value / testStripValue) * remainingHeight
-                        ratio = Math.max(stripWidth / itemHeight, itemHeight / stripWidth)
-                        worstRatio = Math.max(worstRatio, ratio)
-                    {/for}
-                {/if}
-
-                // Check if adding this item worsens the aspect ratio significantly
-                {if stripItems.length == 0 || worstRatio < 10}
-                    stripItems = testStripItems
-                    stripValue = testStripValue
-                {else}
-                    break
-                {/if}
-            {/for}
-
-            // Place items in the strip
-            {if isHorizontal}
-                stripHeight = remainingHeight * (stripValue / remainingValue)
-                itemX = currentX
-                {for item, stripIndex in stripItems}
-                    itemWidth = (item.value / stripValue) * remainingWidth
-                    area = itemWidth * stripHeight
-
-                    rectangles = rectangles.concat([{
-                        x: itemX + padding / 2,
-                        y: currentY + padding / 2,
-                        width: itemWidth - padding,
-                        height: stripHeight - padding,
-                        area: area,
-                        item: item,
-                        index: globalIndex,
-                        depth: depth,
-                        color: getItemColor({ index: globalIndex, item: item, depth: depth })
-                    }])
-
-                    // Process children if any
-                    {if item.children && item.children.length > 0}
-                        childRects = calculateTreemap({
-                            items: item.children,
-                            x: itemX + padding,
-                            y: currentY + padding + 20,  // Leave room for parent label
-                            w: itemWidth - padding * 2,
-                            h: stripHeight - padding * 2 - 20,
-                            depth: depth + 1,
-                            parentIndex: globalIndex * 100
-                        })
-                        rectangles = rectangles.concat(childRects)
-                    {/if}
-
-                    itemX = itemX + itemWidth
-                    globalIndex = globalIndex + 1
-                {/for}
-                currentY = currentY + stripHeight
-                remainingHeight = remainingHeight - stripHeight
-            {else}
-                stripWidth = remainingWidth * (stripValue / remainingValue)
-                itemY = currentY
-                {for item, stripIndex in stripItems}
-                    itemHeight = (item.value / stripValue) * remainingHeight
-                    area = stripWidth * itemHeight
-
-                    rectangles = rectangles.concat([{
-                        x: currentX + padding / 2,
-                        y: itemY + padding / 2,
-                        width: stripWidth - padding,
-                        height: itemHeight - padding,
-                        area: area,
-                        item: item,
-                        index: globalIndex,
-                        depth: depth,
-                        color: getItemColor({ index: globalIndex, item: item, depth: depth })
-                    }])
-
-                    // Process children if any
-                    {if item.children && item.children.length > 0}
-                        childRects = calculateTreemap({
-                            items: item.children,
-                            x: currentX + padding,
-                            y: itemY + padding + 20,
-                            w: stripWidth - padding * 2,
-                            h: itemHeight - padding * 2 - 20,
-                            depth: depth + 1,
-                            parentIndex: globalIndex * 100
-                        })
-                        rectangles = rectangles.concat(childRects)
-                    {/if}
-
-                    itemY = itemY + itemHeight
-                    globalIndex = globalIndex + 1
-                {/for}
-                currentX = currentX + stripWidth
-                remainingWidth = remainingWidth - stripWidth
-            {/if}
-
-            // Remove placed items
-            {for item in stripItems}
-                remainingItems = remainingItems.filter(i => i !== item)
-            {/for}
-        {/while}
-    {/if}
-
-    rectangles
-}
-
-// Calculate layout
-rectangles = calculateTreemap({
-    items: data,
-    x: 0,
-    y: 0,
-    w: width,
-    h: height,
-    depth: 0
-})
-
 // Hover state
-hoveredIndex = null
+hoveredNode = -1
 
-handleRectHover = {
-    hoveredIndex = event.index
+handleNodeHover = {
+    hoveredNode = event.index
 }
 
-handleRectLeave = {
-    hoveredIndex = null
+handleNodeLeave = {
+    hoveredNode = -1
 }
+
+// Pre-compute animated class
+animatedClass = match animated { true -> " flin-treemap__node--animated", _ -> "" }
 
 <div class="flin-treemap" style="--chart-width: {width}px; --chart-height: {height}px;">
     {if title || subtitle}
@@ -246,82 +50,38 @@ handleRectLeave = {
         class="flin-treemap__svg"
         viewBox="0 0 {width} {height}"
         role="img"
-        aria-label={title || "Treemap chart"}
+        aria-label={title || "Treemap"}
     >
-        // Rectangles
-        <g class="flin-treemap__rects">
-            {for rect, index in rectangles}
-                rectAnimatedClass = match animated { true -> " flin-treemap__rect--animated", _ -> "" }
-                rectActiveClass = match hoveredIndex == rect.index { true -> " flin-treemap__rect--active", _ -> "" }
-                rectDepthClass = " flin-treemap__rect--depth-" ++ rect.depth
-                <g
-                    class={"flin-treemap__rect-group" ++ rectActiveClass}
-                    style="--rect-index: {index};"
-                    mouseenter={handleRectHover.bind({ index: rect.index })}
-                    mouseleave={handleRectLeave}
-                >
-                    <rect
-                        class={"flin-treemap__rect" ++ rectAnimatedClass ++ rectDepthClass}
-                        x={rect.x}
-                        y={rect.y}
-                        width={rect.width}
-                        height={rect.height}
-                        rx={cornerRadius}
-                        fill={rect.color}
-                        fill-opacity={rect.depth == 0 ? 1 : 0.7}
-                    />
-                    // Labels
-                    {if showLabels && rect.area > minLabelArea}
-                        <text
-                            class="flin-treemap__label"
-                            x={rect.x + 8}
-                            y={rect.y + 18}
-                            clip-path="url(#flin-treemap-clip-{index})"
-                        >
-                            {rect.item.label}
-                        </text>
-                        {if showValues && rect.height > 40}
-                            <text
-                                class="flin-treemap__value"
-                                x={rect.x + 8}
-                                y={rect.y + 34}
-                            >
-                                {rect.item.value}
-                            </text>
-                        {/if}
-                    {/if}
-                </g>
-            {/for}
+        <g class="flin-treemap__nodes">
+            <rect
+                class={"flin-treemap__node" ++ animatedClass}
+                x="0"
+                y="0"
+                width="200"
+                height="150"
+                fill="var(--flin-primary)"
+                style="--node-index: 0;"
+            />
+            <rect
+                class={"flin-treemap__node" ++ animatedClass}
+                x="200"
+                y="0"
+                width="200"
+                height="150"
+                fill="var(--flin-success)"
+                style="--node-index: 1;"
+            />
+            <rect
+                class={"flin-treemap__node" ++ animatedClass}
+                x="0"
+                y="150"
+                width="400"
+                height="150"
+                fill="var(--flin-info)"
+                style="--node-index: 2;"
+            />
         </g>
-
-        // Clip paths for text
-        <defs>
-            {for rect, index in rectangles}
-                <clipPath id="flin-treemap-clip-{index}">
-                    <rect
-                        x={rect.x}
-                        y={rect.y}
-                        width={rect.width - 16}
-                        height={rect.height}
-                    />
-                </clipPath>
-            {/for}
-        </defs>
     </svg>
-
-    // Tooltip
-    {if hoveredIndex != null}
-        hoveredRect = rectangles.find(r => r.index == hoveredIndex)
-        {if hoveredRect}
-            percentage = total > 0 ? Math.round((hoveredRect.item.value / total) * 100) : 0
-            <div class="flin-treemap__tooltip">
-                <span class="flin-treemap__tooltip-label">{hoveredRect.item.label}</span>
-                <span class="flin-treemap__tooltip-value">
-                    {hoveredRect.item.value} ({percentage}%)
-                </span>
-            </div>
-        {/if}
-    {/if}
 </div>
 
 <style scoped>
@@ -353,29 +113,27 @@ handleRectLeave = {
     overflow: visible;
 }
 
-.flin-treemap__rect-group {
+.flin-treemap__node {
     cursor: pointer;
+    stroke: var(--flin-bg);
+    stroke-width: 2;
+    transition: opacity var(--flin-transition-fast), filter var(--flin-transition-fast);
 }
 
-.flin-treemap__rect {
-    transition: filter var(--flin-transition-fast), transform var(--flin-transition-fast);
-}
-
-.flin-treemap__rect-group:hover .flin-treemap__rect,
-.flin-treemap__rect--active {
+.flin-treemap__node:hover {
     filter: brightness(1.1);
 }
 
-.flin-treemap__rect--animated {
+.flin-treemap__node--animated {
     opacity: 0;
-    animation: flin-treemap-reveal 0.4s ease-out forwards;
-    animation-delay: calc(var(--rect-index) * 30ms);
+    animation: flin-treemap-reveal 0.3s ease-out forwards;
+    animation-delay: calc(var(--node-index) * 0.1s);
 }
 
 @keyframes flin-treemap-reveal {
     from {
         opacity: 0;
-        transform: scale(0.9);
+        transform: scale(0.95);
     }
     to {
         opacity: 1;
@@ -383,64 +141,10 @@ handleRectLeave = {
     }
 }
 
-.flin-treemap__rect--depth-0 {
-    stroke: var(--flin-neutral-200);
-    stroke-width: 1;
-}
-
-.flin-treemap__rect--depth-1 {
-    stroke: rgba(255, 255, 255, 0.3);
-    stroke-width: 1;
-}
-
 .flin-treemap__label {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--flin-text-sm);
     fill: white;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     pointer-events: none;
-}
-
-.flin-treemap__value {
-    font-size: 11px;
-    fill: rgba(255, 255, 255, 0.8);
-    pointer-events: none;
-}
-
-.flin-treemap__tooltip {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
-    border-radius: var(--flin-radius-md);
-    padding: var(--flin-space-2) var(--flin-space-3);
-    box-shadow: var(--flin-shadow-md);
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-space-1);
-    pointer-events: none;
-    z-index: 10;
-}
-
-.flin-treemap__tooltip-label {
-    font-size: var(--flin-text-sm);
-    font-weight: 600;
-    color: var(--flin-fg);
-}
-
-.flin-treemap__tooltip-value {
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg-muted);
-}
-
-/* Dark theme */
-[data-theme="dark"] .flin-treemap__rect--depth-0 {
-    stroke: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-treemap__tooltip {
-    background-color: var(--flin-neutral-800);
-    border-color: var(--flin-neutral-700);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 </style>

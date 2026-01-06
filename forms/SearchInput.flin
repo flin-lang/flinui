@@ -7,15 +7,7 @@ placeholder = props.placeholder || "Search..."
 size = props.size || "md"
 disabled = props.disabled || false
 loading = props.loading || false
-onSearch = props.onSearch
-onClear = props.onClear
 onChange = props.onChange
-debounce = props.debounce || 0
-
-// Internal state
-internalValue = value
-isFocused = false
-debounceTimer = null
 
 // Size classes
 sizeClass = match size {
@@ -24,119 +16,59 @@ sizeClass = match size {
     _ -> "search-input-md"
 }
 
-// Handle input change
-handleInput = {
-    newValue = event.target.value;
-    internalValue = newValue;
-
-    {if onChange}
-        onChange(newValue)
-    {/if}
-
-    // Debounced search
-    {if debounce > 0 && onSearch}
-        {if debounceTimer}
-            clearTimeout(debounceTimer)
-        {/if}
-        debounceTimer = setTimeout(() => {
-            onSearch(newValue)
-        }, debounce)
-    {/if}
-}
-
-// Handle keydown for Enter
-handleKeydown = {
-    {if event.key == "Enter" && onSearch && !loading}
-        {if debounceTimer}
-            clearTimeout(debounceTimer)
-        {/if}
-        onSearch(internalValue)
-    {else if event.key == "Escape"}
-        handleClear()
-    {/if}
-}
-
-// Clear input
-handleClear = {
-    internalValue = "";
-
-    {if debounceTimer}
-        clearTimeout(debounceTimer)
-    {/if}
-
-    {if onClear}
-        onClear()
-    {/if}
-    {if onChange}
-        onChange("")
-    {/if}
-
-    // Re-focus input after clear
-    document.querySelector(".search-input-field")?.focus()
-}
-
-// Handle search button click
-handleSearchClick = {
-    {if onSearch && !loading}
-        {if debounceTimer}
-            clearTimeout(debounceTimer)
-        {/if}
-        onSearch(internalValue)
-    {/if}
-}
-
-// Handle focus/blur
-handleFocus = {
-    isFocused = true
-}
-
-handleBlur = {
-    isFocused = false
-}
-
 // Compute classes
-disabledClass = match disabled { true -> " search-input-disabled", _ -> "" }
-focusedClass = match isFocused { true -> " search-input-focused", _ -> "" }
-loadingClass = match loading { true -> " search-input-loading", _ -> "" }
-hasValueClass = match internalValue.length > 0 { true -> " search-input-has-value", _ -> "" }
-containerClass = "search-input " ++ sizeClass ++ disabledClass ++ focusedClass ++ loadingClass ++ hasValueClass
+disabledClass = match disabled {
+    true -> " search-input-disabled"
+    _ -> ""
+}
+loadingClass = match loading {
+    true -> " search-input-loading"
+    _ -> ""
+}
+hasValueClass = match value != "" {
+    true -> " search-input-has-value"
+    _ -> ""
+}
+containerClass = "search-input " ++ sizeClass ++ disabledClass ++ loadingClass ++ hasValueClass
+
+// Loading icon visibility
+spinnerClass = match loading {
+    true -> ""
+    _ -> " hidden"
+}
+searchIconClass = match loading {
+    true -> " hidden"
+    _ -> ""
+}
 
 <div class={containerClass}>
     <button
         type="button"
         class="search-input-icon-btn search-input-search-btn"
-        click={handleSearchClick}
         disabled={disabled || loading}
         tabindex="-1"
         aria-label="Search"
     >
-        {if loading}
-            <span class="search-input-spinner"></span>
-        {else}
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="M21 21l-4.35-4.35"/>
-            </svg>
-        {/if}
+        <span class={"search-input-spinner" ++ spinnerClass}></span>
+        <svg class={"search-icon" ++ searchIconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+        </svg>
     </button>
     <input
         type="text"
         class="search-input-field"
-        value={internalValue}
+        value={value}
         placeholder={placeholder}
         disabled={disabled}
-        input={handleInput}
-        keydown={handleKeydown}
-        focus={handleFocus}
-        blur={handleBlur}
+        change={onChange}
         aria-label="Search input"
         role="searchbox"
     >
-    {if internalValue.length > 0 && !loading}
+    {if value != "" && !loading}
         <button
             type="button"
             class="search-input-icon-btn search-input-clear-btn"
-            click={handleClear}
             disabled={disabled}
             tabindex="-1"
             aria-label="Clear search"
@@ -164,7 +96,7 @@ containerClass = "search-input " ++ sizeClass ++ disabledClass ++ focusedClass +
     border-color: var(--flin-neutral-400);
 }
 
-.search-input-focused {
+.search-input:focus-within {
     border-color: var(--flin-primary);
     box-shadow: 0 0 0 3px var(--flin-primary-light);
 }
@@ -220,6 +152,11 @@ containerClass = "search-input " ++ sizeClass ++ disabledClass ++ focusedClass +
 .search-input-icon-btn svg {
     width: 18px;
     height: 18px;
+}
+
+.search-icon.hidden,
+.search-input-spinner.hidden {
+    display: none;
 }
 
 /* Spinner */
@@ -310,18 +247,5 @@ containerClass = "search-input " ++ sizeClass ++ disabledClass ++ focusedClass +
 
 .search-input-loading .search-input-field {
     opacity: 0.7;
-}
-
-/* Round variant (optional via class) */
-.search-input.search-input-rounded {
-    border-radius: 9999px;
-}
-
-.search-input.search-input-rounded .search-input-search-btn {
-    padding-left: var(--flin-space-1);
-}
-
-.search-input.search-input-rounded .search-input-clear-btn {
-    padding-right: var(--flin-space-1);
 }
 </style>

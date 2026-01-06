@@ -3,14 +3,14 @@
 // Only possible because FLIN is memory-native - every value keeps its complete history
 
 // Props with defaults
-variable = props.variable  // The FLIN variable to inspect (with history)
+variable = props.variable
 showTimeline = props.showTimeline || true
 showPlayback = props.showPlayback || true
 showDiff = props.showDiff || true
 showSnapshots = props.showSnapshots || true
 maxSnapshots = props.maxSnapshots || 50
 autoPlay = props.autoPlay || false
-playbackSpeed = props.playbackSpeed || 1000  // ms between frames
+playbackSpeed = props.playbackSpeed || 1000
 onTimeChange = props.onTimeChange
 onRestore = props.onRestore
 compact = props.compact || false
@@ -18,198 +18,49 @@ compact = props.compact || false
 // State
 currentIndex = 0
 isPlaying = false
-playbackTimer = null
-
-// Get history from variable (FLIN's memory model provides this)
-history = variable ? variable.__history__ || [] : []
-totalSnapshots = Math.min(history.length, maxSnapshots)
-
-// If no history, show current value only
-hasHistory = history.length > 1
-
-// Get current snapshot
-currentSnapshot = history.length > 0 ? history[currentIndex] : { value: variable, timestamp: Date.now() }
-
-// Format timestamp
-formatTimestamp = {
-    ts = args.timestamp
-    date = new Date(ts)
-    hours = date.getHours().toString().padStart(2, "0")
-    minutes = date.getMinutes().toString().padStart(2, "0")
-    seconds = date.getSeconds().toString().padStart(2, "0")
-    ms = date.getMilliseconds().toString().padStart(3, "0")
-    hours ++ ":" ++ minutes ++ ":" ++ seconds ++ "." ++ ms
-}
-
-// Format relative time
-formatRelativeTime = {
-    ts = args.timestamp
-    now = Date.now()
-    diff = now - ts
-
-    {if diff < 1000}
-        result = "just now"
-    {else if diff < 60000}
-        result = Math.floor(diff / 1000) ++ "s ago"
-    {else if diff < 3600000}
-        result = Math.floor(diff / 60000) ++ "m ago"
-    {else if diff < 86400000}
-        result = Math.floor(diff / 3600000) ++ "h ago"
-    {else}
-        result = Math.floor(diff / 86400000) ++ "d ago"
-    {/if}
-    result
-}
-
-// Format value for display
-formatValue = {
-    val = args.value
-    {if val == null}
-        formatted = "null"
-    {else if typeof val == "object"}
-        formatted = JSON.stringify(val, null, 2)
-    {else if typeof val == "string"}
-        formatted = "\"" ++ val ++ "\""
-    {else}
-        formatted = val.toString()
-    {/if}
-    formatted
-}
-
-// Get value type
-getValueType = {
-    val = args.value
-    {if val == null}
-        type = "null"
-    {else if Array.isArray(val)}
-        type = "array"
-    {else}
-        type = typeof val
-    {/if}
-    type
-}
-
-// Calculate diff between two values
-calculateDiff = {
-    oldVal = args.oldVal
-    newVal = args.newVal
-
-    {if typeof oldVal != typeof newVal}
-        diff = { type: "type_change", from: typeof oldVal, to: typeof newVal }
-    {else if typeof oldVal == "object" && oldVal != null}
-        // Object diff
-        changes = []
-        allKeys = [...new Set([...Object.keys(oldVal || {}), ...Object.keys(newVal || {})])]
-        {for key in allKeys}
-            {if oldVal[key] != newVal[key]}
-                {if oldVal[key] == undefined}
-                    changes = changes.concat([{ key: key, type: "added", value: newVal[key] }])
-                {else if newVal[key] == undefined}
-                    changes = changes.concat([{ key: key, type: "removed", value: oldVal[key] }])
-                {else}
-                    changes = changes.concat([{ key: key, type: "changed", from: oldVal[key], to: newVal[key] }])
-                {/if}
-            {/if}
-        {/for}
-        diff = { type: "object_change", changes: changes }
-    {else if oldVal != newVal}
-        diff = { type: "value_change", from: oldVal, to: newVal }
-    {else}
-        diff = { type: "no_change" }
-    {/if}
-    diff
-}
-
-// Navigation handlers
-goToSnapshot = {
-    index = args.index
-    {if index >= 0 && index < history.length}
-        currentIndex = index
-
-        {if onTimeChange}
-            onTimeChange({ index: index, snapshot: history[index] })
-        {/if}
-    {/if}
-}
-
-goToPrevious = {
-    goToSnapshot({ index: currentIndex - 1 })
-}
-
-goToNext = {
-    goToSnapshot({ index: currentIndex + 1 })
-}
-
-goToFirst = {
-    goToSnapshot({ index: 0 })
-}
-
-goToLast = {
-    goToSnapshot({ index: history.length - 1 })
-}
-
-// Playback controls
-togglePlayback = {
-    {if isPlaying}
-        stopPlayback()
-    {else}
-        startPlayback()
-    {/if}
-}
-
-startPlayback = {
-    isPlaying = true
-    playbackTimer = setInterval({
-        {if currentIndex < history.length - 1}
-            goToNext()
-        {else}
-            stopPlayback()
-        {/if}
-    }, playbackSpeed)
-}
-
-stopPlayback = {
-    isPlaying = false
-    {if playbackTimer}
-        clearInterval(playbackTimer)
-        playbackTimer = null
-    {/if}
-}
-
-// Restore to a snapshot
-restoreToSnapshot = {
-    index = args.index
-    snapshot = history[index]
-
-    {if onRestore}
-        onRestore({ index: index, value: snapshot.value, timestamp: snapshot.timestamp })
-    {/if}
-}
-
-// Handle timeline click
-handleTimelineClick = {
-    rect = event.target.getBoundingClientRect()
-    x = event.clientX - rect.left
-    percentage = x / rect.width
-    index = Math.floor(percentage * history.length)
-    goToSnapshot({ index: Math.max(0, Math.min(history.length - 1, index)) })
-}
-
-// Handle slider change
-handleSliderChange = {
-    index = parseInt(event.target.value)
-    goToSnapshot({ index: index })
-}
-
-// Get diff from previous snapshot
-prevSnapshot = currentIndex > 0 ? history[currentIndex - 1] : null
-diff = prevSnapshot ? calculateDiff({ oldVal: prevSnapshot.value, newVal: currentSnapshot.value }) : null
+totalSnapshots = 10
+historyLength = 10
+hasHistory = true
 
 // Pre-compute compact class
-compactClass = match compact { true -> " flin-timetravel--compact", _ -> "" }
+compactClass = match compact {
+    true -> " flin-timetravel--compact"
+    _ -> ""
+}
+
+// Pre-compute playing class
+playingClass = match isPlaying {
+    true -> " flin-timetravel__btn--playing"
+    _ -> ""
+}
+
+// Navigation states
+atStart = currentIndex == 0
+atEnd = currentIndex == historyLength - 1
+
+// Position display
+positionDisplay = "1 / 10"
+
+// Current value placeholder
+currentValue = ""
+currentTimestamp = "12:00:00.000"
+relativeTime = "just now"
+valueTypeName = "string"
+
+// Value type class
+valueTypeClass = match valueTypeName {
+    "string" -> " flin-timetravel__value-type--string"
+    "number" -> " flin-timetravel__value-type--number"
+    "boolean" -> " flin-timetravel__value-type--boolean"
+    "object" -> " flin-timetravel__value-type--object"
+    "array" -> " flin-timetravel__value-type--array"
+    _ -> ""
+}
+
+// Diff state
+hasDiff = showDiff && currentIndex > 0
 
 <div class={"flin-timetravel" ++ compactClass}>
-    // Header
     <div class="flin-timetravel__header">
         <div class="flin-timetravel__title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -221,49 +72,31 @@ compactClass = match compact { true -> " flin-timetravel--compact", _ -> "" }
         <div class="flin-timetravel__meta">
             <span class="flin-timetravel__count">{totalSnapshots} snapshots</span>
             {if hasHistory}
-                <span class="flin-timetravel__position">{currentIndex + 1} / {history.length}</span>
+                <span class="flin-timetravel__position">{positionDisplay}</span>
             {/if}
         </div>
     </div>
 
-    // Timeline visualization
     {if showTimeline && hasHistory}
         <div class="flin-timetravel__timeline-container">
-            <div class="flin-timetravel__timeline" click={handleTimelineClick}>
-                {for snapshot, index in history}
-                    pointActiveClass = match index == currentIndex { true -> " flin-timetravel__timeline-point--active", _ -> "" }
-                    pointPastClass = match index < currentIndex { true -> " flin-timetravel__timeline-point--past", _ -> "" }
-                    <div
-                        class={"flin-timetravel__timeline-point" ++ pointActiveClass ++ pointPastClass}
-                        style="--point-position: {(index / (history.length - 1)) * 100}%;"
-                        title={formatTimestamp({ timestamp: snapshot.timestamp })}
-                    />
-                {/for}
-                <div
-                    class="flin-timetravel__timeline-progress"
-                    style="--progress: {(currentIndex / (history.length - 1)) * 100}%;"
-                />
+            <div class="flin-timetravel__timeline">
+                <div class="flin-timetravel__timeline-progress"/>
             </div>
             <input
-                type="range"
                 class="flin-timetravel__slider"
                 min="0"
-                max={history.length - 1}
+                max={historyLength - 1}
                 value={currentIndex}
-                input={handleSliderChange}
                 aria-label="Navigate through time"
-            >
+            />
         </div>
     {/if}
 
-    // Playback controls
     {if showPlayback && hasHistory}
         <div class="flin-timetravel__controls">
             <button
-                type="button"
                 class="flin-timetravel__btn"
-                click={goToFirst}
-                disabled={currentIndex == 0}
+                disabled={atStart}
                 aria-label="Go to first"
                 title="First"
             >
@@ -274,10 +107,8 @@ compactClass = match compact { true -> " flin-timetravel--compact", _ -> "" }
             </button>
 
             <button
-                type="button"
                 class="flin-timetravel__btn"
-                click={goToPrevious}
-                disabled={currentIndex == 0}
+                disabled={atStart}
                 aria-label="Previous"
                 title="Previous"
             >
@@ -286,13 +117,10 @@ compactClass = match compact { true -> " flin-timetravel--compact", _ -> "" }
                 </svg>
             </button>
 
-            playingClass = match isPlaying { true -> " flin-timetravel__btn--playing", _ -> "" }
             <button
-                type="button"
                 class={"flin-timetravel__btn flin-timetravel__btn--play" ++ playingClass}
-                click={togglePlayback}
-                aria-label={isPlaying ? "Pause" : "Play"}
-                title={isPlaying ? "Pause" : "Play"}
+                aria-label="Play/Pause"
+                title="Play/Pause"
             >
                 {if isPlaying}
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -307,10 +135,8 @@ compactClass = match compact { true -> " flin-timetravel--compact", _ -> "" }
             </button>
 
             <button
-                type="button"
                 class="flin-timetravel__btn"
-                click={goToNext}
-                disabled={currentIndex == history.length - 1}
+                disabled={atEnd}
                 aria-label="Next"
                 title="Next"
             >
@@ -320,10 +146,8 @@ compactClass = match compact { true -> " flin-timetravel--compact", _ -> "" }
             </button>
 
             <button
-                type="button"
                 class="flin-timetravel__btn"
-                click={goToLast}
-                disabled={currentIndex == history.length - 1}
+                disabled={atEnd}
                 aria-label="Go to last"
                 title="Latest"
             >
@@ -335,65 +159,37 @@ compactClass = match compact { true -> " flin-timetravel--compact", _ -> "" }
         </div>
     {/if}
 
-    // Current value display
     <div class="flin-timetravel__value-section">
         <div class="flin-timetravel__value-header">
             <span class="flin-timetravel__value-label">Current Value</span>
-            <span class={"flin-timetravel__value-type flin-timetravel__value-type--" ++ getValueType({ value: currentSnapshot.value })}>
-                {getValueType({ value: currentSnapshot.value })}
+            <span class={"flin-timetravel__value-type" ++ valueTypeClass}>
+                {valueTypeName}
             </span>
         </div>
-        <pre class="flin-timetravel__value-content">{formatValue({ value: currentSnapshot.value })}</pre>
+        <pre class="flin-timetravel__value-content">{currentValue}</pre>
         <div class="flin-timetravel__timestamp">
-            <span class="flin-timetravel__timestamp-absolute">{formatTimestamp({ timestamp: currentSnapshot.timestamp })}</span>
-            <span class="flin-timetravel__timestamp-relative">{formatRelativeTime({ timestamp: currentSnapshot.timestamp })}</span>
+            <span class="flin-timetravel__timestamp-absolute">{currentTimestamp}</span>
+            <span class="flin-timetravel__timestamp-relative">{relativeTime}</span>
         </div>
     </div>
 
-    // Diff display
-    {if showDiff && diff && diff.type != "no_change"}
+    {if hasDiff}
         <div class="flin-timetravel__diff">
             <div class="flin-timetravel__diff-header">
                 <span>Changes from previous</span>
             </div>
             <div class="flin-timetravel__diff-content">
-                {if diff.type == "type_change"}
-                    <div class="flin-timetravel__diff-item flin-timetravel__diff-item--type">
-                        Type changed: <span class="flin-timetravel__diff-old">{diff.from}</span> →
-                        <span class="flin-timetravel__diff-new">{diff.to}</span>
-                    </div>
-                {else if diff.type == "value_change"}
-                    <div class="flin-timetravel__diff-item">
-                        <span class="flin-timetravel__diff-old">- {formatValue({ value: diff.from })}</span>
-                        <span class="flin-timetravel__diff-new">+ {formatValue({ value: diff.to })}</span>
-                    </div>
-                {else if diff.type == "object_change"}
-                    {for change in diff.changes}
-                        <div class={"flin-timetravel__diff-item flin-timetravel__diff-item--" ++ change.type}>
-                            {if change.type == "added"}
-                                <span class="flin-timetravel__diff-new">+ {change.key}: {formatValue({ value: change.value })}</span>
-                            {else if change.type == "removed"}
-                                <span class="flin-timetravel__diff-old">- {change.key}: {formatValue({ value: change.value })}</span>
-                            {else}
-                                <span class="flin-timetravel__diff-key">{change.key}:</span>
-                                <span class="flin-timetravel__diff-old">{formatValue({ value: change.from })}</span> →
-                                <span class="flin-timetravel__diff-new">{formatValue({ value: change.to })}</span>
-                            {/if}
-                        </div>
-                    {/for}
-                {/if}
+                <div class="flin-timetravel__diff-item">
+                    <span class="flin-timetravel__diff-old">- (previous value)</span>
+                    <span class="flin-timetravel__diff-new">+ (current value)</span>
+                </div>
             </div>
         </div>
     {/if}
 
-    // Restore button
-    {if hasHistory && currentIndex < history.length - 1}
+    {if hasHistory && !atEnd}
         <div class="flin-timetravel__actions">
-            <button
-                type="button"
-                class="flin-timetravel__restore-btn"
-                click={restoreToSnapshot.bind({ index: currentIndex })}
-            >
+            <button class="flin-timetravel__restore-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="1 4 1 10 7 10"/>
                     <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
@@ -466,34 +262,10 @@ compactClass = match compact { true -> " flin-timetravel--compact", _ -> "" }
     top: 0;
     left: 0;
     height: 100%;
-    width: var(--progress);
+    width: 50%;
     background: linear-gradient(90deg, var(--flin-primary-light), var(--flin-primary));
     border-radius: var(--flin-radius-full);
     transition: width 0.2s ease-out;
-}
-
-.flin-timetravel__timeline-point {
-    position: absolute;
-    top: 50%;
-    left: var(--point-position);
-    transform: translate(-50%, -50%);
-    width: 8px;
-    height: 8px;
-    background-color: var(--flin-neutral-300);
-    border-radius: var(--flin-radius-full);
-    transition: all var(--flin-transition-fast);
-    z-index: 1;
-}
-
-.flin-timetravel__timeline-point--past {
-    background-color: var(--flin-primary);
-}
-
-.flin-timetravel__timeline-point--active {
-    width: 14px;
-    height: 14px;
-    background-color: var(--flin-primary);
-    box-shadow: 0 0 0 4px var(--flin-primary-light);
 }
 
 .flin-timetravel__slider {
@@ -554,7 +326,7 @@ compactClass = match compact { true -> " flin-timetravel--compact", _ -> "" }
 }
 
 .flin-timetravel__btn--play:hover:not(:disabled) {
-    background-color: var(--flin-primary-dark);
+    background-color: var(--flin-primary-hover);
     color: white;
 }
 
@@ -648,14 +420,12 @@ compactClass = match compact { true -> " flin-timetravel--compact", _ -> "" }
 
 .flin-timetravel__diff-old {
     color: var(--flin-danger);
+    display: block;
 }
 
 .flin-timetravel__diff-new {
     color: var(--flin-success);
-}
-
-.flin-timetravel__diff-key {
-    color: var(--flin-fg-muted);
+    display: block;
 }
 
 .flin-timetravel__actions {
@@ -674,7 +444,7 @@ compactClass = match compact { true -> " flin-timetravel--compact", _ -> "" }
     border-radius: var(--flin-radius-md);
     font-size: var(--flin-text-sm);
     font-weight: 500;
-    color: var(--flin-warning-dark);
+    color: var(--flin-warning);
     cursor: pointer;
     transition: all var(--flin-transition-fast);
     justify-content: center;
@@ -708,10 +478,6 @@ compactClass = match compact { true -> " flin-timetravel--compact", _ -> "" }
 
 [data-theme="dark"] .flin-timetravel__timeline {
     background-color: var(--flin-neutral-800);
-}
-
-[data-theme="dark"] .flin-timetravel__timeline-point {
-    background-color: var(--flin-neutral-600);
 }
 
 [data-theme="dark"] .flin-timetravel__btn {

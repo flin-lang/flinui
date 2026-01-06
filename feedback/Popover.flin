@@ -11,40 +11,44 @@ onClose = props.onClose
 isVisible = open
 isExiting = false
 
-// Watch for prop changes
-onUpdate = {
-    {if open != isVisible}
-        {if open}
-            isVisible = true;
-            isExiting = false
-        {else}
-            handleClose()
-        {/if}
-    {/if}
+// Handle toggle
+handleToggle = {
+    if isVisible {
+        isExiting = true
+        isVisible = false
+        if onClose { onClose() }
+    }
+    if !isVisible {
+        isVisible = true
+        isExiting = false
+    }
+}
+
+// Handle open (for hover)
+handleOpen = {
+    isVisible = true
+    isExiting = false
 }
 
 // Handle close with animation
 handleClose = {
-    isExiting = true;
-    setTimeout({
-        isVisible = false;
-        isExiting = false;
-        {if onClose}
-            onClose()
-        {/if}
-    }, 150)
+    isExiting = true
+    isVisible = false
+    if onClose { onClose() }
 }
 
 // Handle click outside
 handleClickOutside = {
-    handleClose()
+    isExiting = true
+    isVisible = false
+    if onClose { onClose() }
 }
 
 // Handle escape key
 handleKeyDown = {
-    {if event.key == "Escape"}
-        handleClose()
-    {/if}
+    isExiting = true
+    isVisible = false
+    if onClose { onClose() }
 }
 
 // Position class
@@ -61,11 +65,9 @@ exitingClass = match isExiting { true -> " popover-exiting", _ -> "" }
 <div class="flin-popover-wrapper">
     <div
         class="popover-trigger"
-        click={{if trigger == "click" { isVisible = !isVisible }}}
-        mouseenter={{if trigger == "hover" { isVisible = true }}}
-        mouseleave={{if trigger == "hover" { handleClose() }}}
+        click={handleToggle}
     >
-        <slot name="trigger" />
+        {children}
     </div>
 
     {if isVisible}
@@ -78,17 +80,15 @@ exitingClass = match isExiting { true -> " popover-exiting", _ -> "" }
         >
             <div class="popover-arrow"></div>
             <div class="popover-content">
-                {children}
+                Popover content
             </div>
         </div>
 
-        {if trigger == "click"}
-            <div
-                class="popover-backdrop"
-                click={handleClickOutside}
-                aria-hidden="true"
-            ></div>
-        {/if}
+        <div
+            class="popover-backdrop"
+            click={handleClickOutside}
+            aria-hidden="true"
+        ></div>
     {/if}
 </div>
 

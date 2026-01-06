@@ -1,147 +1,36 @@
 // Menu.flin - FlinUI Menu Component
-// A dropdown menu component with keyboard navigation and positioning
+// A dropdown menu component with positioning
 
 // Props with defaults
-open = props.open || false
 placement = props.placement || "bottom"
-items = props.items || []
 onClose = props.onClose
-onItemClick = props.onItemClick
 
 // Internal state
-isVisible = open
-isExiting = false
-focusedIndex = -1
-
-// Watch for prop changes
-onUpdate = {
-    {if open != isVisible}
-        {if open}
-            isVisible = true;
-            isExiting = false;
-            focusedIndex = -1
-        {else}
-            handleClose()
-        {/if}
-    {/if}
-}
-
-// Handle close with animation
-handleClose = {
-    isExiting = true;
-    setTimeout({
-        isVisible = false;
-        isExiting = false;
-        focusedIndex = -1;
-        {if onClose}
-            onClose()
-        {/if}
-    }, 150)
-}
+isOpen = false
 
 // Handle trigger click
 handleTriggerClick = {
-    isVisible = !isVisible;
-    {if !isVisible}
-        handleClose()
-    {/if}
+    isOpen = !isOpen
 }
 
 // Handle click outside
 handleClickOutside = {
-    handleClose()
-}
-
-// Handle item click
-handleItemClick = {
-    {if !event.item.disabled}
-        {if onItemClick}
-            onItemClick(event.item)
-        {/if}
-        {if event.item.onClick}
-            event.item.onClick()
-        {/if}
-        handleClose()
-    {/if}
-}
-
-// Handle keyboard navigation
-handleKeyDown = {
-    match event.key {
-        "Escape" -> handleClose()
-        "ArrowDown" -> {
-            event.preventDefault();
-            focusNextItem()
-        }
-        "ArrowUp" -> {
-            event.preventDefault();
-            focusPreviousItem()
-        }
-        "Home" -> {
-            event.preventDefault();
-            focusFirstItem()
-        }
-        "End" -> {
-            event.preventDefault();
-            focusLastItem()
-        }
-        "Enter" | " " -> {
-            event.preventDefault();
-            {if focusedIndex >= 0 && focusedIndex < items.length}
-                handleItemClick({ item: items[focusedIndex] })
-            {/if}
-        }
-        _ -> {}
-    }
-}
-
-// Keyboard navigation helpers
-focusNextItem = {
-    loop i from focusedIndex + 1 to items.length {
-        {if !items[i].disabled && !items[i].divider}
-            focusedIndex = i;
-            break
-        {/if}
-    }
-}
-
-focusPreviousItem = {
-    loop i from focusedIndex - 1 to -1 step -1 {
-        {if !items[i].disabled && !items[i].divider}
-            focusedIndex = i;
-            break
-        {/if}
-    }
-}
-
-focusFirstItem = {
-    loop i from 0 to items.length {
-        {if !items[i].disabled && !items[i].divider}
-            focusedIndex = i;
-            break
-        {/if}
-    }
-}
-
-focusLastItem = {
-    loop i from items.length - 1 to -1 step -1 {
-        {if !items[i].disabled && !items[i].divider}
-            focusedIndex = i;
-            break
-        {/if}
+    isOpen = false
+    if onClose {
+        onClose()
     }
 }
 
 // Placement class
 placementClass = match placement {
-    "top" -> "menu-top"
-    "left" -> "menu-left"
-    "right" -> "menu-right"
-    "bottom-start" -> "menu-bottom-start"
-    "bottom-end" -> "menu-bottom-end"
-    "top-start" -> "menu-top-start"
-    "top-end" -> "menu-top-end"
-    _ -> "menu-bottom"
+    "top" -> " menu-top"
+    "left" -> " menu-left"
+    "right" -> " menu-right"
+    "bottom-start" -> " menu-bottom-start"
+    "bottom-end" -> " menu-bottom-end"
+    "top-start" -> " menu-top-start"
+    "top-end" -> " menu-top-end"
+    _ -> " menu-bottom"
 }
 
 <div class="flin-menu-wrapper">
@@ -149,51 +38,14 @@ placementClass = match placement {
         <slot name="trigger" />
     </div>
 
-    {if isVisible}
-        {
-            exitingClass = match isExiting { true -> " menu-exiting", _ -> "" }
-        }
+    {if isOpen}
         <div
-            class={"flin-menu " ++ placementClass ++ exitingClass}
+            class={"flin-menu" ++ placementClass}
             role="menu"
             aria-orientation="vertical"
             tabindex="-1"
-            keydown={handleKeyDown}
         >
-            <ul class="menu-list" role="none">
-                {loop item, index in items}
-                    {if item.divider}
-                        <li class="menu-divider" role="separator"></li>
-                    {else}
-                        {
-                            itemDisabledClass = match item.disabled { true -> " menu-item--disabled", _ -> "" }
-                            itemFocusedClass = match index == focusedIndex { true -> " menu-item--focused", _ -> "" }
-                        }
-                        <li
-                            class={"menu-item" ++ itemDisabledClass ++ itemFocusedClass}
-                            role="menuitem"
-                            tabindex={if item.disabled { "-1" } else { "0" }}
-                            aria-disabled={item.disabled}
-                            click={{if !item.disabled { handleItemClick({ item: item }) }}}
-                            mouseenter={{if !item.disabled { focusedIndex = index }}}
-                        >
-                            {if item.icon}
-                                <span class="menu-item__icon" aria-hidden="true">
-                                    {item.icon}
-                                </span>
-                            {/if}
-                            <span class="menu-item__label">
-                                {item.label}
-                            </span>
-                            {if item.shortcut}
-                                <span class="menu-item__shortcut" aria-label="Keyboard shortcut">
-                                    {item.shortcut}
-                                </span>
-                            {/if}
-                        </li>
-                    {/if}
-                {/loop}
-            </ul>
+            {children}
         </div>
 
         <div
@@ -205,7 +57,6 @@ placementClass = match placement {
 </div>
 
 <style scoped>
-/* Wrapper */
 .flin-menu-wrapper {
     position: relative;
     display: inline-block;
@@ -215,7 +66,6 @@ placementClass = match placement {
     cursor: pointer;
 }
 
-/* Backdrop */
 .menu-backdrop {
     position: fixed;
     inset: 0;
@@ -223,7 +73,6 @@ placementClass = match placement {
     background-color: transparent;
 }
 
-/* Menu panel */
 .flin-menu {
     position: absolute;
     z-index: 9998;
@@ -234,32 +83,8 @@ placementClass = match placement {
     min-width: 200px;
     max-width: 320px;
     padding: var(--flin-space-2);
-    animation: menuFadeIn var(--flin-transition-fast) ease-out;
 }
 
-@keyframes menuFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-8px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.menu-exiting {
-    animation: menuFadeOut var(--flin-transition-fast) ease-in forwards;
-}
-
-@keyframes menuFadeOut {
-    to {
-        opacity: 0;
-        transform: translateY(-8px) scale(0.95);
-    }
-}
-
-/* Placement variants */
 .menu-bottom {
     top: calc(100% + var(--flin-space-2));
     left: 0;
@@ -300,7 +125,10 @@ placementClass = match placement {
     top: 0;
 }
 
-/* Menu list */
+.flin-menu:focus {
+    outline: none;
+}
+
 .menu-list {
     list-style: none;
     margin: 0;
@@ -310,7 +138,6 @@ placementClass = match placement {
     gap: var(--flin-space-1);
 }
 
-/* Menu item */
 .menu-item {
     display: flex;
     align-items: center;
@@ -318,32 +145,23 @@ placementClass = match placement {
     padding: var(--flin-space-2) var(--flin-space-3);
     border-radius: var(--flin-radius-md);
     font-size: var(--flin-text-sm);
-    line-height: 1.5;
     color: var(--flin-fg);
     cursor: pointer;
     transition: all var(--flin-transition-fast);
     user-select: none;
-    -webkit-user-select: none;
     outline: none;
 }
 
-.menu-item:hover:not(.menu-item--disabled),
-.menu-item--focused:not(.menu-item--disabled) {
+.menu-item:hover {
     background-color: var(--flin-neutral-100);
 }
 
-.menu-item:active:not(.menu-item--disabled) {
-    background-color: var(--flin-neutral-200);
-}
-
-/* Disabled item */
 .menu-item--disabled {
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;
 }
 
-/* Item elements */
 .menu-item__icon {
     flex-shrink: 0;
     width: 16px;
@@ -372,36 +190,19 @@ placementClass = match placement {
     border-radius: var(--flin-radius-sm);
 }
 
-/* Divider */
 .menu-divider {
     height: 1px;
     background-color: var(--flin-neutral-200);
     margin: var(--flin-space-1) 0;
 }
 
-/* Focus styling */
-.flin-menu:focus {
-    outline: none;
-}
-
-.menu-item:focus-visible {
-    background-color: var(--flin-neutral-100);
-    box-shadow: 0 0 0 2px var(--flin-primary);
-}
-
-/* Dark theme support */
 [data-theme="dark"] .flin-menu {
     background-color: var(--flin-neutral-800);
     border-color: var(--flin-neutral-700);
 }
 
-[data-theme="dark"] .menu-item:hover:not(.menu-item--disabled),
-[data-theme="dark"] .menu-item--focused:not(.menu-item--disabled) {
+[data-theme="dark"] .menu-item:hover {
     background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .menu-item:active:not(.menu-item--disabled) {
-    background-color: var(--flin-neutral-600);
 }
 
 [data-theme="dark"] .menu-item__shortcut {
@@ -412,7 +213,6 @@ placementClass = match placement {
     background-color: var(--flin-neutral-700);
 }
 
-/* Responsive */
 @media (max-width: 640px) {
     .flin-menu {
         min-width: 160px;

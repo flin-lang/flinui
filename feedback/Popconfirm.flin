@@ -4,8 +4,8 @@
 // Props with defaults
 title = props.title || "Are you sure?"
 description = props.description || ""
-onConfirm = props.onConfirm || nil
-onCancel = props.onCancel || nil
+onConfirm = props.onConfirm
+onCancel = props.onCancel
 confirmText = props.confirmText || "Yes"
 cancelText = props.cancelText || "No"
 confirmVariant = props.confirmVariant || "primary"
@@ -20,18 +20,16 @@ isExiting = false
 
 // Handle open
 handleOpen = {
-    if disabled { return }
-    isOpen = true
-    isExiting = false
+    if !disabled {
+        isOpen = true
+        isExiting = false
+    }
 }
 
 // Handle close
 handleClose = {
     isExiting = true
-    setTimeout({
-        isOpen = false
-        isExiting = false
-    }, 150)
+    isOpen = false
 }
 
 // Handle confirm
@@ -39,7 +37,8 @@ handleConfirm = {
     if onConfirm {
         onConfirm()
     }
-    handleClose()
+    isExiting = true
+    isOpen = false
 }
 
 // Handle cancel
@@ -47,47 +46,20 @@ handleCancel = {
     if onCancel {
         onCancel()
     }
-    handleClose()
+    isExiting = true
+    isOpen = false
 }
 
 // Handle click outside
 handleClickOutside = {
-    handleClose()
+    isExiting = true
+    isOpen = false
 }
 
 // Handle keyboard
-handleKeyDown = |e| {
-    if e.key == "Escape" {
-        handleCancel()
-    }
-    if e.key == "Enter" {
-        handleConfirm()
-    }
-}
-
-// Get icon SVG
-iconSvg = match icon {
-    "warning" -> `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-        <line x1="12" y1="9" x2="12" y2="13"></line>
-        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-    </svg>`
-    "danger" -> `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="15" y1="9" x2="9" y2="15"></line>
-        <line x1="9" y1="9" x2="15" y2="15"></line>
-    </svg>`
-    "info" -> `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="16" x2="12" y2="12"></line>
-        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-    </svg>`
-    "question" -> `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"></circle>
-        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-    </svg>`
-    _ -> ""
+handleKeyDown = {
+    isExiting = true
+    isOpen = false
 }
 
 // Confirm button variant class
@@ -124,68 +96,97 @@ exitingClass = match isExiting { true -> " popconfirm--exiting", _ -> "" }
 // Disabled class
 disabledClass = match disabled { true -> " popconfirm-wrapper--disabled", _ -> "" }
 
+// Tabindex based on disabled state
+tabindexValue = match disabled { true -> "-1", _ -> "0" }
+
 <div class={"flin-popconfirm-wrapper" ++ disabledClass}>
-    <!-- Trigger slot -->
     <div
         class="popconfirm-trigger"
-        onclick={handleOpen}
+        click={handleOpen}
         role="button"
-        tabindex={disabled ? -1 : 0}
+        tabindex={tabindexValue}
         aria-haspopup="dialog"
-        aria-expanded={isOpen}
     >
-        <slot name="trigger">
-            {children}
-        </slot>
+        {children}
     </div>
 
     {if isOpen}
-        <!-- Backdrop -->
         <div
             class="popconfirm-backdrop"
-            onclick={handleClickOutside}
+            click={handleClickOutside}
             aria-hidden="true"
         ></div>
 
-        <!-- Popconfirm panel -->
         <div
             class={"flin-popconfirm " ++ positionClass ++ exitingClass}
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="popconfirm-title"
-            aria-describedby={description ? "popconfirm-desc" : nil}
-            onkeydown={handleKeyDown}
+            keydown={handleKeyDown}
             tabindex="-1"
         >
             <div class="popconfirm-arrow"></div>
 
             <div class="popconfirm-content">
-                {iconSvg ? (
-                    <div class={"popconfirm-icon" ++ iconVariantClass} innerHTML={iconSvg}></div>
-                ) : nil}
+                {if icon == "warning"}
+                    <div class={"popconfirm-icon" ++ iconVariantClass}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                {/if}
+                {if icon == "danger"}
+                    <div class={"popconfirm-icon" ++ iconVariantClass}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                    </div>
+                {/if}
+                {if icon == "info"}
+                    <div class={"popconfirm-icon" ++ iconVariantClass}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </div>
+                {/if}
+                {if icon == "question"}
+                    <div class={"popconfirm-icon" ++ iconVariantClass}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                {/if}
 
                 <div class="popconfirm-text">
                     <div id="popconfirm-title" class="popconfirm-title">{title}</div>
-                    {description ? (
+                    {if description != ""}
                         <div id="popconfirm-desc" class="popconfirm-description">{description}</div>
-                    ) : nil}
+                    {/if}
                 </div>
             </div>
 
             <div class="popconfirm-actions">
-                {showCancel ? (
+                {if showCancel}
                     <button
                         class="popconfirm-button popconfirm-button--cancel"
-                        onclick={handleCancel}
+                        click={handleCancel}
                         type="button"
                     >
                         {cancelText}
                     </button>
-                ) : nil}
+                {/if}
 
                 <button
                     class={"popconfirm-button" ++ confirmVariantClass}
-                    onclick={handleConfirm}
+                    click={handleConfirm}
                     type="button"
                 >
                     {confirmText}

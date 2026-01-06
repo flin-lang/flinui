@@ -17,10 +17,8 @@ gapClass = match gap {
 
 // Handle form submission with prevention of default
 handleSubmit = {
-    event.preventDefault();
-    {if !disabled && onSubmit}
-        onSubmit(event)
-    {/if}
+    event.preventDefault()
+    if !disabled && onSubmit { onSubmit(event) }
 }
 
 // Compute class modifiers

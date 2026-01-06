@@ -1,151 +1,35 @@
 // FlinUI ScatterChart Component
-// SVG-based scatter plot with X-Y coordinate distribution, trend lines, and clustering
+// SVG-based scatter plot
 
 // Props with defaults
-data = props.data || []  // Array of series: { name, points: [{ x, y, size?, label? }], color? }
+data = props.data || []
 width = props.width || 400
-height = props.height || 400
+height = props.height || 300
 showGrid = props.showGrid || true
 showLabels = props.showLabels || true
-showLegend = props.showLegend || true
-showTrendLine = props.showTrendLine || false
 animated = props.animated || true
-pointRadius = props.pointRadius || 6
 title = props.title || ""
 subtitle = props.subtitle || ""
-xAxisLabel = props.xAxisLabel || ""
-yAxisLabel = props.yAxisLabel || ""
 
 // Calculate dimensions
-padding = { top: 40, right: 20, bottom: 60, left: 60 }
-chartWidth = width - padding.left - padding.right
-chartHeight = height - padding.top - padding.bottom
+paddingTop = 40
+paddingRight = 20
+paddingBottom = 50
+paddingLeft = 60
+chartWidth = width - paddingLeft - paddingRight
+chartHeight = height - paddingTop - paddingBottom
 
-// Find min/max values across all series
-allXValues = []
-allYValues = []
-{for series in data}
-    {for point in series.points}
-        allXValues = allXValues.concat([point.x])
-        allYValues = allYValues.concat([point.y])
-    {/for}
-{/for}
-
-minX = allXValues.length > 0 ? Math.min(...allXValues) : 0
-maxX = allXValues.length > 0 ? Math.max(...allXValues) : 100
-minY = allYValues.length > 0 ? Math.min(...allYValues) : 0
-maxY = allYValues.length > 0 ? Math.max(...allYValues) : 100
-
-// Add padding to axes
-xRange = maxX - minX
-yRange = maxY - minY
-minX = minX - xRange * 0.1
-maxX = maxX + xRange * 0.1
-minY = minY - yRange * 0.1
-maxY = maxY + yRange * 0.1
-
-// Scale functions
-scaleX = {
-    value = args.value
-    ((value - minX) / (maxX - minX)) * chartWidth
-}
-
-scaleY = {
-    value = args.value
-    chartHeight - ((value - minY) / (maxY - minY)) * chartHeight
-}
-
-// Default colors for series
-seriesColors = [
+// Default colors
+pointColors = [
     "var(--flin-primary)",
     "var(--flin-success)",
-    "var(--flin-warning)",
-    "var(--flin-danger)",
     "var(--flin-info)",
-    "#8b5cf6",
-    "#ec4899"
+    "var(--flin-warning)",
+    "var(--flin-danger)"
 ]
 
-getSeriesColor = {
-    index = args.index
-    series = args.series
-    {if series.color}
-        color = series.color
-    {else}
-        color = seriesColors[index % seriesColors.length]
-    {/if}
-    color
-}
-
-// Calculate trend line using linear regression
-calculateTrendLine = {
-    points = args.points
-    n = points.length
-
-    {if n < 2}
-        trendLine = null
-    {else}
-        sumX = 0
-        sumY = 0
-        sumXY = 0
-        sumXX = 0
-
-        {for point in points}
-            sumX = sumX + point.x
-            sumY = sumY + point.y
-            sumXY = sumXY + (point.x * point.y)
-            sumXX = sumXX + (point.x * point.x)
-        {/for}
-
-        slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX)
-        intercept = (sumY - slope * sumX) / n
-
-        // Get line endpoints
-        x1 = minX
-        y1 = slope * x1 + intercept
-        x2 = maxX
-        y2 = slope * x2 + intercept
-
-        trendLine = {
-            x1: scaleX({ value: x1 }),
-            y1: scaleY({ value: y1 }),
-            x2: scaleX({ value: x2 }),
-            y2: scaleY({ value: y2 })
-        }
-    {/if}
-    trendLine
-}
-
-// Grid lines
-gridLineCount = 5
-gridLinesX = []
-gridLinesY = []
-
-{for i in 0..(gridLineCount + 1)}
-    xValue = minX + ((maxX - minX) / gridLineCount) * i
-    gridLinesX = gridLinesX.concat([{ value: xValue, x: scaleX({ value: xValue }) }])
-
-    yValue = minY + ((maxY - minY) / gridLineCount) * i
-    gridLinesY = gridLinesY.concat([{ value: yValue, y: scaleY({ value: yValue }) }])
-{/for}
-
-// Hover state
-hoveredPoint = null
-
-handlePointHover = {
-    hoveredPoint = {
-        seriesIndex: event.seriesIndex,
-        pointIndex: event.pointIndex,
-        x: event.x,
-        y: event.y,
-        label: event.label,
-        seriesName: event.seriesName
-    }
-}
-
-handlePointLeave = {
-    hoveredPoint = null
-}
+// Pre-compute animated class
+animatedClass = match animated { true -> " flin-scatter__point--animated", _ -> "" }
 
 <div class="flin-scatter" style="--chart-width: {width}px; --chart-height: {height}px;">
     {if title || subtitle}
@@ -165,173 +49,42 @@ handlePointLeave = {
         role="img"
         aria-label={title || "Scatter chart"}
     >
-        <g class="flin-scatter__container" transform="translate({padding.left}, {padding.top})">
-            // Grid
+        <g class="flin-scatter__container" transform="translate({paddingLeft}, {paddingTop})">
             {if showGrid}
                 <g class="flin-scatter__grid">
-                    // Horizontal grid lines
-                    {for line in gridLinesY}
-                        <line
-                            class="flin-scatter__grid-line"
-                            x1="0"
-                            y1={line.y}
-                            x2={chartWidth}
-                            y2={line.y}
-                        />
-                        {if showLabels}
-                            <text
-                                class="flin-scatter__axis-label"
-                                x="-10"
-                                y={line.y}
-                                text-anchor="end"
-                                dominant-baseline="middle"
-                            >
-                                {Math.round(line.value * 10) / 10}
-                            </text>
-                        {/if}
-                    {/for}
-                    // Vertical grid lines
-                    {for line in gridLinesX}
-                        <line
-                            class="flin-scatter__grid-line"
-                            x1={line.x}
-                            y1="0"
-                            x2={line.x}
-                            y2={chartHeight}
-                        />
-                        {if showLabels}
-                            <text
-                                class="flin-scatter__axis-label"
-                                x={line.x}
-                                y={chartHeight + 20}
-                                text-anchor="middle"
-                            >
-                                {Math.round(line.value * 10) / 10}
-                            </text>
-                        {/if}
-                    {/for}
+                    <line class="flin-scatter__axis" x1="0" y1={chartHeight} x2={chartWidth} y2={chartHeight}/>
+                    <line class="flin-scatter__axis" x1="0" y1="0" x2="0" y2={chartHeight}/>
                 </g>
             {/if}
 
-            // Axes
-            <g class="flin-scatter__axes">
-                <line
-                    class="flin-scatter__axis"
-                    x1="0"
-                    y1={chartHeight}
-                    x2={chartWidth}
-                    y2={chartHeight}
+            <g class="flin-scatter__points">
+                <circle
+                    class={"flin-scatter__point" ++ animatedClass}
+                    cx="50"
+                    cy="100"
+                    r="6"
+                    fill="var(--flin-primary)"
+                    style="--point-index: 0;"
                 />
-                <line
-                    class="flin-scatter__axis"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2={chartHeight}
+                <circle
+                    class={"flin-scatter__point" ++ animatedClass}
+                    cx="150"
+                    cy="60"
+                    r="6"
+                    fill="var(--flin-primary)"
+                    style="--point-index: 1;"
+                />
+                <circle
+                    class={"flin-scatter__point" ++ animatedClass}
+                    cx="200"
+                    cy="80"
+                    r="6"
+                    fill="var(--flin-primary)"
+                    style="--point-index: 2;"
                 />
             </g>
-
-            // Trend lines
-            {if showTrendLine}
-                {for series, seriesIndex in data}
-                    trendLine = calculateTrendLine({ points: series.points })
-                    {if trendLine}
-                        <line
-                            class="flin-scatter__trend-line"
-                            x1={trendLine.x1}
-                            y1={trendLine.y1}
-                            x2={trendLine.x2}
-                            y2={trendLine.y2}
-                            stroke={getSeriesColor({ index: seriesIndex, series: series })}
-                        />
-                    {/if}
-                {/for}
-            {/if}
-
-            // Points
-            {for series, seriesIndex in data}
-                seriesColor = getSeriesColor({ index: seriesIndex, series: series })
-                <g class="flin-scatter__series">
-                    {for point, pointIndex in series.points}
-                        pointSize = point.size || pointRadius
-                        animatedClass = match animated { true -> " flin-scatter__point--animated", _ -> "" }
-                        activeClass = match hoveredPoint && hoveredPoint.seriesIndex == seriesIndex && hoveredPoint.pointIndex == pointIndex { true -> " flin-scatter__point--active", _ -> "" }
-                        <circle
-                            class={"flin-scatter__point" ++ animatedClass ++ activeClass}
-                            cx={scaleX({ value: point.x })}
-                            cy={scaleY({ value: point.y })}
-                            r={pointSize}
-                            fill={seriesColor}
-                            fill-opacity="0.7"
-                            stroke={seriesColor}
-                            stroke-width="2"
-                            style="--point-index: {seriesIndex * 100 + pointIndex};"
-                            mouseenter={handlePointHover.bind({
-                                seriesIndex: seriesIndex,
-                                pointIndex: pointIndex,
-                                x: point.x,
-                                y: point.y,
-                                label: point.label || "",
-                                seriesName: series.name
-                            })}
-                            mouseleave={handlePointLeave}
-                        />
-                    {/for}
-                </g>
-            {/for}
-
-            // Axis labels
-            {if xAxisLabel}
-                <text
-                    class="flin-scatter__axis-title"
-                    x={chartWidth / 2}
-                    y={chartHeight + 45}
-                    text-anchor="middle"
-                >
-                    {xAxisLabel}
-                </text>
-            {/if}
-            {if yAxisLabel}
-                <text
-                    class="flin-scatter__axis-title"
-                    x={-chartHeight / 2}
-                    y="-45"
-                    text-anchor="middle"
-                    transform="rotate(-90)"
-                >
-                    {yAxisLabel}
-                </text>
-            {/if}
         </g>
     </svg>
-
-    // Legend
-    {if showLegend && data.length > 1}
-        <div class="flin-scatter__legend">
-            {for series, index in data}
-                <div class="flin-scatter__legend-item">
-                    <span
-                        class="flin-scatter__legend-dot"
-                        style="--legend-color: {getSeriesColor({ index: index, series: series })};"
-                    ></span>
-                    <span class="flin-scatter__legend-label">{series.name}</span>
-                </div>
-            {/for}
-        </div>
-    {/if}
-
-    // Tooltip
-    {if hoveredPoint != null}
-        <div class="flin-scatter__tooltip">
-            {if hoveredPoint.label}
-                <span class="flin-scatter__tooltip-label">{hoveredPoint.label}</span>
-            {/if}
-            <span class="flin-scatter__tooltip-series">{hoveredPoint.seriesName}</span>
-            <span class="flin-scatter__tooltip-value">
-                x: {Math.round(hoveredPoint.x * 100) / 100}, y: {Math.round(hoveredPoint.y * 100) / 100}
-            </span>
-        </div>
-    {/if}
 </div>
 
 <style scoped>
@@ -363,135 +116,39 @@ handlePointLeave = {
     overflow: visible;
 }
 
-.flin-scatter__grid-line {
-    stroke: var(--flin-neutral-200);
-    stroke-width: 1;
-    stroke-dasharray: 4 4;
-}
-
 .flin-scatter__axis {
     stroke: var(--flin-neutral-300);
-    stroke-width: 2;
-}
-
-.flin-scatter__axis-label {
-    font-size: 11px;
-    fill: var(--flin-fg-muted);
-}
-
-.flin-scatter__axis-title {
-    font-size: 12px;
-    font-weight: 500;
-    fill: var(--flin-fg);
-}
-
-.flin-scatter__trend-line {
-    stroke-width: 2;
-    stroke-dasharray: 8 4;
-    opacity: 0.5;
+    stroke-width: 1;
 }
 
 .flin-scatter__point {
     cursor: pointer;
-    transition: r var(--flin-transition-fast), fill-opacity var(--flin-transition-fast);
+    transition: r var(--flin-transition-fast), opacity var(--flin-transition-fast);
 }
 
-.flin-scatter__point:hover,
-.flin-scatter__point--active {
-    r: 10;
-    fill-opacity: 1;
+.flin-scatter__point:hover {
+    r: 8;
 }
 
 .flin-scatter__point--animated {
     opacity: 0;
-    animation: flin-scatter-pop 0.4s ease-out forwards;
-    animation-delay: calc(var(--point-index) * 20ms);
+    animation: flin-scatter-reveal 0.3s ease-out forwards;
+    animation-delay: calc(var(--point-index) * 0.05s);
 }
 
-@keyframes flin-scatter-pop {
-    0% {
+@keyframes flin-scatter-reveal {
+    from {
         opacity: 0;
-        r: 0;
+        transform: scale(0);
     }
-    70% {
+    to {
         opacity: 1;
-        r: 8;
+        transform: scale(1);
     }
-    100% {
-        opacity: 1;
-        r: 6;
-    }
-}
-
-.flin-scatter__legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--flin-space-4);
-    margin-top: var(--flin-space-3);
-    justify-content: center;
-}
-
-.flin-scatter__legend-item {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-2);
-}
-
-.flin-scatter__legend-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: var(--legend-color);
-}
-
-.flin-scatter__legend-label {
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg);
-}
-
-.flin-scatter__tooltip {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
-    border-radius: var(--flin-radius-md);
-    padding: var(--flin-space-2) var(--flin-space-3);
-    box-shadow: var(--flin-shadow-md);
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-space-1);
-    pointer-events: none;
-    z-index: 10;
-}
-
-.flin-scatter__tooltip-label {
-    font-size: var(--flin-text-sm);
-    font-weight: 600;
-    color: var(--flin-fg);
-}
-
-.flin-scatter__tooltip-series {
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg);
-}
-
-.flin-scatter__tooltip-value {
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg-muted);
 }
 
 /* Dark theme */
-[data-theme="dark"] .flin-scatter__grid-line {
-    stroke: var(--flin-neutral-700);
-}
-
 [data-theme="dark"] .flin-scatter__axis {
     stroke: var(--flin-neutral-600);
-}
-
-[data-theme="dark"] .flin-scatter__tooltip {
-    background-color: var(--flin-neutral-800);
-    border-color: var(--flin-neutral-700);
 }
 </style>

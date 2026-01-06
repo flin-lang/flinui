@@ -5,9 +5,6 @@
 // SHADOW SCALE
 // ============================================================================
 
-/// Shadow tokens for creating depth and elevation
-/// Based on Material Design elevation system
-
 // Light theme shadows (default)
 shadowNone = "none"
 shadowSm = "0 1px 2px 0 rgb(0 0 0 / 0.05)"
@@ -33,49 +30,8 @@ shadowDarkXl = "0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0
 shadowDark2xl = "0 25px 50px -12px rgb(0 0 0 / 0.6)"
 
 // ============================================================================
-// ELEVATION HELPERS
-// ============================================================================
-
-/// Get shadow for a specific elevation level (0-5)
-/// @param level - Elevation level (0 = none, 5 = highest)
-/// @returns Shadow CSS value
-getShadowByElevation = fn(level) {
-    if level == 0 { shadowNone }
-    else if level == 1 { shadowSm }
-    else if level == 2 { shadowMd }
-    else if level == 3 { shadowLg }
-    else if level == 4 { shadowXl }
-    else if level == 5 { shadow2xl }
-    else { shadowMd }
-}
-
-/// Get dark mode shadow for elevation level
-getShadowByElevationDark = fn(level) {
-    if level == 0 { shadowNone }
-    else if level == 1 { shadowDarkSm }
-    else if level == 2 { shadowDarkMd }
-    else if level == 3 { shadowDarkLg }
-    else if level == 4 { shadowDarkXl }
-    else if level == 5 { shadowDark2xl }
-    else { shadowDarkMd }
-}
-
-/// Get colored shadow for a variant
-/// @param variant - Color variant (primary, success, warning, danger)
-/// @returns Shadow CSS value
-getColoredShadow = fn(variant) {
-    if variant == "primary" { shadowPrimary }
-    else if variant == "success" { shadowSuccess }
-    else if variant == "warning" { shadowWarning }
-    else if variant == "danger" { shadowDanger }
-    else { shadowMd }
-}
-
-// ============================================================================
 // SHADOW PRESETS FOR COMMON UI ELEMENTS
 // ============================================================================
-
-/// Shadow presets for specific component types
 
 // Cards
 shadowCard = shadowMd

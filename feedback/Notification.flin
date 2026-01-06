@@ -6,7 +6,7 @@ variant = props.variant || "info"
 title = props.title || ""
 message = props.message || ""
 avatar = props.avatar || ""
-actions = props.actions || []
+// Actions can be passed as children
 timestamp = props.timestamp || ""
 onClose = props.onClose
 
@@ -16,13 +16,9 @@ isExiting = false
 
 // Handle close with animation
 handleClose = {
-    isExiting = true;
-    setTimeout({
-        visible = false;
-        {if onClose}
-            onClose()
-        {/if}
-    }, 200)
+    isExiting = true
+    visible = false
+    if onClose { onClose() }
 }
 
 // Variant class
@@ -44,67 +40,53 @@ iconPath = match variant {
 // Computed class for exit animation
 exitingClass = match isExiting { true -> " notification-exiting", _ -> "" }
 
-{if visible}
-    <div
-        class={"flin-notification " ++ variantClass ++ exitingClass}
-        role="alert"
-        aria-live="polite"
-    >
-        <div class="notification-visual">
-            {if avatar}
-                <img class="notification-avatar" src={avatar} alt="" aria-hidden="true" />
-            {else}
-                <div class="notification-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
-                    </svg>
-                </div>
-            {/if}
-        </div>
+// Compute display class
+displayClass = match visible { true -> "flin-notification " ++ variantClass ++ exitingClass, _ -> "flin-notification flin-notification--hidden" }
 
-        <div class="notification-body">
-            <div class="notification-header">
-                {if title}
-                    <h4 class="notification-title">{title}</h4>
-                {/if}
-                {if timestamp}
-                    <span class="notification-timestamp">{timestamp}</span>
-                {/if}
+<div class={displayClass} role="alert" aria-live="polite">
+    <div class="notification-visual">
+        {if avatar != ""}
+            <img class="notification-avatar" src={avatar} alt="" aria-hidden="true" />
+        {/if}
+        {if avatar == ""}
+            <div class="notification-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
+                </svg>
             </div>
+        {/if}
+    </div>
 
-            {if message}
-                <p class="notification-message">{message}</p>
+    <div class="notification-body">
+        <div class="notification-header">
+            {if title != ""}
+                <h4 class="notification-title">{title}</h4>
             {/if}
-
-            {if actions.length > 0}
-                <div class="notification-actions">
-                    {for action in actions}
-                        // Computed class for primary action styling
-                        primaryClass = match action.primary { true -> " notification-action-primary", _ -> "" }
-                        <button
-                            class={"notification-action" ++ primaryClass}
-                            click={action.onClick}
-                            type="button"
-                        >
-                            {action.label}
-                        </button>
-                    {/for}
-                </div>
+            {if timestamp != ""}
+                <span class="notification-timestamp">{timestamp}</span>
             {/if}
         </div>
 
-        <button
-            class="notification-close"
-            click={handleClose}
-            aria-label="Close notification"
-            type="button"
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </button>
+        {if message != ""}
+            <p class="notification-message">{message}</p>
+        {/if}
+
+        <div class="notification-actions">
+            {children}
+        </div>
     </div>
-{/if}
+
+    <button
+        class="notification-close"
+        click={handleClose}
+        aria-label="Close notification"
+        type="button"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </button>
+</div>
 
 <style scoped>
 .flin-notification {

@@ -13,10 +13,8 @@ visible = true
 
 // Handle dismiss action
 handleDismiss = {
-    visible = false;
-    {if onDismiss}
-        onDismiss()
-    {/if}
+    visible = false
+    if onDismiss { onDismiss() }
 }
 
 // Compute variant-based classes
@@ -35,41 +33,42 @@ iconPath = match variant {
     _ -> "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 }
 
-{if visible}
-    <div
-        class={"flin-alert " ++ variantClass}
-        role="alert"
-        aria-live="polite"
-    >
-        {if showIcon}
-            <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
-            </svg>
-        {/if}
+// Compute display class
+displayClass = match visible { true -> "flin-alert " ++ variantClass, _ -> "flin-alert flin-alert--hidden" }
 
-        <div class="alert-content">
-            {if title}
-                <h4 class="alert-title">{title}</h4>
-            {/if}
-            <div class="alert-message">
-                {children}
-            </div>
+<div
+    class={displayClass}
+    role="alert"
+    aria-live="polite"
+>
+    {if showIcon}
+        <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
+        </svg>
+    {/if}
+
+    <div class="alert-content">
+        {if title != ""}
+            <h4 class="alert-title">{title}</h4>
+        {/if}
+        <div class="alert-message">
+            {children}
         </div>
-
-        {if dismissible}
-            <button
-                class="alert-dismiss"
-                click={handleDismiss}
-                aria-label="Dismiss alert"
-                type="button"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        {/if}
     </div>
-{/if}
+
+    {if dismissible}
+        <button
+            class="alert-dismiss"
+            click={handleDismiss}
+            aria-label="Dismiss alert"
+            type="button"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    {/if}
+</div>
 
 <style scoped>
 .flin-alert {

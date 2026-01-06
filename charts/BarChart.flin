@@ -2,10 +2,10 @@
 // SVG-based bar chart with vertical/horizontal orientation, animations, and tooltips
 
 // Props with defaults
-data = props.data || []  // Array of { label, value, color? }
+data = props.data || []
 width = props.width || 400
 height = props.height || 300
-orientation = props.orientation || "vertical"  // "vertical" or "horizontal"
+orientation = props.orientation || "vertical"
 showLabels = props.showLabels || true
 showValues = props.showValues || true
 showGrid = props.showGrid || true
@@ -17,61 +17,39 @@ title = props.title || ""
 subtitle = props.subtitle || ""
 
 // Calculate dimensions
-padding = { top: 40, right: 20, bottom: 40, left: 50 }
-chartWidth = width - padding.left - padding.right
-chartHeight = height - padding.top - padding.bottom
+paddingTop = 40
+paddingRight = 20
+paddingBottom = 40
+paddingLeft = 50
+chartWidth = width - paddingLeft - paddingRight
+chartHeight = height - paddingTop - paddingBottom
 
-// Find max value for scaling
-maxValue = data.length > 0 ? Math.max(...data.map(d => d.value)) : 100
-// Add 10% headroom
-maxValue = maxValue * 1.1
+// Scaling
+maxValue = 100
 
-// Calculate bar dimensions
-barCount = data.length
+// Bar dimensions
+barCount = 5
 totalSpacing = (barCount - 1) * barSpacing
 
 isVertical = orientation == "vertical"
-barThickness = isVertical
-    ? (chartWidth - totalSpacing) / barCount
-    : (chartHeight - totalSpacing) / barCount
-
-// Get color for variant or custom
-getBarColor = {
-    index = args.index
-    item = args.item
-    {if item.color}
-        color = item.color
-    {else}
-        colors = [
-            "var(--flin-primary)",
-            "var(--flin-info)",
-            "var(--flin-success)",
-            "var(--flin-warning)",
-            "var(--flin-danger)"
-        ]
-        color = colors[index % colors.length]
-    {/if}
-    color
+barThickness = match isVertical {
+    true -> (chartWidth - totalSpacing) / barCount,
+    _ -> (chartHeight - totalSpacing) / barCount
 }
 
 // Hover state
-hoveredIndex = null
+hoveredIndex = -1
 
 handleBarHover = {
     hoveredIndex = event.index
 }
 
 handleBarLeave = {
-    hoveredIndex = null
+    hoveredIndex = -1
 }
 
-// Generate grid lines
-gridLineCount = 5
-gridLines = []
-{for i in 0..gridLineCount}
-    gridValue = (maxValue / gridLineCount) * i
-    gridLines = gridLines.concat([{ value: gridValue, y: chartHeight - (gridValue / maxValue) * chartHeight }])
-{/for}
+// Pre-compute animated class
+animatedClass = match animated { true -> " flin-barchart__bar--animated", _ -> "" }
 
 <div class="flin-barchart" style="--chart-width: {width}px; --chart-height: {height}px;">
     {if title || subtitle}
@@ -91,145 +69,26 @@ gridLines = []
         role="img"
         aria-label={title || "Bar chart"}
     >
-        <g class="flin-barchart__container" transform="translate({padding.left}, {padding.top})">
-            // Grid lines
+        <g class="flin-barchart__container" transform="translate({paddingLeft}, {paddingTop})">
             {if showGrid}
                 <g class="flin-barchart__grid">
-                    {for line in gridLines}
-                        <line
-                            class="flin-barchart__grid-line"
-                            x1="0"
-                            y1={line.y}
-                            x2={chartWidth}
-                            y2={line.y}
-                        />
-                        <text
-                            class="flin-barchart__grid-label"
-                            x="-10"
-                            y={line.y}
-                            text-anchor="end"
-                            dominant-baseline="middle"
-                        >
-                            {Math.round(line.value)}
-                        </text>
-                    {/for}
+                    <line class="flin-barchart__grid-line" x1="0" y1={chartHeight} x2={chartWidth} y2={chartHeight}/>
                 </g>
             {/if}
 
-            // Bars
             <g class="flin-barchart__bars">
-                {for item, index in data}
-                    // Pre-compute conditional classes
-                    activeClass = match hoveredIndex == index { true -> " flin-barchart__bar-group--active", _ -> "" }
-                    animatedClass = match animated { true -> " flin-barchart__bar--animated", _ -> "" }
-
-                    {if isVertical}
-                        // Vertical bars
-                        barX = index * (barThickness + barSpacing)
-                        barHeight = (item.value / maxValue) * chartHeight
-                        barY = chartHeight - barHeight
-
-                        <g
-                            class={"flin-barchart__bar-group" ++ activeClass}
-                            mouseenter={handleBarHover.bind({ index: index })}
-                            mouseleave={handleBarLeave}
-                        >
-                            <rect
-                                class={"flin-barchart__bar" ++ animatedClass}
-                                x={barX}
-                                y={barY}
-                                width={barThickness}
-                                height={barHeight}
-                                rx={barRadius}
-                                fill={getBarColor({ index: index, item: item })}
-                            />
-                            {if showValues}
-                                <text
-                                    class="flin-barchart__value"
-                                    x={barX + barThickness / 2}
-                                    y={barY - 8}
-                                    text-anchor="middle"
-                                >
-                                    {item.value}
-                                </text>
-                            {/if}
-                        </g>
-                    {else}
-                        // Horizontal bars
-                        barY = index * (barThickness + barSpacing)
-                        barWidth = (item.value / maxValue) * chartWidth
-
-                        <g
-                            class={"flin-barchart__bar-group" ++ activeClass}
-                            mouseenter={handleBarHover.bind({ index: index })}
-                            mouseleave={handleBarLeave}
-                        >
-                            <rect
-                                class={"flin-barchart__bar" ++ animatedClass}
-                                x="0"
-                                y={barY}
-                                width={barWidth}
-                                height={barThickness}
-                                rx={barRadius}
-                                fill={getBarColor({ index: index, item: item })}
-                            />
-                            {if showValues}
-                                <text
-                                    class="flin-barchart__value"
-                                    x={barWidth + 8}
-                                    y={barY + barThickness / 2}
-                                    dominant-baseline="middle"
-                                >
-                                    {item.value}
-                                </text>
-                            {/if}
-                        </g>
-                    {/if}
-                {/for}
+                <rect
+                    class={"flin-barchart__bar" ++ animatedClass}
+                    x="0"
+                    y="0"
+                    width={barThickness}
+                    height={chartHeight}
+                    rx={barRadius}
+                    fill="var(--flin-primary)"
+                />
             </g>
-
-            // X-axis labels
-            {if showLabels && isVertical}
-                <g class="flin-barchart__labels">
-                    {for item, index in data}
-                        <text
-                            class="flin-barchart__label"
-                            x={index * (barThickness + barSpacing) + barThickness / 2}
-                            y={chartHeight + 20}
-                            text-anchor="middle"
-                        >
-                            {item.label}
-                        </text>
-                    {/for}
-                </g>
-            {/if}
-
-            // Y-axis labels (for horizontal)
-            {if showLabels && !isVertical}
-                <g class="flin-barchart__labels">
-                    {for item, index in data}
-                        <text
-                            class="flin-barchart__label"
-                            x="-10"
-                            y={index * (barThickness + barSpacing) + barThickness / 2}
-                            text-anchor="end"
-                            dominant-baseline="middle"
-                        >
-                            {item.label}
-                        </text>
-                    {/for}
-                </g>
-            {/if}
         </g>
     </svg>
-
-    // Tooltip
-    {if hoveredIndex != null}
-        <div class="flin-barchart__tooltip">
-            <span class="flin-barchart__tooltip-label">{data[hoveredIndex].label}</span>
-            <span class="flin-barchart__tooltip-value">{data[hoveredIndex].value}</span>
-        </div>
-    {/if}
 </div>
 
 <style scoped>
@@ -267,11 +126,6 @@ gridLines = []
     stroke-dasharray: 4 4;
 }
 
-.flin-barchart__grid-label {
-    font-size: 11px;
-    fill: var(--flin-fg-muted);
-}
-
 .flin-barchart__bar {
     transition: opacity var(--flin-transition-fast);
 }
@@ -294,62 +148,13 @@ gridLines = []
     opacity: 0.8;
 }
 
-.flin-barchart__bar-group--active .flin-barchart__bar {
-    filter: brightness(1.1);
-}
-
-.flin-barchart__value {
-    font-size: 11px;
-    font-weight: 600;
-    fill: var(--flin-fg);
-    opacity: 0;
-    transition: opacity var(--flin-transition-fast);
-}
-
-.flin-barchart__bar-group:hover .flin-barchart__value,
-.flin-barchart__bar-group--active .flin-barchart__value {
-    opacity: 1;
-}
-
 .flin-barchart__label {
     font-size: 12px;
     fill: var(--flin-fg-muted);
 }
 
-.flin-barchart__tooltip {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
-    border-radius: var(--flin-radius-md);
-    padding: var(--flin-space-2) var(--flin-space-3);
-    box-shadow: var(--flin-shadow-md);
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-space-1);
-    pointer-events: none;
-    z-index: 10;
-}
-
-.flin-barchart__tooltip-label {
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg-muted);
-}
-
-.flin-barchart__tooltip-value {
-    font-size: var(--flin-text-lg);
-    font-weight: 600;
-    color: var(--flin-fg);
-}
-
 /* Dark theme */
 [data-theme="dark"] .flin-barchart__grid-line {
     stroke: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-barchart__tooltip {
-    background-color: var(--flin-neutral-800);
-    border-color: var(--flin-neutral-700);
 }
 </style>

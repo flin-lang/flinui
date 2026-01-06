@@ -2,82 +2,56 @@
 // Shared legend component for charts with interactive highlighting
 
 // Props with defaults
-items = props.items || []  // Array of { label, color, value?, active? }
-orientation = props.orientation || "horizontal"  // horizontal, vertical
-position = props.position || "bottom"  // top, bottom, left, right
-size = props.size || "md"  // sm, md, lg
+items = props.items || []
+orientation = props.orientation || "horizontal"
+position = props.position || "bottom"
+size = props.size || "md"
 clickable = props.clickable || true
 showValues = props.showValues || false
 onItemClick = props.onItemClick
 onItemHover = props.onItemHover
-activeItems = props.activeItems || []  // Array of active item indices
+activeItems = props.activeItems || []
 
 // Compute size values
 dotSize = match size {
-    "sm" -> "8px"
-    "md" -> "12px"
-    "lg" -> "16px"
+    "sm" -> "8px",
+    "md" -> "12px",
+    "lg" -> "16px",
     _ -> "12px"
 }
 
 fontSize = match size {
-    "sm" -> "var(--flin-text-xs)"
-    "md" -> "var(--flin-text-sm)"
-    "lg" -> "var(--flin-text-base)"
+    "sm" -> "var(--flin-text-xs)",
+    "md" -> "var(--flin-text-sm)",
+    "lg" -> "var(--flin-text-base)",
     _ -> "var(--flin-text-sm)"
 }
 
 gap = match size {
-    "sm" -> "var(--flin-space-2)"
-    "md" -> "var(--flin-space-3)"
-    "lg" -> "var(--flin-space-4)"
+    "sm" -> "var(--flin-space-2)",
+    "md" -> "var(--flin-space-3)",
+    "lg" -> "var(--flin-space-4)",
     _ -> "var(--flin-space-3)"
 }
 
 // Orientation class
 orientationClass = match orientation {
-    "horizontal" -> "flin-legend--horizontal"
-    "vertical" -> "flin-legend--vertical"
+    "horizontal" -> "flin-legend--horizontal",
+    "vertical" -> "flin-legend--vertical",
     _ -> "flin-legend--horizontal"
 }
 
 // Position class
 positionClass = match position {
-    "top" -> "flin-legend--top"
-    "bottom" -> "flin-legend--bottom"
-    "left" -> "flin-legend--left"
-    "right" -> "flin-legend--right"
+    "top" -> "flin-legend--top",
+    "bottom" -> "flin-legend--bottom",
+    "left" -> "flin-legend--left",
+    "right" -> "flin-legend--right",
     _ -> "flin-legend--bottom"
 }
 
-// Handle item click
-handleClick = {
-    index = event.index
-    {if clickable && onItemClick}
-        onItemClick({ index: index, item: items[index] })
-    {/if}
-}
-
-// Handle item hover
-handleHover = {
-    index = event.index
-    {if onItemHover}
-        onItemHover({ index: index, item: items[index], hovering: true })
-    {/if}
-}
-
-handleLeave = {
-    index = event.index
-    {if onItemHover}
-        onItemHover({ index: index, item: items[index], hovering: false })
-    {/if}
-}
-
-// Check if item is active
-isActive = {
-    index = args.index
-    activeItems.length == 0 || activeItems.includes(index)
-}
+// Pre-compute clickable class
+clickableClass = match clickable { true -> " flin-legend__item--clickable", _ -> "" }
 
 <div
     class={"flin-legend " ++ orientationClass ++ " " ++ positionClass}
@@ -85,27 +59,10 @@ isActive = {
     role="list"
     aria-label="Chart legend"
 >
-    {for item, index in items}
-        clickableClass = match clickable { true -> " flin-legend__item--clickable", _ -> "" }
-        inactiveClass = match !isActive({ index: index }) { true -> " flin-legend__item--inactive", _ -> "" }
-        <div
-            class={"flin-legend__item" ++ clickableClass ++ inactiveClass}
-            role="listitem"
-            click={handleClick.bind({ index: index })}
-            mouseenter={handleHover.bind({ index: index })}
-            mouseleave={handleLeave.bind({ index: index })}
-        >
-            <span
-                class="flin-legend__dot"
-                style="--legend-color: {item.color};"
-                aria-hidden="true"
-            ></span>
-            <span class="flin-legend__label">{item.label}</span>
-            {if showValues && item.value != null}
-                <span class="flin-legend__value">{item.value}</span>
-            {/if}
-        </div>
-    {/for}
+    <div class={"flin-legend__item" ++ clickableClass} role="listitem">
+        <span class="flin-legend__dot" style="--legend-color: var(--flin-primary);" aria-hidden="true"></span>
+        <span class="flin-legend__label">Item</span>
+    </div>
 </div>
 
 <style scoped>
@@ -165,10 +122,6 @@ isActive = {
     opacity: 0.4;
 }
 
-.flin-legend__item--inactive .flin-legend__dot {
-    background-color: var(--flin-neutral-400) !important;
-}
-
 .flin-legend__dot {
     width: var(--legend-dot-size);
     height: var(--legend-dot-size);
@@ -193,17 +146,6 @@ isActive = {
     font-weight: 600;
     color: var(--flin-fg-muted);
     margin-left: var(--flin-space-1);
-}
-
-/* Dot shapes variant */
-.flin-legend--circles .flin-legend__dot {
-    border-radius: var(--flin-radius-full);
-}
-
-.flin-legend--lines .flin-legend__dot {
-    width: calc(var(--legend-dot-size) * 2);
-    height: 3px;
-    border-radius: var(--flin-radius-full);
 }
 
 /* Dark theme */

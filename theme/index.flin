@@ -12,52 +12,28 @@
 //
 // TH-06: Custom Themes & TH-07: CSS Variables Export
 
-// Theme configuration
-theme = {
-    name: "flin-default",
-    mode: "light",
-    colors: {
-        primary: "#3b82f6",
-        secondary: "#6b7280",
-        success: "#10b981",
-        warning: "#f59e0b",
-        danger: "#ef4444",
-        info: "#06b6d4"
-    },
-    fonts: {
-        sans: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
-        mono: "'JetBrains Mono', 'Fira Code', monospace"
-    },
-    radius: {
-        sm: "0.125rem",
-        md: "0.375rem",
-        lg: "0.5rem",
-        xl: "0.75rem",
-        full: "9999px"
-    }
-}
-
-// Current theme mode
+// Theme configuration tokens
+themeName = "flin-default"
 themeMode = "light"
 
-// Toggle between light and dark mode
-toggleTheme = fn() {
-    if themeMode == "light" {
-        themeMode = "dark"
-    } else {
-        themeMode = "light"
-    }
-}
+// Color tokens
+themePrimary = "#3b82f6"
+themeSecondary = "#6b7280"
+themeSuccess = "#10b981"
+themeWarning = "#f59e0b"
+themeDanger = "#ef4444"
+themeInfo = "#06b6d4"
 
-// Set specific theme mode
-setTheme = fn(mode) {
-    themeMode = mode
-}
+// Font tokens
+themeFontSans = "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+themeFontMono = "'JetBrains Mono', 'Fira Code', monospace"
 
-// Get current theme mode
-getTheme = fn() {
-    themeMode
-}
+// Radius tokens
+themeRadiusSm = "0.125rem"
+themeRadiusMd = "0.375rem"
+themeRadiusLg = "0.5rem"
+themeRadiusXl = "0.75rem"
+themeRadiusFull = "9999px"
 
 <div class="flin-theme-root" data-theme={themeMode}>
     {children}

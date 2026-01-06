@@ -9,22 +9,22 @@ spacing = props.spacing || "md"
 
 // Build class strings
 spacingClass = match spacing {
-    "sm" -> "flin-section-spacing-sm"
-    "md" -> "flin-section-spacing-md"
-    "lg" -> "flin-section-spacing-lg"
-    "xl" -> "flin-section-spacing-xl"
+    "sm" -> "flin-section-spacing-sm",
+    "md" -> "flin-section-spacing-md",
+    "lg" -> "flin-section-spacing-lg",
+    "xl" -> "flin-section-spacing-xl",
     _ -> "flin-section-spacing-md"
 }
 
 dividerTopClass = match divider {
-    "top" -> " flin-section-divider-top"
-    "both" -> " flin-section-divider-top"
+    "top" -> " flin-section-divider-top",
+    "both" -> " flin-section-divider-top",
     _ -> ""
 }
 
 dividerBottomClass = match divider {
-    "bottom" -> " flin-section-divider-bottom"
-    "both" -> " flin-section-divider-bottom"
+    "bottom" -> " flin-section-divider-bottom",
+    "both" -> " flin-section-divider-bottom",
     _ -> ""
 }
 
@@ -36,16 +36,16 @@ hasDescription = description != ""
 hasHeader = hasTitle || hasDescription
 
 <section class={sectionClass}>
-    {if hasHeader {
+    {if hasHeader}
         <header class="flin-section-header">
-            {if hasTitle {
+            {if hasTitle}
                 <h2 class="flin-section-title">{title}</h2>
-            }}
-            {if hasDescription {
+            {/if}
+            {if hasDescription}
                 <p class="flin-section-description">{description}</p>
-            }}
+            {/if}
         </header>
-    }}
+    {/if}
     <div class="flin-section-content">
         {children}
     </div>

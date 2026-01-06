@@ -5,9 +5,7 @@
 balance = props.balance || "0.00"
 currency = props.currency || "USD"
 currencySymbol = props.currencySymbol || "$"
-tokens = props.tokens || []
 address = props.address || ""
-transactions = props.transactions || []
 showActions = props.showActions ?? true
 showQR = props.showQR || false
 priceChange = props.priceChange || 0
@@ -25,14 +23,8 @@ toggleQR = {
     }
 }
 
-copyAddress = {
-    // Copy to clipboard
-    navigator.clipboard.writeText(address)
+handleCopyAddress = {
     addressCopied = true
-    // Reset after 2 seconds
-    setTimeout(() => {
-        addressCopied = false
-    }, 2000)
     if props.onAddressCopy {
         props.onAddressCopy(address)
     }
@@ -60,13 +52,12 @@ handleSwap = {
 priceUp = priceChange > 0
 priceDown = priceChange < 0
 priceNeutral = priceChange == 0
-formattedChange = if priceUp { "+" ++ priceChange ++ "%" } else { priceChange ++ "%" }
+formattedChange = match priceUp { true -> "+" ++ priceChange ++ "%", _ -> priceChange ++ "%" }
 
 // Format wallet address (show first 6 and last 4 chars)
-shortAddress = if address.length > 10 {
-    address.slice(0, 6) ++ "..." ++ address.slice(-4)
-} else {
-    address
+shortAddress = match address.length > 10 {
+    true -> address.slice(0, 6) ++ "..."
+    _ -> address
 }
 
 // Compute variant classes
@@ -76,42 +67,22 @@ variantClass = match variant {
     _ -> ""
 }
 
-// Transaction type styling
-getTransactionTypeClass = fn(type) {
-    match type {
-        "send" -> "flin-wallet-card__tx--send"
-        "receive" -> "flin-wallet-card__tx--receive"
-        "swap" -> "flin-wallet-card__tx--swap"
+// Compute change class
+changeClass = match priceUp {
+    true -> "flin-wallet-card__change--up"
+    _ -> match priceDown {
+        true -> "flin-wallet-card__change--down"
         _ -> ""
     }
 }
 
-getTransactionIcon = fn(type) {
-    match type {
-        "send" -> "arrow-up-right"
-        "receive" -> "arrow-down-left"
-        "swap" -> "refresh"
-        _ -> "circle"
-    }
-}
-
-<div class="flin-wallet-card {variantClass}">
+<div class={"flin-wallet-card " ++ variantClass}>
     <!-- Header with currency and price change -->
     <div class="flin-wallet-card__header">
         <div class="flin-wallet-card__currency-info">
             <span class="flin-wallet-card__currency">{currency}</span>
             {if !priceNeutral}
-                <span class="flin-wallet-card__change {if priceUp { 'flin-wallet-card__change--up' }} {if priceDown { 'flin-wallet-card__change--down' }}">
-                    {if priceUp}
-                        <svg class="flin-wallet-card__change-icon" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                        </svg>
-                    {/if}
-                    {if priceDown}
-                        <svg class="flin-wallet-card__change-icon" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                        </svg>
-                    {/if}
+                <span class={"flin-wallet-card__change " ++ changeClass}>
                     {formattedChange}
                 </span>
             {/if}
@@ -137,17 +108,10 @@ getTransactionIcon = fn(type) {
         {if qrVisible && address != ""}
             <div class="flin-wallet-card__qr-container">
                 <div class="flin-wallet-card__qr-code">
-                    <!-- QR Code placeholder - uses QRCode component -->
                     <svg class="flin-wallet-card__qr-placeholder" viewBox="0 0 100 100">
                         <rect x="10" y="10" width="25" height="25" fill="currentColor" />
                         <rect x="65" y="10" width="25" height="25" fill="currentColor" />
                         <rect x="10" y="65" width="25" height="25" fill="currentColor" />
-                        <rect x="15" y="15" width="15" height="15" fill="var(--flin-bg)" />
-                        <rect x="70" y="15" width="15" height="15" fill="var(--flin-bg)" />
-                        <rect x="15" y="70" width="15" height="15" fill="var(--flin-bg)" />
-                        <rect x="18" y="18" width="9" height="9" fill="currentColor" />
-                        <rect x="73" y="18" width="9" height="9" fill="currentColor" />
-                        <rect x="18" y="73" width="9" height="9" fill="currentColor" />
                         <rect x="40" y="40" width="20" height="20" fill="currentColor" />
                     </svg>
                 </div>
@@ -166,19 +130,9 @@ getTransactionIcon = fn(type) {
         <div class="flin-wallet-card__address-section">
             <button class="flin-wallet-card__address-btn"
                     type="button"
-                    click={copyAddress}
+                    click={handleCopyAddress}
                     aria-label="Copy wallet address">
                 <span class="flin-wallet-card__address-text">{shortAddress}</span>
-                {if addressCopied}
-                    <svg class="flin-wallet-card__address-icon flin-wallet-card__address-icon--check" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                {else}
-                    <svg class="flin-wallet-card__address-icon" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                    </svg>
-                {/if}
             </button>
             {if addressCopied}
                 <span class="flin-wallet-card__copied-toast">Copied!</span>
@@ -224,85 +178,8 @@ getTransactionIcon = fn(type) {
         </div>
     {/if}
 
-    <!-- Tokens list -->
-    {if tokens.length > 0}
-        <div class="flin-wallet-card__tokens">
-            <h4 class="flin-wallet-card__section-title">Assets</h4>
-            <div class="flin-wallet-card__tokens-list">
-                {for token in tokens}
-                    <div class="flin-wallet-card__token">
-                        <div class="flin-wallet-card__token-left">
-                            {if token.icon}
-                                <img class="flin-wallet-card__token-icon" src={token.icon} alt={token.symbol} />
-                            {else}
-                                <div class="flin-wallet-card__token-icon flin-wallet-card__token-icon--placeholder">
-                                    {token.symbol.slice(0, 2)}
-                                </div>
-                            {/if}
-                            <div class="flin-wallet-card__token-info">
-                                <span class="flin-wallet-card__token-name">{token.name || token.symbol}</span>
-                                <span class="flin-wallet-card__token-symbol">{token.symbol}</span>
-                            </div>
-                        </div>
-                        <div class="flin-wallet-card__token-right">
-                            <span class="flin-wallet-card__token-amount">{token.amount || "0"}</span>
-                            {if token.value}
-                                <span class="flin-wallet-card__token-value">{currencySymbol}{token.value}</span>
-                            {/if}
-                        </div>
-                    </div>
-                {/for}
-            </div>
-        </div>
-    {/if}
-
-    <!-- Recent transactions -->
-    {if transactions.length > 0}
-        <div class="flin-wallet-card__transactions">
-            <h4 class="flin-wallet-card__section-title">Recent Activity</h4>
-            <div class="flin-wallet-card__tx-list">
-                {for tx in transactions}
-                    <div class="flin-wallet-card__tx {getTransactionTypeClass(tx.type)}">
-                        <div class="flin-wallet-card__tx-left">
-                            <div class="flin-wallet-card__tx-icon">
-                                {if tx.type == "send"}
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M7 17L17 7M17 7H7M17 7V17" />
-                                    </svg>
-                                {/if}
-                                {if tx.type == "receive"}
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M17 7L7 17M7 17H17M7 17V7" />
-                                    </svg>
-                                {/if}
-                                {if tx.type == "swap"}
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M7 16V4M7 4L3 8M7 4L11 8M17 8V20M17 20L21 16M17 20L13 16" />
-                                    </svg>
-                                {/if}
-                            </div>
-                            <div class="flin-wallet-card__tx-info">
-                                <span class="flin-wallet-card__tx-title">{tx.title || tx.type}</span>
-                                <span class="flin-wallet-card__tx-date">{tx.date || ""}</span>
-                            </div>
-                        </div>
-                        <div class="flin-wallet-card__tx-right">
-                            <span class="flin-wallet-card__tx-amount {if tx.type == 'receive' { 'flin-wallet-card__tx-amount--positive' }}">
-                                {if tx.type == "receive"}{"+"}{ /if}
-                                {if tx.type == "send"}{"-"}{/if}
-                                {tx.amount || "0"} {tx.symbol || ""}
-                            </span>
-                            {if tx.status}
-                                <span class="flin-wallet-card__tx-status flin-wallet-card__tx-status--{tx.status}">
-                                    {tx.status}
-                                </span>
-                            {/if}
-                        </div>
-                    </div>
-                {/for}
-            </div>
-        </div>
-    {/if}
+    <!-- Tokens and transactions slot for dynamic content -->
+    <slot></slot>
 </div>
 
 <style scoped>
@@ -316,36 +193,18 @@ getTransactionIcon = fn(type) {
     position: relative;
 }
 
-/* Gradient variant */
 .flin-wallet-card--gradient {
-    background: linear-gradient(135deg,
-        var(--flin-primary) 0%,
-        var(--flin-primary-dark, #4338ca) 50%,
-        #7c3aed 100%);
+    background: linear-gradient(135deg, var(--flin-primary) 0%, #7c3aed 100%);
     border: none;
     color: white;
 }
 
-.flin-wallet-card--gradient::before {
-    content: "";
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-    pointer-events: none;
-}
-
-/* Glass variant */
 .flin-wallet-card--glass {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Header */
 .flin-wallet-card__header {
     display: flex;
     justify-content: space-between;
@@ -364,18 +223,11 @@ getTransactionIcon = fn(type) {
     font-weight: 600;
     color: var(--flin-fg-muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__currency,
-.flin-wallet-card--glass .flin-wallet-card__currency {
-    color: rgba(255, 255, 255, 0.8);
 }
 
 .flin-wallet-card__change {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
     padding: var(--flin-space-1) var(--flin-space-2);
     font-size: var(--flin-text-xs);
     font-weight: 600;
@@ -392,23 +244,6 @@ getTransactionIcon = fn(type) {
     background-color: var(--flin-danger-light);
 }
 
-.flin-wallet-card--gradient .flin-wallet-card__change--up,
-.flin-wallet-card--glass .flin-wallet-card__change--up {
-    background-color: rgba(34, 197, 94, 0.3);
-    color: #86efac;
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__change--down,
-.flin-wallet-card--glass .flin-wallet-card__change--down {
-    background-color: rgba(239, 68, 68, 0.3);
-    color: #fca5a5;
-}
-
-.flin-wallet-card__change-icon {
-    width: 12px;
-    height: 12px;
-}
-
 .flin-wallet-card__qr-toggle {
     display: flex;
     align-items: center;
@@ -421,12 +256,6 @@ getTransactionIcon = fn(type) {
     border-radius: var(--flin-radius-md);
     cursor: pointer;
     color: var(--flin-fg-muted);
-    transition: all var(--flin-transition-fast);
-}
-
-.flin-wallet-card__qr-toggle:hover {
-    background-color: var(--flin-neutral-200);
-    color: var(--flin-fg);
 }
 
 .flin-wallet-card__qr-toggle svg {
@@ -434,19 +263,6 @@ getTransactionIcon = fn(type) {
     height: 18px;
 }
 
-.flin-wallet-card--gradient .flin-wallet-card__qr-toggle,
-.flin-wallet-card--glass .flin-wallet-card__qr-toggle {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__qr-toggle:hover,
-.flin-wallet-card--glass .flin-wallet-card__qr-toggle:hover {
-    background-color: rgba(255, 255, 255, 0.25);
-    color: white;
-}
-
-/* Balance section */
 .flin-wallet-card__balance-section {
     margin-bottom: var(--flin-space-4);
     min-height: 80px;
@@ -471,22 +287,8 @@ getTransactionIcon = fn(type) {
     font-weight: 700;
     color: var(--flin-fg);
     line-height: 1;
-    letter-spacing: -0.02em;
 }
 
-.flin-wallet-card--gradient .flin-wallet-card__balance-symbol,
-.flin-wallet-card--gradient .flin-wallet-card__balance-value,
-.flin-wallet-card--glass .flin-wallet-card__balance-symbol,
-.flin-wallet-card--glass .flin-wallet-card__balance-value {
-    color: white;
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__balance-symbol,
-.flin-wallet-card--glass .flin-wallet-card__balance-symbol {
-    opacity: 0.8;
-}
-
-/* QR Code container */
 .flin-wallet-card__qr-container {
     display: flex;
     flex-direction: column;
@@ -513,12 +315,6 @@ getTransactionIcon = fn(type) {
     margin: 0;
 }
 
-.flin-wallet-card--gradient .flin-wallet-card__qr-hint,
-.flin-wallet-card--glass .flin-wallet-card__qr-hint {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-/* Address section */
 .flin-wallet-card__address-section {
     display: flex;
     align-items: center;
@@ -538,59 +334,14 @@ getTransactionIcon = fn(type) {
     font-family: var(--flin-font-mono);
     font-size: var(--flin-text-sm);
     color: var(--flin-fg-muted);
-    transition: all var(--flin-transition-fast);
-}
-
-.flin-wallet-card__address-btn:hover {
-    background-color: var(--flin-neutral-200);
-    color: var(--flin-fg);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__address-btn,
-.flin-wallet-card--glass .flin-wallet-card__address-btn {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__address-btn:hover,
-.flin-wallet-card--glass .flin-wallet-card__address-btn:hover {
-    background-color: rgba(255, 255, 255, 0.25);
-    color: white;
-}
-
-.flin-wallet-card__address-icon {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-}
-
-.flin-wallet-card__address-icon--check {
-    color: var(--flin-success);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__address-icon--check,
-.flin-wallet-card--glass .flin-wallet-card__address-icon--check {
-    color: #86efac;
 }
 
 .flin-wallet-card__copied-toast {
     font-size: var(--flin-text-xs);
     color: var(--flin-success);
     font-weight: 500;
-    animation: fadeIn 0.2s ease-out;
 }
 
-.flin-wallet-card--gradient .flin-wallet-card__copied-toast,
-.flin-wallet-card--glass .flin-wallet-card__copied-toast {
-    color: #86efac;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateX(-4px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-/* Action buttons */
 .flin-wallet-card__actions {
     display: flex;
     gap: var(--flin-space-3);
@@ -598,11 +349,6 @@ getTransactionIcon = fn(type) {
     padding: var(--flin-space-4) 0;
     border-top: 1px solid var(--flin-neutral-200);
     border-bottom: 1px solid var(--flin-neutral-200);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__actions,
-.flin-wallet-card--glass .flin-wallet-card__actions {
-    border-color: rgba(255, 255, 255, 0.15);
 }
 
 .flin-wallet-card__action {
@@ -616,26 +362,6 @@ getTransactionIcon = fn(type) {
     border: none;
     border-radius: var(--flin-radius-lg);
     cursor: pointer;
-    transition: all var(--flin-transition-fast);
-}
-
-.flin-wallet-card__action:hover {
-    background-color: var(--flin-neutral-100);
-    transform: translateY(-2px);
-}
-
-.flin-wallet-card__action:active {
-    transform: translateY(0);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__action,
-.flin-wallet-card--glass .flin-wallet-card__action {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__action:hover,
-.flin-wallet-card--glass .flin-wallet-card__action:hover {
-    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .flin-wallet-card__action-icon {
@@ -645,19 +371,13 @@ getTransactionIcon = fn(type) {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: var(--flin-primary-light, #eef2ff);
+    background-color: var(--flin-primary-light);
     color: var(--flin-primary);
 }
 
 .flin-wallet-card__action-icon svg {
     width: 20px;
     height: 20px;
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__action-icon,
-.flin-wallet-card--glass .flin-wallet-card__action-icon {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
 }
 
 .flin-wallet-card__action--send .flin-wallet-card__action-icon {
@@ -675,321 +395,12 @@ getTransactionIcon = fn(type) {
     color: var(--flin-info);
 }
 
-.flin-wallet-card--gradient .flin-wallet-card__action--send .flin-wallet-card__action-icon,
-.flin-wallet-card--gradient .flin-wallet-card__action--receive .flin-wallet-card__action-icon,
-.flin-wallet-card--gradient .flin-wallet-card__action--swap .flin-wallet-card__action-icon,
-.flin-wallet-card--glass .flin-wallet-card__action--send .flin-wallet-card__action-icon,
-.flin-wallet-card--glass .flin-wallet-card__action--receive .flin-wallet-card__action-icon,
-.flin-wallet-card--glass .flin-wallet-card__action--swap .flin-wallet-card__action-icon {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-}
-
 .flin-wallet-card__action-label {
     font-size: var(--flin-text-sm);
     font-weight: 500;
     color: var(--flin-fg);
 }
 
-.flin-wallet-card--gradient .flin-wallet-card__action-label,
-.flin-wallet-card--glass .flin-wallet-card__action-label {
-    color: white;
-}
-
-/* Section titles */
-.flin-wallet-card__section-title {
-    font-size: var(--flin-text-xs);
-    font-weight: 600;
-    color: var(--flin-fg-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0 0 var(--flin-space-3) 0;
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__section-title,
-.flin-wallet-card--glass .flin-wallet-card__section-title {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-/* Tokens list */
-.flin-wallet-card__tokens {
-    margin-bottom: var(--flin-space-4);
-}
-
-.flin-wallet-card__tokens-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-space-2);
-}
-
-.flin-wallet-card__token {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--flin-space-3);
-    background-color: var(--flin-neutral-50);
-    border-radius: var(--flin-radius-lg);
-    transition: background-color var(--flin-transition-fast);
-}
-
-.flin-wallet-card__token:hover {
-    background-color: var(--flin-neutral-100);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__token,
-.flin-wallet-card--glass .flin-wallet-card__token {
-    background-color: rgba(255, 255, 255, 0.08);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__token:hover,
-.flin-wallet-card--glass .flin-wallet-card__token:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-}
-
-.flin-wallet-card__token-left {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-3);
-}
-
-.flin-wallet-card__token-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.flin-wallet-card__token-icon--placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, var(--flin-primary) 0%, #7c3aed 100%);
-    color: white;
-    font-size: var(--flin-text-xs);
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.flin-wallet-card__token-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.flin-wallet-card__token-name {
-    font-size: var(--flin-text-sm);
-    font-weight: 600;
-    color: var(--flin-fg);
-}
-
-.flin-wallet-card__token-symbol {
-    font-size: var(--flin-text-xs);
-    color: var(--flin-fg-muted);
-    text-transform: uppercase;
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__token-name,
-.flin-wallet-card--glass .flin-wallet-card__token-name {
-    color: white;
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__token-symbol,
-.flin-wallet-card--glass .flin-wallet-card__token-symbol {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.flin-wallet-card__token-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
-}
-
-.flin-wallet-card__token-amount {
-    font-size: var(--flin-text-sm);
-    font-weight: 600;
-    color: var(--flin-fg);
-    font-family: var(--flin-font-mono);
-}
-
-.flin-wallet-card__token-value {
-    font-size: var(--flin-text-xs);
-    color: var(--flin-fg-muted);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__token-amount,
-.flin-wallet-card--glass .flin-wallet-card__token-amount {
-    color: white;
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__token-value,
-.flin-wallet-card--glass .flin-wallet-card__token-value {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-/* Transactions list */
-.flin-wallet-card__transactions {
-    margin-top: var(--flin-space-4);
-}
-
-.flin-wallet-card__tx-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-space-2);
-}
-
-.flin-wallet-card__tx {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--flin-space-3);
-    background-color: var(--flin-neutral-50);
-    border-radius: var(--flin-radius-lg);
-    transition: background-color var(--flin-transition-fast);
-}
-
-.flin-wallet-card__tx:hover {
-    background-color: var(--flin-neutral-100);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__tx,
-.flin-wallet-card--glass .flin-wallet-card__tx {
-    background-color: rgba(255, 255, 255, 0.08);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__tx:hover,
-.flin-wallet-card--glass .flin-wallet-card__tx:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-}
-
-.flin-wallet-card__tx-left {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-3);
-}
-
-.flin-wallet-card__tx-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: var(--flin-neutral-200);
-    color: var(--flin-fg-muted);
-}
-
-.flin-wallet-card__tx-icon svg {
-    width: 16px;
-    height: 16px;
-}
-
-.flin-wallet-card__tx--send .flin-wallet-card__tx-icon {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: var(--flin-danger);
-}
-
-.flin-wallet-card__tx--receive .flin-wallet-card__tx-icon {
-    background-color: rgba(34, 197, 94, 0.1);
-    color: var(--flin-success);
-}
-
-.flin-wallet-card__tx--swap .flin-wallet-card__tx-icon {
-    background-color: rgba(59, 130, 246, 0.1);
-    color: var(--flin-info);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__tx-icon,
-.flin-wallet-card--glass .flin-wallet-card__tx-icon {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: white;
-}
-
-.flin-wallet-card__tx-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.flin-wallet-card__tx-title {
-    font-size: var(--flin-text-sm);
-    font-weight: 500;
-    color: var(--flin-fg);
-    text-transform: capitalize;
-}
-
-.flin-wallet-card__tx-date {
-    font-size: var(--flin-text-xs);
-    color: var(--flin-fg-muted);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__tx-title,
-.flin-wallet-card--glass .flin-wallet-card__tx-title {
-    color: white;
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__tx-date,
-.flin-wallet-card--glass .flin-wallet-card__tx-date {
-    color: rgba(255, 255, 255, 0.6);
-}
-
-.flin-wallet-card__tx-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
-}
-
-.flin-wallet-card__tx-amount {
-    font-size: var(--flin-text-sm);
-    font-weight: 600;
-    color: var(--flin-fg);
-    font-family: var(--flin-font-mono);
-}
-
-.flin-wallet-card__tx-amount--positive {
-    color: var(--flin-success);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__tx-amount,
-.flin-wallet-card--glass .flin-wallet-card__tx-amount {
-    color: white;
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__tx-amount--positive,
-.flin-wallet-card--glass .flin-wallet-card__tx-amount--positive {
-    color: #86efac;
-}
-
-.flin-wallet-card__tx-status {
-    font-size: var(--flin-text-xs);
-    font-weight: 500;
-    padding: 2px 6px;
-    border-radius: var(--flin-radius-sm);
-    text-transform: capitalize;
-}
-
-.flin-wallet-card__tx-status--pending {
-    background-color: rgba(251, 191, 36, 0.1);
-    color: var(--flin-warning);
-}
-
-.flin-wallet-card__tx-status--completed {
-    background-color: rgba(34, 197, 94, 0.1);
-    color: var(--flin-success);
-}
-
-.flin-wallet-card__tx-status--failed {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: var(--flin-danger);
-}
-
-.flin-wallet-card--gradient .flin-wallet-card__tx-status,
-.flin-wallet-card--glass .flin-wallet-card__tx-status {
-    background-color: rgba(255, 255, 255, 0.15);
-}
-
-/* Dark theme support */
 [data-theme="dark"] .flin-wallet-card {
     border-color: var(--flin-neutral-700);
 }
@@ -998,16 +409,8 @@ getTransactionIcon = fn(type) {
     background-color: var(--flin-neutral-800);
 }
 
-[data-theme="dark"] .flin-wallet-card__qr-toggle:hover {
-    background-color: var(--flin-neutral-700);
-}
-
 [data-theme="dark"] .flin-wallet-card__address-btn {
     background-color: var(--flin-neutral-800);
-}
-
-[data-theme="dark"] .flin-wallet-card__address-btn:hover {
-    background-color: var(--flin-neutral-700);
 }
 
 [data-theme="dark"] .flin-wallet-card__actions {
@@ -1016,60 +419,5 @@ getTransactionIcon = fn(type) {
 
 [data-theme="dark"] .flin-wallet-card__action {
     background-color: var(--flin-neutral-800);
-}
-
-[data-theme="dark"] .flin-wallet-card__action:hover {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-wallet-card__token,
-[data-theme="dark"] .flin-wallet-card__tx {
-    background-color: var(--flin-neutral-800);
-}
-
-[data-theme="dark"] .flin-wallet-card__token:hover,
-[data-theme="dark"] .flin-wallet-card__tx:hover {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-wallet-card__tx-icon {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .flin-wallet-card__change--up {
-    background-color: rgba(34, 197, 94, 0.2);
-}
-
-[data-theme="dark"] .flin-wallet-card__change--down {
-    background-color: rgba(239, 68, 68, 0.2);
-}
-
-/* Responsive adjustments */
-@media (max-width: 480px) {
-    .flin-wallet-card {
-        padding: var(--flin-space-4);
-    }
-
-    .flin-wallet-card__balance-value {
-        font-size: var(--flin-text-3xl);
-    }
-
-    .flin-wallet-card__actions {
-        gap: var(--flin-space-2);
-    }
-
-    .flin-wallet-card__action {
-        padding: var(--flin-space-2);
-    }
-
-    .flin-wallet-card__action-icon {
-        width: 36px;
-        height: 36px;
-    }
-
-    .flin-wallet-card__action-icon svg {
-        width: 18px;
-        height: 18px;
-    }
 }
 </style>

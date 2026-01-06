@@ -11,24 +11,8 @@ size = props.size || "md"
 // Internal state for active tab
 activeTab = value
 
-// Handle tab selection
-selectTab = {
-    activeTab = event.value
-    if onChange {
-        onChange(event.value)
-    }
-}
-
-// Handle keyboard navigation
-handleKeydown = {
-    match event.key {
-        "ArrowLeft" -> focusPreviousTab()
-        "ArrowRight" -> focusNextTab()
-        "Home" -> focusFirstTab()
-        "End" -> focusLastTab()
-        _ -> {}
-    }
-}
+// Handle tab selection - passed through from onChange prop
+onTabChange = onChange
 
 // Variant class
 variantClass = match variant {
@@ -52,7 +36,6 @@ fullWidthClass = match fullWidth { true -> " flin-tabs--full-width", _ -> "" }
     class={"flin-tabs " ++ variantClass ++ " " ++ sizeClass ++ fullWidthClass}
     role="tablist"
     aria-label="Tabs"
-    keydown={handleKeydown}
     data-active-tab={activeTab}
 >
     <div class="flin-tabs__list">

@@ -52,15 +52,15 @@ colonSuffix = match colon {
     {/if}
 
     <div class="flin-descriptions__body">
-        {for item, index in items}
+        {for item in items}
             <div class="flin-descriptions__item"
-                 style={if item.span { "--item-span: " ++ item.span } else { "--item-span: 1" }}
+                 style="--item-span: 1"
                  role="listitem">
                 <dt class="flin-descriptions__label">
-                    {item.label}{colonSuffix}
+                    {item}{colonSuffix}
                 </dt>
                 <dd class="flin-descriptions__content">
-                    {item.value}
+                    {item}
                 </dd>
             </div>
         {/for}

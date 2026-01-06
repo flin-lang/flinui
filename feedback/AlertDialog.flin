@@ -17,36 +17,31 @@ isClosing = false
 
 // Handle confirm action
 handleConfirm = {
-    {if !loading}
-        {if onConfirm}
-            onConfirm()
-        {/if}
-    {/if}
+    if !loading && onConfirm { onConfirm() }
 }
 
 // Handle cancel/close action
 handleCancel = {
-    {if !loading}
-        isClosing = true;
-        setTimeout({
-            isClosing = false;
-            {if onCancel}
-                onCancel()
-            {/if}
-        }, 200)
-    {/if}
+    if !loading {
+        isClosing = true
+        if onCancel { onCancel() }
+    }
 }
 
 // Handle backdrop click
 handleBackdropClick = {
-    handleCancel()
+    if !loading {
+        isClosing = true
+        if onCancel { onCancel() }
+    }
 }
 
 // Handle escape key
 handleKeyDown = {
-    {if event.key == "Escape"}
-        handleCancel()
-    {/if}
+    if !loading {
+        isClosing = true
+        if onCancel { onCancel() }
+    }
 }
 
 // Variant class
@@ -80,7 +75,10 @@ confirmButtonClass = match variant {
 // Loading class
 loadingClass = match loading { true -> " alert-dialog-loading", _ -> "" }
 
-{if open}
+// Compute display class
+displayClass = match open { true -> "flin-alert-dialog-container", _ -> "flin-alert-dialog-container flin-alert-dialog-container--hidden" }
+
+<div class={displayClass}>
     <div
         class={"flin-alert-dialog-backdrop" ++ backdropClosingClass}
         click={handleBackdropClick}
@@ -107,7 +105,7 @@ loadingClass = match loading { true -> " alert-dialog-loading", _ -> "" }
                 {title}
             </h2>
 
-            {if description}
+            {if description != ""}
                 <p id="alert-dialog-description" class="alert-dialog-description">
                     {description}
                 </p>
@@ -137,7 +135,7 @@ loadingClass = match loading { true -> " alert-dialog-loading", _ -> "" }
             </button>
         </div>
     </div>
-{/if}
+</div>
 
 <style scoped>
 /* Backdrop */

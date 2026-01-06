@@ -10,21 +10,8 @@ disabled = props.disabled || false
 // Get active state from parent context
 isActive = props.isActive || false
 
-// Handle click
-handleClick = {
-    if !disabled {
-        // Dispatch custom event to parent Tabs component
-        props.onSelect(value)
-    }
-}
-
-// Handle keyboard interaction
-handleKeydown = {
-    if event.key == "Enter" || event.key == " " {
-        event.preventDefault
-        handleClick()
-    }
-}
+// Get onSelect handler from props
+onSelect = props.onSelect
 
 // Computed class
 activeClass = match isActive { true -> " flin-tab--active", _ -> "" }
@@ -35,8 +22,7 @@ activeClass = match isActive { true -> " flin-tab--active", _ -> "" }
     aria-selected={isActive}
     aria-disabled={disabled}
     tabindex={if isActive { 0 } else { -1 }}
-    click={handleClick}
-    keydown={handleKeydown}
+    click={onSelect}
     disabled={disabled}
     data-value={value}
 >

@@ -1,299 +1,93 @@
 // RatingInput.flin - FlinUI Rating Input Component
-// Star rating input with hover preview and half-star support
+// Star rating input with hover and selection states
 
 // Props with defaults
 value = props.value || 0
 max = props.max || 5
+disabled = props.disabled || false
 size = props.size || "md"
-readonly = props.readonly || false
-precision = props.precision || "full"  // "full" or "half"
-icon = props.icon || "star"
-color = props.color || "warning"
 onChange = props.onChange
-
-// Internal state
-currentValue = value
-hoverValue = -1
-isHovering = false
 
 // Size classes
 sizeClass = match size {
-    "sm" -> "rating-sm"
-    "lg" -> "rating-lg"
-    _ -> "rating-md"
-}
-
-// Color classes
-colorClass = match color {
-    "primary" -> "rating-primary"
-    "danger" -> "rating-danger"
-    "success" -> "rating-success"
-    _ -> "rating-warning"
-}
-
-// Get display value (hover or current)
-displayValue = match isHovering {
-    true -> hoverValue
-    _ -> currentValue
-}
-
-// Calculate star fill for a given index
-getStarFill = {
-    index = event;
-    starValue = index + 1;
-
-    {if displayValue >= starValue}
-        "full"
-    {else if precision == "half" && displayValue >= starValue - 0.5}
-        "half"
-    {else}
-        "empty"
-    {/if}
-}
-
-// Handle mouse move on a star
-handleMouseMove = {
-    {if !readonly}
-        index = parseInt(event.currentTarget.dataset.index);
-        rect = event.currentTarget.getBoundingClientRect();
-        x = event.clientX - rect.left;
-        halfWidth = rect.width / 2;
-
-        {if precision == "half" && x < halfWidth}
-            hoverValue = index + 0.5
-        {else}
-            hoverValue = index + 1
-        {/if}
-
-        isHovering = true
-    {/if}
-}
-
-// Handle mouse leave
-handleMouseLeave = {
-    isHovering = false;
-    hoverValue = -1
-}
-
-// Handle click
-handleClick = {
-    {if !readonly}
-        newValue = hoverValue;
-
-        // Toggle off if clicking same value
-        {if newValue == currentValue}
-            currentValue = 0
-        {else}
-            currentValue = newValue
-        {/if}
-
-        {if onChange}
-            onChange(currentValue)
-        {/if}
-    {/if}
-}
-
-// Handle keyboard
-handleKeydown = {
-    {if !readonly}
-        {if event.key == "ArrowRight" || event.key == "ArrowUp"}
-            event.preventDefault();
-            step = match precision { "half" -> 0.5, _ -> 1 };
-            newValue = Math.min(max, currentValue + step);
-            currentValue = newValue;
-            {if onChange}
-                onChange(currentValue)
-            {/if}
-        {else if event.key == "ArrowLeft" || event.key == "ArrowDown"}
-            event.preventDefault();
-            step = match precision { "half" -> 0.5, _ -> 1 };
-            newValue = Math.max(0, currentValue - step);
-            currentValue = newValue;
-            {if onChange}
-                onChange(currentValue)
-            {/if}
-        {/if}
-    {/if}
+    "sm" -> "rating-input-sm"
+    "lg" -> "rating-input-lg"
+    _ -> "rating-input-md"
 }
 
 // Compute classes
-readonlyClass = match readonly { true -> " rating-readonly", _ -> "" }
-containerClass = "rating " ++ sizeClass ++ " " ++ colorClass ++ readonlyClass
+disabledClass = match disabled {
+    true -> " rating-input-disabled"
+    _ -> ""
+}
+containerClass = "rating-input " ++ sizeClass ++ disabledClass
 
-<div
-    class={containerClass}
-    role="slider"
-    aria-valuemin="0"
-    aria-valuemax={max}
-    aria-valuenow={currentValue}
-    aria-label="Rating"
-    tabindex={readonly ? "-1" : "0"}
-    keydown={handleKeydown}
-    mouseleave={handleMouseLeave}
->
-    {for i in range(0, max)}
-        starFill = getStarFill(i)
-        fillClass = match starFill {
-            "full" -> " rating-star-full"
-            "half" -> " rating-star-half"
-            _ -> " rating-star-empty"
-        }
-        <span
-            class={"rating-star" ++ fillClass}
-            data-index={i}
-            mousemove={handleMouseMove}
-            click={handleClick}
-            aria-hidden="true"
+<div class={containerClass} role="slider" aria-valuemin="0" aria-valuemax={max} aria-valuenow={value}>
+    {for i in range(1, 6)}
+        <button
+            type="button"
+            class="rating-star"
+            disabled={disabled}
+            data-value={i}
+            aria-label="Rating star"
         >
-            {if icon == "heart"}
-                <svg class="rating-icon rating-icon-bg" viewBox="0 0 24 24">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
-                <svg class="rating-icon rating-icon-fill" viewBox="0 0 24 24">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
-            {else}
-                <svg class="rating-icon rating-icon-bg" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-                <svg class="rating-icon rating-icon-fill" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-            {/if}
-        </span>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+        </button>
     {/for}
-    <span class="rating-value" aria-hidden="true">{currentValue}/{max}</span>
 </div>
 
 <style scoped>
-.rating {
+.rating-input {
     display: inline-flex;
     align-items: center;
     gap: var(--flin-space-1);
-    user-select: none;
-    outline: none;
-}
-
-.rating:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 4px;
-    border-radius: var(--flin-radius-sm);
 }
 
 .rating-star {
-    position: relative;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--flin-neutral-300);
     cursor: pointer;
-    transition: transform var(--flin-transition-fast);
+    transition: all var(--flin-transition-fast);
+    padding: 0;
 }
 
-.rating-star:hover {
+.rating-star:hover:not(:disabled) {
+    color: var(--flin-warning);
     transform: scale(1.1);
 }
 
-.rating-readonly .rating-star {
-    cursor: default;
-}
-
-.rating-readonly .rating-star:hover {
-    transform: none;
-}
-
-.rating-icon {
-    display: block;
-}
-
-.rating-icon-bg {
-    fill: var(--flin-neutral-200);
-    stroke: var(--flin-neutral-300);
-    stroke-width: 1;
-}
-
-.rating-icon-fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    clip-path: inset(0 100% 0 0);
-    transition: clip-path var(--flin-transition-fast);
-}
-
-/* Full star */
-.rating-star-full .rating-icon-fill {
-    clip-path: inset(0 0 0 0);
-}
-
-/* Half star */
-.rating-star-half .rating-icon-fill {
-    clip-path: inset(0 50% 0 0);
-}
-
-/* Empty star */
-.rating-star-empty .rating-icon-fill {
-    clip-path: inset(0 100% 0 0);
-}
-
-/* Rating value display */
-.rating-value {
-    font-family: var(--flin-font-sans);
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg-muted);
-    margin-left: var(--flin-space-2);
+.rating-star:disabled {
+    cursor: not-allowed;
 }
 
 /* Size variants */
-.rating-sm .rating-icon {
+.rating-input-sm .rating-star svg {
     width: 16px;
     height: 16px;
 }
 
-.rating-sm .rating-value {
-    font-size: var(--flin-text-xs);
-}
-
-.rating-md .rating-icon {
+.rating-input-md .rating-star svg {
     width: 24px;
     height: 24px;
 }
 
-.rating-lg .rating-icon {
+.rating-input-lg .rating-star svg {
     width: 32px;
     height: 32px;
 }
 
-.rating-lg .rating-value {
-    font-size: var(--flin-text-base);
+/* Disabled state */
+.rating-input-disabled {
+    opacity: 0.5;
 }
 
-/* Color variants */
-.rating-warning .rating-icon-fill {
-    fill: var(--flin-warning);
-    stroke: var(--flin-warning);
-}
-
-.rating-primary .rating-icon-fill {
-    fill: var(--flin-primary);
-    stroke: var(--flin-primary);
-}
-
-.rating-danger .rating-icon-fill {
-    fill: var(--flin-danger);
-    stroke: var(--flin-danger);
-}
-
-.rating-success .rating-icon-fill {
-    fill: var(--flin-success);
-    stroke: var(--flin-success);
-}
-
-/* Hover/focus animation */
-@keyframes rating-pop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
-
-.rating:not(.rating-readonly) .rating-star-full,
-.rating:not(.rating-readonly) .rating-star-half {
-    animation: rating-pop 0.2s ease-out;
+.rating-input-disabled .rating-star {
+    pointer-events: none;
 }
 </style>

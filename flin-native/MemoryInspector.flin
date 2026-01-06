@@ -3,8 +3,8 @@
 // Only possible because FLIN has built-in persistence with ZeroCore
 
 // Props with defaults
-database = props.database  // FlinDB/ZeroCore instance
-filter = props.filter || ""
+database = props.database
+filterQuery = props.filter || ""
 showMetadata = props.showMetadata || true
 showHistory = props.showHistory || true
 showSearch = props.showSearch || true
@@ -16,204 +16,34 @@ onEdit = props.onEdit
 
 // State
 searchQuery = ""
-selectedKey = null
-expandedKeys = []
-sortBy = "key"  // key, modified, size
+selectedKey = ""
+sortBy = "key"
 sortDirection = "asc"
 
-// Get all stored keys from database
-allKeys = database ? database.__keys__ || Object.keys(database) : []
+// Stats placeholders
+totalKeys = 0
+totalSize = 0
+stringCount = 0
+numberCount = 0
+objectCount = 0
+arrayCount = 0
 
-// Filter keys based on search
-filteredKeys = searchQuery
-    ? allKeys.filter(key => key.toLowerCase().includes(searchQuery.toLowerCase()))
-    : allKeys
+// Empty state check
+hasDatabase = database != ""
+isEmpty = totalKeys == 0
 
-// Sort keys
-sortedKeys = [...filteredKeys].sort((a, b) => {
-    {if sortBy == "key"}
-        comparison = a.localeCompare(b)
-    {else if sortBy == "modified"}
-        aTime = database[a]?.__lastModified__ || 0
-        bTime = database[b]?.__lastModified__ || 0
-        comparison = bTime - aTime
-    {else if sortBy == "size"}
-        aSize = JSON.stringify(database[a]).length
-        bSize = JSON.stringify(database[b]).length
-        comparison = bSize - aSize
-    {else}
-        comparison = 0
-    {/if}
-
-    sortDirection == "asc" ? comparison : -comparison
-})
-
-// Calculate database stats
-calculateStats = {
-    totalKeys = allKeys.length
-    totalSize = 0
-    typeCount = { string: 0, number: 0, boolean: 0, object: 0, array: 0, null: 0 }
-
-    {for key in allKeys}
-        value = database[key]
-        totalSize = totalSize + JSON.stringify(value).length
-
-        {if value == null}
-            typeCount.null = typeCount.null + 1
-        {else if Array.isArray(value)}
-            typeCount.array = typeCount.array + 1
-        {else}
-            type = typeof value
-            {if typeCount[type] != undefined}
-                typeCount[type] = typeCount[type] + 1
-            {/if}
-        {/if}
-    {/for}
-
-    {
-        totalKeys: totalKeys,
-        totalSize: totalSize,
-        typeCount: typeCount
-    }
+// Classes
+headerActiveKeyClass = match sortBy {
+    "key" -> " flin-memory-inspector__column-header--active"
+    _ -> ""
 }
 
-stats = calculateStats()
-
-// Format bytes
-formatBytes = {
-    bytes = args.bytes
-    {if bytes < 1024}
-        formatted = bytes ++ " B"
-    {else if bytes < 1024 * 1024}
-        formatted = (bytes / 1024).toFixed(1) ++ " KB"
-    {else}
-        formatted = (bytes / (1024 * 1024)).toFixed(2) ++ " MB"
-    {/if}
-    formatted
-}
-
-// Get value preview
-getValuePreview = {
-    value = args.value
-    maxLength = args.maxLength || 50
-
-    {if value == null}
-        preview = "null"
-    {else if typeof value == "string"}
-        preview = "\"" ++ (value.length > maxLength ? value.slice(0, maxLength) ++ "..." : value) ++ "\""
-    {else if typeof value == "number"}
-        preview = value.toString()
-    {else if typeof value == "boolean"}
-        preview = value.toString()
-    {else if Array.isArray(value)}
-        preview = "[" ++ value.length ++ " items]"
-    {else if typeof value == "object"}
-        keys = Object.keys(value)
-        preview = "{" ++ keys.length ++ " keys}"
-    {else}
-        preview = String(value)
-    {/if}
-    preview
-}
-
-// Get value type icon
-getTypeIcon = {
-    value = args.value
-    {if value == null}
-        icon = "⊘"
-    {else if typeof value == "string"}
-        icon = "𝐀"
-    {else if typeof value == "number"}
-        icon = "#"
-    {else if typeof value == "boolean"}
-        icon = "◉"
-    {else if Array.isArray(value)}
-        icon = "[]"
-    {else if typeof value == "object"}
-        icon = "{}"
-    {else}
-        icon = "?"
-    {/if}
-    icon
-}
-
-// Get type class
-getTypeClass = {
-    value = args.value
-    {if value == null}
-        cls = "null"
-    {else if Array.isArray(value)}
-        cls = "array"
-    {else}
-        cls = typeof value
-    {/if}
-    cls
-}
-
-// Toggle key expansion
-toggleExpand = {
-    key = args.key
-    {if expandedKeys.includes(key)}
-        expandedKeys = expandedKeys.filter(k => k != key)
-    {else}
-        expandedKeys = expandedKeys.concat([key])
-    {/if}
-}
-
-// Check if key is expanded
-isExpanded = {
-    key = args.key
-    expandedKeys.includes(key)
-}
-
-// Select a key
-selectKey = {
-    key = args.key
-    selectedKey = key
-
-    {if onSelect}
-        onSelect({ key: key, value: database[key] })
-    {/if}
-}
-
-// Handle search
-handleSearch = {
-    searchQuery = event.target.value
-}
-
-// Clear search
-clearSearch = {
-    searchQuery = ""
-}
-
-// Toggle sort
-toggleSort = {
-    column = args.column
-    {if sortBy == column}
-        sortDirection = sortDirection == "asc" ? "desc" : "asc"
-    {else}
-        sortBy = column
-        sortDirection = "asc"
-    {/if}
-}
-
-// Render value recursively
-renderValue = {
-    value = args.value
-    path = args.path || ""
-    depth = args.depth || 0
-
-    {if depth > expandLevel && !isExpanded({ key: path })}
-        collapsed = true
-    {else}
-        collapsed = false
-    {/if}
-
-    // Will be rendered in template
+headerActiveSizeClass = match sortBy {
+    "size" -> " flin-memory-inspector__column-header--active"
+    _ -> ""
 }
 
 <div class="flin-memory-inspector">
-    // Header
     <div class="flin-memory-inspector__header">
         <div class="flin-memory-inspector__title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -225,43 +55,41 @@ renderValue = {
         </div>
     </div>
 
-    // Stats bar
     {if showStats}
         <div class="flin-memory-inspector__stats">
             <div class="flin-memory-inspector__stat">
-                <span class="flin-memory-inspector__stat-value">{stats.totalKeys}</span>
+                <span class="flin-memory-inspector__stat-value">{totalKeys}</span>
                 <span class="flin-memory-inspector__stat-label">Keys</span>
             </div>
             <div class="flin-memory-inspector__stat">
-                <span class="flin-memory-inspector__stat-value">{formatBytes({ bytes: stats.totalSize })}</span>
+                <span class="flin-memory-inspector__stat-value">{totalSize} B</span>
                 <span class="flin-memory-inspector__stat-label">Size</span>
             </div>
             <div class="flin-memory-inspector__stat-types">
-                {if stats.typeCount.string > 0}
+                {if stringCount > 0}
                     <span class="flin-memory-inspector__type-badge flin-memory-inspector__type-badge--string" title="Strings">
-                        𝐀 {stats.typeCount.string}
+                        A {stringCount}
                     </span>
                 {/if}
-                {if stats.typeCount.number > 0}
+                {if numberCount > 0}
                     <span class="flin-memory-inspector__type-badge flin-memory-inspector__type-badge--number" title="Numbers">
-                        # {stats.typeCount.number}
+                        # {numberCount}
                     </span>
                 {/if}
-                {if stats.typeCount.object > 0}
+                {if objectCount > 0}
                     <span class="flin-memory-inspector__type-badge flin-memory-inspector__type-badge--object" title="Objects">
-                        {} {stats.typeCount.object}
+                        {"{"} {"}"} {objectCount}
                     </span>
                 {/if}
-                {if stats.typeCount.array > 0}
+                {if arrayCount > 0}
                     <span class="flin-memory-inspector__type-badge flin-memory-inspector__type-badge--array" title="Arrays">
-                        [] {stats.typeCount.array}
+                        {"["} {"]"} {arrayCount}
                     </span>
                 {/if}
             </div>
         </div>
     {/if}
 
-    // Search bar
     {if showSearch}
         <div class="flin-memory-inspector__search">
             <svg class="flin-memory-inspector__search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -269,18 +97,12 @@ renderValue = {
                 <path d="M21 21l-4.35-4.35"/>
             </svg>
             <input
-                type="text"
                 class="flin-memory-inspector__search-input"
                 value={searchQuery}
                 placeholder="Search keys..."
-                input={handleSearch}
-            >
-            {if searchQuery}
-                <button
-                    type="button"
-                    class="flin-memory-inspector__search-clear"
-                    click={clearSearch}
-                >
+            />
+            {if searchQuery != ""}
+                <button class="flin-memory-inspector__search-clear" click={searchQuery = ""}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"/>
                         <line x1="6" y1="6" x2="18" y2="18"/>
@@ -290,50 +112,30 @@ renderValue = {
         </div>
     {/if}
 
-    // Column headers
-    keyHeaderActiveClass = match sortBy == "key" { true -> " flin-memory-inspector__column-header--active", _ -> "" }
-    sizeHeaderActiveClass = match sortBy == "size" { true -> " flin-memory-inspector__column-header--active", _ -> "" }
     <div class="flin-memory-inspector__columns">
-        <button
-            type="button"
-            class={"flin-memory-inspector__column-header" ++ keyHeaderActiveClass}
-            click={toggleSort.bind({ column: "key" })}
-        >
+        <button class={"flin-memory-inspector__column-header" ++ headerActiveKeyClass}>
             Key
             {if sortBy == "key"}
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    {if sortDirection == "asc"}
-                        <polyline points="18 15 12 9 6 15"/>
-                    {else}
-                        <polyline points="6 9 12 15 18 9"/>
-                    {/if}
+                    <polyline points="18 15 12 9 6 15"/>
                 </svg>
             {/if}
         </button>
         <span class="flin-memory-inspector__column-header">Value</span>
-        <button
-            type="button"
-            class={"flin-memory-inspector__column-header flin-memory-inspector__column-header--right" ++ sizeHeaderActiveClass}
-            click={toggleSort.bind({ column: "size" })}
-        >
+        <button class={"flin-memory-inspector__column-header flin-memory-inspector__column-header--right" ++ headerActiveSizeClass}>
             Size
             {if sortBy == "size"}
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    {if sortDirection == "asc"}
-                        <polyline points="18 15 12 9 6 15"/>
-                    {else}
-                        <polyline points="6 9 12 15 18 9"/>
-                    {/if}
+                    <polyline points="18 15 12 9 6 15"/>
                 </svg>
             {/if}
         </button>
     </div>
 
-    // Key list
     <div class="flin-memory-inspector__list">
-        {if sortedKeys.length == 0}
+        {if isEmpty}
             <div class="flin-memory-inspector__empty">
-                {if searchQuery}
+                {if searchQuery != ""}
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <circle cx="11" cy="11" r="8"/>
                         <path d="M21 21l-4.35-4.35"/>
@@ -349,57 +151,11 @@ renderValue = {
                 {/if}
             </div>
         {else}
-            {for key in sortedKeys}
-                value = database[key]
-                valueSize = JSON.stringify(value).length
-                isSelected = selectedKey == key
-                itemSelectedClass = match isSelected { true -> " flin-memory-inspector__item--selected", _ -> "" }
-
-                <div
-                    class={"flin-memory-inspector__item" ++ itemSelectedClass}
-                    click={selectKey.bind({ key: key })}
-                >
-                    <div class="flin-memory-inspector__item-key">
-                        <span class={"flin-memory-inspector__type-icon flin-memory-inspector__type-icon--" ++ getTypeClass({ value: value })}>
-                            {getTypeIcon({ value: value })}
-                        </span>
-                        <span class="flin-memory-inspector__key-name">{key}</span>
-                    </div>
-
-                    <div class="flin-memory-inspector__item-value">
-                        <span class={"flin-memory-inspector__value-preview flin-memory-inspector__value-preview--" ++ getTypeClass({ value: value })}>
-                            {getValuePreview({ value: value })}
-                        </span>
-                    </div>
-
-                    <div class="flin-memory-inspector__item-meta">
-                        <span class="flin-memory-inspector__item-size">
-                            {formatBytes({ bytes: valueSize })}
-                        </span>
-                    </div>
-                </div>
-
-                // Expanded view
-                {if isSelected}
-                    <div class="flin-memory-inspector__expanded">
-                        <pre class="flin-memory-inspector__json">{JSON.stringify(value, null, 2)}</pre>
-
-                        {if showMetadata && value && value.__history__}
-                            <div class="flin-memory-inspector__metadata">
-                                <span class="flin-memory-inspector__metadata-label">History:</span>
-                                <span>{value.__history__.length} snapshots</span>
-                            </div>
-                        {/if}
-
-                        {if showMetadata && value && value.__lastModified__}
-                            <div class="flin-memory-inspector__metadata">
-                                <span class="flin-memory-inspector__metadata-label">Modified:</span>
-                                <span>{new Date(value.__lastModified__).toLocaleString()}</span>
-                            </div>
-                        {/if}
-                    </div>
-                {/if}
-            {/for}
+            <div class="flin-memory-inspector__placeholder">
+                <span class="flin-memory-inspector__placeholder-text">
+                    Connect a FlinDB database to inspect its contents
+                </span>
+            </div>
         {/if}
     </div>
 </div>
@@ -577,6 +333,17 @@ renderValue = {
 
 .flin-memory-inspector__empty svg {
     opacity: 0.5;
+}
+
+.flin-memory-inspector__placeholder {
+    display: flex;
+    justify-content: center;
+    padding: var(--flin-space-8);
+}
+
+.flin-memory-inspector__placeholder-text {
+    color: var(--flin-fg-muted);
+    font-size: var(--flin-text-sm);
 }
 
 .flin-memory-inspector__item {

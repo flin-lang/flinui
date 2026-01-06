@@ -1,572 +1,120 @@
 // DateRangePicker.flin - FlinUI Date Range Picker Component
-// Two date inputs for start/end with validation and presets
+// Date range selection input
 
 // Props with defaults
 startDate = props.startDate || ""
 endDate = props.endDate || ""
-minDate = props.minDate || ""
-maxDate = props.maxDate || ""
 disabled = props.disabled || false
-startPlaceholder = props.startPlaceholder || "Start date"
-endPlaceholder = props.endPlaceholder || "End date"
-presets = props.presets || []
-showPresets = props.showPresets || true
-separator = props.separator || "to"
 onChange = props.onChange
-onStartChange = props.onStartChange
-onEndChange = props.onEndChange
 
-// State management
-start = startDate
-end = endDate
-focusedField = ""
-isValid = true
-errorMessage = ""
-showPresetsDropdown = false
-
-// Validate date range
-validateRange = {
-    {if start != "" && end != "" && start > end}
-        isValid = false;
-        errorMessage = "Start date must be before end date"
-    {else if start != "" && minDate != "" && start < minDate}
-        isValid = false;
-        errorMessage = "Start date must be after " ++ minDate
-    {else if end != "" && maxDate != "" && end > maxDate}
-        isValid = false;
-        errorMessage = "End date must be before " ++ maxDate
-    {else}
-        isValid = true;
-        errorMessage = ""
-    {/if}
+// Compute classes
+disabledClass = match disabled {
+    true -> " date-range-picker-disabled"
+    _ -> ""
 }
+containerClass = "date-range-picker" ++ disabledClass
 
-// Handle start date change
-handleStartChange = {
-    start = event.target.value;
-    validateRange();
-    {if onStartChange}
-        onStartChange(start)
-    {/if}
-    {if onChange}
-        onChange({ start: start, end: end, isValid: isValid })
-    {/if}
-}
-
-// Handle end date change
-handleEndChange = {
-    end = event.target.value;
-    validateRange();
-    {if onEndChange}
-        onEndChange(end)
-    {/if}
-    {if onChange}
-        onChange({ start: start, end: end, isValid: isValid })
-    {/if}
-}
-
-// Apply preset
-applyPreset = {
-    preset = event;
-    start = preset.start;
-    end = preset.end;
-    validateRange();
-    showPresetsDropdown = false;
-    {if onChange}
-        onChange({ start: start, end: end, isValid: isValid })
-    {/if}
-}
-
-// Get today's date in YYYY-MM-DD format
-getToday = {
-    now = new Date();
-    year = now.getFullYear();
-    month = String(now.getMonth() + 1).padStart(2, "0");
-    day = String(now.getDate()).padStart(2, "0");
-    year ++ "-" ++ month ++ "-" ++ day
-}
-
-// Get date offset from today
-getDateOffset = {
-    days = event;
-    date = new Date();
-    date.setDate(date.getDate() + days);
-    year = date.getFullYear();
-    month = String(date.getMonth() + 1).padStart(2, "0");
-    day = String(date.getDate()).padStart(2, "0");
-    year ++ "-" ++ month ++ "-" ++ day
-}
-
-// Default presets if none provided
-defaultPresets = [
-    { label: "Today", start: getToday(), end: getToday() },
-    { label: "Yesterday", start: getDateOffset(-1), end: getDateOffset(-1) },
-    { label: "Last 7 days", start: getDateOffset(-6), end: getToday() },
-    { label: "Last 30 days", start: getDateOffset(-29), end: getToday() },
-    { label: "This month", start: getToday().slice(0, 8) ++ "01", end: getToday() },
-    { label: "Last month", start: getDateOffset(-30).slice(0, 8) ++ "01", end: getToday().slice(0, 8) ++ "01" }
-]
-
-activePresets = {if presets.length > 0 { presets } else { defaultPresets }}
-
-// Toggle presets dropdown
-togglePresets = {
-    showPresetsDropdown = !showPresetsDropdown
-}
-
-// Close presets on outside click
-closePresets = {
-    showPresetsDropdown = false
-}
-
-// Clear dates
-clearDates = {
-    start = "";
-    end = "";
-    isValid = true;
-    errorMessage = "";
-    {if onChange}
-        onChange({ start: "", end: "", isValid: true })
-    {/if}
-}
-
-// Format date for display
-formatDisplayDate = {
-    dateStr = event;
-    {if dateStr == ""}
-        ""
-    {else}
-        date = new Date(dateStr);
-        date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-    {/if}
-}
-
-// Compute class modifiers
-disabledClass = match disabled { true -> " date-range-disabled", _ -> "" }
-errorClass = match isValid { false -> " date-range-error", _ -> "" }
-startFocusedClass = match focusedField { "start" -> " date-range-input-focused", _ -> "" }
-endFocusedClass = match focusedField { "end" -> " date-range-input-focused", _ -> "" }
-
-<div class={"date-range-picker" ++ disabledClass ++ errorClass}>
-    <div class="date-range-container">
-        {if showPresets && activePresets.length > 0}
-            <div class="date-range-presets-wrapper">
-                <button
-                    type="button"
-                    class="date-range-presets-toggle"
-                    click={togglePresets}
-                    disabled={disabled}
-                    aria-expanded={showPresetsDropdown}
-                    aria-haspopup="listbox"
-                    aria-label="Date presets"
-                >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="4" width="18" height="18" rx="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                        <path d="M8 14h.01"/>
-                        <path d="M12 14h.01"/>
-                        <path d="M16 14h.01"/>
-                        <path d="M8 18h.01"/>
-                        <path d="M12 18h.01"/>
-                    </svg>
-                </button>
-                {if showPresetsDropdown}
-                    <div class="date-range-presets-dropdown" role="listbox" aria-label="Date presets">
-                        {for preset in activePresets}
-                            <button
-                                type="button"
-                                class="date-range-preset-item"
-                                click={() => applyPreset(preset)}
-                                role="option"
-                            >
-                                <span class="preset-label">{preset.label}</span>
-                                <span class="preset-dates">
-                                    {formatDisplayDate(preset.start)} - {formatDisplayDate(preset.end)}
-                                </span>
-                            </button>
-                        {/for}
-                    </div>
-                {/if}
-            </div>
-        {/if}
-
-        <div class="date-range-inputs">
-            <div class={"date-range-input-wrapper" ++ startFocusedClass}>
-                <svg class="date-range-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/>
-                    <line x1="8" y1="2" x2="8" y2="6"/>
-                    <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                <input
-                    type="date"
-                    class="date-range-input"
-                    value={start}
-                    min={minDate}
-                    max={end || maxDate}
-                    disabled={disabled}
-                    placeholder={startPlaceholder}
-                    change={handleStartChange}
-                    focus={() => focusedField = "start"}
-                    blur={() => focusedField = ""}
-                    aria-label="Start date"
-                    aria-invalid={!isValid}
-                >
-            </div>
-
-            <span class="date-range-separator" aria-hidden="true">{separator}</span>
-
-            <div class={"date-range-input-wrapper" ++ endFocusedClass}>
-                <svg class="date-range-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/>
-                    <line x1="8" y1="2" x2="8" y2="6"/>
-                    <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                <input
-                    type="date"
-                    class="date-range-input"
-                    value={end}
-                    min={start || minDate}
-                    max={maxDate}
-                    disabled={disabled}
-                    placeholder={endPlaceholder}
-                    change={handleEndChange}
-                    focus={() => focusedField = "end"}
-                    blur={() => focusedField = ""}
-                    aria-label="End date"
-                    aria-invalid={!isValid}
-                >
-            </div>
-        </div>
-
-        {if start != "" || end != ""}
-            <button
-                type="button"
-                class="date-range-clear"
-                click={clearDates}
+<div class={containerClass}>
+    <div class="date-range-picker-inputs">
+        <div class="date-range-picker-input-wrapper">
+            <input
+                type="date"
+                class="date-range-picker-input"
+                value={startDate}
                 disabled={disabled}
-                aria-label="Clear dates"
+                change={onChange}
+                aria-label="Start date"
             >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
-            </button>
-        {/if}
-    </div>
-
-    {if !isValid && errorMessage != ""}
-        <div class="date-range-error-msg" role="alert">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </div>
+        <span class="date-range-picker-separator">to</span>
+        <div class="date-range-picker-input-wrapper">
+            <input
+                type="date"
+                class="date-range-picker-input"
+                value={endDate}
+                disabled={disabled}
+                change={onChange}
+                aria-label="End date"
+            >
+        </div>
+        <span class="date-range-picker-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
-            <span>{errorMessage}</span>
-        </div>
-    {/if}
-
-    {if start != "" && end != ""}
-        <div class="date-range-summary">
-            <span class="date-range-summary-label">Selected range:</span>
-            <span class="date-range-summary-dates">
-                {formatDisplayDate(start)} - {formatDisplayDate(end)}
-            </span>
-            <span class="date-range-summary-duration">
-                ({Math.ceil((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24)) + 1} days)
-            </span>
-        </div>
-    {/if}
+        </span>
+    </div>
 </div>
 
 <style scoped>
 .date-range-picker {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-space-2);
-}
-
-.date-range-container {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-2);
-}
-
-.date-range-inputs {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-2);
-    flex: 1;
-}
-
-.date-range-input-wrapper {
     position: relative;
-    flex: 1;
-    min-width: 0;
-}
-
-.date-range-icon {
-    position: absolute;
-    left: var(--flin-space-3);
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--flin-fg-muted);
-    pointer-events: none;
-    z-index: 1;
-}
-
-.date-range-input {
     width: 100%;
-    height: 40px;
-    padding: var(--flin-space-2) var(--flin-space-3);
-    padding-left: var(--flin-space-10);
-    font-family: var(--flin-font-sans);
-    font-size: var(--flin-text-sm);
-    color: var(--flin-fg);
-    background-color: var(--flin-bg);
+}
+
+.date-range-picker-inputs {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
     border: 1px solid var(--flin-neutral-300);
     border-radius: var(--flin-radius-md);
+    background-color: var(--flin-bg);
+    padding: 0 var(--flin-space-3);
     transition: all var(--flin-transition-fast);
-    outline: none;
-    cursor: pointer;
 }
 
-.date-range-input::-webkit-calendar-picker-indicator {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.date-range-input:hover:not(:disabled) {
+.date-range-picker:hover:not(.date-range-picker-disabled) .date-range-picker-inputs {
     border-color: var(--flin-neutral-400);
 }
 
-.date-range-input-focused .date-range-input {
+.date-range-picker-inputs:focus-within {
     border-color: var(--flin-primary);
     box-shadow: 0 0 0 3px var(--flin-primary-light);
 }
 
-.date-range-input-focused .date-range-icon {
-    color: var(--flin-primary);
+.date-range-picker-input-wrapper {
+    flex: 1;
 }
 
-.date-range-separator {
-    color: var(--flin-fg-muted);
-    font-size: var(--flin-text-sm);
-    flex-shrink: 0;
-    padding: 0 var(--flin-space-1);
-}
-
-.date-range-clear {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    background: transparent;
-    border: none;
-    border-radius: var(--flin-radius-sm);
-    color: var(--flin-fg-muted);
-    cursor: pointer;
-    transition: all var(--flin-transition-fast);
-    flex-shrink: 0;
-}
-
-.date-range-clear:hover:not(:disabled) {
-    background-color: var(--flin-neutral-100);
-    color: var(--flin-danger);
-}
-
-.date-range-clear:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Presets */
-.date-range-presets-wrapper {
-    position: relative;
-}
-
-.date-range-presets-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-300);
-    border-radius: var(--flin-radius-md);
-    color: var(--flin-fg-muted);
-    cursor: pointer;
-    transition: all var(--flin-transition-fast);
-}
-
-.date-range-presets-toggle:hover:not(:disabled) {
-    border-color: var(--flin-primary);
-    color: var(--flin-primary);
-}
-
-.date-range-presets-toggle:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.date-range-presets-dropdown {
-    position: absolute;
-    top: calc(100% + var(--flin-space-1));
-    left: 0;
-    min-width: 280px;
-    background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
-    border-radius: var(--flin-radius-md);
-    box-shadow: var(--flin-shadow-lg);
-    z-index: 50;
-    padding: var(--flin-space-1);
-    animation: presets-open 0.15s ease-out;
-}
-
-@keyframes presets-open {
-    from {
-        opacity: 0;
-        transform: translateY(-4px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.date-range-preset-item {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+.date-range-picker-input {
     width: 100%;
-    padding: var(--flin-space-2) var(--flin-space-3);
+    height: 38px;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
     background: transparent;
     border: none;
-    border-radius: var(--flin-radius-sm);
-    text-align: left;
-    cursor: pointer;
-    transition: background-color var(--flin-transition-fast);
+    outline: none;
 }
 
-.date-range-preset-item:hover {
-    background-color: var(--flin-primary-light);
-}
-
-.preset-label {
-    font-family: var(--flin-font-sans);
+.date-range-picker-separator {
+    color: var(--flin-fg-muted);
     font-size: var(--flin-text-sm);
-    font-weight: 500;
-    color: var(--flin-fg);
 }
 
-.preset-dates {
-    font-size: var(--flin-text-xs);
+.date-range-picker-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--flin-fg-muted);
 }
 
-/* Error state */
-.date-range-error .date-range-input {
-    border-color: var(--flin-danger);
-}
-
-.date-range-error .date-range-input-focused .date-range-input {
-    box-shadow: 0 0 0 3px var(--flin-danger-light);
-}
-
-.date-range-error .date-range-icon {
-    color: var(--flin-danger);
-}
-
-.date-range-error-msg {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-1);
-    font-size: var(--flin-text-sm);
-    color: var(--flin-danger);
-}
-
-/* Summary */
-.date-range-summary {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-space-2);
-    padding: var(--flin-space-2) var(--flin-space-3);
-    background-color: var(--flin-primary-light);
-    border-radius: var(--flin-radius-md);
-    font-size: var(--flin-text-sm);
-}
-
-.date-range-summary-label {
-    color: var(--flin-fg-muted);
-}
-
-.date-range-summary-dates {
-    color: var(--flin-fg);
-    font-weight: 500;
-}
-
-.date-range-summary-duration {
-    color: var(--flin-primary);
-    font-weight: 500;
+.date-range-picker-icon svg {
+    width: 18px;
+    height: 18px;
 }
 
 /* Disabled state */
-.date-range-disabled .date-range-input {
+.date-range-picker-disabled .date-range-picker-inputs {
     background-color: var(--flin-bg-muted);
+    cursor: not-allowed;
+    border-color: var(--flin-neutral-200);
+}
+
+.date-range-picker-disabled .date-range-picker-input {
     color: var(--flin-fg-muted);
     cursor: not-allowed;
-}
-
-.date-range-disabled .date-range-icon {
-    color: var(--flin-neutral-400);
-}
-
-.date-range-disabled .date-range-separator {
-    color: var(--flin-neutral-400);
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-    .date-range-inputs {
-        flex-direction: column;
-        gap: var(--flin-space-1);
-    }
-
-    .date-range-input-wrapper {
-        width: 100%;
-    }
-
-    .date-range-separator {
-        display: none;
-    }
-}
-
-/* Dark mode */
-[data-theme="dark"] .date-range-presets-dropdown {
-    background-color: var(--flin-neutral-800);
-    border-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .date-range-preset-item:hover {
-    background-color: var(--flin-neutral-700);
-}
-
-[data-theme="dark"] .date-range-summary {
-    background-color: var(--flin-neutral-800);
-}
-
-[data-theme="dark"] .date-range-input::-webkit-calendar-picker-indicator {
-    filter: invert(1);
 }
 </style>

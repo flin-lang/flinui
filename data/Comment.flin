@@ -1,545 +1,208 @@
 // Comment.flin - Comment/discussion thread component
 
 // Props
-author = props.author || {}
+author = props.author || ""
 content = props.content || ""
 timestamp = props.timestamp || ""
-avatar = props.avatar || author.avatar || nil
-authorName = props.authorName || author.name || "Anonymous"
-authorRole = props.authorRole || author.role || nil
+avatar = props.avatar || ""
+authorName = props.authorName || "Anonymous"
+authorRole = props.authorRole || ""
 likes = props.likes || 0
-replies = props.replies || []
 isLiked = props.isLiked || false
 isEdited = props.isEdited || false
 isPinned = props.isPinned || false
-isHighlighted = props.isHighlighted || false
-showReplies = props.showReplies || true
 showActions = props.showActions || true
-nested = props.nested || false
-maxNesting = props.maxNesting || 3
-currentNesting = props.currentNesting || 0
-onLike = props.onLike || nil
-onReply = props.onReply || nil
-onEdit = props.onEdit || nil
-onDelete = props.onDelete || nil
-onShare = props.onShare || nil
-children = props.children || nil
 
 // State
 liked = isLiked
 likeCount = likes
-repliesExpanded = true
-isReplying = false
-replyText = ""
 
-// Handlers
-toggleLike = {
-    liked = !liked
-    likeCount = if liked then likeCount + 1 else likeCount - 1
-    if onLike then onLike(liked)
+// Computed classes
+pinnedClass = match isPinned {
+    true -> " comment--pinned"
+    _ -> ""
 }
 
-toggleReplies = {
-    repliesExpanded = !repliesExpanded
+likedClass = match liked {
+    true -> " comment__like-btn--liked"
+    _ -> ""
 }
 
-startReply = {
-    isReplying = true
-}
+commentClass = "comment" ++ pinnedClass
 
-cancelReply = {
-    isReplying = false
-    replyText = ""
-}
+// Has avatar check
+hasAvatar = avatar != ""
 
-submitReply = {
-    if replyText != "" && onReply then {
-        onReply(replyText)
-        replyText = ""
-        isReplying = false
-    }
-}
+// Has role check
+hasRole = authorRole != ""
 
-handleEdit = {
-    if onEdit then onEdit()
-}
-
-handleDelete = {
-    if onDelete then onDelete()
-}
-
-handleShare = {
-    if onShare then onShare()
-}
-
-// Computed
-nestedClass = if nested then "comment-nested" else ""
-highlightedClass = if isHighlighted then "comment-highlighted" else ""
-pinnedClass = if isPinned then "comment-pinned" else ""
-commentClass = `comment ${nestedClass} ${highlightedClass} ${pinnedClass}`
-canNest = currentNesting < maxNesting
-
-<article class={commentClass}>
-    {if isPinned then
-        <div class="comment-pinned-badge">
-            <span class="pin-icon">📌</span>
-            <span>Pinned</span>
-        </div>
-    }
-
-    <div class="comment-main">
-        // Avatar
-        <div class="comment-avatar">
-            {if avatar then
-                <img src={avatar} alt={authorName} class="avatar-img" />
-            else
-                <div class="avatar-placeholder">
-                    {authorName.charAt(0).toUpperCase()}
-                </div>
-            }
-        </div>
-
-        // Content
-        <div class="comment-content">
-            // Header
-            <header class="comment-header">
-                <div class="author-info">
-                    <span class="author-name">{authorName}</span>
-                    {if authorRole then
-                        <span class="author-role">{authorRole}</span>
-                    }
-                </div>
-                <div class="comment-meta">
-                    <time class="comment-time">{timestamp}</time>
-                    {if isEdited then
-                        <span class="edited-badge">(edited)</span>
-                    }
-                </div>
-            </header>
-
-            // Body
-            <div class="comment-body">
-                <p>{content}</p>
-                {children}
+<div class={commentClass}>
+    <div class="comment__avatar">
+        {if hasAvatar}
+            <img class="comment__avatar-img" src={avatar} alt={authorName}/>
+        {else}
+            <div class="comment__avatar-placeholder">
+                <span>?</span>
             </div>
-
-            // Actions
-            {if showActions then
-                <footer class="comment-actions">
-                    <button
-                        class={if liked then "action-btn liked" else "action-btn"}
-                        onClick={toggleLike}
-                        aria-label="Like"
-                    >
-                        <span class="action-icon">{if liked then "❤️" else "🤍"}</span>
-                        {if likeCount > 0 then
-                            <span class="action-count">{likeCount}</span>
-                        }
-                    </button>
-
-                    {if canNest then
-                        <button class="action-btn" onClick={startReply} aria-label="Reply">
-                            <span class="action-icon">💬</span>
-                            <span class="action-text">Reply</span>
-                        </button>
-                    }
-
-                    {if onShare then
-                        <button class="action-btn" onClick={handleShare} aria-label="Share">
-                            <span class="action-icon">↗️</span>
-                            <span class="action-text">Share</span>
-                        </button>
-                    }
-
-                    {if onEdit then
-                        <button class="action-btn" onClick={handleEdit} aria-label="Edit">
-                            <span class="action-icon">✏️</span>
-                        </button>
-                    }
-
-                    {if onDelete then
-                        <button class="action-btn action-delete" onClick={handleDelete} aria-label="Delete">
-                            <span class="action-icon">🗑️</span>
-                        </button>
-                    }
-                </footer>
-            }
-
-            // Reply input
-            {if isReplying then
-                <div class="reply-form">
-                    <textarea
-                        class="reply-input"
-                        placeholder="Write a reply..."
-                        value={replyText}
-                        onInput={ e -> replyText = e.target.value }
-                        rows="2"
-                    ></textarea>
-                    <div class="reply-actions">
-                        <button class="btn-cancel" onClick={cancelReply}>Cancel</button>
-                        <button class="btn-submit" onClick={submitReply} disabled={replyText == ""}>
-                            Reply
-                        </button>
-                    </div>
-                </div>
-            }
-        </div>
+        {/if}
     </div>
 
-    // Replies
-    {if showReplies && replies.length > 0 then
-        <div class="comment-replies">
-            {if replies.length > 2 then
-                <button class="toggle-replies" onClick={toggleReplies}>
-                    {if repliesExpanded then
-                        `Hide ${replies.length} replies`
-                    else
-                        `Show ${replies.length} replies`
-                    }
-                </button>
-            }
-
-            {if repliesExpanded then
-                <div class="replies-list">
-                    {replies.map { reply ->
-                        <Comment
-                            key={reply.id}
-                            author={reply.author}
-                            content={reply.content}
-                            timestamp={reply.timestamp}
-                            likes={reply.likes}
-                            replies={reply.replies || []}
-                            isLiked={reply.isLiked}
-                            isEdited={reply.isEdited}
-                            nested={true}
-                            currentNesting={currentNesting + 1}
-                            maxNesting={maxNesting}
-                            showActions={showActions}
-                            onLike={reply.onLike}
-                            onReply={reply.onReply}
-                            onEdit={reply.onEdit}
-                            onDelete={reply.onDelete}
-                        />
-                    }}
-                </div>
-            }
+    <div class="comment__content">
+        <div class="comment__header">
+            <div class="comment__author">
+                <span class="comment__author-name">{authorName}</span>
+                {if hasRole}
+                    <span class="comment__author-role">{authorRole}</span>
+                {/if}
+            </div>
+            <div class="comment__meta">
+                {if isEdited}
+                    <span class="comment__edited">(edited)</span>
+                {/if}
+                <time class="comment__timestamp">{timestamp}</time>
+            </div>
         </div>
-    }
-</article>
+
+        <div class="comment__body">
+            <p class="comment__text">{content}</p>
+        </div>
+
+        {if showActions}
+            <div class="comment__actions">
+                <button class={"comment__like-btn" ++ likedClass} click={liked = !liked}>
+                    <span>{likeCount}</span>
+                </button>
+                <button class="comment__reply-btn">Reply</button>
+                <button class="comment__share-btn">Share</button>
+            </div>
+        {/if}
+    </div>
+</div>
 
 <style scoped>
 .comment {
     display: flex;
-    flex-direction: column;
-    gap: var(--flin-spacing-2);
-}
-
-.comment-nested {
-    margin-left: var(--flin-spacing-8);
-    padding-left: var(--flin-spacing-4);
-    border-left: 2px solid var(--flin-color-gray-200);
-}
-
-.comment-highlighted {
-    background: var(--flin-color-primary-50);
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    background: var(--flin-bg);
     border-radius: var(--flin-radius-lg);
-    padding: var(--flin-spacing-4);
-    margin: calc(-1 * var(--flin-spacing-4));
 }
 
-.comment-pinned-badge {
-    display: flex;
-    align-items: center;
-    gap: var(--flin-spacing-1);
-    font-size: var(--flin-font-size-xs);
-    color: var(--flin-color-primary-600);
-    font-weight: var(--flin-font-weight-medium);
-    margin-bottom: var(--flin-spacing-2);
+.comment--pinned {
+    border: 1px solid var(--flin-primary-light);
+    background: var(--flin-primary-light);
 }
 
-.pin-icon {
-    font-size: var(--flin-font-size-sm);
-}
-
-.comment-main {
-    display: flex;
-    gap: var(--flin-spacing-3);
-}
-
-/* Avatar */
-.comment-avatar {
+.comment__avatar {
     flex-shrink: 0;
-}
-
-.avatar-img {
     width: 40px;
     height: 40px;
     border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.comment__avatar-img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 
-.avatar-placeholder {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--flin-radius-full);
-    background: var(--flin-color-primary-100);
-    color: var(--flin-color-primary-700);
+.comment__avatar-placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: var(--flin-font-weight-semibold);
-    font-size: var(--flin-font-size-lg);
+    width: 100%;
+    height: 100%;
+    background: var(--flin-neutral-200);
+    color: var(--flin-neutral-500);
 }
 
-.comment-nested .avatar-img,
-.comment-nested .avatar-placeholder {
-    width: 32px;
-    height: 32px;
-    font-size: var(--flin-font-size-sm);
-}
-
-/* Content */
-.comment-content {
+.comment__content {
     flex: 1;
     min-width: 0;
 }
 
-/* Header */
-.comment-header {
+.comment__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: var(--flin-spacing-2);
-    margin-bottom: var(--flin-spacing-1);
+    gap: var(--flin-space-2);
+    margin-bottom: var(--flin-space-2);
 }
 
-.author-info {
+.comment__author {
     display: flex;
     align-items: center;
-    gap: var(--flin-spacing-2);
+    gap: var(--flin-space-2);
 }
 
-.author-name {
-    font-weight: var(--flin-font-weight-semibold);
-    color: var(--flin-color-gray-900);
-    font-size: var(--flin-font-size-sm);
+.comment__author-name {
+    font-weight: 600;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
 }
 
-.author-role {
-    font-size: var(--flin-font-size-xs);
-    color: var(--flin-color-white);
-    background: var(--flin-color-primary-500);
-    padding: 2px 8px;
-    border-radius: var(--flin-radius-full);
+.comment__author-role {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-primary);
+    padding: 2px 6px;
+    background: var(--flin-primary-light);
+    border-radius: var(--flin-radius-sm);
 }
 
-.comment-meta {
+.comment__meta {
     display: flex;
     align-items: center;
-    gap: var(--flin-spacing-2);
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
 }
 
-.comment-time {
-    font-size: var(--flin-font-size-xs);
-    color: var(--flin-color-gray-500);
-}
-
-.edited-badge {
-    font-size: var(--flin-font-size-xs);
-    color: var(--flin-color-gray-400);
+.comment__edited {
     font-style: italic;
 }
 
-/* Body */
-.comment-body {
-    margin-bottom: var(--flin-spacing-2);
+.comment__body {
+    margin-bottom: var(--flin-space-3);
 }
 
-.comment-body p {
+.comment__text {
     margin: 0;
-    color: var(--flin-color-gray-700);
-    font-size: var(--flin-font-size-sm);
-    line-height: var(--flin-line-height-relaxed);
-    word-wrap: break-word;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    line-height: 1.6;
 }
 
-/* Actions */
-.comment-actions {
+.comment__actions {
     display: flex;
     align-items: center;
-    gap: var(--flin-spacing-1);
+    gap: var(--flin-space-1);
 }
 
-.action-btn {
-    display: flex;
+.comment__like-btn,
+.comment__reply-btn,
+.comment__share-btn {
+    display: inline-flex;
     align-items: center;
-    gap: var(--flin-spacing-1);
-    padding: var(--flin-spacing-1) var(--flin-spacing-2);
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-1) var(--flin-space-2);
     background: none;
     border: none;
-    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    border-radius: var(--flin-radius-sm);
     cursor: pointer;
-    color: var(--flin-color-gray-500);
-    font-size: var(--flin-font-size-xs);
-    transition: all var(--flin-transition-fast);
 }
 
-.action-btn:hover {
-    background: var(--flin-color-gray-100);
-    color: var(--flin-color-gray-700);
+.comment__like-btn:hover,
+.comment__reply-btn:hover,
+.comment__share-btn:hover {
+    background: var(--flin-neutral-100);
+    color: var(--flin-fg);
 }
 
-.action-btn.liked {
-    color: var(--flin-color-danger-500);
-}
-
-.action-btn.action-delete:hover {
-    background: var(--flin-color-danger-50);
-    color: var(--flin-color-danger-600);
-}
-
-.action-icon {
-    font-size: var(--flin-font-size-sm);
-}
-
-.action-count {
-    font-weight: var(--flin-font-weight-medium);
-}
-
-.action-text {
-    display: none;
-}
-
-@media (min-width: 480px) {
-    .action-text {
-        display: inline;
-    }
-}
-
-/* Reply form */
-.reply-form {
-    margin-top: var(--flin-spacing-3);
-    padding: var(--flin-spacing-3);
-    background: var(--flin-color-gray-50);
-    border-radius: var(--flin-radius-lg);
-}
-
-.reply-input {
-    width: 100%;
-    padding: var(--flin-spacing-2);
-    border: 1px solid var(--flin-color-gray-300);
-    border-radius: var(--flin-radius-md);
-    font-size: var(--flin-font-size-sm);
-    font-family: inherit;
-    resize: vertical;
-    min-height: 60px;
-}
-
-.reply-input:focus {
-    outline: none;
-    border-color: var(--flin-color-primary-500);
-    box-shadow: 0 0 0 3px var(--flin-color-primary-100);
-}
-
-.reply-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--flin-spacing-2);
-    margin-top: var(--flin-spacing-2);
-}
-
-.btn-cancel,
-.btn-submit {
-    padding: var(--flin-spacing-2) var(--flin-spacing-4);
-    border-radius: var(--flin-radius-md);
-    font-size: var(--flin-font-size-sm);
-    font-weight: var(--flin-font-weight-medium);
-    cursor: pointer;
-    transition: all var(--flin-transition-fast);
-}
-
-.btn-cancel {
-    background: none;
-    border: 1px solid var(--flin-color-gray-300);
-    color: var(--flin-color-gray-600);
-}
-
-.btn-cancel:hover {
-    background: var(--flin-color-gray-100);
-}
-
-.btn-submit {
-    background: var(--flin-color-primary-500);
-    border: none;
-    color: var(--flin-color-white);
-}
-
-.btn-submit:hover:not(:disabled) {
-    background: var(--flin-color-primary-600);
-}
-
-.btn-submit:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Replies */
-.comment-replies {
-    margin-top: var(--flin-spacing-3);
-}
-
-.toggle-replies {
-    background: none;
-    border: none;
-    color: var(--flin-color-primary-600);
-    font-size: var(--flin-font-size-sm);
-    cursor: pointer;
-    padding: var(--flin-spacing-1) 0;
-    margin-bottom: var(--flin-spacing-2);
-}
-
-.toggle-replies:hover {
-    text-decoration: underline;
-}
-
-.replies-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--flin-spacing-4);
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-    .author-name {
-        color: var(--flin-color-gray-100);
-    }
-
-    .comment-body p {
-        color: var(--flin-color-gray-300);
-    }
-
-    .comment-nested {
-        border-left-color: var(--flin-color-gray-700);
-    }
-
-    .comment-highlighted {
-        background: var(--flin-color-primary-900);
-    }
-
-    .reply-form {
-        background: var(--flin-color-gray-800);
-    }
-
-    .reply-input {
-        background: var(--flin-color-gray-900);
-        border-color: var(--flin-color-gray-600);
-        color: var(--flin-color-gray-100);
-    }
-
-    .avatar-placeholder {
-        background: var(--flin-color-primary-900);
-        color: var(--flin-color-primary-300);
-    }
+.comment__like-btn--liked {
+    color: var(--flin-danger);
 }
 </style>

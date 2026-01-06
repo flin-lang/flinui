@@ -8,20 +8,18 @@ onClose = props.onClose
 
 // Handle close button click
 handleClose = {
-    {if onClose}
-        onClose()
-    {/if}
+    if onClose { onClose() }
 }
 
 <div class="flin-modal-header" role="banner">
     <div class="modal-header-content">
-        {if title}
+        {if title != ""}
             <h2 class="modal-header-title" id="modal-title">{title}</h2>
         {/if}
-        {if subtitle}
+        {if subtitle != ""}
             <p class="modal-header-subtitle">{subtitle}</p>
         {/if}
-        {if !title && !subtitle}
+        {if title == "" && subtitle == ""}
             {children}
         {/if}
     </div>

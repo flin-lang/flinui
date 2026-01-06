@@ -76,20 +76,32 @@
 // Templates use FlinUI theme tokens for consistent styling.
 // Override styles using CSS custom properties or scoped styles.
 
-// Export all templates
-export { DashboardLayout } from "./DashboardLayout.flin"
-export { AuthLayout } from "./AuthLayout.flin"
-export { LoginForm } from "./LoginForm.flin"
-export { RegisterForm } from "./RegisterForm.flin"
-export { LandingHero } from "./LandingHero.flin"
-export { PricingTable } from "./PricingTable.flin"
-export { FeaturesGrid } from "./FeaturesGrid.flin"
-export { SettingsLayout } from "./SettingsLayout.flin"
-export { ProfileCard } from "./ProfileCard.flin"
-export { ErrorPage } from "./ErrorPage.flin"
-export { BankingDashboard } from "./BankingDashboard.flin"
-export { EcommerceDashboard } from "./EcommerceDashboard.flin"
-export { EmailClient } from "./EmailClient.flin"
-export { CRMDashboard } from "./CRMDashboard.flin"
-export { MonitoringDashboard } from "./MonitoringDashboard.flin"
-export { AnalyticsDashboard } from "./AnalyticsDashboard.flin"
+// Components are auto-imported when used in .flin files
+// Available: DashboardLayout, AuthLayout, LoginForm, RegisterForm, LandingHero,
+// PricingTable, FeaturesGrid, SettingsLayout, ProfileCard, ErrorPage,
+// BankingDashboard, EcommerceDashboard, EmailClient, CRMDashboard,
+// MonitoringDashboard, AnalyticsDashboard
+
+<div class="flinui-templates-info">
+    <h2>FlinUI Templates</h2>
+    <p>16 production-ready page templates for building complete applications.</p>
+</div>
+
+<style scoped>
+.flinui-templates-info {
+    font-family: var(--flin-font-sans);
+    padding: var(--flin-space-4);
+    background: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-md);
+}
+
+.flinui-templates-info h2 {
+    margin: 0 0 var(--flin-space-2) 0;
+    color: var(--flin-fg);
+}
+
+.flinui-templates-info p {
+    margin: 0;
+    color: var(--flin-fg-muted);
+}
+</style>

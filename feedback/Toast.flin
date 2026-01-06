@@ -13,24 +13,11 @@ onClose = props.onClose
 visible = true
 isExiting = false
 
-// Auto-dismiss timer
-onMount = {
-    {if duration > 0}
-        setTimeout({
-            handleClose()
-        }, duration)
-    {/if}
-}
-
 // Handle close with exit animation
 handleClose = {
-    isExiting = true;
-    setTimeout({
-        visible = false;
-        {if onClose}
-            onClose()
-        {/if}
-    }, 200)
+    isExiting = true
+    visible = false
+    if onClose { onClose() }
 }
 
 // Variant class
@@ -62,43 +49,47 @@ iconPath = match variant {
 // Computed class for exit animation
 exitingClass = match isExiting { true -> " toast-exiting", _ -> "" }
 
-{if visible}
-    <div
-        class={"flin-toast " ++ variantClass ++ " " ++ positionClass ++ exitingClass}
-        role="alert"
-        aria-live="polite"
-    >
-        <div class="toast-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
-            </svg>
-        </div>
+// Duration style for progress bar
+durationStyle = "animation-duration: " ++ duration ++ "ms;"
 
-        <div class="toast-content">
-            {if title}
-                <div class="toast-title">{title}</div>
-            {/if}
-            {if message}
-                <div class="toast-message">{message}</div>
-            {/if}
-        </div>
+// Display class based on visibility
+displayClass = match visible { true -> "flin-toast " ++ variantClass ++ " " ++ positionClass ++ exitingClass, _ -> "flin-toast flin-toast--hidden" }
 
-        <button
-            class="toast-close"
-            click={handleClose}
-            aria-label="Close notification"
-            type="button"
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </button>
+<div
+    class={displayClass}
+    role="alert"
+    aria-live="polite"
+>
+    <div class="toast-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
+        </svg>
+    </div>
 
-        {if duration > 0}
-            <div class="toast-progress" style="animation-duration: {duration}ms;"></div>
+    <div class="toast-content">
+        {if title != ""}
+            <div class="toast-title">{title}</div>
+        {/if}
+        {if message != ""}
+            <div class="toast-message">{message}</div>
         {/if}
     </div>
-{/if}
+
+    <button
+        class="toast-close"
+        click={handleClose}
+        aria-label="Close notification"
+        type="button"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </button>
+
+    {if duration > 0}
+        <div class="toast-progress" style={durationStyle}></div>
+    {/if}
+</div>
 
 <style scoped>
 .flin-toast {
