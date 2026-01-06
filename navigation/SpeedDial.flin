@@ -1,0 +1,408 @@
+// SpeedDial.flin - Floating action button with radial/linear action menu
+
+// Props
+actions = props.actions || []
+position = props.position || "bottom-right"
+direction = props.direction || "up"
+icon = props.icon || "+"
+openIcon = props.openIcon || "×"
+size = props.size || "md"
+variant = props.variant || "primary"
+disabled = props.disabled || false
+tooltip = props.tooltip || nil
+ariaLabel = props.ariaLabel || "Speed dial"
+
+// State
+isOpen = false
+
+// Handlers
+toggleOpen = {
+    if !disabled then isOpen = !isOpen
+}
+
+closeMenu = {
+    isOpen = false
+}
+
+handleAction = { action ->
+    if action.onClick then action.onClick()
+    closeMenu()
+}
+
+// Computed classes
+sizeClasses = {
+    "sm": "speed-dial-sm",
+    "md": "speed-dial-md",
+    "lg": "speed-dial-lg"
+}
+
+variantClasses = {
+    "primary": "speed-dial-primary",
+    "secondary": "speed-dial-secondary",
+    "success": "speed-dial-success",
+    "danger": "speed-dial-danger"
+}
+
+positionClasses = {
+    "bottom-right": "position-bottom-right",
+    "bottom-left": "position-bottom-left",
+    "bottom-center": "position-bottom-center",
+    "top-right": "position-top-right",
+    "top-left": "position-top-left",
+    "top-center": "position-top-center"
+}
+
+directionClasses = {
+    "up": "direction-up",
+    "down": "direction-down",
+    "left": "direction-left",
+    "right": "direction-right"
+}
+
+sizeClass = sizeClasses[size] || "speed-dial-md"
+variantClass = variantClasses[variant] || "speed-dial-primary"
+positionClass = positionClasses[position] || "position-bottom-right"
+directionClass = directionClasses[direction] || "direction-up"
+openClass = if isOpen then "is-open" else ""
+disabledClass = if disabled then "is-disabled" else ""
+
+containerClass = `speed-dial ${sizeClass} ${positionClass} ${directionClass} ${openClass} ${disabledClass}`
+fabClass = `speed-dial-fab ${variantClass}`
+
+<div class={containerClass}>
+    // Backdrop for closing
+    {if isOpen then
+        <div class="speed-dial-backdrop" onClick={closeMenu}></div>
+    }
+
+    // Action buttons
+    <div class="speed-dial-actions">
+        {actions.map { action, index ->
+            <div class="speed-dial-action" style={`--action-index: ${index}`} key={action.id || index}>
+                <button
+                    class="speed-dial-action-btn"
+                    onClick={ handleAction(action) }
+                    disabled={action.disabled || false}
+                    aria-label={action.label}
+                    title={action.label}
+                >
+                    {if action.icon then
+                        <span class="action-icon">{action.icon}</span>
+                    }
+                </button>
+                {if action.label then
+                    <span class="action-label">{action.label}</span>
+                }
+            </div>
+        }}
+    </div>
+
+    // Main FAB button
+    <button
+        class={fabClass}
+        onClick={toggleOpen}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        aria-expanded={isOpen}
+        title={tooltip}
+    >
+        <span class="fab-icon fab-icon-closed">{icon}</span>
+        <span class="fab-icon fab-icon-open">{openIcon}</span>
+    </button>
+</div>
+
+<style scoped>
+.speed-dial {
+    position: fixed;
+    z-index: var(--flin-z-index-fixed);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Positions */
+.position-bottom-right {
+    bottom: var(--flin-spacing-6);
+    right: var(--flin-spacing-6);
+}
+
+.position-bottom-left {
+    bottom: var(--flin-spacing-6);
+    left: var(--flin-spacing-6);
+}
+
+.position-bottom-center {
+    bottom: var(--flin-spacing-6);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.position-top-right {
+    top: var(--flin-spacing-6);
+    right: var(--flin-spacing-6);
+}
+
+.position-top-left {
+    top: var(--flin-spacing-6);
+    left: var(--flin-spacing-6);
+}
+
+.position-top-center {
+    top: var(--flin-spacing-6);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Directions */
+.direction-up .speed-dial-actions {
+    flex-direction: column-reverse;
+    bottom: 100%;
+    margin-bottom: var(--flin-spacing-3);
+}
+
+.direction-down .speed-dial-actions {
+    flex-direction: column;
+    top: 100%;
+    margin-top: var(--flin-spacing-3);
+}
+
+.direction-left .speed-dial-actions {
+    flex-direction: row-reverse;
+    right: 100%;
+    margin-right: var(--flin-spacing-3);
+}
+
+.direction-right .speed-dial-actions {
+    flex-direction: row;
+    left: 100%;
+    margin-left: var(--flin-spacing-3);
+}
+
+/* FAB Button */
+.speed-dial-fab {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--flin-radius-full);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-font-size-2xl);
+    box-shadow: var(--flin-shadow-lg);
+    transition: all var(--flin-transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.speed-dial-fab:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: var(--flin-shadow-xl);
+}
+
+.speed-dial-fab:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.speed-dial-fab:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* FAB Icon animation */
+.fab-icon {
+    position: absolute;
+    transition: all var(--flin-transition-normal);
+}
+
+.fab-icon-closed {
+    opacity: 1;
+    transform: rotate(0deg);
+}
+
+.fab-icon-open {
+    opacity: 0;
+    transform: rotate(-90deg);
+}
+
+.is-open .fab-icon-closed {
+    opacity: 0;
+    transform: rotate(90deg);
+}
+
+.is-open .fab-icon-open {
+    opacity: 1;
+    transform: rotate(0deg);
+}
+
+/* Sizes */
+.speed-dial-sm .speed-dial-fab {
+    width: 40px;
+    height: 40px;
+    font-size: var(--flin-font-size-lg);
+}
+
+.speed-dial-lg .speed-dial-fab {
+    width: 72px;
+    height: 72px;
+    font-size: var(--flin-font-size-3xl);
+}
+
+/* Variants */
+.speed-dial-primary {
+    background: var(--flin-color-primary-500);
+    color: var(--flin-color-white);
+}
+
+.speed-dial-primary:hover:not(:disabled) {
+    background: var(--flin-color-primary-600);
+}
+
+.speed-dial-secondary {
+    background: var(--flin-color-gray-600);
+    color: var(--flin-color-white);
+}
+
+.speed-dial-secondary:hover:not(:disabled) {
+    background: var(--flin-color-gray-700);
+}
+
+.speed-dial-success {
+    background: var(--flin-color-success-500);
+    color: var(--flin-color-white);
+}
+
+.speed-dial-success:hover:not(:disabled) {
+    background: var(--flin-color-success-600);
+}
+
+.speed-dial-danger {
+    background: var(--flin-color-danger-500);
+    color: var(--flin-color-white);
+}
+
+.speed-dial-danger:hover:not(:disabled) {
+    background: var(--flin-color-danger-600);
+}
+
+/* Backdrop */
+.speed-dial-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+}
+
+/* Actions container */
+.speed-dial-actions {
+    position: absolute;
+    display: flex;
+    gap: var(--flin-spacing-2);
+    opacity: 0;
+    pointer-events: none;
+    transition: all var(--flin-transition-normal);
+}
+
+.is-open .speed-dial-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Individual action */
+.speed-dial-action {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    opacity: 0;
+    transform: scale(0.3);
+    transition: all var(--flin-transition-normal);
+    transition-delay: calc(var(--action-index) * 50ms);
+}
+
+.is-open .speed-dial-action {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.speed-dial-action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--flin-radius-full);
+    border: none;
+    background: var(--flin-color-white);
+    color: var(--flin-color-gray-700);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-font-size-lg);
+    box-shadow: var(--flin-shadow-md);
+    transition: all var(--flin-transition-fast);
+}
+
+.speed-dial-action-btn:hover:not(:disabled) {
+    background: var(--flin-color-gray-100);
+    transform: scale(1.1);
+}
+
+.speed-dial-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.action-label {
+    background: var(--flin-color-gray-800);
+    color: var(--flin-color-white);
+    font-size: var(--flin-font-size-xs);
+    padding: var(--flin-spacing-1) var(--flin-spacing-2);
+    border-radius: var(--flin-radius-md);
+    white-space: nowrap;
+    box-shadow: var(--flin-shadow-sm);
+}
+
+/* Size adjustments for actions */
+.speed-dial-sm .speed-dial-action-btn {
+    width: 32px;
+    height: 32px;
+    font-size: var(--flin-font-size-base);
+}
+
+.speed-dial-lg .speed-dial-action-btn {
+    width: 48px;
+    height: 48px;
+    font-size: var(--flin-font-size-xl);
+}
+
+/* Disabled state */
+.is-disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Direction-specific label positioning */
+.direction-up .action-label,
+.direction-down .action-label {
+    position: absolute;
+    right: calc(100% + var(--flin-spacing-2));
+}
+
+.direction-left .action-label,
+.direction-right .action-label {
+    position: absolute;
+    bottom: calc(100% + var(--flin-spacing-1));
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .speed-dial-action-btn {
+        background: var(--flin-color-gray-700);
+        color: var(--flin-color-gray-100);
+    }
+
+    .speed-dial-action-btn:hover:not(:disabled) {
+        background: var(--flin-color-gray-600);
+    }
+}
+</style>

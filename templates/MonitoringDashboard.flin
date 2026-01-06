@@ -1,0 +1,1462 @@
+// MonitoringDashboard.flin - DevOps/Infrastructure monitoring dashboard template
+// Real-time system health, services status, metrics, alerts, and log streaming
+
+// Props
+health = props.health || {} // { cpu, memory, disk, network } - each has { value, status, trend }
+services = props.services || [] // [{ id, name, status, uptime, lastCheck, endpoint }]
+metrics = props.metrics || [] // [{ name, data: [{x, y}], color? }] for charts
+alerts = props.alerts || [] // [{ id, severity, title, message, timestamp, acknowledged }]
+logs = props.logs || [] // [{ id, timestamp, level, service, message }]
+uptime = props.uptime || {} // { percentage, lastDowntime, totalDowntime }
+incidents = props.incidents || [] // [{ id, title, status, severity, createdAt, assignee }]
+onAction = props.onAction || { action, target -> }
+
+// Additional props
+title = props.title || "System Monitoring"
+subtitle = props.subtitle || "Infrastructure Health Dashboard"
+refreshInterval = props.refreshInterval || 30000
+showResponseTimeChart = props.showResponseTimeChart ?? true
+showLogStream = props.showLogStream ?? true
+maxLogs = props.maxLogs || 50
+sidebarItems = props.sidebarItems || []
+userMenu = props.userMenu || nil
+
+// State
+selectedService = nil
+logFilter = "all" // "all" | "error" | "warning" | "info" | "debug"
+alertFilter = "all" // "all" | "active" | "acknowledged"
+isRefreshing = false
+lastRefresh = Date.now()
+expandedIncident = nil
+
+// Computed values
+activeAlerts = alerts.filter { alert -> !alert.acknowledged }
+activeIncidentCount = incidents.filter { inc -> inc.status == "active" || inc.status == "investigating" }.length
+
+// Health status helpers
+getStatusColor = { status ->
+    match status {
+        "healthy" | "up" | "success" -> "var(--monitoring-status-healthy)"
+        "warning" | "degraded" -> "var(--monitoring-status-warning)"
+        "critical" | "down" | "error" -> "var(--monitoring-status-critical)"
+        _ -> "var(--flin-color-gray-400)"
+    }
+}
+
+getStatusIcon = { status ->
+    match status {
+        "healthy" | "up" | "success" -> "check-circle"
+        "warning" | "degraded" -> "alert-triangle"
+        "critical" | "down" | "error" -> "x-circle"
+        _ -> "help-circle"
+    }
+}
+
+getSeverityClass = { severity ->
+    match severity {
+        "critical" -> "severity-critical"
+        "high" -> "severity-high"
+        "medium" -> "severity-medium"
+        "low" -> "severity-low"
+        _ -> "severity-info"
+    }
+}
+
+getLogLevelClass = { level ->
+    match level {
+        "error" | "fatal" -> "log-error"
+        "warn" | "warning" -> "log-warning"
+        "info" -> "log-info"
+        "debug" -> "log-debug"
+        _ -> "log-default"
+    }
+}
+
+// Trend indicator
+getTrendIndicator = { trend ->
+    match trend {
+        "up" -> "trending-up"
+        "down" -> "trending-down"
+        _ -> "trending-stable"
+    }
+}
+
+// Handlers
+handleRefresh = {
+    isRefreshing = true
+    onAction("refresh", nil)
+    setTimeout({
+        isRefreshing = false
+        lastRefresh = Date.now()
+    }, 1000)
+}
+
+handleServiceClick = { service ->
+    selectedService = if selectedService?.id == service.id then nil else service
+    onAction("select-service", service)
+}
+
+handleAlertAcknowledge = { alert ->
+    onAction("acknowledge-alert", alert)
+}
+
+handleAlertDismiss = { alert ->
+    onAction("dismiss-alert", alert)
+}
+
+handleIncidentClick = { incident ->
+    expandedIncident = if expandedIncident?.id == incident.id then nil else incident
+}
+
+handleQuickAction = { action, target ->
+    onAction(action, target)
+}
+
+setLogFilter = { filter ->
+    logFilter = filter
+}
+
+setAlertFilter = { filter ->
+    alertFilter = filter
+}
+
+// Filtered data
+filteredLogs = if logFilter == "all" then logs else logs.filter { log -> log.level == logFilter }
+displayedLogs = filteredLogs.slice(0, maxLogs)
+
+filteredAlerts = match alertFilter {
+    "active" -> alerts.filter { a -> !a.acknowledged }
+    "acknowledged" -> alerts.filter { a -> a.acknowledged }
+    _ -> alerts
+}
+
+// Format helpers
+formatTimestamp = { timestamp ->
+    date = new Date(timestamp)
+    date.toLocaleTimeString()
+}
+
+formatDuration = { ms ->
+    seconds = Math.floor(ms / 1000)
+    minutes = Math.floor(seconds / 60)
+    hours = Math.floor(minutes / 60)
+    days = Math.floor(hours / 24)
+
+    if days > 0 then days ++ "d " ++ (hours % 24) ++ "h"
+    else if hours > 0 then hours ++ "h " ++ (minutes % 60) ++ "m"
+    else if minutes > 0 then minutes ++ "m " ++ (seconds % 60) ++ "s"
+    else seconds ++ "s"
+}
+
+formatPercentage = { value ->
+    Math.round(value * 10) / 10 ++ "%"
+}
+
+// Default sidebar items for monitoring
+defaultSidebarItems = [
+    { section: "Monitoring", items: [
+        { id: "overview", label: "Overview", icon: "grid" },
+        { id: "services", label: "Services", icon: "server", badge: services.length },
+        { id: "alerts", label: "Alerts", icon: "bell", badge: if activeAlerts.length > 0 then activeAlerts.length else nil },
+        { id: "logs", label: "Logs", icon: "file-text" }
+    ]},
+    { section: "Infrastructure", items: [
+        { id: "servers", label: "Servers", icon: "hard-drive" },
+        { id: "containers", label: "Containers", icon: "box" },
+        { id: "networks", label: "Networks", icon: "wifi" }
+    ]},
+    { section: "Actions", items: [
+        { id: "deployments", label: "Deployments", icon: "upload" },
+        { id: "settings", label: "Settings", icon: "settings" }
+    ]}
+]
+
+navItems = if sidebarItems.length > 0 then sidebarItems else defaultSidebarItems
+
+// Header content
+headerContent =
+    <div class="monitoring-header">
+        <div class="header-title">
+            <h1>{title}</h1>
+            <span class="header-subtitle">{subtitle}</span>
+        </div>
+        <div class="header-actions">
+            <span class="last-update">
+                Last updated: {formatTimestamp(lastRefresh)}
+            </span>
+            <button
+                class={if isRefreshing then "refresh-btn refreshing" else "refresh-btn"}
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                aria-label="Refresh data"
+            >
+                <span class="refresh-icon">refresh</span>
+            </button>
+            {if activeIncidentCount > 0 then
+                <div class="incident-badge">
+                    <span class="incident-count">{activeIncidentCount}</span>
+                    <span class="incident-label">Active Incidents</span>
+                </div>
+            }
+        </div>
+    </div>
+
+<DashboardLayout
+    sidebarItems={navItems}
+    headerContent={headerContent}
+    userMenu={userMenu}
+    logoText="Monitoring"
+>
+    <div class="monitoring-dashboard">
+        // System Health Overview
+        <section class="dashboard-section health-section">
+            <h2 class="section-title">System Health</h2>
+            <div class="health-grid">
+                // CPU
+                <div class="health-card">
+                    <div class="health-icon cpu-icon">
+                        <span class="icon">cpu</span>
+                    </div>
+                    <div class="health-info">
+                        <span class="health-label">CPU</span>
+                        <span class="health-value" style="--status-color: {getStatusColor(health.cpu?.status || 'healthy')}">
+                            {formatPercentage(health.cpu?.value || 0)}
+                        </span>
+                    </div>
+                    <div class="health-trend {getTrendIndicator(health.cpu?.trend)}">
+                        <span class="trend-icon">
+                            {if health.cpu?.trend == "up" then "arrow-up" else if health.cpu?.trend == "down" then "arrow-down" else "minus"}
+                        </span>
+                    </div>
+                    <div class="health-bar">
+                        <div
+                            class="health-bar-fill"
+                            style="--fill-width: {health.cpu?.value || 0}%; --fill-color: {getStatusColor(health.cpu?.status || 'healthy')}"
+                        ></div>
+                    </div>
+                </div>
+
+                // Memory
+                <div class="health-card">
+                    <div class="health-icon memory-icon">
+                        <span class="icon">memory</span>
+                    </div>
+                    <div class="health-info">
+                        <span class="health-label">Memory</span>
+                        <span class="health-value" style="--status-color: {getStatusColor(health.memory?.status || 'healthy')}">
+                            {formatPercentage(health.memory?.value || 0)}
+                        </span>
+                    </div>
+                    <div class="health-trend {getTrendIndicator(health.memory?.trend)}">
+                        <span class="trend-icon">
+                            {if health.memory?.trend == "up" then "arrow-up" else if health.memory?.trend == "down" then "arrow-down" else "minus"}
+                        </span>
+                    </div>
+                    <div class="health-bar">
+                        <div
+                            class="health-bar-fill"
+                            style="--fill-width: {health.memory?.value || 0}%; --fill-color: {getStatusColor(health.memory?.status || 'healthy')}"
+                        ></div>
+                    </div>
+                </div>
+
+                // Disk
+                <div class="health-card">
+                    <div class="health-icon disk-icon">
+                        <span class="icon">hard-drive</span>
+                    </div>
+                    <div class="health-info">
+                        <span class="health-label">Disk</span>
+                        <span class="health-value" style="--status-color: {getStatusColor(health.disk?.status || 'healthy')}">
+                            {formatPercentage(health.disk?.value || 0)}
+                        </span>
+                    </div>
+                    <div class="health-trend {getTrendIndicator(health.disk?.trend)}">
+                        <span class="trend-icon">
+                            {if health.disk?.trend == "up" then "arrow-up" else if health.disk?.trend == "down" then "arrow-down" else "minus"}
+                        </span>
+                    </div>
+                    <div class="health-bar">
+                        <div
+                            class="health-bar-fill"
+                            style="--fill-width: {health.disk?.value || 0}%; --fill-color: {getStatusColor(health.disk?.status || 'healthy')}"
+                        ></div>
+                    </div>
+                </div>
+
+                // Network
+                <div class="health-card">
+                    <div class="health-icon network-icon">
+                        <span class="icon">wifi</span>
+                    </div>
+                    <div class="health-info">
+                        <span class="health-label">Network</span>
+                        <span class="health-value" style="--status-color: {getStatusColor(health.network?.status || 'healthy')}">
+                            {formatPercentage(health.network?.value || 0)}
+                        </span>
+                    </div>
+                    <div class="health-trend {getTrendIndicator(health.network?.trend)}">
+                        <span class="trend-icon">
+                            {if health.network?.trend == "up" then "arrow-up" else if health.network?.trend == "down" then "arrow-down" else "minus"}
+                        </span>
+                    </div>
+                    <div class="health-bar">
+                        <div
+                            class="health-bar-fill"
+                            style="--fill-width: {health.network?.value || 0}%; --fill-color: {getStatusColor(health.network?.status || 'healthy')}"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        // Main content grid
+        <div class="dashboard-grid">
+            // Left column
+            <div class="dashboard-column dashboard-column--main">
+                // Services Status Grid
+                <section class="dashboard-section services-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Services</h2>
+                        <span class="service-count">
+                            {services.filter { s -> s.status == "up" }.length}/{services.length} Online
+                        </span>
+                    </div>
+                    <div class="services-grid">
+                        {services.map { service ->
+                            <div
+                                class={if selectedService?.id == service.id then "service-card service-card--selected" else "service-card"}
+                                onClick={ handleServiceClick(service) }
+                                key={service.id}
+                            >
+                                <div class="service-status-indicator" style="--indicator-color: {getStatusColor(service.status)}"></div>
+                                <div class="service-info">
+                                    <span class="service-name">{service.name}</span>
+                                    <span class="service-endpoint">{service.endpoint || ""}</span>
+                                </div>
+                                <div class="service-meta">
+                                    <span class="service-uptime">{formatPercentage(service.uptime || 100)}</span>
+                                    <span class="service-last-check">
+                                        {if service.lastCheck then formatTimestamp(service.lastCheck) else "N/A"}
+                                    </span>
+                                </div>
+                            </div>
+                        }}
+                    </div>
+                </section>
+
+                // Response Time Chart
+                {if showResponseTimeChart && metrics.length > 0 then
+                    <section class="dashboard-section chart-section">
+                        <div class="section-header">
+                            <h2 class="section-title">Response Time</h2>
+                            <div class="chart-legend">
+                                {metrics.map { metric ->
+                                    <span class="legend-item" key={metric.name}>
+                                        <span class="legend-color" style="--legend-color: {metric.color || 'var(--flin-color-primary-500)'}"></span>
+                                        {metric.name}
+                                    </span>
+                                }}
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <LineChart
+                                data={metrics}
+                                width={800}
+                                height={250}
+                                showArea={true}
+                                showGrid={true}
+                                showLegend={false}
+                                curved={true}
+                                xAxisLabel="Time"
+                                yAxisLabel="ms"
+                            />
+                        </div>
+                    </section>
+                }
+
+                // Uptime Stats
+                <section class="dashboard-section uptime-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Uptime</h2>
+                    </div>
+                    <div class="uptime-stats">
+                        <div class="uptime-main">
+                            <div class="uptime-percentage">
+                                <span class="percentage-value">{formatPercentage(uptime.percentage || 99.9)}</span>
+                                <span class="percentage-label">Overall Uptime</span>
+                            </div>
+                            <div class="uptime-ring" style="--uptime-value: {uptime.percentage || 99.9}">
+                                <svg viewBox="0 0 100 100">
+                                    <circle class="uptime-ring-bg" cx="50" cy="50" r="45" />
+                                    <circle class="uptime-ring-fill" cx="50" cy="50" r="45" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="uptime-details">
+                            <div class="uptime-detail">
+                                <span class="detail-label">Last Downtime</span>
+                                <span class="detail-value">
+                                    {if uptime.lastDowntime then formatTimestamp(uptime.lastDowntime) else "Never"}
+                                </span>
+                            </div>
+                            <div class="uptime-detail">
+                                <span class="detail-label">Total Downtime (30d)</span>
+                                <span class="detail-value">
+                                    {formatDuration(uptime.totalDowntime || 0)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            // Right column
+            <div class="dashboard-column dashboard-column--side">
+                // Quick Actions
+                <section class="dashboard-section actions-section">
+                    <h2 class="section-title">Quick Actions</h2>
+                    <div class="quick-actions">
+                        <button
+                            class="action-btn action-btn--restart"
+                            onClick={ handleQuickAction("restart", selectedService) }
+                            disabled={!selectedService}
+                        >
+                            <span class="action-icon">rotate-cw</span>
+                            <span class="action-label">Restart</span>
+                        </button>
+                        <button
+                            class="action-btn action-btn--scale"
+                            onClick={ handleQuickAction("scale", selectedService) }
+                            disabled={!selectedService}
+                        >
+                            <span class="action-icon">maximize-2</span>
+                            <span class="action-label">Scale</span>
+                        </button>
+                        <button
+                            class="action-btn action-btn--deploy"
+                            onClick={ handleQuickAction("deploy", nil) }
+                        >
+                            <span class="action-icon">upload-cloud</span>
+                            <span class="action-label">Deploy</span>
+                        </button>
+                    </div>
+                </section>
+
+                // Active Incidents
+                <section class="dashboard-section incidents-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Active Incidents</h2>
+                        <span class="incident-count-badge {if activeIncidentCount > 0 then 'has-incidents' else ''}">
+                            {activeIncidentCount}
+                        </span>
+                    </div>
+                    {if incidents.length == 0 then
+                        <div class="empty-state">
+                            <span class="empty-icon">check-circle</span>
+                            <span class="empty-message">No active incidents</span>
+                        </div>
+                    else
+                        <div class="incidents-list">
+                            {incidents.slice(0, 5).map { incident ->
+                                <div
+                                    class={if expandedIncident?.id == incident.id then "incident-item incident-item--expanded" else "incident-item"}
+                                    onClick={ handleIncidentClick(incident) }
+                                    key={incident.id}
+                                >
+                                    <div class="incident-header">
+                                        <span class={"incident-severity " ++ getSeverityClass(incident.severity)}>
+                                            {incident.severity}
+                                        </span>
+                                        <span class="incident-title">{incident.title}</span>
+                                    </div>
+                                    <div class="incident-meta">
+                                        <span class="incident-status">{incident.status}</span>
+                                        <span class="incident-time">{formatTimestamp(incident.createdAt)}</span>
+                                    </div>
+                                    {if expandedIncident?.id == incident.id then
+                                        <div class="incident-details">
+                                            <p class="incident-assignee">Assigned to: {incident.assignee || "Unassigned"}</p>
+                                            <button
+                                                class="incident-action"
+                                                onClick={ handleQuickAction("view-incident", incident) }
+                                            >
+                                                View Details
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
+                            }}
+                        </div>
+                    }
+                </section>
+
+                // Recent Alerts
+                <section class="dashboard-section alerts-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Alerts</h2>
+                        <div class="alert-filters">
+                            <button
+                                class={if alertFilter == "all" then "filter-btn filter-btn--active" else "filter-btn"}
+                                onClick={ setAlertFilter("all") }
+                            >All</button>
+                            <button
+                                class={if alertFilter == "active" then "filter-btn filter-btn--active" else "filter-btn"}
+                                onClick={ setAlertFilter("active") }
+                            >Active</button>
+                        </div>
+                    </div>
+                    {if filteredAlerts.length == 0 then
+                        <div class="empty-state">
+                            <span class="empty-icon">bell-off</span>
+                            <span class="empty-message">No alerts</span>
+                        </div>
+                    else
+                        <div class="alerts-list">
+                            {filteredAlerts.slice(0, 5).map { alert ->
+                                <div class={"alert-item " ++ getSeverityClass(alert.severity) ++ (if alert.acknowledged then " alert-item--acknowledged" else "")} key={alert.id}>
+                                    <div class="alert-header">
+                                        <span class="alert-severity-dot"></span>
+                                        <span class="alert-title">{alert.title}</span>
+                                    </div>
+                                    <p class="alert-message">{alert.message}</p>
+                                    <div class="alert-footer">
+                                        <span class="alert-time">{formatTimestamp(alert.timestamp)}</span>
+                                        {if !alert.acknowledged then
+                                            <button
+                                                class="alert-ack-btn"
+                                                onClick={ handleAlertAcknowledge(alert) }
+                                            >
+                                                Acknowledge
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            }}
+                        </div>
+                    }
+                </section>
+            </div>
+        </div>
+
+        // Log Stream
+        {if showLogStream then
+            <section class="dashboard-section logs-section">
+                <div class="section-header">
+                    <h2 class="section-title">Log Stream</h2>
+                    <div class="log-filters">
+                        <button
+                            class={if logFilter == "all" then "filter-btn filter-btn--active" else "filter-btn"}
+                            onClick={ setLogFilter("all") }
+                        >All</button>
+                        <button
+                            class={if logFilter == "error" then "filter-btn filter-btn--active filter-btn--error" else "filter-btn"}
+                            onClick={ setLogFilter("error") }
+                        >Error</button>
+                        <button
+                            class={if logFilter == "warning" then "filter-btn filter-btn--active filter-btn--warning" else "filter-btn"}
+                            onClick={ setLogFilter("warning") }
+                        >Warning</button>
+                        <button
+                            class={if logFilter == "info" then "filter-btn filter-btn--active filter-btn--info" else "filter-btn"}
+                            onClick={ setLogFilter("info") }
+                        >Info</button>
+                        <button
+                            class={if logFilter == "debug" then "filter-btn filter-btn--active" else "filter-btn"}
+                            onClick={ setLogFilter("debug") }
+                        >Debug</button>
+                    </div>
+                </div>
+                <div class="log-container">
+                    {if displayedLogs.length == 0 then
+                        <div class="empty-state">
+                            <span class="empty-icon">file-text</span>
+                            <span class="empty-message">No logs to display</span>
+                        </div>
+                    else
+                        <div class="log-stream">
+                            {displayedLogs.map { log ->
+                                <div class={"log-entry " ++ getLogLevelClass(log.level)} key={log.id}>
+                                    <span class="log-timestamp">{formatTimestamp(log.timestamp)}</span>
+                                    <span class="log-level">{log.level.toUpperCase()}</span>
+                                    <span class="log-service">[{log.service}]</span>
+                                    <span class="log-message">{log.message}</span>
+                                </div>
+                            }}
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    </div>
+</DashboardLayout>
+
+<style scoped>
+/* CSS Custom Properties for status colors */
+.monitoring-dashboard {
+    --monitoring-status-healthy: #10b981;
+    --monitoring-status-warning: #f59e0b;
+    --monitoring-status-critical: #ef4444;
+    --monitoring-bg: var(--flin-color-gray-50);
+    --monitoring-card-bg: var(--flin-color-white);
+    --monitoring-border: var(--flin-color-gray-200);
+    --monitoring-text: var(--flin-color-gray-900);
+    --monitoring-text-muted: var(--flin-color-gray-500);
+}
+
+/* Header */
+.monitoring-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.header-title h1 {
+    font-size: var(--flin-font-size-xl);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--monitoring-text);
+    margin: 0;
+}
+
+.header-subtitle {
+    font-size: var(--flin-font-size-sm);
+    color: var(--monitoring-text-muted);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-4);
+}
+
+.last-update {
+    font-size: var(--flin-font-size-sm);
+    color: var(--monitoring-text-muted);
+}
+
+.refresh-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--monitoring-card-bg);
+    border: 1px solid var(--monitoring-border);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.refresh-btn:hover:not(:disabled) {
+    background: var(--flin-color-gray-100);
+}
+
+.refresh-btn.refreshing .refresh-icon {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.incident-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    padding: var(--flin-spacing-2) var(--flin-spacing-3);
+    background: var(--monitoring-status-critical);
+    color: white;
+    border-radius: var(--flin-radius-full);
+    font-size: var(--flin-font-size-sm);
+}
+
+.incident-count {
+    font-weight: var(--flin-font-weight-bold);
+}
+
+/* Dashboard Layout */
+.monitoring-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-6);
+}
+
+.dashboard-section {
+    background: var(--monitoring-card-bg);
+    border: 1px solid var(--monitoring-border);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-spacing-5);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--flin-spacing-4);
+}
+
+.section-title {
+    font-size: var(--flin-font-size-lg);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--monitoring-text);
+    margin: 0;
+}
+
+/* Health Grid */
+.health-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--flin-spacing-4);
+}
+
+.health-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-3);
+    padding: var(--flin-spacing-4);
+    background: var(--flin-color-gray-50);
+    border-radius: var(--flin-radius-md);
+    position: relative;
+}
+
+.health-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--monitoring-card-bg);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-font-size-lg);
+    color: var(--flin-color-gray-600);
+}
+
+.health-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-1);
+}
+
+.health-label {
+    font-size: var(--flin-font-size-sm);
+    color: var(--monitoring-text-muted);
+}
+
+.health-value {
+    font-size: var(--flin-font-size-2xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--status-color);
+}
+
+.health-trend {
+    position: absolute;
+    top: var(--flin-spacing-4);
+    right: var(--flin-spacing-4);
+    font-size: var(--flin-font-size-sm);
+}
+
+.health-trend.trending-up { color: var(--monitoring-status-warning); }
+.health-trend.trending-down { color: var(--monitoring-status-healthy); }
+.health-trend.trending-stable { color: var(--monitoring-text-muted); }
+
+.health-bar {
+    height: 4px;
+    background: var(--flin-color-gray-200);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.health-bar-fill {
+    height: 100%;
+    width: var(--fill-width);
+    background: var(--fill-color);
+    border-radius: var(--flin-radius-full);
+    transition: width var(--flin-transition-normal);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--flin-spacing-6);
+}
+
+.dashboard-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-6);
+}
+
+/* Services Grid */
+.service-count {
+    font-size: var(--flin-font-size-sm);
+    color: var(--monitoring-text-muted);
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--flin-spacing-3);
+}
+
+.service-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-2);
+    padding: var(--flin-spacing-3);
+    background: var(--flin-color-gray-50);
+    border: 2px solid transparent;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.service-card:hover {
+    border-color: var(--flin-color-gray-300);
+}
+
+.service-card--selected {
+    border-color: var(--flin-color-primary-500);
+    background: var(--flin-color-primary-50);
+}
+
+.service-status-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--indicator-color);
+}
+
+.service-info {
+    padding-left: var(--flin-spacing-3);
+}
+
+.service-name {
+    display: block;
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--monitoring-text);
+}
+
+.service-endpoint {
+    display: block;
+    font-size: var(--flin-font-size-xs);
+    color: var(--monitoring-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.service-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: var(--flin-spacing-3);
+    font-size: var(--flin-font-size-xs);
+    color: var(--monitoring-text-muted);
+}
+
+.service-uptime {
+    color: var(--monitoring-status-healthy);
+    font-weight: var(--flin-font-weight-medium);
+}
+
+/* Chart Section */
+.chart-legend {
+    display: flex;
+    gap: var(--flin-spacing-4);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    font-size: var(--flin-font-size-sm);
+    color: var(--monitoring-text-muted);
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--flin-radius-sm);
+    background: var(--legend-color);
+}
+
+.chart-container {
+    overflow-x: auto;
+}
+
+/* Uptime Section */
+.uptime-stats {
+    display: flex;
+    gap: var(--flin-spacing-6);
+    align-items: center;
+}
+
+.uptime-main {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-4);
+}
+
+.uptime-percentage {
+    text-align: center;
+}
+
+.percentage-value {
+    display: block;
+    font-size: var(--flin-font-size-3xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--monitoring-status-healthy);
+}
+
+.percentage-label {
+    font-size: var(--flin-font-size-sm);
+    color: var(--monitoring-text-muted);
+}
+
+.uptime-ring {
+    width: 80px;
+    height: 80px;
+}
+
+.uptime-ring svg {
+    transform: rotate(-90deg);
+}
+
+.uptime-ring-bg {
+    fill: none;
+    stroke: var(--flin-color-gray-200);
+    stroke-width: 8;
+}
+
+.uptime-ring-fill {
+    fill: none;
+    stroke: var(--monitoring-status-healthy);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: calc(var(--uptime-value) * 2.827), 282.7;
+    transition: stroke-dasharray var(--flin-transition-slow);
+}
+
+.uptime-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-3);
+}
+
+.uptime-detail {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    font-size: var(--flin-font-size-xs);
+    color: var(--monitoring-text-muted);
+}
+
+.detail-value {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--monitoring-text);
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: flex;
+    gap: var(--flin-spacing-3);
+}
+
+.action-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    padding: var(--flin-spacing-4);
+    background: var(--flin-color-gray-50);
+    border: 1px solid var(--monitoring-border);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.action-btn:hover:not(:disabled) {
+    background: var(--flin-color-gray-100);
+    border-color: var(--flin-color-gray-300);
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.action-btn--restart .action-icon { color: var(--monitoring-status-warning); }
+.action-btn--scale .action-icon { color: var(--flin-color-primary-500); }
+.action-btn--deploy .action-icon { color: var(--monitoring-status-healthy); }
+
+.action-icon {
+    font-size: var(--flin-font-size-xl);
+}
+
+.action-label {
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--monitoring-text);
+}
+
+/* Incidents Section */
+.incident-count-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 var(--flin-spacing-2);
+    background: var(--flin-color-gray-200);
+    color: var(--monitoring-text-muted);
+    border-radius: var(--flin-radius-full);
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+}
+
+.incident-count-badge.has-incidents {
+    background: var(--monitoring-status-critical);
+    color: white;
+}
+
+.incidents-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-3);
+}
+
+.incident-item {
+    padding: var(--flin-spacing-3);
+    background: var(--flin-color-gray-50);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.incident-item:hover {
+    background: var(--flin-color-gray-100);
+}
+
+.incident-item--expanded {
+    background: var(--flin-color-gray-100);
+}
+
+.incident-header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    margin-bottom: var(--flin-spacing-2);
+}
+
+.incident-severity {
+    padding: 2px 8px;
+    border-radius: var(--flin-radius-sm);
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    text-transform: uppercase;
+}
+
+.severity-critical { background: var(--monitoring-status-critical); color: white; }
+.severity-high { background: #f97316; color: white; }
+.severity-medium { background: var(--monitoring-status-warning); color: white; }
+.severity-low { background: var(--flin-color-gray-400); color: white; }
+.severity-info { background: var(--flin-color-primary-500); color: white; }
+
+.incident-title {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--monitoring-text);
+}
+
+.incident-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--flin-font-size-xs);
+    color: var(--monitoring-text-muted);
+}
+
+.incident-status {
+    text-transform: capitalize;
+}
+
+.incident-details {
+    margin-top: var(--flin-spacing-3);
+    padding-top: var(--flin-spacing-3);
+    border-top: 1px solid var(--monitoring-border);
+}
+
+.incident-assignee {
+    font-size: var(--flin-font-size-sm);
+    color: var(--monitoring-text-muted);
+    margin: 0 0 var(--flin-spacing-2) 0;
+}
+
+.incident-action {
+    padding: var(--flin-spacing-2) var(--flin-spacing-3);
+    background: var(--flin-color-primary-500);
+    color: white;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-font-size-xs);
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.incident-action:hover {
+    background: var(--flin-color-primary-600);
+}
+
+/* Alerts Section */
+.alert-filters {
+    display: flex;
+    gap: var(--flin-spacing-2);
+}
+
+.filter-btn {
+    padding: var(--flin-spacing-1) var(--flin-spacing-3);
+    background: transparent;
+    border: 1px solid var(--monitoring-border);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-font-size-xs);
+    color: var(--monitoring-text-muted);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.filter-btn:hover {
+    background: var(--flin-color-gray-100);
+}
+
+.filter-btn--active {
+    background: var(--flin-color-primary-50);
+    border-color: var(--flin-color-primary-500);
+    color: var(--flin-color-primary-700);
+}
+
+.filter-btn--active.filter-btn--error {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--monitoring-status-critical);
+    color: var(--monitoring-status-critical);
+}
+
+.filter-btn--active.filter-btn--warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: var(--monitoring-status-warning);
+    color: var(--monitoring-status-warning);
+}
+
+.filter-btn--active.filter-btn--info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-3);
+}
+
+.alert-item {
+    padding: var(--flin-spacing-3);
+    background: var(--flin-color-gray-50);
+    border-left: 3px solid;
+    border-radius: var(--flin-radius-md);
+}
+
+.alert-item.severity-critical { border-left-color: var(--monitoring-status-critical); }
+.alert-item.severity-high { border-left-color: #f97316; }
+.alert-item.severity-medium { border-left-color: var(--monitoring-status-warning); }
+.alert-item.severity-low { border-left-color: var(--flin-color-gray-400); }
+.alert-item.severity-info { border-left-color: var(--flin-color-primary-500); }
+
+.alert-item--acknowledged {
+    opacity: 0.6;
+}
+
+.alert-header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    margin-bottom: var(--flin-spacing-2);
+}
+
+.alert-severity-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--flin-radius-full);
+    background: currentColor;
+}
+
+.severity-critical .alert-severity-dot { background: var(--monitoring-status-critical); }
+.severity-high .alert-severity-dot { background: #f97316; }
+.severity-medium .alert-severity-dot { background: var(--monitoring-status-warning); }
+.severity-low .alert-severity-dot { background: var(--flin-color-gray-400); }
+.severity-info .alert-severity-dot { background: var(--flin-color-primary-500); }
+
+.alert-title {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--monitoring-text);
+}
+
+.alert-message {
+    font-size: var(--flin-font-size-sm);
+    color: var(--monitoring-text-muted);
+    margin: 0 0 var(--flin-spacing-2) 0;
+    line-height: 1.5;
+}
+
+.alert-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.alert-time {
+    font-size: var(--flin-font-size-xs);
+    color: var(--monitoring-text-muted);
+}
+
+.alert-ack-btn {
+    padding: var(--flin-spacing-1) var(--flin-spacing-2);
+    background: transparent;
+    border: 1px solid var(--monitoring-border);
+    border-radius: var(--flin-radius-sm);
+    font-size: var(--flin-font-size-xs);
+    color: var(--monitoring-text-muted);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.alert-ack-btn:hover {
+    background: var(--flin-color-gray-100);
+    color: var(--monitoring-text);
+}
+
+/* Log Stream Section */
+.log-filters {
+    display: flex;
+    gap: var(--flin-spacing-2);
+}
+
+.log-container {
+    max-height: 400px;
+    overflow-y: auto;
+    background: #1e1e2e;
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-spacing-4);
+}
+
+.log-stream {
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-font-size-sm);
+}
+
+.log-entry {
+    display: flex;
+    gap: var(--flin-spacing-3);
+    padding: var(--flin-spacing-2) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+.log-timestamp {
+    color: #6c7086;
+    flex-shrink: 0;
+    width: 80px;
+}
+
+.log-level {
+    flex-shrink: 0;
+    width: 60px;
+    font-weight: var(--flin-font-weight-medium);
+}
+
+.log-error .log-level { color: var(--monitoring-status-critical); }
+.log-warning .log-level { color: var(--monitoring-status-warning); }
+.log-info .log-level { color: #3b82f6; }
+.log-debug .log-level { color: #8b5cf6; }
+.log-default .log-level { color: #a1a1aa; }
+
+.log-service {
+    color: #89b4fa;
+    flex-shrink: 0;
+}
+
+.log-message {
+    color: #cdd6f4;
+    word-break: break-word;
+}
+
+/* Empty State */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-spacing-8);
+    color: var(--monitoring-text-muted);
+}
+
+.empty-icon {
+    font-size: var(--flin-font-size-3xl);
+    margin-bottom: var(--flin-spacing-2);
+    opacity: 0.5;
+}
+
+.empty-message {
+    font-size: var(--flin-font-size-sm);
+}
+
+/* Dark Mode */
+[data-theme="dark"] .monitoring-dashboard {
+    --monitoring-bg: var(--flin-color-gray-900);
+    --monitoring-card-bg: var(--flin-color-gray-800);
+    --monitoring-border: var(--flin-color-gray-700);
+    --monitoring-text: var(--flin-color-gray-100);
+    --monitoring-text-muted: var(--flin-color-gray-400);
+}
+
+[data-theme="dark"] .health-card,
+[data-theme="dark"] .service-card,
+[data-theme="dark"] .incident-item,
+[data-theme="dark"] .alert-item {
+    background: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .health-icon {
+    background: var(--flin-color-gray-800);
+}
+
+[data-theme="dark"] .health-bar {
+    background: var(--flin-color-gray-600);
+}
+
+[data-theme="dark"] .service-card:hover,
+[data-theme="dark"] .incident-item:hover,
+[data-theme="dark"] .incident-item--expanded {
+    background: var(--flin-color-gray-600);
+}
+
+[data-theme="dark"] .service-card--selected {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+[data-theme="dark"] .action-btn {
+    background: var(--flin-color-gray-700);
+    border-color: var(--flin-color-gray-600);
+}
+
+[data-theme="dark"] .action-btn:hover:not(:disabled) {
+    background: var(--flin-color-gray-600);
+}
+
+[data-theme="dark"] .filter-btn {
+    border-color: var(--flin-color-gray-600);
+}
+
+[data-theme="dark"] .filter-btn:hover {
+    background: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .filter-btn--active {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+[data-theme="dark"] .uptime-ring-bg {
+    stroke: var(--flin-color-gray-600);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .health-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .monitoring-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--flin-spacing-3);
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .health-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .uptime-stats {
+        flex-direction: column;
+    }
+
+    .quick-actions {
+        flex-direction: column;
+    }
+
+    .log-filters {
+        flex-wrap: wrap;
+    }
+
+    .log-entry {
+        flex-wrap: wrap;
+    }
+
+    .log-timestamp,
+    .log-level,
+    .log-service {
+        flex-basis: auto;
+    }
+
+    .log-message {
+        flex-basis: 100%;
+        padding-top: var(--flin-spacing-2);
+    }
+}
+
+@media (max-width: 480px) {
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--flin-spacing-2);
+    }
+
+    .chart-legend {
+        flex-wrap: wrap;
+    }
+
+    .alert-filters,
+    .log-filters {
+        width: 100%;
+        overflow-x: auto;
+    }
+}
+</style>

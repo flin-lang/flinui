@@ -1,0 +1,1781 @@
+// EcommerceDashboard.flin - E-commerce admin dashboard template
+// A comprehensive dashboard for managing e-commerce operations with stats,
+// charts, orders, products, alerts, and customer activity
+
+// Props
+stats = props.stats || {
+    todaySales: { value: "$0", change: "0%", trend: "neutral" },
+    totalOrders: { value: "0", change: "0%", trend: "neutral" },
+    customers: { value: "0", change: "0%", trend: "neutral" },
+    conversionRate: { value: "0%", change: "0%", trend: "neutral" }
+}
+orders = props.orders || []
+products = props.products || []
+customers = props.customers || []
+chartData = props.chartData || []
+alerts = props.alerts || []
+onAction = props.onAction || { action -> }
+
+// Dashboard config from props
+title = props.title || "E-commerce Dashboard"
+subtitle = props.subtitle || "Overview of your store performance"
+chartType = props.chartType || "line"
+showChart = props.showChart !== false
+showOrders = props.showOrders !== false
+showProducts = props.showProducts !== false
+showAlerts = props.showAlerts !== false
+showActivity = props.showActivity !== false
+showQuickActions = props.showQuickActions !== false
+
+// State
+selectedPeriod = "today"
+isRefreshing = false
+
+// Handlers
+handlePeriodChange = { period ->
+    selectedPeriod = period
+    onAction({ type: "period_change", period: period })
+}
+
+handleRefresh = {
+    isRefreshing = true
+    onAction({ type: "refresh" })
+    // Reset after animation
+    setTimeout({ isRefreshing = false }, 1000)
+}
+
+handleQuickAction = { actionType ->
+    onAction({ type: actionType })
+}
+
+handleOrderClick = { order ->
+    onAction({ type: "view_order", order: order })
+}
+
+handleProductClick = { product ->
+    onAction({ type: "view_product", product: product })
+}
+
+handleAlertDismiss = { alert ->
+    onAction({ type: "dismiss_alert", alert: alert })
+}
+
+// Computed values
+getTrendClass = { trend ->
+    match trend {
+        "up" -> "ecom-stat__trend--up"
+        "down" -> "ecom-stat__trend--down"
+        _ -> "ecom-stat__trend--neutral"
+    }
+}
+
+getTrendIcon = { trend ->
+    match trend {
+        "up" -> "arrow_up"
+        "down" -> "arrow_down"
+        _ -> "minus"
+    }
+}
+
+getStatusClass = { status ->
+    match status {
+        "completed" -> "status--completed"
+        "processing" -> "status--processing"
+        "pending" -> "status--pending"
+        "cancelled" -> "status--cancelled"
+        "shipped" -> "status--shipped"
+        _ -> "status--default"
+    }
+}
+
+getAlertClass = { severity ->
+    match severity {
+        "critical" -> "alert--critical"
+        "warning" -> "alert--warning"
+        "info" -> "alert--info"
+        _ -> "alert--default"
+    }
+}
+
+getStockClass = { stock, threshold ->
+    {if stock <= 0}
+        stockClass = "stock--out"
+    {else if stock <= (threshold || 10)}
+        stockClass = "stock--low"
+    {else}
+        stockClass = "stock--ok"
+    {/if}
+    stockClass
+}
+
+// Format helpers
+formatCurrency = { value ->
+    {if typeof value == "number"}
+        formatted = "$" ++ value.toLocaleString()
+    {else}
+        formatted = value
+    {/if}
+    formatted
+}
+
+formatDate = { date ->
+    {if date}
+        formatted = date
+    {else}
+        formatted = "-"
+    {/if}
+    formatted
+}
+
+<div class="ecom-dashboard">
+    // Header Section
+    <header class="ecom-dashboard__header">
+        <div class="ecom-dashboard__header-content">
+            <div class="ecom-dashboard__title-group">
+                <h1 class="ecom-dashboard__title">{title}</h1>
+                <p class="ecom-dashboard__subtitle">{subtitle}</p>
+            </div>
+            <div class="ecom-dashboard__header-actions">
+                // Period selector
+                <div class="ecom-period-selector">
+                    <button
+                        class={if selectedPeriod == "today" then "ecom-period-btn active" else "ecom-period-btn"}
+                        onClick={ handlePeriodChange("today") }
+                    >
+                        Today
+                    </button>
+                    <button
+                        class={if selectedPeriod == "week" then "ecom-period-btn active" else "ecom-period-btn"}
+                        onClick={ handlePeriodChange("week") }
+                    >
+                        This Week
+                    </button>
+                    <button
+                        class={if selectedPeriod == "month" then "ecom-period-btn active" else "ecom-period-btn"}
+                        onClick={ handlePeriodChange("month") }
+                    >
+                        This Month
+                    </button>
+                    <button
+                        class={if selectedPeriod == "year" then "ecom-period-btn active" else "ecom-period-btn"}
+                        onClick={ handlePeriodChange("year") }
+                    >
+                        This Year
+                    </button>
+                </div>
+                // Refresh button
+                <button
+                    class={if isRefreshing then "ecom-refresh-btn refreshing" else "ecom-refresh-btn"}
+                    onClick={handleRefresh}
+                    aria-label="Refresh dashboard"
+                    title="Refresh data"
+                >
+                    <svg class="ecom-refresh-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6"/>
+                        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    // Stats Cards Section
+    <section class="ecom-stats" aria-label="Key metrics">
+        // Today's Sales Card
+        <div class="ecom-stat-card">
+            <div class="ecom-stat-card__icon ecom-stat-card__icon--sales">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"/>
+                    <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                </svg>
+            </div>
+            <div class="ecom-stat-card__content">
+                <span class="ecom-stat-card__label">Today's Sales</span>
+                <span class="ecom-stat-card__value">{stats.todaySales.value}</span>
+                <div class="ecom-stat-card__change">
+                    <span class={"ecom-stat__trend " ++ getTrendClass(stats.todaySales.trend)}>
+                        {if stats.todaySales.trend == "up"}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M6 10V2M6 2L2 6M6 2L10 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {else if stats.todaySales.trend == "down"}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M6 2V10M6 10L2 6M6 10L10 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {else}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M2 6H10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {/if}
+                        {stats.todaySales.change}
+                    </span>
+                    <span class="ecom-stat-card__period">vs yesterday</span>
+                </div>
+            </div>
+        </div>
+
+        // Total Orders Card
+        <div class="ecom-stat-card">
+            <div class="ecom-stat-card__icon ecom-stat-card__icon--orders">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 01-8 0"/>
+                </svg>
+            </div>
+            <div class="ecom-stat-card__content">
+                <span class="ecom-stat-card__label">Total Orders</span>
+                <span class="ecom-stat-card__value">{stats.totalOrders.value}</span>
+                <div class="ecom-stat-card__change">
+                    <span class={"ecom-stat__trend " ++ getTrendClass(stats.totalOrders.trend)}>
+                        {if stats.totalOrders.trend == "up"}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M6 10V2M6 2L2 6M6 2L10 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {else if stats.totalOrders.trend == "down"}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M6 2V10M6 10L2 6M6 10L10 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {else}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M2 6H10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {/if}
+                        {stats.totalOrders.change}
+                    </span>
+                    <span class="ecom-stat-card__period">vs last period</span>
+                </div>
+            </div>
+        </div>
+
+        // Customers Card
+        <div class="ecom-stat-card">
+            <div class="ecom-stat-card__icon ecom-stat-card__icon--customers">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                </svg>
+            </div>
+            <div class="ecom-stat-card__content">
+                <span class="ecom-stat-card__label">Customers</span>
+                <span class="ecom-stat-card__value">{stats.customers.value}</span>
+                <div class="ecom-stat-card__change">
+                    <span class={"ecom-stat__trend " ++ getTrendClass(stats.customers.trend)}>
+                        {if stats.customers.trend == "up"}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M6 10V2M6 2L2 6M6 2L10 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {else if stats.customers.trend == "down"}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M6 2V10M6 10L2 6M6 10L10 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {else}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M2 6H10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {/if}
+                        {stats.customers.change}
+                    </span>
+                    <span class="ecom-stat-card__period">new this period</span>
+                </div>
+            </div>
+        </div>
+
+        // Conversion Rate Card
+        <div class="ecom-stat-card">
+            <div class="ecom-stat-card__icon ecom-stat-card__icon--conversion">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+            </div>
+            <div class="ecom-stat-card__content">
+                <span class="ecom-stat-card__label">Conversion Rate</span>
+                <span class="ecom-stat-card__value">{stats.conversionRate.value}</span>
+                <div class="ecom-stat-card__change">
+                    <span class={"ecom-stat__trend " ++ getTrendClass(stats.conversionRate.trend)}>
+                        {if stats.conversionRate.trend == "up"}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M6 10V2M6 2L2 6M6 2L10 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {else if stats.conversionRate.trend == "down"}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M6 2V10M6 10L2 6M6 10L10 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {else}
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M2 6H10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {/if}
+                        {stats.conversionRate.change}
+                    </span>
+                    <span class="ecom-stat-card__period">vs last period</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    // Main Content Grid
+    <div class="ecom-dashboard__grid">
+        // Left Column - Chart & Orders
+        <div class="ecom-dashboard__main">
+            // Sales Chart
+            {if showChart}
+                <section class="ecom-card ecom-chart-section" aria-label="Sales chart">
+                    <div class="ecom-card__header">
+                        <h2 class="ecom-card__title">Sales Overview</h2>
+                        <div class="ecom-chart-legend">
+                            <span class="ecom-chart-legend__item">
+                                <span class="ecom-chart-legend__dot ecom-chart-legend__dot--primary"></span>
+                                Revenue
+                            </span>
+                            <span class="ecom-chart-legend__item">
+                                <span class="ecom-chart-legend__dot ecom-chart-legend__dot--secondary"></span>
+                                Orders
+                            </span>
+                        </div>
+                    </div>
+                    <div class="ecom-card__body">
+                        <div class="ecom-chart-container">
+                            {if chartData.length > 0}
+                                // SVG Chart
+                                <svg class="ecom-chart" viewBox="0 0 600 250" preserveAspectRatio="xMidYMid meet">
+                                    // Grid lines
+                                    <g class="ecom-chart__grid">
+                                        {for i in [0, 1, 2, 3, 4]}
+                                            <line x1="50" y1={50 + i * 40} x2="580" y2={50 + i * 40} stroke="var(--flin-neutral-200)" stroke-dasharray="4 4"/>
+                                        {/for}
+                                    </g>
+                                    // Y-axis labels
+                                    <g class="ecom-chart__labels">
+                                        <text x="40" y="55" text-anchor="end" fill="var(--flin-fg-muted)" font-size="11">$50k</text>
+                                        <text x="40" y="95" text-anchor="end" fill="var(--flin-fg-muted)" font-size="11">$40k</text>
+                                        <text x="40" y="135" text-anchor="end" fill="var(--flin-fg-muted)" font-size="11">$30k</text>
+                                        <text x="40" y="175" text-anchor="end" fill="var(--flin-fg-muted)" font-size="11">$20k</text>
+                                        <text x="40" y="215" text-anchor="end" fill="var(--flin-fg-muted)" font-size="11">$10k</text>
+                                    </g>
+                                    // Area fill
+                                    <defs>
+                                        <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="var(--flin-primary)" stop-opacity="0.3"/>
+                                            <stop offset="100%" stop-color="var(--flin-primary)" stop-opacity="0"/>
+                                        </linearGradient>
+                                    </defs>
+                                    // Render chart based on data
+                                    {if chartType == "line"}
+                                        <path
+                                            class="ecom-chart__area"
+                                            d="M50 180 L130 140 L210 160 L290 100 L370 120 L450 80 L530 60 L530 210 L50 210 Z"
+                                            fill="url(#chartGradient)"
+                                        />
+                                        <path
+                                            class="ecom-chart__line"
+                                            d="M50 180 L130 140 L210 160 L290 100 L370 120 L450 80 L530 60"
+                                            fill="none"
+                                            stroke="var(--flin-primary)"
+                                            stroke-width="2.5"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                        />
+                                        // Data points
+                                        <g class="ecom-chart__points">
+                                            <circle cx="50" cy="180" r="4" fill="var(--flin-primary)" stroke="white" stroke-width="2"/>
+                                            <circle cx="130" cy="140" r="4" fill="var(--flin-primary)" stroke="white" stroke-width="2"/>
+                                            <circle cx="210" cy="160" r="4" fill="var(--flin-primary)" stroke="white" stroke-width="2"/>
+                                            <circle cx="290" cy="100" r="4" fill="var(--flin-primary)" stroke="white" stroke-width="2"/>
+                                            <circle cx="370" cy="120" r="4" fill="var(--flin-primary)" stroke="white" stroke-width="2"/>
+                                            <circle cx="450" cy="80" r="4" fill="var(--flin-primary)" stroke="white" stroke-width="2"/>
+                                            <circle cx="530" cy="60" r="4" fill="var(--flin-primary)" stroke="white" stroke-width="2"/>
+                                        </g>
+                                    {else}
+                                        // Bar chart
+                                        <g class="ecom-chart__bars">
+                                            <rect x="60" y="180" width="40" height="30" fill="var(--flin-primary)" rx="4"/>
+                                            <rect x="130" y="140" width="40" height="70" fill="var(--flin-primary)" rx="4"/>
+                                            <rect x="200" y="160" width="40" height="50" fill="var(--flin-primary)" rx="4"/>
+                                            <rect x="270" y="100" width="40" height="110" fill="var(--flin-primary)" rx="4"/>
+                                            <rect x="340" y="120" width="40" height="90" fill="var(--flin-primary)" rx="4"/>
+                                            <rect x="410" y="80" width="40" height="130" fill="var(--flin-primary)" rx="4"/>
+                                            <rect x="480" y="60" width="40" height="150" fill="var(--flin-primary)" rx="4"/>
+                                        </g>
+                                    {/if}
+                                    // X-axis labels
+                                    <g class="ecom-chart__x-labels">
+                                        <text x="50" y="235" text-anchor="middle" fill="var(--flin-fg-muted)" font-size="11">Mon</text>
+                                        <text x="130" y="235" text-anchor="middle" fill="var(--flin-fg-muted)" font-size="11">Tue</text>
+                                        <text x="210" y="235" text-anchor="middle" fill="var(--flin-fg-muted)" font-size="11">Wed</text>
+                                        <text x="290" y="235" text-anchor="middle" fill="var(--flin-fg-muted)" font-size="11">Thu</text>
+                                        <text x="370" y="235" text-anchor="middle" fill="var(--flin-fg-muted)" font-size="11">Fri</text>
+                                        <text x="450" y="235" text-anchor="middle" fill="var(--flin-fg-muted)" font-size="11">Sat</text>
+                                        <text x="530" y="235" text-anchor="middle" fill="var(--flin-fg-muted)" font-size="11">Sun</text>
+                                    </g>
+                                </svg>
+                            {else}
+                                <div class="ecom-chart-empty">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M3 3v18h18"/>
+                                        <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+                                    </svg>
+                                    <p>No chart data available</p>
+                                </div>
+                            {/if}
+                        </div>
+                    </div>
+                </section>
+            {/if}
+
+            // Recent Orders Table
+            {if showOrders}
+                <section class="ecom-card ecom-orders-section" aria-label="Recent orders">
+                    <div class="ecom-card__header">
+                        <h2 class="ecom-card__title">Recent Orders</h2>
+                        <button class="ecom-card__action" onClick={ handleQuickAction("view_all_orders") }>
+                            View All
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="ecom-card__body ecom-card__body--table">
+                        {if orders.length > 0}
+                            <table class="ecom-orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Items</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {orders.slice(0, 5).map { order ->
+                                        <tr class="ecom-orders-table__row" onClick={ handleOrderClick(order) }>
+                                            <td class="ecom-orders-table__id">#{order.id}</td>
+                                            <td class="ecom-orders-table__customer">
+                                                <div class="ecom-customer-cell">
+                                                    {if order.customerAvatar}
+                                                        <img src={order.customerAvatar} alt="" class="ecom-customer-cell__avatar"/>
+                                                    {else}
+                                                        <div class="ecom-customer-cell__avatar ecom-customer-cell__avatar--placeholder">
+                                                            {(order.customerName || "U").charAt(0)}
+                                                        </div>
+                                                    {/if}
+                                                    <span>{order.customerName || "Unknown"}</span>
+                                                </div>
+                                            </td>
+                                            <td class="ecom-orders-table__items">{order.itemCount || order.items?.length || 0} items</td>
+                                            <td class="ecom-orders-table__total">{formatCurrency(order.total)}</td>
+                                            <td>
+                                                <span class={"ecom-status-badge " ++ getStatusClass(order.status)}>
+                                                    {order.status}
+                                                </span>
+                                            </td>
+                                            <td class="ecom-orders-table__date">{formatDate(order.date)}</td>
+                                        </tr>
+                                    }}
+                                </tbody>
+                            </table>
+                        {else}
+                            <div class="ecom-empty-state">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                                    <line x1="3" y1="6" x2="21" y2="6"/>
+                                </svg>
+                                <p>No recent orders</p>
+                            </div>
+                        {/if}
+                    </div>
+                </section>
+            {/if}
+        </div>
+
+        // Right Column - Sidebar
+        <div class="ecom-dashboard__sidebar">
+            // Quick Actions
+            {if showQuickActions}
+                <section class="ecom-card ecom-quick-actions" aria-label="Quick actions">
+                    <div class="ecom-card__header">
+                        <h2 class="ecom-card__title">Quick Actions</h2>
+                    </div>
+                    <div class="ecom-card__body">
+                        <div class="ecom-quick-actions__grid">
+                            <button class="ecom-quick-action-btn" onClick={ handleQuickAction("add_product") }>
+                                <span class="ecom-quick-action-btn__icon ecom-quick-action-btn__icon--product">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                    </svg>
+                                </span>
+                                <span class="ecom-quick-action-btn__label">Add Product</span>
+                            </button>
+                            <button class="ecom-quick-action-btn" onClick={ handleQuickAction("create_order") }>
+                                <span class="ecom-quick-action-btn__icon ecom-quick-action-btn__icon--order">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                        <line x1="12" y1="8" x2="12" y2="16"/>
+                                        <line x1="8" y1="12" x2="16" y2="12"/>
+                                    </svg>
+                                </span>
+                                <span class="ecom-quick-action-btn__label">Create Order</span>
+                            </button>
+                            <button class="ecom-quick-action-btn" onClick={ handleQuickAction("add_customer") }>
+                                <span class="ecom-quick-action-btn__icon ecom-quick-action-btn__icon--customer">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                                        <circle cx="8.5" cy="7" r="4"/>
+                                        <line x1="20" y1="8" x2="20" y2="14"/>
+                                        <line x1="23" y1="11" x2="17" y2="11"/>
+                                    </svg>
+                                </span>
+                                <span class="ecom-quick-action-btn__label">Add Customer</span>
+                            </button>
+                            <button class="ecom-quick-action-btn" onClick={ handleQuickAction("create_discount") }>
+                                <span class="ecom-quick-action-btn__icon ecom-quick-action-btn__icon--discount">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="9" cy="9" r="2"/>
+                                        <circle cx="15" cy="15" r="2"/>
+                                        <line x1="19" y1="5" x2="5" y2="19"/>
+                                    </svg>
+                                </span>
+                                <span class="ecom-quick-action-btn__label">Create Discount</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            {/if}
+
+            // Low Stock Alerts
+            {if showAlerts && alerts.length > 0}
+                <section class="ecom-card ecom-alerts-section" aria-label="Alerts">
+                    <div class="ecom-card__header">
+                        <h2 class="ecom-card__title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                                <line x1="12" y1="9" x2="12" y2="13"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                            Alerts
+                            <span class="ecom-card__badge">{alerts.length}</span>
+                        </h2>
+                    </div>
+                    <div class="ecom-card__body">
+                        <div class="ecom-alerts-list">
+                            {alerts.slice(0, 5).map { alert ->
+                                <div class={"ecom-alert-item " ++ getAlertClass(alert.severity)}>
+                                    <div class="ecom-alert-item__content">
+                                        <span class="ecom-alert-item__title">{alert.title || alert.message}</span>
+                                        {if alert.description}
+                                            <span class="ecom-alert-item__description">{alert.description}</span>
+                                        {/if}
+                                    </div>
+                                    <button
+                                        class="ecom-alert-item__dismiss"
+                                        onClick={ handleAlertDismiss(alert) }
+                                        aria-label="Dismiss alert"
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="18" y1="6" x2="6" y2="18"/>
+                                            <line x1="6" y1="6" x2="18" y2="18"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            }}
+                        </div>
+                    </div>
+                </section>
+            {/if}
+
+            // Top Products
+            {if showProducts && products.length > 0}
+                <section class="ecom-card ecom-products-section" aria-label="Top products">
+                    <div class="ecom-card__header">
+                        <h2 class="ecom-card__title">Top Products</h2>
+                        <button class="ecom-card__action" onClick={ handleQuickAction("view_all_products") }>
+                            View All
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="ecom-card__body">
+                        <div class="ecom-products-list">
+                            {products.slice(0, 5).map { product ->
+                                <div class="ecom-product-item" onClick={ handleProductClick(product) }>
+                                    <div class="ecom-product-item__image">
+                                        {if product.image}
+                                            <img src={product.image} alt={product.name}/>
+                                        {else}
+                                            <div class="ecom-product-item__image-placeholder">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                                    <polyline points="21 15 16 10 5 21"/>
+                                                </svg>
+                                            </div>
+                                        {/if}
+                                    </div>
+                                    <div class="ecom-product-item__info">
+                                        <span class="ecom-product-item__name">{product.name}</span>
+                                        <span class="ecom-product-item__meta">
+                                            <span class="ecom-product-item__price">{formatCurrency(product.price)}</span>
+                                            <span class="ecom-product-item__sales">{product.sales || 0} sold</span>
+                                        </span>
+                                    </div>
+                                    <div class={"ecom-product-item__stock " ++ getStockClass(product.stock, product.lowStockThreshold)}>
+                                        {product.stock} in stock
+                                    </div>
+                                </div>
+                            }}
+                        </div>
+                    </div>
+                </section>
+            {/if}
+
+            // Customer Activity
+            {if showActivity && customers.length > 0}
+                <section class="ecom-card ecom-activity-section" aria-label="Customer activity">
+                    <div class="ecom-card__header">
+                        <h2 class="ecom-card__title">Recent Activity</h2>
+                    </div>
+                    <div class="ecom-card__body">
+                        <div class="ecom-activity-feed">
+                            {customers.slice(0, 5).map { activity ->
+                                <div class="ecom-activity-item">
+                                    <div class="ecom-activity-item__avatar">
+                                        {if activity.avatar}
+                                            <img src={activity.avatar} alt=""/>
+                                        {else}
+                                            <div class="ecom-activity-item__avatar-placeholder">
+                                                {(activity.name || "U").charAt(0)}
+                                            </div>
+                                        {/if}
+                                    </div>
+                                    <div class="ecom-activity-item__content">
+                                        <span class="ecom-activity-item__text">
+                                            <strong>{activity.name}</strong> {activity.action || "performed an action"}
+                                        </span>
+                                        <span class="ecom-activity-item__time">{activity.time || "Just now"}</span>
+                                    </div>
+                                </div>
+                            }}
+                        </div>
+                    </div>
+                </section>
+            {/if}
+        </div>
+    </div>
+</div>
+
+<style scoped>
+/* Base Dashboard Styles */
+.ecom-dashboard {
+    min-height: 100%;
+    background: var(--flin-color-gray-50);
+    font-family: var(--flin-font-sans);
+}
+
+/* Header */
+.ecom-dashboard__header {
+    background: var(--flin-color-white);
+    border-bottom: 1px solid var(--flin-color-gray-200);
+    padding: var(--flin-spacing-5) var(--flin-spacing-6);
+    margin-bottom: var(--flin-spacing-6);
+}
+
+.ecom-dashboard__header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--flin-spacing-4);
+}
+
+.ecom-dashboard__title-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-1);
+}
+
+.ecom-dashboard__title {
+    margin: 0;
+    font-size: var(--flin-font-size-2xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--flin-color-gray-900);
+}
+
+.ecom-dashboard__subtitle {
+    margin: 0;
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+}
+
+.ecom-dashboard__header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-3);
+}
+
+/* Period Selector */
+.ecom-period-selector {
+    display: flex;
+    background: var(--flin-color-gray-100);
+    border-radius: var(--flin-radius-lg);
+    padding: 4px;
+}
+
+.ecom-period-btn {
+    padding: var(--flin-spacing-2) var(--flin-spacing-3);
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-600);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    white-space: nowrap;
+}
+
+.ecom-period-btn:hover {
+    color: var(--flin-color-gray-900);
+}
+
+.ecom-period-btn.active {
+    background: var(--flin-color-white);
+    color: var(--flin-color-gray-900);
+    box-shadow: var(--flin-shadow-sm);
+}
+
+/* Refresh Button */
+.ecom-refresh-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--flin-color-white);
+    border: 1px solid var(--flin-color-gray-200);
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    color: var(--flin-color-gray-600);
+    transition: all var(--flin-transition-fast);
+}
+
+.ecom-refresh-btn:hover {
+    background: var(--flin-color-gray-50);
+    color: var(--flin-color-gray-900);
+}
+
+.ecom-refresh-btn.refreshing .ecom-refresh-icon {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Stats Cards */
+.ecom-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--flin-spacing-5);
+    padding: 0 var(--flin-spacing-6);
+    margin-bottom: var(--flin-spacing-6);
+}
+
+.ecom-stat-card {
+    background: var(--flin-color-white);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-spacing-5);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-spacing-4);
+    box-shadow: var(--flin-shadow-sm);
+    border: 1px solid var(--flin-color-gray-100);
+    transition: all var(--flin-transition-fast);
+}
+
+.ecom-stat-card:hover {
+    box-shadow: var(--flin-shadow-md);
+    transform: translateY(-2px);
+}
+
+.ecom-stat-card__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--flin-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ecom-stat-card__icon--sales {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--flin-color-success-600);
+}
+
+.ecom-stat-card__icon--orders {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--flin-color-primary-600);
+}
+
+.ecom-stat-card__icon--customers {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+.ecom-stat-card__icon--conversion {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--flin-color-warning-600);
+}
+
+.ecom-stat-card__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.ecom-stat-card__label {
+    display: block;
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-500);
+    margin-bottom: var(--flin-spacing-1);
+}
+
+.ecom-stat-card__value {
+    display: block;
+    font-size: var(--flin-font-size-2xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--flin-color-gray-900);
+    line-height: 1.2;
+    margin-bottom: var(--flin-spacing-2);
+}
+
+.ecom-stat-card__change {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+}
+
+.ecom-stat__trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-semibold);
+    padding: 2px 6px;
+    border-radius: var(--flin-radius-full);
+}
+
+.ecom-stat__trend--up {
+    color: var(--flin-color-success-700);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.ecom-stat__trend--down {
+    color: var(--flin-color-danger-700);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.ecom-stat__trend--neutral {
+    color: var(--flin-color-gray-600);
+    background: var(--flin-color-gray-100);
+}
+
+.ecom-stat-card__period {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-400);
+}
+
+/* Main Grid Layout */
+.ecom-dashboard__grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: var(--flin-spacing-6);
+    padding: 0 var(--flin-spacing-6) var(--flin-spacing-6);
+}
+
+.ecom-dashboard__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-6);
+}
+
+.ecom-dashboard__sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-5);
+}
+
+/* Card Base Styles */
+.ecom-card {
+    background: var(--flin-color-white);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-sm);
+    border: 1px solid var(--flin-color-gray-100);
+    overflow: hidden;
+}
+
+.ecom-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-spacing-4) var(--flin-spacing-5);
+    border-bottom: 1px solid var(--flin-color-gray-100);
+}
+
+.ecom-card__title {
+    margin: 0;
+    font-size: var(--flin-font-size-base);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+}
+
+.ecom-card__badge {
+    background: var(--flin-color-danger-500);
+    color: white;
+    font-size: var(--flin-font-size-xs);
+    padding: 2px 8px;
+    border-radius: var(--flin-radius-full);
+    font-weight: var(--flin-font-weight-medium);
+}
+
+.ecom-card__action {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-1);
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-primary-600);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--flin-spacing-1) var(--flin-spacing-2);
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+}
+
+.ecom-card__action:hover {
+    background: var(--flin-color-primary-50);
+}
+
+.ecom-card__body {
+    padding: var(--flin-spacing-5);
+}
+
+.ecom-card__body--table {
+    padding: 0;
+}
+
+/* Chart Section */
+.ecom-chart-container {
+    width: 100%;
+    min-height: 280px;
+}
+
+.ecom-chart {
+    width: 100%;
+    height: 100%;
+}
+
+.ecom-chart__line {
+    animation: drawLine 1.5s ease-out forwards;
+}
+
+@keyframes drawLine {
+    from {
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 1000;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.ecom-chart__area {
+    opacity: 0;
+    animation: fadeIn 1s ease-out 0.5s forwards;
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
+
+.ecom-chart-legend {
+    display: flex;
+    gap: var(--flin-spacing-4);
+}
+
+.ecom-chart-legend__item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-600);
+}
+
+.ecom-chart-legend__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--flin-radius-full);
+}
+
+.ecom-chart-legend__dot--primary {
+    background: var(--flin-color-primary-500);
+}
+
+.ecom-chart-legend__dot--secondary {
+    background: var(--flin-color-gray-400);
+}
+
+.ecom-chart-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 250px;
+    color: var(--flin-color-gray-400);
+}
+
+.ecom-chart-empty p {
+    margin: var(--flin-spacing-3) 0 0;
+    font-size: var(--flin-font-size-sm);
+}
+
+/* Orders Table */
+.ecom-orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--flin-font-size-sm);
+}
+
+.ecom-orders-table th {
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    text-align: left;
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-500);
+    background: var(--flin-color-gray-50);
+    border-bottom: 1px solid var(--flin-color-gray-200);
+    white-space: nowrap;
+}
+
+.ecom-orders-table__row {
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.ecom-orders-table__row:hover {
+    background: var(--flin-color-gray-50);
+}
+
+.ecom-orders-table td {
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    border-bottom: 1px solid var(--flin-color-gray-100);
+    color: var(--flin-color-gray-700);
+}
+
+.ecom-orders-table__row:last-child td {
+    border-bottom: none;
+}
+
+.ecom-orders-table__id {
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+}
+
+.ecom-orders-table__total {
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+}
+
+.ecom-orders-table__date {
+    color: var(--flin-color-gray-500);
+}
+
+.ecom-customer-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+}
+
+.ecom-customer-cell__avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--flin-radius-full);
+    object-fit: cover;
+}
+
+.ecom-customer-cell__avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-color-primary-100);
+    color: var(--flin-color-primary-700);
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-semibold);
+}
+
+/* Status Badges */
+.ecom-status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-semibold);
+    border-radius: var(--flin-radius-full);
+    text-transform: capitalize;
+}
+
+.status--completed {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--flin-color-success-700);
+}
+
+.status--processing {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--flin-color-primary-700);
+}
+
+.status--pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--flin-color-warning-700);
+}
+
+.status--cancelled {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--flin-color-danger-700);
+}
+
+.status--shipped {
+    background: rgba(139, 92, 246, 0.1);
+    color: #7c3aed;
+}
+
+.status--default {
+    background: var(--flin-color-gray-100);
+    color: var(--flin-color-gray-700);
+}
+
+/* Quick Actions */
+.ecom-quick-actions__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--flin-spacing-3);
+}
+
+.ecom-quick-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    padding: var(--flin-spacing-4);
+    background: var(--flin-color-gray-50);
+    border: 1px solid var(--flin-color-gray-100);
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.ecom-quick-action-btn:hover {
+    background: var(--flin-color-white);
+    border-color: var(--flin-color-primary-200);
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.ecom-quick-action-btn__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--flin-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ecom-quick-action-btn__icon--product {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--flin-color-success-600);
+}
+
+.ecom-quick-action-btn__icon--order {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--flin-color-primary-600);
+}
+
+.ecom-quick-action-btn__icon--customer {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+.ecom-quick-action-btn__icon--discount {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--flin-color-warning-600);
+}
+
+.ecom-quick-action-btn__label {
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-700);
+}
+
+/* Alerts Section */
+.ecom-alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-3);
+}
+
+.ecom-alert-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--flin-spacing-3);
+    padding: var(--flin-spacing-3);
+    border-radius: var(--flin-radius-lg);
+    border-left: 3px solid;
+}
+
+.alert--critical {
+    background: rgba(239, 68, 68, 0.05);
+    border-color: var(--flin-color-danger-500);
+}
+
+.alert--warning {
+    background: rgba(245, 158, 11, 0.05);
+    border-color: var(--flin-color-warning-500);
+}
+
+.alert--info {
+    background: rgba(59, 130, 246, 0.05);
+    border-color: var(--flin-color-primary-500);
+}
+
+.alert--default {
+    background: var(--flin-color-gray-50);
+    border-color: var(--flin-color-gray-300);
+}
+
+.ecom-alert-item__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.ecom-alert-item__title {
+    display: block;
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-900);
+    margin-bottom: 2px;
+}
+
+.ecom-alert-item__description {
+    display: block;
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-500);
+}
+
+.ecom-alert-item__dismiss {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: var(--flin-spacing-1);
+    color: var(--flin-color-gray-400);
+    cursor: pointer;
+    border-radius: var(--flin-radius-sm);
+    transition: all var(--flin-transition-fast);
+}
+
+.ecom-alert-item__dismiss:hover {
+    background: var(--flin-color-gray-100);
+    color: var(--flin-color-gray-600);
+}
+
+/* Products List */
+.ecom-products-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-3);
+}
+
+.ecom-product-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-3);
+    padding: var(--flin-spacing-2);
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.ecom-product-item:hover {
+    background: var(--flin-color-gray-50);
+}
+
+.ecom-product-item__image {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.ecom-product-item__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ecom-product-item__image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-color-gray-100);
+    color: var(--flin-color-gray-400);
+}
+
+.ecom-product-item__info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ecom-product-item__name {
+    display: block;
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-900);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ecom-product-item__meta {
+    display: flex;
+    gap: var(--flin-spacing-2);
+    font-size: var(--flin-font-size-xs);
+}
+
+.ecom-product-item__price {
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-700);
+}
+
+.ecom-product-item__sales {
+    color: var(--flin-color-gray-500);
+}
+
+.ecom-product-item__stock {
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    padding: 2px 8px;
+    border-radius: var(--flin-radius-full);
+    white-space: nowrap;
+}
+
+.stock--ok {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--flin-color-success-700);
+}
+
+.stock--low {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--flin-color-warning-700);
+}
+
+.stock--out {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--flin-color-danger-700);
+}
+
+/* Activity Feed */
+.ecom-activity-feed {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-4);
+}
+
+.ecom-activity-item {
+    display: flex;
+    gap: var(--flin-spacing-3);
+}
+
+.ecom-activity-item__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.ecom-activity-item__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ecom-activity-item__avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-color-gray-200);
+    color: var(--flin-color-gray-600);
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-semibold);
+}
+
+.ecom-activity-item__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.ecom-activity-item__text {
+    display: block;
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-600);
+    line-height: 1.4;
+}
+
+.ecom-activity-item__text strong {
+    color: var(--flin-color-gray-900);
+    font-weight: var(--flin-font-weight-medium);
+}
+
+.ecom-activity-item__time {
+    display: block;
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-400);
+    margin-top: 2px;
+}
+
+/* Empty State */
+.ecom-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-spacing-8);
+    color: var(--flin-color-gray-400);
+}
+
+.ecom-empty-state p {
+    margin: var(--flin-spacing-3) 0 0;
+    font-size: var(--flin-font-size-sm);
+}
+
+/* Responsive Styles */
+@media (max-width: 1280px) {
+    .ecom-dashboard__grid {
+        grid-template-columns: 1fr 340px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .ecom-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ecom-dashboard__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ecom-dashboard__sidebar {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--flin-spacing-5);
+    }
+}
+
+@media (max-width: 768px) {
+    .ecom-dashboard__header {
+        padding: var(--flin-spacing-4);
+    }
+
+    .ecom-dashboard__header-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ecom-dashboard__header-actions {
+        justify-content: space-between;
+    }
+
+    .ecom-period-selector {
+        flex: 1;
+        overflow-x: auto;
+    }
+
+    .ecom-stats {
+        grid-template-columns: 1fr;
+        padding: 0 var(--flin-spacing-4);
+    }
+
+    .ecom-dashboard__grid {
+        padding: 0 var(--flin-spacing-4) var(--flin-spacing-4);
+    }
+
+    .ecom-dashboard__sidebar {
+        grid-template-columns: 1fr;
+    }
+
+    .ecom-orders-table {
+        font-size: var(--flin-font-size-xs);
+    }
+
+    .ecom-orders-table th,
+    .ecom-orders-table td {
+        padding: var(--flin-spacing-2) var(--flin-spacing-3);
+    }
+
+    .ecom-orders-table__items,
+    .ecom-orders-table__date {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .ecom-period-btn {
+        padding: var(--flin-spacing-2);
+        font-size: var(--flin-font-size-xs);
+    }
+
+    .ecom-stat-card {
+        padding: var(--flin-spacing-4);
+    }
+
+    .ecom-stat-card__value {
+        font-size: var(--flin-font-size-xl);
+    }
+
+    .ecom-quick-actions__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark Theme Support */
+[data-theme="dark"] .ecom-dashboard {
+    background: var(--flin-color-gray-900);
+}
+
+[data-theme="dark"] .ecom-dashboard__header {
+    background: var(--flin-color-gray-800);
+    border-color: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .ecom-dashboard__title {
+    color: var(--flin-color-gray-100);
+}
+
+[data-theme="dark"] .ecom-dashboard__subtitle {
+    color: var(--flin-color-gray-400);
+}
+
+[data-theme="dark"] .ecom-period-selector {
+    background: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .ecom-period-btn {
+    color: var(--flin-color-gray-300);
+}
+
+[data-theme="dark"] .ecom-period-btn:hover {
+    color: var(--flin-color-gray-100);
+}
+
+[data-theme="dark"] .ecom-period-btn.active {
+    background: var(--flin-color-gray-600);
+    color: var(--flin-color-white);
+}
+
+[data-theme="dark"] .ecom-refresh-btn {
+    background: var(--flin-color-gray-800);
+    border-color: var(--flin-color-gray-700);
+    color: var(--flin-color-gray-300);
+}
+
+[data-theme="dark"] .ecom-refresh-btn:hover {
+    background: var(--flin-color-gray-700);
+    color: var(--flin-color-gray-100);
+}
+
+[data-theme="dark"] .ecom-stat-card {
+    background: var(--flin-color-gray-800);
+    border-color: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .ecom-stat-card__label {
+    color: var(--flin-color-gray-400);
+}
+
+[data-theme="dark"] .ecom-stat-card__value {
+    color: var(--flin-color-gray-100);
+}
+
+[data-theme="dark"] .ecom-stat-card__period {
+    color: var(--flin-color-gray-500);
+}
+
+[data-theme="dark"] .ecom-stat__trend--up {
+    background: rgba(16, 185, 129, 0.2);
+}
+
+[data-theme="dark"] .ecom-stat__trend--down {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+[data-theme="dark"] .ecom-stat__trend--neutral {
+    background: var(--flin-color-gray-700);
+    color: var(--flin-color-gray-400);
+}
+
+[data-theme="dark"] .ecom-card {
+    background: var(--flin-color-gray-800);
+    border-color: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .ecom-card__header {
+    border-color: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .ecom-card__title {
+    color: var(--flin-color-gray-100);
+}
+
+[data-theme="dark"] .ecom-card__action:hover {
+    background: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .ecom-chart__grid line {
+    stroke: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .ecom-chart-empty {
+    color: var(--flin-color-gray-500);
+}
+
+[data-theme="dark"] .ecom-chart-legend__item {
+    color: var(--flin-color-gray-400);
+}
+
+[data-theme="dark"] .ecom-orders-table th {
+    background: var(--flin-color-gray-700);
+    color: var(--flin-color-gray-300);
+    border-color: var(--flin-color-gray-600);
+}
+
+[data-theme="dark"] .ecom-orders-table td {
+    color: var(--flin-color-gray-300);
+    border-color: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .ecom-orders-table__row:hover {
+    background: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .ecom-orders-table__id,
+[data-theme="dark"] .ecom-orders-table__total {
+    color: var(--flin-color-gray-100);
+}
+
+[data-theme="dark"] .ecom-orders-table__date {
+    color: var(--flin-color-gray-500);
+}
+
+[data-theme="dark"] .ecom-customer-cell__avatar--placeholder {
+    background: var(--flin-color-primary-900);
+    color: var(--flin-color-primary-300);
+}
+
+[data-theme="dark"] .ecom-quick-action-btn {
+    background: var(--flin-color-gray-700);
+    border-color: var(--flin-color-gray-600);
+}
+
+[data-theme="dark"] .ecom-quick-action-btn:hover {
+    background: var(--flin-color-gray-600);
+    border-color: var(--flin-color-primary-500);
+}
+
+[data-theme="dark"] .ecom-quick-action-btn__label {
+    color: var(--flin-color-gray-300);
+}
+
+[data-theme="dark"] .alert--critical {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+[data-theme="dark"] .alert--warning {
+    background: rgba(245, 158, 11, 0.1);
+}
+
+[data-theme="dark"] .alert--info {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+[data-theme="dark"] .alert--default {
+    background: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .ecom-alert-item__title {
+    color: var(--flin-color-gray-100);
+}
+
+[data-theme="dark"] .ecom-alert-item__description {
+    color: var(--flin-color-gray-400);
+}
+
+[data-theme="dark"] .ecom-alert-item__dismiss:hover {
+    background: var(--flin-color-gray-600);
+    color: var(--flin-color-gray-300);
+}
+
+[data-theme="dark"] .ecom-product-item:hover {
+    background: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .ecom-product-item__image-placeholder {
+    background: var(--flin-color-gray-700);
+    color: var(--flin-color-gray-500);
+}
+
+[data-theme="dark"] .ecom-product-item__name {
+    color: var(--flin-color-gray-100);
+}
+
+[data-theme="dark"] .ecom-product-item__price {
+    color: var(--flin-color-gray-300);
+}
+
+[data-theme="dark"] .ecom-product-item__sales {
+    color: var(--flin-color-gray-500);
+}
+
+[data-theme="dark"] .ecom-activity-item__avatar-placeholder {
+    background: var(--flin-color-gray-700);
+    color: var(--flin-color-gray-400);
+}
+
+[data-theme="dark"] .ecom-activity-item__text {
+    color: var(--flin-color-gray-400);
+}
+
+[data-theme="dark"] .ecom-activity-item__text strong {
+    color: var(--flin-color-gray-100);
+}
+
+[data-theme="dark"] .ecom-activity-item__time {
+    color: var(--flin-color-gray-500);
+}
+
+[data-theme="dark"] .ecom-empty-state {
+    color: var(--flin-color-gray-500);
+}
+</style>

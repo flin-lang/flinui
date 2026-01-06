@@ -30,6 +30,7 @@
 // - InfiniteScroll: Container that loads more content on scroll
 // - Masonry: Pinterest-style grid layout using CSS columns
 // - AdvancedDataTable: Enterprise data table with row selection, column resize, export
+// - WalletCard: Crypto/finance wallet card with balance, tokens, transactions, QR
 //
 // All components use FlinUI theme tokens (--flin-*) for consistent styling
 // and support both light and dark themes.
@@ -146,6 +147,31 @@
 //     onSelect={handleSelect}
 //     onResize={handleResize}
 //     onExport={handleExport}
+// />
+//
+// WalletCard:
+// tokens = [
+//     { symbol: "BTC", name: "Bitcoin", amount: "0.5432", value: "21,500", icon: "btc.png" },
+//     { symbol: "ETH", name: "Ethereum", amount: "3.25", value: "5,850" }
+// ]
+// transactions = [
+//     { type: "receive", title: "Received BTC", amount: "0.05", symbol: "BTC", date: "2 hours ago", status: "completed" },
+//     { type: "send", title: "Sent ETH", amount: "0.5", symbol: "ETH", date: "Yesterday", status: "completed" },
+//     { type: "swap", title: "Swapped", amount: "100", symbol: "USDC", date: "3 days ago", status: "completed" }
+// ]
+// <WalletCard
+//     balance="27,350.00"
+//     currency="USD"
+//     currencySymbol="$"
+//     priceChange={2.5}
+//     address="0x1234...5678"
+//     tokens={tokens}
+//     transactions={transactions}
+//     variant="gradient"
+//     showActions={true}
+//     onSend={handleSend}
+//     onReceive={handleReceive}
+//     onSwap={handleSwap}
 // />
 
 <div class="flin-data-index">

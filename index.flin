@@ -1,12 +1,12 @@
 // FlinUI - Official Component Library for FLIN
-// 166 production-ready components. No npm install. No dependencies. Just FLIN.
-// Version 1.5.0
+// 178 production-ready components. No npm install. No dependencies. Just FLIN.
+// Version 1.6.0
 
 // ============================================================================
 // FLINUI COMPONENT LIBRARY
 // ============================================================================
 //
-// 166 production-ready components for building modern web applications.
+// 178 production-ready components for building modern web applications.
 // All components use theme tokens for consistent styling and dark mode support.
 //
 // Usage:
@@ -21,22 +21,22 @@
 
 // Component Categories:
 //
-// BASIC (18 components)
+// BASIC (19 components)
 //   Button, Input, Textarea, Select, Checkbox, Radio, Switch, Slider
 //   Text, Link, Icon (1572 Lucide icons - auto-routed to 14 category files), Image, Avatar, Badge, Tag
-//   IconButton, CloseButton, ButtonGroup
+//   IconButton, CloseButton, ButtonGroup, ThemeToggle
 //
 // LAYOUT (21 components)
 //   Container, Stack, Grid, Flex, Box, Divider, Spacer, Center
 //   AspectRatio, Wrap, ResizablePanels, Header, Footer, Collapse
 //   Section, Hero, PageContainer, Affix, BackTop, ScrollArea, Splitter
 //
-// DATA DISPLAY (30 components)
+// DATA DISPLAY (33 components)
 //   Card, CardHeader, CardBody, CardFooter, Table, List, ListItem
 //   Progress, Spinner, Skeleton, Empty, Code, Kbd, Stat, Accordion
 //   Calendar, Carousel, Timeline, DataTable, AvatarGroup, BadgeGroup
-//   Comment, StatsGrid, Descriptions, QRCode, Watermark, Segmented
-//   InfiniteScroll, Masonry, AdvancedDataTable
+//   Comment, StatsGrid, WalletCard, Descriptions, QRCode, Watermark, Segmented
+//   InfiniteScroll, Masonry, AdvancedDataTable, Tree, Highlight
 //
 // FORMS (22 components)
 //   Form, FormField, FormError, FormHelp, DatePicker, TimePicker
@@ -50,10 +50,10 @@
 //   Drawer, Popover, Tooltip, Notification, CommandPalette
 //   AlertDialog, Sheet, Tour, Popconfirm, HoverCard, Result
 //
-// NAVIGATION (17 components)
+// NAVIGATION (19 components)
 //   Navbar, NavbarBrand, NavbarMenu, NavbarItem, Sidebar, SidebarItem
 //   Tabs, Tab, Breadcrumb, Pagination, Menu, Stepper, BottomNav, SkipNav
-//   Dropdown, ContextMenu, SpeedDial
+//   Dropdown, ContextMenu, SpeedDial, UserMenu, LinkBox
 //
 // CHARTS (13 components)
 //   BarChart, LineChart, PieChart, AreaChart, SparkLine
@@ -67,9 +67,11 @@
 //   Combobox, Listbox, TreeView, VirtualList, TransferList
 //   DragDrop, Sortable, Kanban
 //
-// TEMPLATES (10 templates)
+// TEMPLATES (16 templates)
 //   DashboardLayout, AuthLayout, LoginForm, RegisterForm, LandingHero
 //   PricingTable, FeaturesGrid, SettingsLayout, ProfileCard, ErrorPage
+//   EcommerceDashboard, BankingDashboard, CRMDashboard, AnalyticsDashboard
+//   EmailClient, MonitoringDashboard
 //
 // FLIN-NATIVE (2 components) - UNIQUE TO FLIN!
 //   TimeTravel - Navigate through variable history (memory-native)
@@ -85,8 +87,8 @@
 //   custom.flin - Theme customization
 //   index.flin - Theme provider
 
-version = "1.5.0"
-componentCount = 166
+version = "1.6.0"
+componentCount = 178
 categories = ["basic", "layout", "data", "forms", "feedback", "navigation", "charts", "typography", "collections", "templates", "flin-native"]
 
 <div class="flinui-root">

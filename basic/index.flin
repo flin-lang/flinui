@@ -42,6 +42,9 @@
 //
 // 18. ButtonGroup - Grouped buttons with attached styling and dividers
 //
+// 19. ThemeToggle - Dark/light mode toggle with sun/moon icons, system preference detection,
+//                   variants (switch/button/icon/dropdown), sizes (sm/md/lg), animated transitions
+//
 // USAGE:
 // ------
 // All components use FlinUI theme tokens (CSS variables --flin-*).
@@ -56,7 +59,7 @@
 
 <div class="flinui-basic-info">
     <h2>FlinUI Basic Components</h2>
-    <p>18 production-ready components for building beautiful interfaces.</p>
+    <p>19 production-ready components for building beautiful interfaces.</p>
 </div>
 
 <style scoped>

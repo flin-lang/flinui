@@ -1,0 +1,1701 @@
+// AnalyticsDashboard.flin - Analytics/data dashboard template with metrics, charts, and data visualization
+
+// Props
+metrics = props.metrics || {
+    users: { value: 0, trend: 0, label: "Total Users" },
+    sessions: { value: 0, trend: 0, label: "Sessions" },
+    bounceRate: { value: 0, trend: 0, label: "Bounce Rate" },
+    avgDuration: { value: "0:00", trend: 0, label: "Avg Duration" }
+}
+traffic = props.traffic || [] // [{ source, value, percentage, color }]
+realtime = props.realtime || { visitors: 0, activePages: [] }
+pages = props.pages || [] // [{ path, views, avgTime, bounceRate }]
+devices = props.devices || { desktop: 0, mobile: 0, tablet: 0 }
+geography = props.geography || [] // [{ country, code, visitors, percentage }]
+chartData = props.chartData || [] // [{ name, values: [{ x, y }] }]
+dateRange = props.dateRange || { start: nil, end: nil, preset: "7d" }
+onDateChange = props.onDateChange || { range -> }
+
+// Dashboard layout props
+sidebarItems = props.sidebarItems || []
+headerContent = props.headerContent || nil
+logo = props.logo || nil
+logoText = props.logoText || "Analytics"
+userMenu = props.userMenu || nil
+
+// State
+selectedDatePreset = dateRange.preset || "7d"
+customDateStart = dateRange.start
+customDateEnd = dateRange.end
+showDatePicker = false
+animatedCounters = {}
+realtimeAnimating = false
+
+// Date presets
+datePresets = [
+    { id: "today", label: "Today" },
+    { id: "yesterday", label: "Yesterday" },
+    { id: "7d", label: "Last 7 days" },
+    { id: "30d", label: "Last 30 days" },
+    { id: "90d", label: "Last 90 days" },
+    { id: "custom", label: "Custom" }
+]
+
+// Handlers
+handleDatePresetChange = { preset ->
+    selectedDatePreset = preset
+    if preset != "custom" then
+        showDatePicker = false
+        onDateChange({ preset: preset, start: nil, end: nil })
+    else
+        showDatePicker = true
+}
+
+handleCustomDateChange = { start, end ->
+    customDateStart = start
+    customDateEnd = end
+    onDateChange({ preset: "custom", start: start, end: end })
+}
+
+// Format helpers
+formatNumber = { num ->
+    if num >= 1000000 then
+        return (Math.round(num / 100000) / 10) ++ "M"
+    else if num >= 1000 then
+        return (Math.round(num / 100) / 10) ++ "K"
+    else
+        return num.toString()
+}
+
+formatPercentage = { value ->
+    return value ++ "%"
+}
+
+formatTrend = { trend ->
+    prefix = if trend > 0 then "+" else ""
+    prefix ++ trend ++ "%"
+}
+
+getTrendClass = { trend ->
+    if trend > 0 then "trend-positive"
+    else if trend < 0 then "trend-negative"
+    else "trend-neutral"
+}
+
+getTrendIcon = { trend ->
+    if trend > 0 then "↑"
+    else if trend < 0 then "↓"
+    else "→"
+}
+
+// Device icon helper
+getDeviceIcon = { device ->
+    if device == "desktop" then "🖥️"
+    else if device == "mobile" then "📱"
+    else if device == "tablet" then "📲"
+    else "💻"
+}
+
+// Browser colors
+browserColors = {
+    "Chrome": "#4285F4",
+    "Safari": "#000000",
+    "Firefox": "#FF7139",
+    "Edge": "#0078D7",
+    "Opera": "#FF1B2D",
+    "Other": "#6B7280"
+}
+
+<DashboardLayout
+    sidebarItems={sidebarItems}
+    headerContent={headerContent}
+    logo={logo}
+    logoText={logoText}
+    userMenu={userMenu}
+>
+    <div class="analytics-dashboard">
+        // Dashboard header with date picker
+        <div class="dashboard-header-section">
+            <div class="dashboard-title-area">
+                <h1 class="dashboard-title">Analytics Overview</h1>
+                <p class="dashboard-subtitle">Monitor your website performance and user engagement</p>
+            </div>
+            <div class="date-range-picker">
+                <div class="preset-buttons">
+                    {datePresets.map { preset ->
+                        <button
+                            class={if selectedDatePreset == preset.id then "preset-btn preset-btn--active" else "preset-btn"}
+                            onClick={ handleDatePresetChange(preset.id) }
+                            key={preset.id}
+                        >
+                            {preset.label}
+                        </button>
+                    }}
+                </div>
+                {if showDatePicker then
+                    <div class="custom-date-inputs">
+                        <input
+                            type="date"
+                            class="date-input"
+                            value={customDateStart}
+                            onChange={ e -> customDateStart = e.target.value }
+                        />
+                        <span class="date-separator">to</span>
+                        <input
+                            type="date"
+                            class="date-input"
+                            value={customDateEnd}
+                            onChange={ e -> customDateEnd = e.target.value }
+                        />
+                        <button
+                            class="apply-date-btn"
+                            onClick={ handleCustomDateChange(customDateStart, customDateEnd) }
+                        >
+                            Apply
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+
+        // Key metrics cards
+        <div class="metrics-grid">
+            // Users card
+            <div class="metric-card metric-card--users">
+                <div class="metric-icon">
+                    <span>👥</span>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">{metrics.users.label}</span>
+                    <span class="metric-value animated-counter" data-target={metrics.users.value}>
+                        {formatNumber(metrics.users.value)}
+                    </span>
+                    <div class={`metric-trend ${getTrendClass(metrics.users.trend)}`}>
+                        <span class="trend-icon">{getTrendIcon(metrics.users.trend)}</span>
+                        <span class="trend-value">{formatTrend(metrics.users.trend)}</span>
+                        <span class="trend-period">vs last period</span>
+                    </div>
+                </div>
+            </div>
+
+            // Sessions card
+            <div class="metric-card metric-card--sessions">
+                <div class="metric-icon">
+                    <span>📊</span>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">{metrics.sessions.label}</span>
+                    <span class="metric-value animated-counter" data-target={metrics.sessions.value}>
+                        {formatNumber(metrics.sessions.value)}
+                    </span>
+                    <div class={`metric-trend ${getTrendClass(metrics.sessions.trend)}`}>
+                        <span class="trend-icon">{getTrendIcon(metrics.sessions.trend)}</span>
+                        <span class="trend-value">{formatTrend(metrics.sessions.trend)}</span>
+                        <span class="trend-period">vs last period</span>
+                    </div>
+                </div>
+            </div>
+
+            // Bounce Rate card
+            <div class="metric-card metric-card--bounce">
+                <div class="metric-icon">
+                    <span>↩️</span>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">{metrics.bounceRate.label}</span>
+                    <span class="metric-value animated-counter" data-target={metrics.bounceRate.value}>
+                        {formatPercentage(metrics.bounceRate.value)}
+                    </span>
+                    <div class={`metric-trend ${getTrendClass(-metrics.bounceRate.trend)}`}>
+                        <span class="trend-icon">{getTrendIcon(-metrics.bounceRate.trend)}</span>
+                        <span class="trend-value">{formatTrend(metrics.bounceRate.trend)}</span>
+                        <span class="trend-period">vs last period</span>
+                    </div>
+                </div>
+            </div>
+
+            // Avg Duration card
+            <div class="metric-card metric-card--duration">
+                <div class="metric-icon">
+                    <span>⏱️</span>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">{metrics.avgDuration.label}</span>
+                    <span class="metric-value">
+                        {metrics.avgDuration.value}
+                    </span>
+                    <div class={`metric-trend ${getTrendClass(metrics.avgDuration.trend)}`}>
+                        <span class="trend-icon">{getTrendIcon(metrics.avgDuration.trend)}</span>
+                        <span class="trend-value">{formatTrend(metrics.avgDuration.trend)}</span>
+                        <span class="trend-period">vs last period</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        // Main content grid
+        <div class="dashboard-content-grid">
+            // Left column - Charts
+            <div class="dashboard-column dashboard-column--main">
+                // Page Views Chart
+                <div class="dashboard-card chart-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Page Views</h2>
+                        <div class="card-actions">
+                            <button class="chart-type-btn active">Line</button>
+                            <button class="chart-type-btn">Bar</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        {if chartData.length > 0 then
+                            <svg class="line-chart" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet">
+                                // Grid lines
+                                <g class="chart-grid">
+                                    {[0, 1, 2, 3, 4].map { i ->
+                                        <line
+                                            x1="50"
+                                            y1={50 + i * 50}
+                                            x2="580"
+                                            y2={50 + i * 50}
+                                            class="grid-line"
+                                            key={i}
+                                        />
+                                    }}
+                                </g>
+                                // Chart lines
+                                {chartData.map { series, idx ->
+                                    <g class="chart-series" key={series.name}>
+                                        <path
+                                            class="chart-line animated-line"
+                                            d={series.path || ""}
+                                            fill="none"
+                                            stroke={series.color || "var(--flin-color-primary-500)"}
+                                            stroke-width="2"
+                                            style={`--delay: ${idx * 200}ms`}
+                                        />
+                                        {if series.showArea then
+                                            <path
+                                                class="chart-area"
+                                                d={series.areaPath || ""}
+                                                fill={series.color || "var(--flin-color-primary-500)"}
+                                                opacity="0.1"
+                                            />
+                                        }
+                                    </g>
+                                }}
+                                // X-axis labels
+                                <g class="chart-labels">
+                                    {chartData[0]?.labels?.map { label, i ->
+                                        <text
+                                            x={50 + (i / (chartData[0].labels.length - 1)) * 530}
+                                            y="285"
+                                            class="axis-label"
+                                            text-anchor="middle"
+                                            key={i}
+                                        >
+                                            {label}
+                                        </text>
+                                    }}
+                                </g>
+                            </svg>
+                        else
+                            <div class="chart-empty">
+                                <span class="empty-icon">📈</span>
+                                <span class="empty-text">No chart data available</span>
+                            </div>
+                        }
+                    </div>
+                    {if chartData.length > 1 then
+                        <div class="chart-legend">
+                            {chartData.map { series ->
+                                <div class="legend-item" key={series.name}>
+                                    <span class="legend-color" style={`background: ${series.color || "var(--flin-color-primary-500)"}`}></span>
+                                    <span class="legend-label">{series.name}</span>
+                                </div>
+                            }}
+                        </div>
+                    }
+                </div>
+
+                // Top Pages Table
+                <div class="dashboard-card table-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Top Pages</h2>
+                        <button class="view-all-btn">View All →</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="analytics-table">
+                            <thead>
+                                <tr>
+                                    <th>Page</th>
+                                    <th>Views</th>
+                                    <th>Avg. Time</th>
+                                    <th>Bounce Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {pages.map { page, index ->
+                                    <tr key={page.path} style={`--delay: ${index * 50}ms`} class="table-row-animated">
+                                        <td class="page-cell">
+                                            <span class="page-path">{page.path}</span>
+                                            {if page.title then
+                                                <span class="page-title">{page.title}</span>
+                                            }
+                                        </td>
+                                        <td class="views-cell">{formatNumber(page.views)}</td>
+                                        <td class="time-cell">{page.avgTime}</td>
+                                        <td class="bounce-cell">
+                                            <span class={if page.bounceRate > 50 then "bounce-high" else "bounce-normal"}>
+                                                {page.bounceRate}%
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }}
+                                {if pages.length == 0 then
+                                    <tr>
+                                        <td colspan="4" class="empty-table-cell">No page data available</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            // Right column - Sidebar widgets
+            <div class="dashboard-column dashboard-column--side">
+                // Real-time visitors
+                <div class="dashboard-card realtime-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="realtime-dot"></span>
+                            Real-time
+                        </h2>
+                    </div>
+                    <div class="realtime-content">
+                        <div class="realtime-count">
+                            <span class="realtime-number animated-counter pulse" data-target={realtime.visitors}>
+                                {realtime.visitors}
+                            </span>
+                            <span class="realtime-label">visitors now</span>
+                        </div>
+                        {if realtime.activePages && realtime.activePages.length > 0 then
+                            <div class="active-pages">
+                                <span class="active-pages-label">Active on:</span>
+                                <ul class="active-pages-list">
+                                    {realtime.activePages.slice(0, 5).map { page ->
+                                        <li class="active-page" key={page.path}>
+                                            <span class="active-page-path">{page.path}</span>
+                                            <span class="active-page-count">{page.count}</span>
+                                        </li>
+                                    }}
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                // Traffic Sources
+                <div class="dashboard-card traffic-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Traffic Sources</h2>
+                    </div>
+                    <div class="traffic-content">
+                        {traffic.map { source, index ->
+                            <div class="traffic-source" key={source.source} style={`--delay: ${index * 100}ms`}>
+                                <div class="source-header">
+                                    <span class="source-name">{source.source}</span>
+                                    <span class="source-value">{formatNumber(source.value)}</span>
+                                </div>
+                                <div class="source-bar">
+                                    <div
+                                        class="source-bar-fill animated-bar"
+                                        style={`width: ${source.percentage}%; background: ${source.color || "var(--flin-color-primary-500)"}`}
+                                    ></div>
+                                </div>
+                                <span class="source-percentage">{source.percentage}%</span>
+                            </div>
+                        }}
+                        {if traffic.length == 0 then
+                            <div class="empty-widget">
+                                <span>No traffic data available</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                // Device Breakdown
+                <div class="dashboard-card devices-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Devices</h2>
+                    </div>
+                    <div class="devices-content">
+                        <div class="devices-chart">
+                            <svg viewBox="0 0 100 100" class="donut-chart">
+                                {// Calculate donut segments
+                                    total = devices.desktop + devices.mobile + devices.tablet
+                                    desktopPercent = if total > 0 then (devices.desktop / total) * 100 else 0
+                                    mobilePercent = if total > 0 then (devices.mobile / total) * 100 else 0
+                                    tabletPercent = if total > 0 then (devices.tablet / total) * 100 else 0
+
+                                    // SVG circle params
+                                    radius = 35
+                                    circumference = 2 * 3.14159 * radius
+                                }
+                                <circle cx="50" cy="50" r={radius} fill="none" stroke="var(--flin-color-gray-200)" stroke-width="10" />
+                                <circle
+                                    cx="50" cy="50" r={radius}
+                                    fill="none"
+                                    stroke="var(--flin-color-primary-500)"
+                                    stroke-width="10"
+                                    stroke-dasharray={`${(desktopPercent / 100) * circumference} ${circumference}`}
+                                    stroke-dashoffset="0"
+                                    transform="rotate(-90 50 50)"
+                                    class="donut-segment animated-segment"
+                                />
+                                <circle
+                                    cx="50" cy="50" r={radius}
+                                    fill="none"
+                                    stroke="var(--flin-color-success-500)"
+                                    stroke-width="10"
+                                    stroke-dasharray={`${(mobilePercent / 100) * circumference} ${circumference}`}
+                                    stroke-dashoffset={`${-((desktopPercent / 100) * circumference)}`}
+                                    transform="rotate(-90 50 50)"
+                                    class="donut-segment animated-segment"
+                                    style="--delay: 200ms"
+                                />
+                                <circle
+                                    cx="50" cy="50" r={radius}
+                                    fill="none"
+                                    stroke="var(--flin-color-warning-500)"
+                                    stroke-width="10"
+                                    stroke-dasharray={`${(tabletPercent / 100) * circumference} ${circumference}`}
+                                    stroke-dashoffset={`${-(((desktopPercent + mobilePercent) / 100) * circumference)}`}
+                                    transform="rotate(-90 50 50)"
+                                    class="donut-segment animated-segment"
+                                    style="--delay: 400ms"
+                                />
+                            </svg>
+                        </div>
+                        <div class="devices-legend">
+                            <div class="device-item">
+                                <span class="device-dot device-dot--desktop"></span>
+                                <span class="device-icon">{getDeviceIcon("desktop")}</span>
+                                <span class="device-label">Desktop</span>
+                                <span class="device-value">{devices.desktop}%</span>
+                            </div>
+                            <div class="device-item">
+                                <span class="device-dot device-dot--mobile"></span>
+                                <span class="device-icon">{getDeviceIcon("mobile")}</span>
+                                <span class="device-label">Mobile</span>
+                                <span class="device-value">{devices.mobile}%</span>
+                            </div>
+                            <div class="device-item">
+                                <span class="device-dot device-dot--tablet"></span>
+                                <span class="device-icon">{getDeviceIcon("tablet")}</span>
+                                <span class="device-label">Tablet</span>
+                                <span class="device-value">{devices.tablet}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                // Geographic Distribution
+                <div class="dashboard-card geography-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Top Countries</h2>
+                    </div>
+                    <div class="geography-content">
+                        // Map placeholder
+                        <div class="geography-map-placeholder">
+                            <div class="map-grid">
+                                {[...Array(6)].map { _, i ->
+                                    <div class="map-region" key={i}></div>
+                                }}
+                            </div>
+                            <span class="map-label">World Map</span>
+                        </div>
+                        // Country list
+                        <div class="country-list">
+                            {geography.slice(0, 5).map { country, index ->
+                                <div class="country-item" key={country.code} style={`--delay: ${index * 80}ms`}>
+                                    <span class="country-flag">{country.flag || "🌍"}</span>
+                                    <span class="country-name">{country.country}</span>
+                                    <div class="country-bar">
+                                        <div
+                                            class="country-bar-fill animated-bar"
+                                            style={`width: ${country.percentage}%`}
+                                        ></div>
+                                    </div>
+                                    <span class="country-percentage">{country.percentage}%</span>
+                                </div>
+                            }}
+                            {if geography.length == 0 then
+                                <div class="empty-widget">
+                                    <span>No geographic data available</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                // Conversion Funnel
+                <div class="dashboard-card funnel-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Conversion Funnel</h2>
+                    </div>
+                    <div class="funnel-content">
+                        {props.funnel?.map { step, index ->
+                            <div class="funnel-step" key={step.name} style={`--delay: ${index * 100}ms`}>
+                                <div class="funnel-bar-container">
+                                    <div
+                                        class="funnel-bar animated-bar"
+                                        style={`width: ${step.percentage}%`}
+                                    >
+                                        <span class="funnel-value">{formatNumber(step.value)}</span>
+                                    </div>
+                                </div>
+                                <div class="funnel-info">
+                                    <span class="funnel-name">{step.name}</span>
+                                    <span class="funnel-percentage">{step.percentage}%</span>
+                                </div>
+                                {if index < props.funnel.length - 1 then
+                                    <div class="funnel-connector">
+                                        <span class="connector-rate">
+                                            {step.dropoff ? `-${step.dropoff}%` : ""}
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+                        }}
+                        {if !props.funnel || props.funnel.length == 0 then
+                            <div class="empty-widget">
+                                <span>No funnel data available</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</DashboardLayout>
+
+<style scoped>
+.analytics-dashboard {
+    min-height: 100%;
+}
+
+/* Dashboard header */
+.dashboard-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: var(--flin-spacing-4);
+    margin-bottom: var(--flin-spacing-6);
+}
+
+.dashboard-title-area {
+    flex: 1;
+    min-width: 200px;
+}
+
+.dashboard-title {
+    font-size: var(--flin-font-size-2xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--flin-color-gray-900);
+    margin: 0 0 var(--flin-spacing-1) 0;
+}
+
+.dashboard-subtitle {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+    margin: 0;
+}
+
+/* Date range picker */
+.date-range-picker {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-3);
+}
+
+.preset-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-spacing-1);
+    background: var(--flin-color-gray-100);
+    padding: var(--flin-spacing-1);
+    border-radius: var(--flin-radius-lg);
+}
+
+.preset-btn {
+    padding: var(--flin-spacing-2) var(--flin-spacing-3);
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-600);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    white-space: nowrap;
+}
+
+.preset-btn:hover {
+    color: var(--flin-color-gray-900);
+}
+
+.preset-btn--active {
+    background: var(--flin-color-white);
+    color: var(--flin-color-gray-900);
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.custom-date-inputs {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    flex-wrap: wrap;
+}
+
+.date-input {
+    padding: var(--flin-spacing-2) var(--flin-spacing-3);
+    font-size: var(--flin-font-size-sm);
+    border: 1px solid var(--flin-color-gray-300);
+    border-radius: var(--flin-radius-md);
+    background: var(--flin-color-white);
+    color: var(--flin-color-gray-900);
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: var(--flin-color-primary-500);
+    box-shadow: 0 0 0 3px var(--flin-color-primary-100);
+}
+
+.date-separator {
+    color: var(--flin-color-gray-500);
+    font-size: var(--flin-font-size-sm);
+}
+
+.apply-date-btn {
+    padding: var(--flin-spacing-2) var(--flin-spacing-4);
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-white);
+    background: var(--flin-color-primary-600);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.apply-date-btn:hover {
+    background: var(--flin-color-primary-700);
+}
+
+/* Metrics grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--flin-spacing-4);
+    margin-bottom: var(--flin-spacing-6);
+}
+
+.metric-card {
+    background: var(--flin-color-white);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-spacing-5);
+    display: flex;
+    gap: var(--flin-spacing-4);
+    box-shadow: var(--flin-shadow-sm);
+    border: 1px solid var(--flin-color-gray-100);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlideIn 0.5s ease-out forwards;
+}
+
+.metric-card:nth-child(1) { animation-delay: 0ms; }
+.metric-card:nth-child(2) { animation-delay: 100ms; }
+.metric-card:nth-child(3) { animation-delay: 200ms; }
+.metric-card:nth-child(4) { animation-delay: 300ms; }
+
+@keyframes fadeSlideIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.metric-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--flin-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-font-size-xl);
+    flex-shrink: 0;
+}
+
+.metric-card--users .metric-icon { background: var(--flin-color-primary-100); }
+.metric-card--sessions .metric-icon { background: var(--flin-color-success-100); }
+.metric-card--bounce .metric-icon { background: var(--flin-color-warning-100); }
+.metric-card--duration .metric-icon { background: var(--flin-color-info-100); }
+
+.metric-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-1);
+    flex: 1;
+    min-width: 0;
+}
+
+.metric-label {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+    font-weight: var(--flin-font-weight-medium);
+}
+
+.metric-value {
+    font-size: var(--flin-font-size-2xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--flin-color-gray-900);
+    line-height: 1.2;
+}
+
+/* Animated counter */
+.animated-counter {
+    display: inline-block;
+}
+
+.animated-counter.pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.metric-trend {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-1);
+    font-size: var(--flin-font-size-sm);
+}
+
+.trend-positive { color: var(--flin-color-success-600); }
+.trend-negative { color: var(--flin-color-danger-600); }
+.trend-neutral { color: var(--flin-color-gray-500); }
+
+.trend-icon {
+    font-size: var(--flin-font-size-xs);
+}
+
+.trend-value {
+    font-weight: var(--flin-font-weight-medium);
+}
+
+.trend-period {
+    color: var(--flin-color-gray-400);
+    font-weight: var(--flin-font-weight-normal);
+}
+
+/* Dashboard content grid */
+.dashboard-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: var(--flin-spacing-6);
+}
+
+.dashboard-column--main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-6);
+}
+
+.dashboard-column--side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-4);
+}
+
+/* Dashboard cards */
+.dashboard-card {
+    background: var(--flin-color-white);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-spacing-5);
+    box-shadow: var(--flin-shadow-sm);
+    border: 1px solid var(--flin-color-gray-100);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--flin-spacing-4);
+}
+
+.card-title {
+    font-size: var(--flin-font-size-lg);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+}
+
+.card-actions {
+    display: flex;
+    gap: var(--flin-spacing-1);
+}
+
+.chart-type-btn {
+    padding: var(--flin-spacing-1) var(--flin-spacing-3);
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-500);
+    background: transparent;
+    border: 1px solid var(--flin-color-gray-200);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.chart-type-btn:hover {
+    border-color: var(--flin-color-gray-300);
+    color: var(--flin-color-gray-700);
+}
+
+.chart-type-btn.active {
+    background: var(--flin-color-primary-50);
+    border-color: var(--flin-color-primary-200);
+    color: var(--flin-color-primary-700);
+}
+
+.view-all-btn {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-primary-600);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color var(--flin-transition-fast);
+}
+
+.view-all-btn:hover {
+    color: var(--flin-color-primary-700);
+}
+
+/* Chart */
+.chart-container {
+    height: 300px;
+    position: relative;
+}
+
+.line-chart {
+    width: 100%;
+    height: 100%;
+}
+
+.grid-line {
+    stroke: var(--flin-color-gray-200);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+}
+
+.chart-line {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.animated-line {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawLine 1.5s ease-out forwards;
+    animation-delay: var(--delay, 0ms);
+}
+
+@keyframes drawLine {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.axis-label {
+    font-size: 11px;
+    fill: var(--flin-color-gray-500);
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-spacing-4);
+    margin-top: var(--flin-spacing-3);
+    padding-top: var(--flin-spacing-3);
+    border-top: 1px solid var(--flin-color-gray-100);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--flin-radius-sm);
+}
+
+.legend-label {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-600);
+}
+
+.chart-empty {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-spacing-2);
+    color: var(--flin-color-gray-400);
+}
+
+.empty-icon {
+    font-size: var(--flin-font-size-3xl);
+    opacity: 0.5;
+}
+
+.empty-text {
+    font-size: var(--flin-font-size-sm);
+}
+
+/* Table */
+.table-container {
+    overflow-x: auto;
+}
+
+.analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.analytics-table th {
+    text-align: left;
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--flin-color-gray-200);
+    background: var(--flin-color-gray-50);
+}
+
+.analytics-table td {
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-700);
+    border-bottom: 1px solid var(--flin-color-gray-100);
+}
+
+.table-row-animated {
+    opacity: 0;
+    transform: translateX(-10px);
+    animation: slideIn 0.3s ease-out forwards;
+    animation-delay: var(--delay, 0ms);
+}
+
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.page-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.page-path {
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-900);
+}
+
+.page-title {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-400);
+}
+
+.views-cell {
+    font-weight: var(--flin-font-weight-semibold);
+}
+
+.bounce-high {
+    color: var(--flin-color-danger-600);
+}
+
+.bounce-normal {
+    color: var(--flin-color-success-600);
+}
+
+.empty-table-cell {
+    text-align: center;
+    color: var(--flin-color-gray-400);
+    padding: var(--flin-spacing-8) !important;
+}
+
+/* Real-time card */
+.realtime-card .card-title {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+}
+
+.realtime-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--flin-radius-full);
+    background: var(--flin-color-success-500);
+    animation: blink 1.5s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.realtime-content {
+    text-align: center;
+}
+
+.realtime-count {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-spacing-1);
+    margin-bottom: var(--flin-spacing-4);
+}
+
+.realtime-number {
+    font-size: var(--flin-font-size-4xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--flin-color-gray-900);
+    line-height: 1;
+}
+
+.realtime-label {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+}
+
+.active-pages {
+    text-align: left;
+    border-top: 1px solid var(--flin-color-gray-100);
+    padding-top: var(--flin-spacing-3);
+}
+
+.active-pages-label {
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.active-pages-list {
+    list-style: none;
+    padding: 0;
+    margin: var(--flin-spacing-2) 0 0 0;
+}
+
+.active-page {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--flin-spacing-2) 0;
+    font-size: var(--flin-font-size-sm);
+}
+
+.active-page-path {
+    color: var(--flin-color-gray-700);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.active-page-count {
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-primary-600);
+    background: var(--flin-color-primary-50);
+    padding: 2px 8px;
+    border-radius: var(--flin-radius-full);
+    font-size: var(--flin-font-size-xs);
+}
+
+/* Traffic sources */
+.traffic-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-3);
+}
+
+.traffic-source {
+    opacity: 0;
+    transform: translateX(-10px);
+    animation: slideIn 0.3s ease-out forwards;
+    animation-delay: var(--delay, 0ms);
+}
+
+.source-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--flin-spacing-1);
+}
+
+.source-name {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-700);
+}
+
+.source-value {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+}
+
+.source-bar {
+    height: 6px;
+    background: var(--flin-color-gray-200);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    margin-bottom: var(--flin-spacing-1);
+}
+
+.source-bar-fill {
+    height: 100%;
+    border-radius: var(--flin-radius-full);
+}
+
+.animated-bar {
+    width: 0 !important;
+    animation: growBar 0.8s ease-out forwards;
+    animation-delay: var(--delay, 0ms);
+}
+
+@keyframes growBar {
+    to {
+        width: var(--target-width, 100%);
+    }
+}
+
+.source-percentage {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-400);
+}
+
+/* Devices */
+.devices-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-4);
+}
+
+.devices-chart {
+    display: flex;
+    justify-content: center;
+    padding: var(--flin-spacing-4) 0;
+}
+
+.donut-chart {
+    width: 120px;
+    height: 120px;
+}
+
+.donut-segment {
+    transform-origin: center;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+    animation-delay: var(--delay, 0ms);
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+.devices-legend {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-2);
+}
+
+.device-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    padding: var(--flin-spacing-2);
+    border-radius: var(--flin-radius-md);
+    transition: background var(--flin-transition-fast);
+}
+
+.device-item:hover {
+    background: var(--flin-color-gray-50);
+}
+
+.device-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--flin-radius-full);
+}
+
+.device-dot--desktop { background: var(--flin-color-primary-500); }
+.device-dot--mobile { background: var(--flin-color-success-500); }
+.device-dot--tablet { background: var(--flin-color-warning-500); }
+
+.device-icon {
+    font-size: var(--flin-font-size-lg);
+}
+
+.device-label {
+    flex: 1;
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-600);
+}
+
+.device-value {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+}
+
+/* Geography */
+.geography-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-4);
+}
+
+.geography-map-placeholder {
+    background: var(--flin-color-gray-50);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-spacing-4);
+    text-align: center;
+    position: relative;
+}
+
+.map-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--flin-spacing-2);
+    margin-bottom: var(--flin-spacing-2);
+}
+
+.map-region {
+    height: 24px;
+    background: var(--flin-color-gray-200);
+    border-radius: var(--flin-radius-sm);
+    opacity: 0.5;
+}
+
+.map-label {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-400);
+}
+
+.country-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-2);
+}
+
+.country-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    opacity: 0;
+    transform: translateX(-10px);
+    animation: slideIn 0.3s ease-out forwards;
+    animation-delay: var(--delay, 0ms);
+}
+
+.country-flag {
+    font-size: var(--flin-font-size-lg);
+}
+
+.country-name {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-700);
+    width: 80px;
+}
+
+.country-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--flin-color-gray-200);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.country-bar-fill {
+    height: 100%;
+    background: var(--flin-color-primary-500);
+    border-radius: var(--flin-radius-full);
+}
+
+.country-percentage {
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-500);
+    min-width: 32px;
+    text-align: right;
+}
+
+/* Funnel */
+.funnel-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-3);
+}
+
+.funnel-step {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeSlideIn 0.4s ease-out forwards;
+    animation-delay: var(--delay, 0ms);
+}
+
+.funnel-bar-container {
+    background: var(--flin-color-gray-100);
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+}
+
+.funnel-bar {
+    background: linear-gradient(90deg, var(--flin-color-primary-500), var(--flin-color-primary-400));
+    padding: var(--flin-spacing-2) var(--flin-spacing-3);
+    border-radius: var(--flin-radius-md);
+    min-width: fit-content;
+}
+
+.funnel-value {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-white);
+}
+
+.funnel-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--flin-spacing-1);
+}
+
+.funnel-name {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-700);
+}
+
+.funnel-percentage {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+}
+
+.funnel-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-spacing-1) 0;
+}
+
+.connector-rate {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-danger-500);
+    font-weight: var(--flin-font-weight-medium);
+}
+
+/* Empty widget */
+.empty-widget {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-spacing-6);
+    color: var(--flin-color-gray-400);
+    font-size: var(--flin-font-size-sm);
+}
+
+/* Responsive */
+@media (max-width: 1280px) {
+    .dashboard-content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-column--side {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--flin-spacing-4);
+    }
+}
+
+@media (max-width: 1024px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-header-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .preset-buttons {
+        justify-content: center;
+    }
+
+    .dashboard-column--side {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-container {
+        height: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .metric-icon {
+        margin: 0 auto;
+    }
+
+    .metric-trend {
+        justify-content: center;
+    }
+
+    .preset-buttons {
+        flex-direction: column;
+    }
+
+    .preset-btn {
+        text-align: center;
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .dashboard-title {
+        color: var(--flin-color-gray-100);
+    }
+
+    .dashboard-subtitle {
+        color: var(--flin-color-gray-400);
+    }
+
+    .preset-buttons {
+        background: var(--flin-color-gray-800);
+    }
+
+    .preset-btn {
+        color: var(--flin-color-gray-400);
+    }
+
+    .preset-btn:hover {
+        color: var(--flin-color-gray-200);
+    }
+
+    .preset-btn--active {
+        background: var(--flin-color-gray-700);
+        color: var(--flin-color-gray-100);
+    }
+
+    .date-input {
+        background: var(--flin-color-gray-800);
+        border-color: var(--flin-color-gray-600);
+        color: var(--flin-color-gray-200);
+    }
+
+    .metric-card,
+    .dashboard-card {
+        background: var(--flin-color-gray-800);
+        border-color: var(--flin-color-gray-700);
+    }
+
+    .metric-value,
+    .realtime-number,
+    .source-value,
+    .device-value,
+    .funnel-percentage {
+        color: var(--flin-color-gray-100);
+    }
+
+    .metric-label,
+    .source-name,
+    .device-label,
+    .country-name,
+    .funnel-name {
+        color: var(--flin-color-gray-400);
+    }
+
+    .card-title {
+        color: var(--flin-color-gray-100);
+    }
+
+    .analytics-table th {
+        background: var(--flin-color-gray-700);
+        border-color: var(--flin-color-gray-600);
+        color: var(--flin-color-gray-400);
+    }
+
+    .analytics-table td {
+        border-color: var(--flin-color-gray-700);
+        color: var(--flin-color-gray-300);
+    }
+
+    .page-path {
+        color: var(--flin-color-gray-200);
+    }
+
+    .grid-line {
+        stroke: var(--flin-color-gray-700);
+    }
+
+    .source-bar,
+    .country-bar,
+    .progress-bar {
+        background: var(--flin-color-gray-700);
+    }
+
+    .geography-map-placeholder {
+        background: var(--flin-color-gray-700);
+    }
+
+    .map-region {
+        background: var(--flin-color-gray-600);
+    }
+
+    .funnel-bar-container {
+        background: var(--flin-color-gray-700);
+    }
+
+    .chart-type-btn {
+        border-color: var(--flin-color-gray-600);
+        color: var(--flin-color-gray-400);
+    }
+
+    .chart-type-btn:hover {
+        border-color: var(--flin-color-gray-500);
+        color: var(--flin-color-gray-300);
+    }
+
+    .chart-type-btn.active {
+        background: var(--flin-color-primary-900);
+        border-color: var(--flin-color-primary-700);
+        color: var(--flin-color-primary-300);
+    }
+
+    .device-item:hover {
+        background: var(--flin-color-gray-700);
+    }
+
+    .active-pages {
+        border-color: var(--flin-color-gray-700);
+    }
+
+    .chart-legend {
+        border-color: var(--flin-color-gray-700);
+    }
+}
+
+/* Dark mode via data attribute */
+[data-theme="dark"] .dashboard-title {
+    color: var(--flin-color-gray-100);
+}
+
+[data-theme="dark"] .dashboard-subtitle {
+    color: var(--flin-color-gray-400);
+}
+
+[data-theme="dark"] .preset-buttons {
+    background: var(--flin-color-gray-800);
+}
+
+[data-theme="dark"] .preset-btn {
+    color: var(--flin-color-gray-400);
+}
+
+[data-theme="dark"] .preset-btn:hover {
+    color: var(--flin-color-gray-200);
+}
+
+[data-theme="dark"] .preset-btn--active {
+    background: var(--flin-color-gray-700);
+    color: var(--flin-color-gray-100);
+}
+
+[data-theme="dark"] .date-input {
+    background: var(--flin-color-gray-800);
+    border-color: var(--flin-color-gray-600);
+    color: var(--flin-color-gray-200);
+}
+
+[data-theme="dark"] .metric-card,
+[data-theme="dark"] .dashboard-card {
+    background: var(--flin-color-gray-800);
+    border-color: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .metric-value,
+[data-theme="dark"] .realtime-number,
+[data-theme="dark"] .source-value,
+[data-theme="dark"] .device-value,
+[data-theme="dark"] .funnel-percentage {
+    color: var(--flin-color-gray-100);
+}
+
+[data-theme="dark"] .card-title {
+    color: var(--flin-color-gray-100);
+}
+
+[data-theme="dark"] .analytics-table th {
+    background: var(--flin-color-gray-700);
+    border-color: var(--flin-color-gray-600);
+}
+
+[data-theme="dark"] .analytics-table td {
+    border-color: var(--flin-color-gray-700);
+    color: var(--flin-color-gray-300);
+}
+
+[data-theme="dark"] .grid-line {
+    stroke: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .source-bar,
+[data-theme="dark"] .country-bar {
+    background: var(--flin-color-gray-700);
+}
+
+[data-theme="dark"] .funnel-bar-container {
+    background: var(--flin-color-gray-700);
+}
+</style>

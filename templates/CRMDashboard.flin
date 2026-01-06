@@ -1,0 +1,1812 @@
+// CRMDashboard.flin - Customer Relationship Management dashboard template
+
+// Props
+pipeline = props.pipeline || { leads: 0, qualified: 0, proposals: 0, closed: 0 }
+deals = props.deals || [] // [{id, name, company, value, stage, probability, owner, createdAt}]
+activities = props.activities || [] // [{id, type, title, description, user, timestamp, icon}]
+tasks = props.tasks || [] // [{id, title, completed, priority, dueDate, assignee}]
+team = props.team || [] // [{id, name, avatar, role, deals, revenue, quota, performance}]
+meetings = props.meetings || [] // [{id, title, attendees, startTime, endTime, location, type}]
+contacts = props.contacts || [] // [{id, name, email, company, phone, avatar}]
+onAction = props.onAction || { action, data -> }
+title = props.title || "CRM Dashboard"
+currency = props.currency || "$"
+showQuickAdd = props.showQuickAdd ?? true
+
+// State
+newContactName = ""
+newContactEmail = ""
+newContactCompany = ""
+taskFilter = "all" // "all" | "pending" | "completed"
+showContactForm = false
+
+// Handlers
+handleAction = { action, data ->
+    onAction(action, data)
+}
+
+handleAddContact = {
+    if newContactName && newContactEmail then
+        handleAction("add_contact", {
+            name: newContactName,
+            email: newContactEmail,
+            company: newContactCompany
+        })
+        newContactName = ""
+        newContactEmail = ""
+        newContactCompany = ""
+        showContactForm = false
+}
+
+handleToggleTask = { task ->
+    handleAction("toggle_task", task)
+}
+
+handleViewDeal = { deal ->
+    handleAction("view_deal", deal)
+}
+
+handleViewActivity = { activity ->
+    handleAction("view_activity", activity)
+}
+
+handleViewMeeting = { meeting ->
+    handleAction("view_meeting", meeting)
+}
+
+handleViewContact = { contact ->
+    handleAction("view_contact", contact)
+}
+
+handleViewTeamMember = { member ->
+    handleAction("view_team_member", member)
+}
+
+toggleContactForm = {
+    showContactForm = !showContactForm
+}
+
+setTaskFilter = { filter ->
+    taskFilter = filter
+}
+
+// Computed
+pipelineTotal = pipeline.leads + pipeline.qualified + pipeline.proposals + pipeline.closed
+filteredTasks = if taskFilter == "all" then tasks
+                else if taskFilter == "pending" then tasks.filter { t -> !t.completed }
+                else tasks.filter { t -> t.completed }
+
+// Format helpers
+formatCurrency = { value ->
+    if value >= 1000000 then
+        currency ++ (value / 1000000).toFixed(1) ++ "M"
+    else if value >= 1000 then
+        currency ++ (value / 1000).toFixed(1) ++ "K"
+    else
+        currency ++ value
+}
+
+formatTime = { timestamp ->
+    // Returns relative time like "2h ago", "Yesterday", etc.
+    timestamp
+}
+
+getPriorityClass = { priority ->
+    if priority == "high" then "priority-high"
+    else if priority == "medium" then "priority-medium"
+    else "priority-low"
+}
+
+getStageClass = { stage ->
+    if stage == "closed" then "stage-closed"
+    else if stage == "proposal" then "stage-proposal"
+    else if stage == "qualified" then "stage-qualified"
+    else "stage-lead"
+}
+
+<div class="crm-dashboard">
+    // Header
+    <header class="crm-header">
+        <h1 class="crm-title">{title}</h1>
+        <div class="crm-header-actions">
+            {if showQuickAdd then
+                <button class="quick-add-btn" onClick={toggleContactForm}>
+                    <span class="btn-icon">+</span>
+                    <span class="btn-text">Add Contact</span>
+                </button>
+            }
+        </div>
+    </header>
+
+    // Pipeline Stats
+    <section class="pipeline-section">
+        <div class="pipeline-stats">
+            <div class="pipeline-card pipeline-card--leads">
+                <div class="pipeline-icon">
+                    <span>🎯</span>
+                </div>
+                <div class="pipeline-info">
+                    <span class="pipeline-value">{pipeline.leads}</span>
+                    <span class="pipeline-label">Leads</span>
+                </div>
+                <div class="pipeline-bar">
+                    <div class="pipeline-progress" style={"width: " ++ (if pipelineTotal > 0 then (pipeline.leads / pipelineTotal * 100) else 0) ++ "%"}></div>
+                </div>
+            </div>
+
+            <div class="pipeline-card pipeline-card--qualified">
+                <div class="pipeline-icon">
+                    <span>✓</span>
+                </div>
+                <div class="pipeline-info">
+                    <span class="pipeline-value">{pipeline.qualified}</span>
+                    <span class="pipeline-label">Qualified</span>
+                </div>
+                <div class="pipeline-bar">
+                    <div class="pipeline-progress" style={"width: " ++ (if pipelineTotal > 0 then (pipeline.qualified / pipelineTotal * 100) else 0) ++ "%"}></div>
+                </div>
+            </div>
+
+            <div class="pipeline-card pipeline-card--proposals">
+                <div class="pipeline-icon">
+                    <span>📋</span>
+                </div>
+                <div class="pipeline-info">
+                    <span class="pipeline-value">{pipeline.proposals}</span>
+                    <span class="pipeline-label">Proposals</span>
+                </div>
+                <div class="pipeline-bar">
+                    <div class="pipeline-progress" style={"width: " ++ (if pipelineTotal > 0 then (pipeline.proposals / pipelineTotal * 100) else 0) ++ "%"}></div>
+                </div>
+            </div>
+
+            <div class="pipeline-card pipeline-card--closed">
+                <div class="pipeline-icon">
+                    <span>🏆</span>
+                </div>
+                <div class="pipeline-info">
+                    <span class="pipeline-value">{pipeline.closed}</span>
+                    <span class="pipeline-label">Closed</span>
+                </div>
+                <div class="pipeline-bar">
+                    <div class="pipeline-progress" style={"width: " ++ (if pipelineTotal > 0 then (pipeline.closed / pipelineTotal * 100) else 0) ++ "%"}></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    // Main grid
+    <div class="crm-grid">
+        // Deal Funnel Visualization
+        <section class="crm-card funnel-card">
+            <div class="card-header">
+                <h2 class="card-title">Deal Funnel</h2>
+            </div>
+            <div class="funnel-visualization">
+                <div class="funnel-stage funnel-stage--leads" style={"width: " ++ (if pipelineTotal > 0 then Math.max(30, pipeline.leads / pipelineTotal * 100) else 100) ++ "%"}>
+                    <span class="funnel-label">Leads</span>
+                    <span class="funnel-count">{pipeline.leads}</span>
+                </div>
+                <div class="funnel-stage funnel-stage--qualified" style={"width: " ++ (if pipelineTotal > 0 then Math.max(25, pipeline.qualified / pipelineTotal * 100) else 75) ++ "%"}>
+                    <span class="funnel-label">Qualified</span>
+                    <span class="funnel-count">{pipeline.qualified}</span>
+                </div>
+                <div class="funnel-stage funnel-stage--proposals" style={"width: " ++ (if pipelineTotal > 0 then Math.max(20, pipeline.proposals / pipelineTotal * 100) else 50) ++ "%"}>
+                    <span class="funnel-label">Proposals</span>
+                    <span class="funnel-count">{pipeline.proposals}</span>
+                </div>
+                <div class="funnel-stage funnel-stage--closed" style={"width: " ++ (if pipelineTotal > 0 then Math.max(15, pipeline.closed / pipelineTotal * 100) else 25) ++ "%"}>
+                    <span class="funnel-label">Closed</span>
+                    <span class="funnel-count">{pipeline.closed}</span>
+                </div>
+            </div>
+        </section>
+
+        // Recent Activities Timeline
+        <section class="crm-card activities-card">
+            <div class="card-header">
+                <h2 class="card-title">Recent Activities</h2>
+                <button class="card-action" onClick={ handleAction("view_all_activities", nil) }>View All</button>
+            </div>
+            <div class="activities-timeline">
+                {activities.slice(0, 5).map { activity ->
+                    <div class="activity-item" key={activity.id} onClick={ handleViewActivity(activity) }>
+                        <div class="activity-icon">
+                            {activity.icon || "●"}
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-header">
+                                <span class="activity-title">{activity.title}</span>
+                                <span class="activity-time">{formatTime(activity.timestamp)}</span>
+                            </div>
+                            {if activity.description then
+                                <p class="activity-description">{activity.description}</p>
+                            }
+                            {if activity.user then
+                                <span class="activity-user">{activity.user}</span>
+                            }
+                        </div>
+                    </div>
+                }}
+                {if activities.length == 0 then
+                    <div class="empty-state">
+                        <span class="empty-icon">📭</span>
+                        <span class="empty-text">No recent activities</span>
+                    </div>
+                }
+            </div>
+        </section>
+
+        // Top Deals Table
+        <section class="crm-card deals-card">
+            <div class="card-header">
+                <h2 class="card-title">Top Deals</h2>
+                <button class="card-action" onClick={ handleAction("view_all_deals", nil) }>View All</button>
+            </div>
+            <div class="deals-table-wrapper">
+                <table class="deals-table">
+                    <thead>
+                        <tr>
+                            <th>Deal</th>
+                            <th>Value</th>
+                            <th>Stage</th>
+                            <th>Probability</th>
+                            <th>Owner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {deals.slice(0, 5).map { deal ->
+                            <tr key={deal.id} class="deal-row" onClick={ handleViewDeal(deal) }>
+                                <td>
+                                    <div class="deal-info">
+                                        <span class="deal-name">{deal.name}</span>
+                                        <span class="deal-company">{deal.company}</span>
+                                    </div>
+                                </td>
+                                <td class="deal-value">{formatCurrency(deal.value)}</td>
+                                <td>
+                                    <span class={"deal-stage " ++ getStageClass(deal.stage)}>{deal.stage}</span>
+                                </td>
+                                <td>
+                                    <div class="probability-bar">
+                                        <div class="probability-fill" style={"width: " ++ deal.probability ++ "%"}></div>
+                                        <span class="probability-text">{deal.probability}%</span>
+                                    </div>
+                                </td>
+                                <td class="deal-owner">{deal.owner}</td>
+                            </tr>
+                        }}
+                    </tbody>
+                </table>
+                {if deals.length == 0 then
+                    <div class="empty-state">
+                        <span class="empty-icon">💼</span>
+                        <span class="empty-text">No deals yet</span>
+                    </div>
+                }
+            </div>
+        </section>
+
+        // Task/To-do List
+        <section class="crm-card tasks-card">
+            <div class="card-header">
+                <h2 class="card-title">Tasks</h2>
+                <div class="task-filters">
+                    <button
+                        class={if taskFilter == "all" then "filter-btn filter-btn--active" else "filter-btn"}
+                        onClick={ setTaskFilter("all") }
+                    >All</button>
+                    <button
+                        class={if taskFilter == "pending" then "filter-btn filter-btn--active" else "filter-btn"}
+                        onClick={ setTaskFilter("pending") }
+                    >Pending</button>
+                    <button
+                        class={if taskFilter == "completed" then "filter-btn filter-btn--active" else "filter-btn"}
+                        onClick={ setTaskFilter("completed") }
+                    >Done</button>
+                </div>
+            </div>
+            <div class="tasks-list">
+                {filteredTasks.slice(0, 6).map { task ->
+                    <div class={"task-item " ++ (if task.completed then "task-item--completed" else "")} key={task.id}>
+                        <button
+                            class={if task.completed then "task-checkbox task-checkbox--checked" else "task-checkbox"}
+                            onClick={ handleToggleTask(task) }
+                            aria-label={if task.completed then "Mark as incomplete" else "Mark as complete"}
+                        >
+                            {if task.completed then "✓" else ""}
+                        </button>
+                        <div class="task-content">
+                            <span class="task-title">{task.title}</span>
+                            <div class="task-meta">
+                                {if task.dueDate then
+                                    <span class="task-due">{task.dueDate}</span>
+                                }
+                                {if task.assignee then
+                                    <span class="task-assignee">{task.assignee}</span>
+                                }
+                            </div>
+                        </div>
+                        <span class={"task-priority " ++ getPriorityClass(task.priority)}>{task.priority}</span>
+                    </div>
+                }}
+                {if filteredTasks.length == 0 then
+                    <div class="empty-state">
+                        <span class="empty-icon">✅</span>
+                        <span class="empty-text">No tasks</span>
+                    </div>
+                }
+            </div>
+            <button class="add-task-btn" onClick={ handleAction("add_task", nil) }>
+                <span>+</span> Add Task
+            </button>
+        </section>
+
+        // Team Performance Metrics
+        <section class="crm-card team-card">
+            <div class="card-header">
+                <h2 class="card-title">Team Performance</h2>
+                <button class="card-action" onClick={ handleAction("view_team", nil) }>View All</button>
+            </div>
+            <div class="team-list">
+                {team.slice(0, 4).map { member ->
+                    <div class="team-member" key={member.id} onClick={ handleViewTeamMember(member) }>
+                        <div class="member-avatar">
+                            {if member.avatar then
+                                <img src={member.avatar} alt={member.name} />
+                            else
+                                <span class="avatar-placeholder">{member.name.charAt(0)}</span>
+                            }
+                        </div>
+                        <div class="member-info">
+                            <span class="member-name">{member.name}</span>
+                            <span class="member-role">{member.role}</span>
+                        </div>
+                        <div class="member-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">{member.deals}</span>
+                                <span class="stat-label">Deals</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">{formatCurrency(member.revenue)}</span>
+                                <span class="stat-label">Revenue</span>
+                            </div>
+                        </div>
+                        <div class="member-performance">
+                            <div class="performance-bar">
+                                <div
+                                    class={"performance-fill " ++ (if member.performance >= 100 then "performance-fill--success" else if member.performance >= 70 then "performance-fill--warning" else "performance-fill--danger")}
+                                    style={"width: " ++ Math.min(100, member.performance) ++ "%"}
+                                ></div>
+                            </div>
+                            <span class="performance-text">{member.performance}%</span>
+                        </div>
+                    </div>
+                }}
+                {if team.length == 0 then
+                    <div class="empty-state">
+                        <span class="empty-icon">👥</span>
+                        <span class="empty-text">No team members</span>
+                    </div>
+                }
+            </div>
+        </section>
+
+        // Upcoming Meetings
+        <section class="crm-card meetings-card">
+            <div class="card-header">
+                <h2 class="card-title">Upcoming Meetings</h2>
+                <button class="card-action" onClick={ handleAction("schedule_meeting", nil) }>+ Schedule</button>
+            </div>
+            <div class="meetings-list">
+                {meetings.slice(0, 4).map { meeting ->
+                    <div class="meeting-item" key={meeting.id} onClick={ handleViewMeeting(meeting) }>
+                        <div class={"meeting-type meeting-type--" ++ (meeting.type || "call")}>
+                            {if meeting.type == "video" then "📹"
+                             else if meeting.type == "in-person" then "🤝"
+                             else "📞"}
+                        </div>
+                        <div class="meeting-content">
+                            <span class="meeting-title">{meeting.title}</span>
+                            <div class="meeting-details">
+                                <span class="meeting-time">{meeting.startTime} - {meeting.endTime}</span>
+                                {if meeting.location then
+                                    <span class="meeting-location">{meeting.location}</span>
+                                }
+                            </div>
+                            {if meeting.attendees && meeting.attendees.length > 0 then
+                                <div class="meeting-attendees">
+                                    {meeting.attendees.slice(0, 3).map { attendee ->
+                                        <span class="attendee-avatar" key={attendee} title={attendee}>
+                                            {attendee.charAt(0)}
+                                        </span>
+                                    }}
+                                    {if meeting.attendees.length > 3 then
+                                        <span class="attendee-more">+{meeting.attendees.length - 3}</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }}
+                {if meetings.length == 0 then
+                    <div class="empty-state">
+                        <span class="empty-icon">📅</span>
+                        <span class="empty-text">No upcoming meetings</span>
+                    </div>
+                }
+            </div>
+        </section>
+
+        // Contact Quick-Add
+        {if showContactForm then
+            <section class="crm-card contact-card contact-card--form">
+                <div class="card-header">
+                    <h2 class="card-title">Add New Contact</h2>
+                    <button class="close-btn" onClick={toggleContactForm}>×</button>
+                </div>
+                <form class="contact-form" onSubmit={ e -> e.preventDefault(); handleAddContact() }>
+                    <div class="form-group">
+                        <label class="form-label">Name *</label>
+                        <input
+                            type="text"
+                            class="form-input"
+                            value={newContactName}
+                            onChange={ e -> newContactName = e.target.value }
+                            placeholder="Enter full name"
+                            required
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email *</label>
+                        <input
+                            type="email"
+                            class="form-input"
+                            value={newContactEmail}
+                            onChange={ e -> newContactEmail = e.target.value }
+                            placeholder="Enter email address"
+                            required
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Company</label>
+                        <input
+                            type="text"
+                            class="form-input"
+                            value={newContactCompany}
+                            onChange={ e -> newContactCompany = e.target.value }
+                            placeholder="Enter company name"
+                        />
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onClick={toggleContactForm}>Cancel</button>
+                        <button type="submit" class="btn-primary">Add Contact</button>
+                    </div>
+                </form>
+            </section>
+        else
+            <section class="crm-card contact-card">
+                <div class="card-header">
+                    <h2 class="card-title">Recent Contacts</h2>
+                    <button class="card-action" onClick={ handleAction("view_all_contacts", nil) }>View All</button>
+                </div>
+                <div class="contacts-list">
+                    {contacts.slice(0, 5).map { contact ->
+                        <div class="contact-item" key={contact.id} onClick={ handleViewContact(contact) }>
+                            <div class="contact-avatar">
+                                {if contact.avatar then
+                                    <img src={contact.avatar} alt={contact.name} />
+                                else
+                                    <span class="avatar-placeholder">{contact.name.charAt(0)}</span>
+                                }
+                            </div>
+                            <div class="contact-info">
+                                <span class="contact-name">{contact.name}</span>
+                                <span class="contact-company">{contact.company}</span>
+                            </div>
+                            <div class="contact-actions">
+                                <button class="contact-action-btn" onClick={ e -> e.stopPropagation(); handleAction("email_contact", contact) } title="Send email">
+                                    ✉
+                                </button>
+                                <button class="contact-action-btn" onClick={ e -> e.stopPropagation(); handleAction("call_contact", contact) } title="Call">
+                                    📞
+                                </button>
+                            </div>
+                        </div>
+                    }}
+                    {if contacts.length == 0 then
+                        <div class="empty-state">
+                            <span class="empty-icon">📇</span>
+                            <span class="empty-text">No contacts yet</span>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    </div>
+</div>
+
+<style scoped>
+.crm-dashboard {
+    padding: var(--flin-spacing-6);
+    background: var(--flin-color-gray-50);
+    min-height: 100vh;
+}
+
+/* Header */
+.crm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--flin-spacing-6);
+}
+
+.crm-title {
+    font-size: var(--flin-font-size-2xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--flin-color-gray-900);
+    margin: 0;
+}
+
+.crm-header-actions {
+    display: flex;
+    gap: var(--flin-spacing-3);
+}
+
+.quick-add-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    padding: var(--flin-spacing-2) var(--flin-spacing-4);
+    background: var(--flin-color-primary-600);
+    color: var(--flin-color-white);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.quick-add-btn:hover {
+    background: var(--flin-color-primary-700);
+}
+
+.btn-icon {
+    font-size: var(--flin-font-size-lg);
+}
+
+/* Pipeline Section */
+.pipeline-section {
+    margin-bottom: var(--flin-spacing-6);
+}
+
+.pipeline-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--flin-spacing-4);
+}
+
+.pipeline-card {
+    background: var(--flin-color-white);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-spacing-4);
+    border: 1px solid var(--flin-color-gray-200);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-3);
+}
+
+.pipeline-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--flin-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-font-size-xl);
+}
+
+.pipeline-card--leads .pipeline-icon {
+    background: var(--flin-color-blue-100);
+}
+
+.pipeline-card--qualified .pipeline-icon {
+    background: var(--flin-color-yellow-100);
+}
+
+.pipeline-card--proposals .pipeline-icon {
+    background: var(--flin-color-purple-100);
+}
+
+.pipeline-card--closed .pipeline-icon {
+    background: var(--flin-color-green-100);
+}
+
+.pipeline-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-1);
+}
+
+.pipeline-value {
+    font-size: var(--flin-font-size-2xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--flin-color-gray-900);
+}
+
+.pipeline-label {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+}
+
+.pipeline-bar {
+    height: 4px;
+    background: var(--flin-color-gray-100);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.pipeline-progress {
+    height: 100%;
+    border-radius: var(--flin-radius-full);
+    transition: width var(--flin-transition-normal);
+}
+
+.pipeline-card--leads .pipeline-progress {
+    background: var(--flin-color-blue-500);
+}
+
+.pipeline-card--qualified .pipeline-progress {
+    background: var(--flin-color-yellow-500);
+}
+
+.pipeline-card--proposals .pipeline-progress {
+    background: var(--flin-color-purple-500);
+}
+
+.pipeline-card--closed .pipeline-progress {
+    background: var(--flin-color-green-500);
+}
+
+/* Main Grid */
+.crm-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--flin-spacing-6);
+}
+
+/* Card styles */
+.crm-card {
+    background: var(--flin-color-white);
+    border-radius: var(--flin-radius-lg);
+    border: 1px solid var(--flin-color-gray-200);
+    overflow: hidden;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--flin-spacing-4);
+    border-bottom: 1px solid var(--flin-color-gray-100);
+}
+
+.card-title {
+    font-size: var(--flin-font-size-base);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+    margin: 0;
+}
+
+.card-action {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-primary-600);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: var(--flin-font-weight-medium);
+}
+
+.card-action:hover {
+    color: var(--flin-color-primary-700);
+    text-decoration: underline;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: var(--flin-font-size-xl);
+    color: var(--flin-color-gray-400);
+    cursor: pointer;
+    padding: var(--flin-spacing-1);
+}
+
+.close-btn:hover {
+    color: var(--flin-color-gray-600);
+}
+
+/* Funnel Card */
+.funnel-card {
+    grid-column: span 1;
+}
+
+.funnel-visualization {
+    padding: var(--flin-spacing-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-2);
+    align-items: center;
+}
+
+.funnel-stage {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    border-radius: var(--flin-radius-md);
+    min-width: 60%;
+    transition: width var(--flin-transition-normal);
+}
+
+.funnel-stage--leads {
+    background: var(--flin-color-blue-100);
+    color: var(--flin-color-blue-700);
+}
+
+.funnel-stage--qualified {
+    background: var(--flin-color-yellow-100);
+    color: var(--flin-color-yellow-700);
+}
+
+.funnel-stage--proposals {
+    background: var(--flin-color-purple-100);
+    color: var(--flin-color-purple-700);
+}
+
+.funnel-stage--closed {
+    background: var(--flin-color-green-100);
+    color: var(--flin-color-green-700);
+}
+
+.funnel-label {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+}
+
+.funnel-count {
+    font-size: var(--flin-font-size-base);
+    font-weight: var(--flin-font-weight-bold);
+}
+
+/* Activities Card */
+.activities-card {
+    grid-column: span 1;
+}
+
+.activities-timeline {
+    padding: var(--flin-spacing-4);
+}
+
+.activity-item {
+    display: flex;
+    gap: var(--flin-spacing-3);
+    padding: var(--flin-spacing-3) 0;
+    border-bottom: 1px solid var(--flin-color-gray-100);
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-item:hover {
+    background: var(--flin-color-gray-50);
+    margin: 0 calc(-1 * var(--flin-spacing-4));
+    padding-left: var(--flin-spacing-4);
+    padding-right: var(--flin-spacing-4);
+}
+
+.activity-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--flin-color-gray-100);
+    border-radius: var(--flin-radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-font-size-sm);
+    flex-shrink: 0;
+}
+
+.activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--flin-spacing-2);
+}
+
+.activity-title {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-900);
+}
+
+.activity-time {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-400);
+    flex-shrink: 0;
+}
+
+.activity-description {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-500);
+    margin: var(--flin-spacing-1) 0 0 0;
+    line-height: 1.4;
+}
+
+.activity-user {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-400);
+}
+
+/* Deals Card */
+.deals-card {
+    grid-column: span 2;
+}
+
+.deals-table-wrapper {
+    overflow-x: auto;
+}
+
+.deals-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.deals-table th,
+.deals-table td {
+    padding: var(--flin-spacing-3) var(--flin-spacing-4);
+    text-align: left;
+}
+
+.deals-table th {
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--flin-color-gray-50);
+}
+
+.deal-row {
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.deal-row:hover {
+    background: var(--flin-color-gray-50);
+}
+
+.deal-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.deal-name {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-900);
+}
+
+.deal-company {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-500);
+}
+
+.deal-value {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+}
+
+.deal-stage {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    border-radius: var(--flin-radius-full);
+    text-transform: capitalize;
+}
+
+.stage-lead {
+    background: var(--flin-color-blue-100);
+    color: var(--flin-color-blue-700);
+}
+
+.stage-qualified {
+    background: var(--flin-color-yellow-100);
+    color: var(--flin-color-yellow-700);
+}
+
+.stage-proposal {
+    background: var(--flin-color-purple-100);
+    color: var(--flin-color-purple-700);
+}
+
+.stage-closed {
+    background: var(--flin-color-green-100);
+    color: var(--flin-color-green-700);
+}
+
+.probability-bar {
+    position: relative;
+    height: 20px;
+    width: 80px;
+    background: var(--flin-color-gray-100);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.probability-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: var(--flin-color-primary-500);
+    border-radius: var(--flin-radius-full);
+}
+
+.probability-text {
+    position: relative;
+    z-index: 1;
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.deal-owner {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-600);
+}
+
+/* Tasks Card */
+.tasks-card {
+    grid-column: span 1;
+}
+
+.task-filters {
+    display: flex;
+    gap: var(--flin-spacing-1);
+}
+
+.filter-btn {
+    padding: var(--flin-spacing-1) var(--flin-spacing-2);
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-500);
+    background: none;
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.filter-btn:hover {
+    color: var(--flin-color-gray-700);
+    background: var(--flin-color-gray-100);
+}
+
+.filter-btn--active {
+    background: var(--flin-color-primary-100);
+    color: var(--flin-color-primary-700);
+}
+
+.tasks-list {
+    padding: var(--flin-spacing-4);
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-3);
+    padding: var(--flin-spacing-2) 0;
+    border-bottom: 1px solid var(--flin-color-gray-100);
+}
+
+.task-item:last-child {
+    border-bottom: none;
+}
+
+.task-item--completed .task-title {
+    text-decoration: line-through;
+    color: var(--flin-color-gray-400);
+}
+
+.task-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--flin-color-gray-300);
+    border-radius: var(--flin-radius-sm);
+    background: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-font-size-xs);
+    color: transparent;
+    transition: all var(--flin-transition-fast);
+    flex-shrink: 0;
+}
+
+.task-checkbox:hover {
+    border-color: var(--flin-color-primary-500);
+}
+
+.task-checkbox--checked {
+    background: var(--flin-color-primary-500);
+    border-color: var(--flin-color-primary-500);
+    color: var(--flin-color-white);
+}
+
+.task-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.task-title {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-700);
+    display: block;
+}
+
+.task-meta {
+    display: flex;
+    gap: var(--flin-spacing-2);
+    margin-top: 2px;
+}
+
+.task-due,
+.task-assignee {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-400);
+}
+
+.task-priority {
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    padding: 2px 6px;
+    border-radius: var(--flin-radius-sm);
+    text-transform: capitalize;
+}
+
+.priority-high {
+    background: var(--flin-color-red-100);
+    color: var(--flin-color-red-600);
+}
+
+.priority-medium {
+    background: var(--flin-color-yellow-100);
+    color: var(--flin-color-yellow-600);
+}
+
+.priority-low {
+    background: var(--flin-color-gray-100);
+    color: var(--flin-color-gray-600);
+}
+
+.add-task-btn {
+    width: 100%;
+    padding: var(--flin-spacing-3);
+    background: none;
+    border: none;
+    border-top: 1px solid var(--flin-color-gray-100);
+    color: var(--flin-color-gray-500);
+    font-size: var(--flin-font-size-sm);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-spacing-2);
+}
+
+.add-task-btn:hover {
+    background: var(--flin-color-gray-50);
+    color: var(--flin-color-primary-600);
+}
+
+/* Team Card */
+.team-card {
+    grid-column: span 1;
+}
+
+.team-list {
+    padding: var(--flin-spacing-4);
+}
+
+.team-member {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-3);
+    padding: var(--flin-spacing-3) 0;
+    border-bottom: 1px solid var(--flin-color-gray-100);
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.team-member:last-child {
+    border-bottom: none;
+}
+
+.team-member:hover {
+    background: var(--flin-color-gray-50);
+    margin: 0 calc(-1 * var(--flin-spacing-4));
+    padding-left: var(--flin-spacing-4);
+    padding-right: var(--flin-spacing-4);
+}
+
+.member-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.member-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-color-primary-100);
+    color: var(--flin-color-primary-700);
+    font-weight: var(--flin-font-weight-semibold);
+    font-size: var(--flin-font-size-base);
+}
+
+.member-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.member-name {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-900);
+}
+
+.member-role {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-500);
+}
+
+.member-stats {
+    display: flex;
+    gap: var(--flin-spacing-4);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.stat-value {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-semibold);
+    color: var(--flin-color-gray-900);
+}
+
+.stat-label {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-400);
+}
+
+.member-performance {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+}
+
+.performance-bar {
+    width: 60px;
+    height: 6px;
+    background: var(--flin-color-gray-100);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.performance-fill {
+    height: 100%;
+    border-radius: var(--flin-radius-full);
+    transition: width var(--flin-transition-normal);
+}
+
+.performance-fill--success {
+    background: var(--flin-color-green-500);
+}
+
+.performance-fill--warning {
+    background: var(--flin-color-yellow-500);
+}
+
+.performance-fill--danger {
+    background: var(--flin-color-red-500);
+}
+
+.performance-text {
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-600);
+    min-width: 32px;
+}
+
+/* Meetings Card */
+.meetings-card {
+    grid-column: span 1;
+}
+
+.meetings-list {
+    padding: var(--flin-spacing-4);
+}
+
+.meeting-item {
+    display: flex;
+    gap: var(--flin-spacing-3);
+    padding: var(--flin-spacing-3) 0;
+    border-bottom: 1px solid var(--flin-color-gray-100);
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.meeting-item:last-child {
+    border-bottom: none;
+}
+
+.meeting-item:hover {
+    background: var(--flin-color-gray-50);
+    margin: 0 calc(-1 * var(--flin-spacing-4));
+    padding-left: var(--flin-spacing-4);
+    padding-right: var(--flin-spacing-4);
+}
+
+.meeting-type {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--flin-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-font-size-base);
+    flex-shrink: 0;
+}
+
+.meeting-type--call {
+    background: var(--flin-color-blue-100);
+}
+
+.meeting-type--video {
+    background: var(--flin-color-purple-100);
+}
+
+.meeting-type--in-person {
+    background: var(--flin-color-green-100);
+}
+
+.meeting-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.meeting-title {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-900);
+    display: block;
+}
+
+.meeting-details {
+    display: flex;
+    gap: var(--flin-spacing-2);
+    margin-top: 2px;
+}
+
+.meeting-time,
+.meeting-location {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-500);
+}
+
+.meeting-attendees {
+    display: flex;
+    align-items: center;
+    margin-top: var(--flin-spacing-2);
+}
+
+.attendee-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--flin-radius-full);
+    background: var(--flin-color-primary-100);
+    color: var(--flin-color-primary-700);
+    font-size: var(--flin-font-size-xs);
+    font-weight: var(--flin-font-weight-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -6px;
+    border: 2px solid var(--flin-color-white);
+}
+
+.attendee-avatar:first-child {
+    margin-left: 0;
+}
+
+.attendee-more {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-500);
+    margin-left: var(--flin-spacing-2);
+}
+
+/* Contacts Card */
+.contact-card {
+    grid-column: span 1;
+}
+
+.contact-card--form {
+    grid-column: span 1;
+}
+
+.contacts-list {
+    padding: var(--flin-spacing-4);
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-3);
+    padding: var(--flin-spacing-2) 0;
+    border-bottom: 1px solid var(--flin-color-gray-100);
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.contact-item:last-child {
+    border-bottom: none;
+}
+
+.contact-item:hover {
+    background: var(--flin-color-gray-50);
+    margin: 0 calc(-1 * var(--flin-spacing-4));
+    padding-left: var(--flin-spacing-4);
+    padding-right: var(--flin-spacing-4);
+}
+
+.contact-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.contact-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.contact-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.contact-name {
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-900);
+}
+
+.contact-company {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-500);
+}
+
+.contact-actions {
+    display: flex;
+    gap: var(--flin-spacing-1);
+    opacity: 0;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.contact-item:hover .contact-actions {
+    opacity: 1;
+}
+
+.contact-action-btn {
+    width: 28px;
+    height: 28px;
+    background: var(--flin-color-gray-100);
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-font-size-sm);
+    transition: background var(--flin-transition-fast);
+}
+
+.contact-action-btn:hover {
+    background: var(--flin-color-gray-200);
+}
+
+/* Contact Form */
+.contact-form {
+    padding: var(--flin-spacing-4);
+}
+
+.form-group {
+    margin-bottom: var(--flin-spacing-4);
+}
+
+.form-label {
+    display: block;
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    color: var(--flin-color-gray-700);
+    margin-bottom: var(--flin-spacing-2);
+}
+
+.form-input {
+    width: 100%;
+    padding: var(--flin-spacing-2) var(--flin-spacing-3);
+    font-size: var(--flin-font-size-sm);
+    border: 1px solid var(--flin-color-gray-300);
+    border-radius: var(--flin-radius-md);
+    transition: border-color var(--flin-transition-fast), box-shadow var(--flin-transition-fast);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--flin-color-primary-500);
+    box-shadow: 0 0 0 3px var(--flin-color-primary-100);
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--flin-spacing-3);
+    justify-content: flex-end;
+    padding-top: var(--flin-spacing-2);
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: var(--flin-spacing-2) var(--flin-spacing-4);
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.btn-primary {
+    background: var(--flin-color-primary-600);
+    color: var(--flin-color-white);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: var(--flin-color-primary-700);
+}
+
+.btn-secondary {
+    background: var(--flin-color-white);
+    color: var(--flin-color-gray-700);
+    border: 1px solid var(--flin-color-gray-300);
+}
+
+.btn-secondary:hover {
+    background: var(--flin-color-gray-50);
+    border-color: var(--flin-color-gray-400);
+}
+
+/* Empty State */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-spacing-8) var(--flin-spacing-4);
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: var(--flin-font-size-3xl);
+    margin-bottom: var(--flin-spacing-3);
+    opacity: 0.5;
+}
+
+.empty-text {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-400);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .crm-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .deals-card {
+        grid-column: span 2;
+    }
+
+    .funnel-card,
+    .activities-card,
+    .tasks-card,
+    .team-card,
+    .meetings-card,
+    .contact-card {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .crm-dashboard {
+        padding: var(--flin-spacing-4);
+    }
+
+    .pipeline-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .crm-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .deals-card,
+    .funnel-card,
+    .activities-card,
+    .tasks-card,
+    .team-card,
+    .meetings-card,
+    .contact-card {
+        grid-column: span 1;
+    }
+
+    .crm-header {
+        flex-direction: column;
+        gap: var(--flin-spacing-3);
+        align-items: flex-start;
+    }
+
+    .crm-title {
+        font-size: var(--flin-font-size-xl);
+    }
+
+    .team-member {
+        flex-wrap: wrap;
+    }
+
+    .member-stats {
+        order: 3;
+        width: 100%;
+        margin-top: var(--flin-spacing-2);
+        padding-top: var(--flin-spacing-2);
+        border-top: 1px solid var(--flin-color-gray-100);
+    }
+
+    .member-performance {
+        order: 4;
+        width: 100%;
+    }
+
+    .performance-bar {
+        flex: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .pipeline-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .pipeline-card {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .pipeline-info {
+        flex: 1;
+    }
+
+    .pipeline-bar {
+        display: none;
+    }
+
+    .btn-text {
+        display: none;
+    }
+
+    .quick-add-btn {
+        padding: var(--flin-spacing-2);
+    }
+
+    .deals-table th:nth-child(4),
+    .deals-table td:nth-child(4),
+    .deals-table th:nth-child(5),
+    .deals-table td:nth-child(5) {
+        display: none;
+    }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .crm-dashboard {
+        background: var(--flin-color-gray-900);
+    }
+
+    .crm-title {
+        color: var(--flin-color-gray-100);
+    }
+
+    .pipeline-card,
+    .crm-card {
+        background: var(--flin-color-gray-800);
+        border-color: var(--flin-color-gray-700);
+    }
+
+    .pipeline-value,
+    .card-title,
+    .deal-name,
+    .deal-value,
+    .task-title,
+    .member-name,
+    .meeting-title,
+    .contact-name,
+    .activity-title,
+    .funnel-count {
+        color: var(--flin-color-gray-100);
+    }
+
+    .pipeline-label,
+    .deal-company,
+    .deal-owner,
+    .task-due,
+    .task-assignee,
+    .member-role,
+    .meeting-time,
+    .meeting-location,
+    .contact-company,
+    .activity-description,
+    .stat-label,
+    .funnel-label {
+        color: var(--flin-color-gray-400);
+    }
+
+    .card-header {
+        border-bottom-color: var(--flin-color-gray-700);
+    }
+
+    .pipeline-bar,
+    .performance-bar,
+    .probability-bar {
+        background: var(--flin-color-gray-700);
+    }
+
+    .deals-table th {
+        background: var(--flin-color-gray-700);
+        color: var(--flin-color-gray-300);
+    }
+
+    .deal-row:hover,
+    .activity-item:hover,
+    .team-member:hover,
+    .meeting-item:hover,
+    .contact-item:hover,
+    .task-item:hover {
+        background: var(--flin-color-gray-700);
+    }
+
+    .activity-item,
+    .task-item,
+    .team-member,
+    .meeting-item,
+    .contact-item {
+        border-bottom-color: var(--flin-color-gray-700);
+    }
+
+    .activity-icon,
+    .contact-action-btn {
+        background: var(--flin-color-gray-700);
+    }
+
+    .task-checkbox {
+        border-color: var(--flin-color-gray-600);
+    }
+
+    .filter-btn:hover {
+        background: var(--flin-color-gray-700);
+        color: var(--flin-color-gray-300);
+    }
+
+    .add-task-btn {
+        border-top-color: var(--flin-color-gray-700);
+    }
+
+    .add-task-btn:hover {
+        background: var(--flin-color-gray-700);
+    }
+
+    .form-input {
+        background: var(--flin-color-gray-700);
+        border-color: var(--flin-color-gray-600);
+        color: var(--flin-color-gray-100);
+    }
+
+    .form-input:focus {
+        border-color: var(--flin-color-primary-400);
+    }
+
+    .form-label {
+        color: var(--flin-color-gray-300);
+    }
+
+    .btn-secondary {
+        background: var(--flin-color-gray-700);
+        border-color: var(--flin-color-gray-600);
+        color: var(--flin-color-gray-300);
+    }
+
+    .btn-secondary:hover {
+        background: var(--flin-color-gray-600);
+    }
+
+    .avatar-placeholder {
+        background: var(--flin-color-primary-900);
+        color: var(--flin-color-primary-300);
+    }
+
+    .attendee-avatar {
+        border-color: var(--flin-color-gray-800);
+        background: var(--flin-color-primary-900);
+        color: var(--flin-color-primary-300);
+    }
+
+    .probability-text {
+        color: var(--flin-color-gray-300);
+    }
+
+    .empty-text {
+        color: var(--flin-color-gray-500);
+    }
+}
+</style>

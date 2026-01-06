@@ -10,6 +10,13 @@
 // - AuthLayout        - Authentication page wrapper (login/register pages)
 // - SettingsLayout    - Settings page with sidebar navigation
 //
+// Industry Templates:
+// - BankingDashboard      - Complete banking/fintech dashboard with accounts, transactions, charts
+// - EcommerceDashboard    - E-commerce admin dashboard with stats, orders, products, alerts
+// - CRMDashboard          - CRM dashboard with pipeline, deals, activities, tasks, team metrics
+// - MonitoringDashboard   - DevOps/infrastructure monitoring with health, services, alerts, logs
+// - AnalyticsDashboard    - Analytics/data dashboard with metrics, traffic, realtime visitors, charts
+//
 // Form Templates:
 // - LoginForm         - Complete login form with validation
 // - RegisterForm      - Complete registration form with password strength
@@ -21,6 +28,9 @@
 //
 // Profile Templates:
 // - ProfileCard       - User profile card template
+//
+// Application Templates:
+// - EmailClient       - Gmail-like email client with three-column layout
 //
 // Utility Templates:
 // - ErrorPage         - Error pages (404, 500, etc.)
@@ -77,3 +87,9 @@ export { FeaturesGrid } from "./FeaturesGrid.flin"
 export { SettingsLayout } from "./SettingsLayout.flin"
 export { ProfileCard } from "./ProfileCard.flin"
 export { ErrorPage } from "./ErrorPage.flin"
+export { BankingDashboard } from "./BankingDashboard.flin"
+export { EcommerceDashboard } from "./EcommerceDashboard.flin"
+export { EmailClient } from "./EmailClient.flin"
+export { CRMDashboard } from "./CRMDashboard.flin"
+export { MonitoringDashboard } from "./MonitoringDashboard.flin"
+export { AnalyticsDashboard } from "./AnalyticsDashboard.flin"

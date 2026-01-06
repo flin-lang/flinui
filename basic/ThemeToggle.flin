@@ -1,0 +1,851 @@
+// ThemeToggle.flin - FlinUI Theme Toggle Component
+// A dark/light mode toggle with sun/moon icons, system preference detection, and beautiful animations
+
+// Props with defaults
+theme = props.theme || "system"
+variant = props.variant || "switch"
+size = props.size || "md"
+showLabel = props.showLabel || false
+labels = props.labels || { light: "Light", dark: "Dark", system: "System" }
+disabled = props.disabled || false
+onChange = props.onChange
+
+// State for dropdown visibility
+dropdownOpen = state(false)
+
+// Computed: resolve actual theme from system preference
+resolvedTheme = match theme {
+    "system" -> window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+    _ -> theme
+}
+
+// Computed: is dark mode active
+isDark = resolvedTheme == "dark"
+
+// Event handlers
+handleToggle = fn() {
+    if disabled { return }
+    newTheme = match theme {
+        "light" -> "dark"
+        "dark" -> "light"
+        "system" -> isDark ? "light" : "dark"
+        _ -> "dark"
+    }
+    if onChange { onChange(newTheme) }
+}
+
+handleSelectTheme = fn(selectedTheme) {
+    if disabled { return }
+    dropdownOpen.set(false)
+    if onChange { onChange(selectedTheme) }
+}
+
+toggleDropdown = fn() {
+    if disabled { return }
+    dropdownOpen.set(!dropdownOpen.get())
+}
+
+closeDropdown = fn() {
+    dropdownOpen.set(false)
+}
+
+// Computed size classes
+sizeClass = match size {
+    "sm" -> "theme-toggle-sm"
+    "lg" -> "theme-toggle-lg"
+    _ -> "theme-toggle-md"
+}
+
+// Icon sizes based on component size
+iconSize = match size {
+    "sm" -> 14
+    "lg" -> 22
+    _ -> 18
+}
+
+// Computed variant class
+variantClass = match variant {
+    "button" -> "theme-toggle-button"
+    "icon" -> "theme-toggle-icon"
+    "dropdown" -> "theme-toggle-dropdown"
+    _ -> "theme-toggle-switch"
+}
+
+// Computed disabled class
+disabledClass = match disabled {
+    true -> " theme-toggle-disabled"
+    _ -> ""
+}
+
+// Computed active theme class for styling
+themeClass = match isDark {
+    true -> " theme-toggle-dark"
+    _ -> " theme-toggle-light"
+}
+
+// Pre-compute full class string
+toggleClass = "theme-toggle " ++ variantClass ++ " " ++ sizeClass ++ themeClass ++ disabledClass
+
+// Get current label
+currentLabel = match theme {
+    "light" -> labels.light
+    "dark" -> labels.dark
+    _ -> labels.system
+}
+
+// Render based on variant
+{match variant {
+    // Switch variant - classic toggle switch with sun/moon icons
+    "switch" ->
+        <button
+            class={toggleClass}
+            click={handleToggle}
+            disabled={disabled}
+            role="switch"
+            aria-checked={isDark}
+            aria-label={"Toggle theme, currently " ++ resolvedTheme ++ " mode"}
+        >
+            <span class="theme-toggle-track">
+                <span class="theme-toggle-icons">
+                    <span class={"theme-toggle-sun" ++ (isDark ? " hidden" : "")}>
+                        <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="4"/>
+                            <path d="M12 2v2"/>
+                            <path d="M12 20v2"/>
+                            <path d="m4.93 4.93 1.41 1.41"/>
+                            <path d="m17.66 17.66 1.41 1.41"/>
+                            <path d="M2 12h2"/>
+                            <path d="M20 12h2"/>
+                            <path d="m6.34 17.66-1.41 1.41"/>
+                            <path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                    </span>
+                    <span class={"theme-toggle-moon" ++ (isDark ? "" : " hidden")}>
+                        <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                        </svg>
+                    </span>
+                </span>
+                <span class="theme-toggle-thumb"></span>
+            </span>
+            {if showLabel}
+                <span class="theme-toggle-label">{currentLabel}</span>
+            {/if}
+        </button>
+
+    // Button variant - pill-shaped button with icon and optional label
+    "button" ->
+        <button
+            class={toggleClass}
+            click={handleToggle}
+            disabled={disabled}
+            aria-label={"Toggle theme, currently " ++ resolvedTheme ++ " mode"}
+        >
+            <span class="theme-toggle-icon-wrapper">
+                <span class={"theme-toggle-sun" ++ (isDark ? " rotated-out" : " rotated-in")}>
+                    <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4"/>
+                        <path d="M12 2v2"/>
+                        <path d="M12 20v2"/>
+                        <path d="m4.93 4.93 1.41 1.41"/>
+                        <path d="m17.66 17.66 1.41 1.41"/>
+                        <path d="M2 12h2"/>
+                        <path d="M20 12h2"/>
+                        <path d="m6.34 17.66-1.41 1.41"/>
+                        <path d="m19.07 4.93-1.41 1.41"/>
+                    </svg>
+                </span>
+                <span class={"theme-toggle-moon" ++ (isDark ? " rotated-in" : " rotated-out")}>
+                    <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                    </svg>
+                </span>
+            </span>
+            {if showLabel}
+                <span class="theme-toggle-label">{currentLabel}</span>
+            {/if}
+        </button>
+
+    // Icon-only variant - minimal icon button
+    "icon" ->
+        <button
+            class={toggleClass}
+            click={handleToggle}
+            disabled={disabled}
+            aria-label={"Toggle theme, currently " ++ resolvedTheme ++ " mode"}
+        >
+            <span class="theme-toggle-icon-wrapper">
+                <span class={"theme-toggle-sun" ++ (isDark ? " scaled-out" : " scaled-in")}>
+                    <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4"/>
+                        <path d="M12 2v2"/>
+                        <path d="M12 20v2"/>
+                        <path d="m4.93 4.93 1.41 1.41"/>
+                        <path d="m17.66 17.66 1.41 1.41"/>
+                        <path d="M2 12h2"/>
+                        <path d="M20 12h2"/>
+                        <path d="m6.34 17.66-1.41 1.41"/>
+                        <path d="m19.07 4.93-1.41 1.41"/>
+                    </svg>
+                </span>
+                <span class={"theme-toggle-moon" ++ (isDark ? " scaled-in" : " scaled-out")}>
+                    <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                    </svg>
+                </span>
+            </span>
+        </button>
+
+    // Dropdown variant - shows all three options (light/dark/system)
+    "dropdown" ->
+        <div class={toggleClass} blur={closeDropdown}>
+            <button
+                class="theme-toggle-dropdown-trigger"
+                click={toggleDropdown}
+                disabled={disabled}
+                aria-expanded={dropdownOpen.get()}
+                aria-haspopup="listbox"
+                aria-label={"Select theme, currently " ++ theme}
+            >
+                <span class="theme-toggle-icon-wrapper">
+                    {match theme {
+                        "light" ->
+                            <span class="theme-toggle-sun scaled-in">
+                                <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="4"/>
+                                    <path d="M12 2v2"/>
+                                    <path d="M12 20v2"/>
+                                    <path d="m4.93 4.93 1.41 1.41"/>
+                                    <path d="m17.66 17.66 1.41 1.41"/>
+                                    <path d="M2 12h2"/>
+                                    <path d="M20 12h2"/>
+                                    <path d="m6.34 17.66-1.41 1.41"/>
+                                    <path d="m19.07 4.93-1.41 1.41"/>
+                                </svg>
+                            </span>
+                        "dark" ->
+                            <span class="theme-toggle-moon scaled-in">
+                                <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                                </svg>
+                            </span>
+                        _ ->
+                            <span class="theme-toggle-system scaled-in">
+                                <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="3" width="20" height="14" rx="2"/>
+                                    <path d="M8 21h8"/>
+                                    <path d="M12 17v4"/>
+                                </svg>
+                            </span>
+                    }}
+                </span>
+                {if showLabel}
+                    <span class="theme-toggle-label">{currentLabel}</span>
+                {/if}
+                <span class="theme-toggle-chevron" aria-hidden="true">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                </span>
+            </button>
+            {if dropdownOpen.get()}
+                <div class="theme-toggle-menu" role="listbox" aria-label="Theme options">
+                    <button
+                        class={"theme-toggle-option" ++ (theme == "light" ? " selected" : "")}
+                        click={fn() { handleSelectTheme("light") }}
+                        role="option"
+                        aria-selected={theme == "light"}
+                    >
+                        <span class="theme-toggle-option-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="4"/>
+                                <path d="M12 2v2"/>
+                                <path d="M12 20v2"/>
+                                <path d="m4.93 4.93 1.41 1.41"/>
+                                <path d="m17.66 17.66 1.41 1.41"/>
+                                <path d="M2 12h2"/>
+                                <path d="M20 12h2"/>
+                                <path d="m6.34 17.66-1.41 1.41"/>
+                                <path d="m19.07 4.93-1.41 1.41"/>
+                            </svg>
+                        </span>
+                        <span class="theme-toggle-option-label">{labels.light}</span>
+                        {if theme == "light"}
+                            <span class="theme-toggle-check">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6 9 17l-5-5"/>
+                                </svg>
+                            </span>
+                        {/if}
+                    </button>
+                    <button
+                        class={"theme-toggle-option" ++ (theme == "dark" ? " selected" : "")}
+                        click={fn() { handleSelectTheme("dark") }}
+                        role="option"
+                        aria-selected={theme == "dark"}
+                    >
+                        <span class="theme-toggle-option-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                            </svg>
+                        </span>
+                        <span class="theme-toggle-option-label">{labels.dark}</span>
+                        {if theme == "dark"}
+                            <span class="theme-toggle-check">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6 9 17l-5-5"/>
+                                </svg>
+                            </span>
+                        {/if}
+                    </button>
+                    <button
+                        class={"theme-toggle-option" ++ (theme == "system" ? " selected" : "")}
+                        click={fn() { handleSelectTheme("system") }}
+                        role="option"
+                        aria-selected={theme == "system"}
+                    >
+                        <span class="theme-toggle-option-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                                <path d="M8 21h8"/>
+                                <path d="M12 17v4"/>
+                            </svg>
+                        </span>
+                        <span class="theme-toggle-option-label">{labels.system}</span>
+                        {if theme == "system"}
+                            <span class="theme-toggle-check">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 6 9 17l-5-5"/>
+                                </svg>
+                            </span>
+                        {/if}
+                    </button>
+                </div>
+            {/if}
+        </div>
+
+    // Default fallback to switch
+    _ ->
+        <button
+            class={toggleClass}
+            click={handleToggle}
+            disabled={disabled}
+            role="switch"
+            aria-checked={isDark}
+            aria-label={"Toggle theme, currently " ++ resolvedTheme ++ " mode"}
+        >
+            <span class="theme-toggle-track">
+                <span class="theme-toggle-thumb"></span>
+            </span>
+        </button>
+}}
+
+<style scoped>
+/* ===================================
+   Base Theme Toggle Styles
+   =================================== */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    border: none;
+    background: none;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    position: relative;
+}
+
+.theme-toggle:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+    border-radius: var(--flin-radius-md);
+}
+
+.theme-toggle-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.theme-toggle-label {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+    white-space: nowrap;
+}
+
+/* ===================================
+   Switch Variant
+   =================================== */
+.theme-toggle-switch .theme-toggle-track {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-full);
+    transition: background-color 0.3s ease;
+    overflow: hidden;
+}
+
+.theme-toggle-switch.theme-toggle-dark .theme-toggle-track {
+    background: var(--flin-neutral-700);
+}
+
+.theme-toggle-switch:hover:not(.theme-toggle-disabled) .theme-toggle-track {
+    background: var(--flin-neutral-300);
+}
+
+.theme-toggle-switch.theme-toggle-dark:hover:not(.theme-toggle-disabled) .theme-toggle-track {
+    background: var(--flin-neutral-600);
+}
+
+/* Switch sizes */
+.theme-toggle-sm .theme-toggle-track {
+    width: 44px;
+    height: 24px;
+    padding: 2px;
+}
+
+.theme-toggle-md .theme-toggle-track {
+    width: 56px;
+    height: 30px;
+    padding: 3px;
+}
+
+.theme-toggle-lg .theme-toggle-track {
+    width: 68px;
+    height: 36px;
+    padding: 4px;
+}
+
+.theme-toggle-thumb {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    box-shadow: var(--flin-shadow-sm);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+}
+
+.theme-toggle-sm .theme-toggle-thumb {
+    width: 20px;
+    height: 20px;
+    top: 2px;
+    left: 2px;
+}
+
+.theme-toggle-md .theme-toggle-thumb {
+    width: 24px;
+    height: 24px;
+    top: 3px;
+    left: 3px;
+}
+
+.theme-toggle-lg .theme-toggle-thumb {
+    width: 28px;
+    height: 28px;
+    top: 4px;
+    left: 4px;
+}
+
+.theme-toggle-switch.theme-toggle-dark .theme-toggle-thumb {
+    background: var(--flin-neutral-100);
+}
+
+.theme-toggle-switch.theme-toggle-dark.theme-toggle-sm .theme-toggle-thumb {
+    transform: translateX(20px);
+}
+
+.theme-toggle-switch.theme-toggle-dark.theme-toggle-md .theme-toggle-thumb {
+    transform: translateX(26px);
+}
+
+.theme-toggle-switch.theme-toggle-dark.theme-toggle-lg .theme-toggle-thumb {
+    transform: translateX(32px);
+}
+
+/* Icons container */
+.theme-toggle-icons {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+    z-index: 1;
+}
+
+.theme-toggle-sm .theme-toggle-icons {
+    padding: 0 5px;
+}
+
+.theme-toggle-lg .theme-toggle-icons {
+    padding: 0 8px;
+}
+
+.theme-toggle-sun,
+.theme-toggle-moon,
+.theme-toggle-system {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-toggle-sun {
+    color: var(--flin-warning);
+}
+
+.theme-toggle-moon {
+    color: var(--flin-primary);
+}
+
+.theme-toggle-system {
+    color: var(--flin-fg-muted);
+}
+
+.theme-toggle-sun.hidden,
+.theme-toggle-moon.hidden {
+    opacity: 0;
+    transform: scale(0.5);
+}
+
+/* ===================================
+   Button Variant
+   =================================== */
+.theme-toggle-button {
+    background: var(--flin-neutral-100);
+    border-radius: var(--flin-radius-full);
+    transition: all 0.2s ease;
+}
+
+.theme-toggle-button.theme-toggle-dark {
+    background: var(--flin-neutral-800);
+}
+
+.theme-toggle-button:hover:not(.theme-toggle-disabled) {
+    background: var(--flin-neutral-200);
+}
+
+.theme-toggle-button.theme-toggle-dark:hover:not(.theme-toggle-disabled) {
+    background: var(--flin-neutral-700);
+}
+
+/* Button sizes */
+.theme-toggle-button.theme-toggle-sm {
+    padding: var(--flin-space-1) var(--flin-space-2);
+    gap: var(--flin-space-1);
+}
+
+.theme-toggle-button.theme-toggle-md {
+    padding: var(--flin-space-2) var(--flin-space-3);
+}
+
+.theme-toggle-button.theme-toggle-lg {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    gap: var(--flin-space-3);
+}
+
+.theme-toggle-button .theme-toggle-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle-button.theme-toggle-sm .theme-toggle-icon-wrapper {
+    width: 14px;
+    height: 14px;
+}
+
+.theme-toggle-button.theme-toggle-md .theme-toggle-icon-wrapper {
+    width: 18px;
+    height: 18px;
+}
+
+.theme-toggle-button.theme-toggle-lg .theme-toggle-icon-wrapper {
+    width: 22px;
+    height: 22px;
+}
+
+.theme-toggle-button .theme-toggle-sun,
+.theme-toggle-button .theme-toggle-moon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle-button .theme-toggle-label {
+    color: var(--flin-fg);
+}
+
+.theme-toggle-button.theme-toggle-dark .theme-toggle-label {
+    color: var(--flin-neutral-100);
+}
+
+/* ===================================
+   Icon-only Variant
+   =================================== */
+.theme-toggle-icon {
+    background: transparent;
+    border-radius: var(--flin-radius-md);
+    transition: all 0.2s ease;
+}
+
+.theme-toggle-icon:hover:not(.theme-toggle-disabled) {
+    background: var(--flin-neutral-100);
+}
+
+.theme-toggle-icon.theme-toggle-dark:hover:not(.theme-toggle-disabled) {
+    background: var(--flin-neutral-800);
+}
+
+/* Icon sizes */
+.theme-toggle-icon.theme-toggle-sm {
+    width: 28px;
+    height: 28px;
+}
+
+.theme-toggle-icon.theme-toggle-md {
+    width: 36px;
+    height: 36px;
+}
+
+.theme-toggle-icon.theme-toggle-lg {
+    width: 44px;
+    height: 44px;
+}
+
+.theme-toggle-icon .theme-toggle-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle-icon.theme-toggle-sm .theme-toggle-icon-wrapper {
+    width: 14px;
+    height: 14px;
+}
+
+.theme-toggle-icon.theme-toggle-md .theme-toggle-icon-wrapper {
+    width: 18px;
+    height: 18px;
+}
+
+.theme-toggle-icon.theme-toggle-lg .theme-toggle-icon-wrapper {
+    width: 22px;
+    height: 22px;
+}
+
+.theme-toggle-icon .theme-toggle-sun,
+.theme-toggle-icon .theme-toggle-moon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===================================
+   Dropdown Variant
+   =================================== */
+.theme-toggle-dropdown {
+    position: relative;
+}
+
+.theme-toggle-dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    background: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.theme-toggle-dropdown-trigger:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+    background: var(--flin-neutral-50);
+}
+
+.theme-toggle-dropdown-trigger:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.theme-toggle-dropdown-trigger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Dropdown trigger sizes */
+.theme-toggle-dropdown.theme-toggle-sm .theme-toggle-dropdown-trigger {
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+}
+
+.theme-toggle-dropdown.theme-toggle-md .theme-toggle-dropdown-trigger {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-base);
+}
+
+.theme-toggle-dropdown.theme-toggle-lg .theme-toggle-dropdown-trigger {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-size: var(--flin-text-lg);
+}
+
+.theme-toggle-dropdown .theme-toggle-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle-chevron {
+    display: flex;
+    align-items: center;
+    color: var(--flin-fg-muted);
+    transition: transform 0.2s ease;
+}
+
+.theme-toggle-dropdown-trigger[aria-expanded="true"] .theme-toggle-chevron {
+    transform: rotate(180deg);
+}
+
+/* Dropdown menu */
+.theme-toggle-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 140px;
+    background: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    box-shadow: var(--flin-shadow-lg);
+    z-index: 50;
+    overflow: hidden;
+    animation: theme-toggle-menu-enter 0.15s ease-out;
+}
+
+@keyframes theme-toggle-menu-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.theme-toggle-option {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    text-align: left;
+    transition: background-color 0.15s ease;
+}
+
+.theme-toggle-option:hover {
+    background: var(--flin-neutral-100);
+}
+
+.theme-toggle-option:focus-visible {
+    outline: none;
+    background: var(--flin-primary-light);
+}
+
+.theme-toggle-option.selected {
+    background: var(--flin-primary-light);
+}
+
+.theme-toggle-option-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-fg-muted);
+}
+
+.theme-toggle-option.selected .theme-toggle-option-icon {
+    color: var(--flin-primary);
+}
+
+.theme-toggle-option-label {
+    flex: 1;
+}
+
+.theme-toggle-check {
+    display: flex;
+    align-items: center;
+    color: var(--flin-primary);
+}
+
+/* ===================================
+   Animation Classes
+   =================================== */
+.rotated-in {
+    opacity: 1;
+    transform: rotate(0deg);
+}
+
+.rotated-out {
+    opacity: 0;
+    transform: rotate(90deg);
+}
+
+.scaled-in {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.scaled-out {
+    opacity: 0;
+    transform: scale(0);
+}
+
+/* ===================================
+   Dark Mode Overrides (dropdown)
+   =================================== */
+.theme-toggle-dropdown.theme-toggle-dark .theme-toggle-dropdown-trigger {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+    color: var(--flin-neutral-100);
+}
+
+.theme-toggle-dropdown.theme-toggle-dark .theme-toggle-dropdown-trigger:hover:not(:disabled) {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-600);
+}
+
+.theme-toggle-dropdown.theme-toggle-dark .theme-toggle-menu {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+.theme-toggle-dropdown.theme-toggle-dark .theme-toggle-option {
+    color: var(--flin-neutral-100);
+}
+
+.theme-toggle-dropdown.theme-toggle-dark .theme-toggle-option:hover {
+    background: var(--flin-neutral-800);
+}
+
+.theme-toggle-dropdown.theme-toggle-dark .theme-toggle-option.selected {
+    background: var(--flin-primary);
+    background-opacity: 0.2;
+}
+</style>

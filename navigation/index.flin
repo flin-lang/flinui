@@ -19,6 +19,7 @@
 // - SkipNav: Accessibility skip navigation link
 // - Dropdown: Click-triggered dropdown menu with icons and keyboard navigation
 // - ContextMenu: Right-click context menu with nested submenus
+// - UserMenu: User menu dropdown for navigation bars with avatar and status
 //
 // All components use FlinUI theme tokens (--flin-*) for consistent styling
 // and support both light and dark themes.
@@ -133,6 +134,23 @@
 // <ContextMenu items={contextItems}>
 //     <div class="my-element">Right-click me</div>
 // </ContextMenu>
+//
+// UserMenu:
+// user = { name: "John Doe", email: "john@example.com", avatar: "/avatar.jpg", role: "Admin" }
+// menuItems = [
+//     { label: "Profile", icon: <UserIcon />, onClick: () -> navigate("/profile") },
+//     { label: "Settings", icon: <SettingsIcon />, onClick: () -> navigate("/settings") },
+//     { label: "Help", icon: <HelpIcon />, onClick: () -> navigate("/help") }
+// ]
+// <UserMenu
+//     user={user}
+//     menuItems={menuItems}
+//     showStatus={true}
+//     status="online"
+//     notificationCount={3}
+//     onSignOut={() -> handleSignOut()}
+//     position="bottom-end"
+// />
 
 <div class="flin-navigation-index">
     <p>FlinUI Navigation Components</p>

@@ -1,0 +1,373 @@
+// StatsGrid.flin - Grid of statistical cards for dashboards
+
+// Props
+stats = props.stats || []
+columns = props.columns || 4
+gap = props.gap || "md"
+variant = props.variant || "default"
+size = props.size || "md"
+showTrend = props.showTrend || true
+showIcon = props.showIcon || true
+animated = props.animated || true
+
+// Computed classes
+gapClasses = {
+    "sm": "gap-sm",
+    "md": "gap-md",
+    "lg": "gap-lg"
+}
+
+sizeClasses = {
+    "sm": "stats-sm",
+    "md": "stats-md",
+    "lg": "stats-lg"
+}
+
+variantClasses = {
+    "default": "variant-default",
+    "gradient": "variant-gradient",
+    "bordered": "variant-bordered",
+    "minimal": "variant-minimal"
+}
+
+gapClass = gapClasses[gap] || "gap-md"
+sizeClass = sizeClasses[size] || "stats-md"
+variantClass = variantClasses[variant] || "variant-default"
+animatedClass = if animated then "animated" else ""
+
+gridClass = `stats-grid ${gapClass} ${sizeClass} ${variantClass} ${animatedClass}`
+gridStyle = `--columns: ${columns}`
+
+// Helper for trend direction
+getTrendClass = { trend ->
+    if trend > 0 then "trend-up"
+    else if trend < 0 then "trend-down"
+    else "trend-neutral"
+}
+
+getTrendIcon = { trend ->
+    if trend > 0 then "↑"
+    else if trend < 0 then "↓"
+    else "→"
+}
+
+formatTrend = { trend ->
+    prefix = if trend > 0 then "+" else ""
+    `${prefix}${trend}%`
+}
+
+<div class={gridClass} style={gridStyle}>
+    {stats.map { stat, index ->
+        <div
+            class={`stat-card ${if stat.color then `stat-${stat.color}` else ""}`}
+            style={`--delay: ${index * 100}ms`}
+            key={stat.id || index}
+        >
+            {if showIcon && stat.icon then
+                <div class="stat-icon">
+                    <span>{stat.icon}</span>
+                </div>
+            }
+
+            <div class="stat-content">
+                <span class="stat-label">{stat.label}</span>
+                <span class="stat-value">{stat.value}</span>
+
+                {if stat.subtitle then
+                    <span class="stat-subtitle">{stat.subtitle}</span>
+                }
+            </div>
+
+            {if showTrend && stat.trend != nil then
+                <div class={`stat-trend ${getTrendClass(stat.trend)}`}>
+                    <span class="trend-icon">{getTrendIcon(stat.trend)}</span>
+                    <span class="trend-value">{formatTrend(stat.trend)}</span>
+                    {if stat.trendLabel then
+                        <span class="trend-label">{stat.trendLabel}</span>
+                    }
+                </div>
+            }
+
+            {if stat.progress != nil then
+                <div class="stat-progress">
+                    <div class="progress-bar">
+                        <div
+                            class="progress-fill"
+                            style={`width: ${stat.progress}%`}
+                        ></div>
+                    </div>
+                    <span class="progress-text">{stat.progress}%</span>
+                </div>
+            }
+
+            {if stat.sparkline then
+                <div class="stat-sparkline">
+                    <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                        <polyline
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            points={stat.sparkline.map { v, i ->
+                                `${(i / (stat.sparkline.length - 1)) * 100},${30 - (v / 100) * 30}`
+                            }.join(" ")}
+                        />
+                    </svg>
+                </div>
+            }
+        </div>
+    }}
+</div>
+
+<style scoped>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--columns), 1fr);
+}
+
+/* Gaps */
+.gap-sm { gap: var(--flin-spacing-3); }
+.gap-md { gap: var(--flin-spacing-4); }
+.gap-lg { gap: var(--flin-spacing-6); }
+
+/* Stat card */
+.stat-card {
+    background: var(--flin-color-white);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-spacing-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animation */
+.animated .stat-card {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlideIn 0.5s ease-out forwards;
+    animation-delay: var(--delay);
+}
+
+@keyframes fadeSlideIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Variants */
+.variant-default .stat-card {
+    box-shadow: var(--flin-shadow-sm);
+    border: 1px solid var(--flin-color-gray-100);
+}
+
+.variant-gradient .stat-card {
+    background: linear-gradient(135deg, var(--flin-color-white) 0%, var(--flin-color-gray-50) 100%);
+    box-shadow: var(--flin-shadow-md);
+}
+
+.variant-bordered .stat-card {
+    border: 2px solid var(--flin-color-gray-200);
+    box-shadow: none;
+}
+
+.variant-minimal .stat-card {
+    background: transparent;
+    box-shadow: none;
+    padding: var(--flin-spacing-3);
+}
+
+/* Sizes */
+.stats-sm .stat-card { padding: var(--flin-spacing-3); }
+.stats-lg .stat-card { padding: var(--flin-spacing-6); }
+
+/* Icon */
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--flin-radius-lg);
+    background: var(--flin-color-primary-100);
+    color: var(--flin-color-primary-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-font-size-xl);
+}
+
+.stats-sm .stat-icon {
+    width: 36px;
+    height: 36px;
+    font-size: var(--flin-font-size-lg);
+}
+
+.stats-lg .stat-icon {
+    width: 56px;
+    height: 56px;
+    font-size: var(--flin-font-size-2xl);
+}
+
+/* Color variants */
+.stat-primary .stat-icon { background: var(--flin-color-primary-100); color: var(--flin-color-primary-600); }
+.stat-success .stat-icon { background: var(--flin-color-success-100); color: var(--flin-color-success-600); }
+.stat-warning .stat-icon { background: var(--flin-color-warning-100); color: var(--flin-color-warning-600); }
+.stat-danger .stat-icon { background: var(--flin-color-danger-100); color: var(--flin-color-danger-600); }
+.stat-info .stat-icon { background: var(--flin-color-info-100); color: var(--flin-color-info-600); }
+
+/* Content */
+.stat-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-spacing-1);
+}
+
+.stat-label {
+    font-size: var(--flin-font-size-sm);
+    color: var(--flin-color-gray-500);
+    font-weight: var(--flin-font-weight-medium);
+}
+
+.stat-value {
+    font-size: var(--flin-font-size-2xl);
+    font-weight: var(--flin-font-weight-bold);
+    color: var(--flin-color-gray-900);
+    line-height: 1.2;
+}
+
+.stats-sm .stat-value { font-size: var(--flin-font-size-xl); }
+.stats-lg .stat-value { font-size: var(--flin-font-size-3xl); }
+
+.stat-subtitle {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-400);
+}
+
+/* Trend */
+.stat-trend {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-1);
+    font-size: var(--flin-font-size-sm);
+    font-weight: var(--flin-font-weight-medium);
+}
+
+.trend-up {
+    color: var(--flin-color-success-600);
+}
+
+.trend-down {
+    color: var(--flin-color-danger-600);
+}
+
+.trend-neutral {
+    color: var(--flin-color-gray-500);
+}
+
+.trend-icon {
+    font-size: var(--flin-font-size-xs);
+}
+
+.trend-label {
+    color: var(--flin-color-gray-400);
+    font-weight: var(--flin-font-weight-normal);
+    margin-left: var(--flin-spacing-1);
+}
+
+/* Progress */
+.stat-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-spacing-2);
+    margin-top: var(--flin-spacing-1);
+}
+
+.progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--flin-color-gray-200);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--flin-color-primary-500);
+    border-radius: var(--flin-radius-full);
+    transition: width 1s ease-out;
+}
+
+.stat-success .progress-fill { background: var(--flin-color-success-500); }
+.stat-warning .progress-fill { background: var(--flin-color-warning-500); }
+.stat-danger .progress-fill { background: var(--flin-color-danger-500); }
+
+.progress-text {
+    font-size: var(--flin-font-size-xs);
+    color: var(--flin-color-gray-500);
+    min-width: 36px;
+    text-align: right;
+}
+
+/* Sparkline */
+.stat-sparkline {
+    height: 40px;
+    margin-top: var(--flin-spacing-2);
+    color: var(--flin-color-primary-400);
+}
+
+.stat-sparkline svg {
+    width: 100%;
+    height: 100%;
+}
+
+.stat-success .stat-sparkline { color: var(--flin-color-success-400); }
+.stat-warning .stat-sparkline { color: var(--flin-color-warning-400); }
+.stat-danger .stat-sparkline { color: var(--flin-color-danger-400); }
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(min(var(--columns), 3), 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .stat-card {
+        background: var(--flin-color-gray-800);
+        border-color: var(--flin-color-gray-700);
+    }
+
+    .variant-gradient .stat-card {
+        background: linear-gradient(135deg, var(--flin-color-gray-800) 0%, var(--flin-color-gray-900) 100%);
+    }
+
+    .variant-minimal .stat-card {
+        background: transparent;
+    }
+
+    .stat-value {
+        color: var(--flin-color-gray-100);
+    }
+
+    .stat-icon {
+        background: var(--flin-color-primary-900);
+        color: var(--flin-color-primary-400);
+    }
+
+    .progress-bar {
+        background: var(--flin-color-gray-700);
+    }
+}
+</style>
