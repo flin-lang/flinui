@@ -12,7 +12,7 @@ fixedClass = match isFixed { true -> " flin-affix--fixed", _ -> "" }
 
 // Build inline style for fixed position
 affixStyle = match isFixed {
-    true -> "position: fixed; top: " ++ offsetTop ++ "px; z-index: 1000;",
+    true -> "position: fixed; top: " ++ offsetTop ++ "px; z-index: var(--flin-z-fixed);",
     _ -> ""
 }
 
@@ -39,11 +39,11 @@ affixStyle = match isFixed {
 /* Animation when becoming fixed */
 @keyframes affixFadeIn {
     from {
-        opacity: 0.8;
-        transform: translateY(-4px);
+        opacity: var(--flin-opacity-80);
+        transform: translateY(calc(-1 * var(--flin-space-1)));
     }
     to {
-        opacity: 1;
+        opacity: var(--flin-opacity-100);
         transform: translateY(0);
     }
 }
@@ -55,6 +55,6 @@ affixStyle = match isFixed {
 /* Dark theme support */
 [data-theme="dark"] .flin-affix--fixed {
     background-color: var(--flin-neutral-900);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--flin-shadow-lg);
 }
 </style>

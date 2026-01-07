@@ -164,8 +164,8 @@ placementClass = match placement {
 
 .menu-item__icon {
     flex-shrink: 0;
-    width: 16px;
-    height: 16px;
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -186,12 +186,12 @@ placementClass = match placement {
     color: var(--flin-fg-muted);
     font-family: var(--flin-font-mono);
     background-color: var(--flin-neutral-100);
-    padding: 2px 6px;
+    padding: var(--flin-space-0-5) var(--flin-space-1-5);
     border-radius: var(--flin-radius-sm);
 }
 
 .menu-divider {
-    height: 1px;
+    height: var(--flin-space-px);
     background-color: var(--flin-neutral-200);
     margin: var(--flin-space-1) 0;
 }
@@ -216,7 +216,7 @@ placementClass = match placement {
 @media (max-width: 640px) {
     .flin-menu {
         min-width: 160px;
-        max-width: calc(100vw - 32px);
+        max-width: calc(100vw - var(--flin-space-8));
     }
 }
 </style>

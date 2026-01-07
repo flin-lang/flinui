@@ -103,12 +103,12 @@ paneStyle2 = match direction {
 }
 
 .flin-splitter--horizontal .flin-splitter__divider {
-    width: 8px;
+    width: var(--flin-space-2);
     cursor: col-resize;
 }
 
 .flin-splitter--vertical .flin-splitter__divider {
-    height: 8px;
+    height: var(--flin-space-2);
     cursor: row-resize;
 }
 
@@ -117,8 +117,8 @@ paneStyle2 = match direction {
 }
 
 .flin-splitter__divider:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: -2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: calc(-1 * var(--flin-space-0-5));
     background-color: var(--flin-primary-light);
 }
 
@@ -167,11 +167,11 @@ paneStyle2 = match direction {
 /* Responsive adjustments */
 @media (max-width: 640px) {
     .flin-splitter--horizontal .flin-splitter__divider {
-        width: 12px; /* Larger touch target on mobile */
+        width: var(--flin-space-3); /* Larger touch target on mobile */
     }
 
     .flin-splitter--vertical .flin-splitter__divider {
-        height: 12px;
+        height: var(--flin-space-3);
     }
 }
 </style>

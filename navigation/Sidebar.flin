@@ -74,10 +74,10 @@ toggleAriaLabel = match isCollapsed { true -> "Expand sidebar", _ -> "Collapse s
     width: var(--sidebar-width);
     height: 100vh;
     background-color: var(--flin-bg);
-    border-right: 1px solid var(--flin-neutral-200);
+    border-right: var(--flin-space-px) solid var(--flin-neutral-200);
     position: fixed;
     top: 0;
-    z-index: 900;
+    z-index: calc(var(--flin-z-navbar) - 100);
     transition: width var(--flin-transition-normal),
                 transform var(--flin-transition-normal);
     overflow: hidden;
@@ -91,7 +91,7 @@ toggleAriaLabel = match isCollapsed { true -> "Expand sidebar", _ -> "Collapse s
     right: 0;
     left: auto;
     border-right: none;
-    border-left: 1px solid var(--flin-neutral-200);
+    border-left: var(--flin-space-px) solid var(--flin-neutral-200);
 }
 
 .flin-sidebar--collapsed {
@@ -102,12 +102,12 @@ toggleAriaLabel = match isCollapsed { true -> "Expand sidebar", _ -> "Collapse s
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: var(--flin-height-xs);
+    height: var(--flin-height-xs);
     margin: var(--flin-space-3);
     padding: 0;
     background-color: var(--flin-neutral-100);
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-space-px) solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-md);
     cursor: pointer;
     transition: background-color var(--flin-transition-fast);
@@ -124,8 +124,8 @@ toggleAriaLabel = match isCollapsed { true -> "Expand sidebar", _ -> "Collapse s
 }
 
 .flin-sidebar__toggle:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
 }
 
 .flin-sidebar__toggle-icon {
@@ -147,15 +147,15 @@ toggleAriaLabel = match isCollapsed { true -> "Expand sidebar", _ -> "Collapse s
 }
 
 .flin-sidebar__content::-webkit-scrollbar {
-    width: 6px;
+    width: var(--flin-space-1-5);
 }
 
 .flin-sidebar__content::-webkit-scrollbar-thumb {
     background-color: var(--flin-neutral-300);
-    border-radius: 3px;
+    border-radius: var(--flin-space-0-5);
 }
 
-@media (max-width: 768px) {
+@media (max-width: var(--flin-breakpoint-md)) {
     .flin-sidebar {
         transform: translateX(-100%);
         box-shadow: var(--flin-shadow-xl);

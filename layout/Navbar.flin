@@ -114,7 +114,7 @@ toggleMobile = {
 .flin-navbar {
     width: 100%;
     padding: var(--flin-space-4, 1rem) var(--flin-space-8, 2rem);
-    transition: all 0.3s ease;
+    transition: all var(--flin-transition-slow);
     z-index: var(--flin-z-navbar, 1000);
 }
 
@@ -126,7 +126,7 @@ toggleMobile = {
 }
 
 .flin-navbar-container {
-    max-width: 1400px;
+    max-width: var(--flin-container-screen-xl);
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -139,14 +139,14 @@ toggleMobile = {
    ──────────────────────────────────────────────────────────────────────── */
 
 .flin-navbar-dark {
-    background: var(--flin-navbar-bg, rgba(10, 10, 15, 0.8));
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--flin-border-subtle, rgba(255, 255, 255, 0.06));
+    background: var(--flin-navbar-bg, rgba(10, 10, 15, var(--flin-opacity-80)));
+    backdrop-filter: blur(var(--flin-blur-xl));
+    -webkit-backdrop-filter: blur(var(--flin-blur-xl));
+    border-bottom: var(--flin-space-px) solid var(--flin-border-subtle, rgba(255, 255, 255, 0.06));
 }
 
 .flin-navbar-dark.flin-navbar-scrolled {
-    background: var(--flin-navbar-bg-scrolled, rgba(10, 10, 15, 0.95));
+    background: var(--flin-navbar-bg-scrolled, rgba(10, 10, 15, var(--flin-opacity-95)));
     padding: var(--flin-space-2, 0.5rem) var(--flin-space-8, 2rem);
 }
 
@@ -169,16 +169,16 @@ toggleMobile = {
    ──────────────────────────────────────────────────────────────────────── */
 
 .flin-navbar-light {
-    background: var(--flin-navbar-bg, rgba(255, 255, 255, 0.9));
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--flin-border-subtle, rgba(0, 0, 0, 0.06));
+    background: var(--flin-navbar-bg, rgba(255, 255, 255, var(--flin-opacity-90)));
+    backdrop-filter: blur(var(--flin-blur-xl));
+    -webkit-backdrop-filter: blur(var(--flin-blur-xl));
+    border-bottom: var(--flin-space-px) solid var(--flin-border-subtle, rgba(0, 0, 0, 0.06));
 }
 
 .flin-navbar-light.flin-navbar-scrolled {
-    background: var(--flin-navbar-bg-scrolled, rgba(255, 255, 255, 0.95));
+    background: var(--flin-navbar-bg-scrolled, rgba(255, 255, 255, var(--flin-opacity-95)));
     padding: var(--flin-space-2, 0.5rem) var(--flin-space-8, 2rem);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--flin-shadow-xs);
 }
 
 .flin-navbar-light.flin-navbar-transparent:not(.flin-navbar-scrolled) {
@@ -206,18 +206,18 @@ toggleMobile = {
     text-decoration: none;
     font-family: var(--flin-font-display, Georgia, serif);
     font-size: var(--flin-text-xl, 1.25rem);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-text-primary, inherit);
-    transition: opacity 0.15s ease;
+    transition: opacity var(--flin-transition-fast);
 }
 
 .flin-navbar-logo:hover {
-    opacity: 0.8;
+    opacity: var(--flin-opacity-80);
 }
 
 .flin-navbar-logo img,
 .flin-navbar-logo svg {
-    height: 32px;
+    height: var(--flin-size-8);
     width: auto;
 }
 
@@ -236,23 +236,23 @@ toggleMobile = {
 
 .flin-navbar-link {
     font-size: var(--flin-text-sm, 0.875rem);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     text-decoration: none;
     position: relative;
     padding: var(--flin-space-1, 0.25rem) 0;
-    transition: color 0.15s ease;
+    transition: color var(--flin-transition-fast);
 }
 
 /* Gold underline effect on hover */
 .flin-navbar-link::after {
     content: '';
     position: absolute;
-    bottom: -2px;
+    bottom: calc(-1 * var(--flin-space-0-5));
     left: 0;
     width: 0;
-    height: 2px;
-    background: var(--flin-gold, #d4a853);
-    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    height: var(--flin-space-0-5);
+    background: var(--flin-accent-gold, #d4a853);
+    transition: width var(--flin-transition-slow) var(--flin-ease-out-expo);
 }
 
 .flin-navbar-link:hover::after,
@@ -274,8 +274,8 @@ toggleMobile = {
 
 .flin-navbar-mobile-btn {
     display: none;
-    width: 44px;
-    height: 44px;
+    width: var(--flin-size-11);
+    height: var(--flin-size-11);
     padding: var(--flin-space-2, 0.5rem);
     background: none;
     border: none;
@@ -287,26 +287,26 @@ toggleMobile = {
 .flin-navbar-mobile-icon::before,
 .flin-navbar-mobile-icon::after {
     display: block;
-    width: 24px;
-    height: 2px;
+    width: var(--flin-size-6);
+    height: var(--flin-space-0-5);
     background: var(--flin-text-primary, currentColor);
-    border-radius: 2px;
-    transition: all 0.3s ease;
+    border-radius: var(--flin-radius-sm);
+    transition: all var(--flin-transition-slow);
 }
 
 .flin-navbar-mobile-icon::before,
 .flin-navbar-mobile-icon::after {
     content: '';
     position: absolute;
-    left: 10px;
+    left: var(--flin-space-2-5);
 }
 
 .flin-navbar-mobile-icon::before {
-    top: 14px;
+    top: var(--flin-space-3-5);
 }
 
 .flin-navbar-mobile-icon::after {
-    bottom: 14px;
+    bottom: var(--flin-space-3-5);
 }
 
 /* Hamburger to X animation */
@@ -315,12 +315,12 @@ toggleMobile = {
 }
 
 .flin-navbar-mobile-open .flin-navbar-mobile-icon::before {
-    top: 21px;
+    top: var(--flin-space-5);
     transform: rotate(45deg);
 }
 
 .flin-navbar-mobile-open .flin-navbar-mobile-icon::after {
-    bottom: 21px;
+    bottom: var(--flin-space-5);
     transform: rotate(-45deg);
 }
 
@@ -334,7 +334,7 @@ toggleMobile = {
     left: 0;
     right: 0;
     background: var(--flin-bg-surface, #12121a);
-    border-bottom: 1px solid var(--flin-border-subtle, rgba(255, 255, 255, 0.06));
+    border-bottom: var(--flin-space-px) solid var(--flin-border-subtle, rgba(255, 255, 255, 0.06));
     padding: var(--flin-space-6, 1.5rem);
     display: flex;
     flex-direction: column;
@@ -343,22 +343,22 @@ toggleMobile = {
 
 .flin-navbar-mobile-link {
     font-size: var(--flin-text-base, 1rem);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-text-secondary, #a0a0b0);
     text-decoration: none;
     padding: var(--flin-space-2, 0.5rem) 0;
-    transition: color 0.15s ease;
+    transition: color var(--flin-transition-fast);
 }
 
 .flin-navbar-mobile-link:hover,
 .flin-navbar-mobile-link.active {
-    color: var(--flin-gold, #d4a853);
+    color: var(--flin-accent-gold, #d4a853);
 }
 
 .flin-navbar-mobile-cta {
     margin-top: var(--flin-space-4, 1rem);
     padding-top: var(--flin-space-4, 1rem);
-    border-top: 1px solid var(--flin-border-subtle, rgba(255, 255, 255, 0.06));
+    border-top: var(--flin-space-px) solid var(--flin-border-subtle, rgba(255, 255, 255, 0.06));
 }
 
 /* ────────────────────────────────────────────────────────────────────────
@@ -388,7 +388,7 @@ toggleMobile = {
 
     .flin-navbar-logo img,
     .flin-navbar-logo svg {
-        height: 28px;
+        height: var(--flin-size-7);
     }
 }
 </style>

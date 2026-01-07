@@ -29,9 +29,9 @@ safeAreaClass = match safeArea { true -> " flin-bottomnav--safe-area", _ -> "" }
     right: 0;
     width: 100%;
     background-color: var(--flin-bg);
-    border-top: 1px solid var(--flin-neutral-200);
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
-    z-index: 1000;
+    border-top: var(--flin-space-px) solid var(--flin-neutral-200);
+    box-shadow: 0 calc(-1 * var(--flin-space-0-5)) var(--flin-space-2) rgba(0, 0, 0, 0.05);
+    z-index: var(--flin-z-navbar);
 }
 
 .flin-bottomnav__container {
@@ -40,7 +40,7 @@ safeAreaClass = match safeArea { true -> " flin-bottomnav--safe-area", _ -> "" }
     justify-content: space-around;
     width: 100%;
     max-width: 100%;
-    height: 56px;
+    height: var(--flin-height-lg);
     margin: 0 auto;
 }
 
@@ -49,7 +49,7 @@ safeAreaClass = match safeArea { true -> " flin-bottomnav--safe-area", _ -> "" }
 }
 
 .flin-bottomnav--no-labels .flin-bottomnav__container {
-    height: 48px;
+    height: var(--flin-height-md);
 }
 
 .flin-bottomnav__item {
@@ -66,7 +66,7 @@ safeAreaClass = match safeArea { true -> " flin-bottomnav--safe-area", _ -> "" }
     color: var(--flin-fg-muted);
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-xs);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     cursor: pointer;
     transition: color var(--flin-transition-fast);
     position: relative;
@@ -79,9 +79,9 @@ safeAreaClass = match safeArea { true -> " flin-bottomnav--safe-area", _ -> "" }
 }
 
 .flin-bottomnav__item:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: -2px;
-    z-index: 1;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: calc(-1 * var(--flin-space-0-5));
+    z-index: var(--flin-z-10);
 }
 
 .flin-bottomnav__item--active {
@@ -94,10 +94,10 @@ safeAreaClass = match safeArea { true -> " flin-bottomnav--safe-area", _ -> "" }
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 32px;
-    height: 2px;
+    width: var(--flin-space-8);
+    height: var(--flin-space-0-5);
     background-color: var(--flin-primary);
-    border-radius: 0 0 2px 2px;
+    border-radius: 0 0 var(--flin-space-0-5) var(--flin-space-0-5);
 }
 
 .flin-bottomnav__item--disabled {
@@ -110,8 +110,8 @@ safeAreaClass = match safeArea { true -> " flin-bottomnav--safe-area", _ -> "" }
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: var(--flin-icon-lg);
+    height: var(--flin-icon-lg);
     position: relative;
     flex-shrink: 0;
 }
@@ -123,20 +123,20 @@ safeAreaClass = match safeArea { true -> " flin-bottomnav--safe-area", _ -> "" }
 
 .flin-bottomnav__badge {
     position: absolute;
-    top: -4px;
-    right: -8px;
+    top: calc(-1 * var(--flin-space-1));
+    right: calc(-1 * var(--flin-space-2));
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 16px;
-    height: 16px;
-    padding: 0 4px;
-    font-size: 10px;
-    font-weight: 600;
+    min-width: var(--flin-space-4);
+    height: var(--flin-space-4);
+    padding: 0 var(--flin-space-1);
+    font-size: var(--flin-text-2xs);
+    font-weight: var(--flin-font-semibold);
     color: white;
     background-color: var(--flin-danger);
     border-radius: var(--flin-radius-full);
-    border: 2px solid var(--flin-bg);
+    border: var(--flin-space-0-5) solid var(--flin-bg);
 }
 
 .flin-bottomnav__label {
@@ -148,7 +148,7 @@ safeAreaClass = match safeArea { true -> " flin-bottomnav--safe-area", _ -> "" }
 
 @media (min-width: 640px) {
     .flin-bottomnav__container {
-        max-width: 480px;
+        max-width: var(--flin-size-120, 30rem);
     }
 }
 
@@ -161,7 +161,7 @@ safeAreaClass = match safeArea { true -> " flin-bottomnav--safe-area", _ -> "" }
 [data-theme="dark"] .flin-bottomnav {
     background-color: var(--flin-neutral-900);
     border-top-color: var(--flin-neutral-700);
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 calc(-1 * var(--flin-space-0-5)) var(--flin-space-2) rgba(0, 0, 0, 0.3);
 }
 
 [data-theme="dark"] .flin-bottomnav__item:hover {

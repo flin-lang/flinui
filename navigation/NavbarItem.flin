@@ -30,7 +30,7 @@ ariaCurrent = match active { true -> "page", _ -> "" }
     padding: var(--flin-space-2) var(--flin-space-3);
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg-muted);
     text-decoration: none;
     background: none;
@@ -48,8 +48,8 @@ ariaCurrent = match active { true -> "page", _ -> "" }
 }
 
 .flin-navbar-item:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
 }
 
 .flin-navbar-item--active {
@@ -62,23 +62,23 @@ ariaCurrent = match active { true -> "page", _ -> "" }
 }
 
 .flin-navbar-item--disabled {
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
     cursor: not-allowed;
     pointer-events: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: var(--flin-breakpoint-md)) {
     .flin-navbar-item {
         width: 100%;
         padding: var(--flin-space-3) var(--flin-space-4);
-        border-radius: 0;
+        border-radius: var(--flin-radius-none);
         justify-content: flex-start;
         font-size: var(--flin-text-base);
     }
 
     .flin-navbar-item--active {
         background-color: var(--flin-primary-light);
-        border-left: 3px solid var(--flin-primary);
+        border-left: var(--flin-space-0-5) solid var(--flin-primary);
     }
 }
 

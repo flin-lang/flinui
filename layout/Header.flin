@@ -46,18 +46,18 @@ hasDescription = description != ""
     padding: var(--flin-space-6) var(--flin-space-4);
     background-color: var(--flin-bg);
     box-sizing: border-box;
-    z-index: 100;
+    z-index: var(--flin-z-sticky);
 }
 
 .flin-header-sticky {
     position: sticky;
     top: 0;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(var(--flin-blur-DEFAULT));
     background-color: color-mix(in srgb, var(--flin-bg) 90%, transparent);
 }
 
 .flin-header-bordered {
-    border-bottom: 1px solid var(--flin-neutral-200);
+    border-bottom: var(--flin-space-px) solid var(--flin-neutral-200);
 }
 
 .flin-header-content {
@@ -76,16 +76,16 @@ hasDescription = description != ""
 .flin-header-title {
     margin: 0;
     font-size: var(--flin-text-3xl);
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     color: var(--flin-fg);
-    line-height: 1.2;
+    line-height: var(--flin-leading-tight);
 }
 
 .flin-header-description {
     margin: var(--flin-space-2) 0 0 0;
     font-size: var(--flin-text-base);
-    color: var(--flin-muted-fg);
-    line-height: 1.5;
+    color: var(--flin-fg-muted);
+    line-height: var(--flin-leading-normal);
 }
 
 .flin-header-actions {

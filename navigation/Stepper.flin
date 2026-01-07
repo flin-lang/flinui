@@ -53,28 +53,28 @@ sizeClass = match size {
 }
 
 .flin-stepper--sm .flin-stepper__indicator {
-    width: 32px;
-    height: 32px;
+    width: var(--flin-height-xs);
+    height: var(--flin-height-xs);
 }
 
 .flin-stepper--md .flin-stepper__indicator {
-    width: 40px;
-    height: 40px;
+    width: var(--flin-height-sm);
+    height: var(--flin-height-sm);
 }
 
 .flin-stepper--lg .flin-stepper__indicator {
-    width: 48px;
-    height: 48px;
+    width: var(--flin-height-md);
+    height: var(--flin-height-md);
 }
 
 .flin-stepper__indicator {
-    border-radius: 50%;
+    border-radius: var(--flin-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: var(--flin-neutral-200);
     color: var(--flin-neutral-600);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     transition: all var(--flin-transition-normal);
     flex-shrink: 0;
 }
@@ -82,7 +82,7 @@ sizeClass = match size {
 .flin-stepper__step--active .flin-stepper__indicator {
     background-color: var(--flin-primary);
     color: white;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 var(--flin-space-1) rgba(59, 130, 246, var(--flin-opacity-10));
 }
 
 .flin-stepper__step--completed .flin-stepper__indicator {
@@ -97,7 +97,7 @@ sizeClass = match size {
 
 .flin-stepper__label {
     font-size: var(--flin-text-sm);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-neutral-700);
 }
 

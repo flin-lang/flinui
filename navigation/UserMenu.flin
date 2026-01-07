@@ -117,8 +117,8 @@ positionClass = match position {
 }
 
 .usermenu-trigger:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
 }
 
 .usermenu-avatar {
@@ -126,8 +126,8 @@ positionClass = match position {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: var(--flin-size-9);
+    height: var(--flin-size-9);
     border-radius: var(--flin-radius-full);
     overflow: hidden;
     background-color: var(--flin-neutral-200);
@@ -143,7 +143,7 @@ positionClass = match position {
 .usermenu-avatar-initials {
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-sm);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     text-transform: uppercase;
     user-select: none;
 }
@@ -151,15 +151,15 @@ positionClass = match position {
 .usermenu-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 9997;
+    z-index: var(--flin-z-dropdown);
     background-color: transparent;
 }
 
 .usermenu-panel {
     position: absolute;
-    z-index: 9998;
+    z-index: calc(var(--flin-z-dropdown) + 1);
     background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-space-px) solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-lg);
     box-shadow: var(--flin-shadow-lg);
     min-width: 240px;
@@ -172,33 +172,33 @@ positionClass = match position {
 }
 
 .usermenu-bottom-end {
-    top: calc(100% + 8px);
+    top: calc(100% + var(--flin-space-2));
     right: 0;
 }
 
 .usermenu-bottom-start {
-    top: calc(100% + 8px);
+    top: calc(100% + var(--flin-space-2));
     left: 0;
 }
 
 .usermenu-bottom {
-    top: calc(100% + 8px);
+    top: calc(100% + var(--flin-space-2));
     left: 50%;
     transform: translateX(-50%);
 }
 
 .usermenu-top-end {
-    bottom: calc(100% + 8px);
+    bottom: calc(100% + var(--flin-space-2));
     right: 0;
 }
 
 .usermenu-top-start {
-    bottom: calc(100% + 8px);
+    bottom: calc(100% + var(--flin-space-2));
     left: 0;
 }
 
 .usermenu-top {
-    bottom: calc(100% + 8px);
+    bottom: calc(100% + var(--flin-space-2));
     left: 50%;
     transform: translateX(-50%);
 }
@@ -213,8 +213,8 @@ positionClass = match position {
 }
 
 .usermenu-header-avatar {
-    width: 56px;
-    height: 56px;
+    width: var(--flin-height-lg);
+    height: var(--flin-height-lg);
     border-radius: var(--flin-radius-full);
     overflow: hidden;
     display: flex;
@@ -235,7 +235,7 @@ positionClass = match position {
 .usermenu-header-name {
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-base);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
     white-space: nowrap;
     overflow: hidden;
@@ -252,7 +252,7 @@ positionClass = match position {
 }
 
 .usermenu-divider {
-    height: 1px;
+    height: var(--flin-space-px);
     background-color: var(--flin-neutral-200);
     margin: 0;
 }

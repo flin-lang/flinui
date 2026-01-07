@@ -39,11 +39,11 @@ hasCopyright = copyright != ""
 /* Columns variant */
 .flin-footer-columns-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(var(--flin-size-44), 1fr));
     gap: var(--flin-space-8);
     margin-bottom: var(--flin-space-8);
     padding-bottom: var(--flin-space-8);
-    border-bottom: 1px solid var(--flin-neutral-200);
+    border-bottom: var(--flin-space-px) solid var(--flin-neutral-200);
 }
 
 .flin-footer-column {
@@ -53,10 +53,10 @@ hasCopyright = copyright != ""
 .flin-footer-column-title {
     margin: 0 0 var(--flin-space-4) 0;
     font-size: var(--flin-text-sm);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--flin-tracking-wide);
 }
 
 .flin-footer-links {
@@ -73,10 +73,10 @@ hasCopyright = copyright != ""
 }
 
 .flin-footer-link {
-    color: var(--flin-muted-fg);
+    color: var(--flin-fg-muted);
     text-decoration: none;
     font-size: var(--flin-text-sm);
-    transition: color 0.15s ease;
+    transition: color var(--flin-transition-fast);
 }
 
 .flin-footer-link:hover {
@@ -112,13 +112,13 @@ hasCopyright = copyright != ""
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: var(--flin-size-9);
+    height: var(--flin-size-9);
     border-radius: var(--flin-radius-full);
     background-color: var(--flin-neutral-100);
-    color: var(--flin-muted-fg);
+    color: var(--flin-fg-muted);
     text-decoration: none;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color var(--flin-transition-fast), color var(--flin-transition-fast);
 }
 
 .flin-footer-social-link:hover {
@@ -134,7 +134,7 @@ hasCopyright = copyright != ""
 .flin-footer-copyright {
     margin: 0;
     font-size: var(--flin-text-sm);
-    color: var(--flin-muted-fg);
+    color: var(--flin-fg-muted);
 }
 
 /* Responsive adjustments */

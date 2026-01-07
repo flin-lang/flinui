@@ -68,7 +68,7 @@ fullWidthClass = match fullWidth { true -> " flin-tabs--full-width", _ -> "" }
 
 /* Size variants */
 .flin-tabs--sm .flin-tabs__list {
-    gap: 0;
+    gap: var(--flin-space-0);
 }
 
 .flin-tabs--lg .flin-tabs__list {
@@ -77,18 +77,18 @@ fullWidthClass = match fullWidth { true -> " flin-tabs--full-width", _ -> "" }
 
 /* Line variant (default) */
 .flin-tabs--line {
-    border-bottom: 1px solid var(--flin-neutral-200);
+    border-bottom: var(--flin-space-px) solid var(--flin-neutral-200);
 }
 
 .flin-tabs--line .flin-tabs__list {
-    margin-bottom: -1px;
+    margin-bottom: calc(-1 * var(--flin-space-px));
 }
 
 .flin-tabs--line .flin-tabs__indicator {
     position: absolute;
     bottom: 0;
     left: 0;
-    height: 2px;
+    height: var(--flin-space-0-5);
     background-color: var(--flin-primary);
     transition: left var(--flin-transition-normal),
                 width var(--flin-transition-normal);
@@ -102,7 +102,7 @@ fullWidthClass = match fullWidth { true -> " flin-tabs--full-width", _ -> "" }
 }
 
 .flin-tabs--enclosed .flin-tabs__list {
-    gap: 0;
+    gap: var(--flin-space-0);
 }
 
 /* Soft variant */
@@ -119,7 +119,7 @@ fullWidthClass = match fullWidth { true -> " flin-tabs--full-width", _ -> "" }
 }
 
 /* Responsive styles */
-@media (max-width: 640px) {
+@media (max-width: var(--flin-breakpoint-sm)) {
     .flin-tabs__list {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;

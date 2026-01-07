@@ -49,7 +49,7 @@ activeClass = match isActive { true -> " flin-tab--active", _ -> "" }
     padding: var(--flin-space-2) var(--flin-space-4);
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg-muted);
     background: transparent;
     border: none;
@@ -68,12 +68,12 @@ activeClass = match isActive { true -> " flin-tab--active", _ -> "" }
 }
 
 .flin-tab:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
 }
 
 .flin-tab:disabled {
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
     cursor: not-allowed;
 }
 
@@ -86,8 +86,8 @@ activeClass = match isActive { true -> " flin-tab--active", _ -> "" }
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
 }
 
 .flin-tab__icon svg {
@@ -114,18 +114,18 @@ activeClass = match isActive { true -> " flin-tab--active", _ -> "" }
 
 /* Line variant styles */
 .flin-tabs--line .flin-tab {
-    border-radius: 0;
-    padding-bottom: calc(var(--flin-space-2) + 2px);
+    border-radius: var(--flin-radius-none);
+    padding-bottom: calc(var(--flin-space-2) + var(--flin-space-0-5));
 }
 
 .flin-tabs--line .flin-tab--active {
-    border-bottom: 2px solid var(--flin-primary);
-    margin-bottom: -1px;
+    border-bottom: var(--flin-space-0-5) solid var(--flin-primary);
+    margin-bottom: calc(-1 * var(--flin-space-px));
 }
 
 .flin-tabs--line .flin-tab:hover:not(:disabled):not(.flin-tab--active) {
-    border-bottom: 2px solid var(--flin-neutral-300);
-    margin-bottom: -1px;
+    border-bottom: var(--flin-space-0-5) solid var(--flin-neutral-300);
+    margin-bottom: calc(-1 * var(--flin-space-px));
 }
 
 /* Enclosed variant styles */

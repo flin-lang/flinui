@@ -83,13 +83,13 @@ homeLabel = props.homeLabel || "Home"
 }
 
 .flin-breadcrumb__link:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
 }
 
 .flin-breadcrumb__home-icon {
-    width: 16px;
-    height: 16px;
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
     flex-shrink: 0;
 }
 

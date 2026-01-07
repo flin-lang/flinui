@@ -44,7 +44,7 @@ alignClass = match align {
 }
 
 /* Responsive styles - collapse to mobile menu */
-@media (max-width: 768px) {
+@media (max-width: var(--flin-breakpoint-md)) {
     .flin-navbar-menu {
         position: fixed;
         top: 64px; /* navbar height */
@@ -52,17 +52,17 @@ alignClass = match align {
         right: 0;
         flex-direction: column;
         align-items: stretch;
-        gap: 0;
+        gap: var(--flin-space-0);
         background-color: var(--flin-bg);
-        border-bottom: 1px solid var(--flin-neutral-200);
+        border-bottom: var(--flin-space-px) solid var(--flin-neutral-200);
         padding: var(--flin-space-2) 0;
         box-shadow: var(--flin-shadow-lg);
-        z-index: 1000;
+        z-index: var(--flin-z-navbar);
 
         /* Hidden by default on mobile */
-        opacity: 0;
+        opacity: var(--flin-opacity-0);
         visibility: hidden;
-        transform: translateY(-10px);
+        transform: translateY(calc(-1 * var(--flin-space-2-5)));
         transition: opacity var(--flin-transition-fast),
                     visibility var(--flin-transition-fast),
                     transform var(--flin-transition-fast);
@@ -70,7 +70,7 @@ alignClass = match align {
 
     /* Show when navbar has mobile-open class */
     .flin-navbar--mobile-open .flin-navbar-menu {
-        opacity: 1;
+        opacity: var(--flin-opacity-100);
         visibility: visible;
         transform: translateY(0);
     }

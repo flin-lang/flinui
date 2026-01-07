@@ -110,26 +110,26 @@ hasHorizontal = orientation == "horizontal" || orientation == "both"
 }
 
 .flin-scrollarea__track--vertical {
-    top: 2px;
-    right: 2px;
-    bottom: 2px;
-    width: 8px;
+    top: var(--flin-space-0-5);
+    right: var(--flin-space-0-5);
+    bottom: var(--flin-space-0-5);
+    width: var(--flin-space-2);
 }
 
 .flin-scrollarea__track--horizontal {
-    left: 2px;
-    right: 2px;
-    bottom: 2px;
-    height: 8px;
+    left: var(--flin-space-0-5);
+    right: var(--flin-space-0-5);
+    bottom: var(--flin-space-0-5);
+    height: var(--flin-space-2);
 }
 
 /* Corner space when both scrollbars */
 .flin-scrollarea--both .flin-scrollarea__track--vertical {
-    bottom: 12px;
+    bottom: var(--flin-space-3);
 }
 
 .flin-scrollarea--both .flin-scrollarea__track--horizontal {
-    right: 12px;
+    right: var(--flin-space-3);
 }
 
 /* Thumbs */
@@ -154,12 +154,12 @@ hasHorizontal = orientation == "horizontal" || orientation == "both"
 
 .flin-scrollarea__thumb--vertical {
     width: 100%;
-    min-height: 40px;
+    min-height: var(--flin-size-10);
 }
 
 .flin-scrollarea__thumb--horizontal {
     height: 100%;
-    min-width: 40px;
+    min-width: var(--flin-size-10);
 }
 
 /* Dark theme support */
@@ -182,19 +182,19 @@ hasHorizontal = orientation == "horizontal" || orientation == "both"
 /* Responsive adjustments */
 @media (max-width: 640px) {
     .flin-scrollarea__track--vertical {
-        width: 6px;
+        width: var(--flin-space-1-5);
     }
 
     .flin-scrollarea__track--horizontal {
-        height: 6px;
+        height: var(--flin-space-1-5);
     }
 
     .flin-scrollarea__thumb--vertical {
-        min-height: 30px;
+        min-height: var(--flin-space-7);
     }
 
     .flin-scrollarea__thumb--horizontal {
-        min-width: 30px;
+        min-width: var(--flin-space-7);
     }
 }
 </style>

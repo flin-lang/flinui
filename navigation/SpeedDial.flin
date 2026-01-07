@@ -96,33 +96,33 @@ displayedIcon = match isOpen {
 
 /* Positions */
 .position-bottom-right {
-    bottom: var(--flin-spacing-6);
-    right: var(--flin-spacing-6);
+    bottom: var(--flin-space-6);
+    right: var(--flin-space-6);
 }
 
 .position-bottom-left {
-    bottom: var(--flin-spacing-6);
-    left: var(--flin-spacing-6);
+    bottom: var(--flin-space-6);
+    left: var(--flin-space-6);
 }
 
 .position-bottom-center {
-    bottom: var(--flin-spacing-6);
+    bottom: var(--flin-space-6);
     left: 50%;
     transform: translateX(-50%);
 }
 
 .position-top-right {
-    top: var(--flin-spacing-6);
-    right: var(--flin-spacing-6);
+    top: var(--flin-space-6);
+    right: var(--flin-space-6);
 }
 
 .position-top-left {
-    top: var(--flin-spacing-6);
-    left: var(--flin-spacing-6);
+    top: var(--flin-space-6);
+    left: var(--flin-space-6);
 }
 
 .position-top-center {
-    top: var(--flin-spacing-6);
+    top: var(--flin-space-6);
     left: 50%;
     transform: translateX(-50%);
 }
@@ -131,38 +131,38 @@ displayedIcon = match isOpen {
 .direction-up .speed-dial-actions {
     flex-direction: column-reverse;
     bottom: 100%;
-    margin-bottom: var(--flin-spacing-3);
+    margin-bottom: var(--flin-space-3);
 }
 
 .direction-down .speed-dial-actions {
     flex-direction: column;
     top: 100%;
-    margin-top: var(--flin-spacing-3);
+    margin-top: var(--flin-space-3);
 }
 
 .direction-left .speed-dial-actions {
     flex-direction: row-reverse;
     right: 100%;
-    margin-right: var(--flin-spacing-3);
+    margin-right: var(--flin-space-3);
 }
 
 .direction-right .speed-dial-actions {
     flex-direction: row;
     left: 100%;
-    margin-left: var(--flin-spacing-3);
+    margin-left: var(--flin-space-3);
 }
 
 /* FAB Button */
 .speed-dial-fab {
-    width: 56px;
-    height: 56px;
+    width: var(--flin-height-lg);
+    height: var(--flin-height-lg);
     border-radius: var(--flin-radius-full);
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--flin-font-size-2xl);
+    font-size: var(--flin-text-2xl);
     box-shadow: var(--flin-shadow-lg);
     transition: all var(--flin-transition-normal);
     position: relative;
@@ -175,11 +175,11 @@ displayedIcon = match isOpen {
 }
 
 .speed-dial-fab:active:not(:disabled) {
-    transform: scale(0.95);
+    transform: scale(var(--flin-opacity-95));
 }
 
 .speed-dial-fab:disabled {
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
     cursor: not-allowed;
 }
 
@@ -194,73 +194,73 @@ displayedIcon = match isOpen {
 
 /* Sizes */
 .speed-dial-sm .speed-dial-fab {
-    width: 40px;
-    height: 40px;
-    font-size: var(--flin-font-size-lg);
+    width: var(--flin-height-sm);
+    height: var(--flin-height-sm);
+    font-size: var(--flin-text-lg);
 }
 
 .speed-dial-lg .speed-dial-fab {
     width: 72px;
     height: 72px;
-    font-size: var(--flin-font-size-3xl);
+    font-size: var(--flin-text-3xl);
 }
 
 /* Variants */
 .speed-dial-primary {
-    background: var(--flin-color-primary-500);
-    color: var(--flin-color-white);
+    background: var(--flin-primary);
+    color: white;
 }
 
 .speed-dial-primary:hover:not(:disabled) {
-    background: var(--flin-color-primary-600);
+    background: var(--flin-primary-hover);
 }
 
 .speed-dial-secondary {
-    background: var(--flin-color-gray-600);
-    color: var(--flin-color-white);
+    background: var(--flin-secondary);
+    color: white;
 }
 
 .speed-dial-secondary:hover:not(:disabled) {
-    background: var(--flin-color-gray-700);
+    background: var(--flin-secondary-hover);
 }
 
 .speed-dial-success {
-    background: var(--flin-color-success-500);
-    color: var(--flin-color-white);
+    background: var(--flin-success);
+    color: white;
 }
 
 .speed-dial-success:hover:not(:disabled) {
-    background: var(--flin-color-success-600);
+    background: var(--flin-success-hover);
 }
 
 .speed-dial-danger {
-    background: var(--flin-color-danger-500);
-    color: var(--flin-color-white);
+    background: var(--flin-danger);
+    color: white;
 }
 
 .speed-dial-danger:hover:not(:disabled) {
-    background: var(--flin-color-danger-600);
+    background: var(--flin-danger-hover);
 }
 
 /* Actions container */
 .speed-dial-actions {
     position: absolute;
     display: flex;
-    gap: var(--flin-spacing-2);
-    opacity: 0;
+    gap: var(--flin-space-2);
+    opacity: var(--flin-opacity-0);
     pointer-events: none;
     transition: all var(--flin-transition-normal);
 }
 
 .is-open .speed-dial-actions {
-    opacity: 1;
+    opacity: var(--flin-opacity-100);
     pointer-events: auto;
 }
 
 /* Disabled state */
 .is-disabled {
     pointer-events: none;
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
 }
 
 /* Dark mode */

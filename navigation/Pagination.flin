@@ -144,7 +144,7 @@ nextDisabled = currentPage == totalPages
     align-items: center;
     justify-content: center;
     font-family: var(--flin-font-sans);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     border: none;
     border-radius: var(--flin-radius-md);
     cursor: pointer;
@@ -152,18 +152,18 @@ nextDisabled = currentPage == totalPages
 }
 
 .flin-pagination__btn:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
 }
 
 .flin-pagination__btn:disabled {
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
     cursor: not-allowed;
 }
 
 .flin-pagination__btn svg {
-    width: 16px;
-    height: 16px;
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
 }
 
 .flin-pagination--sm .flin-pagination__btn {
@@ -172,8 +172,8 @@ nextDisabled = currentPage == totalPages
 }
 
 .flin-pagination--md .flin-pagination__btn {
-    min-width: 36px;
-    height: 36px;
+    min-width: var(--flin-size-9);
+    height: var(--flin-size-9);
 }
 
 .flin-pagination--lg .flin-pagination__btn {
@@ -184,7 +184,7 @@ nextDisabled = currentPage == totalPages
 .flin-pagination--default .flin-pagination__btn {
     background-color: var(--flin-bg);
     color: var(--flin-fg-muted);
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-space-px) solid var(--flin-neutral-200);
 }
 
 .flin-pagination--default .flin-pagination__btn:hover:not(:disabled) {
@@ -195,7 +195,7 @@ nextDisabled = currentPage == totalPages
 .flin-pagination--outline .flin-pagination__btn {
     background-color: transparent;
     color: var(--flin-fg-muted);
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-space-px) solid var(--flin-neutral-200);
 }
 
 .flin-pagination--outline .flin-pagination__btn:hover:not(:disabled) {

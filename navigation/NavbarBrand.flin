@@ -28,18 +28,18 @@ logo = props.logo  // Named slot for logo content
     text-decoration: none;
     color: var(--flin-fg);
     font-size: var(--flin-text-xl);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     transition: opacity var(--flin-transition-fast);
     flex-shrink: 0;
 }
 
 .flin-navbar-brand:hover {
-    opacity: 0.8;
+    opacity: var(--flin-opacity-80);
 }
 
 .flin-navbar-brand:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
     border-radius: var(--flin-radius-sm);
 }
 
@@ -52,8 +52,8 @@ logo = props.logo  // Named slot for logo content
 .flin-navbar-brand__logo img,
 .flin-navbar-brand__logo svg {
     width: auto;
-    height: 32px;
-    max-height: 40px;
+    height: var(--flin-height-xs);
+    max-height: var(--flin-height-sm);
     object-fit: contain;
 }
 

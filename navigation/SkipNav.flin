@@ -18,12 +18,12 @@ label = props.label || "Skip to main content"
     position: fixed;
     top: var(--flin-space-2);
     left: var(--flin-space-2);
-    z-index: 9999;
+    z-index: var(--flin-z-max);
     transform: translateY(-200%);
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-sm);
-    font-weight: 600;
-    line-height: 1.5;
+    font-weight: var(--flin-font-semibold);
+    line-height: var(--flin-leading-normal);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -31,7 +31,7 @@ label = props.label || "Skip to main content"
     padding: var(--flin-space-2) var(--flin-space-4);
     color: white;
     background-color: var(--flin-primary);
-    border: 2px solid var(--flin-primary-hover);
+    border: var(--flin-space-0-5) solid var(--flin-primary-hover);
     border-radius: var(--flin-radius-md);
     box-shadow: var(--flin-shadow-lg);
     transition: transform var(--flin-transition-normal);
@@ -41,8 +41,8 @@ label = props.label || "Skip to main content"
 .flin-skipnav:focus,
 .flin-skipnav:focus-visible {
     transform: translateY(0);
-    outline: 3px solid var(--flin-primary-active);
-    outline-offset: 3px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary-active);
+    outline-offset: var(--flin-space-0-5);
 }
 
 .flin-skipnav:focus:hover {
@@ -53,7 +53,7 @@ label = props.label || "Skip to main content"
 
 .flin-skipnav:active {
     background-color: var(--flin-primary-active);
-    transform: translateY(0) scale(0.98);
+    transform: translateY(0) scale(var(--flin-opacity-95));
 }
 
 [data-theme="dark"] .flin-skipnav {

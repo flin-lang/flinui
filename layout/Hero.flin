@@ -88,22 +88,22 @@ showSplitImage = isSplit && hasImage
 
 /* Height variants */
 .flin-hero-height-sm {
-    min-height: 300px;
+    min-height: var(--flin-size-72);
     padding: var(--flin-space-8) var(--flin-space-4);
 }
 
 .flin-hero-height-md {
-    min-height: 500px;
+    min-height: var(--flin-container-md);
     padding: var(--flin-space-12) var(--flin-space-4);
 }
 
 .flin-hero-height-lg {
-    min-height: 700px;
+    min-height: var(--flin-container-lg);
     padding: var(--flin-space-16) var(--flin-space-4);
 }
 
 .flin-hero-height-full {
-    min-height: 100vh;
+    min-height: var(--flin-size-screen-h);
     padding: var(--flin-space-8) var(--flin-space-4);
 }
 
@@ -114,25 +114,25 @@ showSplitImage = isSplit && hasImage
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
-    z-index: 1;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, var(--flin-opacity-40)), rgba(0, 0, 0, var(--flin-opacity-60)));
+    z-index: var(--flin-z-10);
 }
 
 .flin-hero-overlay .flin-hero-container {
     position: relative;
-    z-index: 2;
+    z-index: var(--flin-z-20);
 }
 
 .flin-hero-overlay .flin-hero-title,
 .flin-hero-overlay .flin-hero-subtitle {
-    color: #fff;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    color: var(--flin-bg);
+    text-shadow: 0 var(--flin-space-0-5) var(--flin-space-1) rgba(0, 0, 0, var(--flin-opacity-30));
 }
 
 /* Container */
 .flin-hero-container {
     width: 100%;
-    max-width: 1200px;
+    max-width: var(--flin-container-screen-lg);
     margin: 0 auto;
 }
 
@@ -142,7 +142,7 @@ showSplitImage = isSplit && hasImage
 }
 
 .flin-hero-centered .flin-hero-content {
-    max-width: 800px;
+    max-width: var(--flin-container-3xl);
     margin: 0 auto;
 }
 
@@ -177,7 +177,7 @@ showSplitImage = isSplit && hasImage
 }
 
 .flin-hero-full .flin-hero-content {
-    max-width: 900px;
+    max-width: var(--flin-container-4xl);
     margin: 0 auto;
 }
 
@@ -195,18 +195,18 @@ showSplitImage = isSplit && hasImage
 .flin-hero-title {
     margin: 0;
     font-size: clamp(var(--flin-text-3xl), 5vw, var(--flin-text-5xl));
-    font-weight: 800;
+    font-weight: var(--flin-font-extrabold);
     color: var(--flin-fg);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    line-height: var(--flin-leading-none);
+    letter-spacing: var(--flin-tracking-tight);
 }
 
 .flin-hero-subtitle {
     margin: 0;
     font-size: clamp(var(--flin-text-lg), 2vw, var(--flin-text-xl));
-    color: var(--flin-muted-fg);
-    line-height: 1.5;
-    max-width: 600px;
+    color: var(--flin-fg-muted);
+    line-height: var(--flin-leading-normal);
+    max-width: var(--flin-size-3xl);
 }
 
 .flin-hero-centered .flin-hero-subtitle,
@@ -225,17 +225,17 @@ showSplitImage = isSplit && hasImage
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .flin-hero-height-sm {
-        min-height: 250px;
+        min-height: var(--flin-size-60);
         padding: var(--flin-space-6) var(--flin-space-4);
     }
 
     .flin-hero-height-md {
-        min-height: 400px;
+        min-height: var(--flin-size-full);
         padding: var(--flin-space-8) var(--flin-space-4);
     }
 
     .flin-hero-height-lg {
-        min-height: 500px;
+        min-height: var(--flin-container-md);
         padding: var(--flin-space-10) var(--flin-space-4);
     }
 

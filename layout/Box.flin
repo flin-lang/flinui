@@ -73,9 +73,9 @@ boxStyle = bgStyle ++ borderStyle
 .flin-box-radius-full { border-radius: var(--flin-radius-full); }
 
 /* Shadow variants */
-.flin-box-shadow-none { box-shadow: none; }
+.flin-box-shadow-none { box-shadow: var(--flin-shadow-none); }
 .flin-box-shadow-sm { box-shadow: var(--flin-shadow-sm); }
 .flin-box-shadow-md { box-shadow: var(--flin-shadow-md); }
 .flin-box-shadow-lg { box-shadow: var(--flin-shadow-lg); }
-.flin-box-shadow-xl { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
+.flin-box-shadow-xl { box-shadow: var(--flin-shadow-xl); }
 </style>

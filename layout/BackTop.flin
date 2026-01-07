@@ -61,22 +61,22 @@ visibleClass = match isVisible { true -> " flin-backtop--visible", _ -> "" }
     position: fixed;
     right: var(--flin-space-6);
     bottom: var(--flin-space-6);
-    z-index: 1000;
+    z-index: var(--flin-z-fixed);
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
+    width: var(--flin-size-11);
+    height: var(--flin-size-11);
+    padding: var(--flin-space-0);
     background-color: var(--flin-primary);
-    color: white;
+    color: var(--flin-bg);
     border: none;
     border-radius: var(--flin-radius-full);
     cursor: pointer;
     box-shadow: var(--flin-shadow-lg);
-    opacity: 0;
+    opacity: var(--flin-opacity-0);
     visibility: hidden;
-    transform: translateY(16px) scale(0.8);
+    transform: translateY(var(--flin-space-4)) scale(0.8);
     transition:
         opacity var(--flin-transition-fast),
         visibility var(--flin-transition-fast),
@@ -85,20 +85,20 @@ visibleClass = match isVisible { true -> " flin-backtop--visible", _ -> "" }
 }
 
 .flin-backtop--visible {
-    opacity: 1;
+    opacity: var(--flin-opacity-100);
     visibility: visible;
     transform: translateY(0) scale(1);
 }
 
 .flin-backtop:hover {
-    background-color: var(--flin-primary-dark);
-    transform: translateY(-2px) scale(1.05);
+    background-color: var(--flin-primary-hover);
+    transform: translateY(calc(-1 * var(--flin-space-0-5))) scale(1.05);
     box-shadow: var(--flin-shadow-xl);
 }
 
 .flin-backtop:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
 }
 
 .flin-backtop:active {
@@ -114,23 +114,23 @@ visibleClass = match isVisible { true -> " flin-backtop--visible", _ -> "" }
     .flin-backtop {
         right: var(--flin-space-4);
         bottom: var(--flin-space-4);
-        width: 40px;
-        height: 40px;
+        width: var(--flin-size-10);
+        height: var(--flin-size-10);
     }
 
     .flin-backtop__icon {
-        width: 18px;
-        height: 18px;
+        width: var(--flin-icon-sm);
+        height: var(--flin-icon-sm);
     }
 }
 
 /* Dark theme support */
 [data-theme="dark"] .flin-backtop {
     background-color: var(--flin-primary);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--flin-shadow-lg);
 }
 
 [data-theme="dark"] .flin-backtop:hover {
-    background-color: var(--flin-primary-light);
+    background-color: var(--flin-primary-hover);
 }
 </style>

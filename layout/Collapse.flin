@@ -82,7 +82,7 @@ handleToggle = {
     font-family: inherit;
     font-size: var(--flin-text-base);
     color: var(--flin-fg);
-    transition: background-color 0.15s ease;
+    transition: background-color var(--flin-transition-fast);
 }
 
 .flin-collapse-header:hover {
@@ -90,20 +90,20 @@ handleToggle = {
 }
 
 .flin-collapse-header:focus-visible {
-    outline: 2px solid var(--flin-ring);
-    outline-offset: -2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: calc(-1 * var(--flin-space-0-5));
 }
 
 .flin-collapse-icon {
     flex-shrink: 0;
     margin-right: var(--flin-space-3);
     font-size: var(--flin-text-lg);
-    color: var(--flin-muted-fg);
+    color: var(--flin-fg-muted);
 }
 
 .flin-collapse-title {
     flex: 1;
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     min-width: 0;
 }
 
@@ -113,8 +113,8 @@ handleToggle = {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--flin-muted-fg);
-    transition: transform 0.2s ease;
+    color: var(--flin-fg-muted);
+    transition: transform var(--flin-transition-normal);
 }
 
 .flin-collapse-open .flin-collapse-chevron {
@@ -124,7 +124,7 @@ handleToggle = {
 .flin-collapse-content {
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows 0.2s ease;
+    transition: grid-template-rows var(--flin-transition-normal);
 }
 
 .flin-collapse-open .flin-collapse-content {

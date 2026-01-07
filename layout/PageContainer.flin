@@ -78,25 +78,25 @@ sidebarStyle = "--flin-sidebar-width: " ++ sidebarWidth ++ ";"
 
 /* Max width variants */
 .flin-page-max-sm {
-    max-width: 640px;
+    max-width: var(--flin-breakpoint-sm);
     margin-left: auto;
     margin-right: auto;
 }
 
 .flin-page-max-md {
-    max-width: 768px;
+    max-width: var(--flin-breakpoint-md);
     margin-left: auto;
     margin-right: auto;
 }
 
 .flin-page-max-lg {
-    max-width: 1024px;
+    max-width: var(--flin-breakpoint-lg);
     margin-left: auto;
     margin-right: auto;
 }
 
 .flin-page-max-xl {
-    max-width: 1280px;
+    max-width: var(--flin-breakpoint-xl);
     margin-left: auto;
     margin-right: auto;
 }
@@ -105,7 +105,7 @@ sidebarStyle = "--flin-sidebar-width: " ++ sidebarWidth ++ ";"
 .flin-page-header {
     flex-shrink: 0;
     width: 100%;
-    z-index: 100;
+    z-index: var(--flin-z-dropdown);
 }
 
 /* Body (sidebar + main) */
@@ -118,9 +118,9 @@ sidebarStyle = "--flin-sidebar-width: " ++ sidebarWidth ++ ";"
 /* Sidebar */
 .flin-page-sidebar {
     flex-shrink: 0;
-    width: var(--flin-sidebar-width, 280px);
+    width: var(--flin-sidebar-width, var(--flin-size-72));
     background-color: var(--flin-bg-muted);
-    border-right: 1px solid var(--flin-neutral-200);
+    border-right: var(--flin-space-px) solid var(--flin-neutral-200);
     overflow-y: auto;
     position: sticky;
     top: 0;
@@ -129,7 +129,7 @@ sidebarStyle = "--flin-sidebar-width: " ++ sidebarWidth ++ ";"
 
 .flin-page-sidebar-right .flin-page-sidebar {
     border-right: none;
-    border-left: 1px solid var(--flin-neutral-200);
+    border-left: var(--flin-space-px) solid var(--flin-neutral-200);
     order: 2;
 }
 
@@ -172,7 +172,7 @@ sidebarStyle = "--flin-sidebar-width: " ++ sidebarWidth ++ ";"
 /* Responsive adjustments */
 @media (max-width: 1024px) {
     .flin-page-has-sidebar .flin-page-sidebar {
-        width: 240px;
+        width: var(--flin-size-60);
     }
 }
 
@@ -186,13 +186,13 @@ sidebarStyle = "--flin-sidebar-width: " ++ sidebarWidth ++ ";"
         height: auto;
         position: relative;
         border-right: none;
-        border-bottom: 1px solid var(--flin-neutral-200);
+        border-bottom: var(--flin-space-px) solid var(--flin-neutral-200);
         order: 0 !important;
     }
 
     .flin-page-sidebar-right .flin-page-sidebar {
         border-left: none;
-        border-bottom: 1px solid var(--flin-neutral-200);
+        border-bottom: var(--flin-space-px) solid var(--flin-neutral-200);
     }
 
     .flin-page-sidebar-content {

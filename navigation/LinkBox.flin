@@ -47,29 +47,29 @@ relAttr = match target { "_blank" -> "noopener noreferrer", _ -> "" }
 }
 
 .flin-linkbox:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
     border-radius: var(--flin-radius-md);
-    z-index: 1;
+    z-index: var(--flin-z-10);
 }
 
 .flin-linkbox--lift:hover {
-    transform: translateY(-4px);
+    transform: translateY(calc(-1 * var(--flin-space-1)));
     box-shadow: var(--flin-shadow-lg);
 }
 
 .flin-linkbox--lift:active {
-    transform: translateY(-2px);
+    transform: translateY(calc(-1 * var(--flin-space-0-5)));
     box-shadow: var(--flin-shadow-md);
 }
 
 .flin-linkbox--glow:hover {
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15),
+    box-shadow: 0 0 0 var(--flin-space-1) rgba(59, 130, 246, 0.15),
                 var(--flin-shadow-md);
 }
 
 .flin-linkbox--glow:active {
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1),
+    box-shadow: 0 0 0 var(--flin-space-0-5) rgba(59, 130, 246, 0.1),
                 var(--flin-shadow-sm);
 }
 

@@ -86,7 +86,7 @@ directionClass = " flin-resizable--" ++ direction
     min-width: 0;
     min-height: 0;
     overflow: hidden;
-    transition: flex-basis 0.2s ease-out;
+    transition: flex-basis var(--flin-transition-normal);
 }
 
 .flin-resizable__panel--collapsed {
@@ -103,19 +103,19 @@ directionClass = " flin-resizable--" ++ direction
     position: absolute;
     top: var(--flin-space-2);
     right: var(--flin-space-2);
-    width: 24px;
-    height: 24px;
+    width: var(--flin-icon-lg);
+    height: var(--flin-icon-lg);
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-space-px) solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-sm);
     color: var(--flin-fg-muted);
     cursor: pointer;
     opacity: 0;
     transition: all var(--flin-transition-fast);
-    z-index: 10;
+    z-index: var(--flin-z-10);
 }
 
 .flin-resizable__panel:hover .flin-resizable__collapse-btn,
@@ -168,8 +168,8 @@ directionClass = " flin-resizable--" ++ direction
 
 /* Focus styles for keyboard navigation */
 .flin-resizable__divider:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
     background-color: var(--flin-primary);
 }
 

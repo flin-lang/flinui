@@ -76,11 +76,11 @@ hasHeader = hasTitle || hasDescription
 
 /* Divider variants */
 .flin-section-divider-top {
-    border-top: 1px solid var(--flin-neutral-200);
+    border-top: var(--flin-space-px) solid var(--flin-neutral-200);
 }
 
 .flin-section-divider-bottom {
-    border-bottom: 1px solid var(--flin-neutral-200);
+    border-bottom: var(--flin-space-px) solid var(--flin-neutral-200);
 }
 
 /* Header */
@@ -91,16 +91,16 @@ hasHeader = hasTitle || hasDescription
 .flin-section-title {
     margin: 0;
     font-size: var(--flin-text-2xl);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
-    line-height: 1.3;
+    line-height: var(--flin-leading-tight);
 }
 
 .flin-section-description {
     margin: var(--flin-space-2) 0 0 0;
     font-size: var(--flin-text-base);
-    color: var(--flin-muted-fg);
-    line-height: 1.6;
+    color: var(--flin-fg-muted);
+    line-height: var(--flin-leading-relaxed);
     max-width: 65ch;
 }
 

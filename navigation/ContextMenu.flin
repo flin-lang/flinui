@@ -68,19 +68,19 @@ disabledClass = match disabled { true -> " context-menu-disabled", _ -> "" }
 .context-menu-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 9997;
+    z-index: var(--flin-z-modal-backdrop);
     background-color: transparent;
 }
 
 .flin-context-menu {
     position: fixed;
-    z-index: 9998;
+    z-index: var(--flin-z-modal);
     background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-space-px) solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-lg);
     box-shadow: var(--flin-shadow-lg);
-    min-width: 180px;
-    max-width: 280px;
+    min-width: var(--flin-size-44);
+    max-width: var(--flin-size-72);
     padding: var(--flin-space-2);
 }
 
