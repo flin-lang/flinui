@@ -25,7 +25,7 @@ variantClass = match variant {
     padding: var(--flin-space-1) var(--flin-space-2);
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-xs);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     line-height: 1;
     border-radius: var(--flin-radius-full);
     white-space: nowrap;
@@ -42,24 +42,24 @@ variantClass = match variant {
 /* Success variant */
 .badge-success {
     background-color: var(--flin-success-light);
-    color: #065f46;
+    color: var(--flin-success-dark);
 }
 
 /* Warning variant */
 .badge-warning {
     background-color: var(--flin-warning-light);
-    color: #92400e;
+    color: var(--flin-warning-dark);
 }
 
 /* Danger variant */
 .badge-danger {
     background-color: var(--flin-danger-light);
-    color: #991b1b;
+    color: var(--flin-danger-dark);
 }
 
 /* Info variant */
 .badge-info {
     background-color: var(--flin-info-light);
-    color: #0e7490;
+    color: var(--flin-info-dark);
 }
 </style>

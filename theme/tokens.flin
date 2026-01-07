@@ -212,24 +212,28 @@ iconXl = "32px"
     --flin-success-hover: #059669;
     --flin-success-active: #047857;
     --flin-success-light: #d1fae5;
+    --flin-success-dark: #065f46;
 
     /* Warning */
     --flin-warning: #f59e0b;
     --flin-warning-hover: #d97706;
     --flin-warning-active: #b45309;
     --flin-warning-light: #fef3c7;
+    --flin-warning-dark: #92400e;
 
     /* Danger */
     --flin-danger: #ef4444;
     --flin-danger-hover: #dc2626;
     --flin-danger-active: #b91c1c;
     --flin-danger-light: #fee2e2;
+    --flin-danger-dark: #991b1b;
 
     /* Info */
     --flin-info: #06b6d4;
     --flin-info-hover: #0891b2;
     --flin-info-active: #0e7490;
     --flin-info-light: #cffafe;
+    --flin-info-dark: #0e7490;
 
     /* Neutral */
     --flin-neutral-50: #fafafa;

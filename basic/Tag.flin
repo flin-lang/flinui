@@ -42,7 +42,7 @@ variantClass = match variant {
     padding: var(--flin-space-1) var(--flin-space-2);
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     line-height: 1.4;
     border-radius: var(--flin-radius-md);
     white-space: nowrap;
@@ -58,27 +58,27 @@ variantClass = match variant {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
     padding: 0;
     margin-left: var(--flin-space-1);
     background: transparent;
     border: none;
     border-radius: var(--flin-radius-sm);
     cursor: pointer;
-    opacity: 0.6;
+    opacity: var(--flin-opacity-60);
     transition: all var(--flin-transition-fast);
 }
 
 .tag-remove:hover {
-    opacity: 1;
+    opacity: var(--flin-opacity-100);
     background-color: rgba(0, 0, 0, 0.1);
 }
 
 .tag-remove:focus-visible {
     outline: 2px solid currentColor;
     outline-offset: 1px;
-    opacity: 1;
+    opacity: var(--flin-opacity-100);
 }
 
 /* Default variant */
@@ -104,7 +104,7 @@ variantClass = match variant {
 /* Success variant */
 .tag-success {
     background-color: var(--flin-success-light);
-    color: #065f46;
+    color: var(--flin-success-dark);
 }
 
 .tag-success .tag-remove:hover {
@@ -114,7 +114,7 @@ variantClass = match variant {
 /* Warning variant */
 .tag-warning {
     background-color: var(--flin-warning-light);
-    color: #92400e;
+    color: var(--flin-warning-dark);
 }
 
 .tag-warning .tag-remove:hover {
@@ -124,7 +124,7 @@ variantClass = match variant {
 /* Danger variant */
 .tag-danger {
     background-color: var(--flin-danger-light);
-    color: #991b1b;
+    color: var(--flin-danger-dark);
 }
 
 .tag-danger .tag-remove:hover {
@@ -134,7 +134,7 @@ variantClass = match variant {
 /* Info variant */
 .tag-info {
     background-color: var(--flin-info-light);
-    color: #0e7490;
+    color: var(--flin-info-dark);
 }
 
 .tag-info .tag-remove:hover {

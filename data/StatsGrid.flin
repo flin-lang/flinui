@@ -90,11 +90,11 @@ hasStats = statCount > 0
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
+    width: var(--flin-size-12);
+    height: var(--flin-size-12);
     background: var(--flin-primary-light);
     border-radius: var(--flin-radius-md);
-    font-size: 24px;
+    font-size: var(--flin-text-2xl);
 }
 
 .stat-content {
@@ -110,7 +110,7 @@ hasStats = statCount > 0
 
 .stat-value {
     font-size: var(--flin-text-2xl);
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     color: var(--flin-fg);
 }
 
@@ -124,7 +124,7 @@ hasStats = statCount > 0
     align-items: center;
     gap: var(--flin-space-1);
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
 }
 
 .stat-trend--positive {
@@ -140,7 +140,7 @@ hasStats = statCount > 0
 }
 
 .trend-icon {
-    font-size: 12px;
+    font-size: var(--flin-text-xs);
 }
 
 .trend-value {

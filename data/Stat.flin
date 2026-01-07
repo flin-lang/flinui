@@ -50,7 +50,7 @@ hasTrend = trendUp || trendDown
 
 .flin-stat__label {
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg-muted);
     margin: 0;
 }
@@ -64,7 +64,7 @@ hasTrend = trendUp || trendDown
 
 .flin-stat__number {
     font-size: var(--flin-text-3xl);
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     color: var(--flin-fg);
     line-height: 1.2;
 }
@@ -74,7 +74,7 @@ hasTrend = trendUp || trendDown
     align-items: center;
     padding: var(--flin-space-1) var(--flin-space-2);
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     border-radius: var(--flin-radius-full);
 }
 
@@ -89,8 +89,8 @@ hasTrend = trendUp || trendDown
 }
 
 .flin-stat__trend-icon {
-    width: 16px;
-    height: 16px;
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
 }
 
 .flin-stat__help {
