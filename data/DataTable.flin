@@ -155,7 +155,7 @@ tableClass = "flin-datatable__table" ++ stripedClass ++ hoverableClass ++ border
 /* Filter styles */
 .flin-datatable__filter {
     position: relative;
-    max-width: 400px;
+    max-width: var(--flin-size-96);
 }
 
 .flin-datatable__filter-icon {
@@ -169,14 +169,14 @@ tableClass = "flin-datatable__table" ++ stripedClass ++ hoverableClass ++ border
 
 .flin-datatable__filter-input {
     width: 100%;
-    height: 40px;
+    height: var(--flin-height-sm);
     padding: var(--flin-space-2) var(--flin-space-10);
     padding-left: var(--flin-space-10);
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-sm);
     color: var(--flin-fg);
     background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-300);
+    border: var(--flin-size-px) solid var(--flin-neutral-300);
     border-radius: var(--flin-radius-md);
     transition: all var(--flin-transition-fast);
     outline: none;
@@ -192,7 +192,7 @@ tableClass = "flin-datatable__table" ++ stripedClass ++ hoverableClass ++ border
 
 .flin-datatable__filter-input:focus {
     border-color: var(--flin-primary);
-    box-shadow: 0 0 0 3px var(--flin-primary-light);
+    box-shadow: 0 0 0 var(--flin-space-1) var(--flin-primary-light);
 }
 
 .flin-datatable__filter-clear {
@@ -234,12 +234,12 @@ tableClass = "flin-datatable__table" ++ stripedClass ++ hoverableClass ++ border
 /* Table head */
 .flin-datatable__head {
     background-color: var(--flin-neutral-50);
-    border-bottom: 2px solid var(--flin-neutral-200);
+    border-bottom: var(--flin-space-0-5) solid var(--flin-neutral-200);
 }
 
 .flin-datatable__header {
     padding: var(--flin-space-3) var(--flin-space-4);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
     white-space: nowrap;
     user-select: none;
@@ -282,7 +282,7 @@ tableClass = "flin-datatable__table" ++ stripedClass ++ hoverableClass ++ border
 .flin-datatable__cell {
     padding: var(--flin-space-3) var(--flin-space-4);
     color: var(--flin-fg);
-    border-bottom: 1px solid var(--flin-neutral-200);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
 }
 
 .flin-datatable__body tr:last-child .flin-datatable__cell {
@@ -319,13 +319,13 @@ tableClass = "flin-datatable__table" ++ stripedClass ++ hoverableClass ++ border
 
 /* Bordered variant */
 .flin-datatable__table--bordered {
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-lg);
 }
 
 .flin-datatable__table--bordered th,
 .flin-datatable__table--bordered td {
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
 }
 
 /* Pagination */
@@ -353,13 +353,13 @@ tableClass = "flin-datatable__table" ++ stripedClass ++ hoverableClass ++ border
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: var(--flin-size-9);
+    height: var(--flin-size-9);
     padding: 0;
     font-family: var(--flin-font-sans);
     background-color: var(--flin-bg);
     color: var(--flin-fg-muted);
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-md);
     cursor: pointer;
     transition: all var(--flin-transition-fast);
@@ -371,25 +371,25 @@ tableClass = "flin-datatable__table" ++ stripedClass ++ hoverableClass ++ border
 }
 
 .flin-datatable__pagination-btn:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
 }
 
 .flin-datatable__pagination-btn:disabled {
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
     cursor: not-allowed;
 }
 
 .flin-datatable__pagination-text {
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg);
-    min-width: 100px;
+    min-width: var(--flin-size-24);
     text-align: center;
 }
 
 /* Responsive styles */
-@media (max-width: 640px) {
+@media (max-width: var(--flin-breakpoint-sm)) {
     .flin-datatable__pagination {
         flex-direction: column;
         align-items: stretch;

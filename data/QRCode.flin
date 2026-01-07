@@ -5,8 +5,8 @@
 value = props.value || ""
 size = props.size || 128
 level = props.level || "M"
-bgColor = props.bgColor || "#ffffff"
-fgColor = props.fgColor || "#000000"
+bgColor = props.bgColor || "var(--flin-bg)"
+fgColor = props.fgColor || "var(--flin-fg)"
 includeMargin = props.includeMargin || true
 imageUrl = props.imageUrl || ""
 imageSize = props.imageSize || 24
@@ -135,9 +135,9 @@ coreSize = moduleSize * 3
 }
 
 .flin-qrcode__empty-icon {
-    width: 32px;
-    height: 32px;
-    opacity: 0.5;
+    width: var(--flin-size-8);
+    height: var(--flin-size-8);
+    opacity: var(--flin-opacity-50);
 }
 
 /* Dark theme support */

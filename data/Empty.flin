@@ -51,21 +51,21 @@ description = props.description || ""
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 80px;
-    height: 80px;
+    width: var(--flin-size-20);
+    height: var(--flin-size-20);
     background-color: var(--flin-neutral-100);
-    border-radius: 50%;
+    border-radius: var(--flin-radius-full);
 }
 
 .flin-empty__icon--default svg {
-    width: 40px;
-    height: 40px;
+    width: var(--flin-size-10);
+    height: var(--flin-size-10);
 }
 
 .flin-empty__title {
     margin: 0 0 var(--flin-space-2) 0;
     font-size: var(--flin-text-lg);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
 }
 
@@ -73,8 +73,8 @@ description = props.description || ""
     margin: 0 0 var(--flin-space-6) 0;
     font-size: var(--flin-text-sm);
     color: var(--flin-fg-muted);
-    max-width: 320px;
-    line-height: 1.5;
+    max-width: var(--flin-size-80);
+    line-height: var(--flin-leading-normal);
 }
 
 .flin-empty__action {

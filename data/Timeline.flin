@@ -62,7 +62,7 @@ timelineClass = "flin-timeline flin-timeline--" ++ variant ++ alternatingClass
 /* Horizontal layout */
 .flin-timeline--horizontal .flin-timeline__item {
     flex-direction: column;
-    min-width: 250px;
+    min-width: var(--flin-size-64);
     padding-left: 0;
 }
 
@@ -72,21 +72,21 @@ timelineClass = "flin-timeline flin-timeline--" ++ variant ++ alternatingClass
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: var(--flin-size-8);
+    height: var(--flin-size-8);
     flex-shrink: 0;
     background-color: var(--flin-bg);
-    border: 2px solid var(--timeline-status-color, var(--flin-primary));
-    border-radius: 50%;
+    border: var(--flin-space-0-5) solid var(--timeline-status-color, var(--flin-primary));
+    border-radius: var(--flin-radius-full);
     z-index: 2;
 }
 
 /* Timeline dot */
 .flin-timeline__dot {
-    width: 12px;
-    height: 12px;
+    width: var(--flin-size-3);
+    height: var(--flin-size-3);
     background-color: var(--timeline-status-color, var(--flin-primary));
-    border-radius: 50%;
+    border-radius: var(--flin-radius-full);
 }
 
 /* Timeline icon */
@@ -102,10 +102,10 @@ timelineClass = "flin-timeline flin-timeline--" ++ variant ++ alternatingClass
 .flin-timeline--vertical .flin-timeline__item::before {
     content: "";
     position: absolute;
-    left: 15px;
-    top: 32px;
-    bottom: -24px;
-    width: 2px;
+    left: var(--flin-space-4);
+    top: var(--flin-size-8);
+    bottom: calc(-1 * var(--flin-space-6));
+    width: var(--flin-space-0-5);
     background-color: var(--flin-neutral-200);
     z-index: 1;
 }
@@ -118,17 +118,17 @@ timelineClass = "flin-timeline flin-timeline--" ++ variant ++ alternatingClass
 /* Alternating right items */
 .flin-timeline--alternating .flin-timeline__item--right::before {
     left: auto;
-    right: 15px;
+    right: var(--flin-space-4);
 }
 
 /* Connecting line - Horizontal */
 .flin-timeline--horizontal .flin-timeline__item::before {
     content: "";
     position: absolute;
-    left: 32px;
-    top: 15px;
-    right: -24px;
-    height: 2px;
+    left: var(--flin-size-8);
+    top: var(--flin-space-4);
+    right: calc(-1 * var(--flin-space-6));
+    height: var(--flin-space-0-5);
     background-color: var(--flin-neutral-200);
     z-index: 1;
 }
@@ -140,7 +140,7 @@ timelineClass = "flin-timeline flin-timeline--" ++ variant ++ alternatingClass
 /* Timeline content */
 .flin-timeline__content {
     flex: 1;
-    padding-top: 4px;
+    padding-top: var(--flin-space-1);
 }
 
 .flin-timeline--horizontal .flin-timeline__content {
@@ -152,16 +152,16 @@ timelineClass = "flin-timeline flin-timeline--" ++ variant ++ alternatingClass
     font-size: var(--flin-text-xs);
     color: var(--flin-fg-muted);
     margin-bottom: var(--flin-space-1);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
 }
 
 /* Title */
 .flin-timeline__title {
     font-size: var(--flin-text-base);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
     margin: 0 0 var(--flin-space-2) 0;
-    line-height: 1.4;
+    line-height: var(--flin-leading-snug);
 }
 
 /* Description */
@@ -169,7 +169,7 @@ timelineClass = "flin-timeline flin-timeline--" ++ variant ++ alternatingClass
     font-size: var(--flin-text-sm);
     color: var(--flin-fg-muted);
     margin: 0 0 var(--flin-space-2) 0;
-    line-height: 1.5;
+    line-height: var(--flin-leading-normal);
 }
 
 /* Status badge */
@@ -177,7 +177,7 @@ timelineClass = "flin-timeline flin-timeline--" ++ variant ++ alternatingClass
     display: inline-block;
     padding: var(--flin-space-1) var(--flin-space-2);
     font-size: var(--flin-text-xs);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     border-radius: var(--flin-radius-md);
     text-transform: capitalize;
 }
@@ -222,19 +222,23 @@ timelineClass = "flin-timeline flin-timeline--" ++ variant ++ alternatingClass
 }
 
 [data-theme="dark"] .flin-timeline__status--success {
-    background-color: rgba(34, 197, 94, 0.15);
+    background-color: var(--flin-success-light);
+    opacity: var(--flin-opacity-20);
 }
 
 [data-theme="dark"] .flin-timeline__status--warning {
-    background-color: rgba(251, 191, 36, 0.15);
+    background-color: var(--flin-warning-light);
+    opacity: var(--flin-opacity-20);
 }
 
 [data-theme="dark"] .flin-timeline__status--error {
-    background-color: rgba(239, 68, 68, 0.15);
+    background-color: var(--flin-danger-light);
+    opacity: var(--flin-opacity-20);
 }
 
 [data-theme="dark"] .flin-timeline__status--info {
-    background-color: rgba(59, 130, 246, 0.15);
+    background-color: var(--flin-info-light);
+    opacity: var(--flin-opacity-20);
 }
 
 /* Responsive behavior */
@@ -251,7 +255,7 @@ timelineClass = "flin-timeline flin-timeline--" ++ variant ++ alternatingClass
     }
 
     .flin-timeline--alternating .flin-timeline__item--right::before {
-        left: 15px;
+        left: var(--flin-space-4);
         right: auto;
     }
 

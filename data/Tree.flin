@@ -22,7 +22,7 @@ selectedNodeId = ""
 .flin-tree {
     width: 100%;
     background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-space-px) solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-lg);
     overflow: hidden;
 }
@@ -35,7 +35,7 @@ selectedNodeId = ""
     display: flex;
     align-items: center;
     gap: var(--flin-space-2);
-    min-height: 36px;
+    min-height: var(--flin-size-9);
     transition: background-color var(--flin-transition-fast);
 }
 
@@ -55,9 +55,9 @@ selectedNodeId = ""
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
-    padding: 0;
+    width: var(--flin-size-5);
+    height: var(--flin-size-5);
+    padding: var(--flin-space-0);
     background: none;
     border: none;
     cursor: pointer;
@@ -70,14 +70,14 @@ selectedNodeId = ""
 }
 
 .flin-tree__toggle:focus {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
     border-radius: var(--flin-radius-sm);
 }
 
 .flin-tree__toggle-icon {
     display: block;
-    font-size: 10px;
+    font-size: var(--flin-text-2xs);
     line-height: 1;
     transition: transform var(--flin-transition-fast);
 }
@@ -87,8 +87,8 @@ selectedNodeId = ""
 }
 
 .flin-tree__toggle-spacer {
-    width: 20px;
-    height: 20px;
+    width: var(--flin-size-5);
+    height: var(--flin-size-5);
     flex-shrink: 0;
 }
 
@@ -116,9 +116,9 @@ selectedNodeId = ""
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
-    font-size: 16px;
+    width: var(--flin-icon-md);
+    height: var(--flin-icon-md);
+    font-size: var(--flin-icon-sm);
     line-height: 1;
     flex-shrink: 0;
 }
@@ -137,11 +137,11 @@ selectedNodeId = ""
 
 @keyframes flin-tree-expand {
     from {
-        opacity: 0;
+        opacity: var(--flin-opacity-0);
         transform: scaleY(0.95);
     }
     to {
-        opacity: 1;
+        opacity: var(--flin-opacity-100);
         transform: scaleY(1);
     }
 }
@@ -155,8 +155,8 @@ selectedNodeId = ""
 
 /* Accessibility: Focus visible for keyboard navigation */
 .flin-tree__label:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
 }
 
 /* Dark theme support */

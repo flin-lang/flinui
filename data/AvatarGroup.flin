@@ -40,18 +40,18 @@ expandedClass = match isExpanded { true -> " avatar-group-expanded", _ -> "" }
 
 // Avatar size values for inline styling
 avatarSize = match size {
-    "xs" -> "24px"
-    "sm" -> "32px"
-    "lg" -> "48px"
-    "xl" -> "64px"
-    _ -> "40px"
+    "xs" -> "var(--flin-avatar-xs)"
+    "sm" -> "var(--flin-avatar-sm)"
+    "lg" -> "var(--flin-avatar-lg)"
+    "xl" -> "var(--flin-avatar-xl)"
+    _ -> "var(--flin-avatar-md)"
 }
 
 // Overlap offset (negative margin)
 overlapOffset = match spacing {
-    "none" -> "0px"
-    "loose" -> "-8px"
-    _ -> "-12px"
+    "none" -> "0"
+    "loose" -> "calc(-1 * var(--flin-space-2))"
+    _ -> "calc(-1 * var(--flin-space-3))"
 }
 
 <div
@@ -132,7 +132,7 @@ overlapOffset = match spacing {
 
 /* Size Variants */
 .avatar-group-xs .overflow-count {
-    font-size: 10px;
+    font-size: var(--flin-text-2xs);
 }
 
 .avatar-group-sm .overflow-count {
@@ -159,12 +159,12 @@ overlapOffset = match spacing {
 
 .avatar-group-spacing-tight .avatar-group-item,
 .avatar-group-spacing-tight .avatar-group-overflow {
-    margin-left: -12px;
+    margin-left: calc(-1 * var(--flin-space-3));
 }
 
 .avatar-group-spacing-loose .avatar-group-item,
 .avatar-group-spacing-loose .avatar-group-overflow {
-    margin-left: -8px;
+    margin-left: calc(-1 * var(--flin-space-2));
 }
 
 /* Expanded State (Hover) */
@@ -179,7 +179,7 @@ overlapOffset = match spacing {
 
 /* Hover Effects */
 .flin-avatar-group:hover .avatar-group-item {
-    transform: translateY(-2px);
+    transform: translateY(calc(-1 * var(--flin-space-0-5)));
 }
 
 .flin-avatar-group:hover .avatar-group-overflow {
@@ -188,25 +188,25 @@ overlapOffset = match spacing {
 
 /* Individual hover highlight */
 .avatar-group-item:hover {
-    z-index: 100 !important;
-    transform: scale(1.1) translateY(-2px) !important;
+    z-index: var(--flin-z-dropdown) !important;
+    transform: scale(1.1) translateY(calc(-1 * var(--flin-space-0-5))) !important;
 }
 
 /* Focus styling for accessibility */
 .avatar-group-item:focus-within {
-    z-index: 100 !important;
+    z-index: var(--flin-z-dropdown) !important;
     outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline-offset: var(--flin-space-0-5);
 }
 
 /* Animation on mount */
 @keyframes avatarSlideIn {
     from {
-        opacity: 0;
-        transform: translateX(-10px);
+        opacity: var(--flin-opacity-0);
+        transform: translateX(calc(-1 * var(--flin-space-2-5)));
     }
     to {
-        opacity: 1;
+        opacity: var(--flin-opacity-100);
         transform: translateX(0);
     }
 }
@@ -237,10 +237,10 @@ overlapOffset = match spacing {
 }
 
 /* Responsive adjustments */
-@media (max-width: 640px) {
+@media (max-width: var(--flin-breakpoint-sm)) {
     .avatar-group-lg,
     .avatar-group-xl {
-        --avatar-size: 40px;
+        --avatar-size: var(--flin-avatar-md);
     }
 }
 </style>

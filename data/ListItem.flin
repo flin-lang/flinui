@@ -60,8 +60,8 @@ isClickable = props.onClick != none
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: var(--flin-icon-md);
+    height: var(--flin-icon-md);
     color: var(--flin-fg-muted);
 }
 

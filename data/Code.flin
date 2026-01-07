@@ -57,7 +57,7 @@ preClass = match showLineNumbers { true -> "flin-code flin-code--numbered", _ ->
     font-family: var(--flin-font-mono);
     color: var(--flin-neutral-400);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--flin-tracking-wide);
 }
 
 .flin-code {
@@ -78,7 +78,7 @@ preClass = match showLineNumbers { true -> "flin-code flin-code--numbered", _ ->
     font-family: var(--flin-font-mono);
     font-size: var(--flin-text-sm);
     color: var(--flin-neutral-100);
-    line-height: 1.6;
+    line-height: var(--flin-leading-relaxed);
     white-space: pre;
     tab-size: 4;
 }
@@ -96,7 +96,7 @@ preClass = match showLineNumbers { true -> "flin-code flin-code--numbered", _ ->
     counter-increment: line;
     content: counter(line);
     display: inline-block;
-    width: 2em;
+    width: var(--flin-size-8);
     margin-right: var(--flin-space-4);
     text-align: right;
     color: var(--flin-neutral-600);
@@ -106,9 +106,9 @@ preClass = match showLineNumbers { true -> "flin-code flin-code--numbered", _ ->
 /* Inline code */
 .flin-code__inline {
     display: inline;
-    padding: 0.2em 0.4em;
+    padding: var(--flin-space-1) var(--flin-space-2);
     font-family: var(--flin-font-mono);
-    font-size: 0.875em;
+    font-size: var(--flin-text-sm);
     color: var(--flin-danger);
     background-color: var(--flin-neutral-100);
     border-radius: var(--flin-radius-sm);
@@ -116,7 +116,7 @@ preClass = match showLineNumbers { true -> "flin-code flin-code--numbered", _ ->
 
 /* Scrollbar styling */
 .flin-code::-webkit-scrollbar {
-    height: 8px;
+    height: var(--flin-size-2);
 }
 
 .flin-code::-webkit-scrollbar-track {

@@ -23,11 +23,11 @@ variantColor = match variant {
 
 // Compute height based on size
 barHeight = match size {
-    "sm" -> "4px"
-    "md" -> "8px"
-    "lg" -> "12px"
-    "xl" -> "16px"
-    _ -> "8px"
+    "sm" -> "var(--flin-space-1)"
+    "md" -> "var(--flin-space-2)"
+    "lg" -> "var(--flin-space-3)"
+    "xl" -> "var(--flin-space-4)"
+    _ -> "var(--flin-space-2)"
 }
 
 <div class="flin-progress" role="progressbar"
@@ -69,7 +69,7 @@ barHeight = match size {
 .flin-progress__label {
     flex-shrink: 0;
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg);
     min-width: 3ch;
     text-align: right;

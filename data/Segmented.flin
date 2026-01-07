@@ -80,7 +80,7 @@ disabledClass = match disabled {
     border: none;
     border-radius: var(--flin-radius-md);
     font-family: inherit;
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg-muted);
     cursor: pointer;
     transition: color var(--flin-transition-fast);
@@ -93,8 +93,8 @@ disabledClass = match disabled {
 }
 
 .flin-segmented__option:focus-visible {
-    outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: var(--flin-space-0-5);
 }
 
 .flin-segmented__option--selected {
@@ -103,7 +103,7 @@ disabledClass = match disabled {
 
 .flin-segmented__option--disabled,
 .flin-segmented__option:disabled {
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
     cursor: not-allowed;
 }
 
@@ -126,8 +126,8 @@ disabledClass = match disabled {
 
 /* Size variants */
 .flin-segmented--sm {
-    padding: 2px;
-    gap: 2px;
+    padding: var(--flin-space-0-5);
+    gap: var(--flin-space-0-5);
 }
 
 .flin-segmented--sm .flin-segmented__option {
@@ -136,10 +136,10 @@ disabledClass = match disabled {
 }
 
 .flin-segmented--sm .flin-segmented__indicator {
-    top: 2px;
-    bottom: 2px;
-    left: 2px;
-    width: calc((100% - 4px) / var(--segment-count, 3));
+    top: var(--flin-space-0-5);
+    bottom: var(--flin-space-0-5);
+    left: var(--flin-space-0-5);
+    width: calc((100% - var(--flin-space-1)) / var(--segment-count, 3));
 }
 
 .flin-segmented--lg .flin-segmented__option {
@@ -155,7 +155,7 @@ disabledClass = match disabled {
 
 /* Disabled state */
 .flin-segmented--disabled {
-    opacity: 0.6;
+    opacity: var(--flin-opacity-60);
     pointer-events: none;
 }
 

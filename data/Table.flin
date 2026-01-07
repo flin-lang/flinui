@@ -34,12 +34,12 @@ tableClass = tableClass + " " + (if bordered { "flin-table--bordered" } else { "
 
 .flin-table thead {
     background-color: var(--flin-neutral-50);
-    border-bottom: 2px solid var(--flin-neutral-200);
+    border-bottom: var(--flin-space-0-5) solid var(--flin-neutral-200);
 }
 
 .flin-table th {
     padding: var(--flin-space-3) var(--flin-space-4);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
     white-space: nowrap;
 }
@@ -47,7 +47,7 @@ tableClass = tableClass + " " + (if bordered { "flin-table--bordered" } else { "
 .flin-table td {
     padding: var(--flin-space-3) var(--flin-space-4);
     color: var(--flin-fg);
-    border-bottom: 1px solid var(--flin-neutral-200);
+    border-bottom: var(--flin-space-px) solid var(--flin-neutral-200);
 }
 
 .flin-table tbody tr:last-child td {
@@ -70,13 +70,13 @@ tableClass = tableClass + " " + (if bordered { "flin-table--bordered" } else { "
 
 /* Bordered variant */
 .flin-table--bordered {
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-space-px) solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-lg);
 }
 
 .flin-table--bordered th,
 .flin-table--bordered td {
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-space-px) solid var(--flin-neutral-200);
 }
 
 /* Empty state */

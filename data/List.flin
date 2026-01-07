@@ -36,7 +36,7 @@ computedSpacing = match spacing {
 }
 
 .flin-list--dividers > :global(.flin-list-item) {
-    border-bottom: 1px solid var(--flin-neutral-200);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
     padding-top: var(--list-spacing);
     padding-bottom: var(--list-spacing);
 }

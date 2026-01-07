@@ -59,25 +59,25 @@ responsiveClass = match responsive {
 }
 
 /* Fixed column counts at different breakpoints when not using auto */
-@media (max-width: 1200px) {
+@media (max-width: var(--flin-breakpoint-xl)) {
     .flin-masonry:not(.flin-masonry--responsive) {
         column-count: min(var(--masonry-columns), 4);
     }
 }
 
-@media (max-width: 992px) {
+@media (max-width: var(--flin-breakpoint-lg)) {
     .flin-masonry:not(.flin-masonry--responsive) {
         column-count: min(var(--masonry-columns), 3);
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: var(--flin-breakpoint-md)) {
     .flin-masonry:not(.flin-masonry--responsive) {
         column-count: min(var(--masonry-columns), 2);
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: var(--flin-breakpoint-sm)) {
     .flin-masonry:not(.flin-masonry--responsive),
     .flin-masonry--responsive {
         column-count: 1;
@@ -91,11 +91,11 @@ responsiveClass = match responsive {
 
 @keyframes flin-masonry-fade-in {
     from {
-        opacity: 0;
-        transform: translateY(10px);
+        opacity: var(--flin-opacity-0);
+        transform: translateY(var(--flin-space-2-5));
     }
     to {
-        opacity: 1;
+        opacity: var(--flin-opacity-100);
         transform: translateY(0);
     }
 }

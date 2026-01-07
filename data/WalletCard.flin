@@ -185,7 +185,7 @@ changeClass = match priceUp {
 <style scoped>
 .flin-wallet-card {
     background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-space-px) solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-xl);
     padding: var(--flin-space-5);
     font-family: var(--flin-font-sans);
@@ -194,15 +194,15 @@ changeClass = match priceUp {
 }
 
 .flin-wallet-card--gradient {
-    background: linear-gradient(135deg, var(--flin-primary) 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, var(--flin-primary) 0%, var(--flin-accent-violet) 100%);
     border: none;
-    color: white;
+    color: var(--flin-bg);
 }
 
 .flin-wallet-card--glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, var(--flin-opacity-10));
+    backdrop-filter: blur(var(--flin-blur-lg));
+    border: var(--flin-space-px) solid rgba(255, 255, 255, var(--flin-opacity-20));
 }
 
 .flin-wallet-card__header {
@@ -220,7 +220,7 @@ changeClass = match priceUp {
 
 .flin-wallet-card__currency {
     font-size: var(--flin-text-sm);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg-muted);
     text-transform: uppercase;
 }
@@ -230,7 +230,7 @@ changeClass = match priceUp {
     align-items: center;
     padding: var(--flin-space-1) var(--flin-space-2);
     font-size: var(--flin-text-xs);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     border-radius: var(--flin-radius-full);
 }
 
@@ -248,9 +248,9 @@ changeClass = match priceUp {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    padding: 0;
+    width: var(--flin-size-9);
+    height: var(--flin-size-9);
+    padding: var(--flin-space-0);
     border: none;
     background-color: var(--flin-neutral-100);
     border-radius: var(--flin-radius-md);
@@ -259,13 +259,13 @@ changeClass = match priceUp {
 }
 
 .flin-wallet-card__qr-toggle svg {
-    width: 18px;
-    height: 18px;
+    width: var(--flin-icon-md);
+    height: var(--flin-icon-md);
 }
 
 .flin-wallet-card__balance-section {
     margin-bottom: var(--flin-space-4);
-    min-height: 80px;
+    min-height: var(--flin-size-20);
     display: flex;
     align-items: center;
 }
@@ -278,15 +278,15 @@ changeClass = match priceUp {
 
 .flin-wallet-card__balance-symbol {
     font-size: var(--flin-text-2xl);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg-muted);
 }
 
 .flin-wallet-card__balance-value {
     font-size: var(--flin-text-4xl);
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     color: var(--flin-fg);
-    line-height: 1;
+    line-height: var(--flin-leading-none);
 }
 
 .flin-wallet-card__qr-container {
@@ -298,14 +298,14 @@ changeClass = match priceUp {
 }
 
 .flin-wallet-card__qr-code {
-    background-color: white;
+    background-color: var(--flin-bg);
     padding: var(--flin-space-3);
     border-radius: var(--flin-radius-lg);
 }
 
 .flin-wallet-card__qr-placeholder {
-    width: 120px;
-    height: 120px;
+    width: var(--flin-size-32);
+    height: var(--flin-size-32);
     color: var(--flin-fg);
 }
 
@@ -339,16 +339,16 @@ changeClass = match priceUp {
 .flin-wallet-card__copied-toast {
     font-size: var(--flin-text-xs);
     color: var(--flin-success);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
 }
 
 .flin-wallet-card__actions {
     display: flex;
     gap: var(--flin-space-3);
     margin-bottom: var(--flin-space-4);
-    padding: var(--flin-space-4) 0;
-    border-top: 1px solid var(--flin-neutral-200);
-    border-bottom: 1px solid var(--flin-neutral-200);
+    padding: var(--flin-space-4) var(--flin-space-0);
+    border-top: var(--flin-space-px) solid var(--flin-neutral-200);
+    border-bottom: var(--flin-space-px) solid var(--flin-neutral-200);
 }
 
 .flin-wallet-card__action {
@@ -368,36 +368,39 @@ changeClass = match priceUp {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    width: var(--flin-size-10);
+    height: var(--flin-size-10);
+    border-radius: var(--flin-radius-full);
     background-color: var(--flin-primary-light);
     color: var(--flin-primary);
 }
 
 .flin-wallet-card__action-icon svg {
-    width: 20px;
-    height: 20px;
+    width: var(--flin-size-5);
+    height: var(--flin-size-5);
 }
 
 .flin-wallet-card__action--send .flin-wallet-card__action-icon {
-    background-color: rgba(239, 68, 68, 0.1);
+    background-color: var(--flin-danger-light);
+    opacity: var(--flin-opacity-30);
     color: var(--flin-danger);
 }
 
 .flin-wallet-card__action--receive .flin-wallet-card__action-icon {
-    background-color: rgba(34, 197, 94, 0.1);
+    background-color: var(--flin-success-light);
+    opacity: var(--flin-opacity-30);
     color: var(--flin-success);
 }
 
 .flin-wallet-card__action--swap .flin-wallet-card__action-icon {
-    background-color: rgba(59, 130, 246, 0.1);
+    background-color: var(--flin-info-light);
+    opacity: var(--flin-opacity-30);
     color: var(--flin-info);
 }
 
 .flin-wallet-card__action-label {
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg);
 }
 

@@ -95,8 +95,8 @@ hasRole = authorRole != ""
 
 .comment__avatar {
     flex-shrink: 0;
-    width: 40px;
-    height: 40px;
+    width: var(--flin-avatar-md);
+    height: var(--flin-avatar-md);
     border-radius: var(--flin-radius-full);
     overflow: hidden;
 }
@@ -138,7 +138,7 @@ hasRole = authorRole != ""
 }
 
 .comment__author-name {
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     font-size: var(--flin-text-sm);
     color: var(--flin-fg);
 }
@@ -146,7 +146,7 @@ hasRole = authorRole != ""
 .comment__author-role {
     font-size: var(--flin-text-xs);
     color: var(--flin-primary);
-    padding: 2px 6px;
+    padding: var(--flin-space-0-5) var(--flin-space-1-5);
     background: var(--flin-primary-light);
     border-radius: var(--flin-radius-sm);
 }
@@ -171,7 +171,7 @@ hasRole = authorRole != ""
     margin: 0;
     font-size: var(--flin-text-sm);
     color: var(--flin-fg);
-    line-height: 1.6;
+    line-height: var(--flin-leading-relaxed);
 }
 
 .comment__actions {

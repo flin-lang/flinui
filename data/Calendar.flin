@@ -127,8 +127,8 @@ gridWeekNumbersClass = match showWeekNumbers { true -> " flin-calendar__grid--wi
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: var(--flin-size-9);
+    height: var(--flin-size-9);
     padding: 0;
     background: none;
     border: 1px solid var(--flin-neutral-200);
@@ -151,7 +151,7 @@ gridWeekNumbersClass = match showWeekNumbers { true -> " flin-calendar__grid--wi
 
 .flin-calendar__month {
     font-size: var(--flin-text-lg);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
 }
 
@@ -169,7 +169,7 @@ gridWeekNumbersClass = match showWeekNumbers { true -> " flin-calendar__grid--wi
 .flin-calendar__today-btn {
     padding: var(--flin-space-1) var(--flin-space-3);
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-primary);
     background: none;
     border: 1px solid var(--flin-primary);
@@ -191,13 +191,13 @@ gridWeekNumbersClass = match showWeekNumbers { true -> " flin-calendar__grid--wi
 }
 
 .flin-calendar__weekdays--with-numbers {
-    grid-template-columns: 32px repeat(7, 1fr);
+    grid-template-columns: var(--flin-size-8) repeat(7, 1fr);
 }
 
 .flin-calendar__weekday {
     text-align: center;
     font-size: var(--flin-text-xs);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg-muted);
     text-transform: uppercase;
     padding: var(--flin-space-2) 0;
@@ -214,7 +214,7 @@ gridWeekNumbersClass = match showWeekNumbers { true -> " flin-calendar__grid--wi
 }
 
 .flin-calendar__grid--with-numbers {
-    grid-template-columns: 32px repeat(7, 1fr);
+    grid-template-columns: var(--flin-size-8) repeat(7, 1fr);
 }
 
 .flin-calendar__day {
@@ -236,7 +236,7 @@ gridWeekNumbersClass = match showWeekNumbers { true -> " flin-calendar__grid--wi
 }
 
 .flin-calendar__day--other-month {
-    opacity: 0.4;
+    opacity: var(--flin-opacity-40);
 }
 
 .flin-calendar__day--today {
@@ -253,9 +253,9 @@ gridWeekNumbersClass = match showWeekNumbers { true -> " flin-calendar__grid--wi
 
 .flin-calendar__day-number {
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg);
-    line-height: 1;
+    line-height: var(--flin-leading-none);
 }
 
 /* Dark theme */

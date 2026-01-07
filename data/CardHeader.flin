@@ -42,17 +42,17 @@ subtitle = props.subtitle || ""
 
 .flin-card-header__title {
     font-size: var(--flin-text-lg);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
     margin: 0;
-    line-height: 1.4;
+    line-height: var(--flin-leading-snug);
 }
 
 .flin-card-header__subtitle {
     font-size: var(--flin-text-sm);
     color: var(--flin-fg-muted);
     margin: var(--flin-space-1) 0 0 0;
-    line-height: 1.5;
+    line-height: var(--flin-leading-normal);
 }
 
 .flin-card-header__action {

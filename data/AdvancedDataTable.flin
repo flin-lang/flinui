@@ -223,7 +223,7 @@ exportMenuClass = match exportMenuOpen {
     background: var(--flin-bg);
     border: 1px solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-md);
-    min-width: 250px;
+    min-width: var(--flin-size-64);
 }
 
 .advanced-table__search svg {
@@ -272,8 +272,8 @@ exportMenuClass = match exportMenuOpen {
     border: 1px solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-md);
     box-shadow: var(--flin-shadow-lg);
-    z-index: 10;
-    min-width: 150px;
+    z-index: var(--flin-z-10);
+    min-width: var(--flin-size-40);
 }
 
 .advanced-table__export-option {
@@ -335,13 +335,13 @@ exportMenuClass = match exportMenuOpen {
 }
 
 .advanced-table__cell--header {
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
     white-space: nowrap;
 }
 
 .advanced-table__cell--checkbox {
-    width: 40px;
+    width: var(--flin-size-10);
     text-align: center;
 }
 
@@ -363,8 +363,8 @@ exportMenuClass = match exportMenuOpen {
 }
 
 .advanced-table__checkbox {
-    width: 16px;
-    height: 16px;
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
     cursor: pointer;
 }
 
@@ -378,7 +378,7 @@ exportMenuClass = match exportMenuOpen {
 }
 
 .advanced-table__empty svg {
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
 }
 
 .advanced-table__empty-text {
@@ -413,8 +413,8 @@ exportMenuClass = match exportMenuOpen {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: var(--flin-size-8);
+    height: var(--flin-size-8);
     background: var(--flin-bg);
     border: 1px solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-md);
@@ -429,7 +429,7 @@ exportMenuClass = match exportMenuOpen {
 }
 
 .advanced-table__pagination-btn:disabled {
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
     cursor: not-allowed;
 }
 

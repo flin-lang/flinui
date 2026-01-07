@@ -5,7 +5,7 @@
 text = props.text || ""
 image = props.image || ""
 fontSize = props.fontSize || 16
-fontColor = props.fontColor || "rgba(0, 0, 0, 0.1)"
+fontColor = props.fontColor || "rgba(0, 0, 0, var(--flin-opacity-10))"
 rotate = props.rotate || -22
 gap = props.gap || 100
 offsetX = props.offsetX || 0
@@ -47,7 +47,7 @@ patternHeight = gap + fontSize * 2
                                    y={offsetY}
                                    width={fontSize * 4}
                                    height={fontSize * 4}
-                                   opacity="0.1"
+                                   opacity={var(--flin-opacity-10)}
                                    preserveAspectRatio="xMidYMid meet" />
                         {/if}
                         {if hasText}
@@ -77,15 +77,15 @@ patternHeight = gap + fontSize * 2
 
 .flin-watermark__content {
     position: relative;
-    z-index: 1;
+    z-index: var(--flin-z-10);
 }
 
 .flin-watermark__layer {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: var(--flin-space-0);
+    left: var(--flin-space-0);
+    right: var(--flin-space-0);
+    bottom: var(--flin-space-0);
     z-index: var(--watermark-z-index);
     pointer-events: none;
     overflow: hidden;
@@ -104,10 +104,10 @@ patternHeight = gap + fontSize * 2
 
 .flin-watermark--fullscreen .flin-watermark__layer {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: var(--flin-space-0);
+    left: var(--flin-space-0);
+    right: var(--flin-space-0);
+    bottom: var(--flin-space-0);
 }
 
 /* Prevent watermark selection and interaction */

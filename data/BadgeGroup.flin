@@ -63,11 +63,11 @@ expandableClass = match expandable { true -> " badge-overflow-expandable", _ -> 
 
 @keyframes badgeFadeIn {
     from {
-        opacity: 0;
+        opacity: var(--flin-opacity-0);
         transform: scale(0.8);
     }
     to {
-        opacity: 1;
+        opacity: var(--flin-opacity-100);
         transform: scale(1);
     }
 }
@@ -103,7 +103,7 @@ expandableClass = match expandable { true -> " badge-overflow-expandable", _ -> 
     justify-content: center;
     padding: var(--flin-space-1) var(--flin-space-2);
     font-size: var(--flin-text-xs);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg-muted);
     background-color: var(--flin-neutral-100);
     border: 1px solid var(--flin-neutral-200);
@@ -132,8 +132,8 @@ expandableClass = match expandable { true -> " badge-overflow-expandable", _ -> 
 
 .overflow-text {
     font-size: var(--flin-text-xs);
-    font-weight: 500;
-    line-height: 1.4;
+    font-weight: var(--flin-font-medium);
+    line-height: var(--flin-leading-snug);
 }
 
 /* Collapse Button */
@@ -143,7 +143,7 @@ expandableClass = match expandable { true -> " badge-overflow-expandable", _ -> 
     justify-content: center;
     padding: var(--flin-space-1) var(--flin-space-2);
     font-size: var(--flin-text-xs);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-primary);
     background-color: transparent;
     border: 1px solid var(--flin-primary);
@@ -165,8 +165,8 @@ expandableClass = match expandable { true -> " badge-overflow-expandable", _ -> 
 
 .collapse-text {
     font-size: var(--flin-text-xs);
-    font-weight: 500;
-    line-height: 1.4;
+    font-weight: var(--flin-font-medium);
+    line-height: var(--flin-leading-snug);
 }
 
 /* Expanded State Animation */
@@ -176,18 +176,18 @@ expandableClass = match expandable { true -> " badge-overflow-expandable", _ -> 
 
 @keyframes badgeExpand {
     from {
-        opacity: 0;
-        transform: translateX(-8px);
+        opacity: var(--flin-opacity-0);
+        transform: translateX(calc(-1 * var(--flin-space-2)));
     }
     to {
-        opacity: 1;
+        opacity: var(--flin-opacity-100);
         transform: translateX(0);
     }
 }
 
 /* Hover effects */
 .badge-group-item:hover {
-    transform: translateY(-1px);
+    transform: translateY(calc(-1 * var(--flin-space-px)));
 }
 
 /* Dark theme support */
@@ -212,7 +212,7 @@ expandableClass = match expandable { true -> " badge-overflow-expandable", _ -> 
 }
 
 /* Responsive adjustments */
-@media (max-width: 640px) {
+@media (max-width: var(--flin-breakpoint-sm)) {
     .flin-badge-group {
         gap: var(--flin-space-1);
     }
@@ -220,7 +220,7 @@ expandableClass = match expandable { true -> " badge-overflow-expandable", _ -> 
     .badge-group-overflow,
     .badge-group-collapse {
         padding: var(--flin-space-1);
-        font-size: 10px;
+        font-size: var(--flin-text-2xs);
     }
 }
 </style>

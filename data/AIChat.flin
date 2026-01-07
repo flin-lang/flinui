@@ -1,0 +1,368 @@
+// =============================================================================
+// AIChat Component - FlinUI
+// A reusable AI chat interface supporting Claude, ChatGPT, and custom providers
+// =============================================================================
+// Props:
+//   provider: "claude" | "openai" | "custom" (default: "claude")
+//   api_key: string (required)
+//   api_url: string (for custom providers)
+//   model: string (optional, uses provider default)
+//   system_prompt: string (optional)
+//   placeholder: string (default: "Type a message...")
+//   theme: "light" | "dark" (default: "dark")
+// =============================================================================
+
+// Default props
+provider = provider ?? "claude"
+model = model ?? ""
+system_prompt = system_prompt ?? ""
+placeholder = placeholder ?? "Type a message..."
+theme = theme ?? "dark"
+
+// State
+messages = []
+input_text = ""
+is_loading = false
+error = ""
+
+// Model defaults per provider
+fn get_default_model(prov) {
+    if prov == "claude" {
+        return "claude-sonnet-4-20250514"
+    } else if prov == "openai" {
+        return "gpt-4"
+    }
+    return ""
+}
+
+// Build API request based on provider
+fn build_request(prompt, prov, key, url) {
+    actual_model = model
+    if actual_model == "" {
+        actual_model = get_default_model(prov)
+    }
+
+    if prov == "claude" {
+        msgs = [["role": "user", "content": prompt]]
+        body = [
+            "model": actual_model,
+            "max_tokens": 1024,
+            "messages": msgs
+        ]
+        if system_prompt != "" {
+            body["system"] = system_prompt
+        }
+        return [
+            "url": "https://api.anthropic.com/v1/messages",
+            "body": json_stringify(body),
+            "headers": [
+                "x-api-key": key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json"
+            ]
+        ]
+    } else if prov == "openai" {
+        msgs = []
+        if system_prompt != "" {
+            push(msgs, ["role": "system", "content": system_prompt])
+        }
+        push(msgs, ["role": "user", "content": prompt])
+        body = [
+            "model": actual_model,
+            "messages": msgs
+        ]
+        return [
+            "url": "https://api.openai.com/v1/chat/completions",
+            "body": json_stringify(body),
+            "headers": [
+                "Authorization": "Bearer " + key,
+                "Content-Type": "application/json"
+            ]
+        ]
+    } else {
+        // Custom provider
+        return [
+            "url": url,
+            "body": json_stringify(["prompt": prompt, "model": actual_model]),
+            "headers": [
+                "Authorization": "Bearer " + key,
+                "Content-Type": "application/json"
+            ]
+        ]
+    }
+}
+
+// Parse response based on provider
+fn parse_response(response, prov) {
+    if !response.ok {
+        return ["error": response.body]
+    }
+
+    data = response.json
+    if prov == "claude" {
+        return ["text": data.content[0].text]
+    } else if prov == "openai" {
+        return ["text": data.choices[0].message.content]
+    } else {
+        // Try common response formats
+        if data.text != nil {
+            return ["text": data.text]
+        }
+        if data.response != nil {
+            return ["text": data.response]
+        }
+        return ["text": json_stringify(data)]
+    }
+}
+
+// Send message to AI
+fn send_message() {
+    if trim(input_text) == "" {
+        return
+    }
+
+    // Add user message
+    push(messages, ["role": "user", "content": input_text])
+    user_prompt = input_text
+    input_text = ""
+    is_loading = true
+    error = ""
+
+    // Build and send request
+    req = build_request(user_prompt, provider, api_key, api_url)
+    response = http_request("POST", req["url"], [
+        "body": req["body"],
+        "headers": req["headers"]
+    ])
+
+    // Parse response
+    result = parse_response(response, provider)
+
+    if result["error"] != nil {
+        error = result["error"]
+    } else {
+        push(messages, ["role": "assistant", "content": result["text"]])
+    }
+
+    is_loading = false
+}
+
+// Clear chat history
+fn clear_chat() {
+    messages = []
+    error = ""
+}
+
+// Theme colors (using design tokens where applicable)
+bg_color = if theme == "dark" { "#1a1a2e" } else { "#ffffff" }
+text_color = if theme == "dark" { "#e4e4e4" } else { "#1a1a2e" }
+input_bg = if theme == "dark" { "#16213e" } else { "#f5f5f5" }
+user_bg = if theme == "dark" { "#e94560" } else { "#0066cc" }
+assistant_bg = if theme == "dark" { "#0f3460" } else { "#e8e8e8" }
+border_color = if theme == "dark" { "#30363d" } else { "#ddd" }
+
+<div class="ai-chat-container">
+    <style>
+        .ai-chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            background: {bg_color};
+            border-radius: var(--flin-radius-lg);
+            border: 1px solid {border_color};
+            overflow: hidden;
+            font-family: var(--flin-font-sans);
+        }
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--flin-space-4);
+            border-bottom: 1px solid {border_color};
+            background: {input_bg};
+        }
+        .chat-title {
+            font-weight: var(--flin-font-semibold);
+            color: {text_color};
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+        .provider-badge {
+            font-size: var(--flin-text-xs);
+            padding: var(--flin-space-1) var(--flin-space-2);
+            border-radius: var(--flin-radius-md);
+            background: {user_bg};
+            color: #fff;
+        }
+        .clear-btn {
+            padding: var(--flin-space-2) var(--flin-space-4);
+            border-radius: var(--flin-radius-md);
+            border: none;
+            background: transparent;
+            color: {text_color};
+            cursor: pointer;
+            font-size: var(--flin-text-sm);
+        }
+        .clear-btn:hover {
+            background: {input_bg};
+        }
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--flin-space-4);
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+        }
+        .message {
+            max-width: 80%;
+            padding: var(--flin-space-3) var(--flin-space-4);
+            border-radius: var(--flin-radius-lg);
+            line-height: var(--flin-leading-normal);
+            font-size: var(--flin-text-sm);
+        }
+        .message-user {
+            align-self: flex-end;
+            background: {user_bg};
+            color: #fff;
+            border-bottom-right-radius: var(--flin-radius-md);
+        }
+        .message-assistant {
+            align-self: flex-start;
+            background: {assistant_bg};
+            color: {text_color};
+            border-bottom-left-radius: var(--flin-radius-md);
+        }
+        .loading-indicator {
+            display: flex;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-3) var(--flin-space-4);
+            align-self: flex-start;
+        }
+        .loading-dot {
+            width: var(--flin-size-2);
+            height: var(--flin-size-2);
+            border-radius: var(--flin-radius-full);
+            background: {text_color};
+            opacity: var(--flin-opacity-30);
+            animation: pulse 1.5s infinite;
+        }
+        .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes pulse {
+            0%, 100% { opacity: var(--flin-opacity-30); }
+            50% { opacity: var(--flin-opacity-100); }
+        }
+        .error-message {
+            background: var(--flin-danger-light);
+            border: 1px solid var(--flin-danger);
+            color: var(--flin-danger);
+            padding: var(--flin-space-3);
+            border-radius: var(--flin-radius-lg);
+            font-size: var(--flin-text-sm);
+            margin: 0 var(--flin-space-4);
+        }
+        .input-container {
+            display: flex;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-4);
+            border-top: 1px solid {border_color};
+            background: {input_bg};
+        }
+        .chat-input {
+            flex: 1;
+            padding: var(--flin-space-3) var(--flin-space-4);
+            border-radius: var(--flin-radius-lg);
+            border: 1px solid {border_color};
+            background: {bg_color};
+            color: {text_color};
+            font-size: var(--flin-text-sm);
+            outline: none;
+            transition: border-color var(--flin-transition-fast);
+        }
+        .chat-input:focus {
+            border-color: {user_bg};
+        }
+        .send-btn {
+            padding: var(--flin-space-3) var(--flin-space-6);
+            border-radius: var(--flin-radius-lg);
+            border: none;
+            background: {user_bg};
+            color: #fff;
+            font-weight: var(--flin-font-medium);
+            cursor: pointer;
+            font-size: var(--flin-text-sm);
+            transition: opacity var(--flin-transition-fast);
+        }
+        .send-btn:disabled {
+            opacity: var(--flin-opacity-50);
+            cursor: not-allowed;
+        }
+        .send-btn:hover:not(:disabled) {
+            opacity: var(--flin-opacity-90);
+        }
+        .empty-state {
+            text-align: center;
+            color: {text_color};
+            opacity: var(--flin-opacity-50);
+            padding: var(--flin-space-8);
+        }
+    </style>
+
+    <div class="chat-header">
+        <div class="chat-title">
+            <span>AI Chat</span>
+            <span class="provider-badge">{provider}</span>
+        </div>
+        <button class="clear-btn" click={clear_chat()}>
+            Clear
+        </button>
+    </div>
+
+    <div class="messages-container">
+        {if len(messages) == 0 && !is_loading}
+            <div class="empty-state">
+                Start a conversation with AI
+            </div>
+        {/if}
+
+        {for msg in messages}
+            <div class="message" class:message-user={msg.role == "user"} class:message-assistant={msg.role == "assistant"}>
+                {msg.content}
+            </div>
+        {/for}
+
+        {if is_loading}
+            <div class="loading-indicator">
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+            </div>
+        {/if}
+    </div>
+
+    {if error != ""}
+        <div class="error-message">
+            {error}
+        </div>
+    {/if}
+
+    <div class="input-container">
+        <input
+            type="text"
+            class="chat-input"
+            placeholder={placeholder}
+            value={input_text}
+            input={input_text = event.target.value}
+            keypress={if event.key == "Enter" { send_message() }}
+        />
+        <button
+            class="send-btn"
+            click={send_message()}
+            disabled={is_loading || trim(input_text) == ""}
+        >
+            Send
+        </button>
+    </div>
+</div>

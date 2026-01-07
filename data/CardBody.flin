@@ -22,7 +22,7 @@ computedPadding = match padding {
     padding: var(--body-padding);
     color: var(--flin-fg);
     font-size: var(--flin-text-base);
-    line-height: 1.6;
+    line-height: var(--flin-leading-relaxed);
 }
 
 .flin-card-body:empty {
