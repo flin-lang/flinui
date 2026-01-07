@@ -83,19 +83,19 @@ labelClass = "btn-label" ++ labelHiddenClass
 .btn-sm {
     font-size: var(--flin-text-sm);
     padding: var(--flin-space-1) var(--flin-space-3);
-    height: 32px;
+    height: var(--flin-height-xs);
 }
 
 .btn-md {
     font-size: var(--flin-text-base);
     padding: var(--flin-space-2) var(--flin-space-4);
-    height: 40px;
+    height: var(--flin-height-sm);
 }
 
 .btn-lg {
     font-size: var(--flin-text-lg);
     padding: var(--flin-space-3) var(--flin-space-6);
-    height: 48px;
+    height: var(--flin-height-md);
 }
 
 /* Primary variant */
@@ -137,7 +137,7 @@ labelClass = "btn-label" ++ labelHiddenClass
 }
 
 .btn-danger:active:not(:disabled) {
-    background-color: #b91c1c;
+    background-color: var(--flin-danger-active);
 }
 
 /* Success variant */
@@ -151,7 +151,7 @@ labelClass = "btn-label" ++ labelHiddenClass
 }
 
 .btn-success:active:not(:disabled) {
-    background-color: #047857;
+    background-color: var(--flin-success-active);
 }
 
 /* Warning variant */
@@ -165,7 +165,7 @@ labelClass = "btn-label" ++ labelHiddenClass
 }
 
 .btn-warning:active:not(:disabled) {
-    background-color: #b45309;
+    background-color: var(--flin-warning-active);
 }
 
 /* Loading state */

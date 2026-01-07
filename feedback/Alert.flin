@@ -140,7 +140,7 @@ displayClass = match visible { true -> "flin-alert " ++ variantClass, _ -> "flin
 .alert-info {
     background-color: var(--flin-info-light);
     border-color: var(--flin-info);
-    color: #0e7490;
+    color: var(--flin-info-active);
 }
 
 .alert-info .alert-icon {
@@ -151,7 +151,7 @@ displayClass = match visible { true -> "flin-alert " ++ variantClass, _ -> "flin
 .alert-success {
     background-color: var(--flin-success-light);
     border-color: var(--flin-success);
-    color: #047857;
+    color: var(--flin-success-active);
 }
 
 .alert-success .alert-icon {
@@ -162,7 +162,7 @@ displayClass = match visible { true -> "flin-alert " ++ variantClass, _ -> "flin
 .alert-warning {
     background-color: var(--flin-warning-light);
     border-color: var(--flin-warning);
-    color: #b45309;
+    color: var(--flin-warning-active);
 }
 
 .alert-warning .alert-icon {
@@ -173,7 +173,7 @@ displayClass = match visible { true -> "flin-alert " ++ variantClass, _ -> "flin
 .alert-danger {
     background-color: var(--flin-danger-light);
     border-color: var(--flin-danger);
-    color: #b91c1c;
+    color: var(--flin-danger-active);
 }
 
 .alert-danger .alert-icon {
@@ -183,21 +183,21 @@ displayClass = match visible { true -> "flin-alert " ++ variantClass, _ -> "flin
 /* Dark theme support */
 [data-theme="dark"] .alert-info {
     background-color: rgba(6, 182, 212, 0.15);
-    color: #67e8f9;
+    color: var(--flin-info-active);
 }
 
 [data-theme="dark"] .alert-success {
     background-color: rgba(16, 185, 129, 0.15);
-    color: #6ee7b7;
+    color: var(--flin-success-active);
 }
 
 [data-theme="dark"] .alert-warning {
     background-color: rgba(245, 158, 11, 0.15);
-    color: #fcd34d;
+    color: var(--flin-warning-active);
 }
 
 [data-theme="dark"] .alert-danger {
     background-color: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
+    color: var(--flin-danger-active);
 }
 </style>

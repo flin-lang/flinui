@@ -88,26 +88,26 @@ avatarClass = "avatar " ++ sizeClass ++ " " ++ bgClass
 
 /* Size variants */
 .avatar-sm {
-    width: 32px;
-    height: 32px;
+    width: var(--flin-avatar-sm);
+    height: var(--flin-avatar-sm);
     font-size: var(--flin-text-xs);
 }
 
 .avatar-md {
-    width: 40px;
-    height: 40px;
+    width: var(--flin-avatar-md);
+    height: var(--flin-avatar-md);
     font-size: var(--flin-text-sm);
 }
 
 .avatar-lg {
-    width: 56px;
-    height: 56px;
+    width: var(--flin-avatar-lg);
+    height: var(--flin-avatar-lg);
     font-size: var(--flin-text-lg);
 }
 
 .avatar-xl {
-    width: 80px;
-    height: 80px;
+    width: var(--flin-avatar-xl);
+    height: var(--flin-avatar-xl);
     font-size: var(--flin-text-2xl);
 }
 
@@ -137,18 +137,18 @@ avatarClass = "avatar " ++ sizeClass ++ " " ++ bgClass
 }
 
 .avatar-bg-purple {
-    background-color: #ede9fe;
-    color: #7c3aed;
+    background-color: var(--flin-avatar-purple-bg);
+    color: var(--flin-avatar-purple-text);
 }
 
 .avatar-bg-orange {
     background-color: var(--flin-warning-light);
-    color: #c2410c;
+    color: var(--flin-avatar-orange-text);
 }
 
 .avatar-bg-pink {
-    background-color: #fce7f3;
-    color: #db2777;
+    background-color: var(--flin-avatar-pink-bg);
+    color: var(--flin-avatar-pink-text);
 }
 
 .avatar-bg-cyan {
