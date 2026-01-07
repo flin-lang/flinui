@@ -111,7 +111,7 @@ layoutClass = "auth-layout auth-layout--" ++ variant ++ splitLeftClass
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 440px;
+    max-width: var(--flin-size-md);
 }
 
 .auth-layout--centered .auth-card {
@@ -127,7 +127,7 @@ layoutClass = "auth-layout auth-layout--" ++ variant ++ splitLeftClass
 }
 
 .auth-layout--centered .auth-logo {
-    height: 48px;
+    height: var(--flin-size-12);
     width: auto;
     margin-bottom: var(--flin-space-6);
 }
@@ -161,21 +161,21 @@ layoutClass = "auth-layout auth-layout--" ++ variant ++ splitLeftClass
 }
 
 .auth-branding-logo {
-    height: 40px;
+    height: var(--flin-size-10);
     width: auto;
     filter: brightness(0) invert(1);
 }
 
 .auth-image-title {
     font-size: var(--flin-text-3xl);
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     color: white;
     margin: 0 0 var(--flin-space-4) 0;
 }
 
 .auth-image-subtitle {
     font-size: var(--flin-text-lg);
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, var(--flin-opacity-80));
     margin: 0;
 }
 
@@ -190,12 +190,12 @@ layoutClass = "auth-layout auth-layout--" ++ variant ++ splitLeftClass
 
 .auth-layout--split .auth-content-wrapper {
     width: 100%;
-    max-width: 400px;
+    max-width: var(--flin-size-96);
 }
 
 .auth-title {
     font-size: var(--flin-text-2xl);
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     color: var(--flin-fg);
     margin: 0 0 var(--flin-space-2) 0;
 }
@@ -227,15 +227,15 @@ layoutClass = "auth-layout auth-layout--" ++ variant ++ splitLeftClass
     position: absolute;
     inset: 0;
     background-image:
-        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 50px 50px;
+        linear-gradient(rgba(255, 255, 255, var(--flin-opacity-5)) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, var(--flin-opacity-5)) 1px, transparent 1px);
+    background-size: var(--flin-space-12) var(--flin-space-12);
 }
 
 .pattern-gradient {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, var(--flin-opacity-10)) 0%, transparent 50%);
 }
 
 @media (max-width: 1024px) {

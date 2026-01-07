@@ -47,26 +47,26 @@ size = props.size || "large"
 
 .hero-content {
     text-align: center;
-    max-width: 800px;
+    max-width: var(--flin-container-3xl);
 }
 
 .hero-title {
     font-size: clamp(2.5rem, 6vw, 4rem);
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     color: white;
     margin: 0 0 var(--flin-space-4) 0;
-    line-height: 1.2;
+    line-height: var(--flin-leading-tight);
 }
 
 .hero-subtitle {
     font-size: var(--flin-text-xl);
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, var(--flin-opacity-90));
     margin: 0 0 var(--flin-space-4) 0;
 }
 
 .hero-description {
     font-size: var(--flin-text-lg);
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, var(--flin-opacity-80));
     margin: 0 0 var(--flin-space-8) 0;
 }
 
@@ -83,13 +83,13 @@ size = props.size || "large"
     color: var(--flin-primary);
     border-radius: var(--flin-radius-lg);
     text-decoration: none;
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     font-size: var(--flin-text-lg);
     transition: transform var(--flin-transition-fast), box-shadow var(--flin-transition-fast);
 }
 
 .hero-cta:hover {
-    transform: translateY(-2px);
+    transform: translateY(calc(-1 * var(--flin-space-0-5)));
     box-shadow: var(--flin-shadow-lg);
 }
 </style>

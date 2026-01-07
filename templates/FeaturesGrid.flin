@@ -48,7 +48,7 @@ variant = props.variant || "default"
 
 .features-title {
     font-size: var(--flin-text-3xl);
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     color: var(--flin-fg);
     margin: 0 0 var(--flin-space-4) 0;
 }
@@ -63,7 +63,7 @@ variant = props.variant || "default"
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--flin-space-6);
-    max-width: 1200px;
+    max-width: var(--flin-breakpoint-xl);
     margin: 0 auto;
 }
 
@@ -76,21 +76,21 @@ variant = props.variant || "default"
 }
 
 .feature-icon {
-    width: 48px;
-    height: 48px;
+    width: var(--flin-size-12);
+    height: var(--flin-size-12);
     background: var(--flin-primary-light);
     color: var(--flin-primary);
     border-radius: var(--flin-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     margin: 0 auto var(--flin-space-4);
 }
 
 .feature-item .feature-title {
     font-size: var(--flin-text-lg);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
     margin: 0 0 var(--flin-space-2) 0;
 }

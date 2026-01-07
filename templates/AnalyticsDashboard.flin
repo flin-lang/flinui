@@ -275,7 +275,7 @@ durationTrendIcon = match durationTrend > 0 {
 
 .dashboard-title-area {
     flex: 1;
-    min-width: 200px;
+    min-width: var(--flin-size-52);
 }
 
 .dashboard-title {
@@ -342,12 +342,12 @@ durationTrendIcon = match durationTrend > 0 {
     display: flex;
     gap: var(--flin-spacing-4);
     box-shadow: var(--flin-shadow-sm);
-    border: 1px solid var(--flin-color-gray-100);
+    border: var(--flin-space-px) solid var(--flin-color-gray-100);
 }
 
 .metric-icon {
-    width: 48px;
-    height: 48px;
+    width: var(--flin-size-12);
+    height: var(--flin-size-12);
     border-radius: var(--flin-radius-lg);
     display: flex;
     align-items: center;
@@ -409,7 +409,7 @@ durationTrendIcon = match durationTrend > 0 {
 
 .dashboard-content-grid {
     display: grid;
-    grid-template-columns: 1fr 380px;
+    grid-template-columns: 1fr var(--flin-size-96);
     gap: var(--flin-spacing-6);
 }
 
@@ -430,7 +430,7 @@ durationTrendIcon = match durationTrend > 0 {
     border-radius: var(--flin-radius-xl);
     padding: var(--flin-spacing-5);
     box-shadow: var(--flin-shadow-sm);
-    border: 1px solid var(--flin-color-gray-100);
+    border: var(--flin-space-px) solid var(--flin-color-gray-100);
 }
 
 .card-header {
@@ -461,7 +461,7 @@ durationTrendIcon = match durationTrend > 0 {
     font-weight: var(--flin-font-weight-medium);
     color: var(--flin-color-gray-500);
     background: transparent;
-    border: 1px solid var(--flin-color-gray-200);
+    border: var(--flin-space-px) solid var(--flin-color-gray-200);
     border-radius: var(--flin-radius-md);
     cursor: pointer;
     transition: all var(--flin-transition-fast);
@@ -493,7 +493,7 @@ durationTrendIcon = match durationTrend > 0 {
 }
 
 .chart-container {
-    height: 300px;
+    height: var(--flin-size-80);
     position: relative;
 }
 
@@ -527,8 +527,8 @@ durationTrendIcon = match durationTrend > 0 {
     font-weight: var(--flin-font-weight-semibold);
     color: var(--flin-color-gray-500);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--flin-color-gray-200);
+    letter-spacing: var(--flin-tracking-wider);
+    border-bottom: var(--flin-space-px) solid var(--flin-color-gray-200);
     background: var(--flin-color-gray-50);
 }
 
@@ -536,7 +536,7 @@ durationTrendIcon = match durationTrend > 0 {
     padding: var(--flin-spacing-3) var(--flin-spacing-4);
     font-size: var(--flin-font-size-sm);
     color: var(--flin-color-gray-700);
-    border-bottom: 1px solid var(--flin-color-gray-100);
+    border-bottom: var(--flin-space-px) solid var(--flin-color-gray-100);
 }
 
 .realtime-card .card-title {
@@ -546,8 +546,8 @@ durationTrendIcon = match durationTrend > 0 {
 }
 
 .realtime-dot {
-    width: 8px;
-    height: 8px;
+    width: var(--flin-size-2);
+    height: var(--flin-size-2);
     border-radius: var(--flin-radius-full);
     background: var(--flin-color-success-500);
     animation: blink 1.5s ease-in-out infinite;
@@ -613,8 +613,8 @@ durationTrendIcon = match durationTrend > 0 {
 }
 
 .device-dot {
-    width: 8px;
-    height: 8px;
+    width: var(--flin-size-2);
+    height: var(--flin-size-2);
     border-radius: var(--flin-radius-full);
 }
 
@@ -674,7 +674,7 @@ durationTrendIcon = match durationTrend > 0 {
     }
 
     .chart-container {
-        height: 200px;
+        height: var(--flin-size-52);
     }
 }
 

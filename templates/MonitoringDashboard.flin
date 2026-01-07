@@ -60,7 +60,7 @@ uptime = props.uptime || "0%"
 
 .monitoring-title {
     font-size: var(--flin-text-2xl);
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     margin: 0;
 }
 
@@ -93,7 +93,7 @@ uptime = props.uptime || "0%"
 .stat-value {
     display: block;
     font-size: var(--flin-text-2xl);
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     color: var(--flin-success);
 }
 
@@ -110,7 +110,7 @@ uptime = props.uptime || "0%"
 
 .card-title {
     font-size: var(--flin-text-lg);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     margin: 0 0 var(--flin-space-4) 0;
 }
 
@@ -121,8 +121,8 @@ uptime = props.uptime || "0%"
 }
 
 .status-dot {
-    width: 10px;
-    height: 10px;
+    width: var(--flin-size-2-5);
+    height: var(--flin-size-2-5);
     border-radius: var(--flin-radius-full);
 }
 

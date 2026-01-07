@@ -51,7 +51,7 @@ password = ""
 <style scoped>
 .login-form {
     width: 100%;
-    max-width: 400px;
+    max-width: var(--flin-size-96);
 }
 
 .form-body {
@@ -68,7 +68,7 @@ password = ""
 
 .form-label {
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg);
 }
 
@@ -97,7 +97,7 @@ password = ""
     border: none;
     border-radius: var(--flin-radius-md);
     font-size: var(--flin-text-base);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     cursor: pointer;
     transition: background-color var(--flin-transition-fast);
 }

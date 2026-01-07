@@ -43,7 +43,7 @@ unreadCount = props.unreadCount || 0
 }
 
 .email-sidebar {
-    width: 220px;
+    width: var(--flin-size-56);
     background: var(--flin-bg);
     border-right: 1px solid var(--flin-neutral-200);
 }
@@ -55,7 +55,7 @@ unreadCount = props.unreadCount || 0
 
 .sidebar-title {
     font-size: var(--flin-text-lg);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
     margin: 0;
 }
@@ -109,7 +109,7 @@ unreadCount = props.unreadCount || 0
 
 .header-title {
     font-size: var(--flin-text-xl);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
     margin: 0;
 }
@@ -121,7 +121,7 @@ unreadCount = props.unreadCount || 0
 
 .email-item {
     display: grid;
-    grid-template-columns: 150px 1fr 80px;
+    grid-template-columns: var(--flin-size-40) 1fr var(--flin-size-20);
     gap: var(--flin-space-4);
     padding: var(--flin-space-4) var(--flin-space-6);
     border-bottom: 1px solid var(--flin-neutral-200);
@@ -133,7 +133,7 @@ unreadCount = props.unreadCount || 0
 }
 
 .email-item--unread {
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
 }
 
 .email-sender {

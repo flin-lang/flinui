@@ -61,10 +61,10 @@ isOwnProfile = props.isOwnProfile || false
 <style scoped>
 .profile-card {
     background: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-xl);
     padding: var(--flin-space-6);
-    max-width: 350px;
+    max-width: var(--flin-container-xs);
 }
 
 .profile-header {
@@ -75,22 +75,22 @@ isOwnProfile = props.isOwnProfile || false
 }
 
 .profile-avatar {
-    width: 64px;
-    height: 64px;
+    width: var(--flin-size-16);
+    height: var(--flin-size-16);
     border-radius: var(--flin-radius-full);
     background: var(--flin-neutral-200);
     overflow: hidden;
 }
 
 .avatar-image {
-    width: 100%;
-    height: 100%;
+    width: var(--flin-size-full);
+    height: var(--flin-size-full);
     object-fit: cover;
 }
 
 .profile-name {
     font-size: var(--flin-text-lg);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
     margin: 0;
 }
@@ -104,15 +104,15 @@ isOwnProfile = props.isOwnProfile || false
     font-size: var(--flin-text-sm);
     color: var(--flin-fg-muted);
     margin: 0 0 var(--flin-space-4) 0;
-    line-height: 1.5;
+    line-height: var(--flin-leading-normal);
 }
 
 .profile-stats {
     display: flex;
     justify-content: space-around;
     padding: var(--flin-space-4) 0;
-    border-top: 1px solid var(--flin-neutral-200);
-    border-bottom: 1px solid var(--flin-neutral-200);
+    border-top: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
     margin-bottom: var(--flin-space-4);
 }
 
@@ -123,7 +123,7 @@ isOwnProfile = props.isOwnProfile || false
 .stat-value {
     display: block;
     font-size: var(--flin-text-lg);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
 }
 
@@ -140,11 +140,11 @@ isOwnProfile = props.isOwnProfile || false
 .action-button {
     flex: 1;
     padding: var(--flin-space-2) var(--flin-space-4);
-    border: 1px solid var(--flin-neutral-300);
+    border: var(--flin-size-px) solid var(--flin-neutral-300);
     border-radius: var(--flin-radius-md);
     background: var(--flin-bg);
     color: var(--flin-fg);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     cursor: pointer;
     transition: background-color var(--flin-transition-fast);
 }

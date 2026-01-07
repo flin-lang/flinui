@@ -78,7 +78,7 @@ billingPeriod = props.billingPeriod || "monthly"
 
 .pricing-title {
     font-size: var(--flin-text-3xl);
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     color: var(--flin-fg);
     margin: 0 0 var(--flin-space-4) 0;
 }
@@ -93,7 +93,7 @@ billingPeriod = props.billingPeriod || "monthly"
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--flin-space-6);
-    max-width: 1000px;
+    max-width: var(--flin-breakpoint-lg);
     margin: 0 auto;
 }
 
@@ -113,7 +113,7 @@ billingPeriod = props.billingPeriod || "monthly"
 
 .plan-badge {
     position: absolute;
-    top: -12px;
+    top: calc(-1 * var(--flin-size-3));
     left: 50%;
     transform: translateX(-50%);
     background: var(--flin-primary);
@@ -121,12 +121,12 @@ billingPeriod = props.billingPeriod || "monthly"
     padding: var(--flin-space-1) var(--flin-space-3);
     border-radius: var(--flin-radius-full);
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
 }
 
 .plan-name {
     font-size: var(--flin-text-xl);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
     margin: 0 0 var(--flin-space-4) 0;
 }
@@ -141,8 +141,8 @@ billingPeriod = props.billingPeriod || "monthly"
 }
 
 .price-amount {
-    font-size: 48px;
-    font-weight: 700;
+    font-size: var(--flin-text-5xl);
+    font-weight: var(--flin-font-bold);
     color: var(--flin-fg);
 }
 
@@ -160,17 +160,17 @@ billingPeriod = props.billingPeriod || "monthly"
 .feature-item {
     padding: var(--flin-space-2) 0;
     color: var(--flin-fg-muted);
-    border-bottom: 1px solid var(--flin-neutral-100);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-100);
 }
 
 .plan-cta {
-    width: 100%;
+    width: var(--flin-size-full);
     padding: var(--flin-space-3);
     background: var(--flin-primary);
     color: white;
     border: none;
     border-radius: var(--flin-radius-md);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     cursor: pointer;
     transition: background-color var(--flin-transition-fast);
 }

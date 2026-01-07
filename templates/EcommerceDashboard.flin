@@ -52,7 +52,7 @@ customers = props.customers || 0
 
 .ecommerce-title {
     font-size: var(--flin-text-2xl);
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     color: var(--flin-fg);
     margin: 0;
 }
@@ -75,7 +75,7 @@ customers = props.customers || 0
 .stat-value {
     display: block;
     font-size: var(--flin-text-2xl);
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
     color: var(--flin-primary);
 }
 
@@ -98,7 +98,7 @@ customers = props.customers || 0
 
 .card-title {
     font-size: var(--flin-text-lg);
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
     margin: 0 0 var(--flin-space-4) 0;
 }
@@ -113,11 +113,11 @@ customers = props.customers || 0
     display: flex;
     justify-content: space-between;
     padding: var(--flin-space-3);
-    border-bottom: 1px solid var(--flin-neutral-200);
+    border-bottom: var(--flin-space-px) solid var(--flin-neutral-200);
 }
 
 .order-id {
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg);
 }
 
