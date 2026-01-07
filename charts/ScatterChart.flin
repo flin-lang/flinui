@@ -10,6 +10,7 @@ showLabels = props.showLabels || true
 animated = props.animated || true
 title = props.title || ""
 subtitle = props.subtitle || ""
+pointRadius = props.pointRadius || 6
 
 // Calculate dimensions
 paddingTop = 40
@@ -62,7 +63,7 @@ animatedClass = match animated { true -> " flin-scatter__point--animated", _ -> 
                     class={"flin-scatter__point" ++ animatedClass}
                     cx="50"
                     cy="100"
-                    r="6"
+                    r={pointRadius}
                     fill="var(--flin-primary)"
                     style="--point-index: 0;"
                 />
@@ -70,7 +71,7 @@ animatedClass = match animated { true -> " flin-scatter__point--animated", _ -> 
                     class={"flin-scatter__point" ++ animatedClass}
                     cx="150"
                     cy="60"
-                    r="6"
+                    r={pointRadius}
                     fill="var(--flin-primary)"
                     style="--point-index: 1;"
                 />
@@ -78,7 +79,7 @@ animatedClass = match animated { true -> " flin-scatter__point--animated", _ -> 
                     class={"flin-scatter__point" ++ animatedClass}
                     cx="200"
                     cy="80"
-                    r="6"
+                    r={pointRadius}
                     fill="var(--flin-primary)"
                     style="--point-index: 2;"
                 />
@@ -118,7 +119,7 @@ animatedClass = match animated { true -> " flin-scatter__point--animated", _ -> 
 
 .flin-scatter__axis {
     stroke: var(--flin-neutral-300);
-    stroke-width: 1;
+    stroke-width: var(--flin-space-px);
 }
 
 .flin-scatter__point {
@@ -127,7 +128,7 @@ animatedClass = match animated { true -> " flin-scatter__point--animated", _ -> 
 }
 
 .flin-scatter__point:hover {
-    r: 8;
+    transform: scale(1.33);
 }
 
 .flin-scatter__point--animated {

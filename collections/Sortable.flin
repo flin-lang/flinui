@@ -99,7 +99,7 @@ draggingClass = match isDragging { true -> " sortable--dragging", _ -> "" }
 }
 
 .sortable--disabled {
-    opacity: 0.6;
+    opacity: var(--flin-opacity-60);
     pointer-events: none;
 }
 
@@ -130,11 +130,11 @@ draggingClass = match isDragging { true -> " sortable--dragging", _ -> "" }
 
 /* Dragging state */
 .sortable-item--dragging {
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
     cursor: grabbing;
     box-shadow: var(--flin-shadow-lg);
     transform: scale(1.02);
-    z-index: 100;
+    z-index: var(--flin-z-dropdown);
 }
 
 /* Drag over state */
@@ -180,9 +180,9 @@ draggingClass = match isDragging { true -> " sortable--dragging", _ -> "" }
 .sortable-drop-indicator {
     position: absolute;
     background-color: var(--flin-primary);
-    border-radius: 2px;
+    border-radius: var(--flin-radius-sm);
     pointer-events: none;
-    z-index: 10;
+    z-index: var(--flin-z-10);
 }
 
 .sortable--vertical .sortable-drop-indicator {

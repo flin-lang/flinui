@@ -89,19 +89,19 @@ visibleClass = match visible { true -> " flin-chart-tooltip--visible", _ -> "" }
 
 .flin-chart-tooltip__content {
     background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-space-px) solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-md);
     box-shadow: var(--flin-shadow-lg);
     padding: var(--flin-space-2) var(--flin-space-3);
-    min-width: 120px;
-    max-width: 280px;
+    min-width: var(--flin-size-30);
+    max-width: var(--flin-size-70);
     font-family: var(--flin-font-sans);
 }
 
 .flin-chart-tooltip__header {
     margin-bottom: var(--flin-space-2);
     padding-bottom: var(--flin-space-2);
-    border-bottom: 1px solid var(--flin-neutral-200);
+    border-bottom: var(--flin-space-px) solid var(--flin-neutral-200);
 }
 
 .flin-chart-tooltip__title {
@@ -123,8 +123,8 @@ visibleClass = match visible { true -> " flin-chart-tooltip--visible", _ -> "" }
 }
 
 .flin-chart-tooltip__dot {
-    width: 8px;
-    height: 8px;
+    width: var(--flin-size-2);
+    height: var(--flin-size-2);
     border-radius: var(--flin-radius-full);
     background-color: var(--dot-color);
     flex-shrink: 0;
@@ -145,25 +145,25 @@ visibleClass = match visible { true -> " flin-chart-tooltip--visible", _ -> "" }
 
 .flin-chart-tooltip__arrow {
     position: absolute;
-    width: 8px;
-    height: 8px;
+    width: var(--flin-size-2);
+    height: var(--flin-size-2);
     background-color: var(--flin-bg);
-    border: 1px solid var(--flin-neutral-200);
+    border: var(--flin-space-px) solid var(--flin-neutral-200);
     transform: rotate(45deg);
 }
 
 .flin-chart-tooltip--top .flin-chart-tooltip__arrow {
-    bottom: -5px;
+    bottom: calc(-1 * var(--flin-space-1) - var(--flin-space-px));
     left: 50%;
-    margin-left: -4px;
+    margin-left: calc(-1 * var(--flin-space-1));
     border-top: none;
     border-left: none;
 }
 
 .flin-chart-tooltip--bottom .flin-chart-tooltip__arrow {
-    top: -5px;
+    top: calc(-1 * var(--flin-space-1) - var(--flin-space-px));
     left: 50%;
-    margin-left: -4px;
+    margin-left: calc(-1 * var(--flin-space-1));
     border-bottom: none;
     border-right: none;
 }

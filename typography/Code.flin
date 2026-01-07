@@ -19,7 +19,7 @@ codeStyle = colorPart ++ fontSizePart
     display: inline;
     padding: 0.15em 0.4em;
     font-family: var(--flin-font-mono);
-    font-size: 0.875em;
+    font-size: var(--flin-text-sm);
     color: var(--flin-danger);
     background-color: var(--flin-bg-muted);
     border-radius: var(--flin-radius-sm);

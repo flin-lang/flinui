@@ -89,7 +89,7 @@ animatedClass = match animated { true -> " flin-heatmap__cell--animated", _ -> "
 }
 
 .flin-heatmap__cell:hover {
-    opacity: 0.8;
+    opacity: var(--flin-opacity-80);
 }
 
 .flin-heatmap__cell--animated {

@@ -30,6 +30,9 @@ seriesColors = [
     "var(--flin-danger)"
 ]
 
+// Stroke width
+strokeWidth = props.strokeWidth || 2
+
 // Pre-compute animated class
 animatedClass = match animated { true -> " flin-linechart__line--animated", _ -> "" }
 
@@ -61,7 +64,7 @@ animatedClass = match animated { true -> " flin-linechart__line--animated", _ ->
                 d="M 0 100 L 100 50 L 200 75"
                 fill="none"
                 stroke="var(--flin-primary)"
-                stroke-width="2"
+                stroke-width={strokeWidth}
             />
         </g>
     </svg>
@@ -107,7 +110,7 @@ animatedClass = match animated { true -> " flin-linechart__line--animated", _ ->
 
 .flin-linechart__axis {
     stroke: var(--flin-neutral-300);
-    stroke-width: 1;
+    stroke-width: var(--flin-space-px);
 }
 
 .flin-linechart__line {
@@ -141,8 +144,8 @@ animatedClass = match animated { true -> " flin-linechart__line--animated", _ ->
 }
 
 .flin-linechart__legend-color {
-    width: 20px;
-    height: 3px;
+    width: var(--flin-size-5);
+    height: var(--flin-space-0-5);
     background-color: var(--legend-color);
     border-radius: var(--flin-radius-full);
 }

@@ -116,7 +116,7 @@ animatedClass = match animated { true -> " flin-treemap__node--animated", _ -> "
 .flin-treemap__node {
     cursor: pointer;
     stroke: var(--flin-bg);
-    stroke-width: 2;
+    stroke-width: var(--flin-space-0-5);
     transition: opacity var(--flin-transition-fast), filter var(--flin-transition-fast);
 }
 
@@ -143,8 +143,8 @@ animatedClass = match animated { true -> " flin-treemap__node--animated", _ -> "
 
 .flin-treemap__label {
     font-size: var(--flin-text-sm);
-    fill: white;
+    fill: var(--flin-bg);
     pointer-events: none;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 var(--flin-space-px) var(--flin-space-0-5) rgba(0, 0, 0, var(--flin-opacity-30));
 }
 </style>

@@ -77,7 +77,7 @@ textClass = "text " ++ sizeClass ++ " " ++ weightClass ++ alignClass ++ truncate
 <style scoped>
 .text {
     font-family: var(--flin-font-sans);
-    line-height: 1.5;
+    line-height: var(--flin-leading-normal);
     margin: 0;
     color: var(--flin-fg);
 }
@@ -85,59 +85,59 @@ textClass = "text " ++ sizeClass ++ " " ++ weightClass ++ alignClass ++ truncate
 /* Size variants */
 .text-xs {
     font-size: var(--flin-text-xs);
-    line-height: 1.4;
+    line-height: var(--flin-leading-tight);
 }
 
 .text-sm {
     font-size: var(--flin-text-sm);
-    line-height: 1.45;
+    line-height: var(--flin-leading-normal);
 }
 
 .text-base {
     font-size: var(--flin-text-base);
-    line-height: 1.5;
+    line-height: var(--flin-leading-normal);
 }
 
 .text-lg {
     font-size: var(--flin-text-lg);
-    line-height: 1.55;
+    line-height: var(--flin-leading-relaxed);
 }
 
 .text-xl {
     font-size: var(--flin-text-xl);
-    line-height: 1.4;
+    line-height: var(--flin-leading-tight);
 }
 
 .text-2xl {
     font-size: var(--flin-text-2xl);
-    line-height: 1.35;
+    line-height: var(--flin-leading-snug);
 }
 
 .text-3xl {
     font-size: var(--flin-text-3xl);
-    line-height: 1.3;
+    line-height: var(--flin-leading-snug);
 }
 
 .text-4xl {
     font-size: var(--flin-text-4xl);
-    line-height: 1.2;
+    line-height: var(--flin-leading-tight);
 }
 
 /* Weight variants */
 .text-normal {
-    font-weight: 400;
+    font-weight: var(--flin-font-normal);
 }
 
 .text-medium {
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
 }
 
 .text-semibold {
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
 }
 
 .text-bold {
-    font-weight: 700;
+    font-weight: var(--flin-font-bold);
 }
 
 /* Alignment variants */

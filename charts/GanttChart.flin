@@ -59,7 +59,7 @@ animatedClass = match animated { true -> " flin-gantt__bar--animated", _ -> "" }
                 y="0"
                 width="200"
                 height="30"
-                rx="4"
+                rx={barRadius}
                 fill="var(--flin-primary)"
             />
         </g>

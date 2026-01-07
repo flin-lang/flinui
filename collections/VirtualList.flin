@@ -120,7 +120,7 @@ disabledClass = match disabled { true -> " virtual-list--disabled", _ -> "" }
 }
 
 .virtual-list--disabled {
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
     pointer-events: none;
 }
 

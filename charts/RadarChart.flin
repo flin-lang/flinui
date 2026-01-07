@@ -10,6 +10,7 @@ showGrid = props.showGrid || true
 animated = props.animated || true
 title = props.title || ""
 subtitle = props.subtitle || ""
+strokeWidth = props.strokeWidth || 2
 
 // Calculate dimensions
 chartSize = 300
@@ -40,9 +41,9 @@ animatedClass = match animated { true -> " flin-radar__area--animated", _ -> "" 
     >
         {if showGrid}
             <g class="flin-radar__grid">
-                <circle cx={centerX} cy={centerY} r={radius} fill="none" stroke="var(--flin-neutral-200)" stroke-width="1"/>
-                <circle cx={centerX} cy={centerY} r={radius * 0.66} fill="none" stroke="var(--flin-neutral-200)" stroke-width="1"/>
-                <circle cx={centerX} cy={centerY} r={radius * 0.33} fill="none" stroke="var(--flin-neutral-200)" stroke-width="1"/>
+                <circle cx={centerX} cy={centerY} r={radius} fill="none" stroke="var(--flin-neutral-200)" stroke-width="var(--flin-space-px)"/>
+                <circle cx={centerX} cy={centerY} r={radius * 0.66} fill="none" stroke="var(--flin-neutral-200)" stroke-width="var(--flin-space-px)"/>
+                <circle cx={centerX} cy={centerY} r={radius * 0.33} fill="none" stroke="var(--flin-neutral-200)" stroke-width="var(--flin-space-px)"/>
             </g>
         {/if}
 
@@ -53,9 +54,9 @@ animatedClass = match animated { true -> " flin-radar__area--animated", _ -> "" 
                 cy={centerY}
                 r={radius * 0.7}
                 fill="var(--flin-primary)"
-                fill-opacity="0.3"
+                fill-opacity="var(--flin-opacity-30)"
                 stroke="var(--flin-primary)"
-                stroke-width="2"
+                stroke-width={strokeWidth}
             />
         </g>
     </svg>
@@ -96,7 +97,7 @@ animatedClass = match animated { true -> " flin-radar__area--animated", _ -> "" 
 }
 
 .flin-radar__area:hover {
-    fill-opacity: 0.5;
+    fill-opacity: var(--flin-opacity-50);
 }
 
 .flin-radar__area--animated {

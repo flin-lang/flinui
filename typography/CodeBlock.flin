@@ -100,7 +100,7 @@ copiedText = match copied {
     font-size: var(--flin-text-sm);
     font-family: var(--flin-font-sans);
     color: var(--flin-neutral-200);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
 }
 
 .code-block__language {
@@ -108,7 +108,7 @@ copiedText = match copied {
     font-family: var(--flin-font-mono);
     color: var(--flin-neutral-400);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--flin-tracking-wide);
 }
 
 .code-block__copy {
@@ -168,7 +168,7 @@ copiedText = match copied {
     font-family: var(--flin-font-mono);
     font-size: var(--flin-text-sm);
     color: var(--flin-neutral-100);
-    line-height: 1.7;
+    line-height: var(--flin-leading-relaxed);
     white-space: pre;
     tab-size: 4;
 }

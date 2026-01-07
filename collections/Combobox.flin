@@ -141,7 +141,7 @@ isEmpty = !hasValue
 }
 
 .combobox-trigger--disabled {
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
     cursor: not-allowed;
     background: var(--flin-neutral-100);
 }
@@ -205,15 +205,15 @@ isEmpty = !hasValue
     border: 1px solid var(--flin-neutral-200);
     border-radius: var(--flin-radius-md);
     box-shadow: var(--flin-shadow-lg);
-    z-index: 50;
-    opacity: 0;
+    z-index: var(--flin-z-50);
+    opacity: var(--flin-opacity-0);
     visibility: hidden;
     transform: translateY(-8px);
     transition: all var(--flin-transition-fast);
 }
 
 .combobox-dropdown--open {
-    opacity: 1;
+    opacity: var(--flin-opacity-100);
     visibility: visible;
     transform: translateY(0);
 }
@@ -306,11 +306,11 @@ isEmpty = !hasValue
     border: none;
     cursor: pointer;
     border-radius: var(--flin-radius-sm);
-    opacity: 0.7;
+    opacity: var(--flin-opacity-70);
 }
 
 .combobox-tag-remove:hover {
-    opacity: 1;
+    opacity: var(--flin-opacity-100);
     background: var(--flin-primary);
     color: white;
 }
@@ -355,7 +355,7 @@ isEmpty = !hasValue
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 40;
+    z-index: var(--flin-z-40);
 }
 
 /* Dark theme */

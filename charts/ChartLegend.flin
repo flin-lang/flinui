@@ -14,10 +14,10 @@ activeItems = props.activeItems || []
 
 // Compute size values
 dotSize = match size {
-    "sm" -> "8px",
-    "md" -> "12px",
-    "lg" -> "16px",
-    _ -> "12px"
+    "sm" -> "var(--flin-size-2)",
+    "md" -> "var(--flin-size-3)",
+    "lg" -> "var(--flin-size-4)",
+    _ -> "var(--flin-size-3)"
 }
 
 fontSize = match size {
@@ -119,7 +119,7 @@ clickableClass = match clickable { true -> " flin-legend__item--clickable", _ ->
 }
 
 .flin-legend__item--inactive {
-    opacity: 0.4;
+    opacity: var(--flin-opacity-40);
 }
 
 .flin-legend__dot {

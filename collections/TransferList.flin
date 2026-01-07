@@ -118,7 +118,7 @@ disabledClass = match disabled { true -> " transfer-list--disabled", _ -> "" }
 }
 
 .transfer-list--disabled {
-    opacity: 0.6;
+    opacity: var(--flin-opacity-60);
     pointer-events: none;
 }
 

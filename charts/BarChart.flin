@@ -122,8 +122,8 @@ animatedClass = match animated { true -> " flin-barchart__bar--animated", _ -> "
 
 .flin-barchart__grid-line {
     stroke: var(--flin-neutral-200);
-    stroke-width: 1;
-    stroke-dasharray: 4 4;
+    stroke-width: var(--flin-space-px);
+    stroke-dasharray: var(--flin-space-4) var(--flin-space-4);
 }
 
 .flin-barchart__bar {
@@ -145,11 +145,11 @@ animatedClass = match animated { true -> " flin-barchart__bar--animated", _ -> "
 }
 
 .flin-barchart__bar-group:hover .flin-barchart__bar {
-    opacity: 0.8;
+    opacity: var(--flin-opacity-80);
 }
 
 .flin-barchart__label {
-    font-size: 12px;
+    font-size: var(--flin-text-xs);
     fill: var(--flin-fg-muted);
 }
 

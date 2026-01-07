@@ -37,7 +37,7 @@ blockquoteClass = "blockquote " ++ variantClass
 .blockquote__content {
     margin: 0;
     font-size: var(--flin-text-lg);
-    line-height: 1.7;
+    line-height: var(--flin-leading-relaxed);
     color: var(--flin-fg);
     font-style: italic;
 }

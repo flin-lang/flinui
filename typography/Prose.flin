@@ -34,7 +34,7 @@ proseStyle = "max-width: " ++ maxWidth ++ ";"
 .prose {
     font-family: var(--flin-font-sans);
     color: var(--flin-fg);
-    line-height: 1.75;
+    line-height: var(--flin-leading-relaxed);
 }
 
 /* Size: base */
@@ -46,21 +46,21 @@ proseStyle = "max-width: " ++ maxWidth ++ ";"
     font-size: var(--flin-text-4xl);
     margin-top: 0;
     margin-bottom: var(--flin-space-6);
-    line-height: 1.2;
+    line-height: var(--flin-leading-tight);
 }
 
 .prose--base h2 {
     font-size: var(--flin-text-2xl);
     margin-top: var(--flin-space-10);
     margin-bottom: var(--flin-space-4);
-    line-height: 1.3;
+    line-height: var(--flin-leading-snug);
 }
 
 .prose--base h3 {
     font-size: var(--flin-text-xl);
     margin-top: var(--flin-space-8);
     margin-bottom: var(--flin-space-3);
-    line-height: 1.4;
+    line-height: var(--flin-leading-tight);
 }
 
 .prose--base p {
@@ -105,21 +105,21 @@ proseStyle = "max-width: " ++ maxWidth ++ ";"
     font-size: var(--flin-text-4xl);
     margin-top: 0;
     margin-bottom: var(--flin-space-8);
-    line-height: 1.15;
+    line-height: var(--flin-leading-tight);
 }
 
 .prose--lg h2 {
     font-size: var(--flin-text-3xl);
     margin-top: var(--flin-space-12);
     margin-bottom: var(--flin-space-5);
-    line-height: 1.25;
+    line-height: var(--flin-leading-snug);
 }
 
 .prose--lg h3 {
     font-size: var(--flin-text-2xl);
     margin-top: var(--flin-space-10);
     margin-bottom: var(--flin-space-4);
-    line-height: 1.35;
+    line-height: var(--flin-leading-snug);
 }
 
 .prose--lg p {
@@ -136,7 +136,7 @@ proseStyle = "max-width: " ++ maxWidth ++ ";"
     font-size: var(--flin-text-4xl);
     margin-top: 0;
     margin-bottom: var(--flin-space-10);
-    line-height: 1.1;
+    line-height: var(--flin-leading-tight);
 }
 
 .prose--xl h2 {
@@ -161,8 +161,8 @@ proseStyle = "max-width: " ++ maxWidth ++ ";"
 .prose h2,
 .prose h3,
 .prose h4 {
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-weight: var(--flin-font-bold);
+    letter-spacing: var(--flin-tracking-tight);
     color: var(--flin-fg);
 }
 
@@ -177,7 +177,7 @@ proseStyle = "max-width: " ++ maxWidth ++ ";"
 }
 
 .prose strong {
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     color: var(--flin-fg);
 }
 
@@ -187,7 +187,7 @@ proseStyle = "max-width: " ++ maxWidth ++ ";"
 
 .prose code {
     font-family: var(--flin-font-mono);
-    font-size: 0.875em;
+    font-size: var(--flin-text-sm);
     padding: 0.15em 0.4em;
     background-color: var(--flin-bg-muted);
     border-radius: var(--flin-radius-sm);
@@ -261,7 +261,7 @@ proseStyle = "max-width: " ++ maxWidth ++ ";"
 }
 
 .prose th {
-    font-weight: 600;
+    font-weight: var(--flin-font-semibold);
     background-color: var(--flin-bg-muted);
 }
 

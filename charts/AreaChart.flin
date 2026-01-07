@@ -137,13 +137,13 @@ animatedClass = match animated { true -> " flin-areachart__area--animated", _ ->
 
 .flin-areachart__grid-line {
     stroke: var(--flin-neutral-200);
-    stroke-width: 1;
-    stroke-dasharray: 4 4;
+    stroke-width: var(--flin-space-px);
+    stroke-dasharray: var(--flin-space-4) var(--flin-space-4);
 }
 
 .flin-areachart__axis {
     stroke: var(--flin-neutral-300);
-    stroke-width: 1;
+    stroke-width: var(--flin-space-px);
 }
 
 .flin-areachart__series {
@@ -195,8 +195,8 @@ animatedClass = match animated { true -> " flin-areachart__area--animated", _ ->
 }
 
 .flin-areachart__legend-color {
-    width: 12px;
-    height: 12px;
+    width: var(--flin-size-3);
+    height: var(--flin-size-3);
     border-radius: var(--flin-radius-sm);
     background-color: var(--legend-color);
 }

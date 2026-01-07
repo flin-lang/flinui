@@ -161,8 +161,8 @@ animatedClass = match animated { true -> " flin-pie__slice--animated", _ -> "" }
 }
 
 .flin-pie__legend-color {
-    width: 12px;
-    height: 12px;
+    width: var(--flin-size-3);
+    height: var(--flin-size-3);
     border-radius: var(--flin-radius-sm);
     background-color: var(--legend-color);
 }

@@ -9,6 +9,8 @@ variant = props.variant || "line"
 color = props.color || "var(--flin-primary)"
 showEndpoint = props.showEndpoint || true
 animated = props.animated || true
+strokeWidth = props.strokeWidth || 2
+endpointRadius = props.endpointRadius || 3
 
 // Pre-compute animated class
 animatedClass = match animated { true -> " flin-sparkline__path--animated", _ -> "" }
@@ -25,7 +27,7 @@ animatedClass = match animated { true -> " flin-sparkline__path--animated", _ ->
             d="M 0 20 L 25 15 L 50 18 L 75 10 L 100 12"
             fill="none"
             stroke={color}
-            stroke-width="2"
+            stroke-width={strokeWidth}
             stroke-linecap="round"
             stroke-linejoin="round"
         />
@@ -34,7 +36,7 @@ animatedClass = match animated { true -> " flin-sparkline__path--animated", _ ->
                 class="flin-sparkline__endpoint"
                 cx="100"
                 cy="12"
-                r="3"
+                r={endpointRadius}
                 fill={color}
             />
         {/if}
@@ -75,6 +77,6 @@ animatedClass = match animated { true -> " flin-sparkline__path--animated", _ ->
 }
 
 .flin-sparkline:hover .flin-sparkline__endpoint {
-    r: 4;
+    transform: scale(1.33);
 }
 </style>

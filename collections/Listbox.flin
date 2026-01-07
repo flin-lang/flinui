@@ -97,7 +97,7 @@ disabledClass = match disabled { true -> " listbox--disabled", _ -> "" }
 }
 
 .listbox--disabled {
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
     pointer-events: none;
     background: var(--flin-neutral-100);
 }
@@ -138,7 +138,7 @@ disabledClass = match disabled { true -> " listbox--disabled", _ -> "" }
 }
 
 .listbox-option--disabled {
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
     cursor: not-allowed;
 }
 

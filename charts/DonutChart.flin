@@ -211,8 +211,8 @@ animatedClass = match animated { true -> " flin-donut__slice--animated", _ -> ""
 }
 
 .flin-donut__legend-color {
-    width: 12px;
-    height: 12px;
+    width: var(--flin-size-3);
+    height: var(--flin-size-3);
     border-radius: var(--flin-radius-sm);
     background-color: var(--legend-color);
     flex-shrink: 0;
