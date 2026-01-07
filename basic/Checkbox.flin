@@ -64,8 +64,8 @@ checkboxClass = "checkbox" ++ checkedClass ++ disabledClass
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: var(--flin-icon-md);
+    height: var(--flin-icon-md);
     border: 2px solid var(--flin-neutral-300);
     border-radius: var(--flin-radius-sm);
     background-color: var(--flin-bg);
@@ -79,7 +79,7 @@ checkboxClass = "checkbox" ++ checkedClass ++ disabledClass
 
 .checkbox-input:focus-visible + .checkbox-control {
     outline: 2px solid var(--flin-primary);
-    outline-offset: 2px;
+    outline-offset: var(--flin-space-0-5);
 }
 
 .checkbox-checked .checkbox-control {
@@ -96,13 +96,14 @@ checkboxClass = "checkbox" ++ checkedClass ++ disabledClass
 .checkbox-label {
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-normal);
     color: var(--flin-fg);
-    line-height: 1.4;
+    line-height: var(--flin-leading-snug);
 }
 
 .checkbox-disabled {
     cursor: not-allowed;
-    opacity: 0.5;
+    opacity: var(--flin-opacity-50);
 }
 
 .checkbox-disabled .checkbox-control {

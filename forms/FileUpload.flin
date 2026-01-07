@@ -79,14 +79,14 @@ containerClass = "file-upload" ++ disabledClass
 }
 
 .file-upload-icon {
-    width: 48px;
-    height: 48px;
+    width: calc(var(--flin-size-10) * 1.2);
+    height: calc(var(--flin-size-10) * 1.2);
     color: var(--flin-neutral-400);
 }
 
 .file-upload-text {
     font-size: var(--flin-text-base);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg);
 }
 

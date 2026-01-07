@@ -63,7 +63,7 @@ containerClass = "date-picker" ++ disabledClass
 
 .date-picker-input {
     flex: 1;
-    height: 40px;
+    height: var(--flin-height-sm);
     padding: 0 var(--flin-space-3);
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-base);
@@ -86,8 +86,8 @@ containerClass = "date-picker" ++ disabledClass
 }
 
 .date-picker-icon svg {
-    width: 18px;
-    height: 18px;
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
 }
 
 /* Disabled state */

@@ -57,7 +57,7 @@ sliderClass = "slider" ++ disabledClass
 .slider-track-wrapper {
     position: relative;
     flex: 1;
-    height: 24px;
+    height: var(--flin-size-6);
     display: flex;
     align-items: center;
 }
@@ -78,7 +78,7 @@ sliderClass = "slider" ++ disabledClass
 
 .slider-track {
     width: 100%;
-    height: 6px;
+    height: calc(var(--flin-size-6) / 4);
     background-color: var(--flin-neutral-200);
     border-radius: var(--flin-radius-full);
     overflow: hidden;
@@ -96,8 +96,8 @@ sliderClass = "slider" ++ disabledClass
 .slider-input::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 20px;
-    height: 20px;
+    width: var(--flin-size-5);
+    height: var(--flin-size-5);
     background-color: white;
     border: 2px solid var(--flin-primary);
     border-radius: var(--flin-radius-full);
@@ -109,8 +109,8 @@ sliderClass = "slider" ++ disabledClass
 }
 
 .slider-input::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
+    width: var(--flin-size-5);
+    height: var(--flin-size-5);
     background-color: white;
     border: 2px solid var(--flin-primary);
     border-radius: var(--flin-radius-full);
@@ -150,9 +150,9 @@ sliderClass = "slider" ++ disabledClass
 .slider-value {
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-sm);
-    font-weight: 500;
+    font-weight: var(--flin-font-medium);
     color: var(--flin-fg);
-    min-width: 40px;
+    min-width: var(--flin-size-10);
     text-align: right;
     font-variant-numeric: tabular-nums;
 }

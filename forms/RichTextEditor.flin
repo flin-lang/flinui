@@ -92,8 +92,8 @@ containerClass = "rich-text-editor" ++ disabledClass
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: var(--flin-space-8);
+    height: var(--flin-space-8);
     background: transparent;
     border: none;
     border-radius: var(--flin-radius-sm);
@@ -113,13 +113,13 @@ containerClass = "rich-text-editor" ++ disabledClass
 }
 
 .rich-text-btn svg {
-    width: 18px;
-    height: 18px;
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
 }
 
 .rich-text-separator {
     width: 1px;
-    height: 20px;
+    height: var(--flin-space-5);
     background-color: var(--flin-neutral-300);
     margin: 0 var(--flin-space-1);
 }

@@ -52,6 +52,7 @@ textareaClass = "textarea" ++ errorClass ++ disabledClass
     padding: var(--flin-space-3);
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-normal);
     color: var(--flin-fg);
     background-color: var(--flin-bg);
     border: 1px solid var(--flin-neutral-300);
@@ -59,7 +60,7 @@ textareaClass = "textarea" ++ errorClass ++ disabledClass
     transition: all var(--flin-transition-fast);
     outline: none;
     resize: vertical;
-    line-height: 1.5;
+    line-height: var(--flin-leading-normal);
 }
 
 .textarea::placeholder {

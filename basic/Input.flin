@@ -50,10 +50,11 @@ inputClass = "input" ++ errorClass ++ disabledClass
 
 .input {
     width: 100%;
-    height: 40px;
+    height: var(--flin-height-sm);
     padding: var(--flin-space-2) var(--flin-space-3);
     font-family: var(--flin-font-sans);
     font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-normal);
     color: var(--flin-fg);
     background-color: var(--flin-bg);
     border: 1px solid var(--flin-neutral-300);

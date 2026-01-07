@@ -66,8 +66,8 @@ radioClass = "radio" ++ checkedClass ++ disabledClass
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: var(--flin-size-5);
+    height: var(--flin-size-5);
     border: 2px solid var(--flin-neutral-300);
     border-radius: var(--flin-radius-full);
     background-color: var(--flin-bg);
@@ -89,11 +89,11 @@ radioClass = "radio" ++ checkedClass ++ disabledClass
 }
 
 .radio-dot {
-    width: 10px;
-    height: 10px;
+    width: calc(var(--flin-size-5) / 2);
+    height: calc(var(--flin-size-5) / 2);
     border-radius: var(--flin-radius-full);
     background-color: var(--flin-primary);
-    animation: radio-dot-appear 0.15s ease-out;
+    animation: radio-dot-appear var(--flin-transition-fast) ease-out;
 }
 
 @keyframes radio-dot-appear {

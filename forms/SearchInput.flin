@@ -150,8 +150,8 @@ searchIconClass = match loading {
 }
 
 .search-input-icon-btn svg {
-    width: 18px;
-    height: 18px;
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
 }
 
 .search-icon.hidden,
@@ -161,11 +161,11 @@ searchIconClass = match loading {
 
 /* Spinner */
 .search-input-spinner {
-    width: 16px;
-    height: 16px;
+    width: var(--flin-space-4);
+    height: var(--flin-space-4);
     border: 2px solid var(--flin-neutral-200);
     border-top-color: var(--flin-primary);
-    border-radius: 50%;
+    border-radius: var(--flin-radius-full);
     animation: search-spin 0.6s linear infinite;
 }
 
@@ -177,11 +177,11 @@ searchIconClass = match loading {
 
 /* Size variants */
 .search-input-sm {
-    height: 32px;
+    height: var(--flin-space-8);
 }
 
 .search-input-sm .search-input-icon-btn {
-    width: 32px;
+    width: var(--flin-space-8);
 }
 
 .search-input-sm .search-input-field {
@@ -189,29 +189,29 @@ searchIconClass = match loading {
 }
 
 .search-input-sm .search-input-icon-btn svg {
-    width: 16px;
-    height: 16px;
+    width: var(--flin-space-4);
+    height: var(--flin-space-4);
 }
 
 .search-input-sm .search-input-spinner {
-    width: 14px;
-    height: 14px;
+    width: calc(var(--flin-space-3) + 2px);
+    height: calc(var(--flin-space-3) + 2px);
 }
 
 .search-input-md {
-    height: 40px;
+    height: var(--flin-height-sm);
 }
 
 .search-input-md .search-input-icon-btn {
-    width: 40px;
+    width: var(--flin-height-sm);
 }
 
 .search-input-lg {
-    height: 48px;
+    height: var(--flin-height-md);
 }
 
 .search-input-lg .search-input-icon-btn {
-    width: 48px;
+    width: var(--flin-height-md);
 }
 
 .search-input-lg .search-input-field {
@@ -219,13 +219,13 @@ searchIconClass = match loading {
 }
 
 .search-input-lg .search-input-icon-btn svg {
-    width: 22px;
-    height: 22px;
+    width: calc(var(--flin-icon-md) + 2px);
+    height: calc(var(--flin-icon-md) + 2px);
 }
 
 .search-input-lg .search-input-spinner {
-    width: 20px;
-    height: 20px;
+    width: var(--flin-icon-md);
+    height: var(--flin-icon-md);
 }
 
 /* Disabled state */
