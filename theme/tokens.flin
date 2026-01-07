@@ -145,6 +145,53 @@ breakpointLg = "1024px"
 breakpointXl = "1280px"
 breakpoint2xl = "1536px"
 
+// ============================================================================
+// COMPONENT-SPECIFIC TOKENS
+// ============================================================================
+
+// Avatar variant colors
+avatarPurpleBg = "#ede9fe"
+avatarPurpleText = "#7c3aed"
+avatarPinkBg = "#fce7f3"
+avatarPinkText = "#db2777"
+avatarOrangeBg = "#fed7aa"
+avatarOrangeText = "#c2410c"
+
+// Highlight colors (light mode - for Highlight and Mark components)
+highlightYellowBg = "#fef3c7"
+highlightYellowText = "#92400e"
+highlightGreenBg = "#d1fae5"
+highlightGreenText = "#065f46"
+highlightBlueBg = "#dbeafe"
+highlightBlueText = "#1e40af"
+highlightRedBg = "#fee2e2"
+highlightRedText = "#991b1b"
+highlightPurpleBg = "#ede9fe"
+highlightPurpleText = "#6b21a8"
+highlightPinkBg = "#fce7f3"
+highlightPinkText = "#9f1239"
+
+// Component heights (for Button, IconButton, etc.)
+heightXs = "32px"
+heightSm = "40px"
+heightMd = "48px"
+heightLg = "56px"
+heightXl = "64px"
+
+// Avatar sizes
+avatarXs = "24px"
+avatarSm = "32px"
+avatarMd = "40px"
+avatarLg = "56px"
+avatarXl = "80px"
+
+// Icon sizes
+iconXs = "12px"
+iconSm = "16px"
+iconMd = "20px"
+iconLg = "24px"
+iconXl = "32px"
+
 // Export theme as CSS custom properties
 <style>
 :root {
@@ -157,26 +204,31 @@ breakpoint2xl = "1536px"
     /* Secondary */
     --flin-secondary: #6b7280;
     --flin-secondary-hover: #4b5563;
+    --flin-secondary-active: #374151;
     --flin-secondary-light: #f3f4f6;
 
     /* Success */
     --flin-success: #10b981;
     --flin-success-hover: #059669;
+    --flin-success-active: #047857;
     --flin-success-light: #d1fae5;
 
     /* Warning */
     --flin-warning: #f59e0b;
     --flin-warning-hover: #d97706;
+    --flin-warning-active: #b45309;
     --flin-warning-light: #fef3c7;
 
     /* Danger */
     --flin-danger: #ef4444;
     --flin-danger-hover: #dc2626;
+    --flin-danger-active: #b91c1c;
     --flin-danger-light: #fee2e2;
 
     /* Info */
     --flin-info: #06b6d4;
     --flin-info-hover: #0891b2;
+    --flin-info-active: #0e7490;
     --flin-info-light: #cffafe;
 
     /* Neutral */
@@ -477,6 +529,53 @@ breakpoint2xl = "1536px"
     --flin-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
     --flin-transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
     --flin-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       COMPONENT-SPECIFIC TOKENS
+       ═══════════════════════════════════════════════════════════════════════════ */
+
+    /* Avatar Variant Colors */
+    --flin-avatar-purple-bg: #ede9fe;
+    --flin-avatar-purple-text: #7c3aed;
+    --flin-avatar-pink-bg: #fce7f3;
+    --flin-avatar-pink-text: #db2777;
+    --flin-avatar-orange-bg: #fed7aa;
+    --flin-avatar-orange-text: #c2410c;
+
+    /* Highlight Colors (for Highlight and Mark components) */
+    --flin-highlight-yellow-bg: #fef3c7;
+    --flin-highlight-yellow-text: #92400e;
+    --flin-highlight-green-bg: #d1fae5;
+    --flin-highlight-green-text: #065f46;
+    --flin-highlight-blue-bg: #dbeafe;
+    --flin-highlight-blue-text: #1e40af;
+    --flin-highlight-red-bg: #fee2e2;
+    --flin-highlight-red-text: #991b1b;
+    --flin-highlight-purple-bg: #ede9fe;
+    --flin-highlight-purple-text: #6b21a8;
+    --flin-highlight-pink-bg: #fce7f3;
+    --flin-highlight-pink-text: #9f1239;
+
+    /* Component Heights (Button, IconButton, etc.) */
+    --flin-height-xs: 32px;
+    --flin-height-sm: 40px;
+    --flin-height-md: 48px;
+    --flin-height-lg: 56px;
+    --flin-height-xl: 64px;
+
+    /* Avatar Sizes */
+    --flin-avatar-xs: 24px;
+    --flin-avatar-sm: 32px;
+    --flin-avatar-md: 40px;
+    --flin-avatar-lg: 56px;
+    --flin-avatar-xl: 80px;
+
+    /* Icon Sizes */
+    --flin-icon-xs: 12px;
+    --flin-icon-sm: 16px;
+    --flin-icon-md: 20px;
+    --flin-icon-lg: 24px;
+    --flin-icon-xl: 32px;
 
     /* ═══════════════════════════════════════════════════════════════════════════
        AFRICAN DUSK THEME — FLIN Brand Identity
