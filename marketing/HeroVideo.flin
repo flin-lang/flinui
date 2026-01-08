@@ -1,0 +1,185 @@
+// ============================================================================
+// HeroVideo.flin — FlinUI PRO Marketing Component
+// Full-screen video hero with text overlay
+// ============================================================================
+// Props:
+//   - headline: Main headline text (string)
+//   - subtitle: Subtitle text (string or none)
+//   - ctaLabel: Call-to-action button text (string)
+//   - ctaUrl: CTA button URL (string or none)
+//   - onCtaClick: CTA click handler (function or none)
+//   - videoSrc: Video source URL (string)
+//   - videoPoster: Video poster image (string or none)
+//   - overlayOpacity: Overlay opacity 0-1 (number)
+
+headline = props.headline || "Experience the Future"
+subtitle = props.subtitle || none
+ctaLabel = props.ctaLabel || "Watch Demo"
+ctaUrl = props.ctaUrl || none
+onCtaClick = props.onCtaClick || none
+videoSrc = props.videoSrc || "/hero-video.mp4"
+videoPoster = props.videoPoster || none
+overlayOpacity = props.overlayOpacity || 0.4
+
+handleCtaClick = fn() {
+    if onCtaClick != none {
+        onCtaClick()
+    }
+}
+
+<div class="flin-hero-video" style="--overlay-opacity: {overlayOpacity}">
+    <style>
+        .flin-hero-video {
+            position: relative;
+            min-height: 700px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-elevated);
+        }
+
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, var(--overlay-opacity));
+            z-index: 1;
+        }
+
+        .video-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: var(--flin-text-inverse);
+            padding: var(--flin-space-12);
+            max-width: 800px;
+            animation: fadeInScale 1s ease-out;
+        }
+
+        .video-headline {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: var(--flin-font-black);
+            line-height: var(--flin-leading-tight);
+            margin: 0 0 var(--flin-space-6) 0;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-subtitle {
+            font-size: clamp(1.125rem, 2vw, 1.5rem);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0 0 var(--flin-space-8) 0;
+            opacity: 0.95;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .video-cta {
+            padding: var(--flin-space-4) var(--flin-space-8);
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+            border: none;
+            border-radius: var(--flin-radius-button);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+            box-shadow: var(--flin-shadow-lg);
+        }
+
+        .video-cta:hover {
+            background: var(--flin-accent-gold-bright);
+            transform: translateY(-2px);
+            box-shadow: var(--flin-shadow-xl);
+        }
+
+        .video-cta:active {
+            transform: translateY(0);
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-hero-video {
+                min-height: 500px;
+            }
+
+            .video-content {
+                padding: var(--flin-space-6);
+            }
+
+            .video-headline {
+                font-size: 2rem;
+            }
+
+            .video-subtitle {
+                font-size: 1.125rem;
+            }
+
+            .video-cta {
+                padding: var(--flin-space-3) var(--flin-space-6);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flin-hero-video {
+                min-height: 400px;
+            }
+
+            .video-headline {
+                font-size: 1.5rem;
+            }
+
+            .video-subtitle {
+                font-size: 1rem;
+                margin-bottom: var(--flin-space-6);
+            }
+
+            .video-content {
+                padding: var(--flin-space-4);
+            }
+        }
+    </style>
+
+    <video
+        class="video-background"
+        poster={videoPoster}
+        autoplay
+        muted
+        loop
+        playsinline
+    >
+        <source src={videoSrc} type="video/mp4" />
+    </video>
+
+    <div class="video-overlay"></div>
+
+    <div class="video-content">
+        <h1 class="video-headline">{headline}</h1>
+        {if subtitle != none}
+            <p class="video-subtitle">{subtitle}</p>
+        {/if}
+        <button class="video-cta" click={handleCtaClick}>{ctaLabel}</button>
+    </div>
+</div>

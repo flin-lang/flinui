@@ -1,0 +1,150 @@
+// ============================================================================
+// HeroGradient.flin — FlinUI PRO Marketing Component
+// Hero with bold gradient background and centered content
+// ============================================================================
+// Props:
+//   - headline: Main headline text (string)
+//   - subtitle: Subtitle text (string or none)
+//   - ctaLabel: Call-to-action button text (string)
+//   - onCtaClick: CTA click handler (function or none)
+//   - gradientStart: Gradient start color (string)
+//   - gradientEnd: Gradient end color (string)
+
+headline = props.headline || "Unleash Your Potential"
+subtitle = props.subtitle || "Join thousands of teams building the future"
+ctaLabel = props.ctaLabel || "Get Started Free"
+onCtaClick = props.onCtaClick || none
+gradientStart = props.gradientStart || "#1a1a2e"
+gradientEnd = props.gradientEnd || "#16213e"
+
+handleCtaClick = fn() {
+    if onCtaClick != none {
+        onCtaClick()
+    }
+}
+
+<div class="flin-hero-gradient" style="--gradient-start: {gradientStart}; --gradient-end: {gradientEnd}">
+    <style>
+        .flin-hero-gradient {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 700px;
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            overflow: hidden;
+        }
+
+        .flin-hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        .gradient-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+        }
+
+        .gradient-headline {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: var(--flin-font-black);
+            line-height: var(--flin-leading-tight);
+            color: #ffffff;
+            margin: 0 0 var(--flin-space-6) 0;
+            background: linear-gradient(to right, #ffffff 0%, var(--flin-accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+
+        .gradient-subtitle {
+            font-size: clamp(1.125rem, 2vw, 1.5rem);
+            line-height: var(--flin-leading-relaxed);
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0 0 var(--flin-space-10) 0;
+        }
+
+        .gradient-cta {
+            padding: var(--flin-space-4) var(--flin-space-10);
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+            border: none;
+            border-radius: var(--flin-radius-button);
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3);
+        }
+
+        .gradient-cta:hover {
+            background: var(--flin-accent-gold-bright);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(255, 215, 0, 0.4);
+        }
+
+        .gradient-cta:active {
+            transform: translateY(-1px);
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-hero-gradient {
+                min-height: 600px;
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .gradient-headline {
+                font-size: 2rem;
+            }
+
+            .gradient-subtitle {
+                font-size: 1.125rem;
+            }
+
+            .gradient-cta {
+                width: 100%;
+                padding: var(--flin-space-4) var(--flin-space-6);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flin-hero-gradient {
+                min-height: 500px;
+            }
+
+            .gradient-headline {
+                font-size: 1.75rem;
+            }
+
+            .gradient-subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+
+    <div class="gradient-content">
+        <h1 class="gradient-headline">{headline}</h1>
+        {if subtitle != none}
+            <p class="gradient-subtitle">{subtitle}</p>
+        {/if}
+        <button class="gradient-cta" click={handleCtaClick}>{ctaLabel}</button>
+    </div>
+</div>

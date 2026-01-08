@@ -1,0 +1,150 @@
+// ============================================================================
+// FeatureComparison.flin — FlinUI PRO Marketing Component
+// Side-by-side comparison of features or products
+// ============================================================================
+// Props:
+//   - title: Section title (string or none)
+//   - leftTitle: Left column title (string)
+//   - rightTitle: Right column title (string)
+//   - leftFeatures: List of features for left side (list of strings)
+//   - rightFeatures: List of features for right side (list of strings)
+//   - highlightLeft: Highlight left column (boolean)
+//   - highlightRight: Highlight right column (boolean)
+
+title = props.title || "Choose Your Plan"
+leftTitle = props.leftTitle || "Basic"
+rightTitle = props.rightTitle || "Pro"
+leftFeatures = props.leftFeatures || ["Feature 1", "Feature 2", "Feature 3"]
+rightFeatures = props.rightFeatures || ["All Basic features", "Advanced analytics", "Priority support", "Custom integrations"]
+highlightLeft = props.highlightLeft || false
+highlightRight = props.highlightRight || true
+
+<div class="flin-feature-comparison">
+    <style>
+        .flin-feature-comparison {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .comparison-header {
+            text-align: center;
+            margin-bottom: var(--flin-space-16);
+        }
+
+        .comparison-title {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--flin-space-6);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .comparison-column {
+            display: flex;
+            flex-direction: column;
+            padding: var(--flin-space-8);
+            background: var(--flin-bg-elevated);
+            border: 2px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .comparison-column.highlight {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-glow-gold);
+            transform: scale(1.03);
+        }
+
+        .comparison-column:hover {
+            border-color: var(--flin-accent-gold);
+            transform: scale(1.05);
+        }
+
+        .column-title {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-6) 0;
+            text-align: center;
+        }
+
+        .column-title.highlight {
+            color: var(--flin-accent-gold);
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-3);
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+        }
+
+        .feature-item::before {
+            content: '✓';
+            color: var(--flin-accent-emerald);
+            font-weight: var(--flin-font-bold);
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-feature-comparison {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .comparison-container {
+                grid-template-columns: 1fr;
+                gap: var(--flin-space-4);
+            }
+
+            .comparison-column.highlight {
+                transform: scale(1);
+            }
+
+            .comparison-column:hover {
+                transform: scale(1.02);
+            }
+        }
+    </style>
+
+    {if title != none}
+        <div class="comparison-header">
+            <h2 class="comparison-title">{title}</h2>
+        </div>
+    {/if}
+
+    <div class="comparison-container">
+        <div class="comparison-column {highlightLeft ? 'highlight' : ''}">
+            <h3 class="column-title {highlightLeft ? 'highlight' : ''}">{leftTitle}</h3>
+            <div class="feature-list">
+                {for feature in leftFeatures}
+                    <div class="feature-item">{feature}</div>
+                {/for}
+            </div>
+        </div>
+
+        <div class="comparison-column {highlightRight ? 'highlight' : ''}">
+            <h3 class="column-title {highlightRight ? 'highlight' : ''}">{rightTitle}</h3>
+            <div class="feature-list">
+                {for feature in rightFeatures}
+                    <div class="feature-item">{feature}</div>
+                {/for}
+            </div>
+        </div>
+    </div>
+</div>

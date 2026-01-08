@@ -1,0 +1,235 @@
+// ============================================================================
+// FeatureShowcase.flin — FlinUI PRO Marketing Component
+// Large feature showcase with prominent image and feature list
+// ============================================================================
+// Props:
+//   - title: Main title (string)
+//   - description: Description text (string or none)
+//   - image: Showcase image URL (string)
+//   - imageAlt: Alt text for image (string)
+//   - features: List of feature strings (list)
+//   - ctaLabel: CTA button text (string or none)
+//   - onCtaClick: CTA click handler (function or none)
+
+title = props.title || "Everything You Need in One Place"
+description = props.description || none
+image = props.image || "/showcase-image.jpg"
+imageAlt = props.imageAlt || "Feature showcase"
+features = props.features || [
+    "Real-time collaboration",
+    "Advanced analytics",
+    "Unlimited storage",
+    "24/7 support",
+    "API access"
+]
+ctaLabel = props.ctaLabel || none
+onCtaClick = props.onCtaClick || none
+
+// State
+imageLoaded = false
+
+handleCtaClick = fn() {
+    if onCtaClick != none {
+        onCtaClick()
+    }
+}
+
+handleImageLoad = fn() {
+    imageLoaded = true
+}
+
+<div class="flin-feature-showcase">
+    <style>
+        .flin-feature-showcase {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .showcase-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .showcase-image-container {
+            width: 100%;
+            height: 500px;
+            border-radius: var(--flin-radius-2xl);
+            overflow: hidden;
+            box-shadow: var(--flin-shadow-2xl);
+            margin-bottom: var(--flin-space-12);
+        }
+
+        .showcase-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--flin-transition-slow);
+        }
+
+        .showcase-image.loaded {
+            animation: zoomIn 1s ease-out;
+        }
+
+        .flin-feature-showcase:hover .showcase-image {
+            transform: scale(1.02);
+        }
+
+        .showcase-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--flin-space-12);
+            align-items: start;
+        }
+
+        .showcase-text {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-5);
+        }
+
+        .showcase-title {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            line-height: var(--flin-leading-tight);
+            margin: 0;
+        }
+
+        .showcase-description {
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        .showcase-cta {
+            padding: var(--flin-space-4) var(--flin-space-8);
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+            border: none;
+            border-radius: var(--flin-radius-button);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            cursor: pointer;
+            width: fit-content;
+            transition: all var(--flin-transition-normal);
+            box-shadow: var(--flin-shadow-md);
+        }
+
+        .showcase-cta:hover {
+            background: var(--flin-accent-gold-bright);
+            transform: translateY(-2px);
+            box-shadow: var(--flin-shadow-glow-gold);
+        }
+
+        .showcase-features {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+        }
+
+        .showcase-feature {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-lg);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .showcase-feature:hover {
+            border-color: var(--flin-accent-gold);
+            transform: translateX(5px);
+        }
+
+        .showcase-feature::before {
+            content: '✓';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: var(--flin-accent-emerald);
+            color: white;
+            border-radius: 50%;
+            font-weight: var(--flin-font-bold);
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .showcase-content {
+                grid-template-columns: 1fr;
+                gap: var(--flin-space-8);
+            }
+
+            .showcase-image-container {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flin-feature-showcase {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .showcase-image-container {
+                height: 300px;
+            }
+
+            .showcase-title {
+                font-size: 2rem;
+            }
+
+            .showcase-cta {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+
+    <div class="showcase-container">
+        <div class="showcase-image-container">
+            <img
+                src={image}
+                alt={imageAlt}
+                class="showcase-image {imageLoaded ? 'loaded' : ''}"
+                load={handleImageLoad}
+            />
+        </div>
+
+        <div class="showcase-content">
+            <div class="showcase-text">
+                <h2 class="showcase-title">{title}</h2>
+                {if description != none}
+                    <p class="showcase-description">{description}</p>
+                {/if}
+                {if ctaLabel != none}
+                    <button class="showcase-cta" click={handleCtaClick}>{ctaLabel}</button>
+                {/if}
+            </div>
+
+            <div class="showcase-features">
+                {for feature in features}
+                    <div class="showcase-feature">{feature}</div>
+                {/for}
+            </div>
+        </div>
+    </div>
+</div>

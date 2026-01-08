@@ -1,0 +1,234 @@
+// ============================================================================
+// HeroWithApp.flin — FlinUI PRO Marketing Component
+// Hero showcasing app screenshot with floating mockup
+// ============================================================================
+// Props:
+//   - headline: Main headline text (string)
+//   - subtitle: Subtitle text (string or none)
+//   - ctaLabel: Call-to-action button text (string)
+//   - onCtaClick: CTA click handler (function or none)
+//   - appScreenshot: App screenshot URL (string)
+//   - appScreenshotAlt: Alt text for screenshot (string)
+//   - features: List of feature highlights (list of strings)
+
+headline = props.headline || "Your App, Beautifully Designed"
+subtitle = props.subtitle || "Experience the perfect blend of power and simplicity"
+ctaLabel = props.ctaLabel || "Download Now"
+onCtaClick = props.onCtaClick || none
+appScreenshot = props.appScreenshot || "/app-screenshot.png"
+appScreenshotAlt = props.appScreenshotAlt || "App screenshot"
+features = props.features || ["Fast", "Secure", "Easy to use"]
+
+// State
+screenshotLoaded = false
+
+handleCtaClick = fn() {
+    if onCtaClick != none {
+        onCtaClick()
+    }
+}
+
+handleScreenshotLoad = fn() {
+    screenshotLoaded = true
+}
+
+<div class="flin-hero-with-app">
+    <style>
+        .flin-hero-with-app {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--flin-space-12);
+            align-items: center;
+            padding: var(--flin-space-20) var(--flin-space-8);
+            min-height: 700px;
+            background: linear-gradient(to bottom right,
+                var(--flin-bg-surface) 0%,
+                var(--flin-bg-elevated) 100%);
+            overflow: hidden;
+        }
+
+        .app-content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-6);
+            z-index: 1;
+        }
+
+        .app-headline {
+            font-size: clamp(2.5rem, 4vw, 3.75rem);
+            font-weight: var(--flin-font-black);
+            line-height: var(--flin-leading-tight);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .app-subtitle {
+            font-size: clamp(1.125rem, 2vw, 1.25rem);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-secondary);
+            margin: 0;
+        }
+
+        .app-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--flin-space-3);
+            margin: var(--flin-space-4) 0;
+        }
+
+        .app-feature {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-2) var(--flin-space-4);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-full);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+        }
+
+        .app-feature::before {
+            content: '✓';
+            color: var(--flin-accent-emerald);
+            font-weight: var(--flin-font-bold);
+        }
+
+        .app-cta {
+            padding: var(--flin-space-4) var(--flin-space-8);
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+            border: none;
+            border-radius: var(--flin-radius-button);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            cursor: pointer;
+            width: fit-content;
+            transition: all var(--flin-transition-normal);
+            box-shadow: var(--flin-shadow-lg);
+        }
+
+        .app-cta:hover {
+            background: var(--flin-accent-gold-bright);
+            transform: translateY(-2px);
+            box-shadow: var(--flin-shadow-glow-gold);
+        }
+
+        .app-mockup {
+            position: relative;
+            z-index: 2;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .app-screenshot {
+            width: 100%;
+            height: auto;
+            border-radius: var(--flin-radius-xl);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15),
+                        0 0 100px rgba(255, 215, 0, 0.1);
+            transition: transform var(--flin-transition-slow);
+        }
+
+        .app-screenshot.loaded {
+            animation: scaleIn 0.8s ease-out;
+        }
+
+        .app-mockup:hover .app-screenshot {
+            transform: scale(1.02) translateY(-5px);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .flin-hero-with-app {
+                grid-template-columns: 1fr;
+                gap: var(--flin-space-10);
+            }
+
+            .app-mockup {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flin-hero-with-app {
+                padding: var(--flin-space-16) var(--flin-space-4);
+                min-height: 600px;
+            }
+
+            .app-headline {
+                font-size: 2rem;
+            }
+
+            .app-subtitle {
+                font-size: 1.125rem;
+            }
+
+            .app-cta {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flin-hero-with-app {
+                min-height: 550px;
+            }
+
+            .app-headline {
+                font-size: 1.75rem;
+            }
+
+            .app-subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+
+    <div class="app-content">
+        <h1 class="app-headline">{headline}</h1>
+        {if subtitle != none}
+            <p class="app-subtitle">{subtitle}</p>
+        {/if}
+
+        {if features.length > 0}
+            <div class="app-features">
+                {for feature in features}
+                    <span class="app-feature">{feature}</span>
+                {/for}
+            </div>
+        {/if}
+
+        <button class="app-cta" click={handleCtaClick}>{ctaLabel}</button>
+    </div>
+
+    <div class="app-mockup">
+        <img
+            src={appScreenshot}
+            alt={appScreenshotAlt}
+            class="app-screenshot {screenshotLoaded ? 'loaded' : ''}"
+            load={handleScreenshotLoad}
+        />
+    </div>
+</div>

@@ -1,0 +1,141 @@
+// ============================================================================
+// FeatureGrid.flin — FlinUI PRO Marketing Component
+// Grid layout displaying features with icons, titles, and descriptions
+// ============================================================================
+// Props:
+//   - title: Section title (string or none)
+//   - subtitle: Section subtitle (string or none)
+//   - features: List of feature objects with icon, title, description (list)
+//   - columns: Number of columns 2-4 (number)
+
+title = props.title || none
+subtitle = props.subtitle || none
+features = props.features || [
+    ["icon": "⚡", "title": "Lightning Fast", "description": "Optimized for speed and performance"],
+    ["icon": "🔒", "title": "Secure", "description": "Enterprise-grade security built-in"],
+    ["icon": "🎨", "title": "Beautiful", "description": "Stunning UI that users love"],
+    ["icon": "📱", "title": "Responsive", "description": "Works perfectly on all devices"]
+]
+columns = props.columns || 3
+
+<div class="flin-feature-grid" style="--columns: {columns}">
+    <style>
+        .flin-feature-grid {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .grid-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto var(--flin-space-16) auto;
+        }
+
+        .grid-title {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-4) 0;
+        }
+
+        .grid-subtitle {
+            font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(var(--columns), 1fr);
+            gap: var(--flin-space-8);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-8);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .feature-card:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-lg);
+            font-size: 1.75rem;
+        }
+
+        .feature-title {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .feature-description {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flin-feature-grid {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .grid-container {
+                grid-template-columns: 1fr;
+                gap: var(--flin-space-6);
+            }
+
+            .feature-card {
+                padding: var(--flin-space-6);
+            }
+        }
+    </style>
+
+    {if title != none || subtitle != none}
+        <div class="grid-header">
+            {if title != none}
+                <h2 class="grid-title">{title}</h2>
+            {/if}
+            {if subtitle != none}
+                <p class="grid-subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="grid-container">
+        {for feature in features}
+            <div class="feature-card">
+                <div class="feature-icon">{feature.icon}</div>
+                <h3 class="feature-title">{feature.title}</h3>
+                <p class="feature-description">{feature.description}</p>
+            </div>
+        {/for}
+    </div>
+</div>

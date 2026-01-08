@@ -1,0 +1,155 @@
+// ============================================================================
+// FeatureTimeline.flin — FlinUI PRO Marketing Component
+// Sequential timeline display for features or process steps
+// ============================================================================
+// Props:
+//   - title: Section title (string or none)
+//   - items: List of timeline items with title, description, icon (list)
+
+title = props.title || none
+items = props.items || [
+    ["title": "Sign Up", "description": "Create your account in seconds", "icon": "1"],
+    ["title": "Set Up", "description": "Configure your workspace and invite your team", "icon": "2"],
+    ["title": "Launch", "description": "Start building amazing projects", "icon": "3"],
+    ["title": "Scale", "description": "Grow your business with confidence", "icon": "4"]
+]
+
+<div class="flin-feature-timeline">
+    <style>
+        .flin-feature-timeline {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .timeline-header {
+            text-align: center;
+            margin-bottom: var(--flin-space-16);
+        }
+
+        .timeline-title {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .timeline-container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 40px;
+            top: 40px;
+            bottom: 40px;
+            width: 2px;
+            background: var(--flin-border-subtle);
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: var(--flin-space-6);
+            margin-bottom: var(--flin-space-12);
+            position: relative;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-icon {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-elevated);
+            border: 3px solid var(--flin-border-medium);
+            border-radius: 50%;
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-accent-gold);
+            position: relative;
+            z-index: 1;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .timeline-item:hover .timeline-icon {
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+            border-color: var(--flin-accent-gold);
+            transform: scale(1.1);
+        }
+
+        .timeline-content {
+            padding-top: var(--flin-space-2);
+        }
+
+        .timeline-item-title {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-3) 0;
+        }
+
+        .timeline-item-description {
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-feature-timeline {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .timeline-line {
+                left: 30px;
+            }
+
+            .timeline-item {
+                grid-template-columns: 60px 1fr;
+                gap: var(--flin-space-4);
+            }
+
+            .timeline-icon {
+                width: 60px;
+                height: 60px;
+                font-size: var(--flin-text-xl);
+            }
+
+            .timeline-item-title {
+                font-size: var(--flin-text-xl);
+            }
+
+            .timeline-item-description {
+                font-size: var(--flin-text-base);
+            }
+        }
+    </style>
+
+    {if title != none}
+        <div class="timeline-header">
+            <h2 class="timeline-title">{title}</h2>
+        </div>
+    {/if}
+
+    <div class="timeline-container">
+        <div class="timeline-line"></div>
+
+        {for item in items}
+            <div class="timeline-item">
+                <div class="timeline-icon">{item.icon}</div>
+                <div class="timeline-content">
+                    <h3 class="timeline-item-title">{item.title}</h3>
+                    <p class="timeline-item-description">{item.description}</p>
+                </div>
+            </div>
+        {/for}
+    </div>
+</div>

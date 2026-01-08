@@ -1,0 +1,223 @@
+// ============================================================================
+// HeroSplit.flin — FlinUI PRO Marketing Component
+// Hero section with split layout: text on left, image on right
+// ============================================================================
+// Props:
+//   - headline: Main headline text (string)
+//   - subheading: Secondary heading (string or none)
+//   - description: Description text (string or none)
+//   - ctaLabel: Call-to-action button text (string)
+//   - ctaUrl: CTA button URL (string or none)
+//   - onCtaClick: CTA click handler (function or none)
+//   - imageSrc: Hero image URL (string)
+//   - imageAlt: Alt text for image (string)
+//   - imagePosition: Image position "right" or "left" (string)
+
+headline = props.headline || "Build Faster with Modern Tools"
+subheading = props.subheading || none
+description = props.description || none
+ctaLabel = props.ctaLabel || "Get Started"
+ctaUrl = props.ctaUrl || none
+onCtaClick = props.onCtaClick || none
+imageSrc = props.imageSrc || "/placeholder-hero.jpg"
+imageAlt = props.imageAlt || "Hero image"
+imagePosition = props.imagePosition || "right"
+
+// State
+imageLoaded = false
+
+handleCtaClick = fn() {
+    if onCtaClick != none {
+        onCtaClick()
+    }
+}
+
+handleImageLoad = fn() {
+    imageLoaded = true
+}
+
+<div class="flin-hero-split {imagePosition == 'left' ? 'image-left' : ''}">
+    <style>
+        .flin-hero-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--flin-space-12);
+            align-items: center;
+            padding: var(--flin-space-20) var(--flin-space-8);
+            min-height: 650px;
+            background: var(--flin-bg-surface);
+        }
+
+        .flin-hero-split.image-left {
+            direction: rtl;
+        }
+
+        .flin-hero-split.image-left > * {
+            direction: ltr;
+        }
+
+        .split-content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-6);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .split-headline {
+            font-size: clamp(2.25rem, 4vw, 3.5rem);
+            font-weight: var(--flin-font-black);
+            line-height: var(--flin-leading-tight);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .split-subheading {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-accent-gold);
+            margin: 0;
+        }
+
+        .split-description {
+            font-size: var(--flin-text-lg);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-secondary);
+            margin: 0;
+        }
+
+        .split-cta {
+            padding: var(--flin-space-4) var(--flin-space-8);
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+            border: none;
+            border-radius: var(--flin-radius-button);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            cursor: pointer;
+            width: fit-content;
+            transition: all var(--flin-transition-normal);
+            box-shadow: var(--flin-shadow-md);
+        }
+
+        .split-cta:hover {
+            background: var(--flin-accent-gold-bright);
+            transform: translateY(-2px);
+            box-shadow: var(--flin-shadow-glow-gold);
+        }
+
+        .split-cta:active {
+            transform: translateY(0);
+        }
+
+        .split-image-container {
+            width: 100%;
+            height: 100%;
+            min-height: 450px;
+            border-radius: var(--flin-radius-xl);
+            overflow: hidden;
+            box-shadow: var(--flin-shadow-2xl);
+            animation: fadeInUp 0.8s ease-out 0.2s;
+            animation-fill-mode: both;
+        }
+
+        .split-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--flin-transition-slow);
+        }
+
+        .split-image.loaded {
+            animation: scaleIn 0.6s ease-out;
+        }
+
+        .flin-hero-split:hover .split-image {
+            transform: scale(1.03);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .flin-hero-split {
+                grid-template-columns: 1fr;
+                gap: var(--flin-space-8);
+                direction: ltr;
+            }
+
+            .flin-hero-split.image-left {
+                direction: ltr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flin-hero-split {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .split-headline {
+                font-size: 1.75rem;
+            }
+
+            .split-description {
+                font-size: var(--flin-text-base);
+            }
+
+            .split-cta {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .flin-hero-split {
+                padding: var(--flin-space-12) var(--flin-space-4);
+                min-height: 500px;
+            }
+
+            .split-image-container {
+                min-height: 300px;
+            }
+        }
+    </style>
+
+    <div class="split-content">
+        <h1 class="split-headline">{headline}</h1>
+        {if subheading != none}
+            <h2 class="split-subheading">{subheading}</h2>
+        {/if}
+        {if description != none}
+            <p class="split-description">{description}</p>
+        {/if}
+        <button class="split-cta" click={handleCtaClick}>{ctaLabel}</button>
+    </div>
+
+    <div class="split-image-container">
+        <img
+            src={imageSrc}
+            alt={imageAlt}
+            class="split-image {imageLoaded ? 'loaded' : ''}"
+            load={handleImageLoad}
+        />
+    </div>
+</div>

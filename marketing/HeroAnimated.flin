@@ -1,0 +1,236 @@
+// ============================================================================
+// HeroAnimated.flin — FlinUI PRO Marketing Component
+// Hero with animated text effects and gradient background
+// ============================================================================
+// Props:
+//   - headline: Main headline text (string)
+//   - highlightWord: Word to highlight in headline (string or none)
+//   - subtitle: Subtitle text (string or none)
+//   - ctaLabel: Call-to-action button text (string)
+//   - ctaSecondaryLabel: Secondary CTA text (string or none)
+//   - onCtaClick: Primary CTA click handler (function or none)
+//   - onSecondaryCtaClick: Secondary CTA click handler (function or none)
+
+headline = props.headline || "Transform Your Workflow"
+highlightWord = props.highlightWord || none
+subtitle = props.subtitle || "Start building amazing projects in minutes, not hours"
+ctaLabel = props.ctaLabel || "Start Free Trial"
+ctaSecondaryLabel = props.ctaSecondaryLabel || none
+onCtaClick = props.onCtaClick || none
+onSecondaryCtaClick = props.onSecondaryCtaClick || none
+
+// State
+mounted = false
+
+onMount {
+    mounted = true
+}
+
+handlePrimaryClick = fn() {
+    if onCtaClick != none {
+        onCtaClick()
+    }
+}
+
+handleSecondaryClick = fn() {
+    if onSecondaryCtaClick != none {
+        onSecondaryCtaClick()
+    }
+}
+
+<div class="flin-hero-animated {mounted ? 'mounted' : ''}">
+    <style>
+        .flin-hero-animated {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 700px;
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: linear-gradient(135deg,
+                var(--flin-bg-surface) 0%,
+                var(--flin-bg-elevated) 50%,
+                var(--flin-bg-surface) 100%);
+            overflow: hidden;
+        }
+
+        .flin-hero-animated::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle,
+                rgba(255, 215, 0, 0.1) 0%,
+                transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        .animated-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+        }
+
+        .animated-headline {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: var(--flin-font-black);
+            line-height: var(--flin-leading-tight);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-6) 0;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .mounted .animated-headline {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .highlight {
+            color: var(--flin-accent-gold);
+            position: relative;
+            display: inline-block;
+        }
+
+        .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 0.1em;
+            left: 0;
+            width: 100%;
+            height: 0.1em;
+            background: var(--flin-accent-gold);
+            transform: scaleX(0);
+            transform-origin: right;
+        }
+
+        .mounted .highlight::after {
+            animation: underline 0.6s ease-out 0.4s forwards;
+        }
+
+        .animated-subtitle {
+            font-size: clamp(1.125rem, 2vw, 1.5rem);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-secondary);
+            margin: 0 0 var(--flin-space-10) 0;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .mounted .animated-subtitle {
+            animation: fadeInUp 0.8s ease-out 0.2s forwards;
+        }
+
+        .animated-actions {
+            display: flex;
+            gap: var(--flin-space-4);
+            justify-content: center;
+            flex-wrap: wrap;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .mounted .animated-actions {
+            animation: fadeInUp 0.8s ease-out 0.4s forwards;
+        }
+
+        .primary-cta {
+            padding: var(--flin-space-4) var(--flin-space-8);
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+            border: none;
+            border-radius: var(--flin-radius-button);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+            box-shadow: var(--flin-shadow-lg);
+        }
+
+        .primary-cta:hover {
+            background: var(--flin-accent-gold-bright);
+            transform: translateY(-2px);
+            box-shadow: var(--flin-shadow-glow-gold);
+        }
+
+        .secondary-cta {
+            padding: var(--flin-space-4) var(--flin-space-8);
+            background: transparent;
+            color: var(--flin-text-primary);
+            border: 2px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-button);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .secondary-cta:hover {
+            background: var(--flin-bg-hover);
+            border-color: var(--flin-accent-gold);
+            transform: translateY(-2px);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes underline {
+            to { transform: scaleX(1); transform-origin: left; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-hero-animated {
+                min-height: 600px;
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .animated-headline {
+                font-size: 2rem;
+            }
+
+            .animated-subtitle {
+                font-size: 1.125rem;
+            }
+
+            .animated-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .primary-cta,
+            .secondary-cta {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+
+    <div class="animated-content">
+        <h1 class="animated-headline">
+            {if highlightWord != none}
+                {headline.replace(highlightWord, '<span class="highlight">' + highlightWord + '</span>')}
+            {else}
+                {headline}
+            {/if}
+        </h1>
+        {if subtitle != none}
+            <p class="animated-subtitle">{subtitle}</p>
+        {/if}
+        <div class="animated-actions">
+            <button class="primary-cta" click={handlePrimaryClick}>{ctaLabel}</button>
+            {if ctaSecondaryLabel != none}
+                <button class="secondary-cta" click={handleSecondaryClick}>{ctaSecondaryLabel}</button>
+            {/if}
+        </div>
+    </div>
+</div>

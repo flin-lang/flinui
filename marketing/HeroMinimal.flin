@@ -1,0 +1,163 @@
+// ============================================================================
+// HeroMinimal.flin — FlinUI PRO Marketing Component
+// Ultra-minimal text-only hero for focused messaging
+// ============================================================================
+// Props:
+//   - headline: Main headline text (string)
+//   - subtitle: Subtitle text (string or none)
+//   - ctaLabel: Call-to-action button text (string or none)
+//   - onCtaClick: CTA click handler (function or none)
+//   - alignment: Text alignment "left", "center", or "right" (string)
+
+headline = props.headline || "Less is More"
+subtitle = props.subtitle || none
+ctaLabel = props.ctaLabel || none
+onCtaClick = props.onCtaClick || none
+alignment = props.alignment || "center"
+
+handleCtaClick = fn() {
+    if onCtaClick != none {
+        onCtaClick()
+    }
+}
+
+<div class="flin-hero-minimal align-{alignment}">
+    <style>
+        .flin-hero-minimal {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 600px;
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .flin-hero-minimal.align-center {
+            align-items: center;
+            text-align: center;
+        }
+
+        .flin-hero-minimal.align-left {
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .flin-hero-minimal.align-right {
+            align-items: flex-end;
+            text-align: right;
+        }
+
+        .minimal-content {
+            max-width: 800px;
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        .minimal-headline {
+            font-size: clamp(2.75rem, 5vw, 5rem);
+            font-weight: var(--flin-font-black);
+            line-height: var(--flin-leading-none);
+            color: var(--flin-text-primary);
+            margin: 0;
+            letter-spacing: var(--flin-tracking-tight);
+        }
+
+        .minimal-subtitle {
+            font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-secondary);
+            margin: var(--flin-space-8) 0 0 0;
+            font-weight: var(--flin-font-normal);
+        }
+
+        .minimal-cta {
+            margin-top: var(--flin-space-12);
+            padding: var(--flin-space-3) 0;
+            background: transparent;
+            color: var(--flin-text-primary);
+            border: none;
+            border-bottom: 2px solid var(--flin-accent-gold);
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-medium);
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .minimal-cta:hover {
+            color: var(--flin-accent-gold);
+            transform: translateX(5px);
+        }
+
+        .minimal-cta::after {
+            content: ' →';
+            display: inline-block;
+            transition: transform var(--flin-transition-normal);
+        }
+
+        .minimal-cta:hover::after {
+            transform: translateX(5px);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-hero-minimal {
+                min-height: 500px;
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .flin-hero-minimal.align-right {
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .minimal-headline {
+                font-size: 2.25rem;
+            }
+
+            .minimal-subtitle {
+                font-size: 1.125rem;
+                margin-top: var(--flin-space-6);
+            }
+
+            .minimal-cta {
+                margin-top: var(--flin-space-8);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flin-hero-minimal {
+                min-height: 450px;
+            }
+
+            .minimal-headline {
+                font-size: 1.875rem;
+            }
+
+            .minimal-subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+
+    <div class="minimal-content">
+        <h1 class="minimal-headline">{headline}</h1>
+
+        {if subtitle != none}
+            <p class="minimal-subtitle">{subtitle}</p>
+        {/if}
+
+        {if ctaLabel != none}
+            <button class="minimal-cta" click={handleCtaClick}>{ctaLabel}</button>
+        {/if}
+    </div>
+</div>

@@ -1,0 +1,173 @@
+// ============================================================================
+// FeatureAccordion.flin — FlinUI PRO Marketing Component
+// Expandable accordion for feature details
+// ============================================================================
+// Props:
+//   - title: Section title (string or none)
+//   - items: List of accordion items with title, content (list)
+//   - allowMultiple: Allow multiple items open at once (boolean)
+
+title = props.title || none
+items = props.items || [
+    ["title": "How does it work?", "content": "Our platform uses advanced AI to automatically handle complex workflows, saving you hours of manual work every day."],
+    ["title": "Is it secure?", "content": "Yes! We use enterprise-grade encryption and comply with SOC 2, GDPR, and HIPAA standards."],
+    ["title": "Can I integrate with my existing tools?", "content": "Absolutely. We support over 100+ integrations including Slack, Google Workspace, Microsoft 365, and many more."],
+    ["title": "What kind of support do you offer?", "content": "We provide 24/7 support via chat, email, and phone. Enterprise customers get a dedicated account manager."]
+]
+allowMultiple = props.allowMultiple || false
+
+// State - track which items are open
+openItems = []
+
+toggleItem = fn(index) {
+    isOpen = openItems.includes(index)
+
+    if isOpen {
+        // Close the item
+        openItems = openItems.filter(fn(i) { return i != index })
+    } else {
+        // Open the item
+        if allowMultiple {
+            openItems = openItems.concat([index])
+        } else {
+            openItems = [index]
+        }
+    }
+}
+
+<div class="flin-feature-accordion">
+    <style>
+        .flin-feature-accordion {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .accordion-header {
+            text-align: center;
+            margin-bottom: var(--flin-space-16);
+        }
+
+        .accordion-title {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .accordion-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .accordion-item {
+            margin-bottom: var(--flin-space-4);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-lg);
+            overflow: hidden;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .accordion-item.open {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+        }
+
+        .accordion-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--flin-space-5) var(--flin-space-6);
+            cursor: pointer;
+            user-select: none;
+            transition: background var(--flin-transition-normal);
+        }
+
+        .accordion-item-header:hover {
+            background: var(--flin-bg-hover);
+        }
+
+        .accordion-item-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .accordion-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--flin-accent-gold);
+            font-size: 1.25rem;
+            font-weight: var(--flin-font-bold);
+            transition: transform var(--flin-transition-normal);
+            flex-shrink: 0;
+        }
+
+        .accordion-item.open .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--flin-transition-normal);
+        }
+
+        .accordion-item.open .accordion-content {
+            max-height: 500px;
+        }
+
+        .accordion-content-inner {
+            padding: 0 var(--flin-space-6) var(--flin-space-6) var(--flin-space-6);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-feature-accordion {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .accordion-item-header {
+                padding: var(--flin-space-4) var(--flin-space-5);
+            }
+
+            .accordion-item-title {
+                font-size: var(--flin-text-base);
+            }
+
+            .accordion-content-inner {
+                padding: 0 var(--flin-space-5) var(--flin-space-5) var(--flin-space-5);
+                font-size: var(--flin-text-sm);
+            }
+        }
+    </style>
+
+    {if title != none}
+        <div class="accordion-header">
+            <h2 class="accordion-title">{title}</h2>
+        </div>
+    {/if}
+
+    <div class="accordion-container">
+        {for item, index in items}
+            <div class="accordion-item {openItems.includes(index) ? 'open' : ''}">
+                <div class="accordion-item-header" click={() => { toggleItem(index) }}>
+                    <h3 class="accordion-item-title">{item.title}</h3>
+                    <span class="accordion-icon">+</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-content-inner">
+                        {item.content}
+                    </div>
+                </div>
+            </div>
+        {/for}
+    </div>
+</div>

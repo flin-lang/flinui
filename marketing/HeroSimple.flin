@@ -1,0 +1,26 @@
+// HeroSimple - Basic hero with text and CTA
+headline = props.headline || "Welcome"
+subtitle = props.subtitle || none
+ctaLabel = props.ctaLabel || "Get Started"
+ctaUrl = props.ctaUrl || none
+imageSrc = props.imageSrc || none
+
+<div class="flin-hero-simple">
+    <style>
+        .flin-hero-simple {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            padding: 6rem 4rem;
+            min-height: 600px;
+            background: linear-gradient(135deg, var(--flin-bg-surface) 0%, var(--flin-bg-elevated) 100%);
+        }
+    </style>
+    <div>
+        <h1>{headline}</h1>
+        {if subtitle != none}<p>{subtitle}</p>{/if}
+        <button click={() => { window.location.href = ctaUrl }}>{ctaLabel}</button>
+    </div>
+    {if imageSrc != none}<img src={imageSrc} />{/if}
+</div>
