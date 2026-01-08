@@ -1,0 +1,278 @@
+// ============================================================================
+// OfficeLocations.flin — FlinUI PRO Marketing Component
+// Display office location cards with contact info and optional map links
+// ============================================================================
+// Props:
+//   - title: Section title (string or none)
+//   - subtitle: Section subtitle (string or none)
+//   - locations: List of location objects with city, country, address, phone, email, image, mapUrl (list)
+
+title = props.title || none
+subtitle = props.subtitle || none
+locations = props.locations || [
+    ["city": "San Francisco", "country": "United States", "address": "123 Market Street, Suite 500", "phone": "+1 (415) 555-0123", "email": "sf@company.com", "image": none, "mapUrl": none],
+    ["city": "London", "country": "United Kingdom", "address": "45 Old Broad Street, EC2N 1HT", "phone": "+44 20 7123 4567", "email": "london@company.com", "image": none, "mapUrl": none],
+    ["city": "Singapore", "country": "Singapore", "address": "1 Raffles Place, Tower 2, #30-01", "phone": "+65 6123 4567", "email": "singapore@company.com", "image": none, "mapUrl": none]
+]
+
+<div class="flin-office-locations">
+    <style>
+        .flin-office-locations {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .locations-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto var(--flin-space-16) auto;
+        }
+
+        .locations-title {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-4) 0;
+        }
+
+        .locations-subtitle {
+            font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        .locations-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--flin-space-8);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .location-card {
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            overflow: hidden;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .location-card:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-4px);
+        }
+
+        .location-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .location-placeholder {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(135deg, var(--flin-bg-surface) 0%, var(--flin-bg-base) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .location-content {
+            padding: var(--flin-space-6);
+        }
+
+        .location-header {
+            margin-bottom: var(--flin-space-4);
+            padding-bottom: var(--flin-space-4);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .location-city {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-1) 0;
+        }
+
+        .location-country {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-accent-gold);
+            font-weight: var(--flin-font-medium);
+            margin: 0;
+        }
+
+        .location-details {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-3);
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--flin-space-3);
+        }
+
+        .detail-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--flin-text-muted);
+            font-size: 0.875rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .detail-text {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        .detail-link {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            text-decoration: none;
+            transition: color var(--flin-transition-fast);
+        }
+
+        .detail-link:hover {
+            color: var(--flin-accent-gold);
+        }
+
+        .location-actions {
+            margin-top: var(--flin-space-5);
+            padding-top: var(--flin-space-4);
+            border-top: 1px solid var(--flin-border-subtle);
+        }
+
+        .map-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-accent-gold);
+            text-decoration: none;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .map-link:hover {
+            color: var(--flin-accent-gold-dark);
+            transform: translateX(4px);
+        }
+
+        .map-link-arrow {
+            font-size: 1rem;
+            transition: transform var(--flin-transition-fast);
+        }
+
+        .map-link:hover .map-link-arrow {
+            transform: translateX(4px);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .locations-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flin-office-locations {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .locations-grid {
+                grid-template-columns: 1fr;
+                gap: var(--flin-space-6);
+            }
+
+            .location-card {
+                max-width: 480px;
+                margin: 0 auto;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .location-content {
+                padding: var(--flin-space-5);
+            }
+
+            .location-placeholder {
+                height: 140px;
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+
+    {if title != none || subtitle != none}
+        <div class="locations-header">
+            {if title != none}
+                <h2 class="locations-title">{title}</h2>
+            {/if}
+            {if subtitle != none}
+                <p class="locations-subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="locations-grid">
+        {for location in locations}
+            <div class="location-card">
+                {if location.image != none}
+                    <img class="location-image" src="{location.image}" alt="{location.city}" loading="lazy" />
+                {else}
+                    <div class="location-placeholder">📍</div>
+                {/if}
+
+                <div class="location-content">
+                    <div class="location-header">
+                        <h3 class="location-city">{location.city}</h3>
+                        <p class="location-country">{location.country}</p>
+                    </div>
+
+                    <div class="location-details">
+                        {if location.address != none}
+                            <div class="detail-row">
+                                <span class="detail-icon">📍</span>
+                                <p class="detail-text">{location.address}</p>
+                            </div>
+                        {/if}
+
+                        {if location.phone != none}
+                            <div class="detail-row">
+                                <span class="detail-icon">📞</span>
+                                <a href="tel:{location.phone}" class="detail-link">{location.phone}</a>
+                            </div>
+                        {/if}
+
+                        {if location.email != none}
+                            <div class="detail-row">
+                                <span class="detail-icon">✉️</span>
+                                <a href="mailto:{location.email}" class="detail-link">{location.email}</a>
+                            </div>
+                        {/if}
+                    </div>
+
+                    {if location.mapUrl != none}
+                        <div class="location-actions">
+                            <a href="{location.mapUrl}" class="map-link" target="_blank" rel="noopener noreferrer">
+                                View on Map
+                                <span class="map-link-arrow">→</span>
+                            </a>
+                        </div>
+                    {/if}
+                </div>
+            </div>
+        {/for}
+    </div>
+</div>

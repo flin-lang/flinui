@@ -1,0 +1,229 @@
+// ============================================================================
+// CTABanner.flin — FlinUI PRO Marketing Component
+// Full-width call-to-action banner with prominent CTA button
+// ============================================================================
+// Props:
+//   - title: Main headline text (string)
+//   - description: Supporting description (string or none)
+//   - buttonText: CTA button label (string)
+//   - buttonHref: CTA button link (string)
+//   - variant: Style variant "primary", "gradient", or "dark" (string)
+//   - dismissible: Show close button (boolean)
+//   - onDismiss: Callback when dismissed (function or none)
+
+title = props.title || "Ready to get started?"
+description = props.description || none
+buttonText = props.buttonText || "Get Started"
+buttonHref = props.buttonHref || "#"
+variant = props.variant || "primary"
+dismissible = props.dismissible || false
+onDismiss = props.onDismiss || none
+
+dismissed = false
+
+handleDismiss = () => {
+    dismissed = true
+    if onDismiss != none {
+        onDismiss()
+    }
+}
+
+{if !dismissed}
+<div class="flin-cta-banner {variant}">
+    <style>
+        .flin-cta-banner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--flin-space-6);
+            padding: var(--flin-space-6) var(--flin-space-8);
+            position: relative;
+            width: 100%;
+        }
+
+        .flin-cta-banner.primary {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+        }
+
+        .flin-cta-banner.gradient {
+            background: linear-gradient(135deg,
+                var(--flin-accent-gold) 0%,
+                var(--flin-accent-gold-light) 50%,
+                #ff8c00 100%
+            );
+            color: var(--flin-bg-base);
+        }
+
+        .flin-cta-banner.dark {
+            background: var(--flin-bg-base);
+            border-top: 1px solid var(--flin-border-subtle);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .cta-banner-content {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-4);
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .cta-banner-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            margin: 0;
+            line-height: var(--flin-leading-tight);
+        }
+
+        .flin-cta-banner.dark .cta-banner-title {
+            color: var(--flin-text-primary);
+        }
+
+        .cta-banner-description {
+            font-size: var(--flin-text-base);
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .flin-cta-banner.dark .cta-banner-description {
+            color: var(--flin-text-secondary);
+        }
+
+        .cta-banner-button {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-3) var(--flin-space-6);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            text-decoration: none;
+            border-radius: var(--flin-radius-lg);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            border: none;
+            white-space: nowrap;
+        }
+
+        .flin-cta-banner.primary .cta-banner-button,
+        .flin-cta-banner.gradient .cta-banner-button {
+            background: var(--flin-bg-base);
+            color: var(--flin-accent-gold);
+        }
+
+        .flin-cta-banner.primary .cta-banner-button:hover,
+        .flin-cta-banner.gradient .cta-banner-button:hover {
+            background: var(--flin-bg-elevated);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .flin-cta-banner.dark .cta-banner-button {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+        }
+
+        .flin-cta-banner.dark .cta-banner-button:hover {
+            background: var(--flin-accent-gold-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4);
+        }
+
+        .cta-banner-button::after {
+            content: "→";
+            transition: transform var(--flin-transition-fast);
+        }
+
+        .cta-banner-button:hover::after {
+            transform: translateX(4px);
+        }
+
+        .cta-banner-dismiss {
+            position: absolute;
+            right: var(--flin-space-4);
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: var(--flin-space-2);
+            opacity: 0.7;
+            transition: opacity var(--flin-transition-fast);
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        .flin-cta-banner.primary .cta-banner-dismiss,
+        .flin-cta-banner.gradient .cta-banner-dismiss {
+            color: var(--flin-bg-base);
+        }
+
+        .flin-cta-banner.dark .cta-banner-dismiss {
+            color: var(--flin-text-secondary);
+        }
+
+        .cta-banner-dismiss:hover {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-cta-banner {
+                padding: var(--flin-space-5) var(--flin-space-6);
+                flex-direction: column;
+                gap: var(--flin-space-4);
+            }
+
+            .cta-banner-content {
+                flex-direction: column;
+                gap: var(--flin-space-2);
+            }
+
+            .cta-banner-title {
+                font-size: var(--flin-text-base);
+            }
+
+            .cta-banner-description {
+                font-size: var(--flin-text-sm);
+            }
+
+            .cta-banner-dismiss {
+                position: absolute;
+                right: var(--flin-space-2);
+                top: var(--flin-space-2);
+                transform: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flin-cta-banner {
+                padding: var(--flin-space-4) var(--flin-space-4);
+                padding-top: var(--flin-space-8);
+            }
+
+            .cta-banner-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+
+    <div class="cta-banner-content">
+        <h3 class="cta-banner-title">{title}</h3>
+        {if description != none}
+            <p class="cta-banner-description">{description}</p>
+        {/if}
+    </div>
+
+    <a href="{buttonHref}" class="cta-banner-button">
+        {buttonText}
+    </a>
+
+    {if dismissible}
+        <button class="cta-banner-dismiss" click={handleDismiss} aria-label="Dismiss">
+            ✕
+        </button>
+    {/if}
+</div>
+{/if}

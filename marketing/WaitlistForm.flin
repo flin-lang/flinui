@@ -1,0 +1,421 @@
+// ============================================================================
+// WaitlistForm.flin — FlinUI PRO Marketing Component
+// Coming soon signup with countdown timer and email capture
+// ============================================================================
+// Props:
+//   - title: Form headline (string)
+//   - description: Supporting text (string or none)
+//   - launchDate: Target launch date ISO string (string or none)
+//   - placeholder: Email input placeholder (string)
+//   - buttonText: Submit button text (string)
+//   - onSubmit: Form submission handler (function or none)
+//   - showCount: Show waitlist count (boolean)
+//   - count: Current waitlist count (number)
+
+title = props.title || "Something amazing is coming"
+description = props.description || "Be the first to know when we launch. Join our exclusive waitlist for early access and special perks."
+launchDate = props.launchDate || none
+placeholder = props.placeholder || "Enter your email"
+buttonText = props.buttonText || "Join Waitlist"
+onSubmit = props.onSubmit || none
+showCount = props.showCount || false
+count = props.count || 0
+
+email = ""
+isSubmitting = false
+isSuccess = false
+errorMessage = none
+
+// Countdown state
+days = 0
+hours = 0
+minutes = 0
+seconds = 0
+
+updateCountdown = () => {
+    if launchDate == none {
+        return
+    }
+    target = Date.parse(launchDate)
+    now = Date.now()
+    diff = target - now
+
+    if diff > 0 {
+        days = Math.floor(diff / (1000 * 60 * 60 * 24))
+        hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+        minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+        seconds = Math.floor((diff % (1000 * 60)) / 1000)
+    }
+}
+
+handleSubmit = (e) => {
+    e.preventDefault()
+
+    if email == "" {
+        errorMessage = "Please enter your email"
+        return
+    }
+
+    isSubmitting = true
+    errorMessage = none
+
+    if onSubmit != none {
+        onSubmit(email)
+    }
+
+    isSubmitting = false
+    isSuccess = true
+}
+
+<div class="flin-waitlist-form">
+    <style>
+        .flin-waitlist-form {
+            max-width: 600px;
+            padding: var(--flin-space-12);
+            background: linear-gradient(135deg,
+                var(--flin-bg-elevated) 0%,
+                rgba(212, 175, 55, 0.05) 100%
+            );
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-2xl);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flin-waitlist-form::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg,
+                var(--flin-accent-gold) 0%,
+                var(--flin-accent-gold-light) 50%,
+                var(--flin-accent-gold) 100%
+            );
+        }
+
+        .waitlist-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-2) var(--flin-space-4);
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--flin-accent-gold);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: var(--flin-radius-full);
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .waitlist-title {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-4) 0;
+            line-height: var(--flin-leading-tight);
+        }
+
+        .waitlist-description {
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-secondary);
+            margin: 0 0 var(--flin-space-8) 0;
+            line-height: var(--flin-leading-relaxed);
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .waitlist-countdown {
+            display: flex;
+            justify-content: center;
+            gap: var(--flin-space-4);
+            margin-bottom: var(--flin-space-10);
+        }
+
+        .countdown-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--flin-space-4) var(--flin-space-5);
+            background: var(--flin-bg-base);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            min-width: 80px;
+        }
+
+        .countdown-value {
+            font-size: var(--flin-text-3xl);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-accent-gold);
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .countdown-label {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: var(--flin-space-2);
+        }
+
+        .waitlist-form {
+            display: flex;
+            gap: var(--flin-space-3);
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .waitlist-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .waitlist-input {
+            width: 100%;
+            padding: var(--flin-space-4) var(--flin-space-5);
+            font-size: var(--flin-text-base);
+            background: var(--flin-bg-base);
+            border: 2px solid var(--flin-border-default);
+            border-radius: var(--flin-radius-lg);
+            color: var(--flin-text-primary);
+            outline: none;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .waitlist-input:focus {
+            border-color: var(--flin-accent-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+        }
+
+        .waitlist-input::placeholder {
+            color: var(--flin-text-tertiary);
+        }
+
+        .waitlist-input.error {
+            border-color: var(--flin-status-error);
+        }
+
+        .waitlist-button {
+            padding: var(--flin-space-4) var(--flin-space-8);
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-bold);
+            border: none;
+            border-radius: var(--flin-radius-lg);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            white-space: nowrap;
+        }
+
+        .waitlist-button:hover:not(:disabled) {
+            background: var(--flin-accent-gold-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4);
+        }
+
+        .waitlist-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .waitlist-error {
+            position: absolute;
+            bottom: -24px;
+            left: 0;
+            font-size: var(--flin-text-sm);
+            color: var(--flin-status-error);
+            text-align: left;
+        }
+
+        .waitlist-count {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--flin-space-2);
+            margin-top: var(--flin-space-8);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+
+        .waitlist-count-avatars {
+            display: flex;
+            margin-right: var(--flin-space-2);
+        }
+
+        .waitlist-count-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--flin-accent-gold) 0%, var(--flin-accent-gold-light) 100%);
+            border: 2px solid var(--flin-bg-elevated);
+            margin-left: -8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .waitlist-count-avatar:first-child {
+            margin-left: 0;
+        }
+
+        .waitlist-count strong {
+            color: var(--flin-text-primary);
+            font-weight: var(--flin-font-semibold);
+        }
+
+        .waitlist-success {
+            padding: var(--flin-space-8) 0;
+        }
+
+        .waitlist-success-icon {
+            width: 72px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(34, 197, 94, 0.15);
+            border-radius: 50%;
+            margin: 0 auto var(--flin-space-6) auto;
+            font-size: 2rem;
+        }
+
+        .waitlist-success-title {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-3) 0;
+        }
+
+        .waitlist-success-text {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .flin-waitlist-form {
+                padding: var(--flin-space-8) var(--flin-space-4);
+            }
+
+            .waitlist-countdown {
+                gap: var(--flin-space-2);
+            }
+
+            .countdown-item {
+                min-width: 65px;
+                padding: var(--flin-space-3) var(--flin-space-3);
+            }
+
+            .countdown-value {
+                font-size: var(--flin-text-2xl);
+            }
+
+            .waitlist-form {
+                flex-direction: column;
+            }
+
+            .waitlist-button {
+                width: 100%;
+            }
+
+            .waitlist-error {
+                position: relative;
+                bottom: auto;
+                margin-top: var(--flin-space-1);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .countdown-item {
+                min-width: 55px;
+            }
+
+            .countdown-value {
+                font-size: var(--flin-text-xl);
+            }
+
+            .countdown-label {
+                font-size: 0.6rem;
+            }
+        }
+    </style>
+
+    {if isSuccess}
+        <div class="waitlist-success">
+            <div class="waitlist-success-icon">🎉</div>
+            <h3 class="waitlist-success-title">You're on the list!</h3>
+            <p class="waitlist-success-text">We'll notify you when we launch. Stay tuned!</p>
+        </div>
+    {else}
+        <span class="waitlist-badge">Coming Soon</span>
+
+        <h2 class="waitlist-title">{title}</h2>
+
+        {if description != none}
+            <p class="waitlist-description">{description}</p>
+        {/if}
+
+        {if launchDate != none}
+            <div class="waitlist-countdown">
+                <div class="countdown-item">
+                    <span class="countdown-value">{days}</span>
+                    <span class="countdown-label">Days</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-value">{hours}</span>
+                    <span class="countdown-label">Hours</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-value">{minutes}</span>
+                    <span class="countdown-label">Minutes</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-value">{seconds}</span>
+                    <span class="countdown-label">Seconds</span>
+                </div>
+            </div>
+        {/if}
+
+        <form class="waitlist-form" submit={handleSubmit}>
+            <div class="waitlist-input-wrapper">
+                <input
+                    type="email"
+                    class="waitlist-input {if errorMessage != none}error{/if}"
+                    placeholder="{placeholder}"
+                    value={email}
+                    change={(e) => { email = e.target.value }}
+                />
+                {if errorMessage != none}
+                    <span class="waitlist-error">{errorMessage}</span>
+                {/if}
+            </div>
+            <button
+                type="submit"
+                class="waitlist-button"
+                disabled={isSubmitting}
+            >
+                {if isSubmitting}Joining...{else}{buttonText}{/if}
+            </button>
+        </form>
+
+        {if showCount && count > 0}
+            <div class="waitlist-count">
+                <div class="waitlist-count-avatars">
+                    <div class="waitlist-count-avatar">👤</div>
+                    <div class="waitlist-count-avatar">👤</div>
+                    <div class="waitlist-count-avatar">👤</div>
+                </div>
+                <strong>{count}+</strong> people already joined
+            </div>
+        {/if}
+    {/if}
+</div>

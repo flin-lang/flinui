@@ -1,0 +1,241 @@
+// ============================================================================
+// TimelineVertical.flin — FlinUI PRO Marketing Component
+// Vertical timeline for company history with alternating sides and connecting line
+// ============================================================================
+// Props:
+//   - title: Section title (string or none)
+//   - subtitle: Section subtitle (string or none)
+//   - events: List of event objects with year, title, description, icon (list)
+
+title = props.title || none
+subtitle = props.subtitle || none
+events = props.events || [
+    ["year": "2020", "title": "Company Founded", "description": "Started in a small garage with a big vision to change the industry.", "icon": "🚀"],
+    ["year": "2021", "title": "First Product Launch", "description": "Released our MVP and gained our first 1,000 users within months.", "icon": "📦"],
+    ["year": "2022", "title": "Series A Funding", "description": "Raised $10M to accelerate growth and expand the team.", "icon": "💰"],
+    ["year": "2023", "title": "Global Expansion", "description": "Opened offices in Europe and Asia, serving customers worldwide.", "icon": "🌍"],
+    ["year": "2024", "title": "1M Users Milestone", "description": "Reached one million active users and launched enterprise features.", "icon": "🎯"]
+]
+
+<div class="flin-timeline-vertical">
+    <style>
+        .flin-timeline-vertical {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .timeline-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto var(--flin-space-16) auto;
+        }
+
+        .timeline-title {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-4) 0;
+        }
+
+        .timeline-subtitle {
+            font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        .timeline-container {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 var(--flin-space-8);
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--flin-accent-gold), var(--flin-accent-gold-dark));
+            transform: translateX(-50%);
+        }
+
+        .timeline-event {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: var(--flin-space-12);
+        }
+
+        .timeline-event:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-event:nth-child(odd) {
+            flex-direction: row;
+        }
+
+        .timeline-event:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .event-content {
+            width: calc(50% - 40px);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            padding: var(--flin-space-6);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .event-content:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-4px);
+        }
+
+        .timeline-event:nth-child(odd) .event-content {
+            text-align: right;
+            margin-right: var(--flin-space-8);
+        }
+
+        .timeline-event:nth-child(even) .event-content {
+            text-align: left;
+            margin-left: var(--flin-space-8);
+        }
+
+        .event-marker {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 48px;
+            height: 48px;
+            background: var(--flin-bg-elevated);
+            border: 3px solid var(--flin-accent-gold);
+            border-radius: var(--flin-radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            z-index: 1;
+        }
+
+        .event-year {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-accent-gold);
+            margin: 0 0 var(--flin-space-2) 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .event-title {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-2) 0;
+        }
+
+        .event-description {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .timeline-container {
+                padding: 0 var(--flin-space-4) 0 var(--flin-space-12);
+            }
+
+            .timeline-line {
+                left: 24px;
+            }
+
+            .timeline-event,
+            .timeline-event:nth-child(odd),
+            .timeline-event:nth-child(even) {
+                flex-direction: row;
+            }
+
+            .event-content {
+                width: 100%;
+                margin-left: var(--flin-space-8) !important;
+                margin-right: 0 !important;
+            }
+
+            .event-content,
+            .timeline-event:nth-child(odd) .event-content,
+            .timeline-event:nth-child(even) .event-content {
+                text-align: left;
+            }
+
+            .event-marker {
+                left: 24px;
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .flin-timeline-vertical {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .timeline-container {
+                padding: 0 0 0 var(--flin-space-10);
+            }
+
+            .timeline-line {
+                left: 20px;
+            }
+
+            .event-marker {
+                left: 20px;
+                width: 36px;
+                height: 36px;
+                font-size: 0.875rem;
+            }
+
+            .event-content {
+                padding: var(--flin-space-5);
+                margin-left: var(--flin-space-6) !important;
+            }
+
+            .timeline-event {
+                margin-bottom: var(--flin-space-8);
+            }
+        }
+    </style>
+
+    {if title != none || subtitle != none}
+        <div class="timeline-header">
+            {if title != none}
+                <h2 class="timeline-title">{title}</h2>
+            {/if}
+            {if subtitle != none}
+                <p class="timeline-subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="timeline-container">
+        <div class="timeline-line"></div>
+
+        {for event in events}
+            <div class="timeline-event">
+                <div class="event-content">
+                    <p class="event-year">{event.year}</p>
+                    <h3 class="event-title">{event.title}</h3>
+                    <p class="event-description">{event.description}</p>
+                </div>
+                <div class="event-marker">
+                    {if event.icon != none}{event.icon}{else}•{/if}
+                </div>
+            </div>
+        {/for}
+    </div>
+</div>

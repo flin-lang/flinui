@@ -37,3 +37,20 @@ export PricingCards from "./PricingCards.flin"
 export PricingToggle from "./PricingToggle.flin"
 export PricingComparison from "./PricingComparison.flin"
 export EnterpriseContact from "./EnterpriseContact.flin"
+
+// Team & About (6)
+export TeamGrid from "./TeamGrid.flin"
+export TeamMember from "./TeamMember.flin"
+export TimelineVertical from "./TimelineVertical.flin"
+export StatsSection from "./StatsSection.flin"
+export MissionStatement from "./MissionStatement.flin"
+export OfficeLocations from "./OfficeLocations.flin"
+
+// Call-to-Action (7)
+export CTABanner from "./CTABanner.flin"
+export CTASection from "./CTASection.flin"
+export CTAInline from "./CTAInline.flin"
+export NewsletterForm from "./NewsletterForm.flin"
+export WaitlistForm from "./WaitlistForm.flin"
+export ContactForm from "./ContactForm.flin"
+export AppDownload from "./AppDownload.flin"

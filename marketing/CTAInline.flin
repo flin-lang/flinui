@@ -1,0 +1,284 @@
+// ============================================================================
+// CTAInline.flin — FlinUI PRO Marketing Component
+// Inline newsletter/signup CTA with horizontal layout
+// ============================================================================
+// Props:
+//   - title: Main headline (string)
+//   - description: Supporting text (string or none)
+//   - placeholder: Input placeholder text (string)
+//   - buttonText: Submit button text (string)
+//   - onSubmit: Form submission handler (function or none)
+//   - compact: Use compact styling (boolean)
+
+title = props.title || "Stay in the loop"
+description = props.description || "Get the latest updates delivered to your inbox."
+placeholder = props.placeholder || "Enter your email"
+buttonText = props.buttonText || "Subscribe"
+onSubmit = props.onSubmit || none
+compact = props.compact || false
+
+email = ""
+isSubmitting = false
+isSuccess = false
+errorMessage = none
+
+handleSubmit = (e) => {
+    e.preventDefault()
+    if email == "" {
+        errorMessage = "Please enter your email"
+        return
+    }
+    isSubmitting = true
+    errorMessage = none
+    if onSubmit != none {
+        onSubmit(email)
+    }
+    isSubmitting = false
+    isSuccess = true
+    email = ""
+}
+
+<div class="flin-cta-inline {if compact}compact{/if}">
+    <style>
+        .flin-cta-inline {
+            padding: var(--flin-space-12) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-2xl);
+            border: 1px solid var(--flin-border-subtle);
+        }
+
+        .flin-cta-inline.compact {
+            padding: var(--flin-space-6) var(--flin-space-6);
+            border-radius: var(--flin-radius-xl);
+        }
+
+        .cta-inline-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--flin-space-8);
+        }
+
+        .flin-cta-inline.compact .cta-inline-container {
+            gap: var(--flin-space-6);
+        }
+
+        .cta-inline-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .cta-inline-title {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-2) 0;
+            line-height: var(--flin-leading-tight);
+        }
+
+        .flin-cta-inline.compact .cta-inline-title {
+            font-size: var(--flin-text-lg);
+            margin-bottom: var(--flin-space-1);
+        }
+
+        .cta-inline-description {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            margin: 0;
+            line-height: var(--flin-leading-relaxed);
+        }
+
+        .flin-cta-inline.compact .cta-inline-description {
+            font-size: var(--flin-text-sm);
+        }
+
+        .cta-inline-form {
+            display: flex;
+            gap: var(--flin-space-3);
+            flex-shrink: 0;
+        }
+
+        .cta-inline-input-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .flin-cta-inline.compact .cta-inline-input-wrapper {
+            min-width: 220px;
+        }
+
+        .cta-inline-input {
+            width: 100%;
+            padding: var(--flin-space-4) var(--flin-space-5);
+            font-size: var(--flin-text-base);
+            background: var(--flin-bg-elevated);
+            border: 2px solid var(--flin-border-default);
+            border-radius: var(--flin-radius-lg);
+            color: var(--flin-text-primary);
+            outline: none;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .flin-cta-inline.compact .cta-inline-input {
+            padding: var(--flin-space-3) var(--flin-space-4);
+            font-size: var(--flin-text-sm);
+        }
+
+        .cta-inline-input:focus {
+            border-color: var(--flin-accent-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+        }
+
+        .cta-inline-input::placeholder {
+            color: var(--flin-text-tertiary);
+        }
+
+        .cta-inline-input.error {
+            border-color: var(--flin-status-error);
+        }
+
+        .cta-inline-button {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-4) var(--flin-space-8);
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            border: none;
+            border-radius: var(--flin-radius-lg);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            white-space: nowrap;
+        }
+
+        .flin-cta-inline.compact .cta-inline-button {
+            padding: var(--flin-space-3) var(--flin-space-6);
+            font-size: var(--flin-text-sm);
+        }
+
+        .cta-inline-button:hover:not(:disabled) {
+            background: var(--flin-accent-gold-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4);
+        }
+
+        .cta-inline-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .cta-inline-error {
+            position: absolute;
+            bottom: -24px;
+            left: 0;
+            font-size: var(--flin-text-sm);
+            color: var(--flin-status-error);
+        }
+
+        .cta-inline-success {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-4);
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--flin-status-success);
+            border-radius: var(--flin-radius-lg);
+            color: var(--flin-status-success);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-medium);
+        }
+
+        .flin-cta-inline.compact .cta-inline-success {
+            padding: var(--flin-space-3);
+            font-size: var(--flin-text-sm);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .cta-inline-container {
+                flex-direction: column;
+                text-align: center;
+                gap: var(--flin-space-6);
+            }
+
+            .cta-inline-form {
+                width: 100%;
+                max-width: 500px;
+            }
+
+            .cta-inline-input-wrapper {
+                min-width: 0;
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flin-cta-inline {
+                padding: var(--flin-space-8) var(--flin-space-4);
+            }
+
+            .cta-inline-form {
+                flex-direction: column;
+                gap: var(--flin-space-3);
+            }
+
+            .cta-inline-input-wrapper {
+                width: 100%;
+            }
+
+            .cta-inline-button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .cta-inline-error {
+                position: relative;
+                bottom: auto;
+                margin-top: var(--flin-space-1);
+            }
+        }
+    </style>
+
+    <div class="cta-inline-container">
+        <div class="cta-inline-content">
+            <h3 class="cta-inline-title">{title}</h3>
+            {if description != none}
+                <p class="cta-inline-description">{description}</p>
+            {/if}
+        </div>
+
+        {if isSuccess}
+            <div class="cta-inline-success">
+                <span>✓</span>
+                Thanks for subscribing!
+            </div>
+        {else}
+            <form class="cta-inline-form" submit={handleSubmit}>
+                <div class="cta-inline-input-wrapper">
+                    <input
+                        type="email"
+                        class="cta-inline-input {if errorMessage != none}error{/if}"
+                        placeholder="{placeholder}"
+                        value={email}
+                        change={(e) => { email = e.target.value }}
+                    />
+                    {if errorMessage != none}
+                        <span class="cta-inline-error">{errorMessage}</span>
+                    {/if}
+                </div>
+                <button
+                    type="submit"
+                    class="cta-inline-button"
+                    disabled={isSubmitting}
+                >
+                    {if isSubmitting}Sending...{else}{buttonText}{/if}
+                </button>
+            </form>
+        {/if}
+    </div>
+</div>

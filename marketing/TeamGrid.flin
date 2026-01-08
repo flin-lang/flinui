@@ -1,0 +1,215 @@
+// ============================================================================
+// TeamGrid.flin — FlinUI PRO Marketing Component
+// Responsive grid layout for displaying team members with cards and hover effects
+// ============================================================================
+// Props:
+//   - title: Section title (string or none)
+//   - subtitle: Section subtitle (string or none)
+//   - members: List of member objects with name, role, avatar, bio, social (list)
+//   - columns: Number of columns 2-4 (number)
+
+title = props.title || none
+subtitle = props.subtitle || none
+members = props.members || [
+    ["name": "Sarah Chen", "role": "CEO & Co-founder", "avatar": none, "bio": "10+ years leading tech companies", "social": ["twitter": "@sarahchen", "linkedin": "/in/sarahchen"]],
+    ["name": "Marcus Johnson", "role": "CTO", "avatar": none, "bio": "Former engineering lead at BigTech", "social": ["twitter": "@marcusj", "github": "marcusj"]],
+    ["name": "Elena Rodriguez", "role": "Head of Design", "avatar": none, "bio": "Award-winning product designer", "social": ["twitter": "@elenard", "linkedin": "/in/elenarodriguez"]],
+    ["name": "David Kim", "role": "Head of Engineering", "avatar": none, "bio": "Building scalable systems since 2010", "social": ["github": "davidkim", "linkedin": "/in/davidkim"]]
+]
+columns = props.columns || 4
+
+<div class="flin-team-grid" style="--columns: {columns}">
+    <style>
+        .flin-team-grid {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .team-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto var(--flin-space-16) auto;
+        }
+
+        .team-title {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-4) 0;
+        }
+
+        .team-subtitle {
+            font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        .team-container {
+            display: grid;
+            grid-template-columns: repeat(var(--columns), 1fr);
+            gap: var(--flin-space-8);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .member-card {
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            padding: var(--flin-space-6);
+            text-align: center;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .member-card:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-4px);
+        }
+
+        .member-avatar {
+            width: 96px;
+            height: 96px;
+            border-radius: var(--flin-radius-full);
+            object-fit: cover;
+            margin: 0 auto var(--flin-space-4) auto;
+            display: block;
+        }
+
+        .member-placeholder {
+            width: 96px;
+            height: 96px;
+            border-radius: var(--flin-radius-full);
+            background: linear-gradient(135deg, var(--flin-accent-gold), var(--flin-accent-gold-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-bg-base);
+            margin: 0 auto var(--flin-space-4) auto;
+        }
+
+        .member-name {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-1) 0;
+        }
+
+        .member-role {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-accent-gold);
+            font-weight: var(--flin-font-medium);
+            margin: 0 0 var(--flin-space-3) 0;
+        }
+
+        .member-bio {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0 0 var(--flin-space-4) 0;
+        }
+
+        .member-social {
+            display: flex;
+            justify-content: center;
+            gap: var(--flin-space-3);
+            padding-top: var(--flin-space-4);
+            border-top: 1px solid var(--flin-border-subtle);
+        }
+
+        .social-link {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-md);
+            color: var(--flin-text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .social-link:hover {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .team-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .team-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--flin-space-6);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .flin-team-grid {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .team-container {
+                grid-template-columns: 1fr;
+                gap: var(--flin-space-4);
+            }
+
+            .member-card {
+                padding: var(--flin-space-5);
+            }
+        }
+    </style>
+
+    {if title != none || subtitle != none}
+        <div class="team-header">
+            {if title != none}
+                <h2 class="team-title">{title}</h2>
+            {/if}
+            {if subtitle != none}
+                <p class="team-subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="team-container">
+        {for member in members}
+            <div class="member-card">
+                {if member.avatar != none}
+                    <img class="member-avatar" src="{member.avatar}" alt="{member.name}" />
+                {else}
+                    <div class="member-placeholder">{member.name[0]}</div>
+                {/if}
+
+                <h3 class="member-name">{member.name}</h3>
+                <p class="member-role">{member.role}</p>
+
+                {if member.bio != none}
+                    <p class="member-bio">{member.bio}</p>
+                {/if}
+
+                {if member.social != none}
+                    <div class="member-social">
+                        {if member.social.twitter != none}
+                            <a href="https://twitter.com/{member.social.twitter}" class="social-link" target="_blank" rel="noopener noreferrer" title="Twitter">X</a>
+                        {/if}
+                        {if member.social.linkedin != none}
+                            <a href="https://linkedin.com{member.social.linkedin}" class="social-link" target="_blank" rel="noopener noreferrer" title="LinkedIn">in</a>
+                        {/if}
+                        {if member.social.github != none}
+                            <a href="https://github.com/{member.social.github}" class="social-link" target="_blank" rel="noopener noreferrer" title="GitHub">GH</a>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+        {/for}
+    </div>
+</div>

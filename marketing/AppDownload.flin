@@ -1,0 +1,363 @@
+// ============================================================================
+// AppDownload.flin — FlinUI PRO Marketing Component
+// App store download buttons with optional QR code and stats
+// ============================================================================
+// Props:
+//   - title: Section headline (string)
+//   - description: Supporting text (string or none)
+//   - appStoreUrl: Apple App Store URL (string or none)
+//   - playStoreUrl: Google Play Store URL (string or none)
+//   - qrCode: QR code image URL for direct download (string or none)
+//   - rating: App rating out of 5 (number or none)
+//   - downloads: Download count display text (string or none)
+
+title = props.title || "Download our app"
+description = props.description || "Get the best experience on mobile. Available on iOS and Android."
+appStoreUrl = props.appStoreUrl || none
+playStoreUrl = props.playStoreUrl || none
+qrCode = props.qrCode || none
+rating = props.rating || none
+downloads = props.downloads || none
+
+<div class="flin-app-download">
+    <style>
+        .flin-app-download {
+            padding: var(--flin-space-16) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .app-download-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: var(--flin-space-12);
+            align-items: center;
+        }
+
+        .app-download-content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-6);
+        }
+
+        .app-download-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0;
+            line-height: var(--flin-leading-tight);
+        }
+
+        .app-download-description {
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-secondary);
+            margin: 0;
+            line-height: var(--flin-leading-relaxed);
+            max-width: 500px;
+        }
+
+        .app-download-stats {
+            display: flex;
+            gap: var(--flin-space-8);
+            padding: var(--flin-space-6) 0;
+            border-top: 1px solid var(--flin-border-subtle);
+            border-bottom: 1px solid var(--flin-border-subtle);
+            margin: var(--flin-space-2) 0;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-1);
+        }
+
+        .stat-value {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .stat-stars {
+            display: flex;
+            gap: 2px;
+            color: var(--flin-accent-gold);
+        }
+
+        .stat-label {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-tertiary);
+        }
+
+        .app-download-buttons {
+            display: flex;
+            gap: var(--flin-space-4);
+            flex-wrap: wrap;
+        }
+
+        .store-button {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-4) var(--flin-space-6);
+            background: var(--flin-bg-base);
+            border: 2px solid var(--flin-border-default);
+            border-radius: var(--flin-radius-xl);
+            text-decoration: none;
+            transition: all var(--flin-transition-fast);
+            min-width: 180px;
+        }
+
+        .store-button:hover {
+            border-color: var(--flin-accent-gold);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .store-icon {
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .store-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .store-label {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .store-name {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+        }
+
+        .app-download-qr {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-8);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-2xl);
+        }
+
+        .qr-code {
+            width: 160px;
+            height: 160px;
+            padding: var(--flin-space-3);
+            background: white;
+            border-radius: var(--flin-radius-lg);
+        }
+
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .qr-label {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            text-align: center;
+            max-width: 150px;
+        }
+
+        .qr-label strong {
+            display: block;
+            color: var(--flin-text-primary);
+            font-weight: var(--flin-font-semibold);
+            margin-bottom: 2px;
+        }
+
+        /* Phone mockup fallback when no QR */
+        .phone-mockup {
+            width: 200px;
+            height: 400px;
+            background: linear-gradient(180deg,
+                var(--flin-bg-elevated) 0%,
+                rgba(212, 175, 55, 0.1) 100%
+            );
+            border: 3px solid var(--flin-border-default);
+            border-radius: 36px;
+            padding: var(--flin-space-4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phone-mockup::before {
+            content: "";
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 6px;
+            background: var(--flin-border-default);
+            border-radius: var(--flin-radius-full);
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: var(--flin-bg-base);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--flin-accent-gold);
+            font-size: 3rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .app-download-container {
+                grid-template-columns: 1fr;
+                gap: var(--flin-space-10);
+                text-align: center;
+            }
+
+            .app-download-description {
+                margin: 0 auto;
+            }
+
+            .app-download-stats {
+                justify-content: center;
+            }
+
+            .app-download-buttons {
+                justify-content: center;
+            }
+
+            .app-download-qr {
+                margin: 0 auto;
+            }
+
+            .phone-mockup {
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .flin-app-download {
+                padding: var(--flin-space-12) var(--flin-space-4);
+            }
+
+            .app-download-stats {
+                flex-direction: column;
+                gap: var(--flin-space-4);
+                align-items: center;
+            }
+
+            .stat-item {
+                align-items: center;
+                text-align: center;
+            }
+
+            .app-download-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .store-button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .qr-code {
+                width: 140px;
+                height: 140px;
+            }
+
+            .phone-mockup {
+                width: 160px;
+                height: 320px;
+            }
+        }
+    </style>
+
+    <div class="app-download-container">
+        <div class="app-download-content">
+            <h2 class="app-download-title">{title}</h2>
+
+            {if description != none}
+                <p class="app-download-description">{description}</p>
+            {/if}
+
+            {if rating != none || downloads != none}
+                <div class="app-download-stats">
+                    {if rating != none}
+                        <div class="stat-item">
+                            <span class="stat-value">
+                                {rating}
+                                <span class="stat-stars">
+                                    {for i in [1, 2, 3, 4, 5]}
+                                        {if i <= rating}★{else}☆{/if}
+                                    {/for}
+                                </span>
+                            </span>
+                            <span class="stat-label">App Store Rating</span>
+                        </div>
+                    {/if}
+
+                    {if downloads != none}
+                        <div class="stat-item">
+                            <span class="stat-value">{downloads}</span>
+                            <span class="stat-label">Downloads</span>
+                        </div>
+                    {/if}
+                </div>
+            {/if}
+
+            <div class="app-download-buttons">
+                {if appStoreUrl != none}
+                    <a href="{appStoreUrl}" class="store-button" target="_blank" rel="noopener">
+                        <span class="store-icon"></span>
+                        <span class="store-text">
+                            <span class="store-label">Download on the</span>
+                            <span class="store-name">App Store</span>
+                        </span>
+                    </a>
+                {/if}
+
+                {if playStoreUrl != none}
+                    <a href="{playStoreUrl}" class="store-button" target="_blank" rel="noopener">
+                        <span class="store-icon">▶</span>
+                        <span class="store-text">
+                            <span class="store-label">Get it on</span>
+                            <span class="store-name">Google Play</span>
+                        </span>
+                    </a>
+                {/if}
+            </div>
+        </div>
+
+        {if qrCode != none}
+            <div class="app-download-qr">
+                <div class="qr-code">
+                    <img src="{qrCode}" alt="Download QR Code" />
+                </div>
+                <div class="qr-label">
+                    <strong>Scan to download</strong>
+                    Point your camera at the QR code
+                </div>
+            </div>
+        {else}
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    ★
+                </div>
+            </div>
+        {/if}
+    </div>
+</div>

@@ -1,0 +1,198 @@
+// ============================================================================
+// StatsSection.flin — FlinUI PRO Marketing Component
+// Display company numbers with large values, labels, and optional count-up animation
+// ============================================================================
+// Props:
+//   - title: Section title (string or none)
+//   - subtitle: Section subtitle (string or none)
+//   - stats: List of stat objects with value, label, suffix, prefix (list)
+//   - columns: Number of columns 2-4 (number)
+//   - animated: Enable count-up animation on scroll (boolean)
+
+title = props.title || none
+subtitle = props.subtitle || none
+stats = props.stats || [
+    ["value": "10", "label": "Years of Experience", "suffix": "+", "prefix": none],
+    ["value": "1", "label": "Active Users", "suffix": "M+", "prefix": none],
+    ["value": "99.9", "label": "Uptime Guaranteed", "suffix": "%", "prefix": none],
+    ["value": "50", "label": "Countries Served", "suffix": "+", "prefix": none]
+]
+columns = props.columns || 4
+animated = props.animated || false
+
+<div class="flin-stats-section {if animated}animated{/if}" style="--columns: {columns}">
+    <style>
+        .flin-stats-section {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-base);
+        }
+
+        .stats-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto var(--flin-space-16) auto;
+        }
+
+        .stats-title {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-4) 0;
+        }
+
+        .stats-subtitle {
+            font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(var(--columns), 1fr);
+            gap: var(--flin-space-8);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: var(--flin-space-8);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .stat-item:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-4px);
+        }
+
+        .stat-value {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            line-height: 1;
+            margin: 0 0 var(--flin-space-2) 0;
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .stat-prefix,
+        .stat-suffix {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            color: var(--flin-accent-gold);
+            font-weight: var(--flin-font-bold);
+        }
+
+        .stat-number {
+            background: linear-gradient(135deg, var(--flin-text-primary), var(--flin-accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            font-weight: var(--flin-font-medium);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Animation styles */
+        .flin-stats-section.animated .stat-number {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: countUp 0.8s ease-out forwards;
+        }
+
+        .flin-stats-section.animated .stat-item:nth-child(1) .stat-number { animation-delay: 0.1s; }
+        .flin-stats-section.animated .stat-item:nth-child(2) .stat-number { animation-delay: 0.2s; }
+        .flin-stats-section.animated .stat-item:nth-child(3) .stat-number { animation-delay: 0.3s; }
+        .flin-stats-section.animated .stat-item:nth-child(4) .stat-number { animation-delay: 0.4s; }
+        .flin-stats-section.animated .stat-item:nth-child(5) .stat-number { animation-delay: 0.5s; }
+        .flin-stats-section.animated .stat-item:nth-child(6) .stat-number { animation-delay: 0.6s; }
+
+        @keyframes countUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flin-stats-section {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--flin-space-4);
+            }
+
+            .stat-item {
+                padding: var(--flin-space-6);
+            }
+
+            .stat-value {
+                font-size: clamp(2rem, 4vw, 3rem);
+            }
+
+            .stat-label {
+                font-size: var(--flin-text-sm);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: var(--flin-space-4);
+            }
+
+            .stat-item {
+                padding: var(--flin-space-5);
+            }
+        }
+    </style>
+
+    {if title != none || subtitle != none}
+        <div class="stats-header">
+            {if title != none}
+                <h2 class="stats-title">{title}</h2>
+            {/if}
+            {if subtitle != none}
+                <p class="stats-subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="stats-container">
+        {for stat in stats}
+            <div class="stat-item">
+                <div class="stat-value">
+                    {if stat.prefix != none}
+                        <span class="stat-prefix">{stat.prefix}</span>
+                    {/if}
+                    <span class="stat-number">{stat.value}</span>
+                    {if stat.suffix != none}
+                        <span class="stat-suffix">{stat.suffix}</span>
+                    {/if}
+                </div>
+                <p class="stat-label">{stat.label}</p>
+            </div>
+        {/for}
+    </div>
+</div>

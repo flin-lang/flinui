@@ -1,0 +1,309 @@
+// ============================================================================
+// NewsletterForm.flin — FlinUI PRO Marketing Component
+// Email capture form card with optional name field
+// ============================================================================
+// Props:
+//   - title: Form headline (string)
+//   - description: Supporting text (string or none)
+//   - placeholder: Email input placeholder (string)
+//   - buttonText: Submit button text (string)
+//   - onSubmit: Form submission handler (function or none)
+//   - showName: Show name input field (boolean)
+//   - privacyText: Privacy policy text (string or none)
+
+title = props.title || "Subscribe to our newsletter"
+description = props.description || "Get weekly insights, tips, and exclusive content delivered straight to your inbox."
+placeholder = props.placeholder || "you@example.com"
+buttonText = props.buttonText || "Subscribe"
+onSubmit = props.onSubmit || none
+showName = props.showName || false
+privacyText = props.privacyText || "We respect your privacy. Unsubscribe at any time."
+
+name = ""
+email = ""
+isSubmitting = false
+isSuccess = false
+errors = ["name": none, "email": none]
+
+validateForm = () => {
+    valid = true
+    errors = ["name": none, "email": none]
+
+    if showName && name == "" {
+        errors.name = "Name is required"
+        valid = false
+    }
+
+    if email == "" {
+        errors.email = "Email is required"
+        valid = false
+    }
+
+    return valid
+}
+
+handleSubmit = (e) => {
+    e.preventDefault()
+
+    if !validateForm() {
+        return
+    }
+
+    isSubmitting = true
+
+    if onSubmit != none {
+        onSubmit(["name": name, "email": email])
+    }
+
+    isSubmitting = false
+    isSuccess = true
+}
+
+<div class="flin-newsletter-form">
+    <style>
+        .flin-newsletter-form {
+            max-width: 480px;
+            padding: var(--flin-space-10);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-2xl);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .newsletter-icon {
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--flin-accent-gold) 0%, var(--flin-accent-gold-light) 100%);
+            border-radius: var(--flin-radius-xl);
+            margin-bottom: var(--flin-space-6);
+            font-size: 1.5rem;
+        }
+
+        .newsletter-title {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-3) 0;
+            line-height: var(--flin-leading-tight);
+        }
+
+        .newsletter-description {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            margin: 0 0 var(--flin-space-8) 0;
+            line-height: var(--flin-leading-relaxed);
+        }
+
+        .newsletter-form-fields {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+        }
+
+        .newsletter-field {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-2);
+        }
+
+        .newsletter-label {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+        }
+
+        .newsletter-input {
+            width: 100%;
+            padding: var(--flin-space-4) var(--flin-space-4);
+            font-size: var(--flin-text-base);
+            background: var(--flin-bg-base);
+            border: 2px solid var(--flin-border-default);
+            border-radius: var(--flin-radius-lg);
+            color: var(--flin-text-primary);
+            outline: none;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .newsletter-input:focus {
+            border-color: var(--flin-accent-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+        }
+
+        .newsletter-input::placeholder {
+            color: var(--flin-text-tertiary);
+        }
+
+        .newsletter-input.error {
+            border-color: var(--flin-status-error);
+        }
+
+        .newsletter-input.error:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .newsletter-error {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-status-error);
+        }
+
+        .newsletter-button {
+            width: 100%;
+            padding: var(--flin-space-4) var(--flin-space-6);
+            margin-top: var(--flin-space-4);
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            border: none;
+            border-radius: var(--flin-radius-lg);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .newsletter-button:hover:not(:disabled) {
+            background: var(--flin-accent-gold-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4);
+        }
+
+        .newsletter-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .newsletter-privacy {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-tertiary);
+            margin-top: var(--flin-space-4);
+            text-align: center;
+            line-height: var(--flin-leading-relaxed);
+        }
+
+        .newsletter-privacy a {
+            color: var(--flin-accent-gold);
+            text-decoration: none;
+        }
+
+        .newsletter-privacy a:hover {
+            text-decoration: underline;
+        }
+
+        .newsletter-success {
+            text-align: center;
+            padding: var(--flin-space-8) 0;
+        }
+
+        .newsletter-success-icon {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 50%;
+            margin: 0 auto var(--flin-space-6) auto;
+            font-size: 2rem;
+            color: var(--flin-status-success);
+        }
+
+        .newsletter-success-title {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-2) 0;
+        }
+
+        .newsletter-success-text {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .flin-newsletter-form {
+                padding: var(--flin-space-6);
+                border-radius: var(--flin-radius-xl);
+            }
+
+            .newsletter-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.25rem;
+            }
+
+            .newsletter-title {
+                font-size: var(--flin-text-xl);
+            }
+
+            .newsletter-description {
+                font-size: var(--flin-text-sm);
+            }
+        }
+    </style>
+
+    {if isSuccess}
+        <div class="newsletter-success">
+            <div class="newsletter-success-icon">✓</div>
+            <h3 class="newsletter-success-title">You're subscribed!</h3>
+            <p class="newsletter-success-text">Check your inbox for a confirmation email.</p>
+        </div>
+    {else}
+        <div class="newsletter-icon">✉</div>
+
+        <h3 class="newsletter-title">{title}</h3>
+
+        {if description != none}
+            <p class="newsletter-description">{description}</p>
+        {/if}
+
+        <form submit={handleSubmit}>
+            <div class="newsletter-form-fields">
+                {if showName}
+                    <div class="newsletter-field">
+                        <label class="newsletter-label">Name</label>
+                        <input
+                            type="text"
+                            class="newsletter-input {if errors.name != none}error{/if}"
+                            placeholder="Your name"
+                            value={name}
+                            change={(e) => { name = e.target.value }}
+                        />
+                        {if errors.name != none}
+                            <span class="newsletter-error">{errors.name}</span>
+                        {/if}
+                    </div>
+                {/if}
+
+                <div class="newsletter-field">
+                    <label class="newsletter-label">Email address</label>
+                    <input
+                        type="email"
+                        class="newsletter-input {if errors.email != none}error{/if}"
+                        placeholder="{placeholder}"
+                        value={email}
+                        change={(e) => { email = e.target.value }}
+                    />
+                    {if errors.email != none}
+                        <span class="newsletter-error">{errors.email}</span>
+                    {/if}
+                </div>
+            </div>
+
+            <button
+                type="submit"
+                class="newsletter-button"
+                disabled={isSubmitting}
+            >
+                {if isSubmitting}Subscribing...{else}{buttonText}{/if}
+            </button>
+        </form>
+
+        {if privacyText != none}
+            <p class="newsletter-privacy">{privacyText}</p>
+        {/if}
+    {/if}
+</div>

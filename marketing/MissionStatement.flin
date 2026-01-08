@@ -1,0 +1,237 @@
+// ============================================================================
+// MissionStatement.flin — FlinUI PRO Marketing Component
+// Hero-style mission statement with vision and values grid display
+// ============================================================================
+// Props:
+//   - title: Section title (string or none)
+//   - mission: Mission statement text (string or none)
+//   - vision: Vision statement text (string or none)
+//   - values: List of value objects with icon, title, description (list)
+
+title = props.title || "Our Mission"
+mission = props.mission || "We're on a mission to democratize technology, making powerful tools accessible to everyone regardless of their technical background."
+vision = props.vision || "A world where anyone can bring their ideas to life through code, without barriers or gatekeepers."
+values = props.values || [
+    ["icon": "💡", "title": "Innovation", "description": "We push boundaries and challenge the status quo to create better solutions."],
+    ["icon": "🤝", "title": "Collaboration", "description": "We believe the best ideas come from diverse teams working together."],
+    ["icon": "🎯", "title": "Simplicity", "description": "We strip away complexity to reveal elegant, intuitive experiences."],
+    ["icon": "💪", "title": "Empowerment", "description": "We give people the tools they need to achieve their full potential."],
+    ["icon": "🔒", "title": "Trust", "description": "We earn trust through transparency, security, and reliable performance."],
+    ["icon": "🌱", "title": "Growth", "description": "We invest in continuous learning and improvement, always evolving."]
+]
+
+<div class="flin-mission-statement">
+    <style>
+        .flin-mission-statement {
+            background: var(--flin-bg-surface);
+        }
+
+        .mission-hero {
+            padding: var(--flin-space-24) var(--flin-space-8);
+            background: linear-gradient(135deg, var(--flin-bg-base) 0%, var(--flin-bg-elevated) 100%);
+            text-align: center;
+        }
+
+        .mission-title {
+            font-size: clamp(1rem, 1.5vw, 1.125rem);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin: 0 0 var(--flin-space-6) 0;
+        }
+
+        .mission-text {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            line-height: var(--flin-leading-relaxed);
+            max-width: 900px;
+            margin: 0 auto var(--flin-space-8) auto;
+        }
+
+        .vision-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--flin-space-4);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+        }
+
+        .vision-label {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+        }
+
+        .vision-divider {
+            width: 2px;
+            height: 24px;
+            background: var(--flin-border-subtle);
+            flex-shrink: 0;
+        }
+
+        .vision-text {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+            text-align: left;
+        }
+
+        .values-section {
+            padding: var(--flin-space-20) var(--flin-space-8);
+        }
+
+        .values-header {
+            text-align: center;
+            margin-bottom: var(--flin-space-12);
+        }
+
+        .values-title {
+            font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--flin-space-6);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .value-card {
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            padding: var(--flin-space-6);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .value-card:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-4px);
+        }
+
+        .value-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-lg);
+            font-size: 1.5rem;
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .value-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-2) 0;
+        }
+
+        .value-description {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .values-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mission-hero {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .vision-container {
+                flex-direction: column;
+                text-align: center;
+                gap: var(--flin-space-3);
+            }
+
+            .vision-divider {
+                width: 40px;
+                height: 2px;
+            }
+
+            .vision-text {
+                text-align: center;
+            }
+
+            .values-section {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .values-grid {
+                grid-template-columns: 1fr;
+                gap: var(--flin-space-4);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .value-card {
+                padding: var(--flin-space-5);
+            }
+
+            .vision-container {
+                padding: var(--flin-space-4);
+            }
+        }
+    </style>
+
+    <div class="mission-hero">
+        {if title != none}
+            <p class="mission-title">{title}</p>
+        {/if}
+
+        {if mission != none}
+            <p class="mission-text">{mission}</p>
+        {/if}
+
+        {if vision != none}
+            <div class="vision-container">
+                <span class="vision-label">Our Vision</span>
+                <div class="vision-divider"></div>
+                <p class="vision-text">{vision}</p>
+            </div>
+        {/if}
+    </div>
+
+    {if values != none && values.length > 0}
+        <div class="values-section">
+            <div class="values-header">
+                <h2 class="values-title">Our Core Values</h2>
+            </div>
+
+            <div class="values-grid">
+                {for value in values}
+                    <div class="value-card">
+                        <div class="value-icon">{value.icon}</div>
+                        <h3 class="value-title">{value.title}</h3>
+                        <p class="value-description">{value.description}</p>
+                    </div>
+                {/for}
+            </div>
+        </div>
+    {/if}
+</div>

@@ -1,0 +1,250 @@
+// ============================================================================
+// TeamMember.flin — FlinUI PRO Marketing Component
+// Individual team member profile card with full details and social links
+// ============================================================================
+// Props:
+//   - name: Team member name (string)
+//   - role: Job title/role (string)
+//   - avatar: Avatar image URL (string or none)
+//   - bio: Biography text (string or none)
+//   - social: Social links object with twitter, linkedin, github (object or none)
+//   - email: Email address (string or none)
+//   - large: Display as large card (boolean)
+
+name = props.name || "Team Member"
+role = props.role || "Team Role"
+avatar = props.avatar || none
+bio = props.bio || none
+social = props.social || none
+email = props.email || none
+large = props.large || false
+
+<div class="flin-team-member {if large}large{/if}">
+    <style>
+        .flin-team-member {
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            padding: var(--flin-space-6);
+            max-width: 320px;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .flin-team-member:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-4px);
+        }
+
+        .flin-team-member.large {
+            max-width: 480px;
+            padding: var(--flin-space-8);
+            display: flex;
+            gap: var(--flin-space-6);
+            align-items: flex-start;
+        }
+
+        .member-visual {
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .flin-team-member.large .member-visual {
+            text-align: left;
+        }
+
+        .member-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--flin-radius-full);
+            object-fit: cover;
+            margin: 0 auto var(--flin-space-4) auto;
+            display: block;
+        }
+
+        .flin-team-member.large .member-avatar {
+            width: 120px;
+            height: 120px;
+            margin: 0;
+        }
+
+        .member-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--flin-radius-full);
+            background: linear-gradient(135deg, var(--flin-accent-gold), var(--flin-accent-gold-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-bg-base);
+            margin: 0 auto var(--flin-space-4) auto;
+        }
+
+        .flin-team-member.large .member-placeholder {
+            width: 120px;
+            height: 120px;
+            font-size: 2.5rem;
+            margin: 0;
+        }
+
+        .member-content {
+            flex: 1;
+        }
+
+        .flin-team-member:not(.large) .member-content {
+            text-align: center;
+        }
+
+        .member-name {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-1) 0;
+        }
+
+        .flin-team-member.large .member-name {
+            font-size: var(--flin-text-2xl);
+        }
+
+        .member-role {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-accent-gold);
+            font-weight: var(--flin-font-semibold);
+            margin: 0 0 var(--flin-space-3) 0;
+        }
+
+        .member-bio {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0 0 var(--flin-space-4) 0;
+        }
+
+        .flin-team-member.large .member-bio {
+            font-size: var(--flin-text-base);
+        }
+
+        .member-email {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            text-decoration: none;
+            margin-bottom: var(--flin-space-4);
+            transition: color var(--flin-transition-fast);
+        }
+
+        .member-email:hover {
+            color: var(--flin-accent-gold);
+        }
+
+        .member-social {
+            display: flex;
+            gap: var(--flin-space-3);
+            padding-top: var(--flin-space-4);
+            border-top: 1px solid var(--flin-border-subtle);
+        }
+
+        .flin-team-member:not(.large) .member-social {
+            justify-content: center;
+        }
+
+        .social-link {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-md);
+            color: var(--flin-text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: var(--flin-font-medium);
+            transition: all var(--flin-transition-fast);
+        }
+
+        .social-link:hover {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .flin-team-member.large {
+                flex-direction: column;
+                text-align: center;
+                max-width: 100%;
+            }
+
+            .flin-team-member.large .member-visual {
+                text-align: center;
+            }
+
+            .flin-team-member.large .member-avatar,
+            .flin-team-member.large .member-placeholder {
+                margin: 0 auto;
+            }
+
+            .flin-team-member.large .member-social {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .flin-team-member {
+                padding: var(--flin-space-5);
+                max-width: 100%;
+            }
+        }
+    </style>
+
+    {if large}
+        <div class="member-visual">
+            {if avatar != none}
+                <img class="member-avatar" src="{avatar}" alt="{name}" />
+            {else}
+                <div class="member-placeholder">{name[0]}</div>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="member-content">
+        {if !large}
+            {if avatar != none}
+                <img class="member-avatar" src="{avatar}" alt="{name}" />
+            {else}
+                <div class="member-placeholder">{name[0]}</div>
+            {/if}
+        {/if}
+
+        <h3 class="member-name">{name}</h3>
+        <p class="member-role">{role}</p>
+
+        {if bio != none}
+            <p class="member-bio">{bio}</p>
+        {/if}
+
+        {if email != none}
+            <a href="mailto:{email}" class="member-email">{email}</a>
+        {/if}
+
+        {if social != none}
+            <div class="member-social">
+                {if social.twitter != none}
+                    <a href="https://twitter.com/{social.twitter}" class="social-link" target="_blank" rel="noopener noreferrer" title="Twitter">X</a>
+                {/if}
+                {if social.linkedin != none}
+                    <a href="https://linkedin.com{social.linkedin}" class="social-link" target="_blank" rel="noopener noreferrer" title="LinkedIn">in</a>
+                {/if}
+                {if social.github != none}
+                    <a href="https://github.com/{social.github}" class="social-link" target="_blank" rel="noopener noreferrer" title="GitHub">GH</a>
+                {/if}
+            </div>
+        {/if}
+    </div>
+</div>
