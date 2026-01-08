@@ -1,128 +1,321 @@
-<!-- Sidebar.flin - Dashboard sidebar with collapsible state -->
+// Sidebar.flin - Dashboard sidebar with collapsible state
 
-<component>
-  collapsed = props.collapsed || false
-  onToggle = props.onToggle || function() {}
+// Props with defaults
+collapsed = props.collapsed || false
+onToggle = props.onToggle || (() => {})
+currentPath = props.currentPath || "/dashboard"
 
-  <!-- Menu structure -->
-  menuItems = [
-    {
-      section: "Main",
-      items: [
-        { icon: "chat", label: "Chat", href: "/dashboard" },
-        { icon: "deployments", label: "Deployments", href: "/deploy" },
-        { icon: "logs", label: "Logs", href: "/logs" }
-      ]
-    },
-    {
-      section: "Manage",
-      items: [
-        { icon: "domains", label: "Domains", href: "/dashboard/domains" },
-        { icon: "env", label: "Environment", href: "/dashboard/env" },
-        { icon: "secrets", label: "Secrets", href: "/dashboard/secrets" }
-      ]
-    },
-    {
-      section: "Account",
-      items: [
-        { icon: "wallet", label: "Wallet", href: "/wallet" },
-        { icon: "settings", label: "Settings", href: "/dashboard/settings" }
-      ]
-    }
+// Menu items - Main section
+mainItems = [
+  ["icon": "chat", "label": "Chat", "href": "/dashboard"],
+  ["icon": "deployments", "label": "Deployments", "href": "/deploy"],
+  ["icon": "logs", "label": "Logs", "href": "/logs"]
+]
+
+// Menu items - Manage section
+manageItems = [
+  ["icon": "domains", "label": "Domains", "href": "/dashboard/domains"],
+  ["icon": "env", "label": "Environment", "href": "/dashboard/env"],
+  ["icon": "secrets", "label": "Secrets", "href": "/dashboard/secrets"]
+]
+
+// Menu items - Account section
+accountItems = [
+  ["icon": "wallet", "label": "Wallet", "href": "/wallet"],
+  ["icon": "settings", "label": "Settings", "href": "/dashboard/settings"]
+]
+
+// Icon SVG paths
+getIconPath = (iconName) => {
+  icons = [
+    "chat": "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
+    "deployments": "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10",
+    "logs": "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+    "domains": "M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9",
+    "env": "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z",
+    "secrets": "M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z",
+    "wallet": "M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z",
+    "settings": "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z"
   ]
+  return icons[iconName] || ""
+}
 
-  <!-- Check if path is active -->
-  isActive = function(href) {
-    currentPath = window.location.pathname
-    {if href == "/dashboard"}
-      return currentPath == "/dashboard"
-    {/if}
-    return currentPath.startsWith(href)
-  }
+<aside class="sidebar">
+  <!-- Toggle Button -->
+  <button
+    click={onToggle}
+    class="sidebar-toggle"
+    aria-label="Toggle sidebar"
+  >
+    <svg class="toggle-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+  </button>
 
-  <!-- Icon SVG renderer -->
-  getIcon = function(iconName) {
-    icons = {
-      chat: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />',
-      deployments: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />',
-      logs: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />',
-      domains: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />',
-      env: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />',
-      secrets: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />',
-      wallet: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />',
-      settings: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />'
-    }
-    return icons[iconName] || ""
-  }
-
-  <aside class="fixed left-0 top-16 bottom-0 z-40 bg-[var(--flin-color-dark-900)] border-r border-[var(--flin-color-dark-700)] transition-all duration-300" style="width: {collapsed ? '64px' : '256px'}">
-    <!-- Toggle Button -->
-    <button
-      click={onToggle}
-      class="absolute -right-3 top-6 w-6 h-6 rounded-full bg-[var(--flin-color-dark-800)] border border-[var(--flin-color-dark-600)] flex items-center justify-center text-[var(--flin-color-dark-400)] hover:text-white transition-colors"
-      aria-label="Toggle sidebar"
-    >
-      <svg class="w-4 h-4 transition-transform" style="transform: {collapsed ? 'rotate(180deg)' : 'rotate(0deg)'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-      </svg>
-    </button>
-
-    <!-- Menu -->
-    <nav class="p-4 space-y-6">
-      {for section in menuItems}
-        <div>
-          {if !collapsed}
-            <p class="text-xs font-semibold text-[var(--flin-color-dark-500)] uppercase tracking-wider mb-3">
-              {section.section}
-            </p>
-          {/if}
-          <ul class="space-y-1">
-            {for item in section.items}
-              <li>
-                <a
-                  href={item.href}
-                  class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200"
-                  style="
-                    {if isActive(item.href)}
-                      background: var(--flin-color-primary-500-20);
-                      color: var(--flin-color-primary-400);
-                    {else}
-                      color: var(--flin-color-dark-400);
-                    {/if}
-                    {if collapsed}
-                      justify-content: center;
-                    {/if}
-                  "
-                  onmouseover="this.style.background = 'var(--flin-color-dark-800)'; this.style.color = 'white';"
-                  onmouseout="this.style.background = '{isActive(item.href) ? 'var(--flin-color-primary-500-20)' : 'transparent'}'; this.style.color = '{isActive(item.href) ? 'var(--flin-color-primary-400)' : 'var(--flin-color-dark-400)'}';}"
-                >
-                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    {@html getIcon(item.icon)}
-                  </svg>
-                  {if !collapsed}
-                    <span class="font-medium">{item.label}</span>
-                  {/if}
-                </a>
-              </li>
-            {/for}
-          </ul>
-        </div>
-      {/for}
-    </nav>
-
-    <!-- User Info -->
-    <div class="absolute bottom-4 left-4 right-4">
-      <div class="flex items-center gap-3 p-3 bg-[var(--flin-color-dark-800)] rounded-xl" style="{collapsed ? 'justify-content: center;' : ''}">
-        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--flin-color-primary-500)] to-purple-600 flex items-center justify-center text-white text-sm font-medium">
-          U
-        </div>
-        {if !collapsed}
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-white truncate">user@example.com</p>
-            <p class="text-xs text-[var(--flin-color-dark-500)]">Free Plan</p>
-          </div>
-        {/if}
-      </div>
+  <!-- Menu -->
+  <nav class="sidebar-nav">
+    <!-- Main Section -->
+    <div class="menu-section">
+      {if !collapsed}
+        <p class="section-title">MAIN</p>
+      {/if}
+      <ul class="section-items">
+        {for item in mainItems}
+          <li>
+            {if currentPath == item["href"]}
+              <a href={item["href"]} class="menu-item menu-item-active">
+                <svg class="menu-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d={getIconPath(item["icon"])} />
+                </svg>
+                {if !collapsed}
+                  <span class="menu-label">{item["label"]}</span>
+                {/if}
+              </a>
+            {else}
+              <a href={item["href"]} class="menu-item">
+                <svg class="menu-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d={getIconPath(item["icon"])} />
+                </svg>
+                {if !collapsed}
+                  <span class="menu-label">{item["label"]}</span>
+                {/if}
+              </a>
+            {/if}
+          </li>
+        {/for}
+      </ul>
     </div>
-  </aside>
-</component>
+
+    <!-- Manage Section -->
+    <div class="menu-section">
+      {if !collapsed}
+        <p class="section-title">MANAGE</p>
+      {/if}
+      <ul class="section-items">
+        {for item in manageItems}
+          <li>
+            {if currentPath == item["href"]}
+              <a href={item["href"]} class="menu-item menu-item-active">
+                <svg class="menu-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d={getIconPath(item["icon"])} />
+                </svg>
+                {if !collapsed}
+                  <span class="menu-label">{item["label"]}</span>
+                {/if}
+              </a>
+            {else}
+              <a href={item["href"]} class="menu-item">
+                <svg class="menu-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d={getIconPath(item["icon"])} />
+                </svg>
+                {if !collapsed}
+                  <span class="menu-label">{item["label"]}</span>
+                {/if}
+              </a>
+            {/if}
+          </li>
+        {/for}
+      </ul>
+    </div>
+
+    <!-- Account Section -->
+    <div class="menu-section">
+      {if !collapsed}
+        <p class="section-title">ACCOUNT</p>
+      {/if}
+      <ul class="section-items">
+        {for item in accountItems}
+          <li>
+            {if currentPath == item["href"]}
+              <a href={item["href"]} class="menu-item menu-item-active">
+                <svg class="menu-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d={getIconPath(item["icon"])} />
+                </svg>
+                {if !collapsed}
+                  <span class="menu-label">{item["label"]}</span>
+                {/if}
+              </a>
+            {else}
+              <a href={item["href"]} class="menu-item">
+                <svg class="menu-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d={getIconPath(item["icon"])} />
+                </svg>
+                {if !collapsed}
+                  <span class="menu-label">{item["label"]}</span>
+                {/if}
+              </a>
+            {/if}
+          </li>
+        {/for}
+      </ul>
+    </div>
+  </nav>
+
+  <!-- User Info -->
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">U</div>
+      {if !collapsed}
+        <div class="user-details">
+          <p class="user-email">user@example.com</p>
+          <p class="user-plan">Free Plan</p>
+        </div>
+      {/if}
+    </div>
+  </div>
+</aside>
+
+<style scoped>
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 64px;
+  bottom: 0;
+  z-index: 40;
+  background-color: var(--flin-color-dark-900);
+  border-right: 1px solid var(--flin-color-dark-700);
+  transition: all 0.3s;
+  width: 256px;
+}
+
+.sidebar-toggle {
+  position: absolute;
+  right: -12px;
+  top: 24px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--flin-color-dark-800);
+  border: 1px solid var(--flin-color-dark-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--flin-color-dark-400);
+  cursor: pointer;
+  transition: colors 0.2s;
+}
+
+.sidebar-toggle:hover {
+  color: white;
+}
+
+.toggle-icon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s;
+}
+
+.sidebar-nav {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.menu-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-title {
+  font-size: var(--flin-text-xs);
+  font-weight: 600;
+  color: var(--flin-color-dark-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+  padding-left: 12px;
+}
+
+.section-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--flin-radius-xl);
+  transition: all 0.2s;
+  color: var(--flin-color-dark-400);
+  text-decoration: none;
+}
+
+.menu-item:hover {
+  background-color: var(--flin-color-dark-800);
+  color: white;
+}
+
+.menu-item-active {
+  background-color: rgba(var(--flin-color-primary-500), 0.2);
+  color: var(--flin-color-primary-400);
+}
+
+.menu-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.menu-label {
+  font-weight: 500;
+  font-size: var(--flin-text-base);
+}
+
+.sidebar-footer {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background-color: var(--flin-color-dark-800);
+  border-radius: var(--flin-radius-xl);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(to bottom right, var(--flin-color-primary-500), #9333ea);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.user-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-email {
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: white;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.user-plan {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-color-dark-500);
+  margin: 0;
+}
+</style>
