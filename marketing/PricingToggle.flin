@@ -1,0 +1,224 @@
+// ============================================================================
+// PricingToggle.flin — FlinUI PRO Marketing Component
+// Monthly/annual billing toggle switch with discount badge
+// ============================================================================
+// Props:
+//   - monthly: Monthly price label (string)
+//   - annual: Annual price label (string)
+//   - onToggle: Callback when toggled (function or none)
+//   - discount: Discount percentage for annual (number)
+//   - isAnnual: Current state - true for annual (boolean)
+//   - title: Optional title above toggle (string or none)
+
+monthly = props.monthly || "Monthly"
+annual = props.annual || "Annual"
+discount = props.discount || 20
+isAnnual = props.isAnnual || false
+onToggle = props.onToggle || none
+title = props.title || none
+
+<div class="flin-pricing-toggle">
+    <style>
+        .flin-pricing-toggle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-8);
+        }
+
+        .toggle-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-2);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-full);
+        }
+
+        .toggle-label {
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-tertiary);
+            padding: var(--flin-space-2) var(--flin-space-4);
+            cursor: pointer;
+            transition: color var(--flin-transition-fast);
+            user-select: none;
+        }
+
+        .toggle-label:hover {
+            color: var(--flin-text-secondary);
+        }
+
+        .toggle-label.active {
+            color: var(--flin-text-primary);
+            font-weight: var(--flin-font-semibold);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 56px;
+            height: 28px;
+            background: var(--flin-bg-surface);
+            border: 2px solid var(--flin-border-default);
+            border-radius: var(--flin-radius-full);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .toggle-switch:hover {
+            border-color: var(--flin-accent-gold);
+        }
+
+        .toggle-switch.active {
+            background: var(--flin-accent-gold);
+            border-color: var(--flin-accent-gold);
+        }
+
+        .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: var(--flin-text-secondary);
+            border-radius: var(--flin-radius-full);
+            transition: all var(--flin-transition-fast);
+            box-shadow: var(--flin-shadow-sm);
+        }
+
+        .toggle-switch.active .toggle-knob {
+            left: calc(100% - 22px);
+            background: var(--flin-bg-base);
+        }
+
+        .discount-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+            padding: var(--flin-space-1) var(--flin-space-3);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.25));
+            color: #22c55e;
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-bold);
+            border-radius: var(--flin-radius-full);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            animation: pulse-badge 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Alternative pill toggle style */
+        .toggle-pills {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-1);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-full);
+        }
+
+        .toggle-pill {
+            padding: var(--flin-space-3) var(--flin-space-6);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-tertiary);
+            background: transparent;
+            border: none;
+            border-radius: var(--flin-radius-full);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .toggle-pill:hover {
+            color: var(--flin-text-secondary);
+        }
+
+        .toggle-pill.active {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            font-weight: var(--flin-font-semibold);
+        }
+
+        .pill-with-badge {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .pill-badge {
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+            padding: 2px 6px;
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border-radius: var(--flin-radius-sm);
+        }
+
+        .toggle-pill.active .pill-badge {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--flin-bg-base);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .toggle-container {
+                flex-direction: column;
+                gap: var(--flin-space-2);
+                padding: var(--flin-space-4);
+                border-radius: var(--flin-radius-xl);
+            }
+
+            .toggle-pills {
+                flex-direction: column;
+                width: 100%;
+                border-radius: var(--flin-radius-xl);
+            }
+
+            .toggle-pill {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+
+    {if title != none}
+        <h3 class="toggle-title">{title}</h3>
+    {/if}
+
+    <div class="toggle-pills">
+        <button
+            class="toggle-pill {if !isAnnual}active{/if}"
+            click={isAnnual = false; if onToggle != none { onToggle(false) }}
+        >
+            {monthly}
+        </button>
+        <button
+            class="toggle-pill {if isAnnual}active{/if}"
+            click={isAnnual = true; if onToggle != none { onToggle(true) }}
+        >
+            <span class="pill-with-badge">
+                {annual}
+                <span class="pill-badge">-{discount}%</span>
+            </span>
+        </button>
+    </div>
+
+    {if discount > 0}
+        <span class="discount-badge">
+            Save {discount}% with annual billing
+        </span>
+    {/if}
+</div>

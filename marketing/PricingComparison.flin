@@ -1,0 +1,256 @@
+// ============================================================================
+// PricingComparison.flin — FlinUI PRO Marketing Component
+// Feature by plan comparison matrix with plans as columns and features as rows
+// ============================================================================
+// Props:
+//   - title: Section title (string or none)
+//   - subtitle: Section subtitle (string or none)
+//   - plans: List of plan names (list of strings)
+//   - features: List of feature objects with name and tiers (list of booleans/strings)
+//   - highlightPlan: Index of plan to highlight (number or none)
+
+title = props.title || none
+subtitle = props.subtitle || none
+highlightPlan = props.highlightPlan || 1
+plans = props.plans || ["Starter", "Pro", "Enterprise"]
+features = props.features || [
+    ["name": "Projects", "category": "Core", "tiers": ["5", "Unlimited", "Unlimited"]],
+    ["name": "Storage", "category": "Core", "tiers": ["10GB", "100GB", "Unlimited"]],
+    ["name": "Team members", "category": "Core", "tiers": ["1", "10", "Unlimited"]],
+    ["name": "API access", "category": "Features", "tiers": [false, true, true]],
+    ["name": "Advanced analytics", "category": "Features", "tiers": [false, true, true]],
+    ["name": "Custom integrations", "category": "Features", "tiers": [false, false, true]],
+    ["name": "Email support", "category": "Support", "tiers": [true, true, true]],
+    ["name": "Priority support", "category": "Support", "tiers": [false, true, true]],
+    ["name": "Dedicated account manager", "category": "Support", "tiers": [false, false, true]],
+    ["name": "SLA guarantee", "category": "Support", "tiers": [false, false, true]]
+]
+
+<div class="flin-pricing-comparison">
+    <style>
+        .flin-pricing-comparison {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+            overflow-x: auto;
+        }
+
+        .comparison-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto var(--flin-space-16) auto;
+        }
+
+        .comparison-title {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-4) 0;
+        }
+
+        .comparison-subtitle {
+            font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        .comparison-table-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        .comparison-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .comparison-table th {
+            padding: var(--flin-space-6);
+            text-align: center;
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-elevated);
+            border-bottom: 2px solid var(--flin-border-default);
+        }
+
+        .comparison-table th:first-child {
+            text-align: left;
+            width: 40%;
+        }
+
+        .comparison-table th.highlighted {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            position: relative;
+        }
+
+        .comparison-table th.highlighted::before {
+            content: "★ Popular";
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+        }
+
+        .comparison-table td {
+            padding: var(--flin-space-4) var(--flin-space-6);
+            text-align: center;
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            border-bottom: 1px solid var(--flin-border-subtle);
+            background: var(--flin-bg-elevated);
+            transition: background var(--flin-transition-fast);
+        }
+
+        .comparison-table td:first-child {
+            text-align: left;
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+        }
+
+        .comparison-table td.highlighted {
+            background: rgba(212, 175, 55, 0.08);
+        }
+
+        .comparison-table tr:hover td {
+            background: var(--flin-bg-surface);
+        }
+
+        .comparison-table tr:hover td.highlighted {
+            background: rgba(212, 175, 55, 0.12);
+        }
+
+        .category-row td {
+            padding: var(--flin-space-3) var(--flin-space-6);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-bold);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--flin-text-tertiary);
+            background: var(--flin-bg-surface) !important;
+            border-bottom: 1px solid var(--flin-border-default);
+        }
+
+        .check-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border-radius: var(--flin-radius-full);
+            font-size: 14px;
+        }
+
+        .cross-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-radius: var(--flin-radius-full);
+            font-size: 14px;
+        }
+
+        .value-text {
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        /* Mobile scroll hint */
+        .scroll-hint {
+            display: none;
+            text-align: center;
+            padding: var(--flin-space-3);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-tertiary);
+            background: var(--flin-bg-elevated);
+            border-radius: var(--flin-radius-lg);
+            margin-bottom: var(--flin-space-4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-pricing-comparison {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .scroll-hint {
+                display: block;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: var(--flin-space-3) var(--flin-space-4);
+                font-size: var(--flin-text-sm);
+            }
+
+            .comparison-table th.highlighted::before {
+                top: -20px;
+                font-size: 10px;
+            }
+        }
+    </style>
+
+    {if title != none || subtitle != none}
+        <div class="comparison-header">
+            {if title != none}
+                <h2 class="comparison-title">{title}</h2>
+            {/if}
+            {if subtitle != none}
+                <p class="comparison-subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="comparison-table-wrapper">
+        <div class="scroll-hint">← Scroll horizontally to see all plans →</div>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Features</th>
+                    {for plan, index in plans}
+                        <th class="{if index == highlightPlan}highlighted{/if}">{plan}</th>
+                    {/for}
+                </tr>
+            </thead>
+            <tbody>
+                {for feature in features}
+                    <tr>
+                        <td>{feature.name}</td>
+                        {for tier, index in feature.tiers}
+                            <td class="{if index == highlightPlan}highlighted{/if}">
+                                {if tier == true}
+                                    <span class="check-icon">✓</span>
+                                {else if tier == false}
+                                    <span class="cross-icon">✕</span>
+                                {else}
+                                    <span class="value-text">{tier}</span>
+                                {/if}
+                            </td>
+                        {/for}
+                    </tr>
+                {/for}
+            </tbody>
+        </table>
+    </div>
+</div>

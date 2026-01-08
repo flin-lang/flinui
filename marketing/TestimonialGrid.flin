@@ -1,0 +1,211 @@
+// ============================================================================
+// TestimonialGrid.flin — FlinUI PRO Marketing Component
+// Masonry-style grid layout for displaying multiple testimonials
+// ============================================================================
+// Props:
+//   - testimonials: List of testimonial objects (list)
+//   - columns: Number of columns 2-4 (number)
+//   - title: Section title (string or none)
+//   - subtitle: Section subtitle (string or none)
+
+testimonials = props.testimonials || [
+    ["quote": "FLIN changed how we build apps. The simplicity is unmatched.", "author": "Sarah Chen", "role": "CTO", "company": "TechCorp", "avatar": none, "rating": 5],
+    ["quote": "We shipped 3x faster after switching to FLIN.", "author": "Marcus Johnson", "role": "Lead Developer", "company": "StartupXYZ", "avatar": none, "rating": 5],
+    ["quote": "The learning curve is almost non-existent. Our whole team was productive in hours, not weeks.", "author": "Elena Rodriguez", "role": "Engineering Manager", "company": "BigTech Inc", "avatar": none, "rating": 5],
+    ["quote": "Best decision we made this year.", "author": "David Kim", "role": "Founder", "company": "NewCo", "avatar": none, "rating": 5],
+    ["quote": "FLIN is what we've been waiting for. Finally, a framework that gets out of the way.", "author": "Lisa Park", "role": "Senior Engineer", "company": "DevShop", "avatar": none, "rating": 5],
+    ["quote": "Our clients love the results.", "author": "Tom Wilson", "role": "Agency Owner", "company": "WebAgency", "avatar": none, "rating": 5]
+]
+columns = props.columns || 3
+title = props.title || none
+subtitle = props.subtitle || none
+
+<div class="flin-testimonial-grid" style="--columns: {columns}">
+    <style>
+        .flin-testimonial-grid {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .grid-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto var(--flin-space-16) auto;
+        }
+
+        .grid-title {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-4) 0;
+        }
+
+        .grid-subtitle {
+            font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        .testimonials-container {
+            display: grid;
+            grid-template-columns: repeat(var(--columns), 1fr);
+            gap: var(--flin-space-6);
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        .testimonial-card {
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            padding: var(--flin-space-6);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .testimonial-card:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-4px);
+        }
+
+        .card-rating {
+            display: flex;
+            gap: 2px;
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .star {
+            font-size: 1rem;
+            color: var(--flin-accent-gold);
+        }
+
+        .card-quote {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0 0 var(--flin-space-5) 0;
+        }
+
+        .card-author {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding-top: var(--flin-space-4);
+            border-top: 1px solid var(--flin-border-subtle);
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--flin-radius-full);
+            object-fit: cover;
+        }
+
+        .author-placeholder {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--flin-radius-full);
+            background: linear-gradient(135deg, var(--flin-accent-gold), var(--flin-accent-gold-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-bg-base);
+            flex-shrink: 0;
+        }
+
+        .author-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .author-name {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .author-role {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-secondary);
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .testimonials-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flin-testimonial-grid {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .testimonials-container {
+                grid-template-columns: 1fr;
+                gap: var(--flin-space-4);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .testimonial-card {
+                padding: var(--flin-space-5);
+            }
+        }
+    </style>
+
+    {if title != none || subtitle != none}
+        <div class="grid-header">
+            {if title != none}
+                <h2 class="grid-title">{title}</h2>
+            {/if}
+            {if subtitle != none}
+                <p class="grid-subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="testimonials-container">
+        {for testimonial in testimonials}
+            <div class="testimonial-card">
+                {if testimonial.rating != none}
+                    <div class="card-rating">
+                        {for i in [1, 2, 3, 4, 5]}
+                            {if i <= testimonial.rating}
+                                <span class="star">★</span>
+                            {/if}
+                        {/for}
+                    </div>
+                {/if}
+
+                <p class="card-quote">"{testimonial.quote}"</p>
+
+                <div class="card-author">
+                    {if testimonial.avatar != none}
+                        <img class="author-avatar" src="{testimonial.avatar}" alt="{testimonial.author}" />
+                    {else}
+                        <div class="author-placeholder">{testimonial.author[0]}</div>
+                    {/if}
+
+                    <div class="author-info">
+                        <p class="author-name">{testimonial.author}</p>
+                        {if testimonial.role != none || testimonial.company != none}
+                            <p class="author-role">
+                                {if testimonial.role != none}{testimonial.role}{/if}
+                                {if testimonial.role != none && testimonial.company != none}, {/if}
+                                {if testimonial.company != none}{testimonial.company}{/if}
+                            </p>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+        {/for}
+    </div>
+</div>

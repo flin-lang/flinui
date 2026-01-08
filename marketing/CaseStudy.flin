@@ -1,0 +1,270 @@
+// ============================================================================
+// CaseStudy.flin — FlinUI PRO Marketing Component
+// Success story card showcasing client results with metrics
+// ============================================================================
+// Props:
+//   - title: Case study title (string)
+//   - company: Company name (string)
+//   - logo: Company logo URL (string or none)
+//   - challenge: The problem faced (string)
+//   - solution: How it was solved (string)
+//   - results: List of result strings (list)
+//   - metric: Featured metric object with value and label (object or none)
+//   - link: Link to full case study (string or none)
+
+title = props.title || "How TechCorp Increased Productivity by 300%"
+company = props.company || "TechCorp"
+logo = props.logo || none
+challenge = props.challenge || "Legacy codebase was slowing down development and causing frequent bugs."
+solution = props.solution || "Migrated to FLIN in 3 weeks with zero downtime and immediate productivity gains."
+results = props.results || [
+    "300% increase in deployment frequency",
+    "50% reduction in bug reports",
+    "2x faster onboarding for new developers"
+]
+metric = props.metric || ["value": "300%", "label": "Productivity Increase"]
+link = props.link || none
+
+<div class="flin-case-study">
+    <style>
+        .flin-case-study {
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-2xl);
+            overflow: hidden;
+            max-width: 900px;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .flin-case-study:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+        }
+
+        .case-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--flin-space-6);
+            padding: var(--flin-space-8);
+            background: var(--flin-bg-surface);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .case-company {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-4);
+        }
+
+        .company-logo {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            border-radius: var(--flin-radius-lg);
+        }
+
+        .company-placeholder {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--flin-accent-gold), var(--flin-accent-gold-dark));
+            border-radius: var(--flin-radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            font-weight: var(--flin-font-black);
+            color: var(--flin-bg-base);
+        }
+
+        .company-name {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .case-metric {
+            text-align: right;
+        }
+
+        .metric-value {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-accent-gold);
+            line-height: 1;
+            margin: 0;
+        }
+
+        .metric-label {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            margin: var(--flin-space-1) 0 0 0;
+        }
+
+        .case-content {
+            padding: var(--flin-space-8);
+        }
+
+        .case-title {
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-6) 0;
+            line-height: var(--flin-leading-tight);
+        }
+
+        .case-section {
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .section-label {
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 0 0 var(--flin-space-2) 0;
+        }
+
+        .section-text {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        .case-results {
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .results-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-3);
+        }
+
+        .result-item {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--flin-space-3);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+        }
+
+        .result-icon {
+            color: var(--flin-accent-gold);
+            font-size: 1.25rem;
+            line-height: 1.4;
+            flex-shrink: 0;
+        }
+
+        .case-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-3) var(--flin-space-6);
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-bold);
+            text-decoration: none;
+            border-radius: var(--flin-radius-lg);
+            transition: all var(--flin-transition-fast);
+        }
+
+        .case-cta:hover {
+            background: var(--flin-accent-gold-dark);
+            transform: translateX(4px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .case-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--flin-space-4);
+                padding: var(--flin-space-6);
+            }
+
+            .case-metric {
+                text-align: left;
+            }
+
+            .case-content {
+                padding: var(--flin-space-6);
+            }
+
+            .company-logo,
+            .company-placeholder {
+                width: 48px;
+                height: 48px;
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .case-header {
+                padding: var(--flin-space-5);
+            }
+
+            .case-content {
+                padding: var(--flin-space-5);
+            }
+        }
+    </style>
+
+    <div class="case-header">
+        <div class="case-company">
+            {if logo != none}
+                <img class="company-logo" src="{logo}" alt="{company}" />
+            {else}
+                <div class="company-placeholder">{company[0]}</div>
+            {/if}
+            <p class="company-name">{company}</p>
+        </div>
+
+        {if metric != none}
+            <div class="case-metric">
+                <p class="metric-value">{metric.value}</p>
+                <p class="metric-label">{metric.label}</p>
+            </div>
+        {/if}
+    </div>
+
+    <div class="case-content">
+        <h3 class="case-title">{title}</h3>
+
+        <div class="case-section">
+            <p class="section-label">The Challenge</p>
+            <p class="section-text">{challenge}</p>
+        </div>
+
+        <div class="case-section">
+            <p class="section-label">The Solution</p>
+            <p class="section-text">{solution}</p>
+        </div>
+
+        <div class="case-results">
+            <p class="section-label">Results</p>
+            <ul class="results-list">
+                {for result in results}
+                    <li class="result-item">
+                        <span class="result-icon">✓</span>
+                        <span>{result}</span>
+                    </li>
+                {/for}
+            </ul>
+        </div>
+
+        {if link != none}
+            <a href="{link}" class="case-cta">
+                Read Full Case Study
+                <span>→</span>
+            </a>
+        {/if}
+    </div>
+</div>

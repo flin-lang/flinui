@@ -1,0 +1,238 @@
+// ============================================================================
+// ReviewAggregate.flin — FlinUI PRO Marketing Component
+// Overall rating display with breakdown distribution bars
+// ============================================================================
+// Props:
+//   - rating: Overall rating value (number)
+//   - totalReviews: Total number of reviews (number)
+//   - breakdown: List of rating breakdown with stars and count (list)
+//   - source: Rating source name (string or none)
+//   - sourceLogo: Rating source logo URL (string or none)
+
+rating = props.rating || 4.8
+totalReviews = props.totalReviews || 1247
+breakdown = props.breakdown || [
+    ["stars": 5, "count": 892],
+    ["stars": 4, "count": 256],
+    ["stars": 3, "count": 67],
+    ["stars": 2, "count": 21],
+    ["stars": 1, "count": 11]
+]
+source = props.source || none
+sourceLogo = props.sourceLogo || none
+
+// Calculate max count for percentage
+maxCount = 0
+{for item in breakdown}
+    {if item.count > maxCount}
+        maxCount = item.count
+    {/if}
+{/for}
+
+<div class="flin-review-aggregate">
+    <style>
+        .flin-review-aggregate {
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-2xl);
+            padding: var(--flin-space-8);
+            max-width: 480px;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .flin-review-aggregate:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+        }
+
+        .review-main {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-6);
+            margin-bottom: var(--flin-space-6);
+            padding-bottom: var(--flin-space-6);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .rating-score {
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: clamp(3rem, 5vw, 4rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            line-height: 1;
+            margin: 0;
+        }
+
+        .score-stars {
+            display: flex;
+            justify-content: center;
+            gap: 2px;
+            margin-top: var(--flin-space-2);
+        }
+
+        .star {
+            font-size: 1.25rem;
+            color: var(--flin-accent-gold);
+        }
+
+        .star.empty {
+            color: var(--flin-border-subtle);
+        }
+
+        .star.half {
+            background: linear-gradient(90deg, var(--flin-accent-gold) 50%, var(--flin-border-subtle) 50%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .rating-meta {
+            flex: 1;
+        }
+
+        .meta-reviews {
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-primary);
+            font-weight: var(--flin-font-semibold);
+            margin: 0 0 var(--flin-space-2) 0;
+        }
+
+        .meta-source {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+
+        .source-logo {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+
+        .breakdown-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-3);
+        }
+
+        .breakdown-row {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+        }
+
+        .breakdown-stars {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            min-width: 48px;
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+        }
+
+        .breakdown-stars .star-icon {
+            color: var(--flin-accent-gold);
+            font-size: 0.875rem;
+        }
+
+        .breakdown-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-full);
+            overflow: hidden;
+        }
+
+        .breakdown-fill {
+            height: 100%;
+            background: var(--flin-accent-gold);
+            border-radius: var(--flin-radius-full);
+            transition: width 0.5s ease-out;
+        }
+
+        .breakdown-count {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-muted);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .flin-review-aggregate {
+                padding: var(--flin-space-6);
+            }
+
+            .review-main {
+                flex-direction: column;
+                text-align: center;
+                gap: var(--flin-space-4);
+            }
+
+            .rating-meta {
+                text-align: center;
+            }
+
+            .meta-source {
+                justify-content: center;
+            }
+
+            .breakdown-stars {
+                min-width: 40px;
+            }
+
+            .breakdown-count {
+                min-width: 32px;
+            }
+        }
+    </style>
+
+    <div class="review-main">
+        <div class="rating-score">
+            <p class="score-value">{rating}</p>
+            <div class="score-stars">
+                {for i in [1, 2, 3, 4, 5]}
+                    {if i <= rating}
+                        <span class="star">★</span>
+                    {else if i - 0.5 <= rating}
+                        <span class="star half">★</span>
+                    {else}
+                        <span class="star empty">★</span>
+                    {/if}
+                {/for}
+            </div>
+        </div>
+
+        <div class="rating-meta">
+            <p class="meta-reviews">{totalReviews} reviews</p>
+            {if source != none}
+                <div class="meta-source">
+                    {if sourceLogo != none}
+                        <img class="source-logo" src="{sourceLogo}" alt="{source}" />
+                    {/if}
+                    <span>Based on {source}</span>
+                </div>
+            {/if}
+        </div>
+    </div>
+
+    <div class="breakdown-list">
+        {for item in breakdown}
+            <div class="breakdown-row">
+                <div class="breakdown-stars">
+                    <span>{item.stars}</span>
+                    <span class="star-icon">★</span>
+                </div>
+                <div class="breakdown-bar">
+                    <div class="breakdown-fill" style="width: {maxCount > 0 ? (item.count / maxCount * 100) : 0}%"></div>
+                </div>
+                <span class="breakdown-count">{item.count}</span>
+            </div>
+        {/for}
+    </div>
+</div>

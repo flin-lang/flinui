@@ -1,0 +1,237 @@
+// ============================================================================
+// TestimonialCarousel.flin — FlinUI PRO Marketing Component
+// Sliding testimonials carousel with navigation controls
+// ============================================================================
+// Props:
+//   - testimonials: List of testimonial objects (list)
+//   - autoplay: Enable auto-sliding (boolean)
+//   - interval: Autoplay interval in ms (number)
+//   - showDots: Show navigation dots (boolean)
+//   - showArrows: Show prev/next arrows (boolean)
+
+testimonials = props.testimonials || [
+    ["quote": "FLIN changed how we build apps", "author": "Sarah Chen", "role": "CTO", "company": "TechCorp", "rating": 5],
+    ["quote": "The simplest framework I've ever used", "author": "Marcus Johnson", "role": "Lead Developer", "company": "StartupXYZ", "rating": 5],
+    ["quote": "Productivity increased 10x", "author": "Elena Rodriguez", "role": "Engineering Manager", "company": "BigTech Inc", "rating": 5]
+]
+autoplay = props.autoplay || true
+interval = props.interval || 5000
+showDots = props.showDots || true
+showArrows = props.showArrows || true
+
+currentIndex = 0
+
+<div class="flin-testimonial-carousel">
+    <style>
+        .flin-testimonial-carousel {
+            padding: var(--flin-space-16) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .carousel-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            padding: var(--flin-space-8);
+            box-sizing: border-box;
+        }
+
+        .slide-content {
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-2xl);
+            padding: var(--flin-space-10);
+            text-align: center;
+        }
+
+        .slide-rating {
+            display: flex;
+            justify-content: center;
+            gap: var(--flin-space-1);
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .star {
+            font-size: 1.5rem;
+            color: var(--flin-accent-gold);
+        }
+
+        .slide-quote {
+            font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0 0 var(--flin-space-8) 0;
+            font-style: italic;
+        }
+
+        .slide-author {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .author-name {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .author-role {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            margin: 0;
+        }
+
+        .carousel-arrows {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            padding: 0 var(--flin-space-2);
+        }
+
+        .carousel-arrow {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--flin-radius-full);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all var(--flin-transition-fast);
+            font-size: 1.25rem;
+            color: var(--flin-text-primary);
+        }
+
+        .carousel-arrow:hover {
+            background: var(--flin-accent-gold);
+            border-color: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: var(--flin-space-2);
+            margin-top: var(--flin-space-6);
+        }
+
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: var(--flin-radius-full);
+            background: var(--flin-border-subtle);
+            border: none;
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .carousel-dot.active {
+            background: var(--flin-accent-gold);
+            width: 32px;
+        }
+
+        .carousel-dot:hover:not(.active) {
+            background: var(--flin-text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-testimonial-carousel {
+                padding: var(--flin-space-12) var(--flin-space-4);
+            }
+
+            .carousel-slide {
+                padding: var(--flin-space-4);
+            }
+
+            .slide-content {
+                padding: var(--flin-space-6);
+            }
+
+            .carousel-arrow {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .carousel-arrows {
+                display: none;
+            }
+
+            .slide-content {
+                padding: var(--flin-space-5);
+            }
+        }
+    </style>
+
+    <div class="carousel-container">
+        <div class="carousel-track" style="transform: translateX(-{currentIndex * 100}%)">
+            {for testimonial in testimonials}
+                <div class="carousel-slide">
+                    <div class="slide-content">
+                        {if testimonial.rating != none}
+                            <div class="slide-rating">
+                                {for i in [1, 2, 3, 4, 5]}
+                                    {if i <= testimonial.rating}
+                                        <span class="star">★</span>
+                                    {/if}
+                                {/for}
+                            </div>
+                        {/if}
+
+                        <p class="slide-quote">"{testimonial.quote}"</p>
+
+                        <div class="slide-author">
+                            <p class="author-name">{testimonial.author}</p>
+                            {if testimonial.role != none || testimonial.company != none}
+                                <p class="author-role">
+                                    {if testimonial.role != none}{testimonial.role}{/if}
+                                    {if testimonial.role != none && testimonial.company != none}, {/if}
+                                    {if testimonial.company != none}{testimonial.company}{/if}
+                                </p>
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+            {/for}
+        </div>
+
+        {if showArrows}
+            <div class="carousel-arrows">
+                <button class="carousel-arrow" click={currentIndex = currentIndex > 0 ? currentIndex - 1 : testimonials.length - 1}>←</button>
+                <button class="carousel-arrow" click={currentIndex = currentIndex < testimonials.length - 1 ? currentIndex + 1 : 0}>→</button>
+            </div>
+        {/if}
+    </div>
+
+    {if showDots}
+        <div class="carousel-dots">
+            {for index, testimonial in testimonials}
+                <button class="carousel-dot {if index == currentIndex}active{/if}" click={currentIndex = index}></button>
+            {/for}
+        </div>
+    {/if}
+</div>

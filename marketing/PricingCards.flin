@@ -1,0 +1,282 @@
+// ============================================================================
+// PricingCards.flin — FlinUI PRO Marketing Component
+// Individual plan cards with vertical layout, features list, and CTA buttons
+// ============================================================================
+// Props:
+//   - title: Section title (string or none)
+//   - subtitle: Section subtitle (string or none)
+//   - plans: List of plan objects with name, price, period, features, cta, description (list)
+//   - highlight: Index of the popular/highlighted plan (number or none)
+
+title = props.title || none
+subtitle = props.subtitle || none
+highlight = props.highlight || 1
+plans = props.plans || [
+    ["name": "Starter", "price": 0, "period": "month", "description": "Perfect for getting started", "features": ["5 projects", "10GB storage", "Email support"], "cta": "Start Free"],
+    ["name": "Pro", "price": 29, "period": "month", "description": "For growing teams", "features": ["Unlimited projects", "100GB storage", "Priority support", "API access"], "cta": "Get Pro"],
+    ["name": "Enterprise", "price": 99, "period": "month", "description": "For large organizations", "features": ["Everything in Pro", "Unlimited storage", "Dedicated support", "Custom contracts"], "cta": "Contact Sales"]
+]
+
+currentIndex = 0
+
+<div class="flin-pricing-cards">
+    <style>
+        .flin-pricing-cards {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .cards-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto var(--flin-space-16) auto;
+        }
+
+        .cards-title {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-4) 0;
+        }
+
+        .cards-subtitle {
+            font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        .cards-container {
+            display: flex;
+            justify-content: center;
+            gap: var(--flin-space-8);
+            max-width: 1200px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+
+        .pricing-card {
+            flex: 1;
+            min-width: 300px;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            padding: var(--flin-space-10);
+            background: var(--flin-bg-elevated);
+            border: 2px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-2xl);
+            transition: all var(--flin-transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: transparent;
+            transition: background var(--flin-transition-fast);
+        }
+
+        .pricing-card:hover {
+            border-color: var(--flin-border-default);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-8px);
+        }
+
+        .pricing-card:hover::before {
+            background: var(--flin-accent-gold);
+        }
+
+        .pricing-card.highlighted {
+            border-color: var(--flin-accent-gold);
+            transform: scale(1.05);
+            z-index: 1;
+        }
+
+        .pricing-card.highlighted::before {
+            background: linear-gradient(90deg, var(--flin-accent-gold), var(--flin-accent-gold-light));
+        }
+
+        .pricing-card.highlighted:hover {
+            transform: scale(1.05) translateY(-8px);
+        }
+
+        .highlight-ribbon {
+            position: absolute;
+            top: 24px;
+            right: -32px;
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+            padding: var(--flin-space-1) var(--flin-space-10);
+            transform: rotate(45deg);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .card-plan-name {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-2) 0;
+        }
+
+        .card-plan-description {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-tertiary);
+            margin: 0 0 var(--flin-space-6) 0;
+        }
+
+        .card-price-block {
+            display: flex;
+            align-items: baseline;
+            gap: var(--flin-space-1);
+            margin-bottom: var(--flin-space-8);
+            padding-bottom: var(--flin-space-8);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .card-currency {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-secondary);
+        }
+
+        .card-price {
+            font-size: clamp(3rem, 5vw, 4rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            line-height: 1;
+        }
+
+        .card-period {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-tertiary);
+        }
+
+        .card-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 var(--flin-space-8) 0;
+            flex-grow: 1;
+        }
+
+        .card-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-2) 0;
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+        }
+
+        .card-check {
+            color: #22c55e;
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .card-cta {
+            display: block;
+            width: 100%;
+            padding: var(--flin-space-4) var(--flin-space-6);
+            background: var(--flin-bg-surface);
+            color: var(--flin-text-primary);
+            border: 2px solid var(--flin-border-default);
+            border-radius: var(--flin-radius-lg);
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-semibold);
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .card-cta:hover {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            border-color: var(--flin-accent-gold);
+        }
+
+        .pricing-card.highlighted .card-cta {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            border-color: var(--flin-accent-gold);
+        }
+
+        .pricing-card.highlighted .card-cta:hover {
+            background: var(--flin-accent-gold-light);
+            border-color: var(--flin-accent-gold-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .pricing-card.highlighted {
+                transform: none;
+            }
+
+            .pricing-card.highlighted:hover {
+                transform: translateY(-8px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flin-pricing-cards {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .cards-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .pricing-card {
+                max-width: 100%;
+                padding: var(--flin-space-8);
+            }
+        }
+    </style>
+
+    {if title != none || subtitle != none}
+        <div class="cards-header">
+            {if title != none}
+                <h2 class="cards-title">{title}</h2>
+            {/if}
+            {if subtitle != none}
+                <p class="cards-subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="cards-container">
+        {for plan, index in plans}
+            <div class="pricing-card {if index == highlight}highlighted{/if}">
+                {if index == highlight}
+                    <span class="highlight-ribbon">Best Value</span>
+                {/if}
+                <h3 class="card-plan-name">{plan.name}</h3>
+                <p class="card-plan-description">{plan.description}</p>
+                <div class="card-price-block">
+                    <span class="card-currency">$</span>
+                    <span class="card-price">{plan.price}</span>
+                    <span class="card-period">/{plan.period}</span>
+                </div>
+                <ul class="card-features">
+                    {for feature in plan.features}
+                        <li>
+                            <span class="card-check">✓</span>
+                            {feature}
+                        </li>
+                    {/for}
+                </ul>
+                <button class="card-cta">{plan.cta}</button>
+            </div>
+        {/for}
+    </div>
+</div>

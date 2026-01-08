@@ -1,0 +1,170 @@
+// ============================================================================
+// LogoCloud.flin — FlinUI PRO Marketing Component
+// Display partner/client logos in a responsive grid with hover effects
+// ============================================================================
+// Props:
+//   - title: Section title (string or none)
+//   - subtitle: Section subtitle (string or none)
+//   - logos: List of logo objects with src, alt, href (list)
+//   - columns: Number of columns 3-6 (number)
+//   - grayscale: Show logos in grayscale until hover (boolean)
+
+title = props.title || none
+subtitle = props.subtitle || none
+logos = props.logos || [
+    ["src": "/logos/company1.svg", "alt": "Company 1", "href": none],
+    ["src": "/logos/company2.svg", "alt": "Company 2", "href": none],
+    ["src": "/logos/company3.svg", "alt": "Company 3", "href": none],
+    ["src": "/logos/company4.svg", "alt": "Company 4", "href": none],
+    ["src": "/logos/company5.svg", "alt": "Company 5", "href": none],
+    ["src": "/logos/company6.svg", "alt": "Company 6", "href": none]
+]
+columns = props.columns || 6
+grayscale = props.grayscale || true
+
+<div class="flin-logo-cloud" style="--columns: {columns}">
+    <style>
+        .flin-logo-cloud {
+            padding: var(--flin-space-16) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .logo-header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto var(--flin-space-12) auto;
+        }
+
+        .logo-title {
+            font-size: clamp(1rem, 1.5vw, 1.125rem);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 0 0 var(--flin-space-2) 0;
+        }
+
+        .logo-subtitle {
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(var(--columns), 1fr);
+            gap: var(--flin-space-8);
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: center;
+            justify-items: center;
+        }
+
+        .logo-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--flin-space-4);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .logo-item.grayscale img {
+            filter: grayscale(100%) opacity(0.6);
+        }
+
+        .logo-item.grayscale:hover img {
+            filter: grayscale(0%) opacity(1);
+        }
+
+        .logo-item img {
+            max-width: 140px;
+            max-height: 48px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .logo-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .logo-link:hover {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .logo-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .logo-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: var(--flin-space-6);
+            }
+
+            .logo-item img {
+                max-width: 120px;
+                max-height: 40px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .flin-logo-cloud {
+                padding: var(--flin-space-12) var(--flin-space-4);
+            }
+
+            .logo-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--flin-space-4);
+            }
+
+            .logo-item img {
+                max-width: 100px;
+                max-height: 36px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .logo-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+
+    {if title != none || subtitle != none}
+        <div class="logo-header">
+            {if title != none}
+                <p class="logo-title">{title}</p>
+            {/if}
+            {if subtitle != none}
+                <h2 class="logo-subtitle">{subtitle}</h2>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="logo-grid">
+        {for logo in logos}
+            <div class="logo-item {if grayscale}grayscale{/if}">
+                {if logo.href != none}
+                    <a href="{logo.href}" class="logo-link" target="_blank" rel="noopener noreferrer">
+                        <img src="{logo.src}" alt="{logo.alt}" loading="lazy" />
+                    </a>
+                {else}
+                    <img src="{logo.src}" alt="{logo.alt}" loading="lazy" />
+                {/if}
+            </div>
+        {/for}
+    </div>
+</div>

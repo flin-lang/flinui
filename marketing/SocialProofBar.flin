@@ -1,0 +1,196 @@
+// ============================================================================
+// SocialProofBar.flin — FlinUI PRO Marketing Component
+// Horizontal trust indicators strip with stats and icons
+// ============================================================================
+// Props:
+//   - items: List of proof items with icon, value, label (list)
+//   - variant: Color variant "dark" or "light" (string)
+//   - animated: Enable count-up animation (boolean)
+
+items = props.items || [
+    ["icon": "👥", "value": "10,000+", "label": "Happy Customers"],
+    ["icon": "⭐", "value": "4.9/5", "label": "Average Rating"],
+    ["icon": "🚀", "value": "99.9%", "label": "Uptime"],
+    ["icon": "🌍", "value": "50+", "label": "Countries"]
+]
+variant = props.variant || "dark"
+animated = props.animated || false
+
+<div class="flin-social-proof-bar {variant}">
+    <style>
+        .flin-social-proof-bar {
+            padding: var(--flin-space-6) var(--flin-space-8);
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: var(--flin-space-8);
+        }
+
+        .flin-social-proof-bar.dark {
+            background: var(--flin-bg-base);
+            border-top: 1px solid var(--flin-border-subtle);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .flin-social-proof-bar.light {
+            background: var(--flin-bg-elevated);
+        }
+
+        .proof-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-2) var(--flin-space-4);
+            transition: all var(--flin-transition-fast);
+        }
+
+        .proof-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .proof-icon {
+            font-size: 1.75rem;
+            line-height: 1;
+        }
+
+        .proof-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .proof-value {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            line-height: 1;
+            margin: 0;
+        }
+
+        .flin-social-proof-bar.dark .proof-value {
+            color: var(--flin-accent-gold);
+        }
+
+        .proof-label {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .proof-divider {
+            width: 1px;
+            height: 40px;
+            background: var(--flin-border-subtle);
+        }
+
+        /* Compact variant */
+        .flin-social-proof-bar.compact {
+            gap: var(--flin-space-6);
+            padding: var(--flin-space-4) var(--flin-space-6);
+        }
+
+        .flin-social-proof-bar.compact .proof-item {
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-1) var(--flin-space-2);
+        }
+
+        .flin-social-proof-bar.compact .proof-icon {
+            font-size: 1.25rem;
+        }
+
+        .flin-social-proof-bar.compact .proof-value {
+            font-size: var(--flin-text-lg);
+        }
+
+        .flin-social-proof-bar.compact .proof-label {
+            font-size: var(--flin-text-xs);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .flin-social-proof-bar {
+                gap: var(--flin-space-6);
+            }
+
+            .proof-divider {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flin-social-proof-bar {
+                padding: var(--flin-space-5) var(--flin-space-4);
+                gap: var(--flin-space-4);
+            }
+
+            .proof-item {
+                flex: 1 1 45%;
+                justify-content: center;
+                padding: var(--flin-space-3);
+            }
+
+            .proof-icon {
+                font-size: 1.5rem;
+            }
+
+            .proof-value {
+                font-size: var(--flin-text-lg);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flin-social-proof-bar {
+                gap: var(--flin-space-3);
+            }
+
+            .proof-item {
+                flex: 1 1 100%;
+                justify-content: flex-start;
+                padding: var(--flin-space-2) var(--flin-space-3);
+                background: var(--flin-bg-surface);
+                border-radius: var(--flin-radius-lg);
+            }
+
+            .flin-social-proof-bar.dark .proof-item {
+                background: var(--flin-bg-elevated);
+            }
+        }
+
+        /* Animation for count-up effect */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .flin-social-proof-bar.animated .proof-item {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        .flin-social-proof-bar.animated .proof-item:nth-child(1) { animation-delay: 0s; }
+        .flin-social-proof-bar.animated .proof-item:nth-child(2) { animation-delay: 0.1s; }
+        .flin-social-proof-bar.animated .proof-item:nth-child(3) { animation-delay: 0.2s; }
+        .flin-social-proof-bar.animated .proof-item:nth-child(4) { animation-delay: 0.3s; }
+        .flin-social-proof-bar.animated .proof-item:nth-child(5) { animation-delay: 0.4s; }
+        .flin-social-proof-bar.animated .proof-item:nth-child(6) { animation-delay: 0.5s; }
+    </style>
+
+    {for index, item in items}
+        {if index > 0}
+            <div class="proof-divider"></div>
+        {/if}
+        <div class="proof-item">
+            <span class="proof-icon">{item.icon}</span>
+            <div class="proof-content">
+                <p class="proof-value">{item.value}</p>
+                <p class="proof-label">{item.label}</p>
+            </div>
+        </div>
+    {/for}
+</div>

@@ -1,0 +1,318 @@
+// ============================================================================
+// EnterpriseContact.flin — FlinUI PRO Marketing Component
+// Custom pricing CTA card for enterprise customers with gradient styling
+// ============================================================================
+// Props:
+//   - title: Main headline (string)
+//   - description: Descriptive text (string)
+//   - features: List of enterprise features (list of strings)
+//   - buttonText: CTA button text (string)
+//   - buttonHref: CTA button link (string)
+//   - badge: Optional badge text (string or none)
+//   - contactEmail: Contact email for display (string or none)
+
+title = props.title || "Need a custom solution?"
+description = props.description || "Our enterprise plan is tailored to your organization's unique needs with dedicated support, custom integrations, and flexible pricing."
+features = props.features || [
+    "Unlimited everything",
+    "Custom integrations",
+    "Dedicated account manager",
+    "99.99% SLA guarantee",
+    "Priority 24/7 support",
+    "Custom contract terms"
+]
+buttonText = props.buttonText || "Contact Sales"
+buttonHref = props.buttonHref || "/contact"
+badge = props.badge || "Enterprise"
+contactEmail = props.contactEmail || none
+
+<div class="flin-enterprise-contact">
+    <style>
+        .flin-enterprise-contact {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .enterprise-card {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: var(--flin-space-12);
+            background: linear-gradient(135deg,
+                var(--flin-bg-elevated) 0%,
+                rgba(212, 175, 55, 0.08) 50%,
+                var(--flin-bg-elevated) 100%
+            );
+            border: 2px solid var(--flin-accent-gold);
+            border-radius: var(--flin-radius-2xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enterprise-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg,
+                var(--flin-accent-gold) 0%,
+                var(--flin-accent-gold-light) 50%,
+                var(--flin-accent-gold) 100%
+            );
+        }
+
+        .enterprise-card::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .enterprise-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-2) var(--flin-space-4);
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-bold);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-radius: var(--flin-radius-full);
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .enterprise-badge::before {
+            content: "★";
+        }
+
+        .enterprise-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--flin-space-12);
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .enterprise-text {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+        }
+
+        .enterprise-title {
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0;
+            line-height: var(--flin-leading-tight);
+        }
+
+        .enterprise-description {
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        .enterprise-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--flin-space-3);
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .enterprise-features li {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+            padding: var(--flin-space-2) 0;
+        }
+
+        .feature-diamond {
+            width: 8px;
+            height: 8px;
+            background: var(--flin-accent-gold);
+            transform: rotate(45deg);
+            flex-shrink: 0;
+        }
+
+        .enterprise-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--flin-space-6);
+        }
+
+        .enterprise-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-5) var(--flin-space-10);
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            text-decoration: none;
+            border: none;
+            border-radius: var(--flin-radius-lg);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4);
+        }
+
+        .enterprise-cta:hover {
+            background: var(--flin-accent-gold-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .enterprise-cta::after {
+            content: "→";
+            transition: transform var(--flin-transition-fast);
+        }
+
+        .enterprise-cta:hover::after {
+            transform: translateX(4px);
+        }
+
+        .contact-email {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-tertiary);
+        }
+
+        .contact-email a {
+            color: var(--flin-accent-gold);
+            text-decoration: none;
+            font-weight: var(--flin-font-medium);
+            transition: color var(--flin-transition-fast);
+        }
+
+        .contact-email a:hover {
+            color: var(--flin-accent-gold-light);
+            text-decoration: underline;
+        }
+
+        .trust-indicators {
+            display: flex;
+            gap: var(--flin-space-6);
+            margin-top: var(--flin-space-8);
+            padding-top: var(--flin-space-8);
+            border-top: 1px solid var(--flin-border-subtle);
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-tertiary);
+        }
+
+        .trust-icon {
+            font-size: 1.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-enterprise-contact {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .enterprise-card {
+                padding: var(--flin-space-8);
+            }
+
+            .enterprise-content {
+                grid-template-columns: 1fr;
+                gap: var(--flin-space-8);
+            }
+
+            .enterprise-features {
+                grid-template-columns: 1fr;
+            }
+
+            .enterprise-actions {
+                width: 100%;
+                align-items: stretch;
+            }
+
+            .enterprise-cta {
+                justify-content: center;
+                text-align: center;
+            }
+
+            .trust-indicators {
+                flex-wrap: wrap;
+                gap: var(--flin-space-4);
+            }
+        }
+    </style>
+
+    <div class="enterprise-card">
+        {if badge != none}
+            <span class="enterprise-badge">{badge}</span>
+        {/if}
+
+        <div class="enterprise-content">
+            <div class="enterprise-text">
+                <h2 class="enterprise-title">{title}</h2>
+                <p class="enterprise-description">{description}</p>
+
+                <ul class="enterprise-features">
+                    {for feature in features}
+                        <li>
+                            <span class="feature-diamond"></span>
+                            {feature}
+                        </li>
+                    {/for}
+                </ul>
+            </div>
+
+            <div class="enterprise-actions">
+                <a href="{buttonHref}" class="enterprise-cta">
+                    {buttonText}
+                </a>
+
+                {if contactEmail != none}
+                    <div class="contact-email">
+                        Or email us at <a href="mailto:{contactEmail}">{contactEmail}</a>
+                    </div>
+                {/if}
+            </div>
+        </div>
+
+        <div class="trust-indicators">
+            <div class="trust-item">
+                <span class="trust-icon">🔒</span>
+                SOC 2 Compliant
+            </div>
+            <div class="trust-item">
+                <span class="trust-icon">🌐</span>
+                GDPR Ready
+            </div>
+            <div class="trust-item">
+                <span class="trust-icon">⚡</span>
+                99.99% Uptime
+            </div>
+            <div class="trust-item">
+                <span class="trust-icon">🛡️</span>
+                Enterprise Security
+            </div>
+        </div>
+    </div>
+</div>

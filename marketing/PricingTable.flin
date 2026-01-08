@@ -1,0 +1,244 @@
+// ============================================================================
+// PricingTable.flin — FlinUI PRO Marketing Component
+// Plan comparison table with side-by-side pricing columns and feature checklist
+// ============================================================================
+// Props:
+//   - title: Section title (string or none)
+//   - subtitle: Section subtitle (string or none)
+//   - plans: List of plan objects with name, price, period, features, cta, popular (list)
+
+title = props.title || none
+subtitle = props.subtitle || none
+plans = props.plans || [
+    ["name": "Starter", "price": 0, "period": "month", "features": ["5 projects", "10GB storage", "Basic support"], "cta": "Get Started", "popular": false],
+    ["name": "Pro", "price": 29, "period": "month", "features": ["Unlimited projects", "100GB storage", "Priority support", "Advanced analytics"], "cta": "Try Pro", "popular": true],
+    ["name": "Enterprise", "price": 99, "period": "month", "features": ["Everything in Pro", "Unlimited storage", "24/7 support", "Custom integrations", "SLA guarantee"], "cta": "Contact Us", "popular": false]
+]
+
+<div class="flin-pricing-table">
+    <style>
+        .flin-pricing-table {
+            padding: var(--flin-space-20) var(--flin-space-8);
+            background: var(--flin-bg-surface);
+        }
+
+        .pricing-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto var(--flin-space-16) auto;
+        }
+
+        .pricing-title {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-4) 0;
+        }
+
+        .pricing-subtitle {
+            font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin: 0;
+        }
+
+        .pricing-columns {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--flin-space-6);
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: stretch;
+        }
+
+        .plan-column {
+            display: flex;
+            flex-direction: column;
+            padding: var(--flin-space-8);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            transition: all var(--flin-transition-normal);
+            position: relative;
+        }
+
+        .plan-column:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-4px);
+        }
+
+        .plan-column.popular {
+            border-color: var(--flin-accent-gold);
+            background: linear-gradient(180deg, var(--flin-bg-elevated) 0%, rgba(212, 175, 55, 0.05) 100%);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-bold);
+            padding: var(--flin-space-1) var(--flin-space-4);
+            border-radius: var(--flin-radius-full);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .plan-name {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-4) 0;
+            text-align: center;
+        }
+
+        .plan-price {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: var(--flin-space-1);
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .price-currency {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-secondary);
+        }
+
+        .price-amount {
+            font-size: clamp(2.5rem, 4vw, 3.5rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            line-height: 1;
+        }
+
+        .price-period {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-tertiary);
+        }
+
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 var(--flin-space-8) 0;
+            flex-grow: 1;
+        }
+
+        .plan-features li {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-3) 0;
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-check {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border-radius: var(--flin-radius-full);
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .plan-cta {
+            display: block;
+            width: 100%;
+            padding: var(--flin-space-4) var(--flin-space-6);
+            background: var(--flin-bg-surface);
+            color: var(--flin-text-primary);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-lg);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .plan-cta:hover {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            border-color: var(--flin-accent-gold);
+        }
+
+        .plan-column.popular .plan-cta {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            border-color: var(--flin-accent-gold);
+        }
+
+        .plan-column.popular .plan-cta:hover {
+            background: var(--flin-accent-gold-light);
+            border-color: var(--flin-accent-gold-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-pricing-table {
+                padding: var(--flin-space-16) var(--flin-space-4);
+            }
+
+            .pricing-columns {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+
+            .plan-column {
+                padding: var(--flin-space-6);
+            }
+        }
+    </style>
+
+    {if title != none || subtitle != none}
+        <div class="pricing-header">
+            {if title != none}
+                <h2 class="pricing-title">{title}</h2>
+            {/if}
+            {if subtitle != none}
+                <p class="pricing-subtitle">{subtitle}</p>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="pricing-columns">
+        {for plan in plans}
+            <div class="plan-column {if plan.popular}popular{/if}">
+                {if plan.popular}
+                    <span class="popular-badge">Most Popular</span>
+                {/if}
+                <h3 class="plan-name">{plan.name}</h3>
+                <div class="plan-price">
+                    <span class="price-currency">$</span>
+                    <span class="price-amount">{plan.price}</span>
+                    <span class="price-period">/{plan.period}</span>
+                </div>
+                <ul class="plan-features">
+                    {for feature in plan.features}
+                        <li>
+                            <span class="feature-check">✓</span>
+                            {feature}
+                        </li>
+                    {/for}
+                </ul>
+                <button class="plan-cta">{plan.cta}</button>
+            </div>
+        {/for}
+    </div>
+</div>
