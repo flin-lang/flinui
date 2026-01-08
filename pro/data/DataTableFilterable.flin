@@ -1,0 +1,555 @@
+// FlinUI PRO DataTableFilterable Component
+// Column filters with text input per column header
+
+// Props with defaults
+columns = props.columns || []
+data = props.data || []
+loading = props.loading || false
+emptyText = props.emptyText || "No matching data found"
+striped = props.striped || false
+hoverable = props.hoverable || true
+bordered = props.bordered || false
+showFilterRow = props.showFilterRow || true
+globalFilter = props.globalFilter || false
+onFilter = props.onFilter || none
+
+// State
+columnFilters = {}
+globalFilterValue = ""
+
+// Initialize column filters
+{for column in columns}
+    columnFilters[column.key] = ""
+{/for}
+
+// Computed classes
+stripedClass = match striped {
+    true -> " pro-datatable-filterable--striped"
+    _ -> ""
+}
+
+hoverableClass = match hoverable {
+    true -> " pro-datatable-filterable--hoverable"
+    _ -> ""
+}
+
+borderedClass = match bordered {
+    true -> " pro-datatable-filterable--bordered"
+    _ -> ""
+}
+
+tableClass = "pro-datatable-filterable" ++ stripedClass ++ hoverableClass ++ borderedClass
+
+// Filter handlers
+handleColumnFilter = (columnKey, value) => {
+    columnFilters[columnKey] = value
+    if onFilter != none {
+        onFilter(columnFilters, globalFilterValue)
+    }
+}
+
+handleGlobalFilter = (value) => {
+    globalFilterValue = value
+    if onFilter != none {
+        onFilter(columnFilters, globalFilterValue)
+    }
+}
+
+clearColumnFilter = (columnKey) => {
+    columnFilters[columnKey] = ""
+    if onFilter != none {
+        onFilter(columnFilters, globalFilterValue)
+    }
+}
+
+clearAllFilters = {
+    {for column in columns}
+        columnFilters[column.key] = ""
+    {/for}
+    globalFilterValue = ""
+    if onFilter != none {
+        onFilter(columnFilters, globalFilterValue)
+    }
+}
+
+// Filter data
+filteredData = () => {
+    result = data
+
+    // Apply global filter
+    if globalFilterValue != "" {
+        result = result.filter((row) => {
+            {for column in columns}
+                if String(row[column.key]).toLowerCase().includes(globalFilterValue.toLowerCase()) {
+                    return true
+                }
+            {/for}
+            false
+        })
+    }
+
+    // Apply column filters
+    {for column in columns}
+        filterVal = columnFilters[column.key]
+        if filterVal != "" {
+            result = result.filter((row) => {
+                String(row[column.key]).toLowerCase().includes(filterVal.toLowerCase())
+            })
+        }
+    {/for}
+
+    result
+}
+
+displayData = filteredData()
+hasActiveFilters = globalFilterValue != "" || Object.values(columnFilters).some((v) => v != "")
+
+<div class="pro-datatable-filterable-container">
+    {if globalFilter}
+        <div class="pro-datatable-filterable__toolbar">
+            <div class="pro-datatable-filterable__global-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <input
+                    type="text"
+                    class="pro-datatable-filterable__global-input"
+                    placeholder="Search all columns..."
+                    value={globalFilterValue}
+                    input={(e) => handleGlobalFilter(e.target.value)}
+                />
+                {if globalFilterValue != ""}
+                    <button
+                        class="pro-datatable-filterable__clear-btn"
+                        click={handleGlobalFilter("")}
+                        aria-label="Clear search"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
+                {/if}
+            </div>
+
+            {if hasActiveFilters}
+                <button
+                    class="pro-datatable-filterable__clear-all"
+                    click={clearAllFilters}
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"/>
+                    </svg>
+                    Clear all filters
+                </button>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="pro-datatable-filterable__wrapper">
+        <table class={tableClass}>
+            <thead class="pro-datatable-filterable__head">
+                <tr class="pro-datatable-filterable__row pro-datatable-filterable__row--header">
+                    {for column in columns}
+                        <th class="pro-datatable-filterable__header" scope="col">
+                            {column.label || column.key}
+                        </th>
+                    {/for}
+                </tr>
+
+                {if showFilterRow}
+                    <tr class="pro-datatable-filterable__row pro-datatable-filterable__row--filter">
+                        {for column in columns}
+                            <th class="pro-datatable-filterable__filter-cell">
+                                {if column.filterable != false}
+                                    <div class="pro-datatable-filterable__filter-input-wrapper">
+                                        <input
+                                            type="text"
+                                            class="pro-datatable-filterable__filter-input"
+                                            placeholder={"Filter " ++ (column.label || column.key) ++ "..."}
+                                            value={columnFilters[column.key]}
+                                            input={(e) => handleColumnFilter(column.key, e.target.value)}
+                                        />
+                                        {if columnFilters[column.key] != ""}
+                                            <button
+                                                class="pro-datatable-filterable__filter-clear"
+                                                click={clearColumnFilter(column.key)}
+                                                aria-label={"Clear " ++ column.key ++ " filter"}
+                                            >
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        {/if}
+                                    </div>
+                                {/if}
+                            </th>
+                        {/for}
+                    </tr>
+                {/if}
+            </thead>
+
+            <tbody class="pro-datatable-filterable__body">
+                {if loading}
+                    <tr class="pro-datatable-filterable__row">
+                        <td class="pro-datatable-filterable__cell pro-datatable-filterable__loading" colspan={columns.length}>
+                            <div class="pro-datatable-filterable__spinner"></div>
+                            <span>Loading data...</span>
+                        </td>
+                    </tr>
+                {else if displayData.length == 0}
+                    <tr class="pro-datatable-filterable__row">
+                        <td class="pro-datatable-filterable__cell pro-datatable-filterable__empty" colspan={columns.length}>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35"/>
+                                <path d="M8 8l6 6M14 8l-6 6"/>
+                            </svg>
+                            <span>{emptyText}</span>
+                            {if hasActiveFilters}
+                                <button class="pro-datatable-filterable__clear-filters-btn" click={clearAllFilters}>
+                                    Clear filters
+                                </button>
+                            {/if}
+                        </td>
+                    </tr>
+                {else}
+                    {for row in displayData}
+                        <tr class="pro-datatable-filterable__row">
+                            {for column in columns}
+                                <td class="pro-datatable-filterable__cell">
+                                    {row[column.key]}
+                                </td>
+                            {/for}
+                        </tr>
+                    {/for}
+                {/if}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pro-datatable-filterable__footer">
+        <span class="pro-datatable-filterable__count">
+            {displayData.length} of {data.length} rows
+        </span>
+    </div>
+</div>
+
+<style scoped>
+.pro-datatable-filterable-container {
+    font-family: var(--flin-font-sans);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+.pro-datatable-filterable__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    background: var(--flin-neutral-50);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+    gap: var(--flin-space-3);
+    flex-wrap: wrap;
+}
+
+.pro-datatable-filterable__global-search {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    min-width: var(--flin-size-64);
+    flex: 1;
+    max-width: var(--flin-size-96);
+}
+
+.pro-datatable-filterable__global-search svg {
+    color: var(--flin-neutral-400);
+    flex-shrink: 0;
+}
+
+.pro-datatable-filterable__global-input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    outline: none;
+}
+
+.pro-datatable-filterable__clear-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-1);
+    background: none;
+    border: none;
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    border-radius: var(--flin-radius-sm);
+}
+
+.pro-datatable-filterable__clear-btn:hover {
+    color: var(--flin-fg);
+    background: var(--flin-neutral-100);
+}
+
+.pro-datatable-filterable__clear-all {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-danger);
+    background: none;
+    border: var(--flin-size-px) solid var(--flin-danger);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.pro-datatable-filterable__clear-all:hover {
+    background: color-mix(in srgb, var(--flin-danger) 10%, var(--flin-bg));
+}
+
+.pro-datatable-filterable__wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pro-datatable-filterable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--flin-text-sm);
+    text-align: left;
+}
+
+.pro-datatable-filterable__head {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-filterable__header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    white-space: nowrap;
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-filterable__filter-cell {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background: var(--flin-bg);
+    border-bottom: var(--flin-space-0-5) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-filterable__filter-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.pro-datatable-filterable__filter-input {
+    width: 100%;
+    padding: var(--flin-space-1-5) var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-sm);
+    outline: none;
+    transition: border-color var(--flin-transition-fast);
+}
+
+.pro-datatable-filterable__filter-input:focus {
+    border-color: var(--flin-primary);
+}
+
+.pro-datatable-filterable__filter-input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-filterable__filter-clear {
+    position: absolute;
+    right: var(--flin-space-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-0-5);
+    background: none;
+    border: none;
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    border-radius: var(--flin-radius-sm);
+}
+
+.pro-datatable-filterable__filter-clear:hover {
+    color: var(--flin-fg);
+    background: var(--flin-neutral-100);
+}
+
+.pro-datatable-filterable__row {
+    transition: background-color var(--flin-transition-fast);
+}
+
+.pro-datatable-filterable__cell {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    color: var(--flin-fg);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-filterable__body .pro-datatable-filterable__row:last-child .pro-datatable-filterable__cell {
+    border-bottom: none;
+}
+
+/* Footer */
+.pro-datatable-filterable__footer {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background: var(--flin-neutral-50);
+    border-top: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-filterable__count {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+/* Variants */
+.pro-datatable-filterable--striped .pro-datatable-filterable__body .pro-datatable-filterable__row:nth-child(even) {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-filterable--hoverable .pro-datatable-filterable__body .pro-datatable-filterable__row:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.pro-datatable-filterable--bordered .pro-datatable-filterable__header,
+.pro-datatable-filterable--bordered .pro-datatable-filterable__cell {
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+/* Loading state */
+.pro-datatable-filterable__loading {
+    text-align: center;
+    padding: var(--flin-space-10) var(--flin-space-4);
+}
+
+.pro-datatable-filterable__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-filterable__spinner {
+    width: var(--flin-icon-lg);
+    height: var(--flin-icon-lg);
+    border: var(--flin-space-0-5) solid var(--flin-neutral-200);
+    border-top-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    animation: pro-datatable-filterable-spin var(--flin-duration-slow) linear infinite;
+}
+
+@keyframes pro-datatable-filterable-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty state */
+.pro-datatable-filterable__empty {
+    text-align: center;
+    padding: var(--flin-space-12) var(--flin-space-4);
+}
+
+.pro-datatable-filterable__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-filterable__empty svg {
+    color: var(--flin-neutral-300);
+}
+
+.pro-datatable-filterable__clear-filters-btn {
+    margin-top: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-primary);
+    background: none;
+    border: var(--flin-size-px) solid var(--flin-primary);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.pro-datatable-filterable__clear-filters-btn:hover {
+    background: color-mix(in srgb, var(--flin-primary) 10%, var(--flin-bg));
+}
+
+/* Dark theme support */
+[data-theme="dark"] .pro-datatable-filterable-container {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-filterable__toolbar,
+[data-theme="dark"] .pro-datatable-filterable__head,
+[data-theme="dark"] .pro-datatable-filterable__footer {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-filterable__global-search {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .pro-datatable-filterable__filter-cell {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-filterable__filter-input {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .pro-datatable-filterable__header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-filterable__cell {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-filterable--striped .pro-datatable-filterable__body .pro-datatable-filterable__row:nth-child(even) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-filterable--hoverable .pro-datatable-filterable__body .pro-datatable-filterable__row:hover {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-filterable__spinner {
+    border-color: var(--flin-neutral-700);
+    border-top-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .pro-datatable-filterable__empty svg {
+    color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .pro-datatable-filterable__clear-btn:hover,
+[data-theme="dark"] .pro-datatable-filterable__filter-clear:hover {
+    background: var(--flin-neutral-700);
+}
+</style>

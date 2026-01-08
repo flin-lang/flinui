@@ -1,0 +1,25 @@
+// ============================================================================
+// FlinUI PRO — Utilities Index
+// 15 Utility Components for enhanced functionality
+// ============================================================================
+
+// Animations (5)
+export AnimatedCounter    // Number animation
+export FadeIn             // Fade animation wrapper
+export SlideIn            // Slide animation wrapper
+export Parallax           // Scroll parallax effect
+export TypeWriter         // Typing effect
+
+// Interactions (5)
+export DragAndDrop        // Sortable list container
+export Resizable          // Resize handle panel
+export Scrollspy          // Section highlight on scroll
+export InfiniteScroll     // Load more on scroll
+export VirtualList        // Large list render
+
+// Misc (5)
+export ThemeToggle        // Dark/light switch
+export LanguageSelector   // i18n dropdown
+export CurrencySelector   // Currency picker
+export CookieConsent      // GDPR banner
+export PrintButton        // Print page button

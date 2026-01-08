@@ -1,0 +1,652 @@
+// ModalStepper.flin - FlinUI PRO Multi-Step Modal Wizard
+// Multi-step modal with progress indicator and navigation
+
+// Props with defaults
+isOpen = props.isOpen || false
+title = props.title || "Setup Wizard"
+steps = props.steps || []
+currentStep = props.currentStep || 0
+size = props.size || "lg"
+closable = props.closable || true
+closeOnBackdrop = props.closeOnBackdrop || false
+showStepNumbers = props.showStepNumbers || true
+onClose = props.onClose
+onStepChange = props.onStepChange
+onComplete = props.onComplete
+
+// Internal state
+isClosing = false
+activeStep = currentStep
+
+// Calculate total steps
+totalSteps = steps.length
+
+// Check if on first/last step
+isFirstStep = activeStep == 0
+isLastStep = activeStep == totalSteps - 1
+
+// Handle close
+handleClose = {
+    if closable {
+        isClosing = true
+        if onClose { onClose() }
+    }
+}
+
+// Handle backdrop click
+handleBackdropClick = {
+    if closeOnBackdrop && closable {
+        handleClose()
+    }
+}
+
+// Handle escape key
+handleKeyDown = (event) => {
+    if event.key == "Escape" && closable {
+        handleClose()
+    }
+}
+
+// Navigate to previous step
+handlePrevious = {
+    if !isFirstStep {
+        activeStep = activeStep - 1
+        if onStepChange { onStepChange(activeStep) }
+    }
+}
+
+// Navigate to next step
+handleNext = {
+    if isLastStep {
+        if onComplete { onComplete() }
+    } else {
+        activeStep = activeStep + 1
+        if onStepChange { onStepChange(activeStep) }
+    }
+}
+
+// Navigate to specific step
+handleStepClick = (index) => {
+    if index <= activeStep {
+        activeStep = index
+        if onStepChange { onStepChange(activeStep) }
+    }
+}
+
+// Size class
+sizeClass = match size {
+    "md" -> "modal-stepper--md"
+    "xl" -> "modal-stepper--xl"
+    _ -> "modal-stepper--lg"
+}
+
+// Computed classes
+backdropClass = match isClosing {
+    true -> "modal-stepper-backdrop modal-stepper-backdrop--closing"
+    _ -> "modal-stepper-backdrop"
+}
+
+modalClass = match isClosing {
+    true -> "modal-stepper " ++ sizeClass ++ " modal-stepper--closing"
+    _ -> "modal-stepper " ++ sizeClass
+}
+
+containerClass = match isOpen {
+    true -> "modal-stepper-container"
+    _ -> "modal-stepper-container modal-stepper-container--hidden"
+}
+
+// Progress percentage
+progressPercent = ((activeStep + 1) / totalSteps) * 100
+
+<div class={containerClass}>
+    <div
+        class={backdropClass}
+        click={handleBackdropClick}
+        aria-hidden="true"
+    ></div>
+
+    <div
+        class={modalClass}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-stepper-title"
+        tabindex="-1"
+        keydown={handleKeyDown}
+    >
+        // Header with progress
+        <div class="modal-stepper-header">
+            <div class="modal-stepper-header-top">
+                <div class="modal-stepper-title-section">
+                    <h2 id="modal-stepper-title" class="modal-stepper-title">{title}</h2>
+                    <span class="modal-stepper-step-indicator">
+                        Step {activeStep + 1} of {totalSteps}
+                    </span>
+                </div>
+                {if closable}
+                    <button
+                        class="modal-stepper-close"
+                        click={handleClose}
+                        aria-label="Close wizard"
+                        type="button"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                {/if}
+            </div>
+
+            // Progress bar
+            <div class="modal-stepper-progress">
+                <div class="modal-stepper-progress-bar" style={"width: " ++ progressPercent ++ "%"}></div>
+            </div>
+
+            // Step indicators
+            <div class="modal-stepper-steps">
+                {for (step, index) in steps}
+                    <button
+                        class={match index {
+                            _ if index < activeStep -> "modal-stepper-step modal-stepper-step--completed"
+                            _ if index == activeStep -> "modal-stepper-step modal-stepper-step--active"
+                            _ -> "modal-stepper-step modal-stepper-step--pending"
+                        }}
+                        click={() => handleStepClick(index)}
+                        disabled={index > activeStep}
+                        type="button"
+                    >
+                        <span class="modal-stepper-step-number">
+                            {if index < activeStep}
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            {:else if showStepNumbers}
+                                {index + 1}
+                            {:else}
+                                <span class="modal-stepper-step-dot"></span>
+                            {/if}
+                        </span>
+                        <span class="modal-stepper-step-label">{step.title || "Step " ++ (index + 1)}</span>
+                    </button>
+                {/for}
+            </div>
+        </div>
+
+        // Content area
+        <div class="modal-stepper-content">
+            {if steps[activeStep]}
+                <div class="modal-stepper-step-content">
+                    {if steps[activeStep].description}
+                        <p class="modal-stepper-step-description">{steps[activeStep].description}</p>
+                    {/if}
+                    {children}
+                </div>
+            {/if}
+        </div>
+
+        // Footer with navigation
+        <div class="modal-stepper-footer">
+            <button
+                class="modal-stepper-btn modal-stepper-btn--secondary"
+                click={handlePrevious}
+                disabled={isFirstStep}
+                type="button"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span>{props.previousText || "Previous"}</span>
+            </button>
+
+            <div class="modal-stepper-footer-center">
+                {if props.skipEnabled && !isLastStep}
+                    <button
+                        class="modal-stepper-btn modal-stepper-btn--ghost"
+                        click={handleNext}
+                        type="button"
+                    >
+                        Skip this step
+                    </button>
+                {/if}
+            </div>
+
+            <button
+                class="modal-stepper-btn modal-stepper-btn--primary"
+                click={handleNext}
+                type="button"
+            >
+                <span>
+                    {if isLastStep}
+                        {props.completeText || "Complete"}
+                    {:else}
+                        {props.nextText || "Next"}
+                    {/if}
+                </span>
+                {if !isLastStep}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                {/if}
+            </button>
+        </div>
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.modal-stepper-container {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-4);
+}
+
+.modal-stepper-container--hidden {
+    display: none;
+}
+
+/* Backdrop */
+.modal-stepper-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: -1;
+    animation: stepperBackdropIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes stepperBackdropIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-stepper-backdrop--closing {
+    animation: stepperBackdropOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes stepperBackdropOut {
+    to { opacity: 0; }
+}
+
+/* Modal */
+.modal-stepper {
+    position: relative;
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-2xl);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    animation: stepperIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes stepperIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-stepper--closing {
+    animation: stepperOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes stepperOut {
+    to {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+}
+
+/* Size variants */
+.modal-stepper--md {
+    width: 100%;
+    max-width: 560px;
+}
+
+.modal-stepper--lg {
+    width: 100%;
+    max-width: 720px;
+}
+
+.modal-stepper--xl {
+    width: 100%;
+    max-width: 960px;
+}
+
+/* Header */
+.modal-stepper-header {
+    flex-shrink: 0;
+    padding: var(--flin-space-5) var(--flin-space-6) var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.modal-stepper-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--flin-space-4);
+}
+
+.modal-stepper-title-section {
+    flex: 1;
+}
+
+.modal-stepper-title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.modal-stepper-step-indicator {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.modal-stepper-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    color: var(--flin-fg-muted);
+    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.modal-stepper-close:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.modal-stepper-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Progress bar */
+.modal-stepper-progress {
+    height: 4px;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    margin-bottom: var(--flin-space-4);
+}
+
+.modal-stepper-progress-bar {
+    height: 100%;
+    background-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    transition: width var(--flin-transition-normal) ease-out;
+}
+
+/* Step indicators */
+.modal-stepper-steps {
+    display: flex;
+    gap: var(--flin-space-2);
+    overflow-x: auto;
+    padding-bottom: var(--flin-space-1);
+}
+
+.modal-stepper-step {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--flin-transition-fast);
+}
+
+.modal-stepper-step:disabled {
+    cursor: not-allowed;
+}
+
+.modal-stepper-step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: var(--flin-text-xs);
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.modal-stepper-step-number svg {
+    width: 14px;
+    height: 14px;
+}
+
+.modal-stepper-step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: currentColor;
+}
+
+.modal-stepper-step-label {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+}
+
+/* Step states */
+.modal-stepper-step--pending {
+    color: var(--flin-fg-muted);
+}
+
+.modal-stepper-step--pending .modal-stepper-step-number {
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-fg-muted);
+}
+
+.modal-stepper-step--active {
+    color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+}
+
+.modal-stepper-step--active .modal-stepper-step-number {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.modal-stepper-step--completed {
+    color: var(--flin-success);
+}
+
+.modal-stepper-step--completed:hover {
+    background-color: var(--flin-success-light);
+}
+
+.modal-stepper-step--completed .modal-stepper-step-number {
+    background-color: var(--flin-success);
+    color: white;
+}
+
+/* Content */
+.modal-stepper-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--flin-space-6);
+}
+
+.modal-stepper-step-description {
+    margin: 0 0 var(--flin-space-4) 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.6;
+}
+
+/* Footer */
+.modal-stepper-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-top: 1px solid var(--flin-neutral-200);
+    flex-shrink: 0;
+}
+
+.modal-stepper-footer-center {
+    flex: 1;
+    text-align: center;
+}
+
+/* Buttons */
+.modal-stepper-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    border: 1px solid transparent;
+}
+
+.modal-stepper-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.modal-stepper-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.modal-stepper-btn--primary {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.modal-stepper-btn--primary:hover:not(:disabled) {
+    background-color: var(--flin-primary-hover);
+}
+
+.modal-stepper-btn--secondary {
+    background-color: white;
+    color: var(--flin-fg);
+    border-color: var(--flin-neutral-300);
+}
+
+.modal-stepper-btn--secondary:hover:not(:disabled) {
+    background-color: var(--flin-neutral-50);
+}
+
+.modal-stepper-btn--ghost {
+    background: transparent;
+    color: var(--flin-fg-muted);
+}
+
+.modal-stepper-btn--ghost:hover {
+    color: var(--flin-fg);
+    text-decoration: underline;
+}
+
+.modal-stepper-btn:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+/* Focus trap */
+.modal-stepper:focus {
+    outline: none;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+    .modal-stepper {
+        max-height: calc(100vh - var(--flin-space-8));
+    }
+
+    .modal-stepper-header {
+        padding: var(--flin-space-4);
+    }
+
+    .modal-stepper-steps {
+        display: none;
+    }
+
+    .modal-stepper-content {
+        padding: var(--flin-space-4);
+    }
+
+    .modal-stepper-footer {
+        padding: var(--flin-space-3) var(--flin-space-4);
+    }
+
+    .modal-stepper-footer-center {
+        display: none;
+    }
+
+    .modal-stepper-btn span {
+        display: none;
+    }
+
+    .modal-stepper-btn--primary span,
+    .modal-stepper-btn--secondary span {
+        display: inline;
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .modal-stepper {
+    background-color: var(--flin-neutral-900);
+    border: 1px solid var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-stepper-header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-stepper-progress {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-stepper-step--pending .modal-stepper-step-number {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-stepper-step--active {
+    background-color: rgba(99, 102, 241, 0.15);
+}
+
+[data-theme="dark"] .modal-stepper-step--completed:hover {
+    background-color: rgba(16, 185, 129, 0.15);
+}
+
+[data-theme="dark"] .modal-stepper-footer {
+    border-top-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-stepper-close:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .modal-stepper-btn--secondary {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .modal-stepper-btn--secondary:hover:not(:disabled) {
+    background-color: var(--flin-neutral-700);
+}
+</style>

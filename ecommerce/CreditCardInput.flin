@@ -1,0 +1,354 @@
+// CreditCardInput.flin - FlinUI PRO Credit Card Input Component
+// Specialized input with auto-formatting and validation
+
+// Props with defaults
+value = props.value || ""
+onCardChange = props.onCardChange
+onExpiryChange = props.onExpiryChange
+onCVVChange = props.onCVVChange
+disabled = props.disabled || false
+size = props.size || "md"
+
+// Card state
+cardNumber = ""
+expiryDate = ""
+cvvCode = ""
+cardBrand = "unknown"
+focusedField = "none"
+
+// Validation states
+cardValid = false
+expiryValid = false
+cvvValid = false
+
+// Card brand detection
+function detectCardBrand(number) {
+    clean = number.replace(" ", "")
+
+    {if clean.startsWith("4")}
+        return "visa"
+    {else if clean.startsWith("51") || clean.startsWith("52") || clean.startsWith("53") || clean.startsWith("54") || clean.startsWith("55")}
+        return "mastercard"
+    {else if clean.startsWith("34") || clean.startsWith("37")}
+        return "amex"
+    {else if clean.startsWith("6011") || clean.startsWith("65")}
+        return "discover"
+    {else if clean.length >= 2}
+        return "generic"
+    {else}
+        return "unknown"
+    {/if}
+}
+
+// Format card number (4-digit groups)
+function formatCardNumber(input) {
+    digits = input.replace("[^0-9]", "")
+    maxLength = cardBrand == "amex" ? 15 : 16
+    digits = digits.substring(0, maxLength)
+
+    formatted = ""
+    i = 0
+    {for char in digits}
+        {if i > 0 && i % 4 == 0}
+            formatted = formatted ++ " "
+        {/if}
+        formatted = formatted ++ char
+        i = i + 1
+    {/for}
+
+    return formatted
+}
+
+// Format expiry (MM/YY)
+function formatExpiry(input) {
+    digits = input.replace("[^0-9]", "").substring(0, 4)
+
+    {if digits.length >= 2}
+        month = digits.substring(0, 2)
+        year = digits.substring(2)
+        return month ++ "/" ++ year
+    {else}
+        return digits
+    {/if}
+}
+
+// Validate card number (basic Luhn check)
+function validateCard(number) {
+    clean = number.replace(" ", "")
+    return clean.length >= 13 && clean.length <= 19
+}
+
+// Validate expiry
+function validateExpiry(expiry) {
+    parts = expiry.split("/")
+    {if parts.length != 2}
+        return false
+    {/if}
+
+    month = parseInt(parts[0])
+    year = parseInt(parts[1])
+
+    return month >= 1 && month <= 12 && year >= 24 && year <= 35
+}
+
+// Validate CVV
+function validateCVV(cvv) {
+    expectedLength = cardBrand == "amex" ? 4 : 3
+    return cvv.length == expectedLength
+}
+
+// Handle card number input
+function handleCardInput(value) {
+    cardNumber = formatCardNumber(value)
+    cardBrand = detectCardBrand(cardNumber)
+    cardValid = validateCard(cardNumber)
+
+    {if onCardChange}
+        onCardChange({
+            value: cardNumber,
+            brand: cardBrand,
+            valid: cardValid
+        })
+    {/if}
+}
+
+// Handle expiry input
+function handleExpiryInput(value) {
+    expiryDate = formatExpiry(value)
+    expiryValid = validateExpiry(expiryDate)
+
+    {if onExpiryChange}
+        onExpiryChange({
+            value: expiryDate,
+            valid: expiryValid
+        })
+    {/if}
+}
+
+// Handle CVV input
+function handleCVVInput(value) {
+    maxLength = cardBrand == "amex" ? 4 : 3
+    cvvCode = value.replace("[^0-9]", "").substring(0, maxLength)
+    cvvValid = validateCVV(cvvCode)
+
+    {if onCVVChange}
+        onCVVChange({
+            value: cvvCode,
+            valid: cvvValid
+        })
+    {/if}
+}
+
+sizeClass = match size {
+    "sm" -> "input-sm"
+    "lg" -> "input-lg"
+    _ -> "input-md"
+}
+
+<div class="credit-card-input">
+    <style scoped>
+        .credit-card-input {
+            width: 100%;
+        }
+
+        .card-field {
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .field-label {
+            display: block;
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-secondary);
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .card-input {
+            width: 100%;
+            font-family: var(--flin-font-mono);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-deep);
+            border: 2px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-input);
+            transition: all var(--flin-transition-fast);
+        }
+
+        .input-sm {
+            padding: var(--flin-space-2) var(--flin-space-3);
+            font-size: var(--flin-text-sm);
+        }
+
+        .input-md {
+            padding: var(--flin-space-3) var(--flin-space-4);
+        }
+
+        .input-lg {
+            padding: var(--flin-space-4) var(--flin-space-5);
+            font-size: var(--flin-text-lg);
+        }
+
+        .card-input:focus {
+            outline: none;
+            border-color: var(--flin-accent-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .card-input.valid {
+            border-color: var(--flin-status-success);
+        }
+
+        .card-input.invalid:not(:focus) {
+            border-color: var(--flin-status-error);
+        }
+
+        .card-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: var(--flin-bg-muted);
+        }
+
+        .card-brand-icon {
+            position: absolute;
+            right: var(--flin-space-3);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-sm);
+            color: var(--flin-text-muted);
+        }
+
+        .valid-icon {
+            color: var(--flin-status-success);
+            font-size: var(--flin-text-lg);
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--flin-space-4);
+        }
+
+        .cvv-tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: var(--flin-space-1);
+            width: 16px;
+            height: 16px;
+            background: var(--flin-bg-surface);
+            color: var(--flin-text-muted);
+            border-radius: 50%;
+            font-size: var(--flin-text-xs);
+            text-align: center;
+            line-height: 16px;
+            cursor: help;
+        }
+
+        .cvv-tooltip:hover::after {
+            content: '3-digit code on back of card (4 for Amex)';
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            width: 200px;
+            padding: var(--flin-space-2);
+            background: var(--flin-bg-deep);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-sm);
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-primary);
+            box-shadow: var(--flin-shadow-lg);
+            z-index: 10;
+            margin-bottom: var(--flin-space-1);
+        }
+
+        @media (max-width: 640px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <div class="card-field">
+        <label class="field-label">Card Number</label>
+        <div class="input-wrapper">
+            <input
+                type="text"
+                class="card-input {sizeClass} {if cardNumber.length > 0}{if cardValid}valid{else}invalid{/if}{/if}"
+                placeholder="1234 5678 9012 3456"
+                value={cardNumber}
+                input={(e) => handleCardInput(e.target.value)}
+                focus={() => focusedField = "card"}
+                blur={() => focusedField = "none"}
+                disabled={disabled}
+                autocomplete="cc-number"
+            />
+            <div class="card-brand-icon">
+                {if cardBrand != "unknown"}
+                    <div class="brand-logo">
+                        {if cardBrand == "visa"}VISA{/if}
+                        {if cardBrand == "mastercard"}MC{/if}
+                        {if cardBrand == "amex"}AMEX{/if}
+                        {if cardBrand == "discover"}DISC{/if}
+                        {if cardBrand == "generic"}💳{/if}
+                    </div>
+                {/if}
+                {if cardValid}
+                    <span class="valid-icon">✓</span>
+                {/if}
+            </div>
+        </div>
+    </div>
+
+    <div class="two-column">
+        <div class="card-field">
+            <label class="field-label">Expiry Date</label>
+            <input
+                type="text"
+                class="card-input {sizeClass} {if expiryDate.length > 0}{if expiryValid}valid{else}invalid{/if}{/if}"
+                placeholder="MM/YY"
+                value={expiryDate}
+                input={(e) => handleExpiryInput(e.target.value)}
+                focus={() => focusedField = "expiry"}
+                blur={() => focusedField = "none"}
+                disabled={disabled}
+                autocomplete="cc-exp"
+            />
+        </div>
+
+        <div class="card-field">
+            <label class="field-label">
+                CVV
+                <span class="cvv-tooltip">?</span>
+            </label>
+            <input
+                type="password"
+                class="card-input {sizeClass} {if cvvCode.length > 0}{if cvvValid}valid{else}invalid{/if}{/if}"
+                placeholder={cardBrand == "amex" ? "1234" : "123"}
+                value={cvvCode}
+                input={(e) => handleCVVInput(e.target.value)}
+                focus={() => focusedField = "cvv"}
+                blur={() => focusedField = "none"}
+                disabled={disabled}
+                autocomplete="cc-csc"
+            />
+        </div>
+    </div>
+</div>

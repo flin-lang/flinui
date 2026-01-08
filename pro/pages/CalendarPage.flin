@@ -1,0 +1,1292 @@
+// CalendarPage.flin - Calendar application with month/week/day views and event management
+// FlinUI PRO - Page Template
+
+// Props with defaults
+title = props.title || "Calendar"
+events = props.events || []
+onEventCreate = props.onEventCreate || none
+onEventUpdate = props.onEventUpdate || none
+onEventDelete = props.onEventDelete || none
+
+// State
+currentView = "month"
+currentDate = new Date()
+selectedDate = none
+showEventModal = false
+selectedEvent = none
+
+// Computed values
+currentMonth = currentDate.getMonth()
+currentYear = currentDate.getFullYear()
+monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
+// Sample events
+defaultEvents = [
+  { id: 1, title: "Team Standup", date: "2026-01-08", time: "09:00", duration: 30, color: "blue", recurring: true },
+  { id: 2, title: "Product Review", date: "2026-01-08", time: "14:00", duration: 60, color: "green", recurring: false },
+  { id: 3, title: "Client Call", date: "2026-01-10", time: "11:00", duration: 45, color: "purple", recurring: false },
+  { id: 4, title: "Design Workshop", date: "2026-01-12", time: "10:00", duration: 120, color: "orange", recurring: false },
+  { id: 5, title: "Sprint Planning", date: "2026-01-15", time: "09:30", duration: 90, color: "blue", recurring: true },
+  { id: 6, title: "1:1 with Manager", date: "2026-01-15", time: "15:00", duration: 30, color: "red", recurring: true },
+  { id: 7, title: "Team Lunch", date: "2026-01-20", time: "12:00", duration: 60, color: "green", recurring: false }
+]
+
+eventList = events.length > 0 ? events : defaultEvents
+
+// Upcoming events (next 7 days)
+upcomingEvents = eventList.slice(0, 5)
+
+// Calendars/Categories
+calendars = [
+  { id: "work", label: "Work", color: "blue", enabled: true },
+  { id: "personal", label: "Personal", color: "green", enabled: true },
+  { id: "meetings", label: "Meetings", color: "purple", enabled: true },
+  { id: "reminders", label: "Reminders", color: "orange", enabled: false }
+]
+
+<div class="calendar-page">
+  <!-- Sidebar -->
+  <aside class="calendar-sidebar">
+    <div class="sidebar-header">
+      <Button variant="primary" size="md" click={() => showEventModal = true}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Create Event
+      </Button>
+    </div>
+
+    <!-- Mini Calendar -->
+    <div class="mini-calendar">
+      <div class="mini-header">
+        <button class="nav-btn" click={() => currentDate.setMonth(currentDate.getMonth() - 1)}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <span class="mini-title">{monthNames[currentMonth]} {currentYear}</span>
+        <button class="nav-btn" click={() => currentDate.setMonth(currentDate.getMonth() + 1)}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+      <div class="mini-grid">
+        <div class="mini-day-names">
+          {for day in dayNames}
+            <span>{day.charAt(0)}</span>
+          {/for}
+        </div>
+        <div class="mini-dates">
+          <!-- Sample dates for January 2026 -->
+          <span class="other-month">28</span>
+          <span class="other-month">29</span>
+          <span class="other-month">30</span>
+          <span class="other-month">31</span>
+          <span>1</span>
+          <span>2</span>
+          <span>3</span>
+          <span>4</span>
+          <span>5</span>
+          <span>6</span>
+          <span>7</span>
+          <span class="today">8</span>
+          <span>9</span>
+          <span class="has-event">10</span>
+          <span>11</span>
+          <span class="has-event">12</span>
+          <span>13</span>
+          <span>14</span>
+          <span class="has-event">15</span>
+          <span>16</span>
+          <span>17</span>
+          <span>18</span>
+          <span>19</span>
+          <span class="has-event">20</span>
+          <span>21</span>
+          <span>22</span>
+          <span>23</span>
+          <span>24</span>
+          <span>25</span>
+          <span>26</span>
+          <span>27</span>
+          <span>28</span>
+          <span>29</span>
+          <span>30</span>
+          <span>31</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendars -->
+    <div class="calendars-section">
+      <h4 class="section-title">My Calendars</h4>
+      <div class="calendars-list">
+        {for cal in calendars}
+          <label class="calendar-item">
+            <input type="checkbox" checked={cal.enabled} />
+            <span class={"calendar-dot " + cal.color}></span>
+            <span class="calendar-label">{cal.label}</span>
+          </label>
+        {/for}
+      </div>
+    </div>
+
+    <!-- Upcoming Events -->
+    <div class="upcoming-section">
+      <h4 class="section-title">Upcoming Events</h4>
+      <div class="upcoming-list">
+        {for event in upcomingEvents}
+          <div class="upcoming-item">
+            <div class={"event-color-bar " + event.color}></div>
+            <div class="event-info">
+              <span class="event-title">{event.title}</span>
+              <span class="event-time">{event.date} at {event.time}</span>
+            </div>
+          </div>
+        {/for}
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Calendar Area -->
+  <main class="calendar-main">
+    <!-- Header -->
+    <header class="calendar-header">
+      <div class="header-left">
+        <button class="today-btn" click={() => currentDate = new Date()}>Today</button>
+        <div class="nav-arrows">
+          <button class="arrow-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <button class="arrow-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+        <h2 class="current-period">{monthNames[currentMonth]} {currentYear}</h2>
+      </div>
+      <div class="header-right">
+        <div class="view-switcher">
+          <button
+            class={"view-btn " + (currentView == "day" ? "active" : "")}
+            click={() => currentView = "day"}
+          >Day</button>
+          <button
+            class={"view-btn " + (currentView == "week" ? "active" : "")}
+            click={() => currentView = "week"}
+          >Week</button>
+          <button
+            class={"view-btn " + (currentView == "month" ? "active" : "")}
+            click={() => currentView = "month"}
+          >Month</button>
+        </div>
+        <button class="settings-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Month View -->
+    {if currentView == "month"}
+      <div class="month-view">
+        <div class="month-header">
+          {for day in dayNames}
+            <div class="day-header">{day}</div>
+          {/for}
+        </div>
+        <div class="month-grid">
+          <!-- Week 1 -->
+          <div class="day-cell other-month">
+            <span class="day-number">28</span>
+          </div>
+          <div class="day-cell other-month">
+            <span class="day-number">29</span>
+          </div>
+          <div class="day-cell other-month">
+            <span class="day-number">30</span>
+          </div>
+          <div class="day-cell other-month">
+            <span class="day-number">31</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">1</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">2</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">3</span>
+          </div>
+
+          <!-- Week 2 -->
+          <div class="day-cell">
+            <span class="day-number">4</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">5</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">6</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">7</span>
+          </div>
+          <div class="day-cell today">
+            <span class="day-number">8</span>
+            <div class="day-events">
+              <div class="event-chip blue">Team Standup</div>
+              <div class="event-chip green">Product Review</div>
+            </div>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">9</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">10</span>
+            <div class="day-events">
+              <div class="event-chip purple">Client Call</div>
+            </div>
+          </div>
+
+          <!-- Week 3 -->
+          <div class="day-cell">
+            <span class="day-number">11</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">12</span>
+            <div class="day-events">
+              <div class="event-chip orange">Design Workshop</div>
+            </div>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">13</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">14</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">15</span>
+            <div class="day-events">
+              <div class="event-chip blue">Sprint Planning</div>
+              <div class="event-chip red">1:1 with Manager</div>
+            </div>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">16</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">17</span>
+          </div>
+
+          <!-- Week 4 -->
+          <div class="day-cell">
+            <span class="day-number">18</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">19</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">20</span>
+            <div class="day-events">
+              <div class="event-chip green">Team Lunch</div>
+            </div>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">21</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">22</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">23</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">24</span>
+          </div>
+
+          <!-- Week 5 -->
+          <div class="day-cell">
+            <span class="day-number">25</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">26</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">27</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">28</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">29</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">30</span>
+          </div>
+          <div class="day-cell">
+            <span class="day-number">31</span>
+          </div>
+        </div>
+      </div>
+    {/if}
+
+    <!-- Week View -->
+    {if currentView == "week"}
+      <div class="week-view">
+        <div class="week-header">
+          <div class="time-gutter"></div>
+          <div class="day-column-header">
+            <span class="day-name">Sun</span>
+            <span class="day-date">4</span>
+          </div>
+          <div class="day-column-header">
+            <span class="day-name">Mon</span>
+            <span class="day-date">5</span>
+          </div>
+          <div class="day-column-header">
+            <span class="day-name">Tue</span>
+            <span class="day-date">6</span>
+          </div>
+          <div class="day-column-header">
+            <span class="day-name">Wed</span>
+            <span class="day-date">7</span>
+          </div>
+          <div class="day-column-header today">
+            <span class="day-name">Thu</span>
+            <span class="day-date">8</span>
+          </div>
+          <div class="day-column-header">
+            <span class="day-name">Fri</span>
+            <span class="day-date">9</span>
+          </div>
+          <div class="day-column-header">
+            <span class="day-name">Sat</span>
+            <span class="day-date">10</span>
+          </div>
+        </div>
+        <div class="week-grid">
+          <div class="time-slots">
+            <div class="time-slot">8 AM</div>
+            <div class="time-slot">9 AM</div>
+            <div class="time-slot">10 AM</div>
+            <div class="time-slot">11 AM</div>
+            <div class="time-slot">12 PM</div>
+            <div class="time-slot">1 PM</div>
+            <div class="time-slot">2 PM</div>
+            <div class="time-slot">3 PM</div>
+            <div class="time-slot">4 PM</div>
+            <div class="time-slot">5 PM</div>
+            <div class="time-slot">6 PM</div>
+          </div>
+          <div class="day-column"></div>
+          <div class="day-column"></div>
+          <div class="day-column"></div>
+          <div class="day-column"></div>
+          <div class="day-column today">
+            <div class="week-event blue" style="top: 60px; height: 30px;">
+              <span>Team Standup</span>
+            </div>
+            <div class="week-event green" style="top: 360px; height: 60px;">
+              <span>Product Review</span>
+            </div>
+            <div class="current-time-line" style="top: 120px;"></div>
+          </div>
+          <div class="day-column"></div>
+          <div class="day-column">
+            <div class="week-event purple" style="top: 180px; height: 45px;">
+              <span>Client Call</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    {/if}
+
+    <!-- Day View -->
+    {if currentView == "day"}
+      <div class="day-view">
+        <div class="day-view-header">
+          <span class="day-view-date">Thursday, January 8, 2026</span>
+        </div>
+        <div class="day-schedule">
+          <div class="time-slots">
+            <div class="time-slot">6 AM</div>
+            <div class="time-slot">7 AM</div>
+            <div class="time-slot">8 AM</div>
+            <div class="time-slot">9 AM</div>
+            <div class="time-slot">10 AM</div>
+            <div class="time-slot">11 AM</div>
+            <div class="time-slot">12 PM</div>
+            <div class="time-slot">1 PM</div>
+            <div class="time-slot">2 PM</div>
+            <div class="time-slot">3 PM</div>
+            <div class="time-slot">4 PM</div>
+            <div class="time-slot">5 PM</div>
+            <div class="time-slot">6 PM</div>
+            <div class="time-slot">7 PM</div>
+            <div class="time-slot">8 PM</div>
+          </div>
+          <div class="events-column">
+            <div class="day-event blue" style="top: 180px; height: 30px;">
+              <div class="event-content">
+                <span class="event-title">Team Standup</span>
+                <span class="event-details">9:00 AM - 9:30 AM</span>
+              </div>
+            </div>
+            <div class="day-event green" style="top: 480px; height: 60px;">
+              <div class="event-content">
+                <span class="event-title">Product Review</span>
+                <span class="event-details">2:00 PM - 3:00 PM</span>
+              </div>
+            </div>
+            <div class="current-time-indicator" style="top: 240px;">
+              <div class="time-dot"></div>
+              <div class="time-line"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {/if}
+  </main>
+
+  <!-- Event Modal -->
+  {if showEventModal}
+    <div class="modal-overlay" click={() => showEventModal = false}>
+      <div class="modal event-modal" click={(e) => e.stopPropagation()}>
+        <div class="modal-header">
+          <h2>{selectedEvent ? "Edit Event" : "New Event"}</h2>
+          <button class="close-btn" click={() => showEventModal = false}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Event Title</label>
+            <input type="text" placeholder="Add title" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" value="2026-01-08" />
+            </div>
+            <div class="form-group">
+              <label>Time</label>
+              <input type="time" value="09:00" />
+            </div>
+            <div class="form-group">
+              <label>Duration</label>
+              <select>
+                <option value="30">30 min</option>
+                <option value="60">1 hour</option>
+                <option value="90">1.5 hours</option>
+                <option value="120">2 hours</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Calendar</label>
+            <select>
+              <option value="work">Work</option>
+              <option value="personal">Personal</option>
+              <option value="meetings">Meetings</option>
+              <option value="reminders">Reminders</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" placeholder="Add location or video call link" />
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea placeholder="Add description"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Attendees</label>
+            <input type="text" placeholder="Add people" />
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" />
+              <span>Repeat event</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <Button variant="secondary" click={() => showEventModal = false}>Cancel</Button>
+          <Button variant="primary">Save Event</Button>
+        </div>
+      </div>
+    </div>
+  {/if}
+</div>
+
+<style scoped>
+.calendar-page {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: 100vh;
+  background: var(--flin-bg-secondary);
+}
+
+/* Sidebar */
+.calendar-sidebar {
+  background: var(--flin-bg-primary);
+  border-right: 1px solid var(--flin-border-primary);
+  padding: var(--flin-space-4);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  margin-bottom: var(--flin-space-4);
+}
+
+.sidebar-header :global(.btn) {
+  width: 100%;
+}
+
+/* Mini Calendar */
+.mini-calendar {
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-lg);
+  padding: var(--flin-space-3);
+  margin-bottom: var(--flin-space-4);
+}
+
+.mini-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--flin-space-3);
+}
+
+.mini-title {
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.nav-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  border-radius: var(--flin-radius-sm);
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-btn:hover {
+  background: var(--flin-bg-tertiary);
+  color: var(--flin-text-primary);
+}
+
+.mini-day-names {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: var(--flin-space-2);
+}
+
+.mini-day-names span {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.mini-dates {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.mini-dates span {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-primary);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.mini-dates span:hover {
+  background: var(--flin-bg-tertiary);
+}
+
+.mini-dates span.other-month {
+  color: var(--flin-text-tertiary);
+}
+
+.mini-dates span.today {
+  background: var(--flin-accent-gold);
+  color: var(--flin-bg-primary);
+  font-weight: 600;
+}
+
+.mini-dates span.has-event {
+  position: relative;
+}
+
+.mini-dates span.has-event::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  width: 4px;
+  height: 4px;
+  background: var(--flin-accent-gold);
+  border-radius: 50%;
+}
+
+/* Calendars Section */
+.calendars-section {
+  margin-bottom: var(--flin-space-4);
+}
+
+.section-title {
+  font-size: var(--flin-text-xs);
+  font-weight: 600;
+  color: var(--flin-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--flin-space-2);
+}
+
+.calendars-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-2);
+}
+
+.calendar-item {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-primary);
+  cursor: pointer;
+}
+
+.calendar-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.calendar-dot.blue { background: #3b82f6; }
+.calendar-dot.green { background: #22c55e; }
+.calendar-dot.purple { background: #a855f7; }
+.calendar-dot.orange { background: #f97316; }
+
+/* Upcoming Events */
+.upcoming-section {
+  flex: 1;
+}
+
+.upcoming-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-2);
+}
+
+.upcoming-item {
+  display: flex;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-2);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-md);
+}
+
+.event-color-bar {
+  width: 3px;
+  border-radius: var(--flin-radius-full);
+}
+
+.event-color-bar.blue { background: #3b82f6; }
+.event-color-bar.green { background: #22c55e; }
+.event-color-bar.purple { background: #a855f7; }
+.event-color-bar.orange { background: #f97316; }
+.event-color-bar.red { background: #ef4444; }
+
+.event-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-title {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-primary);
+}
+
+.event-time {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+/* Main Calendar Area */
+.calendar-main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--flin-space-4);
+  background: var(--flin-bg-primary);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-4);
+}
+
+.today-btn {
+  padding: var(--flin-space-2) var(--flin-space-4);
+  background: var(--flin-bg-secondary);
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.today-btn:hover {
+  background: var(--flin-bg-tertiary);
+}
+
+.nav-arrows {
+  display: flex;
+  gap: var(--flin-space-1);
+}
+
+.arrow-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow-btn:hover {
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+}
+
+.current-period {
+  font-size: var(--flin-text-xl);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+}
+
+.view-switcher {
+  display: flex;
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-md);
+  padding: 2px;
+}
+
+.view-btn {
+  padding: var(--flin-space-2) var(--flin-space-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--flin-radius-sm);
+  color: var(--flin-text-secondary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+}
+
+.view-btn.active {
+  background: var(--flin-bg-primary);
+  color: var(--flin-text-primary);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.settings-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-btn:hover {
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+}
+
+/* Month View */
+.month-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--flin-bg-primary);
+}
+
+.month-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.day-header {
+  padding: var(--flin-space-3);
+  text-align: center;
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-secondary);
+}
+
+.month-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+}
+
+.day-cell {
+  border-right: 1px solid var(--flin-border-primary);
+  border-bottom: 1px solid var(--flin-border-primary);
+  padding: var(--flin-space-2);
+  min-height: 100px;
+}
+
+.day-cell:nth-child(7n) {
+  border-right: none;
+}
+
+.day-cell.other-month {
+  background: var(--flin-bg-secondary);
+}
+
+.day-cell.other-month .day-number {
+  color: var(--flin-text-tertiary);
+}
+
+.day-cell.today .day-number {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--flin-accent-gold);
+  color: var(--flin-bg-primary);
+  border-radius: 50%;
+  font-weight: 600;
+}
+
+.day-number {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.day-events {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.event-chip {
+  padding: 2px var(--flin-space-2);
+  border-radius: var(--flin-radius-sm);
+  font-size: var(--flin-text-xs);
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.event-chip.blue { background: #3b82f6; }
+.event-chip.green { background: #22c55e; }
+.event-chip.purple { background: #a855f7; }
+.event-chip.orange { background: #f97316; }
+.event-chip.red { background: #ef4444; }
+
+/* Week View */
+.week-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--flin-bg-primary);
+  overflow: hidden;
+}
+
+.week-header {
+  display: grid;
+  grid-template-columns: 60px repeat(7, 1fr);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.time-gutter {
+  border-right: 1px solid var(--flin-border-primary);
+}
+
+.day-column-header {
+  padding: var(--flin-space-3);
+  text-align: center;
+  border-right: 1px solid var(--flin-border-primary);
+}
+
+.day-column-header:last-child {
+  border-right: none;
+}
+
+.day-column-header .day-name {
+  display: block;
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+  margin-bottom: var(--flin-space-1);
+}
+
+.day-column-header .day-date {
+  display: block;
+  font-size: var(--flin-text-lg);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.day-column-header.today .day-date {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--flin-accent-gold);
+  color: var(--flin-bg-primary);
+  border-radius: 50%;
+}
+
+.week-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 60px repeat(7, 1fr);
+  overflow-y: auto;
+}
+
+.time-slots {
+  border-right: 1px solid var(--flin-border-primary);
+}
+
+.time-slot {
+  height: 60px;
+  padding: var(--flin-space-1) var(--flin-space-2);
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+  text-align: right;
+}
+
+.day-column {
+  position: relative;
+  border-right: 1px solid var(--flin-border-primary);
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 59px,
+    var(--flin-border-primary) 59px,
+    var(--flin-border-primary) 60px
+  );
+}
+
+.day-column:last-child {
+  border-right: none;
+}
+
+.day-column.today {
+  background-color: rgba(212, 175, 55, 0.05);
+}
+
+.week-event {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: var(--flin-radius-sm);
+  padding: var(--flin-space-1) var(--flin-space-2);
+  font-size: var(--flin-text-xs);
+  color: white;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.week-event.blue { background: #3b82f6; }
+.week-event.green { background: #22c55e; }
+.week-event.purple { background: #a855f7; }
+
+.current-time-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ef4444;
+}
+
+.current-time-line::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  background: #ef4444;
+  border-radius: 50%;
+}
+
+/* Day View */
+.day-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--flin-bg-primary);
+  overflow: hidden;
+}
+
+.day-view-header {
+  padding: var(--flin-space-4);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.day-view-date {
+  font-size: var(--flin-text-lg);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.day-schedule {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  overflow-y: auto;
+}
+
+.events-column {
+  position: relative;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 59px,
+    var(--flin-border-primary) 59px,
+    var(--flin-border-primary) 60px
+  );
+}
+
+.day-event {
+  position: absolute;
+  left: var(--flin-space-2);
+  right: var(--flin-space-2);
+  border-radius: var(--flin-radius-md);
+  padding: var(--flin-space-2);
+  color: white;
+  cursor: pointer;
+}
+
+.day-event.blue { background: #3b82f6; }
+.day-event.green { background: #22c55e; }
+
+.event-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-content .event-title {
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+}
+
+.event-content .event-details {
+  font-size: var(--flin-text-xs);
+  opacity: 0.8;
+}
+
+.current-time-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+}
+
+.time-dot {
+  width: 12px;
+  height: 12px;
+  background: #ef4444;
+  border-radius: 50%;
+  margin-left: -6px;
+}
+
+.time-line {
+  flex: 1;
+  height: 2px;
+  background: #ef4444;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--flin-space-4);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.modal-header h2 {
+  font-size: var(--flin-text-lg);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: var(--flin-space-4);
+}
+
+.form-group {
+  margin-bottom: var(--flin-space-4);
+}
+
+.form-group label {
+  display: block;
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: var(--flin-space-3);
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--flin-space-3);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  cursor: pointer;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-4);
+  border-top: 1px solid var(--flin-border-primary);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .calendar-page {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-header {
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    align-items: flex-start;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

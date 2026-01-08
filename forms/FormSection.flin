@@ -1,0 +1,177 @@
+// FormSection.flin - FlinUI Form Section Component
+// Groups form fields with title, description, and optional border
+
+// Props with defaults
+title = props.title || none
+description = props.description || none
+variant = props.variant || "default"
+collapsible = props.collapsible || false
+defaultOpen = props.defaultOpen || true
+
+// State for collapsible sections
+isOpen = defaultOpen
+
+// Compute variant class
+variantClass = match variant {
+    "bordered" -> " form-section-bordered"
+    "card" -> " form-section-card"
+    "divided" -> " form-section-divided"
+    _ -> ""
+}
+
+// Compute collapsible class
+collapsibleClass = match collapsible {
+    true -> " form-section-collapsible"
+    _ -> ""
+}
+
+// Compute open state class
+openClass = match isOpen {
+    true -> " form-section-open"
+    _ -> " form-section-closed"
+}
+
+containerClass = "form-section" ++ variantClass ++ collapsibleClass ++ openClass
+
+// Toggle function for collapsible
+toggleSection = {
+    if collapsible {
+        isOpen = !isOpen
+    }
+}
+
+<section class={containerClass}>
+    {if title != none || description != none}
+        <header class="form-section-header" click={toggleSection}>
+            <div class="form-section-header-content">
+                {if title != none}
+                    <h3 class="form-section-title">{title}</h3>
+                {/if}
+                {if description != none}
+                    <p class="form-section-description">{description}</p>
+                {/if}
+            </div>
+            {if collapsible}
+                <span class="form-section-chevron">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </span>
+            {/if}
+        </header>
+    {/if}
+    <div class="form-section-content">
+        {children}
+    </div>
+</section>
+
+<style scoped>
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.form-section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+}
+
+.form-section-collapsible .form-section-header {
+    cursor: pointer;
+    user-select: none;
+    padding: var(--flin-space-2);
+    margin: calc(var(--flin-space-2) * -1);
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.form-section-collapsible .form-section-header:hover {
+    background-color: var(--flin-neutral-50);
+}
+
+.form-section-header-content {
+    flex: 1;
+}
+
+.form-section-title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+    line-height: 1.4;
+}
+
+.form-section-description {
+    margin: var(--flin-space-1) 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.5;
+}
+
+.form-section-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-space-6);
+    height: var(--flin-space-6);
+    color: var(--flin-fg-muted);
+    transition: transform var(--flin-transition-fast);
+}
+
+.form-section-chevron svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.form-section-open .form-section-chevron {
+    transform: rotate(180deg);
+}
+
+.form-section-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.form-section-closed .form-section-content {
+    display: none;
+}
+
+/* Bordered variant */
+.form-section-bordered {
+    padding: var(--flin-space-5);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+}
+
+/* Card variant */
+.form-section-card {
+    padding: var(--flin-space-6);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-sm);
+}
+
+/* Divided variant */
+.form-section-divided {
+    padding-bottom: var(--flin-space-6);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.form-section-divided:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .form-section-card,
+    .form-section-bordered {
+        padding: var(--flin-space-4);
+    }
+}
+</style>

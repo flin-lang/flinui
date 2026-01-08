@@ -1,0 +1,463 @@
+// ============================================================================
+// DocumentViewer.flin — FlinUI PRO Data Component
+// Document preview card for PDF/DOC files with download option
+// ============================================================================
+// Props:
+//   - documents: List of document objects with name, type, size, url, thumbnail, date (list)
+//   - viewMode: Display mode - grid, list (string)
+//   - showPreview: Show document thumbnail/preview (boolean)
+//   - showDetails: Show file details (size, date) (boolean)
+//   - onView: Callback when document is viewed (function or none)
+//   - onDownload: Callback when document is downloaded (function or none)
+
+documents = props.documents || [
+    ["name": "Project Proposal.pdf", "type": "pdf", "size": "2.4 MB", "url": "#", "date": "Jan 15, 2024", "pages": 12],
+    ["name": "Financial Report Q4.xlsx", "type": "excel", "size": "856 KB", "url": "#", "date": "Jan 12, 2024"],
+    ["name": "Design Guidelines.docx", "type": "word", "size": "1.2 MB", "url": "#", "date": "Jan 10, 2024", "pages": 24],
+    ["name": "Meeting Notes.pdf", "type": "pdf", "size": "340 KB", "url": "#", "date": "Jan 8, 2024", "pages": 3],
+    ["name": "Budget Analysis.xlsx", "type": "excel", "size": "1.8 MB", "url": "#", "date": "Jan 5, 2024"],
+    ["name": "User Research.pptx", "type": "powerpoint", "size": "4.2 MB", "url": "#", "date": "Jan 3, 2024", "slides": 32]
+]
+viewMode = props.viewMode || "grid"
+showPreview = props.showPreview || true
+showDetails = props.showDetails || true
+onView = props.onView || none
+onDownload = props.onDownload || none
+
+// Get icon based on file type
+getIcon = (type) => match type {
+    "pdf" => "pdf"
+    "word" => "word"
+    "excel" => "excel"
+    "powerpoint" => "powerpoint"
+    "image" => "image"
+    "zip" => "zip"
+    _ => "file"
+}
+
+// Get icon color
+getIconColor = (type) => match type {
+    "pdf" => "#ef4444"
+    "word" => "#2563eb"
+    "excel" => "#16a34a"
+    "powerpoint" => "#ea580c"
+    "image" => "#a855f7"
+    "zip" => "#eab308"
+    _ => "#6b7280"
+}
+
+<div class="flin-document-viewer view-{viewMode}">
+    <div class="document-list">
+        {for doc in documents}
+            <div class="document-card" data-type={doc.type}>
+                {if showPreview}
+                    <div class="document-preview">
+                        {if doc.thumbnail != none}
+                            <img src={doc.thumbnail} alt={doc.name} class="preview-image" />
+                        {else}
+                            <div class="preview-icon" style="background: {getIconColor(doc.type)}20">
+                                {if doc.type == "pdf"}
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill={getIconColor(doc.type)}>
+                                        <path d="M14 4C11.8 4 10 5.8 10 8v32c0 2.2 1.8 4 4 4h20c2.2 0 4-1.8 4-4V16l-12-12H14zm12 14V6l10 12H26z"/>
+                                        <text x="16" y="34" font-size="8" font-weight="bold" fill={getIconColor(doc.type)}>PDF</text>
+                                    </svg>
+                                {else if doc.type == "word"}
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill={getIconColor(doc.type)}>
+                                        <path d="M14 4C11.8 4 10 5.8 10 8v32c0 2.2 1.8 4 4 4h20c2.2 0 4-1.8 4-4V16l-12-12H14zm12 14V6l10 12H26z"/>
+                                        <text x="14" y="34" font-size="7" font-weight="bold" fill={getIconColor(doc.type)}>DOC</text>
+                                    </svg>
+                                {else if doc.type == "excel"}
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill={getIconColor(doc.type)}>
+                                        <path d="M14 4C11.8 4 10 5.8 10 8v32c0 2.2 1.8 4 4 4h20c2.2 0 4-1.8 4-4V16l-12-12H14zm12 14V6l10 12H26z"/>
+                                        <text x="14" y="34" font-size="7" font-weight="bold" fill={getIconColor(doc.type)}>XLS</text>
+                                    </svg>
+                                {else if doc.type == "powerpoint"}
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill={getIconColor(doc.type)}>
+                                        <path d="M14 4C11.8 4 10 5.8 10 8v32c0 2.2 1.8 4 4 4h20c2.2 0 4-1.8 4-4V16l-12-12H14zm12 14V6l10 12H26z"/>
+                                        <text x="14" y="34" font-size="7" font-weight="bold" fill={getIconColor(doc.type)}>PPT</text>
+                                    </svg>
+                                {else}
+                                    <svg width="48" height="48" viewBox="0 0 48 48" fill={getIconColor(doc.type)}>
+                                        <path d="M14 4C11.8 4 10 5.8 10 8v32c0 2.2 1.8 4 4 4h20c2.2 0 4-1.8 4-4V16l-12-12H14zm12 14V6l10 12H26z"/>
+                                    </svg>
+                                {/if}
+                            </div>
+                        {/if}
+
+                        <div class="preview-overlay">
+                            <button
+                                class="preview-action"
+                                click={() => {
+                                    if onView != none {
+                                        onView(doc)
+                                    }
+                                }}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                </svg>
+                                View
+                            </button>
+                        </div>
+                    </div>
+                {/if}
+
+                <div class="document-info">
+                    <div class="document-header">
+                        <div class="document-icon" style="color: {getIconColor(doc.type)}">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/>
+                            </svg>
+                        </div>
+                        <div class="document-title-wrapper">
+                            <h4 class="document-name">{doc.name}</h4>
+                            {if showDetails}
+                                <div class="document-meta">
+                                    <span class="meta-size">{doc.size}</span>
+                                    {if doc.pages != none}
+                                        <span class="meta-separator">·</span>
+                                        <span class="meta-pages">{doc.pages} pages</span>
+                                    {/if}
+                                    {if doc.slides != none}
+                                        <span class="meta-separator">·</span>
+                                        <span class="meta-slides">{doc.slides} slides</span>
+                                    {/if}
+                                </div>
+                            {/if}
+                        </div>
+                    </div>
+
+                    <div class="document-footer">
+                        {if showDetails && doc.date != none}
+                            <span class="document-date">{doc.date}</span>
+                        {/if}
+
+                        <div class="document-actions">
+                            <button
+                                class="action-btn"
+                                title="View"
+                                click={() => {
+                                    if onView != none {
+                                        onView(doc)
+                                    }
+                                }}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M8 9.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                                    <path fill-rule="evenodd" d="M0.5 8c1.074-3.143 4.017-5.5 7.5-5.5s6.426 2.357 7.5 5.5c-1.074 3.143-4.017 5.5-7.5 5.5S1.574 11.143.5 8zM11 8a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </button>
+                            <button
+                                class="action-btn action-download"
+                                title="Download"
+                                click={() => {
+                                    if onDownload != none {
+                                        onDownload(doc)
+                                    } else {
+                                        // Default download behavior
+                                        window.open(doc.url, '_blank')
+                                    }
+                                }}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M2.75 14A1.75 1.75 0 011 12.25v-2.5a.75.75 0 011.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 00.25-.25v-2.5a.75.75 0 011.5 0v2.5A1.75 1.75 0 0113.25 14H2.75z"/>
+                                    <path d="M7.25 7.689V2a.75.75 0 011.5 0v5.689l1.97-1.969a.75.75 0 111.06 1.06l-3.25 3.25a.75.75 0 01-1.06 0L4.22 6.78a.75.75 0 011.06-1.06l1.97 1.969z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {/for}
+    </div>
+
+    {if documents.length == 0}
+        <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="var(--flin-text-muted)">
+                <path d="M14 4C11.8 4 10 5.8 10 8v32c0 2.2 1.8 4 4 4h20c2.2 0 4-1.8 4-4V16l-12-12H14zm12 14V6l10 12H26z"/>
+            </svg>
+            <p class="empty-text">No documents to display</p>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-document-viewer {
+    width: 100%;
+}
+
+.document-list {
+    display: grid;
+    gap: var(--flin-space-4);
+}
+
+/* Grid view */
+.view-grid .document-list {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.view-grid .document-card {
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    overflow: hidden;
+    transition: all var(--flin-transition-fast);
+}
+
+.view-grid .document-card:hover {
+    border-color: var(--flin-border-default);
+    box-shadow: var(--flin-shadow-card);
+    transform: translateY(-2px);
+}
+
+.view-grid .document-preview {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: var(--flin-bg-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-icon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.document-card:hover .preview-overlay {
+    opacity: 1;
+}
+
+.preview-action {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-5);
+    background: white;
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-bg-base);
+    cursor: pointer;
+    transition: transform var(--flin-transition-fast);
+}
+
+.preview-action:hover {
+    transform: scale(1.05);
+}
+
+.view-grid .document-info {
+    padding: var(--flin-space-4);
+}
+
+/* List view */
+.view-list .document-list {
+    grid-template-columns: 1fr;
+}
+
+.view-list .document-card {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-4);
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-lg);
+    transition: all var(--flin-transition-fast);
+}
+
+.view-list .document-card:hover {
+    border-color: var(--flin-border-default);
+    background: var(--flin-bg-surface);
+}
+
+.view-list .document-preview {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view-list .preview-overlay {
+    display: none;
+}
+
+.view-list .document-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+}
+
+/* Common styles */
+.document-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+}
+
+.document-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view-list .document-icon {
+    display: none;
+}
+
+.document-title-wrapper {
+    min-width: 0;
+    flex: 1;
+}
+
+.document-name {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.document-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    margin-top: var(--flin-space-1);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+}
+
+.meta-separator {
+    color: var(--flin-border-default);
+}
+
+.document-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--flin-space-3);
+    padding-top: var(--flin-space-3);
+    border-top: 1px solid var(--flin-border-subtle);
+}
+
+.view-list .document-footer {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+.document-date {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+}
+
+.document-actions {
+    display: flex;
+    gap: var(--flin-space-1);
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-tertiary);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.action-btn:hover {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+    color: var(--flin-text-primary);
+}
+
+.action-download:hover {
+    background: var(--flin-accent-gold);
+    border-color: var(--flin-accent-gold);
+    color: var(--flin-bg-base);
+}
+
+/* Empty state */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-16);
+    text-align: center;
+}
+
+.empty-text {
+    margin-top: var(--flin-space-4);
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .view-grid .document-list {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .view-grid .document-list {
+        grid-template-columns: 1fr;
+    }
+
+    .view-list .document-preview {
+        width: 48px;
+        height: 48px;
+    }
+
+    .view-list .document-card {
+        flex-wrap: wrap;
+    }
+
+    .view-list .document-footer {
+        width: 100%;
+        margin-top: var(--flin-space-3);
+        padding-top: var(--flin-space-3);
+        border-top: 1px solid var(--flin-border-subtle);
+    }
+}
+</style>

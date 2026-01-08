@@ -1,0 +1,193 @@
+// FlinUI PRO SimpleTable Component
+// Basic table with minimal styling and clean presentation
+
+// Props with defaults
+columns = props.columns || []
+data = props.data || []
+loading = props.loading || false
+emptyText = props.emptyText || "No data available"
+compact = props.compact || false
+caption = props.caption || none
+
+// Computed classes
+compactClass = match compact {
+    true -> " pro-simple-table--compact"
+    _ -> ""
+}
+
+tableClass = "pro-simple-table" ++ compactClass
+
+<div class="pro-simple-table-wrapper">
+    <table class={tableClass}>
+        {if caption != none}
+            <caption class="pro-simple-table__caption">{caption}</caption>
+        {/if}
+
+        <thead class="pro-simple-table__head">
+            <tr class="pro-simple-table__row">
+                {for column in columns}
+                    <th class="pro-simple-table__header" scope="col">
+                        {column.label || column.key}
+                    </th>
+                {/for}
+            </tr>
+        </thead>
+
+        <tbody class="pro-simple-table__body">
+            {if loading}
+                <tr class="pro-simple-table__row">
+                    <td class="pro-simple-table__cell pro-simple-table__loading" colspan={columns.length}>
+                        <div class="pro-simple-table__spinner"></div>
+                        <span>Loading...</span>
+                    </td>
+                </tr>
+            {else if data.length == 0}
+                <tr class="pro-simple-table__row">
+                    <td class="pro-simple-table__cell pro-simple-table__empty" colspan={columns.length}>
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M3 9h18"/>
+                            <path d="M9 21V9"/>
+                        </svg>
+                        <span>{emptyText}</span>
+                    </td>
+                </tr>
+            {else}
+                {for row in data}
+                    <tr class="pro-simple-table__row">
+                        {for column in columns}
+                            <td class="pro-simple-table__cell">
+                                {row[column.key]}
+                            </td>
+                        {/for}
+                    </tr>
+                {/for}
+            {/if}
+        </tbody>
+    </table>
+</div>
+
+<style scoped>
+.pro-simple-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    font-family: var(--flin-font-sans);
+}
+
+.pro-simple-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--flin-text-sm);
+    text-align: left;
+}
+
+.pro-simple-table__caption {
+    padding: var(--flin-space-3);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    text-align: left;
+    caption-side: top;
+}
+
+.pro-simple-table__head {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-simple-table__header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    white-space: nowrap;
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-simple-table__row {
+    transition: background-color var(--flin-transition-fast);
+}
+
+.pro-simple-table__cell {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    color: var(--flin-fg);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-simple-table__body .pro-simple-table__row:last-child .pro-simple-table__cell {
+    border-bottom: none;
+}
+
+/* Compact variant */
+.pro-simple-table--compact .pro-simple-table__header,
+.pro-simple-table--compact .pro-simple-table__cell {
+    padding: var(--flin-space-2) var(--flin-space-3);
+}
+
+/* Loading state */
+.pro-simple-table__loading {
+    text-align: center;
+    padding: var(--flin-space-8) var(--flin-space-4);
+    color: var(--flin-fg-muted);
+}
+
+.pro-simple-table__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+.pro-simple-table__spinner {
+    width: var(--flin-icon-md);
+    height: var(--flin-icon-md);
+    border: var(--flin-space-0-5) solid var(--flin-neutral-200);
+    border-top-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    animation: pro-simple-table-spin var(--flin-duration-slow) linear infinite;
+}
+
+@keyframes pro-simple-table-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty state */
+.pro-simple-table__empty {
+    text-align: center;
+    padding: var(--flin-space-12) var(--flin-space-4);
+}
+
+.pro-simple-table__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-simple-table__empty svg {
+    color: var(--flin-neutral-300);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .pro-simple-table__head {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-simple-table__header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-simple-table__cell {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-simple-table__spinner {
+    border-color: var(--flin-neutral-700);
+    border-top-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .pro-simple-table__empty svg {
+    color: var(--flin-neutral-600);
+}
+</style>

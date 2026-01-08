@@ -1,0 +1,471 @@
+// SkeletonCard.flin - FlinUI PRO Card Skeleton Component
+// Card skeleton with image, title, description areas for loading states
+
+// Props with defaults
+variant = props.variant || "default"
+showImage = props.showImage || true
+showAvatar = props.showAvatar || false
+showBadge = props.showBadge || false
+imageHeight = props.imageHeight || "200px"
+lines = props.lines || 3
+animate = props.animate || true
+horizontal = props.horizontal || false
+className = props.className || ""
+
+// Animation class
+animationClass = match animate {
+    true -> "skeleton-card--animated"
+    _ -> ""
+}
+
+// Layout class
+layoutClass = match horizontal {
+    true -> "skeleton-card--horizontal"
+    _ -> "skeleton-card--vertical"
+}
+
+// Variant class
+variantClass = match variant {
+    "product" -> "skeleton-card--product"
+    "article" -> "skeleton-card--article"
+    "profile" -> "skeleton-card--profile"
+    "minimal" -> "skeleton-card--minimal"
+    _ -> "skeleton-card--default"
+}
+
+// Build lines array
+lineItems = []
+i = 0
+{while i < lines}
+    lineItems = lineItems ++ [i]
+    i = i + 1
+{/while}
+
+// Get line width based on index
+getLineWidth = (index) => {
+    match index {
+        0 -> "100%"
+        _ if index == lines - 1 -> "60%"
+        _ -> "90%"
+    }
+}
+
+<div
+    class={"skeleton-card " ++ layoutClass ++ " " ++ variantClass ++ " " ++ animationClass ++ " " ++ className}
+    aria-hidden="true"
+    aria-label="Loading card"
+>
+    // Image placeholder
+    {if showImage}
+        <div class="skeleton-card-image" style={"height: " ++ imageHeight}>
+            {if showBadge}
+                <div class="skeleton-card-badge"></div>
+            {/if}
+        </div>
+    {/if}
+
+    // Content area
+    <div class="skeleton-card-content">
+        // Header with optional avatar
+        {if showAvatar}
+            <div class="skeleton-card-header">
+                <div class="skeleton-card-avatar"></div>
+                <div class="skeleton-card-meta">
+                    <div class="skeleton-card-line skeleton-card-line--sm" style="width: 120px;"></div>
+                    <div class="skeleton-card-line skeleton-card-line--xs" style="width: 80px;"></div>
+                </div>
+            </div>
+        {/if}
+
+        // Title
+        <div class="skeleton-card-title"></div>
+
+        // Description lines
+        <div class="skeleton-card-body">
+            {for (line, index) in lineItems}
+                <div
+                    class="skeleton-card-line"
+                    style={"width: " ++ getLineWidth(index)}
+                ></div>
+            {/for}
+        </div>
+
+        // Footer (for product/article variants)
+        {if variant == "product"}
+            <div class="skeleton-card-footer">
+                <div class="skeleton-card-price"></div>
+                <div class="skeleton-card-button"></div>
+            </div>
+        {/if}
+
+        {if variant == "article"}
+            <div class="skeleton-card-footer">
+                <div class="skeleton-card-tag"></div>
+                <div class="skeleton-card-date"></div>
+            </div>
+        {/if}
+
+        {if variant == "profile"}
+            <div class="skeleton-card-footer skeleton-card-footer--centered">
+                <div class="skeleton-card-button skeleton-card-button--full"></div>
+            </div>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+/* Card base */
+.skeleton-card {
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-xl);
+    border: 1px solid var(--flin-neutral-200);
+    overflow: hidden;
+}
+
+.skeleton-card--vertical {
+    display: flex;
+    flex-direction: column;
+}
+
+.skeleton-card--horizontal {
+    display: flex;
+    flex-direction: row;
+}
+
+.skeleton-card--horizontal .skeleton-card-image {
+    width: 200px;
+    height: auto;
+    min-height: 150px;
+    flex-shrink: 0;
+}
+
+/* Image placeholder */
+.skeleton-card-image {
+    background-color: var(--flin-neutral-200);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-card--animated .skeleton-card-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonCardShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonCardShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Badge on image */
+.skeleton-card-badge {
+    position: absolute;
+    top: var(--flin-space-3);
+    left: var(--flin-space-3);
+    width: 60px;
+    height: 24px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: var(--flin-radius-full);
+}
+
+/* Content */
+.skeleton-card-content {
+    padding: var(--flin-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    flex: 1;
+}
+
+/* Header with avatar */
+.skeleton-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+.skeleton-card-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--flin-neutral-200);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-card--animated .skeleton-card-avatar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonCardShimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-card-meta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+/* Title */
+.skeleton-card-title {
+    height: 1.5em;
+    width: 80%;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-card--animated .skeleton-card-title::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonCardShimmer 1.5s ease-in-out infinite;
+}
+
+/* Body lines */
+.skeleton-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.skeleton-card-line {
+    height: 0.875em;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-card-line--sm {
+    height: 0.75em;
+}
+
+.skeleton-card-line--xs {
+    height: 0.625em;
+}
+
+.skeleton-card--animated .skeleton-card-line::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonCardShimmer 1.5s ease-in-out infinite;
+}
+
+/* Footer */
+.skeleton-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-3);
+    margin-top: auto;
+    padding-top: var(--flin-space-3);
+    border-top: 1px solid var(--flin-neutral-100);
+}
+
+.skeleton-card-footer--centered {
+    justify-content: center;
+}
+
+/* Price placeholder */
+.skeleton-card-price {
+    width: 80px;
+    height: 1.5em;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-card--animated .skeleton-card-price::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonCardShimmer 1.5s ease-in-out infinite;
+}
+
+/* Button placeholder */
+.skeleton-card-button {
+    width: 100px;
+    height: 36px;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-card-button--full {
+    width: 100%;
+}
+
+.skeleton-card--animated .skeleton-card-button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonCardShimmer 1.5s ease-in-out infinite;
+}
+
+/* Tag placeholder */
+.skeleton-card-tag {
+    width: 60px;
+    height: 24px;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-full);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-card--animated .skeleton-card-tag::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonCardShimmer 1.5s ease-in-out infinite;
+}
+
+/* Date placeholder */
+.skeleton-card-date {
+    width: 80px;
+    height: 0.875em;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-card--animated .skeleton-card-date::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonCardShimmer 1.5s ease-in-out infinite;
+}
+
+/* Variant: Minimal */
+.skeleton-card--minimal .skeleton-card-content {
+    padding: var(--flin-space-3);
+}
+
+.skeleton-card--minimal .skeleton-card-footer {
+    border-top: none;
+    padding-top: 0;
+}
+
+/* Variant: Profile */
+.skeleton-card--profile .skeleton-card-content {
+    align-items: center;
+    text-align: center;
+}
+
+.skeleton-card--profile .skeleton-card-avatar {
+    width: 80px;
+    height: 80px;
+}
+
+.skeleton-card--profile .skeleton-card-title {
+    width: 60%;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+    .skeleton-card--horizontal {
+        flex-direction: column;
+    }
+
+    .skeleton-card--horizontal .skeleton-card-image {
+        width: 100%;
+        height: 150px;
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .skeleton-card {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .skeleton-card-image,
+[data-theme="dark"] .skeleton-card-avatar,
+[data-theme="dark"] .skeleton-card-title,
+[data-theme="dark"] .skeleton-card-line,
+[data-theme="dark"] .skeleton-card-price,
+[data-theme="dark"] .skeleton-card-button,
+[data-theme="dark"] .skeleton-card-tag,
+[data-theme="dark"] .skeleton-card-date {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .skeleton-card--animated .skeleton-card-image::after,
+[data-theme="dark"] .skeleton-card--animated .skeleton-card-avatar::after,
+[data-theme="dark"] .skeleton-card--animated .skeleton-card-title::after,
+[data-theme="dark"] .skeleton-card--animated .skeleton-card-line::after,
+[data-theme="dark"] .skeleton-card--animated .skeleton-card-price::after,
+[data-theme="dark"] .skeleton-card--animated .skeleton-card-button::after,
+[data-theme="dark"] .skeleton-card--animated .skeleton-card-tag::after,
+[data-theme="dark"] .skeleton-card--animated .skeleton-card-date::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 100%
+    );
+}
+
+[data-theme="dark"] .skeleton-card-footer {
+    border-top-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .skeleton-card-badge {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+</style>

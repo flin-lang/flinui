@@ -1,0 +1,316 @@
+// ============================================================================
+// SidebarWithIcons.flin — FlinUI PRO Navigation Component
+// Icon-first sidebar navigation with icons prominent and labels secondary
+// ============================================================================
+// Props:
+//   - items: Navigation items array (list)
+//     Each item: { id, label, href, icon, badge (optional), color (optional) }
+//   - showLabels: Show labels below icons (boolean, default: true)
+//   - activeItem: Currently active item ID (string or none)
+//   - onItemClick: Callback when item is clicked (function or none)
+//   - orientation: "vertical" | "horizontal" (default: "vertical")
+//   - variant: "default" | "colored" | "outlined" (default: "default")
+//   - size: "sm" | "md" | "lg" (default: "md")
+// ============================================================================
+
+items = props.items || [
+    ["id": "home", "label": "Home", "href": "/", "icon": "home", "color": "#3b82f6"],
+    ["id": "search", "label": "Search", "href": "/search", "icon": "search", "color": "#8b5cf6"],
+    ["id": "inbox", "label": "Inbox", "href": "/inbox", "icon": "inbox", "badge": "3", "color": "#ef4444"],
+    ["id": "bookmarks", "label": "Saved", "href": "/bookmarks", "icon": "bookmark", "color": "#f59e0b"],
+    ["id": "profile", "label": "Profile", "href": "/profile", "icon": "user", "color": "#10b981"],
+    ["id": "settings", "label": "Settings", "href": "/settings", "icon": "cog", "color": "#6b7280"]
+]
+showLabels = props.showLabels || true
+activeItem = props.activeItem || "home"
+onItemClick = props.onItemClick || none
+orientation = props.orientation || "vertical"
+variant = props.variant || "default"
+size = props.size || "md"
+
+handleItemClick = (item) => {
+    if onItemClick != none {
+        onItemClick(item)
+    }
+}
+
+isActive = (itemId) => itemId == activeItem
+
+orientationClass = match orientation {
+    "horizontal" -> "orientation-horizontal"
+    _ -> "orientation-vertical"
+}
+
+variantClass = match variant {
+    "colored" -> "variant-colored"
+    "outlined" -> "variant-outlined"
+    _ -> "variant-default"
+}
+
+sizeClass = match size {
+    "sm" -> "size-sm"
+    "lg" -> "size-lg"
+    _ -> "size-md"
+}
+
+labelsClass = match showLabels { true -> "", _ -> " hide-labels" }
+
+<nav class={"flin-sidebar-icons " ++ orientationClass ++ " " ++ variantClass ++ " " ++ sizeClass ++ labelsClass}>
+    <ul class="sidebar-list">
+        {for item in items}
+            <li class="sidebar-item">
+                <a
+                    href={item.href}
+                    class="sidebar-link {if isActive(item.id)}active{/if}"
+                    click={(e) => {
+                        e.preventDefault()
+                        handleItemClick(item)
+                    }}
+                    aria-current={if isActive(item.id)}"page"{else}none{/if}
+                    aria-label={item.label}
+                    style={if variant == "colored" && item.color != none}"--item-color: {item.color}"{else}none{/if}
+                >
+                    <span class="sidebar-icon-wrapper">
+                        <span class="sidebar-icon">
+                            {match item.icon {
+                                "home" -> <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12.707 3.293a1 1 0 00-1.414 0l-9 9a1 1 0 001.414 1.414L4 13.414V20a2 2 0 002 2h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a2 2 0 002-2v-6.586l.293.293a1 1 0 001.414-1.414l-9-9z"/></svg>
+                                "search" -> <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z" clip-rule="evenodd"/></svg>
+                                "inbox" -> <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M5.25 3.75A1.5 1.5 0 013.75 5.25v14.25a1.5 1.5 0 001.5 1.5h14.25a1.5 1.5 0 001.5-1.5V5.25a1.5 1.5 0 00-1.5-1.5H5.25zM6 6h12v5.25H6V6zm0 6.75v6h12v-6h-4.5a.75.75 0 00-.75.75v1.5a.75.75 0 01-.75.75h-1.5a.75.75 0 01-.75-.75v-1.5a.75.75 0 00-.75-.75H6z" clip-rule="evenodd"/></svg>
+                                "bookmark" -> <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 01-1.085.67L12 18.089l-7.165 3.583A.75.75 0 013.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93z" clip-rule="evenodd"/></svg>
+                                "user" -> <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/></svg>
+                                "cog" -> <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 00-2.282.819l-.922 1.597a1.875 1.875 0 00.432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 000 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 00-.432 2.385l.922 1.597a1.875 1.875 0 002.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 002.28-.819l.923-1.597a1.875 1.875 0 00-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 000-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 00-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 00-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 00-1.85-1.567h-1.843zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" clip-rule="evenodd"/></svg>
+                                _ -> <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg>
+                            }}
+                        </span>
+                        {if item.badge != none}
+                            <span class="sidebar-badge">{item.badge}</span>
+                        {/if}
+                    </span>
+                    {if showLabels}
+                        <span class="sidebar-label">{item.label}</span>
+                    {/if}
+                </a>
+            </li>
+        {/for}
+    </ul>
+</nav>
+
+<style scoped>
+.flin-sidebar-icons {
+    background: var(--flin-bg-elevated);
+    padding: var(--flin-space-2);
+}
+
+/* Orientation styles */
+.orientation-vertical {
+    border-right: 1px solid var(--flin-border-subtle);
+    height: 100%;
+}
+
+.orientation-vertical .sidebar-list {
+    flex-direction: column;
+}
+
+.orientation-horizontal {
+    border-bottom: 1px solid var(--flin-border-subtle);
+    width: 100%;
+}
+
+.orientation-horizontal .sidebar-list {
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.sidebar-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: var(--flin-space-1);
+}
+
+.sidebar-item {
+    margin: 0;
+}
+
+.sidebar-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-3);
+    border-radius: var(--flin-radius-lg);
+    text-decoration: none;
+    color: var(--flin-text-secondary);
+    font-family: var(--flin-font-body);
+    transition: all var(--flin-transition-fast);
+    cursor: pointer;
+}
+
+.sidebar-link:hover {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-primary);
+}
+
+.sidebar-link.active {
+    background: rgba(234, 179, 8, 0.1);
+    color: var(--flin-accent-gold);
+}
+
+.sidebar-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 var(--flin-space-1);
+    background: var(--flin-danger);
+    color: white;
+    font-size: 11px;
+    font-weight: var(--flin-font-bold);
+    border-radius: var(--flin-radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-label {
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.hide-labels .sidebar-label {
+    display: none;
+}
+
+/* Size variants */
+.size-sm .sidebar-link {
+    padding: var(--flin-space-2);
+}
+
+.size-sm .sidebar-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.size-sm .sidebar-label {
+    font-size: 10px;
+}
+
+.size-md .sidebar-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.size-lg .sidebar-link {
+    padding: var(--flin-space-4);
+}
+
+.size-lg .sidebar-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.size-lg .sidebar-label {
+    font-size: var(--flin-text-sm);
+}
+
+/* Variant: colored */
+.variant-colored .sidebar-link.active {
+    background: color-mix(in srgb, var(--item-color, var(--flin-accent-gold)) 15%, transparent);
+    color: var(--item-color, var(--flin-accent-gold));
+}
+
+.variant-colored .sidebar-link:hover {
+    color: var(--item-color, var(--flin-text-primary));
+}
+
+/* Variant: outlined */
+.variant-outlined .sidebar-link {
+    border: 2px solid transparent;
+}
+
+.variant-outlined .sidebar-link.active {
+    border-color: var(--flin-accent-gold);
+    background: transparent;
+}
+
+.variant-outlined .sidebar-link:hover {
+    border-color: var(--flin-border-default);
+}
+
+/* Active indicator for vertical */
+.orientation-vertical .sidebar-link.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 32px;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+}
+
+.orientation-vertical .sidebar-item {
+    position: relative;
+}
+
+/* Active indicator for horizontal */
+.orientation-horizontal .sidebar-link.active::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 3px;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+}
+
+.orientation-horizontal .sidebar-link {
+    position: relative;
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-sidebar-icons {
+    background: var(--flin-bg-base);
+}
+
+[data-theme="dark"] .orientation-vertical {
+    border-right-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .orientation-horizontal {
+    border-bottom-color: var(--flin-border-default);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .orientation-vertical {
+        border-right: none;
+        border-bottom: 1px solid var(--flin-border-subtle);
+    }
+
+    .orientation-vertical .sidebar-list {
+        flex-direction: row;
+        justify-content: space-around;
+    }
+}
+</style>

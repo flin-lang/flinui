@@ -1,0 +1,324 @@
+// ============================================================================
+// ThemeToggle.flin — FlinUI PRO Utility Component
+// Dark/light mode toggle switch
+// ============================================================================
+// Props:
+//   - theme: Current theme - light, dark, system (string, default: "system")
+//   - variant: Toggle variant - switch, button, icon (string, default: "switch")
+//   - size: Size - sm, md, lg (string, default: "md")
+//   - showLabel: Show label text (boolean, default: false)
+//   - persist: Persist choice to localStorage (boolean, default: true)
+//   - onChange: Callback when theme changes (function or none)
+// ============================================================================
+
+theme = props.theme || "system"
+variant = props.variant || "switch"
+size = props.size || "md"
+showLabel = props.showLabel || false
+persist = props.persist || true
+onChange = props.onChange || none
+
+// State
+currentTheme = theme
+resolvedTheme = "light"
+
+// Resolve system theme
+resolveTheme = () => {
+    if currentTheme == "system" {
+        if window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches {
+            resolvedTheme = "dark"
+        } else {
+            resolvedTheme = "light"
+        }
+    } else {
+        resolvedTheme = currentTheme
+    }
+
+    // Apply to document
+    document.documentElement.setAttribute("data-theme", resolvedTheme)
+}
+
+// Toggle theme
+toggleTheme = () => {
+    if currentTheme == "light" {
+        currentTheme = "dark"
+    } else if currentTheme == "dark" {
+        currentTheme = "light"
+    } else {
+        // System - toggle to opposite of current resolved
+        currentTheme = resolvedTheme == "light" ? "dark" : "light"
+    }
+
+    resolveTheme()
+
+    if persist {
+        localStorage.setItem("flin-theme", currentTheme)
+    }
+
+    if onChange != none {
+        onChange(currentTheme)
+    }
+}
+
+// Set specific theme
+setTheme = (newTheme) => {
+    currentTheme = newTheme
+    resolveTheme()
+
+    if persist {
+        localStorage.setItem("flin-theme", currentTheme)
+    }
+
+    if onChange != none {
+        onChange(currentTheme)
+    }
+}
+
+// Lifecycle
+onMount = () => {
+    // Load persisted theme
+    if persist {
+        savedTheme = localStorage.getItem("flin-theme")
+        if savedTheme != none {
+            currentTheme = savedTheme
+        }
+    }
+
+    resolveTheme()
+
+    // Listen for system theme changes
+    if currentTheme == "system" {
+        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", resolveTheme)
+    }
+}
+
+isDark = resolvedTheme == "dark"
+
+<div class="flin-theme-toggle variant-{variant} size-{size}">
+    {if variant == "switch"}
+        <button class="toggle-switch" click={toggleTheme} role="switch" aria-checked={isDark}>
+            <span class="switch-track">
+                <span class="switch-icons">
+                    <span class="icon-sun">
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+                        </svg>
+                    </span>
+                    <span class="icon-moon">
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                        </svg>
+                    </span>
+                </span>
+                <span class="switch-thumb"></span>
+            </span>
+            {if showLabel}
+                <span class="toggle-label">{isDark ? "Dark" : "Light"}</span>
+            {/if}
+        </button>
+    {else if variant == "button"}
+        <button class="toggle-button" click={toggleTheme} aria-label="Toggle theme">
+            <span class="button-icon">
+                {if isDark}
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+                    </svg>
+                {else}
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                    </svg>
+                {/if}
+            </span>
+            {if showLabel}
+                <span class="button-label">{isDark ? "Light mode" : "Dark mode"}</span>
+            {/if}
+        </button>
+    {else}
+        <button class="toggle-icon" click={toggleTheme} aria-label="Toggle theme">
+            {if isDark}
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+                </svg>
+            {else}
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                </svg>
+            {/if}
+        </button>
+    {/if}
+</div>
+
+<style scoped>
+.flin-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Switch variant */
+.toggle-switch {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.switch-track {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 52px;
+    height: 28px;
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-full);
+    transition: all var(--flin-transition-fast);
+}
+
+.switch-icons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 6px;
+    z-index: 1;
+}
+
+.icon-sun,
+.icon-moon {
+    display: flex;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.icon-sun {
+    color: var(--flin-accent-gold);
+    opacity: 1;
+}
+
+.icon-moon {
+    color: var(--flin-text-muted);
+    opacity: 0.5;
+}
+
+[aria-checked="true"] .icon-sun {
+    opacity: 0.5;
+}
+
+[aria-checked="true"] .icon-moon {
+    color: var(--flin-accent-gold);
+    opacity: 1;
+}
+
+.switch-thumb {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background: var(--flin-bg-elevated);
+    border-radius: var(--flin-radius-full);
+    box-shadow: var(--flin-shadow-sm);
+    left: 3px;
+    transition: transform var(--flin-transition-fast);
+}
+
+[aria-checked="true"] .switch-thumb {
+    transform: translateX(24px);
+}
+
+.toggle-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+}
+
+/* Button variant */
+.toggle-button {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-secondary);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.toggle-button:hover {
+    background: var(--flin-bg-surface-hover);
+    color: var(--flin-text-primary);
+}
+
+.button-icon {
+    display: flex;
+}
+
+.button-label {
+    font-size: var(--flin-text-sm);
+}
+
+/* Icon variant */
+.toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-secondary);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.toggle-icon:hover {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-primary);
+}
+
+/* Sizes */
+.size-sm .switch-track {
+    width: 44px;
+    height: 24px;
+}
+
+.size-sm .switch-thumb {
+    width: 18px;
+    height: 18px;
+}
+
+.size-sm [aria-checked="true"] .switch-thumb {
+    transform: translateX(20px);
+}
+
+.size-lg .switch-track {
+    width: 60px;
+    height: 32px;
+}
+
+.size-lg .switch-thumb {
+    width: 26px;
+    height: 26px;
+}
+
+.size-lg [aria-checked="true"] .switch-thumb {
+    transform: translateX(28px);
+}
+
+/* Dark theme */
+[data-theme="dark"] .switch-track {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .switch-thumb {
+    background: var(--flin-bg-base);
+}
+
+[data-theme="dark"] .toggle-button {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+}
+</style>

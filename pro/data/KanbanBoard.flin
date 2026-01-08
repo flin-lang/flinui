@@ -1,0 +1,449 @@
+// ============================================================================
+// KanbanBoard.flin — FlinUI PRO Data Component
+// Drag-drop columns for task management (Todo, In Progress, Done)
+// ============================================================================
+// Props:
+//   - columns: List of column objects with id, title, color, items (list)
+//   - onCardMove: Callback when card is moved (function or none)
+//   - onCardClick: Callback when card is clicked (function or none)
+//   - onAddCard: Callback when add button is clicked (function or none)
+//   - showAddButton: Show add card button (boolean)
+//   - draggable: Enable drag and drop (boolean)
+
+columns = props.columns || [
+    [
+        "id": "todo",
+        "title": "To Do",
+        "color": "gray",
+        "items": [
+            ["id": 1, "title": "Research competitors", "description": "Analyze top 5 competitors in the market", "priority": "high", "assignee": "Alice", "tags": ["research"]],
+            ["id": 2, "title": "Create wireframes", "description": "Design initial wireframes for dashboard", "priority": "medium", "assignee": "Bob", "tags": ["design"]],
+            ["id": 3, "title": "Write documentation", "priority": "low", "tags": ["docs"]]
+        ]
+    ],
+    [
+        "id": "in-progress",
+        "title": "In Progress",
+        "color": "blue",
+        "items": [
+            ["id": 4, "title": "Implement authentication", "description": "Set up OAuth2 flow", "priority": "high", "assignee": "Carol", "tags": ["backend", "security"]],
+            ["id": 5, "title": "Design system setup", "priority": "medium", "assignee": "Dave", "tags": ["design"]]
+        ]
+    ],
+    [
+        "id": "review",
+        "title": "In Review",
+        "color": "purple",
+        "items": [
+            ["id": 6, "title": "API endpoints", "description": "REST API for user management", "priority": "high", "assignee": "Eve", "tags": ["backend"]]
+        ]
+    ],
+    [
+        "id": "done",
+        "title": "Done",
+        "color": "green",
+        "items": [
+            ["id": 7, "title": "Project setup", "description": "Initialize repo and CI/CD", "priority": "high", "assignee": "Frank", "tags": ["devops"]],
+            ["id": 8, "title": "Requirements doc", "priority": "medium", "tags": ["docs"]]
+        ]
+    ]
+]
+onCardMove = props.onCardMove || none
+onCardClick = props.onCardClick || none
+onAddCard = props.onAddCard || none
+showAddButton = props.showAddButton || true
+draggable = props.draggable || true
+
+draggedCard = none
+draggedFromColumn = none
+dragOverColumn = none
+
+handleDragStart = (card, columnId) => {
+    draggedCard = card
+    draggedFromColumn = columnId
+}
+
+handleDragOver = (columnId) => {
+    dragOverColumn = columnId
+}
+
+handleDrop = (columnId) => {
+    if draggedCard != none && draggedFromColumn != columnId {
+        if onCardMove != none {
+            onCardMove(draggedCard, draggedFromColumn, columnId)
+        }
+    }
+    draggedCard = none
+    draggedFromColumn = none
+    dragOverColumn = none
+}
+
+getPriorityColor = (priority) => match priority {
+    "high" => "red"
+    "medium" => "orange"
+    "low" => "gray"
+    _ => "gray"
+}
+
+<div class="flin-kanban-board">
+    <div class="kanban-columns">
+        {for column in columns}
+            <div
+                class="kanban-column {if dragOverColumn == column.id}drag-over{/if}"
+                data-color={column.color || "gray"}
+                dragover={(e) => {
+                    e.preventDefault()
+                    handleDragOver(column.id)
+                }}
+                dragleave={() => {
+                    if dragOverColumn == column.id {
+                        dragOverColumn = none
+                    }
+                }}
+                drop={(e) => {
+                    e.preventDefault()
+                    handleDrop(column.id)
+                }}
+            >
+                <div class="column-header">
+                    <div class="column-title-wrapper">
+                        <span class="column-indicator" data-color={column.color || "gray"}></span>
+                        <h3 class="column-title">{column.title}</h3>
+                        <span class="column-count">{column.items.length}</span>
+                    </div>
+                    {if showAddButton}
+                        <button
+                            class="add-card-btn"
+                            click={() => {
+                                if onAddCard != none {
+                                    onAddCard(column.id)
+                                }
+                            }}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M8 2a.75.75 0 01.75.75v4.5h4.5a.75.75 0 010 1.5h-4.5v4.5a.75.75 0 01-1.5 0v-4.5h-4.5a.75.75 0 010-1.5h4.5v-4.5A.75.75 0 018 2z"/>
+                            </svg>
+                        </button>
+                    {/if}
+                </div>
+
+                <div class="column-cards">
+                    {for card in column.items}
+                        <div
+                            class="kanban-card {if draggedCard != none && draggedCard.id == card.id}dragging{/if}"
+                            draggable={draggable}
+                            dragstart={() => handleDragStart(card, column.id)}
+                            dragend={() => {
+                                draggedCard = none
+                                draggedFromColumn = none
+                            }}
+                            click={() => {
+                                if onCardClick != none {
+                                    onCardClick(card)
+                                }
+                            }}
+                        >
+                            {if card.priority != none}
+                                <div class="card-priority" data-priority={card.priority}>
+                                    <span class="priority-dot"></span>
+                                    <span class="priority-label">{card.priority}</span>
+                                </div>
+                            {/if}
+
+                            <h4 class="card-title">{card.title}</h4>
+
+                            {if card.description != none}
+                                <p class="card-description">{card.description}</p>
+                            {/if}
+
+                            {if card.tags != none && card.tags.length > 0}
+                                <div class="card-tags">
+                                    {for tag in card.tags}
+                                        <span class="card-tag">{tag}</span>
+                                    {/for}
+                                </div>
+                            {/if}
+
+                            {if card.assignee != none}
+                                <div class="card-footer">
+                                    <div class="card-assignee">
+                                        <div class="assignee-avatar">
+                                            {card.assignee.charAt(0)}
+                                        </div>
+                                        <span class="assignee-name">{card.assignee}</span>
+                                    </div>
+                                </div>
+                            {/if}
+                        </div>
+                    {/for}
+
+                    {if column.items.length == 0}
+                        <div class="column-empty">
+                            <span class="empty-text">No cards</span>
+                        </div>
+                    {/if}
+                </div>
+            </div>
+        {/for}
+    </div>
+</div>
+
+<style scoped>
+.flin-kanban-board {
+    width: 100%;
+    overflow-x: auto;
+    padding: var(--flin-space-4);
+}
+
+.kanban-columns {
+    display: flex;
+    gap: var(--flin-space-4);
+    min-height: 400px;
+}
+
+.kanban-column {
+    flex: 0 0 280px;
+    background: var(--flin-bg-surface);
+    border-radius: var(--flin-radius-xl);
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    transition: all var(--flin-transition-fast);
+}
+
+.kanban-column.drag-over {
+    background: rgba(234, 179, 8, 0.05);
+    box-shadow: inset 0 0 0 2px var(--flin-accent-gold);
+}
+
+.column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.column-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.column-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--flin-radius-full);
+}
+
+.column-indicator[data-color="gray"] { background: #6b7280; }
+.column-indicator[data-color="blue"] { background: #3b82f6; }
+.column-indicator[data-color="purple"] { background: #a855f7; }
+.column-indicator[data-color="green"] { background: #22c55e; }
+.column-indicator[data-color="orange"] { background: #f97316; }
+.column-indicator[data-color="red"] { background: #ef4444; }
+.column-indicator[data-color="gold"] { background: var(--flin-accent-gold); }
+
+.column-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0;
+}
+
+.column-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 var(--flin-space-2);
+    background: var(--flin-bg-elevated);
+    border-radius: var(--flin-radius-full);
+    font-size: 11px;
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-muted);
+}
+
+.add-card-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-tertiary);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.add-card-btn:hover {
+    background: var(--flin-bg-elevated);
+    border-color: var(--flin-accent-gold);
+    color: var(--flin-accent-gold);
+}
+
+.column-cards {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--flin-space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+}
+
+.kanban-card {
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-space-4);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.kanban-card:hover {
+    border-color: var(--flin-border-default);
+    box-shadow: var(--flin-shadow-card);
+    transform: translateY(-1px);
+}
+
+.kanban-card.dragging {
+    opacity: 0.5;
+    transform: rotate(3deg);
+}
+
+.kanban-card[draggable="true"] {
+    cursor: grab;
+}
+
+.kanban-card[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+.card-priority {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    margin-bottom: var(--flin-space-2);
+}
+
+.priority-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--flin-radius-full);
+}
+
+.card-priority[data-priority="high"] .priority-dot { background: #ef4444; }
+.card-priority[data-priority="medium"] .priority-dot { background: #f97316; }
+.card-priority[data-priority="low"] .priority-dot { background: #6b7280; }
+
+.priority-label {
+    font-size: 10px;
+    font-weight: var(--flin-font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.card-priority[data-priority="high"] .priority-label { color: #ef4444; }
+.card-priority[data-priority="medium"] .priority-label { color: #f97316; }
+.card-priority[data-priority="low"] .priority-label { color: #6b7280; }
+
+.card-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-2) 0;
+    line-height: 1.4;
+}
+
+.card-description {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-secondary);
+    line-height: 1.5;
+    margin: 0 0 var(--flin-space-3) 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-space-1);
+    margin-bottom: var(--flin-space-3);
+}
+
+.card-tag {
+    font-size: 10px;
+    padding: 2px var(--flin-space-2);
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-tertiary);
+    border-radius: var(--flin-radius-sm);
+}
+
+.card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--flin-space-3);
+    border-top: 1px solid var(--flin-border-subtle);
+}
+
+.card-assignee {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.assignee-avatar {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-accent-gold);
+    color: var(--flin-bg-base);
+    border-radius: var(--flin-radius-full);
+    font-size: 11px;
+    font-weight: var(--flin-font-bold);
+}
+
+.assignee-name {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-secondary);
+}
+
+.column-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-8);
+    border: 2px dashed var(--flin-border-subtle);
+    border-radius: var(--flin-radius-lg);
+}
+
+.empty-text {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .flin-kanban-board {
+        padding: var(--flin-space-2);
+    }
+
+    .kanban-column {
+        flex: 0 0 260px;
+    }
+}
+
+@media (max-width: 480px) {
+    .kanban-column {
+        flex: 0 0 calc(100vw - 48px);
+    }
+}
+</style>

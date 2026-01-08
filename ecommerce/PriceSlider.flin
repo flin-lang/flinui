@@ -1,0 +1,396 @@
+// PriceSlider.flin - FlinUI PRO E-commerce Component
+// Dual-handle price range slider with min/max inputs and currency formatting
+
+// Props with defaults
+minValue = props.minValue || 0
+maxValue = props.maxValue || 1000
+currentMin = props.currentMin || minValue
+currentMax = props.currentMax || maxValue
+currency = props.currency || "$"
+step = props.step || 10
+onChange = props.onChange
+
+// Internal state
+isDraggingMin = false
+isDraggingMax = false
+sliderRef = none
+
+// Format currency
+fn formatCurrency(value) {
+    formattedValue = value.toFixed(0)
+    return currency ++ formattedValue
+}
+
+// Calculate position percentage
+fn getPercentage(value) {
+    range = maxValue - minValue
+    if range == 0 {
+        return 0
+    }
+    return ((value - minValue) / range) * 100
+}
+
+// Handle min slider change
+fn handleMinChange(e) {
+    newMin = parseFloat(e.target.value)
+    if newMin <= currentMax - step {
+        currentMin = newMin
+        if onChange {
+            onChange(currentMin, currentMax)
+        }
+    }
+}
+
+// Handle max slider change
+fn handleMaxChange(e) {
+    newMax = parseFloat(e.target.value)
+    if newMax >= currentMin + step {
+        currentMax = newMax
+        if onChange {
+            onChange(currentMin, currentMax)
+        }
+    }
+}
+
+// Handle min input change
+fn handleMinInputChange(e) {
+    value = parseFloat(e.target.value) || minValue
+    if value >= minValue && value <= currentMax - step {
+        currentMin = value
+        if onChange {
+            onChange(currentMin, currentMax)
+        }
+    }
+}
+
+// Handle max input change
+fn handleMaxInputChange(e) {
+    value = parseFloat(e.target.value) || maxValue
+    if value <= maxValue && value >= currentMin + step {
+        currentMax = value
+        if onChange {
+            onChange(currentMin, currentMax)
+        }
+    }
+}
+
+// Reset to full range
+fn handleReset() {
+    currentMin = minValue
+    currentMax = maxValue
+    if onChange {
+        onChange(currentMin, currentMax)
+    }
+}
+
+// Calculate track fill percentage and position
+minPercent = getPercentage(currentMin)
+maxPercent = getPercentage(currentMax)
+rangeWidth = maxPercent - minPercent
+
+// Check if filter is active
+isActive = currentMin != minValue || currentMax != maxValue
+
+<div class="price-slider">
+    <div class="price-slider-header">
+        <label class="price-slider-label">Price Range</label>
+        {if isActive}
+            <button class="price-slider-reset" click={handleReset}>Reset</button>
+        {/if}
+    </div>
+
+    <div class="price-slider-inputs">
+        <div class="price-slider-input-group">
+            <label class="price-slider-input-label">Min</label>
+            <input
+                type="number"
+                class="price-slider-input"
+                value={currentMin}
+                min={minValue}
+                max={currentMax - step}
+                step={step}
+                change={handleMinInputChange}
+            />
+        </div>
+
+        <div class="price-slider-separator">—</div>
+
+        <div class="price-slider-input-group">
+            <label class="price-slider-input-label">Max</label>
+            <input
+                type="number"
+                class="price-slider-input"
+                value={currentMax}
+                min={currentMin + step}
+                max={maxValue}
+                step={step}
+                change={handleMaxInputChange}
+            />
+        </div>
+    </div>
+
+    <div class="price-slider-track-container">
+        <div class="price-slider-track">
+            <div
+                class="price-slider-track-fill"
+                style="left: {minPercent}%; width: {rangeWidth}%"
+            ></div>
+        </div>
+
+        <input
+            type="range"
+            class="price-slider-range price-slider-range-min"
+            value={currentMin}
+            min={minValue}
+            max={maxValue}
+            step={step}
+            input={handleMinChange}
+            aria-label="Minimum price"
+        />
+
+        <input
+            type="range"
+            class="price-slider-range price-slider-range-max"
+            value={currentMax}
+            min={minValue}
+            max={maxValue}
+            step={step}
+            input={handleMaxChange}
+            aria-label="Maximum price"
+        />
+    </div>
+
+    <div class="price-slider-values">
+        <span class="price-slider-value">{formatCurrency(currentMin)}</span>
+        <span class="price-slider-value">{formatCurrency(currentMax)}</span>
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.price-slider {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-4);
+    background-color: white;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+}
+
+/* Header */
+.price-slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.price-slider-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+}
+
+.price-slider-reset {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-primary);
+    background: transparent;
+    border: none;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.price-slider-reset:hover {
+    background-color: var(--flin-primary-light);
+}
+
+/* Input Group */
+.price-slider-inputs {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+.price-slider-input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.price-slider-input-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-neutral-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.price-slider-input {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-neutral-900);
+    background-color: var(--flin-neutral-50);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    transition: all var(--flin-transition-fast);
+}
+
+.price-slider-input:focus {
+    outline: none;
+    border-color: var(--flin-primary);
+    background-color: white;
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.price-slider-separator {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-lg);
+    color: var(--flin-neutral-400);
+    padding-top: var(--flin-space-4);
+}
+
+/* Slider Track */
+.price-slider-track-container {
+    position: relative;
+    height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.price-slider-track {
+    position: absolute;
+    width: 100%;
+    height: 6px;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-full);
+    pointer-events: none;
+}
+
+.price-slider-track-fill {
+    position: absolute;
+    height: 100%;
+    background-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    transition: all var(--flin-transition-fast);
+}
+
+/* Range Inputs */
+.price-slider-range {
+    position: absolute;
+    width: 100%;
+    height: 40px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    pointer-events: none;
+    margin: 0;
+}
+
+.price-slider-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border: 3px solid var(--flin-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: all;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all var(--flin-transition-fast);
+}
+
+.price-slider-range::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.price-slider-range::-webkit-slider-thumb:active {
+    transform: scale(1.05);
+}
+
+.price-slider-range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border: 3px solid var(--flin-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: all;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all var(--flin-transition-fast);
+}
+
+.price-slider-range::-moz-range-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.price-slider-range::-moz-range-thumb:active {
+    transform: scale(1.05);
+}
+
+.price-slider-range-max {
+    pointer-events: none;
+}
+
+.price-slider-range-max::-webkit-slider-thumb {
+    pointer-events: all;
+}
+
+.price-slider-range-max::-moz-range-thumb {
+    pointer-events: all;
+}
+
+/* Values Display */
+.price-slider-values {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.price-slider-value {
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+    padding: var(--flin-space-1) var(--flin-space-3);
+    border-radius: var(--flin-radius-md);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .price-slider {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .price-slider-label {
+        color: var(--flin-neutral-100);
+    }
+
+    .price-slider-input {
+        background-color: var(--flin-neutral-900);
+        border-color: var(--flin-neutral-700);
+        color: var(--flin-neutral-100);
+    }
+
+    .price-slider-input:focus {
+        background-color: var(--flin-neutral-800);
+    }
+
+    .price-slider-track {
+        background-color: var(--flin-neutral-700);
+    }
+}
+</style>

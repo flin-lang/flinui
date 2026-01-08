@@ -1,0 +1,585 @@
+// CheckoutForm.flin - FlinUI PRO E-commerce Component
+// Multi-section checkout form with shipping, billing, and contact information
+
+// Props with defaults
+onSubmit = props.onSubmit
+initialData = props.initialData || {}
+showBillingAddress = props.showBillingAddress || true
+disabled = props.disabled || false
+
+// Form state - shipping address
+shippingFirstName = initialData.shippingFirstName || ""
+shippingLastName = initialData.shippingLastName || ""
+shippingAddress1 = initialData.shippingAddress1 || ""
+shippingAddress2 = initialData.shippingAddress2 || ""
+shippingCity = initialData.shippingCity || ""
+shippingState = initialData.shippingState || ""
+shippingZip = initialData.shippingZip || ""
+shippingCountry = initialData.shippingCountry || "US"
+
+// Form state - contact
+email = initialData.email || ""
+phone = initialData.phone || ""
+
+// Form state - billing address
+sameAsShipping = true
+billingFirstName = ""
+billingLastName = ""
+billingAddress1 = ""
+billingAddress2 = ""
+billingCity = ""
+billingState = ""
+billingZip = ""
+billingCountry = "US"
+
+// Validation errors
+errors = {}
+
+function handleSubmit() {
+    // Clear previous errors
+    errors = {}
+
+    // Basic validation
+    if !email || !email.includes("@") {
+        errors.email = "Valid email is required"
+    }
+    if !shippingFirstName {
+        errors.shippingFirstName = "First name is required"
+    }
+    if !shippingLastName {
+        errors.shippingLastName = "Last name is required"
+    }
+    if !shippingAddress1 {
+        errors.shippingAddress1 = "Address is required"
+    }
+    if !shippingCity {
+        errors.shippingCity = "City is required"
+    }
+    if !shippingState {
+        errors.shippingState = "State is required"
+    }
+    if !shippingZip {
+        errors.shippingZip = "ZIP code is required"
+    }
+
+    // Billing validation if not same as shipping
+    if !sameAsShipping && showBillingAddress {
+        if !billingFirstName {
+            errors.billingFirstName = "First name is required"
+        }
+        if !billingLastName {
+            errors.billingLastName = "Last name is required"
+        }
+        if !billingAddress1 {
+            errors.billingAddress1 = "Address is required"
+        }
+        if !billingCity {
+            errors.billingCity = "City is required"
+        }
+        if !billingState {
+            errors.billingState = "State is required"
+        }
+        if !billingZip {
+            errors.billingZip = "ZIP code is required"
+        }
+    }
+
+    // If no errors, submit
+    if Object.keys(errors).length == 0 {
+        formData = {
+            email: email,
+            phone: phone,
+            shipping: {
+                firstName: shippingFirstName,
+                lastName: shippingLastName,
+                address1: shippingAddress1,
+                address2: shippingAddress2,
+                city: shippingCity,
+                state: shippingState,
+                zip: shippingZip,
+                country: shippingCountry
+            },
+            billing: sameAsShipping ? none : {
+                firstName: billingFirstName,
+                lastName: billingLastName,
+                address1: billingAddress1,
+                address2: billingAddress2,
+                city: billingCity,
+                state: billingState,
+                zip: billingZip,
+                country: billingCountry
+            }
+        }
+
+        if onSubmit {
+            onSubmit(formData)
+        }
+    }
+}
+
+<div class="checkout-form">
+    <style scoped>
+        .checkout-form {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-section {
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-light);
+            border-radius: var(--flin-radius-lg);
+            padding: var(--flin-space-6);
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .section-title {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-1);
+        }
+
+        .section-description {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-muted);
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--flin-space-4);
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .form-group {
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .form-label {
+            display: block;
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .form-label-required::after {
+            content: " *";
+            color: var(--flin-danger);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: var(--flin-space-3);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-deep);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-md);
+            transition: all var(--flin-transition-fast);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--flin-accent-gold);
+            box-shadow: 0 0 0 3px var(--flin-accent-gold-alpha-10);
+        }
+
+        .form-input.error {
+            border-color: var(--flin-danger);
+        }
+
+        .form-error {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-danger);
+            margin-top: var(--flin-space-1);
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-deep);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-md);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .form-checkbox:hover {
+            border-color: var(--flin-accent-gold);
+        }
+
+        .form-checkbox input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--flin-accent-gold);
+        }
+
+        .form-checkbox label {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: var(--flin-space-4);
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-bg-deep);
+            background: var(--flin-accent-gold);
+            border: none;
+            border-radius: var(--flin-radius-md);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .submit-button:hover:not(:disabled) {
+            background: var(--flin-accent-gold-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--flin-shadow-lg);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-section {
+                padding: var(--flin-space-4);
+            }
+        }
+    </style>
+
+    <form submit={handleSubmit}>
+        <!-- Contact Information -->
+        <div class="form-section">
+            <h2 class="section-title">Contact Information</h2>
+            <p class="section-description">We'll use this to send order updates</p>
+
+            <div class="form-group">
+                <label class="form-label form-label-required">Email</label>
+                <input
+                    type="email"
+                    class="form-input {if errors.email}error{/if}"
+                    value={email}
+                    input={(e) => email = e.target.value}
+                    placeholder="you@example.com"
+                    disabled={disabled}
+                    required
+                />
+                {if errors.email}
+                    <div class="form-error">{errors.email}</div>
+                {/if}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Phone (optional)</label>
+                <input
+                    type="tel"
+                    class="form-input"
+                    value={phone}
+                    input={(e) => phone = e.target.value}
+                    placeholder="+1 (555) 123-4567"
+                    disabled={disabled}
+                />
+            </div>
+        </div>
+
+        <!-- Shipping Address -->
+        <div class="form-section">
+            <h2 class="section-title">Shipping Address</h2>
+            <p class="section-description">Where should we deliver your order?</p>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label form-label-required">First Name</label>
+                    <input
+                        type="text"
+                        class="form-input {if errors.shippingFirstName}error{/if}"
+                        value={shippingFirstName}
+                        input={(e) => shippingFirstName = e.target.value}
+                        disabled={disabled}
+                        required
+                    />
+                    {if errors.shippingFirstName}
+                        <div class="form-error">{errors.shippingFirstName}</div>
+                    {/if}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label form-label-required">Last Name</label>
+                    <input
+                        type="text"
+                        class="form-input {if errors.shippingLastName}error{/if}"
+                        value={shippingLastName}
+                        input={(e) => shippingLastName = e.target.value}
+                        disabled={disabled}
+                        required
+                    />
+                    {if errors.shippingLastName}
+                        <div class="form-error">{errors.shippingLastName}</div>
+                    {/if}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label form-label-required">Address Line 1</label>
+                <input
+                    type="text"
+                    class="form-input {if errors.shippingAddress1}error{/if}"
+                    value={shippingAddress1}
+                    input={(e) => shippingAddress1 = e.target.value}
+                    placeholder="Street address"
+                    disabled={disabled}
+                    required
+                />
+                {if errors.shippingAddress1}
+                    <div class="form-error">{errors.shippingAddress1}</div>
+                {/if}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Address Line 2 (optional)</label>
+                <input
+                    type="text"
+                    class="form-input"
+                    value={shippingAddress2}
+                    input={(e) => shippingAddress2 = e.target.value}
+                    placeholder="Apartment, suite, etc."
+                    disabled={disabled}
+                />
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label form-label-required">City</label>
+                    <input
+                        type="text"
+                        class="form-input {if errors.shippingCity}error{/if}"
+                        value={shippingCity}
+                        input={(e) => shippingCity = e.target.value}
+                        disabled={disabled}
+                        required
+                    />
+                    {if errors.shippingCity}
+                        <div class="form-error">{errors.shippingCity}</div>
+                    {/if}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label form-label-required">State / Province</label>
+                    <input
+                        type="text"
+                        class="form-input {if errors.shippingState}error{/if}"
+                        value={shippingState}
+                        input={(e) => shippingState = e.target.value}
+                        disabled={disabled}
+                        required
+                    />
+                    {if errors.shippingState}
+                        <div class="form-error">{errors.shippingState}</div>
+                    {/if}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label form-label-required">ZIP / Postal Code</label>
+                    <input
+                        type="text"
+                        class="form-input {if errors.shippingZip}error{/if}"
+                        value={shippingZip}
+                        input={(e) => shippingZip = e.target.value}
+                        disabled={disabled}
+                        required
+                    />
+                    {if errors.shippingZip}
+                        <div class="form-error">{errors.shippingZip}</div>
+                    {/if}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label form-label-required">Country</label>
+                    <select
+                        class="form-input"
+                        value={shippingCountry}
+                        change={(e) => shippingCountry = e.target.value}
+                        disabled={disabled}
+                    >
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                        <option value="UK">United Kingdom</option>
+                        <option value="AU">Australia</option>
+                        <option value="CI">Côte d'Ivoire</option>
+                        <option value="BJ">Benin</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Billing Address -->
+        {if showBillingAddress}
+            <div class="form-section">
+                <h2 class="section-title">Billing Address</h2>
+                <p class="section-description">Where should we send the invoice?</p>
+
+                <div class="form-checkbox">
+                    <input
+                        type="checkbox"
+                        id="sameAsShipping"
+                        checked={sameAsShipping}
+                        change={(e) => sameAsShipping = e.target.checked}
+                        disabled={disabled}
+                    />
+                    <label for="sameAsShipping">Same as shipping address</label>
+                </div>
+
+                {if !sameAsShipping}
+                    <div style="margin-top: var(--flin-space-6);">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label form-label-required">First Name</label>
+                                <input
+                                    type="text"
+                                    class="form-input {if errors.billingFirstName}error{/if}"
+                                    value={billingFirstName}
+                                    input={(e) => billingFirstName = e.target.value}
+                                    disabled={disabled}
+                                    required
+                                />
+                                {if errors.billingFirstName}
+                                    <div class="form-error">{errors.billingFirstName}</div>
+                                {/if}
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label form-label-required">Last Name</label>
+                                <input
+                                    type="text"
+                                    class="form-input {if errors.billingLastName}error{/if}"
+                                    value={billingLastName}
+                                    input={(e) => billingLastName = e.target.value}
+                                    disabled={disabled}
+                                    required
+                                />
+                                {if errors.billingLastName}
+                                    <div class="form-error">{errors.billingLastName}</div>
+                                {/if}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label form-label-required">Address Line 1</label>
+                            <input
+                                type="text"
+                                class="form-input {if errors.billingAddress1}error{/if}"
+                                value={billingAddress1}
+                                input={(e) => billingAddress1 = e.target.value}
+                                placeholder="Street address"
+                                disabled={disabled}
+                                required
+                            />
+                            {if errors.billingAddress1}
+                                <div class="form-error">{errors.billingAddress1}</div>
+                            {/if}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Address Line 2 (optional)</label>
+                            <input
+                                type="text"
+                                class="form-input"
+                                value={billingAddress2}
+                                input={(e) => billingAddress2 = e.target.value}
+                                placeholder="Apartment, suite, etc."
+                                disabled={disabled}
+                            />
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label form-label-required">City</label>
+                                <input
+                                    type="text"
+                                    class="form-input {if errors.billingCity}error{/if}"
+                                    value={billingCity}
+                                    input={(e) => billingCity = e.target.value}
+                                    disabled={disabled}
+                                    required
+                                />
+                                {if errors.billingCity}
+                                    <div class="form-error">{errors.billingCity}</div>
+                                {/if}
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label form-label-required">State / Province</label>
+                                <input
+                                    type="text"
+                                    class="form-input {if errors.billingState}error{/if}"
+                                    value={billingState}
+                                    input={(e) => billingState = e.target.value}
+                                    disabled={disabled}
+                                    required
+                                />
+                                {if errors.billingState}
+                                    <div class="form-error">{errors.billingState}</div>
+                                {/if}
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label form-label-required">ZIP / Postal Code</label>
+                                <input
+                                    type="text"
+                                    class="form-input {if errors.billingZip}error{/if}"
+                                    value={billingZip}
+                                    input={(e) => billingZip = e.target.value}
+                                    disabled={disabled}
+                                    required
+                                />
+                                {if errors.billingZip}
+                                    <div class="form-error">{errors.billingZip}</div>
+                                {/if}
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label form-label-required">Country</label>
+                                <select
+                                    class="form-input"
+                                    value={billingCountry}
+                                    change={(e) => billingCountry = e.target.value}
+                                    disabled={disabled}
+                                >
+                                    <option value="US">United States</option>
+                                    <option value="CA">Canada</option>
+                                    <option value="UK">United Kingdom</option>
+                                    <option value="AU">Australia</option>
+                                    <option value="CI">Côte d'Ivoire</option>
+                                    <option value="BJ">Benin</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                {/if}
+            </div>
+        {/if}
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-button" disabled={disabled}>
+            Continue to Payment
+        </button>
+    </form>
+</div>

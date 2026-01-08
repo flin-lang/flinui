@@ -1,0 +1,219 @@
+// ============================================================================
+// ArticleContent.flin — FlinUI PRO
+// Blog post body with styled prose for long-form content
+// ============================================================================
+// Props:
+//   content: text - The article content (HTML or markdown rendered)
+//   size: text - Font size variant ("sm", "base", "lg") (default: "base")
+//   maxWidth: text - Max width of content (default: "65ch")
+//   dropCap: boolean - Show decorative drop cap on first letter (default: false)
+// ============================================================================
+
+content = props.content || ""
+size = props.size || "base"
+maxWidth = props.maxWidth || "65ch"
+dropCap = props.dropCap || false
+
+// Compute size class
+sizeClass = match size {
+    "sm" -> "article-content--sm"
+    "lg" -> "article-content--lg"
+    _ -> "article-content--base"
+}
+
+// Compute drop cap class
+dropCapClass = match dropCap {
+    true -> "article-content--drop-cap"
+    _ -> ""
+}
+
+<article
+    class={"article-content " ++ sizeClass ++ " " ++ dropCapClass}
+    style={"--article-max-width: " ++ maxWidth}
+>
+    {if content != ""}
+        <div class="article-content__body">
+            {content}
+        </div>
+    {else}
+        <div class="article-content__body">
+            {children}
+        </div>
+    {/if}
+</article>
+
+<style scoped>
+.article-content {
+    font-family: var(--flin-font-serif, var(--flin-font-sans));
+    color: var(--flin-fg);
+    line-height: 1.8;
+    max-width: var(--article-max-width, 65ch);
+}
+
+.article-content__body {
+    width: 100%;
+}
+
+/* Size variants */
+.article-content--sm {
+    font-size: var(--flin-text-sm);
+    line-height: 1.7;
+}
+
+.article-content--base {
+    font-size: var(--flin-text-lg);
+    line-height: 1.8;
+}
+
+.article-content--lg {
+    font-size: var(--flin-text-xl);
+    line-height: 1.85;
+}
+
+/* Drop cap styling */
+.article-content--drop-cap .article-content__body > p:first-of-type::first-letter {
+    float: left;
+    font-size: 4em;
+    line-height: 0.8;
+    padding-right: var(--flin-space-3);
+    padding-top: var(--flin-space-1);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-primary);
+    font-family: var(--flin-font-serif, var(--flin-font-sans));
+}
+
+/* Prose elements styling */
+.article-content p {
+    margin: 0 0 var(--flin-space-6) 0;
+}
+
+.article-content h2 {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    margin: var(--flin-space-10) 0 var(--flin-space-4) 0;
+    color: var(--flin-fg);
+    font-family: var(--flin-font-sans);
+}
+
+.article-content h3 {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-semibold);
+    margin: var(--flin-space-8) 0 var(--flin-space-3) 0;
+    color: var(--flin-fg);
+    font-family: var(--flin-font-sans);
+}
+
+.article-content h4 {
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    margin: var(--flin-space-6) 0 var(--flin-space-2) 0;
+    color: var(--flin-fg);
+    font-family: var(--flin-font-sans);
+}
+
+.article-content a {
+    color: var(--flin-primary);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    transition: color var(--flin-transition-fast);
+}
+
+.article-content a:hover {
+    color: var(--flin-primary-dark);
+}
+
+.article-content strong {
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+}
+
+.article-content em {
+    font-style: italic;
+}
+
+.article-content ul,
+.article-content ol {
+    margin: 0 0 var(--flin-space-6) 0;
+    padding-left: var(--flin-space-6);
+}
+
+.article-content li {
+    margin-bottom: var(--flin-space-2);
+}
+
+.article-content li::marker {
+    color: var(--flin-fg-muted);
+}
+
+.article-content blockquote {
+    margin: var(--flin-space-6) 0;
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-left: 4px solid var(--flin-primary);
+    background: var(--flin-neutral-50);
+    font-style: italic;
+    color: var(--flin-fg-muted);
+}
+
+.article-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--flin-radius-lg);
+    margin: var(--flin-space-6) 0;
+}
+
+.article-content figure {
+    margin: var(--flin-space-8) 0;
+}
+
+.article-content figcaption {
+    margin-top: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    text-align: center;
+    font-style: italic;
+}
+
+.article-content hr {
+    border: none;
+    height: 1px;
+    background: var(--flin-neutral-200);
+    margin: var(--flin-space-10) 0;
+}
+
+.article-content code {
+    font-family: var(--flin-font-mono);
+    font-size: 0.9em;
+    background: var(--flin-neutral-100);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    color: var(--flin-danger);
+}
+
+.article-content pre {
+    margin: var(--flin-space-6) 0;
+    padding: var(--flin-space-4);
+    background: var(--flin-neutral-900);
+    border-radius: var(--flin-radius-lg);
+    overflow-x: auto;
+}
+
+.article-content pre code {
+    background: transparent;
+    padding: 0;
+    color: var(--flin-neutral-100);
+}
+
+/* Dark theme */
+[data-theme="dark"] .article-content blockquote {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .article-content code {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .article-content hr {
+    background: var(--flin-neutral-700);
+}
+</style>

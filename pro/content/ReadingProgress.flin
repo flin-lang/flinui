@@ -1,0 +1,194 @@
+// ============================================================================
+// ReadingProgress.flin — FlinUI PRO
+// Scroll progress indicator bar
+// ============================================================================
+// Props:
+//   progress: number - Current progress 0-100 (default: 0)
+//   position: text - Bar position ("top", "bottom") (default: "top")
+//   height: text - Bar height (default: "3px")
+//   color: text - Progress bar color (default: "primary")
+//   backgroundColor: text - Background color (default: "transparent")
+//   showPercentage: boolean - Show percentage text (default: false)
+//   variant: text - Style variant ("bar", "gradient", "glow") (default: "bar")
+//   animated: boolean - Animate progress changes (default: true)
+// ============================================================================
+
+progress = props.progress || 0
+position = props.position || "top"
+height = props.height || "3px"
+color = props.color || "primary"
+backgroundColor = props.backgroundColor || "transparent"
+showPercentage = props.showPercentage || false
+variant = props.variant || "bar"
+animated = props.animated || true
+
+// Clamp progress between 0 and 100
+clampedProgress = Math.max(0, Math.min(100, progress))
+
+// Compute position class
+positionClass = match position {
+    "bottom" -> "reading-progress--bottom"
+    _ -> "reading-progress--top"
+}
+
+// Compute variant class
+variantClass = match variant {
+    "gradient" -> "reading-progress--gradient"
+    "glow" -> "reading-progress--glow"
+    _ -> "reading-progress--bar"
+}
+
+// Compute color class
+colorClass = match color {
+    "success" -> "reading-progress--success"
+    "warning" -> "reading-progress--warning"
+    "danger" -> "reading-progress--danger"
+    "info" -> "reading-progress--info"
+    _ -> "reading-progress--primary"
+}
+
+// Compute animated class
+animatedClass = match animated {
+    true -> "reading-progress--animated"
+    _ -> ""
+}
+
+<div
+    class={"reading-progress " ++ positionClass ++ " " ++ variantClass ++ " " ++ colorClass ++ " " ++ animatedClass}
+    style={"--progress-height: " ++ height ++ "; --progress-bg: " ++ backgroundColor ++ ";"}
+    role="progressbar"
+    aria-valuenow={clampedProgress}
+    aria-valuemin="0"
+    aria-valuemax="100"
+    aria-label="Reading progress"
+>
+    <div
+        class="reading-progress__bar"
+        style={"width: " ++ clampedProgress ++ "%;"}
+    ></div>
+
+    {if showPercentage}
+        <span class="reading-progress__text">{Math.round(clampedProgress)}%</span>
+    {/if}
+</div>
+
+<style scoped>
+.reading-progress {
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: var(--progress-height, 3px);
+    background: var(--progress-bg, transparent);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+/* Position */
+.reading-progress--top {
+    top: 0;
+}
+
+.reading-progress--bottom {
+    bottom: 0;
+}
+
+/* Progress bar */
+.reading-progress__bar {
+    height: 100%;
+    width: 0;
+}
+
+/* Animated transition */
+.reading-progress--animated .reading-progress__bar {
+    transition: width 0.1s ease-out;
+}
+
+/* Color variants */
+.reading-progress--primary .reading-progress__bar {
+    background: var(--flin-primary);
+}
+
+.reading-progress--success .reading-progress__bar {
+    background: var(--flin-success);
+}
+
+.reading-progress--warning .reading-progress__bar {
+    background: var(--flin-warning);
+}
+
+.reading-progress--danger .reading-progress__bar {
+    background: var(--flin-danger);
+}
+
+.reading-progress--info .reading-progress__bar {
+    background: var(--flin-info);
+}
+
+/* Variant: gradient */
+.reading-progress--gradient .reading-progress__bar {
+    background: linear-gradient(90deg, var(--flin-primary) 0%, var(--flin-info) 50%, var(--flin-success) 100%);
+}
+
+/* Variant: glow */
+.reading-progress--glow .reading-progress__bar {
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+}
+
+.reading-progress--glow.reading-progress--primary .reading-progress__bar {
+    box-shadow: 0 0 10px var(--flin-primary), 0 0 20px var(--flin-primary);
+}
+
+.reading-progress--glow.reading-progress--success .reading-progress__bar {
+    box-shadow: 0 0 10px var(--flin-success), 0 0 20px var(--flin-success);
+}
+
+.reading-progress--glow.reading-progress--warning .reading-progress__bar {
+    box-shadow: 0 0 10px var(--flin-warning), 0 0 20px var(--flin-warning);
+}
+
+.reading-progress--glow.reading-progress--danger .reading-progress__bar {
+    box-shadow: 0 0 10px var(--flin-danger), 0 0 20px var(--flin-danger);
+}
+
+.reading-progress--glow.reading-progress--info .reading-progress__bar {
+    box-shadow: 0 0 10px var(--flin-info), 0 0 20px var(--flin-info);
+}
+
+/* Percentage text */
+.reading-progress__text {
+    position: absolute;
+    top: 50%;
+    right: var(--flin-space-4);
+    transform: translateY(-50%);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    background: var(--flin-bg);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    box-shadow: var(--flin-shadow-sm);
+}
+
+/* Ensure bar is on top of page content */
+.reading-progress--top {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.reading-progress--bottom {
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Background when specified */
+.reading-progress[style*="--progress-bg: var"] {
+    background: var(--flin-neutral-100);
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .reading-progress__text {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .reading-progress[style*="--progress-bg: var"] {
+    background: var(--flin-neutral-800);
+}
+</style>

@@ -1,0 +1,242 @@
+// PaymentMethodSelector.flin - FlinUI PRO Payment Method Selector
+// Visual payment method selection with icons and badges
+
+// Props with defaults
+selectedMethod = props.selectedMethod || "card"
+onMethodSelect = props.onMethodSelect
+showRecommended = props.showRecommended || true
+disabled = props.disabled || false
+
+// Available payment methods
+paymentMethods = [
+    {
+        id: "card",
+        name: "Credit / Debit Card",
+        icon: "💳",
+        recommended: true,
+        description: "Pay securely with your card"
+    },
+    {
+        id: "paypal",
+        name: "PayPal",
+        icon: "🅿️",
+        recommended: false,
+        description: "Fast checkout with PayPal"
+    },
+    {
+        id: "apple-pay",
+        name: "Apple Pay",
+        icon: "🍎",
+        recommended: false,
+        description: "One-tap payment"
+    },
+    {
+        id: "google-pay",
+        name: "Google Pay",
+        icon: "🔵",
+        recommended: false,
+        description: "Quick Google Pay checkout"
+    }
+]
+
+// Handle method selection
+function handleSelect(methodId) {
+    {if !disabled && onMethodSelect}
+        selectedMethod = methodId
+        onMethodSelect(methodId)
+    {/if}
+}
+
+<div class="payment-method-selector">
+    <style scoped>
+        .payment-method-selector {
+            width: 100%;
+        }
+
+        .selector-header {
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .selector-title {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .selector-subtitle {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-muted);
+        }
+
+        .methods-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--flin-space-4);
+            margin-bottom: var(--flin-space-6);
+        }
+
+        @media (max-width: 640px) {
+            .methods-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .method-card {
+            position: relative;
+            padding: var(--flin-space-5);
+            background: var(--flin-bg-surface);
+            border: 2px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-card);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .method-card:hover:not(.disabled) {
+            border-color: var(--flin-accent-gold);
+            transform: translateY(-2px);
+            box-shadow: var(--flin-shadow-hover);
+        }
+
+        .method-card.selected {
+            border-color: var(--flin-accent-gold);
+            background: rgba(212, 175, 55, 0.05);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .method-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .recommended-badge {
+            position: absolute;
+            top: var(--flin-space-3);
+            right: var(--flin-space-3);
+            padding: var(--flin-space-1) var(--flin-space-2);
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-deep);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-semibold);
+            border-radius: var(--flin-radius-badge);
+            text-transform: uppercase;
+        }
+
+        .method-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--flin-space-3);
+            display: block;
+        }
+
+        .method-name {
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-1);
+        }
+
+        .method-description {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-muted);
+        }
+
+        .check-icon {
+            position: absolute;
+            top: var(--flin-space-3);
+            left: var(--flin-space-3);
+            width: 24px;
+            height: 24px;
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-deep);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity var(--flin-transition-fast);
+        }
+
+        .method-card.selected .check-icon {
+            opacity: 1;
+        }
+
+        .security-footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--flin-space-6);
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-card);
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-muted);
+        }
+
+        .badge-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (max-width: 640px) {
+            .security-footer {
+                flex-direction: column;
+                gap: var(--flin-space-3);
+            }
+        }
+    </style>
+
+    <div class="selector-header">
+        <div class="selector-title">Select Payment Method</div>
+        <div class="selector-subtitle">Choose your preferred payment option</div>
+    </div>
+
+    <div class="methods-grid">
+        {for method in paymentMethods}
+            <div
+                class="method-card {if selectedMethod == method.id}selected{/if} {if disabled}disabled{/if}"
+                click={() => handleSelect(method.id)}
+            >
+                <div class="check-icon">✓</div>
+
+                {if showRecommended && method.recommended}
+                    <span class="recommended-badge">Recommended</span>
+                {/if}
+
+                <span class="method-icon">{method.icon}</span>
+                <div class="method-name">{method.name}</div>
+                <div class="method-description">{method.description}</div>
+            </div>
+        {/for}
+    </div>
+
+    <div class="security-footer">
+        <div class="security-badge">
+            <svg class="badge-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span>Secure Payment</span>
+        </div>
+
+        <div class="security-badge">
+            <svg class="badge-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+            </svg>
+            <span>SSL Encrypted</span>
+        </div>
+
+        <div class="security-badge">
+            <svg class="badge-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span>PCI Compliant</span>
+        </div>
+    </div>
+</div>

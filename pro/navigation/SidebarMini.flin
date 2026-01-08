@@ -1,0 +1,356 @@
+// ============================================================================
+// SidebarMini.flin — FlinUI PRO Navigation Component
+// Icon-only mini sidebar with tooltips on hover
+// ============================================================================
+// Props:
+//   - items: Navigation items array (list)
+//     Each item: { id, icon, tooltip, href, badge (optional), color (optional) }
+//   - activeItem: Currently active item ID (string or none)
+//   - onItemClick: Callback when item is clicked (function or none)
+//   - width: Sidebar width (string, default: "64px")
+//   - position: "left" | "right" (default: "left")
+//   - showDivider: Show divider between main and bottom items (boolean, default: true)
+//   - bottomItems: Items to show at bottom (list or none)
+// ============================================================================
+
+items = props.items || [
+    ["id": "home", "icon": "home", "tooltip": "Home", "href": "/"],
+    ["id": "search", "icon": "search", "tooltip": "Search", "href": "/search"],
+    ["id": "notifications", "icon": "bell", "tooltip": "Notifications", "href": "/notifications", "badge": "5"],
+    ["id": "messages", "icon": "mail", "tooltip": "Messages", "href": "/messages", "badge": "12"],
+    ["id": "files", "icon": "folder", "tooltip": "Files", "href": "/files"],
+    ["id": "calendar", "icon": "calendar", "tooltip": "Calendar", "href": "/calendar"]
+]
+activeItem = props.activeItem || "home"
+onItemClick = props.onItemClick || none
+width = props.width || "64px"
+position = props.position || "left"
+showDivider = props.showDivider || true
+bottomItems = props.bottomItems || [
+    ["id": "settings", "icon": "cog", "tooltip": "Settings", "href": "/settings"],
+    ["id": "profile", "icon": "user", "tooltip": "Profile", "href": "/profile"]
+]
+
+handleItemClick = (item) => {
+    if onItemClick != none {
+        onItemClick(item)
+    }
+}
+
+isActive = (itemId) => itemId == activeItem
+
+positionClass = match position {
+    "right" -> "position-right"
+    _ -> "position-left"
+}
+
+<aside class={"flin-sidebar-mini " ++ positionClass} style="width: {width}">
+    <nav class="sidebar-nav">
+        <ul class="sidebar-list">
+            {for item in items}
+                <li class="sidebar-item">
+                    <a
+                        href={item.href}
+                        class="sidebar-link {if isActive(item.id)}active{/if}"
+                        click={(e) => {
+                            e.preventDefault()
+                            handleItemClick(item)
+                        }}
+                        aria-current={if isActive(item.id)}"page"{else}none{/if}
+                        aria-label={item.tooltip}
+                        style={if item.color != none}"--item-color: {item.color}"{else}none{/if}
+                    >
+                        <span class="sidebar-icon">
+                            {match item.icon {
+                                "home" -> <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12.707 3.293a1 1 0 00-1.414 0l-9 9a1 1 0 001.414 1.414L4 13.414V20a2 2 0 002 2h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a2 2 0 002-2v-6.586l.293.293a1 1 0 001.414-1.414l-9-9z"/></svg>
+                                "search" -> <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z" clip-rule="evenodd"/></svg>
+                                "bell" -> <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M5.25 9a6.75 6.75 0 0113.5 0v.75c0 2.123.8 4.057 2.118 5.52a.75.75 0 01-.297 1.206c-1.544.57-3.16.99-4.831 1.243a3.75 3.75 0 11-7.48 0 24.585 24.585 0 01-4.831-1.244.75.75 0 01-.298-1.205A8.217 8.217 0 005.25 9.75V9zm4.502 8.9a2.25 2.25 0 104.496 0 25.057 25.057 0 01-4.496 0z" clip-rule="evenodd"/></svg>
+                                "mail" -> <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z"/><path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z"/></svg>
+                                "folder" -> <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M19.5 21a3 3 0 003-3v-4.5a3 3 0 00-3-3h-15a3 3 0 00-3 3V18a3 3 0 003 3h15zM1.5 10.146V6a3 3 0 013-3h5.379a2.25 2.25 0 011.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 013 3v1.146A4.483 4.483 0 0019.5 9h-15a4.483 4.483 0 00-3 1.146z"/></svg>
+                                "calendar" -> <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clip-rule="evenodd"/></svg>
+                                "cog" -> <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 00-2.282.819l-.922 1.597a1.875 1.875 0 00.432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 000 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 00-.432 2.385l.922 1.597a1.875 1.875 0 002.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 002.28-.819l.923-1.597a1.875 1.875 0 00-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 000-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 00-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 00-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 00-1.85-1.567h-1.843zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" clip-rule="evenodd"/></svg>
+                                "user" -> <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/></svg>
+                                _ -> <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg>
+                            }}
+                        </span>
+                        {if item.badge != none}
+                            <span class="sidebar-badge">{item.badge}</span>
+                        {/if}
+                    </a>
+                    <div class="sidebar-tooltip">{item.tooltip}</div>
+                </li>
+            {/for}
+        </ul>
+
+        {if showDivider && bottomItems != none}
+            <div class="sidebar-divider"></div>
+        {/if}
+
+        {if bottomItems != none}
+            <ul class="sidebar-list sidebar-bottom">
+                {for item in bottomItems}
+                    <li class="sidebar-item">
+                        <a
+                            href={item.href}
+                            class="sidebar-link {if isActive(item.id)}active{/if}"
+                            click={(e) => {
+                                e.preventDefault()
+                                handleItemClick(item)
+                            }}
+                            aria-current={if isActive(item.id)}"page"{else}none{/if}
+                            aria-label={item.tooltip}
+                        >
+                            <span class="sidebar-icon">
+                                {match item.icon {
+                                    "cog" -> <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 00-2.282.819l-.922 1.597a1.875 1.875 0 00.432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 000 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 00-.432 2.385l.922 1.597a1.875 1.875 0 002.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 002.28-.819l.923-1.597a1.875 1.875 0 00-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 000-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 00-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 00-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 00-1.85-1.567h-1.843zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" clip-rule="evenodd"/></svg>
+                                    "user" -> <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/></svg>
+                                    "logout" -> <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M7.5 3.75A1.5 1.5 0 006 5.25v13.5a1.5 1.5 0 001.5 1.5h6a1.5 1.5 0 001.5-1.5V15a.75.75 0 011.5 0v3.75a3 3 0 01-3 3h-6a3 3 0 01-3-3V5.25a3 3 0 013-3h6a3 3 0 013 3V9A.75.75 0 0115 9V5.25a1.5 1.5 0 00-1.5-1.5h-6zm10.72 4.72a.75.75 0 011.06 0l3 3a.75.75 0 010 1.06l-3 3a.75.75 0 11-1.06-1.06l1.72-1.72H9a.75.75 0 010-1.5h10.94l-1.72-1.72a.75.75 0 010-1.06z" clip-rule="evenodd"/></svg>
+                                    _ -> <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg>
+                                }}
+                            </span>
+                            {if item.badge != none}
+                                <span class="sidebar-badge">{item.badge}</span>
+                            {/if}
+                        </a>
+                        <div class="sidebar-tooltip">{item.tooltip}</div>
+                    </li>
+                {/for}
+            </ul>
+        {/if}
+    </nav>
+</aside>
+
+<style scoped>
+.flin-sidebar-mini {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--flin-bg-elevated);
+}
+
+.position-left {
+    border-right: 1px solid var(--flin-border-subtle);
+}
+
+.position-right {
+    border-left: 1px solid var(--flin-border-subtle);
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: var(--flin-space-2);
+}
+
+.sidebar-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+}
+
+.sidebar-item {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--flin-radius-lg);
+    text-decoration: none;
+    color: var(--flin-text-secondary);
+    transition: all var(--flin-transition-fast);
+    cursor: pointer;
+    position: relative;
+}
+
+.sidebar-link:hover {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-primary);
+    transform: scale(1.05);
+}
+
+.sidebar-link.active {
+    background: rgba(234, 179, 8, 0.15);
+    color: var(--flin-accent-gold);
+}
+
+.sidebar-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    background: var(--flin-danger);
+    color: white;
+    font-size: 10px;
+    font-weight: var(--flin-font-bold);
+    border-radius: var(--flin-radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--flin-bg-elevated);
+}
+
+/* Tooltip */
+.sidebar-tooltip {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: var(--flin-neutral-900);
+    color: white;
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    border-radius: var(--flin-radius-md);
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--flin-transition-fast);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.position-left .sidebar-tooltip {
+    left: calc(100% + 12px);
+}
+
+.position-left .sidebar-tooltip::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-right-color: var(--flin-neutral-900);
+}
+
+.position-right .sidebar-tooltip {
+    right: calc(100% + 12px);
+}
+
+.position-right .sidebar-tooltip::before {
+    content: "";
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-left-color: var(--flin-neutral-900);
+}
+
+.sidebar-item:hover .sidebar-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Divider */
+.sidebar-divider {
+    width: 32px;
+    height: 1px;
+    background: var(--flin-border-subtle);
+    margin: var(--flin-space-4) auto;
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-sidebar-mini {
+    background: var(--flin-bg-base);
+}
+
+[data-theme="dark"] .position-left {
+    border-right-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .position-right {
+    border-left-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .sidebar-badge {
+    border-color: var(--flin-bg-base);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .flin-sidebar-mini {
+        flex-direction: row;
+        width: 100% !important;
+        height: auto;
+    }
+
+    .position-left,
+    .position-right {
+        border-right: none;
+        border-left: none;
+        border-bottom: 1px solid var(--flin-border-subtle);
+    }
+
+    .sidebar-nav {
+        flex-direction: row;
+        justify-content: space-around;
+        width: 100%;
+    }
+
+    .sidebar-list {
+        flex-direction: row;
+    }
+
+    .sidebar-bottom {
+        margin-top: 0;
+        margin-left: auto;
+    }
+
+    .sidebar-divider {
+        width: 1px;
+        height: 32px;
+        margin: auto var(--flin-space-2);
+    }
+
+    .sidebar-tooltip {
+        top: auto;
+        bottom: calc(100% + 12px);
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .position-left .sidebar-tooltip,
+    .position-right .sidebar-tooltip {
+        left: 50%;
+        right: auto;
+    }
+
+    .position-left .sidebar-tooltip::before,
+    .position-right .sidebar-tooltip::before {
+        left: 50%;
+        right: auto;
+        top: auto;
+        bottom: -6px;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-top-color: var(--flin-neutral-900);
+        border-right-color: transparent;
+        border-left-color: transparent;
+    }
+}
+</style>

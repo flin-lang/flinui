@@ -1,0 +1,296 @@
+// ============================================================================
+// TabsHorizontal.flin — FlinUI PRO Navigation Component
+// Horizontal tabs with multiple style variants
+// ============================================================================
+// Props:
+//   - tabs: List of tab objects with id, label, icon, disabled (list)
+//   - activeTab: Currently active tab id (string)
+//   - onChange: Callback when tab changes (function)
+//   - variant: Style variant - default, pills, underline, enclosed (string)
+//   - size: Size variant - sm, md, lg (string)
+//   - fullWidth: Stretch tabs to full width (boolean)
+//   - centered: Center tabs (boolean)
+
+tabs = props.tabs || [
+    ["id": "tab1", "label": "Overview", "icon": none],
+    ["id": "tab2", "label": "Features", "icon": none],
+    ["id": "tab3", "label": "Pricing", "icon": none],
+    ["id": "tab4", "label": "Reviews", "icon": none, "disabled": true]
+]
+activeTab = props.activeTab || tabs[0].id
+onChange = props.onChange || none
+variant = props.variant || "default"
+size = props.size || "md"
+fullWidth = props.fullWidth || false
+centered = props.centered || false
+
+// Variant class
+variantClass = match variant {
+    "pills" => "tabs-h-pills"
+    "underline" => "tabs-h-underline"
+    "enclosed" => "tabs-h-enclosed"
+    _ => "tabs-h-default"
+}
+
+// Size class
+sizeClass = match size {
+    "sm" => "tabs-h-sm"
+    "lg" => "tabs-h-lg"
+    _ => "tabs-h-md"
+}
+
+// Additional classes
+fullWidthClass = match fullWidth { true => " tabs-h-full-width", _ => "" }
+centeredClass = match centered { true => " tabs-h-centered", _ => "" }
+
+// Handle tab click
+handleTabClick = (tabId) => {
+    if onChange != none {
+        onChange(tabId)
+    }
+}
+
+<div
+    class="flin-tabs-horizontal {variantClass} {sizeClass}{fullWidthClass}{centeredClass}"
+    role="tablist"
+    aria-label="Tabs navigation"
+>
+    <div class="tabs-h-list">
+        {for tab in tabs}
+            <button
+                class="tabs-h-tab {if tab.id == activeTab}tabs-h-tab-active{/if}"
+                role="tab"
+                aria-selected={tab.id == activeTab}
+                aria-controls="panel-{tab.id}"
+                id="tab-{tab.id}"
+                disabled={tab.disabled || false}
+                click={() => handleTabClick(tab.id)}
+            >
+                {if tab.icon != none}
+                    <span class="tabs-h-icon">{tab.icon}</span>
+                {/if}
+                <span class="tabs-h-label">{tab.label}</span>
+                {if tab.badge != none}
+                    <span class="tabs-h-badge">{tab.badge}</span>
+                {/if}
+            </button>
+        {/for}
+    </div>
+    {if variant == "default" || variant == "underline"}
+        <div class="tabs-h-indicator"></div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-tabs-horizontal {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.tabs-h-list {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    position: relative;
+}
+
+.tabs-h-full-width .tabs-h-list {
+    width: 100%;
+}
+
+.tabs-h-full-width .tabs-h-tab {
+    flex: 1;
+}
+
+.tabs-h-centered .tabs-h-list {
+    justify-content: center;
+}
+
+.tabs-h-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-weight: var(--flin-font-medium);
+    white-space: nowrap;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    position: relative;
+}
+
+.tabs-h-tab:focus-visible {
+    outline: 2px solid var(--flin-accent-gold);
+    outline-offset: 2px;
+}
+
+.tabs-h-tab:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.tabs-h-icon {
+    display: flex;
+    align-items: center;
+    font-size: 1.125em;
+}
+
+.tabs-h-label {
+    display: inline-block;
+}
+
+.tabs-h-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 var(--flin-space-1);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-tertiary);
+    border-radius: var(--flin-radius-full);
+}
+
+.tabs-h-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background-color: var(--flin-accent-gold);
+    transition: left var(--flin-transition-normal), width var(--flin-transition-normal);
+}
+
+/* Size variants */
+.tabs-h-sm .tabs-h-tab {
+    padding: var(--flin-space-1-5) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+}
+
+.tabs-h-md .tabs-h-tab {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+}
+
+.tabs-h-lg .tabs-h-tab {
+    padding: var(--flin-space-3) var(--flin-space-5);
+    font-size: var(--flin-text-base);
+}
+
+/* Default variant (underlined style) */
+.tabs-h-default {
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.tabs-h-default .tabs-h-list {
+    margin-bottom: -1px;
+}
+
+.tabs-h-default .tabs-h-tab {
+    color: var(--flin-text-tertiary);
+    border-bottom: 2px solid transparent;
+}
+
+.tabs-h-default .tabs-h-tab:hover:not(:disabled) {
+    color: var(--flin-text-primary);
+}
+
+.tabs-h-default .tabs-h-tab-active {
+    color: var(--flin-accent-gold);
+    border-bottom-color: var(--flin-accent-gold);
+}
+
+/* Pills variant */
+.tabs-h-pills .tabs-h-list {
+    gap: var(--flin-space-2);
+}
+
+.tabs-h-pills .tabs-h-tab {
+    color: var(--flin-text-tertiary);
+    border-radius: var(--flin-radius-full);
+}
+
+.tabs-h-pills .tabs-h-tab:hover:not(:disabled) {
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-surface);
+}
+
+.tabs-h-pills .tabs-h-tab-active {
+    color: var(--flin-bg-base);
+    background: var(--flin-accent-gold);
+}
+
+.tabs-h-pills .tabs-h-tab-active:hover:not(:disabled) {
+    background: var(--flin-accent-gold-hover);
+    color: var(--flin-bg-base);
+}
+
+.tabs-h-pills .tabs-h-tab-active .tabs-h-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--flin-bg-base);
+}
+
+/* Underline variant (minimal) */
+.tabs-h-underline .tabs-h-tab {
+    color: var(--flin-text-tertiary);
+    padding-bottom: var(--flin-space-3);
+    border-bottom: 2px solid transparent;
+}
+
+.tabs-h-underline .tabs-h-tab:hover:not(:disabled) {
+    color: var(--flin-text-primary);
+}
+
+.tabs-h-underline .tabs-h-tab-active {
+    color: var(--flin-accent-gold);
+    border-bottom-color: var(--flin-accent-gold);
+}
+
+/* Enclosed variant (card-like) */
+.tabs-h-enclosed {
+    background: var(--flin-bg-surface);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-space-1);
+}
+
+.tabs-h-enclosed .tabs-h-list {
+    gap: var(--flin-space-0);
+}
+
+.tabs-h-enclosed .tabs-h-tab {
+    color: var(--flin-text-tertiary);
+    border-radius: var(--flin-radius-md);
+}
+
+.tabs-h-enclosed .tabs-h-tab:hover:not(:disabled) {
+    color: var(--flin-text-primary);
+}
+
+.tabs-h-enclosed .tabs-h-tab-active {
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-elevated);
+    box-shadow: var(--flin-shadow-sm);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .tabs-h-list {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .tabs-h-list::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tabs-h-tab {
+        flex-shrink: 0;
+    }
+}
+</style>

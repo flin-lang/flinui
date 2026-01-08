@@ -1,0 +1,275 @@
+// CheckoutProgress.flin - FlinUI PRO E-commerce Component
+// Visual progress bar with step numbers, labels, and percentage completion
+
+// Props with defaults
+currentStep = props.currentStep || 1
+totalSteps = props.totalSteps || 4
+steps = props.steps || ["Cart", "Shipping", "Payment", "Complete"]
+showPercentage = props.showPercentage || true
+compact = props.compact || false
+
+// Calculate progress percentage
+percentage = Math.round((currentStep / totalSteps) * 100)
+
+// Get step label by index
+function getStepLabel(index) {
+    if steps && steps.length > index {
+        return steps[index]
+    }
+    return "Step " + (index + 1)
+}
+
+<div class="checkout-progress {if compact}compact{/if}">
+    <style scoped>
+        .checkout-progress {
+            padding: var(--flin-space-6) var(--flin-space-4);
+            background: var(--flin-bg-surface);
+        }
+
+        .checkout-progress.compact {
+            padding: var(--flin-space-4) var(--flin-space-4);
+        }
+
+        .progress-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .progress-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        .compact .progress-title {
+            font-size: var(--flin-text-base);
+        }
+
+        .progress-percentage {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-accent-gold);
+        }
+
+        .compact .progress-percentage {
+            font-size: var(--flin-text-lg);
+        }
+
+        .progress-bar-wrapper {
+            position: relative;
+            height: 12px;
+            background: var(--flin-bg-deep);
+            border-radius: var(--flin-radius-full);
+            overflow: hidden;
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .compact .progress-bar-wrapper {
+            height: 8px;
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                var(--flin-accent-gold) 0%,
+                var(--flin-accent-gold-light) 100%
+            );
+            border-radius: var(--flin-radius-full);
+            transition: width var(--flin-transition-slow);
+            box-shadow: 0 0 10px var(--flin-accent-gold-alpha-30);
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--flin-space-2);
+        }
+
+        .compact .progress-steps {
+            display: none;
+        }
+
+        .progress-step {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-2);
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            transition: all var(--flin-transition-fast);
+        }
+
+        .step-number.completed {
+            background: var(--flin-accent-green);
+            color: white;
+        }
+
+        .step-number.active {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-deep);
+            box-shadow: 0 0 0 4px var(--flin-accent-gold-alpha-20);
+            transform: scale(1.1);
+        }
+
+        .step-number.upcoming {
+            background: var(--flin-bg-deep);
+            color: var(--flin-text-muted);
+            border: 2px solid var(--flin-border-medium);
+        }
+
+        .step-text {
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-medium);
+            text-align: center;
+            transition: color var(--flin-transition-fast);
+        }
+
+        .step-text.completed {
+            color: var(--flin-text-secondary);
+        }
+
+        .step-text.active {
+            color: var(--flin-text-primary);
+            font-weight: var(--flin-font-semibold);
+        }
+
+        .step-text.upcoming {
+            color: var(--flin-text-muted);
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: center;
+            gap: var(--flin-space-2);
+            margin-top: var(--flin-space-4);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+
+        .compact .progress-info {
+            margin-top: var(--flin-space-2);
+            font-size: var(--flin-text-xs);
+        }
+
+        .info-current {
+            color: var(--flin-accent-gold);
+            font-weight: var(--flin-font-semibold);
+        }
+
+        @media (max-width: 768px) {
+            .progress-steps {
+                gap: var(--flin-space-1);
+            }
+
+            .progress-step {
+                padding: var(--flin-space-1);
+            }
+
+            .step-number {
+                width: 28px;
+                height: 28px;
+                font-size: var(--flin-text-xs);
+            }
+
+            .step-text {
+                font-size: 10px;
+            }
+
+            .progress-header {
+                flex-direction: column;
+                gap: var(--flin-space-2);
+                align-items: flex-start;
+            }
+
+            .progress-percentage {
+                font-size: var(--flin-text-lg);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .progress-steps {
+                display: none;
+            }
+
+            .progress-info {
+                display: flex;
+            }
+        }
+    </style>
+
+    <div class="progress-container">
+        <div class="progress-header">
+            <div class="progress-title">
+                Checkout Progress
+            </div>
+            {if showPercentage}
+                <div class="progress-percentage">
+                    {percentage}%
+                </div>
+            {/if}
+        </div>
+
+        <div class="progress-bar-wrapper">
+            <div
+                class="progress-bar-fill"
+                style="width: {percentage}%"
+                role="progressbar"
+                aria-valuenow={percentage}
+                aria-valuemin="0"
+                aria-valuemax="100"
+            ></div>
+        </div>
+
+        <div class="progress-steps">
+            {for i = 0; i < totalSteps; i = i + 1}
+                {stepStatus = if i + 1 < currentStep {
+                    "completed"
+                } else if i + 1 == currentStep {
+                    "active"
+                } else {
+                    "upcoming"
+                }}
+
+                <div class="progress-step">
+                    <div class="step-number {stepStatus}">
+                        {if stepStatus == "completed"}
+                            ✓
+                        {else}
+                            {i + 1}
+                        {/if}
+                    </div>
+                    <div class="step-text {stepStatus}">
+                        {getStepLabel(i)}
+                    </div>
+                </div>
+            {/for}
+        </div>
+
+        <div class="progress-info">
+            <span>Step</span>
+            <span class="info-current">{currentStep}</span>
+            <span>of</span>
+            <span>{totalSteps}</span>
+        </div>
+    </div>
+</div>

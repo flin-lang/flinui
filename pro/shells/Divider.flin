@@ -1,0 +1,233 @@
+// ============================================================================
+// Divider.flin — FlinUI PRO Shell Component
+// Section divider with optional text and icon
+// ============================================================================
+// Props:
+//   - variant: Style variant - solid, dashed, dotted, gradient (string, default: "solid")
+//   - orientation: Divider orientation - horizontal, vertical (string, default: "horizontal")
+//   - label: Optional label text (string or none)
+//   - labelPosition: Label position - start, center, end (string, default: "center")
+//   - spacing: Vertical/horizontal margin - none, sm, md, lg, xl (string, default: "md")
+//   - color: Divider color - default, subtle, muted (string, default: "default")
+//   - thickness: Line thickness - thin, normal, thick (string, default: "normal")
+// ============================================================================
+
+variant = props.variant || "solid"
+orientation = props.orientation || "horizontal"
+label = props.label || none
+labelPosition = props.labelPosition || "center"
+spacing = props.spacing || "md"
+color = props.color || "default"
+thickness = props.thickness || "normal"
+
+// Compute spacing value
+spacingValue = match spacing {
+    "none" -> "0"
+    "sm" -> "var(--flin-space-2)"
+    "md" -> "var(--flin-space-4)"
+    "lg" -> "var(--flin-space-6)"
+    "xl" -> "var(--flin-space-8)"
+    _ -> "var(--flin-space-4)"
+}
+
+// Compute color value
+colorValue = match color {
+    "default" -> "var(--flin-border-default)"
+    "subtle" -> "var(--flin-border-subtle)"
+    "muted" -> "var(--flin-border-muted)"
+    _ -> "var(--flin-border-default)"
+}
+
+// Compute thickness value
+thicknessValue = match thickness {
+    "thin" -> "1px"
+    "normal" -> "2px"
+    "thick" -> "4px"
+    _ -> "2px"
+}
+
+// Build class
+dividerClass = "flin-divider orientation-{orientation} variant-{variant} label-{labelPosition}"
+
+<div class={dividerClass}
+     style="--divider-spacing: {spacingValue}; --divider-color: {colorValue}; --divider-thickness: {thicknessValue}"
+     role="separator"
+     aria-orientation={orientation}>
+
+    {if label != none}
+        <span class="divider-line line-before"></span>
+        <span class="divider-label">
+            {if props.icon != none}
+                <span class="label-icon">{props.icon}</span>
+            {/if}
+            {label}
+        </span>
+        <span class="divider-line line-after"></span>
+    {else}
+        <span class="divider-line line-full"></span>
+    {/if}
+</div>
+
+<style scoped>
+.flin-divider {
+    display: flex;
+    align-items: center;
+}
+
+/* Orientation */
+.orientation-horizontal {
+    flex-direction: row;
+    width: 100%;
+    margin: var(--divider-spacing) 0;
+}
+
+.orientation-vertical {
+    flex-direction: column;
+    height: 100%;
+    margin: 0 var(--divider-spacing);
+}
+
+/* Lines */
+.divider-line {
+    flex: 1;
+}
+
+.orientation-horizontal .divider-line {
+    height: var(--divider-thickness);
+}
+
+.orientation-vertical .divider-line {
+    width: var(--divider-thickness);
+}
+
+/* Variants */
+.variant-solid .divider-line {
+    background: var(--divider-color);
+}
+
+.variant-dashed .divider-line {
+    background: repeating-linear-gradient(
+        90deg,
+        var(--divider-color),
+        var(--divider-color) 8px,
+        transparent 8px,
+        transparent 16px
+    );
+}
+
+.orientation-vertical.variant-dashed .divider-line {
+    background: repeating-linear-gradient(
+        180deg,
+        var(--divider-color),
+        var(--divider-color) 8px,
+        transparent 8px,
+        transparent 16px
+    );
+}
+
+.variant-dotted .divider-line {
+    background: repeating-linear-gradient(
+        90deg,
+        var(--divider-color),
+        var(--divider-color) 4px,
+        transparent 4px,
+        transparent 12px
+    );
+}
+
+.orientation-vertical.variant-dotted .divider-line {
+    background: repeating-linear-gradient(
+        180deg,
+        var(--divider-color),
+        var(--divider-color) 4px,
+        transparent 4px,
+        transparent 12px
+    );
+}
+
+.variant-gradient .divider-line {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--divider-color) 20%,
+        var(--divider-color) 80%,
+        transparent
+    );
+}
+
+.orientation-vertical.variant-gradient .divider-line {
+    background: linear-gradient(
+        180deg,
+        transparent,
+        var(--divider-color) 20%,
+        var(--divider-color) 80%,
+        transparent
+    );
+}
+
+/* Label */
+.divider-label {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: 0 var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-muted);
+    white-space: nowrap;
+}
+
+.orientation-vertical .divider-label {
+    padding: var(--flin-space-4) 0;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+}
+
+.label-icon {
+    display: flex;
+    font-size: var(--flin-text-base);
+}
+
+/* Label position */
+.label-start .line-before {
+    display: none;
+}
+
+.label-start .divider-label {
+    padding-left: 0;
+}
+
+.label-end .line-after {
+    display: none;
+}
+
+.label-end .divider-label {
+    padding-right: 0;
+}
+
+.orientation-vertical.label-start .divider-label {
+    padding-left: var(--flin-space-4);
+    padding-top: 0;
+}
+
+.orientation-vertical.label-end .divider-label {
+    padding-right: var(--flin-space-4);
+    padding-bottom: 0;
+}
+
+/* Full line (no label) */
+.line-full {
+    flex: none;
+    width: 100%;
+}
+
+.orientation-vertical .line-full {
+    width: var(--divider-thickness);
+    height: 100%;
+}
+
+/* Dark theme */
+[data-theme="dark"] .divider-label {
+    color: var(--flin-text-muted);
+}
+</style>

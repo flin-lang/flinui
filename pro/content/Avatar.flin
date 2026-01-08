@@ -1,0 +1,245 @@
+// ============================================================================
+// Avatar.flin — FlinUI PRO (Content)
+// User avatar with sizes, shapes, and status indicator
+// ============================================================================
+// Props:
+//   src: text - Image source URL (default: none)
+//   name: text - User name for initials fallback (default: "")
+//   alt: text - Alt text for image (default: name)
+//   size: text - Size variant ("xs", "sm", "md", "lg", "xl", "2xl") (default: "md")
+//   shape: text - Shape variant ("circle", "rounded", "square") (default: "circle")
+//   status: text - Status indicator ("online", "offline", "busy", "away") (default: none)
+//   statusPosition: text - Status position ("bottom-right", "top-right") (default: "bottom-right")
+//   border: boolean - Show border around avatar (default: false)
+//   borderColor: text - Border color (default: "white")
+//   href: text - Link URL if clickable (default: none)
+//   fallbackIcon: boolean - Use icon instead of initials (default: false)
+// ============================================================================
+
+src = props.src || none
+name = props.name || ""
+alt = props.alt || name
+size = props.size || "md"
+shape = props.shape || "circle"
+status = props.status || none
+statusPosition = props.statusPosition || "bottom-right"
+border = props.border || false
+borderColor = props.borderColor || "white"
+href = props.href || none
+fallbackIcon = props.fallbackIcon || false
+
+// State for image error
+hasError = false
+
+onImageError = {
+    hasError = true
+}
+
+// Generate initials from name
+initials = {if name != "" {
+    words = name.split(" ")
+    {if words.length > 1 {
+        words[0][0] ++ words[words.length - 1][0]
+    } else {
+        name[0]
+    }}
+} else {
+    ""
+}}
+
+// Decide whether to show image
+showImage = src != none && !hasError
+
+// Compute size class
+sizeClass = match size {
+    "xs" -> "pro-avatar--xs"
+    "sm" -> "pro-avatar--sm"
+    "lg" -> "pro-avatar--lg"
+    "xl" -> "pro-avatar--xl"
+    "2xl" -> "pro-avatar--2xl"
+    _ -> "pro-avatar--md"
+}
+
+// Compute shape class
+shapeClass = match shape {
+    "rounded" -> "pro-avatar--rounded"
+    "square" -> "pro-avatar--square"
+    _ -> "pro-avatar--circle"
+}
+
+// Compute status class
+statusClass = match status {
+    "online" -> "pro-avatar__status--online"
+    "offline" -> "pro-avatar__status--offline"
+    "busy" -> "pro-avatar__status--busy"
+    "away" -> "pro-avatar__status--away"
+    _ -> ""
+}
+
+// Compute status position class
+statusPosClass = match statusPosition {
+    "top-right" -> "pro-avatar__status--top-right"
+    _ -> "pro-avatar__status--bottom-right"
+}
+
+// Compute border class
+borderClass = match border {
+    true -> "pro-avatar--bordered"
+    _ -> ""
+}
+
+// Generate a deterministic background color from name
+bgColorIndex = {if name != "" {
+    (name.charCodeAt(0) + name.length) % 6
+} else {
+    0
+}}
+
+bgColorClass = match bgColorIndex {
+    0 -> "pro-avatar--bg-blue"
+    1 -> "pro-avatar--bg-green"
+    2 -> "pro-avatar--bg-purple"
+    3 -> "pro-avatar--bg-orange"
+    4 -> "pro-avatar--bg-pink"
+    _ -> "pro-avatar--bg-cyan"
+}
+
+avatarClass = "pro-avatar " ++ sizeClass ++ " " ++ shapeClass ++ " " ++ borderClass ++ " " ++ {if !showImage { bgColorClass } else { "" }}
+
+avatarContent = <div class={avatarClass} style={"--avatar-border-color: " ++ borderColor} role="img" aria-label={alt}>
+    {if showImage}
+        <img
+            class="pro-avatar__image"
+            src={src}
+            alt={alt}
+            error={onImageError}
+        >
+    {else if fallbackIcon}
+        <svg class="pro-avatar__icon" width="60%" height="60%" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+        </svg>
+    {else}
+        <span class="pro-avatar__initials">{initials || "?"}</span>
+    {/if}
+
+    {if status != none}
+        <span class={"pro-avatar__status " ++ statusClass ++ " " ++ statusPosClass}></span>
+    {/if}
+</div>
+
+{if href != none}
+    <a href={href} class="pro-avatar__link">
+        {avatarContent}
+    </a>
+{else}
+    {avatarContent}
+{/if}
+
+<style scoped>
+.pro-avatar {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    flex-shrink: 0;
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-fg);
+    font-family: var(--flin-font-sans);
+}
+
+.pro-avatar__link {
+    display: inline-block;
+    text-decoration: none;
+}
+
+/* Size variants */
+.pro-avatar--xs { width: 24px; height: 24px; font-size: 10px; }
+.pro-avatar--sm { width: 32px; height: 32px; font-size: var(--flin-text-xs); }
+.pro-avatar--md { width: 40px; height: 40px; font-size: var(--flin-text-sm); }
+.pro-avatar--lg { width: 56px; height: 56px; font-size: var(--flin-text-lg); }
+.pro-avatar--xl { width: 80px; height: 80px; font-size: var(--flin-text-2xl); }
+.pro-avatar--2xl { width: 128px; height: 128px; font-size: var(--flin-text-4xl); }
+
+/* Shape variants */
+.pro-avatar--circle { border-radius: var(--flin-radius-full); }
+.pro-avatar--rounded { border-radius: var(--flin-radius-lg); }
+.pro-avatar--square { border-radius: var(--flin-radius-sm); }
+
+/* Border */
+.pro-avatar--bordered {
+    box-shadow: 0 0 0 3px var(--avatar-border-color, white);
+}
+
+/* Image */
+.pro-avatar__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}
+
+/* Initials */
+.pro-avatar__initials {
+    font-weight: var(--flin-font-semibold);
+    text-transform: uppercase;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Icon fallback */
+.pro-avatar__icon {
+    color: currentColor;
+    opacity: 0.7;
+}
+
+/* Background color variants */
+.pro-avatar--bg-blue { background-color: var(--flin-primary-light); color: var(--flin-primary); }
+.pro-avatar--bg-green { background-color: var(--flin-success-light); color: var(--flin-success); }
+.pro-avatar--bg-purple { background-color: #EDE9FE; color: #7C3AED; }
+.pro-avatar--bg-orange { background-color: var(--flin-warning-light); color: #D97706; }
+.pro-avatar--bg-pink { background-color: #FCE7F3; color: #DB2777; }
+.pro-avatar--bg-cyan { background-color: var(--flin-info-light); color: var(--flin-info); }
+
+/* Status indicator */
+.pro-avatar__status {
+    position: absolute;
+    width: 25%;
+    height: 25%;
+    min-width: 8px;
+    min-height: 8px;
+    max-width: 16px;
+    max-height: 16px;
+    border-radius: var(--flin-radius-full);
+    border: 2px solid white;
+}
+
+.pro-avatar__status--bottom-right {
+    bottom: 0;
+    right: 0;
+}
+
+.pro-avatar__status--top-right {
+    top: 0;
+    right: 0;
+}
+
+.pro-avatar__status--online { background-color: var(--flin-success); }
+.pro-avatar__status--offline { background-color: var(--flin-neutral-400); }
+.pro-avatar__status--busy { background-color: var(--flin-danger); }
+.pro-avatar__status--away { background-color: var(--flin-warning); }
+
+/* Hover effect for linked avatar */
+.pro-avatar__link:hover .pro-avatar {
+    opacity: 0.9;
+}
+
+/* Dark theme */
+[data-theme="dark"] .pro-avatar__status {
+    border-color: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .pro-avatar--bordered {
+    box-shadow: 0 0 0 3px var(--flin-neutral-900);
+}
+</style>

@@ -1,0 +1,247 @@
+// ============================================================================
+// AppShellMultiColumn.flin — FlinUI PRO Shell Component
+// Multiple panel layout for complex applications
+// ============================================================================
+// Props:
+//   - columns: Number of columns - 2, 3 (number, default: 3)
+//   - leftWidth: Width of left panel (string, default: "260px")
+//   - rightWidth: Width of right panel (string, default: "300px")
+//   - showLeft: Show left panel (boolean, default: true)
+//   - showRight: Show right panel (boolean, default: true)
+//   - leftCollapsible: Left panel can collapse (boolean, default: true)
+//   - rightCollapsible: Right panel can collapse (boolean, default: true)
+//   - leftCollapsed: Left panel collapsed state (boolean, default: false)
+//   - rightCollapsed: Right panel collapsed state (boolean, default: false)
+//   - gap: Gap between columns (string, default: "0")
+// ============================================================================
+
+columns = props.columns || 3
+leftWidth = props.leftWidth || "260px"
+rightWidth = props.rightWidth || "300px"
+showLeft = props.showLeft || true
+showRight = props.showRight || true
+leftCollapsible = props.leftCollapsible || true
+rightCollapsible = props.rightCollapsible || true
+leftCollapsed = props.leftCollapsed || false
+rightCollapsed = props.rightCollapsed || false
+gap = props.gap || "0"
+
+// Computed widths
+currentLeftWidth = {if leftCollapsed { "0px" } else { leftWidth }}
+currentRightWidth = {if rightCollapsed { "0px" } else { rightWidth }}
+
+toggleLeft = () => {
+    leftCollapsed = !leftCollapsed
+}
+
+toggleRight = () => {
+    rightCollapsed = !rightCollapsed
+}
+
+<div class="flin-app-shell-multi {if columns == 2}two-column{else}three-column{/if}"
+     style="--left-width: {currentLeftWidth}; --right-width: {currentRightWidth}; --column-gap: {gap}">
+
+    // Left panel
+    {if showLeft}
+        <aside class="panel-left {if leftCollapsed}collapsed{/if}">
+            {if leftCollapsible}
+                <button class="panel-toggle toggle-left" click={toggleLeft} aria-label="Toggle left panel">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        {if leftCollapsed}
+                            <path d="M6.22 3.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 010-1.06z"/>
+                        {else}
+                            <path d="M9.78 12.78a.75.75 0 01-1.06 0L4.47 8.53a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 1.06L6.06 8l3.72 3.72a.75.75 0 010 1.06z"/>
+                        {/if}
+                    </svg>
+                </button>
+            {/if}
+            <div class="panel-content">
+                {props.left || none}
+            </div>
+        </aside>
+    {/if}
+
+    // Main content
+    <main class="panel-main">
+        <div class="main-content">
+            {children}
+        </div>
+    </main>
+
+    // Right panel
+    {if showRight && columns == 3}
+        <aside class="panel-right {if rightCollapsed}collapsed{/if}">
+            {if rightCollapsible}
+                <button class="panel-toggle toggle-right" click={toggleRight} aria-label="Toggle right panel">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        {if rightCollapsed}
+                            <path d="M9.78 12.78a.75.75 0 01-1.06 0L4.47 8.53a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 1.06L6.06 8l3.72 3.72a.75.75 0 010 1.06z"/>
+                        {else}
+                            <path d="M6.22 3.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 010-1.06z"/>
+                        {/if}
+                    </svg>
+                </button>
+            {/if}
+            <div class="panel-content">
+                {props.right || none}
+            </div>
+        </aside>
+    {/if}
+</div>
+
+<style scoped>
+.flin-app-shell-multi {
+    display: flex;
+    min-height: 100vh;
+    background: var(--flin-bg-base);
+    gap: var(--column-gap);
+}
+
+/* Panels */
+.panel-left,
+.panel-right {
+    flex-shrink: 0;
+    position: relative;
+    background: var(--flin-bg-elevated);
+    border-color: var(--flin-border-subtle);
+    transition: width var(--flin-transition-normal),
+                opacity var(--flin-transition-normal);
+    overflow: hidden;
+}
+
+.panel-left {
+    width: var(--left-width);
+    border-right: 1px solid var(--flin-border-subtle);
+}
+
+.panel-right {
+    width: var(--right-width);
+    border-left: 1px solid var(--flin-border-subtle);
+}
+
+.panel-left.collapsed,
+.panel-right.collapsed {
+    width: 0;
+    border-width: 0;
+}
+
+.panel-content {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.collapsed .panel-content {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Main content */
+.panel-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1;
+    padding: var(--flin-space-6);
+}
+
+/* Toggle buttons */
+.panel-toggle {
+    position: absolute;
+    top: var(--flin-space-4);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-full);
+    color: var(--flin-text-secondary);
+    cursor: pointer;
+    z-index: 10;
+    transition: all var(--flin-transition-fast);
+}
+
+.panel-toggle:hover {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-primary);
+    border-color: var(--flin-border-default);
+}
+
+.toggle-left {
+    right: -12px;
+}
+
+.toggle-right {
+    left: -12px;
+}
+
+.collapsed .toggle-left {
+    right: -36px;
+}
+
+.collapsed .toggle-right {
+    left: -36px;
+}
+
+/* Two column mode */
+.two-column .panel-right {
+    display: none;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .panel-right {
+        display: none;
+    }
+
+    .three-column {
+        --right-width: 0px;
+    }
+}
+
+@media (max-width: 768px) {
+    .flin-app-shell-multi {
+        flex-direction: column;
+    }
+
+    .panel-left,
+    .panel-right {
+        width: 100% !important;
+        border-right: none;
+        border-left: none;
+        border-bottom: 1px solid var(--flin-border-subtle);
+    }
+
+    .panel-left.collapsed,
+    .panel-right.collapsed {
+        height: 0;
+        border-bottom: none;
+    }
+
+    .panel-toggle {
+        display: none;
+    }
+
+    .main-content {
+        padding: var(--flin-space-4);
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .panel-left,
+[data-theme="dark"] .panel-right {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .panel-toggle {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+}
+</style>

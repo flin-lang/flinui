@@ -1,0 +1,659 @@
+// ProductFrequentlyBought.flin - FlinUI PRO E-commerce Component
+// "Frequently Bought Together" with checkbox selection and total price calculator
+
+// Props with defaults
+products = props.products || []
+title = props.title || "Frequently Bought Together"
+subtitle = props.subtitle || "Complete your purchase with these popular items"
+onAddMultiple = props.onAddMultiple
+currency = props.currency || "$"
+
+// State
+selectedProducts = []
+
+// Computed values
+hasProducts = products.length > 0
+
+selectedCount = selectedProducts.length
+selectedTotal = selectedProducts.reduce((sum, productId) => {
+    product = products.find(p => p.id == productId)
+    {if product != none}
+        sum = sum + (product.price || 0)
+    {/if}
+    sum
+}, 0)
+
+totalIfAll = products.reduce((sum, product) => {
+    sum + (product.price || 0)
+}, 0)
+
+// Price formatting
+formattedSelectedTotal = currency ++ selectedTotal
+formattedTotalIfAll = currency ++ totalIfAll
+
+// Handlers
+fn toggleProductSelection(productId) {
+    {if selectedProducts.includes(productId)}
+        selectedProducts = selectedProducts.filter(id => id != productId)
+    {else}
+        selectedProducts = [...selectedProducts, productId]
+    {/if}
+}
+
+fn selectAll() {
+    selectedProducts = products.map(p => p.id)
+}
+
+fn deselectAll() {
+    selectedProducts = []
+}
+
+fn isProductSelected(productId) {
+    selectedProducts.includes(productId)
+}
+
+fn handleAddAllSelected() {
+    {if onAddMultiple != none && selectedCount > 0}
+        productsToAdd = products.filter(p => selectedProducts.includes(p.id))
+        onAddMultiple(productsToAdd)
+        selectedProducts = []
+    {/if}
+}
+
+<div class="product-frequently-bought">
+    <div class="product-frequently-bought-header">
+        <div>
+            <h2 class="product-frequently-bought-title">{title}</h2>
+            {if subtitle != ""}
+                <p class="product-frequently-bought-subtitle">{subtitle}</p>
+            {/if}
+        </div>
+        <div class="product-frequently-bought-select-controls">
+            {if hasProducts}
+                <button
+                    class="product-frequently-bought-select-btn"
+                    click={selectAll}
+                >
+                    Select All
+                </button>
+                <button
+                    class="product-frequently-bought-select-btn product-frequently-bought-select-btn-secondary"
+                    click={deselectAll}
+                >
+                    Clear
+                </button>
+            {/if}
+        </div>
+    </div>
+
+    {if hasProducts}
+        <div class="product-frequently-bought-list">
+            {for product in products}
+                <div class="product-frequently-bought-item" key={product.id}>
+                    <div class="product-frequently-bought-checkbox-wrapper">
+                        <input
+                            type="checkbox"
+                            class="product-frequently-bought-checkbox"
+                            checked={isProductSelected(product.id)}
+                            change={() => toggleProductSelection(product.id)}
+                            id={"product-" ++ product.id}
+                        />
+                        <label class="product-frequently-bought-checkbox-label" for={"product-" ++ product.id}></label>
+                    </div>
+
+                    <div class="product-frequently-bought-image">
+                        <img src={product.image || ""} alt={product.name || "Product"} />
+                    </div>
+
+                    <div class="product-frequently-bought-details">
+                        <div class="product-frequently-bought-info">
+                            <h3 class="product-frequently-bought-name">{product.name || "Product Name"}</h3>
+                            {if product.description != ""}
+                                <p class="product-frequently-bought-description">{product.description}</p>
+                            {/if}
+
+                            {if product.rating != none}
+                                <div class="product-frequently-bought-rating">
+                                    <div class="product-frequently-bought-stars">
+                                        {for i in [1, 2, 3, 4, 5]}
+                                            {if i <= product.rating}
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="star-filled">
+                                                    <polygon points="12 2 15.09 10.26 24 10.26 17.55 15.91 19.64 24 12 19.35 4.36 24 6.45 15.91 0 10.26 8.91 10.26"/>
+                                                </svg>
+                                            {else}
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="star-empty">
+                                                    <polygon points="12 2 15.09 10.26 24 10.26 17.55 15.91 19.64 24 12 19.35 4.36 24 6.45 15.91 0 10.26 8.91 10.26"/>
+                                                </svg>
+                                            {/if}
+                                        {/for}
+                                    </div>
+                                    <span class="product-frequently-bought-reviews">({product.reviews || 0} reviews)</span>
+                                </div>
+                            {/if}
+
+                            {if product.specs != none && product.specs.length > 0}
+                                <div class="product-frequently-bought-specs">
+                                    {for spec in product.specs}
+                                        <span class="product-frequently-bought-spec-badge">{spec}</span>
+                                    {/for}
+                                </div>
+                            {/if}
+                        </div>
+
+                        <div class="product-frequently-bought-pricing">
+                            {if product.salePrice != none && product.salePrice < product.price}
+                                <div class="product-frequently-bought-price-container">
+                                    <span class="product-frequently-bought-sale-price">{currency}{product.salePrice}</span>
+                                    <span class="product-frequently-bought-original-price">{currency}{product.price}</span>
+                                </div>
+                            {else}
+                                <span class="product-frequently-bought-sale-price">{currency}{product.price || 0}</span>
+                            {/if}
+
+                            {if product.discount != none && product.discount > 0}
+                                <span class="product-frequently-bought-discount-badge">-{product.discount}%</span>
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+            {/for}
+        </div>
+
+        <div class="product-frequently-bought-summary">
+            <div class="product-frequently-bought-summary-item">
+                <div class="product-frequently-bought-summary-label">Selected</div>
+                <div class="product-frequently-bought-summary-value">{selectedCount} of {products.length}</div>
+            </div>
+
+            <div class="product-frequently-bought-summary-item">
+                <div class="product-frequently-bought-summary-label">Total</div>
+                <div class="product-frequently-bought-summary-value product-frequently-bought-summary-total">
+                    {formattedSelectedTotal}
+                </div>
+            </div>
+
+            {if selectedCount > 0}
+                <div class="product-frequently-bought-summary-item product-frequently-bought-summary-savings">
+                    <div class="product-frequently-bought-summary-label">Save</div>
+                    <div class="product-frequently-bought-summary-value product-frequently-bought-savings-amount">
+                        {if selectedCount == products.length}
+                            {if totalIfAll > selectedTotal}
+                                {currency}{(totalIfAll - selectedTotal).toFixed(2)}
+                            {else}
+                                {currency}0
+                            {/if}
+                        {else}
+                            Varies
+                        {/if}
+                    </div>
+                </div>
+            {/if}
+        </div>
+
+        <button
+            class="product-frequently-bought-cta"
+            click={handleAddAllSelected}
+            disabled={selectedCount == 0}
+        >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1"/>
+                <circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            <span>
+                {if selectedCount > 0}
+                    Add {selectedCount} Item{if selectedCount != 1}s{/if} to Cart
+                {else}
+                    Select Items
+                {/if}
+            </span>
+        </button>
+    {else}
+        <div class="product-frequently-bought-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1"/>
+                <circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            <p>No frequently bought items</p>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+/* Container */
+.product-frequently-bought {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-5);
+    padding: var(--flin-space-6);
+    background-color: white;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-xl);
+}
+
+/* Header */
+.product-frequently-bought-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--flin-space-4);
+}
+
+.product-frequently-bought-title {
+    margin: 0 0 var(--flin-space-1) 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+}
+
+.product-frequently-bought-subtitle {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-600);
+}
+
+/* Select controls */
+.product-frequently-bought-select-controls {
+    display: flex;
+    gap: var(--flin-space-2);
+    flex-shrink: 0;
+}
+
+.product-frequently-bought-select-btn {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background-color: var(--flin-primary);
+    color: white;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.product-frequently-bought-select-btn:hover {
+    background-color: var(--flin-primary-hover);
+    transform: scale(1.02);
+}
+
+.product-frequently-bought-select-btn-secondary {
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-neutral-700);
+}
+
+.product-frequently-bought-select-btn-secondary:hover {
+    background-color: var(--flin-neutral-300);
+}
+
+/* List */
+.product-frequently-bought-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: var(--flin-space-2);
+}
+
+.product-frequently-bought-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.product-frequently-bought-list::-webkit-scrollbar-track {
+    background: var(--flin-neutral-100);
+    border-radius: var(--flin-radius-full);
+}
+
+.product-frequently-bought-list::-webkit-scrollbar-thumb {
+    background: var(--flin-neutral-400);
+    border-radius: var(--flin-radius-full);
+}
+
+.product-frequently-bought-list::-webkit-scrollbar-thumb:hover {
+    background: var(--flin-neutral-500);
+}
+
+/* Item */
+.product-frequently-bought-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    background-color: white;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    transition: all var(--flin-transition-fast);
+}
+
+.product-frequently-bought-item:hover {
+    border-color: var(--flin-neutral-300);
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.product-frequently-bought-item:has(.product-frequently-bought-checkbox:checked) {
+    background-color: var(--flin-primary-light);
+    border-color: var(--flin-primary);
+}
+
+/* Checkbox */
+.product-frequently-bought-checkbox-wrapper {
+    display: flex;
+    flex-shrink: 0;
+    padding-top: 2px;
+}
+
+.product-frequently-bought-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    cursor: pointer;
+}
+
+.product-frequently-bought-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background-color: white;
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    flex-shrink: 0;
+}
+
+.product-frequently-bought-checkbox:checked + .product-frequently-bought-checkbox-label {
+    background-color: var(--flin-primary);
+    border-color: var(--flin-primary);
+}
+
+.product-frequently-bought-checkbox:checked + .product-frequently-bought-checkbox-label::after {
+    content: "✓";
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Image */
+.product-frequently-bought-image {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+    background-color: var(--flin-neutral-100);
+}
+
+.product-frequently-bought-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Details */
+.product-frequently-bought-details {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+    min-width: 0;
+}
+
+/* Info */
+.product-frequently-bought-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+    flex: 1;
+    min-width: 0;
+}
+
+.product-frequently-bought-name {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-frequently-bought-description {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-600);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Rating */
+.product-frequently-bought-rating {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+.product-frequently-bought-stars {
+    display: flex;
+    gap: 2px;
+}
+
+.star-filled {
+    color: #fbbf24;
+}
+
+.star-empty {
+    color: var(--flin-neutral-300);
+}
+
+.product-frequently-bought-reviews {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-600);
+}
+
+/* Specs */
+.product-frequently-bought-specs {
+    display: flex;
+    gap: var(--flin-space-1);
+    flex-wrap: wrap;
+}
+
+.product-frequently-bought-spec-badge {
+    padding: 2px 8px;
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-700);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    border-radius: var(--flin-radius-sm);
+    white-space: nowrap;
+}
+
+/* Pricing */
+.product-frequently-bought-pricing {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--flin-space-1);
+    flex-shrink: 0;
+    min-width: 120px;
+}
+
+.product-frequently-bought-price-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--flin-space-1);
+}
+
+.product-frequently-bought-sale-price {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+}
+
+.product-frequently-bought-original-price {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-500);
+    text-decoration: line-through;
+}
+
+.product-frequently-bought-discount-badge {
+    padding: 2px 6px;
+    background-color: var(--flin-danger);
+    color: white;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-bold);
+    border-radius: var(--flin-radius-sm);
+}
+
+/* Summary */
+.product-frequently-bought-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    background-color: var(--flin-neutral-50);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+}
+
+.product-frequently-bought-summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.product-frequently-bought-summary-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-600);
+    font-weight: var(--flin-font-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.product-frequently-bought-summary-value {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+}
+
+.product-frequently-bought-summary-total {
+    font-size: var(--flin-text-xl);
+    color: var(--flin-primary);
+}
+
+.product-frequently-bought-summary-savings {
+    grid-column: 1 / -1;
+}
+
+.product-frequently-bought-savings-amount {
+    color: var(--flin-success);
+}
+
+/* CTA */
+.product-frequently-bought-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    padding: var(--flin-space-4) var(--flin-space-6);
+    background: linear-gradient(135deg, var(--flin-primary) 0%, var(--flin-primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-bold);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    box-shadow: var(--flin-shadow-md);
+}
+
+.product-frequently-bought-cta:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--flin-primary-hover) 0%, var(--flin-primary-dark) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.product-frequently-bought-cta:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.product-frequently-bought-cta:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Empty state */
+.product-frequently-bought-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-8);
+    color: var(--flin-neutral-500);
+}
+
+.product-frequently-bought-empty svg {
+    color: var(--flin-neutral-400);
+}
+
+.product-frequently-bought-empty p {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .product-frequently-bought {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .product-frequently-bought-title {
+        color: var(--flin-neutral-100);
+    }
+
+    .product-frequently-bought-item {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .product-frequently-bought-item:has(.product-frequently-bought-checkbox:checked) {
+        background-color: var(--flin-neutral-700);
+        border-color: var(--flin-primary);
+    }
+
+    .product-frequently-bought-name {
+        color: var(--flin-neutral-100);
+    }
+
+    .product-frequently-bought-summary {
+        background-color: var(--flin-neutral-700);
+        border-color: var(--flin-neutral-600);
+    }
+
+    .product-frequently-bought-summary-value {
+        color: var(--flin-neutral-100);
+    }
+}
+</style>

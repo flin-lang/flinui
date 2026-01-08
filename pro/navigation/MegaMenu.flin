@@ -1,0 +1,777 @@
+// ============================================================================
+// MegaMenu.flin — FlinUI PRO Navigation Component
+// Large dropdown menu with columns, images, and featured items
+// ============================================================================
+// Props:
+//   - logo: Logo image URL or none for default (string)
+//   - logoText: Text to show with/instead of logo (string)
+//   - logoHref: Link for logo click (string)
+//   - items: Array of menu items with mega menu content (array)
+//     [{ label, href, mega: { columns: [{ title, links: [{ label, href, description }] }], featured: { image, title, description, href } } }]
+//   - ctaLabel: CTA button text (string)
+//   - ctaHref: CTA button link (string)
+//   - variant: Color scheme - light, dark (string)
+
+logo = props.logo || none
+logoText = props.logoText || "Brand"
+logoHref = props.logoHref || "/"
+items = props.items || []
+ctaLabel = props.ctaLabel || none
+ctaHref = props.ctaHref || none
+variant = props.variant || "light"
+
+// State
+mobileOpen = false
+activeMega = none
+activeMobileMenu = none
+
+toggleMobile = {
+    mobileOpen = !mobileOpen
+    activeMobileMenu = none
+}
+
+closeMobile = {
+    mobileOpen = false
+    activeMobileMenu = none
+}
+
+openMega = fn(index) {
+    activeMega = index
+}
+
+closeMega = {
+    activeMega = none
+}
+
+toggleMobileMenu = fn(index) {
+    if activeMobileMenu == index {
+        activeMobileMenu = none
+    } else {
+        activeMobileMenu = index
+    }
+}
+
+// Variant classes
+variantClass = match variant {
+    "dark" => "megamenu-dark"
+    _ => "megamenu-light"
+}
+
+// Mobile menu class
+mobileClass = match mobileOpen {
+    true => " navbar-mobile-open"
+    _ => ""
+}
+
+navbarClass = "flin-megamenu " ++ variantClass ++ mobileClass
+
+<nav class={navbarClass} role="navigation" aria-label="Main navigation">
+    <div class="megamenu-container">
+        <!-- Logo -->
+        <a href={logoHref} class="megamenu-brand">
+            {if logo != none}
+                <img src={logo} alt={logoText} class="megamenu-logo-img">
+            {else}
+                <div class="megamenu-logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+            {/if}
+            <span class="megamenu-logo-text">{logoText}</span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <div class="megamenu-nav">
+            {for item, index in items}
+                {if item.mega != none}
+                    <div
+                        class="megamenu-item-wrapper"
+                        mouseenter={fn() { openMega(index) }}
+                        mouseleave={closeMega}
+                    >
+                        <button
+                            class={"megamenu-trigger" ++ (match activeMega == index { true => " megamenu-trigger-active", _ => "" })}
+                            aria-expanded={activeMega == index}
+                            aria-haspopup="true"
+                        >
+                            {item.label}
+                            <svg class="megamenu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+
+                        <!-- Mega Menu Panel -->
+                        <div class={"megamenu-panel" ++ (match activeMega == index { true => " megamenu-panel-open", _ => "" })}>
+                            <div class="megamenu-panel-inner">
+                                <!-- Columns -->
+                                <div class="megamenu-columns">
+                                    {for column in item.mega.columns}
+                                        <div class="megamenu-column">
+                                            {if column.title != none}
+                                                <h3 class="megamenu-column-title">{column.title}</h3>
+                                            {/if}
+                                            <ul class="megamenu-column-links">
+                                                {for link in column.links}
+                                                    <li>
+                                                        <a href={link.href} class="megamenu-link" click={closeMega}>
+                                                            <span class="megamenu-link-label">{link.label}</span>
+                                                            {if link.description != none}
+                                                                <span class="megamenu-link-desc">{link.description}</span>
+                                                            {/if}
+                                                        </a>
+                                                    </li>
+                                                {/for}
+                                            </ul>
+                                        </div>
+                                    {/for}
+                                </div>
+
+                                <!-- Featured Section -->
+                                {if item.mega.featured != none}
+                                    <div class="megamenu-featured">
+                                        {if item.mega.featured.image != none}
+                                            <a href={item.mega.featured.href} class="megamenu-featured-link" click={closeMega}>
+                                                <img src={item.mega.featured.image} alt={item.mega.featured.title} class="megamenu-featured-img">
+                                                <div class="megamenu-featured-overlay">
+                                                    <h4 class="megamenu-featured-title">{item.mega.featured.title}</h4>
+                                                    <p class="megamenu-featured-desc">{item.mega.featured.description}</p>
+                                                    <span class="megamenu-featured-cta">
+                                                        Learn more
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                            <line x1="5" y1="12" x2="19" y2="12"/>
+                                                            <polyline points="12 5 19 12 12 19"/>
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </a>
+                                        {else}
+                                            <a href={item.mega.featured.href} class="megamenu-featured-text" click={closeMega}>
+                                                <h4 class="megamenu-featured-title">{item.mega.featured.title}</h4>
+                                                <p class="megamenu-featured-desc">{item.mega.featured.description}</p>
+                                                <span class="megamenu-featured-cta">
+                                                    Learn more
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                                        <polyline points="12 5 19 12 12 19"/>
+                                                    </svg>
+                                                </span>
+                                            </a>
+                                        {/if}
+                                    </div>
+                                {/if}
+                            </div>
+                        </div>
+                    </div>
+                {else}
+                    <a href={item.href} class="megamenu-link-simple">{item.label}</a>
+                {/if}
+            {/for}
+        </div>
+
+        <!-- Actions -->
+        <div class="megamenu-actions">
+            {if ctaLabel != none}
+                <a href={ctaHref} class="megamenu-cta">{ctaLabel}</a>
+            {/if}
+        </div>
+
+        <!-- Mobile Toggle -->
+        <button
+            class="megamenu-toggle"
+            click={toggleMobile}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileOpen}
+        >
+            {if mobileOpen}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            {else}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            {/if}
+        </button>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="megamenu-mobile">
+        <div class="megamenu-mobile-inner">
+            {for item, index in items}
+                {if item.mega != none}
+                    <div class="megamenu-mobile-section">
+                        <button
+                            class={"megamenu-mobile-trigger" ++ (match activeMobileMenu == index { true => " is-open", _ => "" })}
+                            click={fn() { toggleMobileMenu(index) }}
+                        >
+                            {item.label}
+                            <svg class="megamenu-mobile-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        {if activeMobileMenu == index}
+                            <div class="megamenu-mobile-content">
+                                {for column in item.mega.columns}
+                                    <div class="megamenu-mobile-column">
+                                        {if column.title != none}
+                                            <h4 class="megamenu-mobile-column-title">{column.title}</h4>
+                                        {/if}
+                                        {for link in column.links}
+                                            <a href={link.href} class="megamenu-mobile-link" click={closeMobile}>
+                                                {link.label}
+                                            </a>
+                                        {/for}
+                                    </div>
+                                {/for}
+                            </div>
+                        {/if}
+                    </div>
+                {else}
+                    <a href={item.href} class="megamenu-mobile-simple" click={closeMobile}>{item.label}</a>
+                {/if}
+            {/for}
+            {if ctaLabel != none}
+                <a href={ctaHref} class="megamenu-mobile-cta" click={closeMobile}>{ctaLabel}</a>
+            {/if}
+        </div>
+    </div>
+</nav>
+
+<style scoped>
+.flin-megamenu {
+    width: 100%;
+    border-bottom: 1px solid var(--flin-neutral-200);
+    position: relative;
+    z-index: var(--flin-z-navbar);
+}
+
+.megamenu-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: var(--flin-container-screen-xl);
+    height: 72px;
+    margin: 0 auto;
+    padding: 0 var(--flin-space-4);
+}
+
+/* Light variant */
+.megamenu-light {
+    background-color: var(--flin-bg);
+    color: var(--flin-fg);
+}
+
+.megamenu-light .megamenu-panel {
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+}
+
+/* Dark variant */
+.megamenu-dark {
+    background-color: var(--flin-neutral-900);
+    color: var(--flin-neutral-50);
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+.megamenu-dark .megamenu-panel {
+    background-color: var(--flin-neutral-800);
+    border: 1px solid var(--flin-neutral-700);
+}
+
+.megamenu-dark .megamenu-link:hover {
+    background-color: var(--flin-neutral-700);
+}
+
+.megamenu-dark .megamenu-column-title {
+    color: var(--flin-neutral-400);
+}
+
+.megamenu-dark .megamenu-link-label {
+    color: var(--flin-neutral-50);
+}
+
+.megamenu-dark .megamenu-link-desc {
+    color: var(--flin-neutral-400);
+}
+
+/* Brand */
+.megamenu-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    text-decoration: none;
+    color: inherit;
+    font-weight: var(--flin-font-bold);
+}
+
+.megamenu-logo-img {
+    height: 36px;
+    width: auto;
+}
+
+.megamenu-logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--flin-radius-md);
+    background: var(--flin-primary);
+    color: white;
+}
+
+.megamenu-logo-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.megamenu-logo-text {
+    font-size: var(--flin-text-xl);
+}
+
+/* Desktop Nav */
+.megamenu-nav {
+    display: none;
+    align-items: center;
+    gap: var(--flin-space-1);
+    height: 100%;
+}
+
+@media (min-width: 1024px) {
+    .megamenu-nav {
+        display: flex;
+    }
+}
+
+.megamenu-item-wrapper {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.megamenu-trigger,
+.megamenu-link-simple {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg-muted);
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.megamenu-trigger:hover,
+.megamenu-trigger-active,
+.megamenu-link-simple:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.megamenu-dark .megamenu-trigger,
+.megamenu-dark .megamenu-link-simple {
+    color: var(--flin-neutral-400);
+}
+
+.megamenu-dark .megamenu-trigger:hover,
+.megamenu-dark .megamenu-trigger-active,
+.megamenu-dark .megamenu-link-simple:hover {
+    color: var(--flin-neutral-50);
+    background-color: var(--flin-neutral-800);
+}
+
+.megamenu-chevron {
+    width: 14px;
+    height: 14px;
+    transition: transform var(--flin-transition-fast);
+}
+
+.megamenu-trigger-active .megamenu-chevron {
+    transform: rotate(180deg);
+}
+
+/* Mega Panel */
+.megamenu-panel {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 700px;
+    max-width: 900px;
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-xl);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--flin-transition-fast);
+}
+
+.megamenu-panel-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.megamenu-panel-inner {
+    display: flex;
+    gap: var(--flin-space-6);
+    padding: var(--flin-space-6);
+}
+
+.megamenu-columns {
+    display: flex;
+    gap: var(--flin-space-8);
+    flex: 1;
+}
+
+.megamenu-column {
+    min-width: 160px;
+}
+
+.megamenu-column-title {
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--flin-tracking-wider);
+    color: var(--flin-fg-muted);
+    margin: 0 0 var(--flin-space-3) 0;
+    padding: 0 var(--flin-space-2);
+}
+
+.megamenu-column-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.megamenu-link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-2);
+    text-decoration: none;
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.megamenu-link:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.megamenu-link-label {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+}
+
+.megamenu-link-desc {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    line-height: var(--flin-leading-relaxed);
+}
+
+/* Featured Section */
+.megamenu-featured {
+    width: 280px;
+    flex-shrink: 0;
+}
+
+.megamenu-featured-link {
+    display: block;
+    position: relative;
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+    text-decoration: none;
+}
+
+.megamenu-featured-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.megamenu-featured-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--flin-space-4);
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    color: white;
+}
+
+.megamenu-featured-title {
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    margin: 0 0 var(--flin-space-1) 0;
+}
+
+.megamenu-featured-desc {
+    font-size: var(--flin-text-sm);
+    margin: 0 0 var(--flin-space-2) 0;
+    opacity: 0.9;
+}
+
+.megamenu-featured-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+}
+
+.megamenu-featured-cta svg {
+    width: 16px;
+    height: 16px;
+}
+
+.megamenu-featured-text {
+    display: block;
+    padding: var(--flin-space-4);
+    background-color: var(--flin-primary-light);
+    border-radius: var(--flin-radius-lg);
+    text-decoration: none;
+}
+
+.megamenu-featured-text .megamenu-featured-title {
+    color: var(--flin-fg);
+}
+
+.megamenu-featured-text .megamenu-featured-desc {
+    color: var(--flin-fg-muted);
+}
+
+.megamenu-featured-text .megamenu-featured-cta {
+    color: var(--flin-primary);
+}
+
+/* Actions */
+.megamenu-actions {
+    display: none;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+@media (min-width: 1024px) {
+    .megamenu-actions {
+        display: flex;
+    }
+}
+
+.megamenu-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-2) var(--flin-space-5);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.megamenu-cta:hover {
+    background-color: var(--flin-primary-hover);
+}
+
+/* Mobile Toggle */
+.megamenu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.megamenu-toggle:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.megamenu-dark .megamenu-toggle:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+.megamenu-toggle svg {
+    width: 24px;
+    height: 24px;
+}
+
+@media (min-width: 1024px) {
+    .megamenu-toggle {
+        display: none;
+    }
+}
+
+/* Mobile Menu */
+.megamenu-mobile {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: calc(100vh - 72px);
+    overflow-y: auto;
+    background-color: var(--flin-bg);
+    border-top: 1px solid var(--flin-neutral-200);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.megamenu-dark .megamenu-mobile {
+    background-color: var(--flin-neutral-900);
+    border-top-color: var(--flin-neutral-700);
+}
+
+.navbar-mobile-open .megamenu-mobile {
+    display: block;
+}
+
+@media (min-width: 1024px) {
+    .megamenu-mobile {
+        display: none !important;
+    }
+}
+
+.megamenu-mobile-inner {
+    padding: var(--flin-space-4);
+}
+
+.megamenu-mobile-section {
+    border-bottom: 1px solid var(--flin-neutral-100);
+}
+
+.megamenu-dark .megamenu-mobile-section {
+    border-bottom-color: var(--flin-neutral-800);
+}
+
+.megamenu-mobile-section:last-of-type {
+    border-bottom: none;
+}
+
+.megamenu-mobile-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--flin-space-3) var(--flin-space-2);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.megamenu-dark .megamenu-mobile-trigger {
+    color: var(--flin-neutral-50);
+}
+
+.megamenu-mobile-chevron {
+    width: 20px;
+    height: 20px;
+    color: var(--flin-fg-muted);
+    transition: transform var(--flin-transition-fast);
+}
+
+.megamenu-mobile-trigger.is-open .megamenu-mobile-chevron {
+    transform: rotate(180deg);
+}
+
+.megamenu-mobile-content {
+    padding: var(--flin-space-2) 0 var(--flin-space-4) var(--flin-space-4);
+}
+
+.megamenu-mobile-column {
+    margin-bottom: var(--flin-space-4);
+}
+
+.megamenu-mobile-column:last-child {
+    margin-bottom: 0;
+}
+
+.megamenu-mobile-column-title {
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--flin-tracking-wider);
+    color: var(--flin-fg-muted);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.megamenu-mobile-link {
+    display: block;
+    padding: var(--flin-space-2) 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    text-decoration: none;
+}
+
+.megamenu-mobile-link:hover {
+    color: var(--flin-fg);
+}
+
+.megamenu-dark .megamenu-mobile-link {
+    color: var(--flin-neutral-400);
+}
+
+.megamenu-dark .megamenu-mobile-link:hover {
+    color: var(--flin-neutral-50);
+}
+
+.megamenu-mobile-simple {
+    display: block;
+    padding: var(--flin-space-3) var(--flin-space-2);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+    text-decoration: none;
+    border-bottom: 1px solid var(--flin-neutral-100);
+}
+
+.megamenu-dark .megamenu-mobile-simple {
+    color: var(--flin-neutral-50);
+    border-bottom-color: var(--flin-neutral-800);
+}
+
+.megamenu-mobile-cta {
+    display: block;
+    width: 100%;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    margin-top: var(--flin-space-4);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    text-align: center;
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    text-decoration: none;
+}
+
+.megamenu-mobile-cta:hover {
+    background-color: var(--flin-primary-hover);
+}
+</style>

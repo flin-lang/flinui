@@ -1,0 +1,547 @@
+// ============================================================================
+// VideoPlayer.flin — FlinUI PRO Data Component
+// Video player with custom controls (play, pause, volume, fullscreen)
+// ============================================================================
+// Props:
+//   - src: Video source URL (string)
+//   - poster: Poster image URL (string or none)
+//   - title: Video title (string or none)
+//   - autoplay: Auto-play video (boolean)
+//   - muted: Start muted (boolean)
+//   - loop: Loop video (boolean)
+//   - showControls: Show custom controls (boolean)
+//   - aspectRatio: Aspect ratio - 16:9, 4:3, 1:1, 21:9 (string)
+
+src = props.src || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+poster = props.poster || none
+title = props.title || "Video Player"
+autoplay = props.autoplay || false
+muted = props.muted || false
+loop = props.loop || false
+showControls = props.showControls || true
+aspectRatio = props.aspectRatio || "16:9"
+
+// Player state
+isPlaying = autoplay
+isMuted = muted
+volume = muted ? 0 : 1
+currentTime = 0
+duration = 0
+buffered = 0
+isFullscreen = false
+showVolumeSlider = false
+controlsVisible = true
+controlsTimeout = none
+
+videoRef = none
+
+// Format time
+formatTime = (seconds) => {
+    mins = Math.floor(seconds / 60)
+    secs = Math.floor(seconds % 60)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
+// Progress percentage
+progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0
+bufferedPercent = duration > 0 ? (buffered / duration) * 100 : 0
+
+// Toggle play/pause
+togglePlay = () => {
+    if videoRef {
+        if isPlaying {
+            videoRef.pause()
+        } else {
+            videoRef.play()
+        }
+        isPlaying = !isPlaying
+    }
+}
+
+// Toggle mute
+toggleMute = () => {
+    if videoRef {
+        isMuted = !isMuted
+        videoRef.muted = isMuted
+        if isMuted {
+            volume = 0
+        } else {
+            volume = 1
+            videoRef.volume = 1
+        }
+    }
+}
+
+// Set volume
+setVolume = (val) => {
+    if videoRef {
+        volume = val
+        videoRef.volume = val
+        isMuted = val == 0
+        videoRef.muted = isMuted
+    }
+}
+
+// Seek
+seek = (percent) => {
+    if videoRef && duration > 0 {
+        videoRef.currentTime = (percent / 100) * duration
+    }
+}
+
+// Toggle fullscreen
+toggleFullscreen = () => {
+    container = videoRef.parentElement.parentElement
+    if !isFullscreen {
+        if container.requestFullscreen {
+            container.requestFullscreen()
+        }
+    } else {
+        if document.exitFullscreen {
+            document.exitFullscreen()
+        }
+    }
+    isFullscreen = !isFullscreen
+}
+
+// Skip forward/backward
+skip = (seconds) => {
+    if videoRef {
+        videoRef.currentTime = Math.max(0, Math.min(duration, currentTime + seconds))
+    }
+}
+
+// Show/hide controls
+showControlsTemporarily = () => {
+    controlsVisible = true
+    if controlsTimeout {
+        clearTimeout(controlsTimeout)
+    }
+    if isPlaying {
+        controlsTimeout = setTimeout(() => {
+            controlsVisible = false
+        }, 3000)
+    }
+}
+
+// Aspect ratio class
+ratioClass = match aspectRatio {
+    "4:3" => "ratio-4-3"
+    "1:1" => "ratio-1-1"
+    "21:9" => "ratio-21-9"
+    _ => "ratio-16-9"
+}
+
+<div
+    class="flin-video-player {ratioClass} {if isFullscreen}fullscreen{/if}"
+    mousemove={showControlsTemporarily}
+    mouseleave={() => {
+        if isPlaying {
+            controlsVisible = false
+        }
+    }}
+>
+    <div class="video-wrapper">
+        <video
+            ref={(el) => { videoRef = el }}
+            src={src}
+            poster={poster}
+            autoplay={autoplay}
+            muted={muted}
+            loop={loop}
+            playsinline
+            class="video-element"
+            timeupdate={() => {
+                currentTime = videoRef.currentTime
+                if videoRef.buffered.length > 0 {
+                    buffered = videoRef.buffered.end(videoRef.buffered.length - 1)
+                }
+            }}
+            loadedmetadata={() => {
+                duration = videoRef.duration
+            }}
+            play={() => { isPlaying = true }}
+            pause={() => { isPlaying = false }}
+            ended={() => { isPlaying = false }}
+            click={togglePlay}
+        />
+
+        <!-- Play button overlay (shown when paused) -->
+        {if !isPlaying}
+            <div class="play-overlay" click={togglePlay}>
+                <div class="play-button-large">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="currentColor">
+                        <path d="M16 10v28l22-14z"/>
+                    </svg>
+                </div>
+            </div>
+        {/if}
+
+        <!-- Controls -->
+        {if showControls}
+            <div class="video-controls {if controlsVisible}visible{/if}">
+                <!-- Progress bar -->
+                <div
+                    class="progress-container"
+                    click={(e) => {
+                        rect = e.currentTarget.getBoundingClientRect()
+                        percent = ((e.clientX - rect.left) / rect.width) * 100
+                        seek(percent)
+                    }}
+                >
+                    <div class="progress-bar">
+                        <div class="progress-buffered" style="width: {bufferedPercent}%"></div>
+                        <div class="progress-played" style="width: {progressPercent}%">
+                            <div class="progress-handle"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls-row">
+                    <div class="controls-left">
+                        <!-- Play/Pause -->
+                        <button class="control-btn" click={togglePlay}>
+                            {if isPlaying}
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M5 4h3v12H5V4zM12 4h3v12h-3V4z"/>
+                                </svg>
+                            {else}
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M6 4l10 6-10 6V4z"/>
+                                </svg>
+                            {/if}
+                        </button>
+
+                        <!-- Skip backward -->
+                        <button class="control-btn" click={() => skip(-10)}>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10 3v2a5 5 0 110 10 5 5 0 01-5-5H3a7 7 0 107-7V3l-4 3 4-3z"/>
+                                <text x="7" y="12" font-size="6" font-weight="bold">10</text>
+                            </svg>
+                        </button>
+
+                        <!-- Skip forward -->
+                        <button class="control-btn" click={() => skip(10)}>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10 3v2a5 5 0 100 10 5 5 0 005-5h2a7 7 0 11-7-7V3l4 3-4-3z"/>
+                                <text x="7" y="12" font-size="6" font-weight="bold">10</text>
+                            </svg>
+                        </button>
+
+                        <!-- Volume -->
+                        <div
+                            class="volume-control"
+                            mouseenter={() => { showVolumeSlider = true }}
+                            mouseleave={() => { showVolumeSlider = false }}
+                        >
+                            <button class="control-btn" click={toggleMute}>
+                                {if isMuted || volume == 0}
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9 4L5 8H2v4h3l4 4V4zM14.5 10l2-2-1-1-2 2-2-2-1 1 2 2-2 2 1 1 2-2 2 2 1-1-2-2z"/>
+                                    </svg>
+                                {else if volume < 0.5}
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9 4L5 8H2v4h3l4 4V4zM12 7v6a3 3 0 000-6z"/>
+                                    </svg>
+                                {else}
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9 4L5 8H2v4h3l4 4V4zM14 4v12a6 6 0 000-12zM12 7v6a3 3 0 000-6z"/>
+                                    </svg>
+                                {/if}
+                            </button>
+                            {if showVolumeSlider}
+                                <div class="volume-slider-container">
+                                    <input
+                                        type="range"
+                                        class="volume-slider"
+                                        min="0"
+                                        max="1"
+                                        step="0.1"
+                                        value={volume}
+                                        input={(e) => setVolume(parseFloat(e.target.value))}
+                                    />
+                                </div>
+                            {/if}
+                        </div>
+
+                        <!-- Time display -->
+                        <div class="time-display">
+                            <span>{formatTime(currentTime)}</span>
+                            <span class="time-separator">/</span>
+                            <span>{formatTime(duration)}</span>
+                        </div>
+                    </div>
+
+                    <div class="controls-right">
+                        {if title != none}
+                            <span class="video-title">{title}</span>
+                        {/if}
+
+                        <!-- Fullscreen -->
+                        <button class="control-btn" click={toggleFullscreen}>
+                            {if isFullscreen}
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M4 14h2v2H4v-2zM14 14h2v2h-2v-2zM4 4h2v2H4V4zM14 4h2v2h-2V4z"/>
+                                </svg>
+                            {else}
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M3 3h5v2H5v3H3V3zM12 3h5v5h-2V5h-3V3zM3 12h2v3h3v2H3v-5zM15 15v-3h2v5h-5v-2h3z"/>
+                                </svg>
+                            {/if}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+.flin-video-player {
+    position: relative;
+    width: 100%;
+    background: #000;
+    border-radius: var(--flin-radius-xl);
+    overflow: hidden;
+}
+
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.ratio-16-9 { aspect-ratio: 16 / 9; }
+.ratio-4-3 { aspect-ratio: 4 / 3; }
+.ratio-1-1 { aspect-ratio: 1 / 1; }
+.ratio-21-9 { aspect-ratio: 21 / 9; }
+
+.video-element {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    cursor: pointer;
+}
+
+.play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+
+.play-button-large {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: var(--flin-radius-full);
+    color: #000;
+    transition: transform var(--flin-transition-fast);
+}
+
+.play-overlay:hover .play-button-large {
+    transform: scale(1.1);
+}
+
+.video-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--flin-space-4);
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    opacity: 0;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.video-controls.visible {
+    opacity: 1;
+}
+
+.flin-video-player:hover .video-controls {
+    opacity: 1;
+}
+
+.progress-container {
+    width: 100%;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: var(--flin-space-3);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: var(--flin-radius-full);
+    position: relative;
+    overflow: visible;
+}
+
+.progress-container:hover .progress-bar {
+    height: 6px;
+}
+
+.progress-buffered {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: var(--flin-radius-full);
+}
+
+.progress-played {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+}
+
+.progress-handle {
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%) scale(0);
+    width: 12px;
+    height: 12px;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+    transition: transform var(--flin-transition-fast);
+}
+
+.progress-container:hover .progress-handle {
+    transform: translateY(-50%) scale(1);
+}
+
+.controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.controls-left,
+.controls-right {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.control-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    color: white;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.volume-control {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.volume-slider-container {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--flin-space-3);
+    background: rgba(0, 0, 0, 0.9);
+    border-radius: var(--flin-radius-md);
+    margin-bottom: var(--flin-space-2);
+}
+
+.volume-slider {
+    width: 80px;
+    height: 4px;
+    -webkit-appearance: none;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: var(--flin-radius-full);
+    outline: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+}
+
+.time-display {
+    font-size: var(--flin-text-sm);
+    color: white;
+    font-variant-numeric: tabular-nums;
+    margin-left: var(--flin-space-2);
+}
+
+.time-separator {
+    margin: 0 var(--flin-space-1);
+    opacity: 0.6;
+}
+
+.video-title {
+    font-size: var(--flin-text-sm);
+    color: white;
+    opacity: 0.9;
+    margin-right: var(--flin-space-3);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Fullscreen */
+.fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    border-radius: 0;
+}
+
+.fullscreen .video-wrapper {
+    height: 100vh;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .video-controls {
+        padding: var(--flin-space-3);
+    }
+
+    .control-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .video-title {
+        display: none;
+    }
+
+    .time-display {
+        font-size: var(--flin-text-xs);
+    }
+}
+</style>

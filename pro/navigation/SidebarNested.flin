@@ -1,0 +1,373 @@
+// ============================================================================
+// SidebarNested.flin — FlinUI PRO Navigation Component
+// Sidebar with nested/expandable sub-menus
+// ============================================================================
+// Props:
+//   - items: Navigation items array with children (list)
+//     Each item: { id, label, href (optional), icon, children (optional list) }
+//   - expandedItems: List of expanded item IDs (list)
+//   - activeItem: Currently active item ID (string or none)
+//   - onItemClick: Callback when item is clicked (function or none)
+//   - onToggle: Callback when item is expanded/collapsed (function or none)
+//   - width: Sidebar width (string, default: "280px")
+//   - singleExpand: Only allow one item expanded at a time (boolean, default: false)
+// ============================================================================
+
+items = props.items || [
+    [
+        "id": "dashboard",
+        "label": "Dashboard",
+        "href": "/dashboard",
+        "icon": "home"
+    ],
+    [
+        "id": "products",
+        "label": "Products",
+        "icon": "box",
+        "children": [
+            ["id": "products-all", "label": "All Products", "href": "/products"],
+            ["id": "products-add", "label": "Add Product", "href": "/products/add"],
+            ["id": "products-categories", "label": "Categories", "href": "/products/categories"],
+            ["id": "products-inventory", "label": "Inventory", "href": "/products/inventory"]
+        ]
+    ],
+    [
+        "id": "orders",
+        "label": "Orders",
+        "icon": "cart",
+        "badge": "12",
+        "children": [
+            ["id": "orders-all", "label": "All Orders", "href": "/orders"],
+            ["id": "orders-pending", "label": "Pending", "href": "/orders/pending", "badge": "5"],
+            ["id": "orders-shipped", "label": "Shipped", "href": "/orders/shipped"],
+            ["id": "orders-delivered", "label": "Delivered", "href": "/orders/delivered"]
+        ]
+    ],
+    [
+        "id": "customers",
+        "label": "Customers",
+        "icon": "users",
+        "children": [
+            ["id": "customers-all", "label": "All Customers", "href": "/customers"],
+            ["id": "customers-segments", "label": "Segments", "href": "/customers/segments"]
+        ]
+    ],
+    [
+        "id": "analytics",
+        "label": "Analytics",
+        "href": "/analytics",
+        "icon": "chart"
+    ],
+    [
+        "id": "settings",
+        "label": "Settings",
+        "href": "/settings",
+        "icon": "cog"
+    ]
+]
+expandedItems = props.expandedItems || ["products"]
+activeItem = props.activeItem || "dashboard"
+onItemClick = props.onItemClick || none
+onToggle = props.onToggle || none
+width = props.width || "280px"
+singleExpand = props.singleExpand || false
+
+isExpanded = (itemId) => expandedItems.includes(itemId)
+
+toggleExpand = (itemId) => {
+    if singleExpand {
+        if isExpanded(itemId) {
+            expandedItems = []
+        } else {
+            expandedItems = [itemId]
+        }
+    } else {
+        if isExpanded(itemId) {
+            expandedItems = expandedItems.filter(id => id != itemId)
+        } else {
+            expandedItems = [...expandedItems, itemId]
+        }
+    }
+    if onToggle != none {
+        onToggle(itemId, isExpanded(itemId))
+    }
+}
+
+handleItemClick = (item) => {
+    if onItemClick != none {
+        onItemClick(item)
+    }
+}
+
+isActive = (itemId) => itemId == activeItem
+
+hasChildren = (item) => item.children != none && item.children.length > 0
+
+<aside class="flin-sidebar-nested" style="width: {width}">
+    <nav class="sidebar-nav">
+        <ul class="sidebar-list">
+            {for item in items}
+                <li class="sidebar-item {if hasChildren(item)}has-children{/if} {if isExpanded(item.id)}expanded{/if}">
+                    {if hasChildren(item)}
+                        <button
+                            class="sidebar-link parent-link {if isActive(item.id)}active{/if}"
+                            click={() => toggleExpand(item.id)}
+                            aria-expanded={isExpanded(item.id)}
+                        >
+                            <span class="sidebar-icon">
+                                {match item.icon {
+                                    "home" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+                                    "box" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2L3 5.5V14.5L10 18L17 14.5V5.5L10 2ZM10 11L5 8.5V6.5L10 9L15 6.5V8.5L10 11Z"/></svg>
+                                    "cart" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>
+                                    "users" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
+                                    "chart" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+                                    "cog" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+                                    _ -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="3"/></svg>
+                                }}
+                            </span>
+                            <span class="sidebar-label">{item.label}</span>
+                            {if item.badge != none}
+                                <span class="sidebar-badge">{item.badge}</span>
+                            {/if}
+                            <span class="sidebar-chevron">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708l-3 3a.5.5 0 01-.708 0l-3-3a.5.5 0 010-.708z" clip-rule="evenodd"/>
+                                </svg>
+                            </span>
+                        </button>
+                        <ul class="sidebar-children">
+                            {for child in item.children}
+                                <li class="sidebar-child">
+                                    <a
+                                        href={child.href}
+                                        class="sidebar-link child-link {if isActive(child.id)}active{/if}"
+                                        click={(e) => {
+                                            e.preventDefault()
+                                            handleItemClick(child)
+                                        }}
+                                        aria-current={if isActive(child.id)}"page"{else}none{/if}
+                                    >
+                                        <span class="sidebar-label">{child.label}</span>
+                                        {if child.badge != none}
+                                            <span class="sidebar-badge small">{child.badge}</span>
+                                        {/if}
+                                    </a>
+                                </li>
+                            {/for}
+                        </ul>
+                    {else}
+                        <a
+                            href={item.href}
+                            class="sidebar-link {if isActive(item.id)}active{/if}"
+                            click={(e) => {
+                                e.preventDefault()
+                                handleItemClick(item)
+                            }}
+                            aria-current={if isActive(item.id)}"page"{else}none{/if}
+                        >
+                            <span class="sidebar-icon">
+                                {match item.icon {
+                                    "home" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+                                    "chart" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+                                    "cog" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+                                    _ -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="3"/></svg>
+                                }}
+                            </span>
+                            <span class="sidebar-label">{item.label}</span>
+                            {if item.badge != none}
+                                <span class="sidebar-badge">{item.badge}</span>
+                            {/if}
+                        </a>
+                    {/if}
+                </li>
+            {/for}
+        </ul>
+    </nav>
+</aside>
+
+<style scoped>
+.flin-sidebar-nested {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--flin-bg-elevated);
+    border-right: 1px solid var(--flin-border-subtle);
+    overflow-y: auto;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: var(--flin-space-2);
+}
+
+.sidebar-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.sidebar-item {
+    margin: 0;
+    position: relative;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    width: 100%;
+    padding: var(--flin-space-3);
+    border: none;
+    background: transparent;
+    border-radius: var(--flin-radius-md);
+    text-decoration: none;
+    color: var(--flin-text-secondary);
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    transition: all var(--flin-transition-fast);
+    cursor: pointer;
+    text-align: left;
+}
+
+.sidebar-link:hover {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-primary);
+}
+
+.sidebar-link.active {
+    background: rgba(234, 179, 8, 0.1);
+    color: var(--flin-accent-gold);
+}
+
+.sidebar-link.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 24px;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+}
+
+.sidebar-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.sidebar-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 var(--flin-space-2);
+    background: var(--flin-accent-gold);
+    color: var(--flin-neutral-900);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    border-radius: var(--flin-radius-full);
+}
+
+.sidebar-badge.small {
+    min-width: 16px;
+    height: 16px;
+    font-size: 10px;
+    padding: 0 var(--flin-space-1);
+}
+
+.sidebar-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    transition: transform var(--flin-transition-fast);
+}
+
+.expanded > .parent-link .sidebar-chevron {
+    transform: rotate(180deg);
+}
+
+/* Children list */
+.sidebar-children {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    padding-left: var(--flin-space-8);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--flin-transition-normal) var(--flin-ease-out);
+}
+
+.expanded .sidebar-children {
+    max-height: 500px;
+}
+
+.sidebar-child {
+    margin: 0;
+    position: relative;
+}
+
+.child-link {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    margin-top: var(--flin-space-1);
+    font-size: var(--flin-text-sm);
+}
+
+.child-link::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--flin-space-4) * -1);
+    top: 50%;
+    width: var(--flin-space-4);
+    height: 1px;
+    background: var(--flin-border-subtle);
+}
+
+.child-link.active::before {
+    background: var(--flin-accent-gold);
+}
+
+/* Connecting line for children */
+.has-children.expanded::after {
+    content: "";
+    position: absolute;
+    left: calc(var(--flin-space-8) + 9px);
+    top: 48px;
+    bottom: var(--flin-space-4);
+    width: 1px;
+    background: var(--flin-border-subtle);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-sidebar-nested {
+    background: var(--flin-bg-base);
+    border-right-color: var(--flin-border-default);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .flin-sidebar-nested {
+        width: 100% !important;
+        border-right: none;
+        border-bottom: 1px solid var(--flin-border-subtle);
+    }
+}
+</style>

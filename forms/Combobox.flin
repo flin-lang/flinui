@@ -1,0 +1,393 @@
+// Combobox.flin - FlinUI Combobox Component
+// Searchable select with typeahead and keyboard navigation
+
+// Props with defaults
+value = props.value || none
+options = props.options || []
+placeholder = props.placeholder || "Select an option..."
+searchPlaceholder = props.searchPlaceholder || "Search..."
+disabled = props.disabled || false
+clearable = props.clearable || true
+onChange = props.onChange
+displayKey = props.displayKey || "label"
+valueKey = props.valueKey || "value"
+
+// State
+isOpen = false
+searchQuery = ""
+highlightedIndex = 0
+
+// Filter options based on search query
+filteredOptions = match searchQuery {
+    "" -> options
+    _ -> options.filter(fn(opt) {
+        label = match opt.type {
+            "string" -> opt
+            _ -> opt[displayKey]
+        }
+        label.toLowerCase().contains(searchQuery.toLowerCase())
+    })
+}
+
+// Get display value for selected option
+getDisplayValue = fn(val) {
+    if val == none { "" }
+    else {
+        found = options.find(fn(opt) {
+            optVal = match opt.type {
+                "string" -> opt
+                _ -> opt[valueKey]
+            }
+            optVal == val
+        })
+        match found {
+            none -> ""
+            _ -> match found.type {
+                "string" -> found
+                _ -> found[displayKey]
+            }
+        }
+    }
+}
+
+selectedDisplay = getDisplayValue(value)
+
+// Toggle dropdown
+toggleOpen = {
+    if !disabled {
+        isOpen = !isOpen
+        if isOpen {
+            searchQuery = ""
+            highlightedIndex = 0
+        }
+    }
+}
+
+// Close dropdown
+closeDropdown = {
+    isOpen = false
+    searchQuery = ""
+}
+
+// Select option
+selectOption = fn(opt) {
+    selectedValue = match opt.type {
+        "string" -> opt
+        _ -> opt[valueKey]
+    }
+    if onChange {
+        onChange(selectedValue)
+    }
+    closeDropdown()
+}
+
+// Clear selection
+clearSelection = {
+    if onChange {
+        onChange(none)
+    }
+}
+
+// Handle keyboard navigation
+handleKeydown = fn(e) {
+    if e.key == "ArrowDown" {
+        e.preventDefault()
+        if !isOpen {
+            isOpen = true
+        } else if highlightedIndex < filteredOptions.len - 1 {
+            highlightedIndex = highlightedIndex + 1
+        }
+    } else if e.key == "ArrowUp" {
+        e.preventDefault()
+        if highlightedIndex > 0 {
+            highlightedIndex = highlightedIndex - 1
+        }
+    } else if e.key == "Enter" {
+        e.preventDefault()
+        if isOpen && filteredOptions.len > 0 {
+            selectOption(filteredOptions[highlightedIndex])
+        } else {
+            isOpen = true
+        }
+    } else if e.key == "Escape" {
+        closeDropdown()
+    }
+}
+
+// Handle search input
+handleSearch = fn(e) {
+    searchQuery = e.target.value
+    highlightedIndex = 0
+}
+
+// Compute classes
+disabledClass = match disabled { true -> " combobox-disabled", _ -> "" }
+openClass = match isOpen { true -> " combobox-open", _ -> "" }
+containerClass = "combobox" ++ disabledClass ++ openClass
+
+<div class={containerClass}>
+    <div class="combobox-trigger" click={toggleOpen} keydown={handleKeydown} tabindex="0">
+        <span class="combobox-value">
+            {if value != none}
+                {selectedDisplay}
+            {else}
+                <span class="combobox-placeholder">{placeholder}</span>
+            {/if}
+        </span>
+        <div class="combobox-actions">
+            {if clearable && value != none}
+                <button
+                    type="button"
+                    class="combobox-clear"
+                    click={clearSelection}
+                    aria-label="Clear selection"
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            {/if}
+            <span class="combobox-chevron">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </span>
+        </div>
+    </div>
+
+    {if isOpen}
+        <div class="combobox-dropdown">
+            <div class="combobox-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                    type="text"
+                    class="combobox-search-input"
+                    placeholder={searchPlaceholder}
+                    value={searchQuery}
+                    input={handleSearch}
+                    autofocus
+                >
+            </div>
+            <ul class="combobox-options" role="listbox">
+                {if filteredOptions.len == 0}
+                    <li class="combobox-empty">No options found</li>
+                {else}
+                    {for opt, index in filteredOptions}
+                        <li
+                            class={"combobox-option" ++ (match index == highlightedIndex { true -> " combobox-option-highlighted", _ -> "" }) ++ (match (match opt.type { "string" -> opt, _ -> opt[valueKey] }) == value { true -> " combobox-option-selected", _ -> "" })}
+                            click={selectOption(opt)}
+                            role="option"
+                        >
+                            {match opt.type {
+                                "string" -> opt
+                                _ -> opt[displayKey]
+                            }}
+                            {if (match opt.type { "string" -> opt, _ -> opt[valueKey] }) == value}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            {/if}
+                        </li>
+                    {/for}
+                {/if}
+            </ul>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.combobox {
+    position: relative;
+    width: 100%;
+}
+
+.combobox-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-2);
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.combobox-trigger:hover:not(.combobox-disabled .combobox-trigger) {
+    border-color: var(--flin-neutral-400);
+}
+
+.combobox-trigger:focus {
+    outline: none;
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.combobox-open .combobox-trigger {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.combobox-value {
+    flex: 1;
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.combobox-placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.combobox-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+.combobox-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-space-5);
+    height: var(--flin-space-5);
+    padding: 0;
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    background-color: transparent;
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.combobox-clear:hover {
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-fg);
+}
+
+.combobox-clear svg {
+    width: var(--flin-icon-xs);
+    height: var(--flin-icon-xs);
+}
+
+.combobox-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-fg-muted);
+    transition: transform var(--flin-transition-fast);
+}
+
+.combobox-chevron svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.combobox-open .combobox-chevron {
+    transform: rotate(180deg);
+}
+
+/* Dropdown */
+.combobox-dropdown {
+    position: absolute;
+    top: calc(100% + var(--flin-space-1));
+    left: 0;
+    right: 0;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    box-shadow: var(--flin-shadow-lg);
+    z-index: var(--flin-z-dropdown);
+    overflow: hidden;
+}
+
+.combobox-search {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.combobox-search svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+}
+
+.combobox-search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    outline: none;
+}
+
+.combobox-search-input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.combobox-options {
+    list-style: none;
+    margin: 0;
+    padding: var(--flin-space-1);
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.combobox-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.combobox-option:hover,
+.combobox-option-highlighted {
+    background-color: var(--flin-neutral-100);
+}
+
+.combobox-option-selected {
+    color: var(--flin-primary);
+    font-weight: 500;
+}
+
+.combobox-option svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+    color: var(--flin-primary);
+}
+
+.combobox-empty {
+    padding: var(--flin-space-4);
+    text-align: center;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Disabled state */
+.combobox-disabled .combobox-trigger {
+    background-color: var(--flin-bg-muted);
+    border-color: var(--flin-neutral-200);
+    cursor: not-allowed;
+}
+
+.combobox-disabled .combobox-value {
+    color: var(--flin-fg-muted);
+}
+</style>

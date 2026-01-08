@@ -1,0 +1,285 @@
+// StackedList.flin - FlinUI PRO
+// Card-style stacked list with avatar, title, subtitle, and actions
+
+// Props with defaults
+items = props.items || []
+gap = props.gap || "md"
+hoverable = props.hoverable || true
+dividers = props.dividers || true
+onItemClick = props.onItemClick || none
+
+// Compute gap class
+gapClass = match gap {
+    "none" -> "stacked-list--gap-none"
+    "sm" -> "stacked-list--gap-sm"
+    "lg" -> "stacked-list--gap-lg"
+    _ -> "stacked-list--gap-md"
+}
+
+// Build class string
+listClass = "stacked-list " ++ gapClass
+listClass = listClass ++ {if dividers { " stacked-list--dividers" } else { "" }}
+
+<div class={listClass} role="list">
+    {for item in items}
+        <div
+            class={"stacked-list__item" ++ {if hoverable { " stacked-list__item--hoverable" } else { "" }}}
+            role="listitem"
+            click={if onItemClick != none { onItemClick(item) }}
+        >
+            // Avatar section
+            {if item.avatar != none || item.avatarSrc != none}
+                <div class="stacked-list__avatar">
+                    {if item.avatarSrc != none}
+                        <img
+                            class="stacked-list__avatar-img"
+                            src={item.avatarSrc}
+                            alt={item.title || ""}
+                        >
+                    {else}
+                        <div class="stacked-list__avatar-initials">
+                            {item.avatar || "?"}
+                        </div>
+                    {/if}
+                </div>
+            {/if}
+
+            // Icon section (alternative to avatar)
+            {if item.icon != none && item.avatar == none && item.avatarSrc == none}
+                <div class="stacked-list__icon">
+                    {item.icon}
+                </div>
+            {/if}
+
+            // Content section
+            <div class="stacked-list__content">
+                {if item.title != none}
+                    <div class="stacked-list__title">{item.title}</div>
+                {/if}
+                {if item.subtitle != none}
+                    <div class="stacked-list__subtitle">{item.subtitle}</div>
+                {/if}
+                {if item.meta != none}
+                    <div class="stacked-list__meta">{item.meta}</div>
+                {/if}
+            </div>
+
+            // Badge/status section
+            {if item.badge != none}
+                <div class="stacked-list__badge">
+                    <span class={"stacked-list__badge-label stacked-list__badge--" ++ (item.badgeVariant || "default")}>
+                        {item.badge}
+                    </span>
+                </div>
+            {/if}
+
+            // Actions section
+            {if item.actions != none}
+                <div class="stacked-list__actions">
+                    {item.actions}
+                </div>
+            {/if}
+
+            // Chevron for navigation items
+            {if item.showChevron}
+                <div class="stacked-list__chevron">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+            {/if}
+        </div>
+    {/for}
+
+    // Empty state
+    {if items.length == 0}
+        <div class="stacked-list__empty">
+            <span class="stacked-list__empty-text">No items to display</span>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.stacked-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background: var(--flin-bg);
+    border-radius: var(--flin-radius-lg);
+    border: 1px solid var(--flin-neutral-200);
+    overflow: hidden;
+}
+
+.stacked-list--gap-none .stacked-list__item { padding: var(--flin-space-2) var(--flin-space-4); }
+.stacked-list--gap-sm .stacked-list__item { padding: var(--flin-space-3) var(--flin-space-4); }
+.stacked-list--gap-md .stacked-list__item { padding: var(--flin-space-4); }
+.stacked-list--gap-lg .stacked-list__item { padding: var(--flin-space-5) var(--flin-space-4); }
+
+.stacked-list--dividers .stacked-list__item:not(:last-child) {
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.stacked-list__item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-4);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.stacked-list__item--hoverable {
+    cursor: pointer;
+}
+
+.stacked-list__item--hoverable:hover {
+    background-color: var(--flin-neutral-50);
+}
+
+.stacked-list__avatar {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    background-color: var(--flin-neutral-200);
+}
+
+.stacked-list__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.stacked-list__avatar-initials {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg-muted);
+    background: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.stacked-list__icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--flin-radius-md);
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-fg-muted);
+}
+
+.stacked-list__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.stacked-list__title {
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stacked-list__subtitle {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stacked-list__meta {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-400);
+    line-height: 1.4;
+}
+
+.stacked-list__badge {
+    flex-shrink: 0;
+}
+
+.stacked-list__badge-label {
+    display: inline-flex;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    border-radius: var(--flin-radius-full);
+}
+
+.stacked-list__badge--default {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-700);
+}
+
+.stacked-list__badge--success {
+    background-color: var(--flin-success-light);
+    color: var(--flin-success-dark);
+}
+
+.stacked-list__badge--warning {
+    background-color: var(--flin-warning-light);
+    color: var(--flin-warning-dark);
+}
+
+.stacked-list__badge--danger {
+    background-color: var(--flin-danger-light);
+    color: var(--flin-danger-dark);
+}
+
+.stacked-list__badge--info {
+    background-color: var(--flin-info-light);
+    color: var(--flin-info-dark);
+}
+
+.stacked-list__actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.stacked-list__chevron {
+    flex-shrink: 0;
+    color: var(--flin-neutral-400);
+}
+
+.stacked-list__empty {
+    padding: var(--flin-space-8);
+    text-align: center;
+}
+
+.stacked-list__empty-text {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Dark theme */
+[data-theme="dark"] .stacked-list {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .stacked-list--dividers .stacked-list__item:not(:last-child) {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .stacked-list__item--hoverable:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .stacked-list__icon {
+    background-color: var(--flin-neutral-800);
+}
+</style>

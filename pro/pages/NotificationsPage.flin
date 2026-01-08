@@ -1,0 +1,799 @@
+// NotificationsPage.flin - Notification center with filters, actions, and settings
+// FlinUI PRO - Page Template
+
+// Props with defaults
+title = props.title || "Notifications"
+notifications = props.notifications || []
+onMarkRead = props.onMarkRead || none
+onMarkAllRead = props.onMarkAllRead || none
+onDelete = props.onDelete || none
+
+// State
+activeFilter = "all"
+selectedNotifications = []
+showSettings = false
+
+// Sample notifications
+defaultNotifications = [
+  { id: 1, type: "mention", title: "Alice mentioned you", message: "Hey @you, check out this design!", time: "2 min ago", read: false, avatar: "Alice Chen" },
+  { id: 2, type: "comment", title: "New comment on your post", message: "Bob: Great work on this project!", time: "15 min ago", read: false, avatar: "Bob Smith" },
+  { id: 3, type: "like", title: "Carol liked your post", message: "Your post received 25 likes", time: "1 hour ago", read: false, avatar: "Carol Davis" },
+  { id: 4, type: "follow", title: "New follower", message: "Dave Wilson started following you", time: "2 hours ago", read: true, avatar: "Dave Wilson" },
+  { id: 5, type: "system", title: "Security alert", message: "New login detected from San Francisco", time: "3 hours ago", read: true, avatar: none },
+  { id: 6, type: "invite", title: "Team invitation", message: "You've been invited to join Project Alpha", time: "5 hours ago", read: true, avatar: "Eve Martinez" },
+  { id: 7, type: "reminder", title: "Meeting reminder", message: "Team standup starts in 30 minutes", time: "Yesterday", read: true, avatar: none },
+  { id: 8, type: "update", title: "App update available", message: "Version 2.5.0 is now available with new features", time: "2 days ago", read: true, avatar: none }
+]
+
+notificationList = notifications.length > 0 ? notifications : defaultNotifications
+
+// Computed
+unreadCount = notificationList.filter(n => !n.read).length
+
+// Filter counts
+filterCounts = {
+  all: notificationList.length,
+  unread: unreadCount,
+  mentions: notificationList.filter(n => n.type == "mention").length,
+  comments: notificationList.filter(n => n.type == "comment").length
+}
+
+<div class="notifications-page">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">{title}</h1>
+      {if unreadCount > 0}
+        <span class="unread-badge">{unreadCount} unread</span>
+      {/if}
+    </div>
+    <div class="header-actions">
+      <Button variant="ghost" size="sm" click={() => showSettings = !showSettings}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        Settings
+      </Button>
+      {if unreadCount > 0}
+        <Button variant="secondary" size="sm">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+          Mark All Read
+        </Button>
+      {/if}
+    </div>
+  </header>
+
+  <div class="page-content">
+    <!-- Filters Sidebar -->
+    <aside class="filters-sidebar">
+      <nav class="filter-nav">
+        <button
+          class={"filter-item " + (activeFilter == "all" ? "active" : "")}
+          click={() => activeFilter = "all"}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span>All Notifications</span>
+          <span class="filter-count">{filterCounts.all}</span>
+        </button>
+        <button
+          class={"filter-item " + (activeFilter == "unread" ? "active" : "")}
+          click={() => activeFilter = "unread"}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+          </svg>
+          <span>Unread</span>
+          <span class="filter-count unread">{filterCounts.unread}</span>
+        </button>
+        <button
+          class={"filter-item " + (activeFilter == "mentions" ? "active" : "")}
+          click={() => activeFilter = "mentions"}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path>
+          </svg>
+          <span>Mentions</span>
+          <span class="filter-count">{filterCounts.mentions}</span>
+        </button>
+        <button
+          class={"filter-item " + (activeFilter == "comments" ? "active" : "")}
+          click={() => activeFilter = "comments"}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>Comments</span>
+          <span class="filter-count">{filterCounts.comments}</span>
+        </button>
+      </nav>
+
+      <div class="filter-divider"></div>
+
+      <h3 class="filter-section-title">Categories</h3>
+      <nav class="category-nav">
+        <button class="category-item">
+          <span class="category-dot system"></span>
+          <span>System</span>
+        </button>
+        <button class="category-item">
+          <span class="category-dot social"></span>
+          <span>Social</span>
+        </button>
+        <button class="category-item">
+          <span class="category-dot updates"></span>
+          <span>Updates</span>
+        </button>
+        <button class="category-item">
+          <span class="category-dot reminders"></span>
+          <span>Reminders</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Notifications List -->
+    <main class="notifications-main">
+      {if selectedNotifications.length > 0}
+        <div class="bulk-actions">
+          <span class="selected-count">{selectedNotifications.length} selected</span>
+          <div class="bulk-buttons">
+            <Button variant="ghost" size="sm">Mark as Read</Button>
+            <Button variant="ghost" size="sm">Archive</Button>
+            <Button variant="ghost" size="sm" class="delete-btn">Delete</Button>
+          </div>
+        </div>
+      {/if}
+
+      <div class="notifications-list">
+        {for notification in notificationList}
+          <div class={"notification-item " + (notification.read ? "" : "unread")}>
+            <div class="notification-checkbox">
+              <input type="checkbox" />
+            </div>
+            <div class="notification-icon">
+              {if notification.avatar}
+                <Avatar size="md" name={notification.avatar} />
+              {else}
+                <div class={"icon-circle " + notification.type}>
+                  {if notification.type == "system"}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                  {/if}
+                  {if notification.type == "reminder"}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  {/if}
+                  {if notification.type == "update"}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                  {/if}
+                </div>
+              {/if}
+            </div>
+            <div class="notification-content">
+              <div class="notification-header">
+                <h4 class="notification-title">{notification.title}</h4>
+                <span class="notification-time">{notification.time}</span>
+              </div>
+              <p class="notification-message">{notification.message}</p>
+              {if notification.type == "invite"}
+                <div class="notification-actions">
+                  <Button variant="primary" size="sm">Accept</Button>
+                  <Button variant="ghost" size="sm">Decline</Button>
+                </div>
+              {/if}
+            </div>
+            {if !notification.read}
+              <div class="unread-indicator"></div>
+            {/if}
+            <button class="notification-menu">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="19" cy="12" r="1"></circle>
+                <circle cx="5" cy="12" r="1"></circle>
+              </svg>
+            </button>
+          </div>
+        {/for}
+      </div>
+
+      <!-- Empty State -->
+      {if notificationList.length == 0}
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </div>
+          <h3>No notifications</h3>
+          <p>You're all caught up! Check back later for new updates.</p>
+        </div>
+      {/if}
+
+      <!-- Load More -->
+      {if notificationList.length > 0}
+        <div class="load-more">
+          <Button variant="secondary">Load More</Button>
+        </div>
+      {/if}
+    </main>
+
+    <!-- Settings Panel -->
+    {if showSettings}
+      <aside class="settings-panel">
+        <div class="panel-header">
+          <h3>Notification Settings</h3>
+          <button class="close-btn" click={() => showSettings = false}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="panel-content">
+          <section class="settings-section">
+            <h4>Push Notifications</h4>
+            <div class="toggle-list">
+              <div class="toggle-item">
+                <span>Desktop notifications</span>
+                <Toggle checked={true} />
+              </div>
+              <div class="toggle-item">
+                <span>Sound</span>
+                <Toggle checked={true} />
+              </div>
+              <div class="toggle-item">
+                <span>Email digest</span>
+                <Toggle checked={false} />
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-section">
+            <h4>Notification Types</h4>
+            <div class="toggle-list">
+              <div class="toggle-item">
+                <span>Mentions</span>
+                <Toggle checked={true} />
+              </div>
+              <div class="toggle-item">
+                <span>Comments</span>
+                <Toggle checked={true} />
+              </div>
+              <div class="toggle-item">
+                <span>Likes</span>
+                <Toggle checked={true} />
+              </div>
+              <div class="toggle-item">
+                <span>Follows</span>
+                <Toggle checked={true} />
+              </div>
+              <div class="toggle-item">
+                <span>System alerts</span>
+                <Toggle checked={true} />
+              </div>
+              <div class="toggle-item">
+                <span>Marketing</span>
+                <Toggle checked={false} />
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-section">
+            <h4>Do Not Disturb</h4>
+            <div class="dnd-schedule">
+              <div class="form-group">
+                <label>From</label>
+                <input type="time" value="22:00" />
+              </div>
+              <div class="form-group">
+                <label>To</label>
+                <input type="time" value="08:00" />
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="panel-footer">
+          <Button variant="primary" click={() => showSettings = false}>Save Settings</Button>
+        </div>
+      </aside>
+    {/if}
+  </div>
+</div>
+
+<style scoped>
+.notifications-page {
+  background: var(--flin-bg-secondary);
+  min-height: 100vh;
+}
+
+/* Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--flin-space-6);
+  background: var(--flin-bg-primary);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+}
+
+.page-title {
+  font-size: var(--flin-text-2xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+}
+
+.unread-badge {
+  padding: var(--flin-space-1) var(--flin-space-3);
+  background: var(--flin-accent-gold);
+  color: var(--flin-bg-primary);
+  font-size: var(--flin-text-xs);
+  font-weight: 600;
+  border-radius: var(--flin-radius-full);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--flin-space-3);
+}
+
+/* Page Content */
+.page-content {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Filters Sidebar */
+.filters-sidebar {
+  padding: var(--flin-space-5);
+  background: var(--flin-bg-primary);
+  border-right: 1px solid var(--flin-border-primary);
+  min-height: calc(100vh - 80px);
+}
+
+.filter-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-1);
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-secondary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.filter-item:hover {
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+}
+
+.filter-item.active {
+  background: var(--flin-bg-secondary);
+  color: var(--flin-accent-gold);
+}
+
+.filter-item span:first-of-type {
+  flex: 1;
+}
+
+.filter-count {
+  padding: var(--flin-space-1) var(--flin-space-2);
+  background: var(--flin-bg-tertiary);
+  border-radius: var(--flin-radius-sm);
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.filter-count.unread {
+  background: var(--flin-accent-gold);
+  color: var(--flin-bg-primary);
+}
+
+.filter-divider {
+  height: 1px;
+  background: var(--flin-border-primary);
+  margin: var(--flin-space-4) 0;
+}
+
+.filter-section-title {
+  font-size: var(--flin-text-xs);
+  font-weight: 600;
+  color: var(--flin-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--flin-space-3);
+  padding: 0 var(--flin-space-3);
+}
+
+.category-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-1);
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-2) var(--flin-space-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-secondary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.category-item:hover {
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+}
+
+.category-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.category-dot.system { background: #ef4444; }
+.category-dot.social { background: #3b82f6; }
+.category-dot.updates { background: #22c55e; }
+.category-dot.reminders { background: #a855f7; }
+
+/* Notifications Main */
+.notifications-main {
+  padding: var(--flin-space-5);
+}
+
+/* Bulk Actions */
+.bulk-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--flin-space-3) var(--flin-space-4);
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  margin-bottom: var(--flin-space-4);
+}
+
+.selected-count {
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+}
+
+.bulk-buttons {
+  display: flex;
+  gap: var(--flin-space-2);
+}
+
+.bulk-buttons .delete-btn {
+  color: #ef4444;
+}
+
+/* Notifications List */
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-2);
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-4);
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  transition: all 0.2s;
+  position: relative;
+}
+
+.notification-item:hover {
+  background: var(--flin-bg-tertiary);
+}
+
+.notification-item.unread {
+  background: rgba(212, 175, 55, 0.05);
+  border-left: 3px solid var(--flin-accent-gold);
+}
+
+.notification-checkbox {
+  padding-top: var(--flin-space-1);
+}
+
+.notification-icon {
+  flex-shrink: 0;
+}
+
+.icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-circle.system { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.icon-circle.reminder { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+.icon-circle.update { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--flin-space-1);
+}
+
+.notification-title {
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.notification-time {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+  white-space: nowrap;
+}
+
+.notification-message {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+  line-height: 1.5;
+}
+
+.notification-actions {
+  display: flex;
+  gap: var(--flin-space-2);
+  margin-top: var(--flin-space-3);
+}
+
+.unread-indicator {
+  width: 8px;
+  height: 8px;
+  background: var(--flin-accent-gold);
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: var(--flin-space-2);
+}
+
+.notification-menu {
+  background: transparent;
+  border: none;
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  padding: var(--flin-space-1);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.notification-item:hover .notification-menu {
+  opacity: 1;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: var(--flin-space-12);
+}
+
+.empty-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--flin-space-4);
+  background: var(--flin-bg-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--flin-text-tertiary);
+}
+
+.empty-state h3 {
+  font-size: var(--flin-text-lg);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.empty-state p {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+/* Load More */
+.load-more {
+  text-align: center;
+  padding: var(--flin-space-6);
+}
+
+/* Settings Panel */
+.settings-panel {
+  width: 320px;
+  background: var(--flin-bg-primary);
+  border-left: 1px solid var(--flin-border-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--flin-space-4);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.panel-header h3 {
+  font-size: var(--flin-text-md);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  padding: var(--flin-space-1);
+}
+
+.panel-content {
+  flex: 1;
+  padding: var(--flin-space-4);
+  overflow-y: auto;
+}
+
+.settings-section {
+  margin-bottom: var(--flin-space-6);
+}
+
+.settings-section h4 {
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-3);
+}
+
+.toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-3);
+}
+
+.toggle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggle-item span {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+/* DND Schedule */
+.dnd-schedule {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--flin-space-3);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-2);
+}
+
+.form-group label {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.form-group input {
+  padding: var(--flin-space-2);
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+}
+
+.panel-footer {
+  padding: var(--flin-space-4);
+  border-top: 1px solid var(--flin-border-primary);
+}
+
+.panel-footer :global(.btn) {
+  width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .page-content {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-sidebar {
+    display: none;
+  }
+
+  .settings-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    z-index: 100;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.2);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-4);
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .notifications-main {
+    padding: var(--flin-space-4);
+  }
+
+  .notification-item {
+    padding: var(--flin-space-3);
+  }
+
+  .notification-header {
+    flex-direction: column;
+    gap: var(--flin-space-1);
+  }
+}
+</style>

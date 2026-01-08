@@ -1,0 +1,372 @@
+// AvailabilityFilter.flin - FlinUI PRO E-commerce Component
+// Availability filter with stock status, sales, new arrivals, and coming soon options
+
+// Props with defaults
+selectedOptions = props.selectedOptions || []
+showCounts = props.showCounts || true
+counts = props.counts || [
+    ["key": "in_stock", "count": 0],
+    ["key": "on_sale", "count": 0],
+    ["key": "new_arrivals", "count": 0],
+    ["key": "coming_soon", "count": 0]
+]
+onChange = props.onChange
+
+// Available options
+availabilityOptions = [
+    [
+        "key": "in_stock",
+        "label": "In Stock",
+        "icon": "check-circle",
+        "color": "success"
+    ],
+    [
+        "key": "on_sale",
+        "label": "On Sale",
+        "icon": "tag",
+        "color": "danger"
+    ],
+    [
+        "key": "new_arrivals",
+        "label": "New Arrivals",
+        "icon": "sparkles",
+        "color": "info"
+    ],
+    [
+        "key": "coming_soon",
+        "label": "Coming Soon",
+        "icon": "clock",
+        "color": "warning"
+    ]
+]
+
+// Get count for option
+fn getCount(key) {
+    for item in counts {
+        if item.key == key {
+            return item.count
+        }
+    }
+    return 0
+}
+
+// Format count
+fn formatCount(count) {
+    if count == 0 {
+        return ""
+    }
+    if count >= 1000 {
+        return (count / 1000).toFixed(1) ++ "k"
+    }
+    return count.toString()
+}
+
+// Check if option is selected
+fn isOptionSelected(key) {
+    return selectedOptions.includes(key)
+}
+
+// Handle option toggle
+fn handleOptionToggle(key) {
+    newSelected = []
+    if isOptionSelected(key) {
+        newSelected = selectedOptions.filter(fn(k) { return k != key })
+    } else {
+        newSelected = [...selectedOptions, key]
+    }
+
+    if onChange {
+        onChange(newSelected)
+    }
+}
+
+// Clear all selections
+fn handleClearAll() {
+    if onChange {
+        onChange([])
+    }
+}
+
+// Render icon based on type
+fn renderIcon(iconType) {
+    if iconType == "check-circle" {
+        return "<circle cx='12' cy='12' r='10'/><path d='m9 12 2 2 4-4'/>"
+    }
+    if iconType == "tag" {
+        return "<path d='M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z'/><line x1='7' y1='7' x2='7.01' y2='7'/>"
+    }
+    if iconType == "sparkles" {
+        return "<path d='M12 3l1.545 4.635L18 9.18l-4.455 1.545L12 15.27l-1.545-4.545L6 9.18l4.455-1.545L12 3z'/><path d='M5 3v4M3 5h4M6 17v4M4 19h4M19 17v4M17 19h4'/>"
+    }
+    if iconType == "clock" {
+        return "<circle cx='12' cy='12' r='10'/><path d='M12 6v6l4 2'/>"
+    }
+    return ""
+}
+
+selectedCount = selectedOptions.length
+hasSelections = selectedCount > 0
+
+<div class="availability-filter">
+    <div class="availability-filter-header">
+        <label class="availability-filter-label">Availability</label>
+        {if hasSelections}
+            <button class="availability-filter-clear" click={handleClearAll}>
+                Clear ({selectedCount})
+            </button>
+        {/if}
+    </div>
+
+    <div class="availability-filter-list">
+        {for option in availabilityOptions}
+            <label class="availability-filter-item" data-color={option.color}>
+                <input
+                    type="checkbox"
+                    class="availability-filter-checkbox"
+                    checked={isOptionSelected(option.key)}
+                    change={fn() { handleOptionToggle(option.key) }}
+                />
+                <span class="availability-filter-checkmark"></span>
+
+                <div class="availability-filter-icon" data-color={option.color}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        {if option.icon == "check-circle"}
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="m9 12 2 2 4-4"/>
+                        {/if}
+                        {if option.icon == "tag"}
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                            <line x1="7" y1="7" x2="7.01" y2="7"/>
+                        {/if}
+                        {if option.icon == "sparkles"}
+                            <path d="M12 3l1.545 4.635L18 9.18l-4.455 1.545L12 15.27l-1.545-4.545L6 9.18l4.455-1.545L12 3z"/>
+                            <path d="M5 3v4M3 5h4M6 17v4M4 19h4M19 17v4M17 19h4"/>
+                        {/if}
+                        {if option.icon == "clock"}
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        {/if}
+                    </svg>
+                </div>
+
+                <span class="availability-filter-label-text">{option.label}</span>
+
+                {if showCounts}
+                    <span class="availability-filter-count">
+                        {formatCount(getCount(option.key))}
+                    </span>
+                {/if}
+            </label>
+        {/for}
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.availability-filter {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    background-color: white;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+}
+
+/* Header */
+.availability-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.availability-filter-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+}
+
+.availability-filter-clear {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-primary);
+    background: transparent;
+    border: none;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.availability-filter-clear:hover {
+    background-color: var(--flin-primary-light);
+}
+
+/* List */
+.availability-filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+/* Item */
+.availability-filter-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.availability-filter-item:hover {
+    background-color: var(--flin-neutral-50);
+    border-color: var(--flin-neutral-300);
+}
+
+/* Checkbox */
+.availability-filter-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.availability-filter-checkmark {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-sm);
+    background-color: white;
+    transition: all var(--flin-transition-fast);
+}
+
+.availability-filter-checkbox:checked + .availability-filter-checkmark {
+    background-color: var(--flin-primary);
+    border-color: var(--flin-primary);
+}
+
+.availability-filter-checkbox:checked + .availability-filter-checkmark::after {
+    content: "";
+    position: absolute;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translate(-50%, -50%);
+    margin-left: 6px;
+    margin-top: 2px;
+}
+
+/* Icon */
+.availability-filter-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+}
+
+.availability-filter-icon[data-color="success"] {
+    background-color: var(--flin-success-light);
+    color: var(--flin-success);
+}
+
+.availability-filter-icon[data-color="danger"] {
+    background-color: var(--flin-danger-light);
+    color: var(--flin-danger);
+}
+
+.availability-filter-icon[data-color="info"] {
+    background-color: var(--flin-info-light);
+    color: var(--flin-info);
+}
+
+.availability-filter-icon[data-color="warning"] {
+    background-color: var(--flin-warning-light);
+    color: var(--flin-warning);
+}
+
+/* Label Text */
+.availability-filter-label-text {
+    flex: 1;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-neutral-900);
+}
+
+/* Count */
+.availability-filter-count {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-500);
+    background-color: var(--flin-neutral-100);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-full);
+    min-width: 32px;
+    text-align: center;
+}
+
+/* Hover effects for colored items */
+.availability-filter-item[data-color="success"]:hover {
+    background-color: var(--flin-success-light);
+    border-color: var(--flin-success);
+}
+
+.availability-filter-item[data-color="danger"]:hover {
+    background-color: var(--flin-danger-light);
+    border-color: var(--flin-danger);
+}
+
+.availability-filter-item[data-color="info"]:hover {
+    background-color: var(--flin-info-light);
+    border-color: var(--flin-info);
+}
+
+.availability-filter-item[data-color="warning"]:hover {
+    background-color: var(--flin-warning-light);
+    border-color: var(--flin-warning);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .availability-filter {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .availability-filter-label,
+    .availability-filter-label-text {
+        color: var(--flin-neutral-100);
+    }
+
+    .availability-filter-item {
+        border-color: var(--flin-neutral-700);
+    }
+
+    .availability-filter-item:hover {
+        background-color: var(--flin-neutral-700);
+    }
+
+    .availability-filter-checkmark {
+        background-color: var(--flin-neutral-900);
+        border-color: var(--flin-neutral-600);
+    }
+
+    .availability-filter-count {
+        background-color: var(--flin-neutral-700);
+        color: var(--flin-neutral-300);
+    }
+}
+</style>

@@ -1,0 +1,474 @@
+// OrderConfirmation.flin - FlinUI PRO E-commerce Component
+// Success confirmation page with order details, tracking, and CTAs
+
+// Props with defaults
+orderNumber = props.orderNumber || "ORD-" + Date.now().toString().slice(-8)
+orderDate = props.orderDate || new Date().toLocaleDateString()
+customerEmail = props.customerEmail || ""
+estimatedDelivery = props.estimatedDelivery || ""
+shippingAddress = props.shippingAddress || {}
+items = props.items || []
+total = props.total || 0
+currency = props.currency || "$"
+onTrackOrder = props.onTrackOrder
+onContinueShopping = props.onContinueShopping
+onPrintReceipt = props.onPrintReceipt
+showPrintButton = props.showPrintButton || true
+
+// Format currency
+function formatPrice(amount) {
+    return currency + amount.toFixed(2)
+}
+
+// Handle button clicks
+function handleTrackOrder() {
+    if onTrackOrder {
+        onTrackOrder(orderNumber)
+    }
+}
+
+function handleContinueShopping() {
+    if onContinueShopping {
+        onContinueShopping()
+    }
+}
+
+function handlePrintReceipt() {
+    if onPrintReceipt {
+        onPrintReceipt()
+    } else {
+        window.print()
+    }
+}
+
+<div class="order-confirmation">
+    <style scoped>
+        .order-confirmation {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--flin-space-8);
+        }
+
+        .success-header {
+            text-align: center;
+            margin-bottom: var(--flin-space-8);
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--flin-space-4);
+            background: var(--flin-success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            animation: successPop 0.6s ease-out;
+        }
+
+        @keyframes successPop {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-title {
+            font-size: var(--flin-text-3xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .success-message {
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-secondary);
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .order-email {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-muted);
+        }
+
+        .confirmation-section {
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-light);
+            border-radius: var(--flin-radius-lg);
+            padding: var(--flin-space-6);
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .section-title {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-4);
+            padding-bottom: var(--flin-space-3);
+            border-bottom: 1px solid var(--flin-border-medium);
+        }
+
+        .order-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--flin-space-6);
+        }
+
+        .detail-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-1);
+        }
+
+        .detail-label {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .detail-value {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        .detail-value.highlight {
+            color: var(--flin-accent-gold);
+        }
+
+        .delivery-banner {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-4);
+            background: var(--flin-accent-gold-alpha-10);
+            border: 1px solid var(--flin-accent-gold-alpha-30);
+            border-radius: var(--flin-radius-md);
+            margin-top: var(--flin-space-4);
+        }
+
+        .delivery-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .delivery-text {
+            flex: 1;
+        }
+
+        .delivery-date {
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        .delivery-note {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            margin-top: var(--flin-space-1);
+        }
+
+        .address-box {
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-deep);
+            border-radius: var(--flin-radius-md);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-secondary);
+        }
+
+        .items-summary {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-3);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--flin-space-3);
+            background: var(--flin-bg-deep);
+            border-radius: var(--flin-radius-md);
+        }
+
+        .item-info {
+            flex: 1;
+            color: var(--flin-text-primary);
+        }
+
+        .item-name {
+            font-weight: var(--flin-font-medium);
+            margin-bottom: var(--flin-space-1);
+        }
+
+        .item-quantity {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-muted);
+        }
+
+        .item-price {
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-deep);
+            border: 2px solid var(--flin-accent-gold);
+            border-radius: var(--flin-radius-md);
+            margin-top: var(--flin-space-4);
+        }
+
+        .total-label {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+        }
+
+        .total-amount {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-accent-gold);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--flin-space-4);
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .action-btn {
+            padding: var(--flin-space-4);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            border: none;
+            border-radius: var(--flin-radius-md);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--flin-space-2);
+        }
+
+        .action-btn.primary {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-deep);
+        }
+
+        .action-btn.primary:hover {
+            background: var(--flin-accent-gold-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--flin-shadow-lg);
+        }
+
+        .action-btn.secondary {
+            background: var(--flin-bg-surface);
+            color: var(--flin-text-primary);
+            border: 1px solid var(--flin-border-medium);
+        }
+
+        .action-btn.secondary:hover {
+            border-color: var(--flin-accent-gold);
+            color: var(--flin-accent-gold);
+        }
+
+        .print-btn {
+            width: 100%;
+            padding: var(--flin-space-3);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-medium);
+            background: transparent;
+            color: var(--flin-text-secondary);
+            border: 1px dashed var(--flin-border-medium);
+            border-radius: var(--flin-radius-md);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .print-btn:hover {
+            border-color: var(--flin-text-secondary);
+            color: var(--flin-text-primary);
+        }
+
+        .help-text {
+            text-align: center;
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-muted);
+            margin-top: var(--flin-space-8);
+            padding-top: var(--flin-space-6);
+            border-top: 1px solid var(--flin-border-light);
+        }
+
+        @media (max-width: 640px) {
+            .order-confirmation {
+                padding: var(--flin-space-4);
+            }
+
+            .success-icon {
+                width: 64px;
+                height: 64px;
+                font-size: 36px;
+            }
+
+            .success-title {
+                font-size: var(--flin-text-2xl);
+            }
+
+            .success-message {
+                font-size: var(--flin-text-base);
+            }
+
+            .order-details-grid {
+                grid-template-columns: 1fr;
+                gap: var(--flin-space-4);
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .confirmation-section {
+                padding: var(--flin-space-4);
+            }
+        }
+
+        @media print {
+            .action-buttons,
+            .print-btn,
+            .help-text {
+                display: none;
+            }
+        }
+    </style>
+
+    <div class="success-header">
+        <div class="success-icon">✓</div>
+        <h1 class="success-title">Order Confirmed!</h1>
+        <p class="success-message">
+            Thank you for your purchase
+        </p>
+        {if customerEmail}
+            <p class="order-email">
+                Confirmation sent to <strong>{customerEmail}</strong>
+            </p>
+        {/if}
+    </div>
+
+    <!-- Order Details -->
+    <div class="confirmation-section">
+        <h2 class="section-title">Order Details</h2>
+        <div class="order-details-grid">
+            <div class="detail-group">
+                <span class="detail-label">Order Number</span>
+                <span class="detail-value highlight">{orderNumber}</span>
+            </div>
+            <div class="detail-group">
+                <span class="detail-label">Order Date</span>
+                <span class="detail-value">{orderDate}</span>
+            </div>
+        </div>
+
+        {if estimatedDelivery}
+            <div class="delivery-banner">
+                <div class="delivery-icon">📦</div>
+                <div class="delivery-text">
+                    <div class="delivery-date">
+                        Estimated Delivery: {estimatedDelivery}
+                    </div>
+                    <div class="delivery-note">
+                        We'll send you tracking information soon
+                    </div>
+                </div>
+            </div>
+        {/if}
+    </div>
+
+    <!-- Shipping Address -->
+    {if shippingAddress && shippingAddress.address1}
+        <div class="confirmation-section">
+            <h2 class="section-title">Shipping Address</h2>
+            <div class="address-box">
+                {if shippingAddress.firstName || shippingAddress.lastName}
+                    <div>{shippingAddress.firstName} {shippingAddress.lastName}</div>
+                {/if}
+                <div>{shippingAddress.address1}</div>
+                {if shippingAddress.address2}
+                    <div>{shippingAddress.address2}</div>
+                {/if}
+                <div>
+                    {shippingAddress.city}{if shippingAddress.state}, {shippingAddress.state}{/if} {shippingAddress.zip}
+                </div>
+                {if shippingAddress.country}
+                    <div>{shippingAddress.country}</div>
+                {/if}
+            </div>
+        </div>
+    {/if}
+
+    <!-- Order Items -->
+    {if items.length > 0}
+        <div class="confirmation-section">
+            <h2 class="section-title">Order Items</h2>
+            <div class="items-summary">
+                {each items as item}
+                    <div class="summary-item">
+                        <div class="item-info">
+                            <div class="item-name">{item.name}</div>
+                            <div class="item-quantity">
+                                Quantity: {item.quantity || 1}
+                                {if item.variant}
+                                    • {item.variant}
+                                {/if}
+                            </div>
+                        </div>
+                        <div class="item-price">
+                            {formatPrice(item.price * (item.quantity || 1))}
+                        </div>
+                    </div>
+                {/each}
+            </div>
+
+            <div class="order-total">
+                <span class="total-label">Total Paid</span>
+                <span class="total-amount">{formatPrice(total)}</span>
+            </div>
+        </div>
+    {/if}
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button class="action-btn primary" click={handleTrackOrder}>
+            <span>📍</span>
+            <span>Track Order</span>
+        </button>
+        <button class="action-btn secondary" click={handleContinueShopping}>
+            <span>🛍️</span>
+            <span>Continue Shopping</span>
+        </button>
+    </div>
+
+    {if showPrintButton}
+        <button class="print-btn" click={handlePrintReceipt}>
+            🖨️ Print Receipt
+        </button>
+    {/if}
+
+    <div class="help-text">
+        Need help? Contact us at support@flin.dev
+    </div>
+</div>

@@ -1,0 +1,490 @@
+// ============================================================================
+// Calendar.flin — FlinUI PRO Data Component
+// Full month calendar view with events
+// ============================================================================
+// Props:
+//   - selectedDate: Currently selected date (Date or none)
+//   - events: List of event objects with date, title, time, color, description (list)
+//   - onDateSelect: Callback when date is selected (function or none)
+//   - onEventClick: Callback when event is clicked (function or none)
+//   - showWeekNumbers: Show week numbers (boolean)
+//   - firstDayOfWeek: 0 = Sunday, 1 = Monday (number)
+
+selectedDate = props.selectedDate || new Date()
+events = props.events || [
+    ["date": "2024-01-15", "title": "Team Standup", "time": "09:00", "color": "blue"],
+    ["date": "2024-01-15", "title": "Design Review", "time": "14:00", "color": "purple"],
+    ["date": "2024-01-17", "title": "Client Meeting", "time": "11:00", "color": "green"],
+    ["date": "2024-01-20", "title": "Sprint Planning", "time": "10:00", "color": "orange"],
+    ["date": "2024-01-22", "title": "Product Demo", "time": "15:00", "color": "gold"],
+    ["date": "2024-01-25", "title": "Code Review", "time": "13:00", "color": "blue"],
+    ["date": "2024-01-28", "title": "Deadline", "time": "23:59", "color": "red"]
+]
+onDateSelect = props.onDateSelect || none
+onEventClick = props.onEventClick || none
+showWeekNumbers = props.showWeekNumbers || false
+firstDayOfWeek = props.firstDayOfWeek || 0
+
+currentMonth = selectedDate.getMonth()
+currentYear = selectedDate.getFullYear()
+
+months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+weekdaysFull = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+weekdaysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
+// Adjust weekdays based on first day of week
+getWeekdays = () => {
+    if firstDayOfWeek == 1 {
+        return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    }
+    return weekdaysShort
+}
+
+weekdays = getWeekdays()
+
+getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate()
+getFirstDayOfMonth = (year, month) => {
+    day = new Date(year, month, 1).getDay()
+    if firstDayOfWeek == 1 {
+        return day == 0 ? 6 : day - 1
+    }
+    return day
+}
+
+daysInMonth = getDaysInMonth(currentYear, currentMonth)
+daysInPrevMonth = getDaysInMonth(currentYear, currentMonth - 1)
+firstDay = getFirstDayOfMonth(currentYear, currentMonth)
+
+// Build calendar grid
+calendarDays = []
+
+// Previous month days
+{for i in range(0, firstDay)}
+    dayNum = daysInPrevMonth - firstDay + i + 1
+    calendarDays.push({
+        "day": dayNum,
+        "month": currentMonth - 1,
+        "year": currentMonth == 0 ? currentYear - 1 : currentYear,
+        "isCurrentMonth": false
+    })
+{/for}
+
+// Current month days
+{for day in range(1, daysInMonth + 1)}
+    calendarDays.push({
+        "day": day,
+        "month": currentMonth,
+        "year": currentYear,
+        "isCurrentMonth": true
+    })
+{/for}
+
+// Next month days to fill grid
+remainingDays = 42 - calendarDays.length
+{for i in range(1, remainingDays + 1)}
+    calendarDays.push({
+        "day": i,
+        "month": currentMonth + 1,
+        "year": currentMonth == 11 ? currentYear + 1 : currentYear,
+        "isCurrentMonth": false
+    })
+{/for}
+
+getDateString = (day, month, year) => {
+    m = month + 1
+    return `${year}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+getEventsForDay = (day, month, year) => {
+    dateStr = getDateString(day, month, year)
+    return events.filter(e => e.date == dateStr)
+}
+
+isToday = (day, month, year) => {
+    today = new Date()
+    return day == today.getDate() && month == today.getMonth() && year == today.getFullYear()
+}
+
+isSelected = (day, month, year) => {
+    return day == selectedDate.getDate() && month == selectedDate.getMonth() && year == selectedDate.getFullYear()
+}
+
+getWeekNumber = (date) => {
+    d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+    dayNum = d.getUTCDay() || 7
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+    yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
+}
+
+<div class="flin-calendar">
+    <div class="calendar-header">
+        <button
+            class="nav-btn"
+            click={() => {
+                if currentMonth == 0 {
+                    currentMonth = 11
+                    currentYear = currentYear - 1
+                } else {
+                    currentMonth = currentMonth - 1
+                }
+            }}
+        >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+            </svg>
+        </button>
+
+        <div class="header-title">
+            <h2 class="month-year">{months[currentMonth]} {currentYear}</h2>
+            <button
+                class="today-btn"
+                click={() => {
+                    today = new Date()
+                    currentMonth = today.getMonth()
+                    currentYear = today.getFullYear()
+                    selectedDate = today
+                }}
+            >
+                Today
+            </button>
+        </div>
+
+        <button
+            class="nav-btn"
+            click={() => {
+                if currentMonth == 11 {
+                    currentMonth = 0
+                    currentYear = currentYear + 1
+                } else {
+                    currentMonth = currentMonth + 1
+                }
+            }}
+        >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+            </svg>
+        </button>
+    </div>
+
+    <div class="calendar-grid {if showWeekNumbers}with-week-numbers{/if}">
+        <!-- Weekday headers -->
+        {if showWeekNumbers}
+            <div class="weekday-header week-number-header">Wk</div>
+        {/if}
+        {for day in weekdays}
+            <div class="weekday-header">{day}</div>
+        {/for}
+
+        <!-- Calendar days -->
+        {for calDay, index in calendarDays}
+            {if showWeekNumbers && index % 7 == 0}
+                <div class="week-number">
+                    {getWeekNumber(new Date(calDay.year, calDay.month, calDay.day))}
+                </div>
+            {/if}
+            <div
+                class="day-cell {if !calDay.isCurrentMonth}other-month{/if} {if isToday(calDay.day, calDay.month, calDay.year)}today{/if} {if isSelected(calDay.day, calDay.month, calDay.year)}selected{/if}"
+                click={() => {
+                    selectedDate = new Date(calDay.year, calDay.month, calDay.day)
+                    if onDateSelect != none {
+                        onDateSelect(selectedDate)
+                    }
+                }}
+            >
+                <span class="day-number">{calDay.day}</span>
+
+                <div class="day-events">
+                    {for event in getEventsForDay(calDay.day, calDay.month, calDay.year).slice(0, 3)}
+                        <div
+                            class="event-pill"
+                            data-color={event.color || "gold"}
+                            click={(e) => {
+                                e.stopPropagation()
+                                if onEventClick != none {
+                                    onEventClick(event)
+                                }
+                            }}
+                        >
+                            <span class="event-time">{event.time}</span>
+                            <span class="event-title">{event.title}</span>
+                        </div>
+                    {/for}
+                    {if getEventsForDay(calDay.day, calDay.month, calDay.year).length > 3}
+                        <div class="more-events">
+                            +{getEventsForDay(calDay.day, calDay.month, calDay.year).length - 3} more
+                        </div>
+                    {/if}
+                </div>
+            </div>
+        {/for}
+    </div>
+</div>
+
+<style scoped>
+.flin-calendar {
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    overflow: hidden;
+}
+
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.nav-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-secondary);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.nav-btn:hover {
+    background: var(--flin-bg-elevated);
+    border-color: var(--flin-accent-gold);
+    color: var(--flin-text-primary);
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-4);
+}
+
+.month-year {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0;
+}
+
+.today-btn {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background: transparent;
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-secondary);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.today-btn:hover {
+    background: var(--flin-accent-gold);
+    border-color: var(--flin-accent-gold);
+    color: var(--flin-bg-base);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-grid.with-week-numbers {
+    grid-template-columns: 40px repeat(7, 1fr);
+}
+
+.weekday-header {
+    padding: var(--flin-space-3) var(--flin-space-2);
+    text-align: center;
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.week-number-header {
+    background: var(--flin-bg-surface);
+}
+
+.week-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+    background: var(--flin-bg-surface);
+    border-right: 1px solid var(--flin-border-subtle);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.day-cell {
+    min-height: 100px;
+    padding: var(--flin-space-2);
+    border-right: 1px solid var(--flin-border-subtle);
+    border-bottom: 1px solid var(--flin-border-subtle);
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.day-cell:nth-child(7n) {
+    border-right: none;
+}
+
+.calendar-grid.with-week-numbers .day-cell:nth-child(8n) {
+    border-right: none;
+}
+
+.day-cell:hover {
+    background: var(--flin-bg-surface);
+}
+
+.day-cell.other-month {
+    background: var(--flin-bg-surface);
+}
+
+.day-cell.other-month .day-number {
+    color: var(--flin-text-muted);
+}
+
+.day-cell.today .day-number {
+    background: var(--flin-accent-gold);
+    color: var(--flin-bg-base);
+}
+
+.day-cell.selected {
+    background: rgba(234, 179, 8, 0.1);
+}
+
+.day-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--flin-radius-full);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-primary);
+    margin-bottom: var(--flin-space-2);
+}
+
+.day-events {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.event-pill {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: 2px var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    font-size: 11px;
+    cursor: pointer;
+    transition: filter var(--flin-transition-fast);
+    overflow: hidden;
+}
+
+.event-pill:hover {
+    filter: brightness(1.1);
+}
+
+.event-pill[data-color="gold"] { background: rgba(234, 179, 8, 0.2); color: #b45309; }
+.event-pill[data-color="blue"] { background: rgba(59, 130, 246, 0.2); color: #1d4ed8; }
+.event-pill[data-color="green"] { background: rgba(34, 197, 94, 0.2); color: #15803d; }
+.event-pill[data-color="purple"] { background: rgba(168, 85, 247, 0.2); color: #7c3aed; }
+.event-pill[data-color="orange"] { background: rgba(249, 115, 22, 0.2); color: #c2410c; }
+.event-pill[data-color="red"] { background: rgba(239, 68, 68, 0.2); color: #dc2626; }
+
+.event-time {
+    font-weight: var(--flin-font-semibold);
+    flex-shrink: 0;
+}
+
+.event-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.more-events {
+    font-size: 10px;
+    color: var(--flin-text-muted);
+    padding: 2px var(--flin-space-2);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .day-cell {
+        min-height: 80px;
+    }
+
+    .event-time {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendar-header {
+        padding: var(--flin-space-3) var(--flin-space-4);
+    }
+
+    .month-year {
+        font-size: var(--flin-text-lg);
+    }
+
+    .today-btn {
+        display: none;
+    }
+
+    .day-cell {
+        min-height: 60px;
+        padding: var(--flin-space-1);
+    }
+
+    .day-number {
+        width: 24px;
+        height: 24px;
+        font-size: var(--flin-text-xs);
+    }
+
+    .event-pill {
+        font-size: 10px;
+        padding: 1px var(--flin-space-1);
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-grid.with-week-numbers {
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    .week-number,
+    .week-number-header {
+        display: none;
+    }
+
+    .day-events {
+        display: none;
+    }
+
+    .day-cell {
+        min-height: auto;
+        aspect-ratio: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .day-number {
+        margin-bottom: 0;
+    }
+}
+</style>

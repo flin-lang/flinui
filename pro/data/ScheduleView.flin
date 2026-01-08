@@ -1,0 +1,554 @@
+// ============================================================================
+// ScheduleView.flin — FlinUI PRO Data Component
+// Week/day schedule view with time slots
+// ============================================================================
+// Props:
+//   - view: Current view - day, week (string)
+//   - selectedDate: Selected date (Date or none)
+//   - events: List of event objects with date, startTime, endTime, title, color (list)
+//   - startHour: First hour to display (number)
+//   - endHour: Last hour to display (number)
+//   - onEventClick: Callback when event is clicked (function or none)
+//   - onSlotClick: Callback when empty slot is clicked (function or none)
+
+view = props.view || "week"
+selectedDate = props.selectedDate || new Date()
+events = props.events || [
+    ["date": "2024-01-15", "startTime": "09:00", "endTime": "10:00", "title": "Team Standup", "color": "blue"],
+    ["date": "2024-01-15", "startTime": "14:00", "endTime": "15:30", "title": "Design Review", "color": "purple"],
+    ["date": "2024-01-16", "startTime": "10:00", "endTime": "11:00", "title": "Client Call", "color": "green"],
+    ["date": "2024-01-17", "startTime": "13:00", "endTime": "14:00", "title": "Lunch Meeting", "color": "orange"],
+    ["date": "2024-01-18", "startTime": "09:30", "endTime": "10:30", "title": "Sprint Planning", "color": "gold"],
+    ["date": "2024-01-19", "startTime": "15:00", "endTime": "16:00", "title": "Code Review", "color": "blue"]
+]
+startHour = props.startHour || 8
+endHour = props.endHour || 18
+onEventClick = props.onEventClick || none
+onSlotClick = props.onSlotClick || none
+
+weekdaysFull = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+weekdaysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+// Generate hours array
+hours = []
+{for h in range(startHour, endHour + 1)}
+    hours.push(h)
+{/for}
+
+// Get week dates
+getWeekDates = () => {
+    weekStart = new Date(selectedDate)
+    dayOfWeek = weekStart.getDay()
+    weekStart.setDate(weekStart.getDate() - dayOfWeek)
+
+    dates = []
+    {for i in range(0, 7)}
+        d = new Date(weekStart)
+        d.setDate(weekStart.getDate() + i)
+        dates.push(d)
+    {/for}
+    return dates
+}
+
+weekDates = getWeekDates()
+
+// Format time
+formatHour = (hour) => {
+    if hour == 0 { return "12 AM" }
+    if hour < 12 { return `${hour} AM` }
+    if hour == 12 { return "12 PM" }
+    return `${hour - 12} PM`
+}
+
+// Get events for a specific date
+getEventsForDate = (date) => {
+    dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    return events.filter(e => e.date == dateStr)
+}
+
+// Calculate event position
+getEventStyle = (event) => {
+    startParts = event.startTime.split(":")
+    endParts = event.endTime.split(":")
+    startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1])
+    endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1])
+
+    topOffset = (startMinutes - startHour * 60) / 60 * 60
+    height = (endMinutes - startMinutes) / 60 * 60
+
+    return {
+        "top": topOffset,
+        "height": Math.max(height, 30)
+    }
+}
+
+// Check if date is today
+isToday = (date) => {
+    today = new Date()
+    return date.getDate() == today.getDate() && date.getMonth() == today.getMonth() && date.getFullYear() == today.getFullYear()
+}
+
+// Get current time position
+getCurrentTimePosition = () => {
+    now = new Date()
+    minutes = now.getHours() * 60 + now.getMinutes()
+    return (minutes - startHour * 60) / 60 * 60
+}
+
+currentTimePos = getCurrentTimePosition()
+showCurrentTime = currentTimePos >= 0 && currentTimePos <= (endHour - startHour) * 60
+
+<div class="flin-schedule-view schedule-{view}">
+    <div class="schedule-header">
+        <button
+            class="nav-btn"
+            click={() => {
+                if view == "week" {
+                    selectedDate.setDate(selectedDate.getDate() - 7)
+                    selectedDate = new Date(selectedDate)
+                } else {
+                    selectedDate.setDate(selectedDate.getDate() - 1)
+                    selectedDate = new Date(selectedDate)
+                }
+            }}
+        >
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+            </svg>
+        </button>
+
+        <div class="header-title">
+            {if view == "week"}
+                <span class="title-text">
+                    {monthsShort[weekDates[0].getMonth()]} {weekDates[0].getDate()} - {monthsShort[weekDates[6].getMonth()]} {weekDates[6].getDate()}, {weekDates[6].getFullYear()}
+                </span>
+            {else}
+                <span class="title-text">
+                    {weekdaysFull[selectedDate.getDay()]}, {monthsShort[selectedDate.getMonth()]} {selectedDate.getDate()}, {selectedDate.getFullYear()}
+                </span>
+            {/if}
+        </div>
+
+        <button
+            class="nav-btn"
+            click={() => {
+                if view == "week" {
+                    selectedDate.setDate(selectedDate.getDate() + 7)
+                    selectedDate = new Date(selectedDate)
+                } else {
+                    selectedDate.setDate(selectedDate.getDate() + 1)
+                    selectedDate = new Date(selectedDate)
+                }
+            }}
+        >
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+            </svg>
+        </button>
+
+        <div class="view-toggle">
+            <button
+                class="toggle-btn {if view == 'day'}active{/if}"
+                click={() => { view = "day" }}
+            >
+                Day
+            </button>
+            <button
+                class="toggle-btn {if view == 'week'}active{/if}"
+                click={() => { view = "week" }}
+            >
+                Week
+            </button>
+        </div>
+    </div>
+
+    <div class="schedule-body">
+        <!-- Time column -->
+        <div class="time-column">
+            <div class="time-header"></div>
+            {for hour in hours}
+                <div class="time-slot">
+                    <span class="time-label">{formatHour(hour)}</span>
+                </div>
+            {/for}
+        </div>
+
+        <!-- Day columns -->
+        <div class="days-container">
+            {if view == "week"}
+                {for date in weekDates}
+                    <div class="day-column {if isToday(date)}is-today{/if}">
+                        <div class="day-header">
+                            <span class="day-name">{weekdaysShort[date.getDay()]}</span>
+                            <span class="day-number">{date.getDate()}</span>
+                        </div>
+                        <div class="day-slots">
+                            {for hour in hours}
+                                <div
+                                    class="hour-slot"
+                                    click={() => {
+                                        if onSlotClick != none {
+                                            onSlotClick(date, hour)
+                                        }
+                                    }}
+                                ></div>
+                            {/for}
+
+                            <!-- Events -->
+                            {for event in getEventsForDate(date)}
+                                <div
+                                    class="schedule-event"
+                                    data-color={event.color || "gold"}
+                                    style="top: {getEventStyle(event).top}px; height: {getEventStyle(event).height}px"
+                                    click={(e) => {
+                                        e.stopPropagation()
+                                        if onEventClick != none {
+                                            onEventClick(event)
+                                        }
+                                    }}
+                                >
+                                    <span class="event-time">{event.startTime}</span>
+                                    <span class="event-title">{event.title}</span>
+                                </div>
+                            {/for}
+
+                            <!-- Current time indicator -->
+                            {if showCurrentTime && isToday(date)}
+                                <div class="current-time" style="top: {currentTimePos}px">
+                                    <div class="time-dot"></div>
+                                    <div class="time-line"></div>
+                                </div>
+                            {/if}
+                        </div>
+                    </div>
+                {/for}
+            {else}
+                <div class="day-column single-day">
+                    <div class="day-header">
+                        <span class="day-name">{weekdaysFull[selectedDate.getDay()]}</span>
+                        <span class="day-number">{selectedDate.getDate()}</span>
+                    </div>
+                    <div class="day-slots">
+                        {for hour in hours}
+                            <div
+                                class="hour-slot"
+                                click={() => {
+                                    if onSlotClick != none {
+                                        onSlotClick(selectedDate, hour)
+                                    }
+                                }}
+                            ></div>
+                        {/for}
+
+                        {for event in getEventsForDate(selectedDate)}
+                            <div
+                                class="schedule-event"
+                                data-color={event.color || "gold"}
+                                style="top: {getEventStyle(event).top}px; height: {getEventStyle(event).height}px"
+                                click={(e) => {
+                                    e.stopPropagation()
+                                    if onEventClick != none {
+                                        onEventClick(event)
+                                    }
+                                }}
+                            >
+                                <span class="event-time">{event.startTime} - {event.endTime}</span>
+                                <span class="event-title">{event.title}</span>
+                            </div>
+                        {/for}
+
+                        {if showCurrentTime && isToday(selectedDate)}
+                            <div class="current-time" style="top: {currentTimePos}px">
+                                <div class="time-dot"></div>
+                                <div class="time-line"></div>
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+            {/if}
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.flin-schedule-view {
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    overflow: hidden;
+}
+
+.schedule-header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.nav-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-secondary);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.nav-btn:hover {
+    background: var(--flin-bg-elevated);
+    border-color: var(--flin-accent-gold);
+    color: var(--flin-text-primary);
+}
+
+.header-title {
+    flex: 1;
+}
+
+.title-text {
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+}
+
+.view-toggle {
+    display: flex;
+    background: var(--flin-bg-surface);
+    border-radius: var(--flin-radius-md);
+    padding: 2px;
+}
+
+.toggle-btn {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-tertiary);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.toggle-btn:hover {
+    color: var(--flin-text-secondary);
+}
+
+.toggle-btn.active {
+    background: var(--flin-bg-elevated);
+    color: var(--flin-text-primary);
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.schedule-body {
+    display: flex;
+    overflow-x: auto;
+}
+
+.time-column {
+    flex-shrink: 0;
+    width: 70px;
+    background: var(--flin-bg-surface);
+    border-right: 1px solid var(--flin-border-subtle);
+}
+
+.time-header {
+    height: 48px;
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.time-slot {
+    height: 60px;
+    padding: var(--flin-space-2);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.time-label {
+    font-size: 11px;
+    color: var(--flin-text-muted);
+}
+
+.days-container {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+}
+
+.day-column {
+    flex: 1;
+    min-width: 100px;
+    border-right: 1px solid var(--flin-border-subtle);
+}
+
+.day-column:last-child {
+    border-right: none;
+}
+
+.day-column.single-day {
+    min-width: 100%;
+}
+
+.day-column.is-today {
+    background: rgba(234, 179, 8, 0.03);
+}
+
+.day-header {
+    height: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--flin-border-subtle);
+    gap: 2px;
+}
+
+.day-name {
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-muted);
+    text-transform: uppercase;
+}
+
+.day-number {
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+}
+
+.is-today .day-number {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-accent-gold);
+    color: var(--flin-bg-base);
+    border-radius: var(--flin-radius-full);
+}
+
+.day-slots {
+    position: relative;
+}
+
+.hour-slot {
+    height: 60px;
+    border-bottom: 1px solid var(--flin-border-subtle);
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.hour-slot:hover {
+    background: var(--flin-bg-surface);
+}
+
+.schedule-event {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-2);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    z-index: 5;
+}
+
+.schedule-event:hover {
+    filter: brightness(1.05);
+    transform: scale(1.02);
+    z-index: 10;
+}
+
+.schedule-event[data-color="gold"] { background: rgba(234, 179, 8, 0.9); color: #78350f; }
+.schedule-event[data-color="blue"] { background: rgba(59, 130, 246, 0.9); color: white; }
+.schedule-event[data-color="green"] { background: rgba(34, 197, 94, 0.9); color: white; }
+.schedule-event[data-color="purple"] { background: rgba(168, 85, 247, 0.9); color: white; }
+.schedule-event[data-color="orange"] { background: rgba(249, 115, 22, 0.9); color: white; }
+.schedule-event[data-color="red"] { background: rgba(239, 68, 68, 0.9); color: white; }
+
+.event-time {
+    display: block;
+    font-size: 10px;
+    font-weight: var(--flin-font-semibold);
+    opacity: 0.9;
+}
+
+.event-title {
+    display: block;
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.current-time {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 15;
+    pointer-events: none;
+}
+
+.time-dot {
+    position: absolute;
+    left: -4px;
+    top: -4px;
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: var(--flin-radius-full);
+}
+
+.time-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #ef4444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .schedule-header {
+        flex-wrap: wrap;
+        padding: var(--flin-space-3) var(--flin-space-4);
+    }
+
+    .header-title {
+        order: -1;
+        width: 100%;
+        text-align: center;
+        margin-bottom: var(--flin-space-2);
+    }
+
+    .title-text {
+        font-size: var(--flin-text-base);
+    }
+
+    .time-column {
+        width: 50px;
+    }
+
+    .day-column {
+        min-width: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .schedule-week .days-container {
+        overflow-x: auto;
+    }
+
+    .view-toggle {
+        display: none;
+    }
+}
+</style>

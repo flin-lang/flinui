@@ -1,0 +1,455 @@
+// SpinnerOverlay.flin - FlinUI PRO Spinner Overlay Component
+// Full-page/container spinner overlay with customizable appearance
+
+// Props with defaults
+isVisible = props.isVisible || true
+size = props.size || "lg"
+message = props.message || ""
+blur = props.blur || true
+variant = props.variant || "default"
+position = props.position || "fixed"
+theme = props.theme || "auto"
+showProgress = props.showProgress || false
+progress = props.progress || 0
+onCancel = props.onCancel
+
+// Size configurations
+spinnerSize = match size {
+    "sm" -> "24px"
+    "md" -> "36px"
+    "xl" -> "64px"
+    _ -> "48px"
+}
+
+strokeWidth = match size {
+    "sm" -> "3"
+    "md" -> "3"
+    "xl" -> "4"
+    _ -> "4"
+}
+
+// Position class
+positionClass = match position {
+    "absolute" -> "spinner-overlay--absolute"
+    "static" -> "spinner-overlay--static"
+    _ -> "spinner-overlay--fixed"
+}
+
+// Theme class
+themeClass = match theme {
+    "dark" -> "spinner-overlay--dark"
+    "light" -> "spinner-overlay--light"
+    _ -> "spinner-overlay--auto"
+}
+
+// Variant class
+variantClass = match variant {
+    "minimal" -> "spinner-overlay--minimal"
+    "branded" -> "spinner-overlay--branded"
+    _ -> "spinner-overlay--default"
+}
+
+// Blur class
+blurClass = match blur {
+    true -> "spinner-overlay--blur"
+    _ -> ""
+}
+
+// Visibility class
+visibilityClass = match isVisible {
+    true -> "spinner-overlay--visible"
+    _ -> "spinner-overlay--hidden"
+}
+
+// Build combined class
+overlayClass = "spinner-overlay " ++ positionClass ++ " " ++ themeClass ++ " " ++ variantClass ++ " " ++ blurClass ++ " " ++ visibilityClass
+
+<div
+    class={overlayClass}
+    role="status"
+    aria-live="polite"
+    aria-busy={isVisible}
+>
+    <div class="spinner-overlay-content">
+        // Spinner
+        <div class="spinner-overlay-spinner" style={"--spinner-size: " ++ spinnerSize}>
+            {if variant == "branded"}
+                // Branded spinner with logo placeholder
+                <div class="spinner-branded">
+                    <div class="spinner-branded-ring"></div>
+                    <div class="spinner-branded-logo">
+                        {if props.logo}
+                            <img src={props.logo} alt="Loading" />
+                        {:else}
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                            </svg>
+                        {/if}
+                    </div>
+                </div>
+            {:else}
+                // Default circular spinner
+                <svg class="spinner-svg" viewBox="0 0 50 50">
+                    <circle
+                        class="spinner-track"
+                        cx="25"
+                        cy="25"
+                        r="20"
+                        fill="none"
+                        stroke-width={strokeWidth}
+                    />
+                    <circle
+                        class="spinner-circle"
+                        cx="25"
+                        cy="25"
+                        r="20"
+                        fill="none"
+                        stroke-width={strokeWidth}
+                        stroke-linecap="round"
+                    />
+                </svg>
+            {/if}
+        </div>
+
+        // Progress bar
+        {if showProgress}
+            <div class="spinner-overlay-progress">
+                <div class="spinner-progress-bar" style={"width: " ++ progress ++ "%"}></div>
+                <span class="spinner-progress-text">{progress}%</span>
+            </div>
+        {/if}
+
+        // Message
+        {if message != ""}
+            <p class="spinner-overlay-message">{message}</p>
+        {/if}
+
+        // Sub-message or hint
+        {if props.hint}
+            <p class="spinner-overlay-hint">{props.hint}</p>
+        {/if}
+
+        // Cancel button
+        {if onCancel}
+            <button
+                class="spinner-overlay-cancel"
+                click={onCancel}
+                type="button"
+            >
+                {props.cancelText || "Cancel"}
+            </button>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+/* Overlay base */
+.spinner-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--flin-transition-normal), visibility var(--flin-transition-normal);
+}
+
+.spinner-overlay--visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.spinner-overlay--hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Position variants */
+.spinner-overlay--fixed {
+    position: fixed;
+    inset: 0;
+}
+
+.spinner-overlay--absolute {
+    position: absolute;
+    inset: 0;
+}
+
+.spinner-overlay--static {
+    position: relative;
+    min-height: 200px;
+}
+
+/* Theme variants */
+.spinner-overlay--auto {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: var(--flin-fg);
+}
+
+.spinner-overlay--light {
+    background-color: rgba(255, 255, 255, 0.95);
+    color: var(--flin-fg);
+}
+
+.spinner-overlay--dark {
+    background-color: rgba(0, 0, 0, 0.85);
+    color: white;
+}
+
+/* Blur effect */
+.spinner-overlay--blur {
+    backdrop-filter: blur(8px);
+}
+
+/* Variant: Minimal */
+.spinner-overlay--minimal {
+    background-color: transparent;
+    backdrop-filter: none;
+}
+
+/* Content container */
+.spinner-overlay-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-6);
+    text-align: center;
+    max-width: 300px;
+}
+
+/* Spinner container */
+.spinner-overlay-spinner {
+    width: var(--spinner-size);
+    height: var(--spinner-size);
+}
+
+/* SVG Spinner */
+.spinner-svg {
+    width: 100%;
+    height: 100%;
+    animation: spinnerRotate 2s linear infinite;
+}
+
+@keyframes spinnerRotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner-track {
+    stroke: currentColor;
+    opacity: 0.15;
+}
+
+.spinner-circle {
+    stroke: currentColor;
+    stroke-dasharray: 80, 200;
+    stroke-dashoffset: 0;
+    animation: spinnerDash 1.5s ease-in-out infinite;
+}
+
+@keyframes spinnerDash {
+    0% {
+        stroke-dasharray: 1, 200;
+        stroke-dashoffset: 0;
+    }
+    50% {
+        stroke-dasharray: 90, 200;
+        stroke-dashoffset: -35px;
+    }
+    100% {
+        stroke-dasharray: 90, 200;
+        stroke-dashoffset: -125px;
+    }
+}
+
+/* Branded spinner */
+.spinner-branded {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.spinner-branded-ring {
+    position: absolute;
+    inset: 0;
+    border: 3px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: spinnerBrandedRing 1s linear infinite;
+}
+
+@keyframes spinnerBrandedRing {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner-branded-logo {
+    position: absolute;
+    inset: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: spinnerBrandedPulse 1.5s ease-in-out infinite;
+}
+
+.spinner-branded-logo img,
+.spinner-branded-logo svg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+@keyframes spinnerBrandedPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(0.9);
+    }
+}
+
+/* Progress bar */
+.spinner-overlay-progress {
+    width: 200px;
+    height: 4px;
+    background-color: rgba(128, 128, 128, 0.2);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    position: relative;
+}
+
+.spinner-progress-bar {
+    height: 100%;
+    background-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    transition: width var(--flin-transition-normal);
+}
+
+.spinner-progress-text {
+    position: absolute;
+    top: calc(100% + var(--flin-space-2));
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Message */
+.spinner-overlay-message {
+    margin: 0;
+    font-size: var(--flin-text-base);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* Hint */
+.spinner-overlay-hint {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+    opacity: 0.7;
+    line-height: 1.5;
+}
+
+/* Cancel button */
+.spinner-overlay-cancel {
+    margin-top: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background: transparent;
+    border: 1px solid currentColor;
+    border-radius: var(--flin-radius-lg);
+    color: inherit;
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.spinner-overlay-cancel:hover {
+    opacity: 1;
+}
+
+.spinner-overlay-cancel:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+/* Color variants for spinner */
+.spinner-overlay--auto .spinner-circle,
+.spinner-overlay--light .spinner-circle {
+    stroke: var(--flin-primary);
+}
+
+.spinner-overlay--dark .spinner-circle {
+    stroke: white;
+}
+
+.spinner-overlay--dark .spinner-progress-bar {
+    background-color: white;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+    .spinner-overlay-content {
+        padding: var(--flin-space-4);
+    }
+
+    .spinner-overlay-progress {
+        width: 160px;
+    }
+}
+
+/* System dark mode */
+[data-theme="dark"] .spinner-overlay--auto {
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+}
+
+[data-theme="dark"] .spinner-overlay--auto .spinner-circle {
+    stroke: var(--flin-primary);
+}
+
+[data-theme="dark"] .spinner-overlay--light {
+    background-color: rgba(30, 30, 30, 0.95);
+    color: var(--flin-neutral-100);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .spinner-svg {
+        animation: spinnerRotateSlow 4s linear infinite;
+    }
+
+    @keyframes spinnerRotateSlow {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .spinner-circle {
+        animation: none;
+        stroke-dasharray: 60, 200;
+    }
+
+    .spinner-branded-ring {
+        animation: spinnerBrandedRingSlow 2s linear infinite;
+    }
+
+    @keyframes spinnerBrandedRingSlow {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .spinner-branded-logo {
+        animation: none;
+    }
+}
+</style>

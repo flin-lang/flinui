@@ -1,0 +1,519 @@
+// CouponCode.flin - FlinUI PRO E-commerce Component
+// Coupon code display with copy to clipboard functionality and expiry tracking
+
+// Props with defaults
+code = props.code || "SAVE20"
+discount = props.discount || "20% OFF"
+description = props.description || "Get 20% off your next purchase"
+expiryDate = props.expiryDate || none
+minPurchase = props.minPurchase || none
+currency = props.currency || "$"
+termsUrl = props.termsUrl || "#"
+onCopy = props.onCopy
+onApply = props.onApply
+variant = props.variant || "gradient"
+showTerms = props.showTerms || true
+
+// State
+copied = false
+timeRemaining = none
+
+// Calculate time remaining until expiry
+fn updateTimeRemaining() {
+    {if expiryDate != none}
+        now = Date.now()
+        diff = expiryDate - now
+        {if diff > 0}
+            days = Math.floor(diff / (1000 * 60 * 60 * 24))
+            hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+            timeRemaining = ["days": days, "hours": hours]
+        {else}
+            timeRemaining = none
+        {/if}
+    {/if}
+}
+
+// Initialize timer
+onMount {
+    updateTimeRemaining()
+    {if expiryDate != none}
+        interval = setInterval(updateTimeRemaining, 60000)
+    {/if}
+}
+
+onUnmount {
+    {if interval != none}
+        clearInterval(interval)
+    {/if}
+}
+
+// Handle copy to clipboard
+fn handleCopy() {
+    navigator.clipboard.writeText(code)
+    copied = true
+
+    {if onCopy != none}
+        onCopy(code)
+    {/if}
+
+    setTimeout(() => {
+        copied = false
+    }, 2000)
+}
+
+// Handle apply coupon
+fn handleApply() {
+    {if onApply != none}
+        onApply(code)
+    {/if}
+}
+
+// Variant classes
+variantClass = match variant {
+    "simple" -> "coupon-simple"
+    "elegant" -> "coupon-elegant"
+    "bold" -> "coupon-bold"
+    _ -> "coupon-gradient"
+}
+
+containerClass = "coupon-code " ++ variantClass
+
+// Check if expiring soon (within 48 hours)
+expiringSoon = match timeRemaining {
+    t if t != none && t.days < 2 -> true
+    _ -> false
+}
+
+<div class={containerClass}>
+    <div class="coupon-header">
+        <div class="coupon-discount-badge">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+            <span class="discount-text">{discount}</span>
+        </div>
+
+        {if timeRemaining != none}
+            <div class="coupon-expiry" data-urgent={expiringSoon}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>
+                    {if timeRemaining.days > 0}
+                        Expires in {timeRemaining.days}d {timeRemaining.hours}h
+                    {else}
+                        Expires in {timeRemaining.hours}h
+                    {/if}
+                </span>
+            </div>
+        {/if}
+    </div>
+
+    <div class="coupon-body">
+        <p class="coupon-description">{description}</p>
+
+        <div class="coupon-code-container">
+            <div class="code-display">
+                <div class="code-dashes">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span class="code-text">{code}</span>
+                <div class="code-dashes">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <button class="copy-button" click={handleCopy} data-copied={copied}>
+                {if copied}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Copied!</span>
+                {else}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    <span>Copy Code</span>
+                {/if}
+            </button>
+        </div>
+
+        {if minPurchase != none}
+            <div class="coupon-requirements">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                <span>Minimum purchase: {currency}{minPurchase}</span>
+            </div>
+        {/if}
+
+        {if onApply != none}
+            <button class="apply-button" click={handleApply}>
+                Apply Coupon
+            </button>
+        {/if}
+
+        {if showTerms}
+            <a href={termsUrl} class="terms-link" target="_blank">
+                Terms & Conditions
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+            </a>
+        {/if}
+    </div>
+
+    <div class="coupon-decoration">
+        <div class="decoration-circle decoration-left"></div>
+        <div class="decoration-circle decoration-right"></div>
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.coupon-code {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: var(--flin-radius-xl);
+    overflow: hidden;
+    font-family: var(--flin-font-sans);
+    box-shadow: var(--flin-shadow-lg);
+    border: 2px dashed var(--flin-neutral-300);
+    transition: all var(--flin-transition-base);
+}
+
+.coupon-code:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--flin-shadow-xl);
+}
+
+/* Variant styles */
+.coupon-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.coupon-gradient .coupon-body {
+    background: white;
+    margin: 2px;
+    border-radius: var(--flin-radius-lg);
+}
+
+.coupon-simple {
+    background: white;
+    border-color: var(--flin-primary);
+}
+
+.coupon-elegant {
+    background: linear-gradient(135deg, var(--flin-neutral-50) 0%, white 100%);
+    border-color: var(--flin-neutral-400);
+}
+
+.coupon-bold {
+    background: var(--flin-primary);
+    border: none;
+}
+
+.coupon-bold .coupon-header,
+.coupon-bold .coupon-body {
+    color: white;
+}
+
+.coupon-bold .code-display {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.coupon-bold .copy-button {
+    background: white;
+    color: var(--flin-primary);
+}
+
+/* Header */
+.coupon-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--flin-space-4);
+    gap: var(--flin-space-3);
+}
+
+.coupon-discount-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: var(--flin-primary);
+    color: white;
+    border-radius: var(--flin-radius-md);
+    font-weight: var(--flin-font-bold);
+    font-size: var(--flin-text-sm);
+}
+
+.coupon-gradient .coupon-discount-badge {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.discount-text {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.coupon-expiry {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1-5);
+    padding: var(--flin-space-1-5) var(--flin-space-2-5);
+    background: var(--flin-neutral-100);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-neutral-700);
+}
+
+.coupon-expiry[data-urgent="true"] {
+    background: var(--flin-warning);
+    color: white;
+    animation: expiry-pulse 1s ease-in-out infinite;
+}
+
+@keyframes expiry-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+/* Body */
+.coupon-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-4);
+}
+
+.coupon-description {
+    margin: 0;
+    font-size: var(--flin-text-base);
+    color: var(--flin-neutral-700);
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* Code display */
+.coupon-code-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+}
+
+.code-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    background: var(--flin-neutral-50);
+    border: 2px dashed var(--flin-neutral-300);
+    border-radius: var(--flin-radius-lg);
+}
+
+.code-dashes {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.code-dashes span {
+    width: 20px;
+    height: 2px;
+    background: var(--flin-neutral-400);
+    border-radius: 1px;
+}
+
+.code-text {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    font-family: var(--flin-font-mono);
+    color: var(--flin-primary);
+    letter-spacing: 2px;
+    user-select: all;
+}
+
+/* Copy button */
+.copy-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    background: var(--flin-primary);
+    color: white;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    font-family: var(--flin-font-sans);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.copy-button:hover {
+    background: var(--flin-primary-dark);
+    transform: translateY(-1px);
+}
+
+.copy-button[data-copied="true"] {
+    background: var(--flin-success);
+}
+
+/* Requirements */
+.coupon-requirements {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2-5) var(--flin-space-3);
+    background: var(--flin-info);
+    color: white;
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    text-align: center;
+    justify-content: center;
+}
+
+/* Apply button */
+.apply-button {
+    padding: var(--flin-space-3);
+    background: linear-gradient(135deg, var(--flin-success) 0%, var(--flin-success-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-bold);
+    font-family: var(--flin-font-sans);
+    cursor: pointer;
+    transition: all var(--flin-transition-base);
+    box-shadow: var(--flin-shadow-md);
+}
+
+.apply-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+/* Terms link */
+.terms-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-1-5);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-600);
+    text-decoration: none;
+    transition: color var(--flin-transition-fast);
+}
+
+.terms-link:hover {
+    color: var(--flin-primary);
+}
+
+/* Decoration circles */
+.coupon-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.decoration-circle {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.decoration-left {
+    left: -12px;
+}
+
+.decoration-right {
+    right: -12px;
+}
+
+.coupon-gradient .decoration-circle {
+    background: var(--flin-neutral-50);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .coupon-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .coupon-expiry {
+        justify-content: center;
+    }
+
+    .code-text {
+        font-size: var(--flin-text-xl);
+    }
+
+    .code-dashes span {
+        width: 15px;
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .coupon-code {
+        background: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-600);
+    }
+
+    .coupon-simple {
+        background: var(--flin-neutral-800);
+    }
+
+    .coupon-elegant {
+        background: linear-gradient(135deg, var(--flin-neutral-900) 0%, var(--flin-neutral-800) 100%);
+    }
+
+    .coupon-gradient .coupon-body {
+        background: var(--flin-neutral-800);
+    }
+
+    .coupon-description {
+        color: var(--flin-neutral-300);
+    }
+
+    .code-display {
+        background: var(--flin-neutral-900);
+        border-color: var(--flin-neutral-600);
+    }
+
+    .decoration-circle {
+        background: var(--flin-neutral-900);
+    }
+
+    .coupon-gradient .decoration-circle {
+        background: var(--flin-neutral-800);
+    }
+}
+</style>

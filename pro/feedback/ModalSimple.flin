@@ -1,0 +1,413 @@
+// ModalSimple.flin - FlinUI PRO Modal Component
+// Basic modal with header, body, footer sections and close button
+
+// Props with defaults
+isOpen = props.isOpen || false
+title = props.title || ""
+size = props.size || "md"
+closable = props.closable || true
+closeOnBackdrop = props.closeOnBackdrop || true
+showFooter = props.showFooter || true
+onClose = props.onClose
+onConfirm = props.onConfirm
+
+// Internal state for animations
+isClosing = false
+
+// Handle close with animation
+handleClose = {
+    if closable {
+        isClosing = true
+        if onClose { onClose() }
+    }
+}
+
+// Handle backdrop click
+handleBackdropClick = {
+    if closeOnBackdrop && closable {
+        isClosing = true
+        if onClose { onClose() }
+    }
+}
+
+// Handle confirm action
+handleConfirm = {
+    if onConfirm { onConfirm() }
+}
+
+// Handle escape key
+handleKeyDown = (event) => {
+    if event.key == "Escape" && closable {
+        isClosing = true
+        if onClose { onClose() }
+    }
+}
+
+// Size class computation
+sizeClass = match size {
+    "sm" -> "modal-simple-sm"
+    "lg" -> "modal-simple-lg"
+    "xl" -> "modal-simple-xl"
+    _ -> "modal-simple-md"
+}
+
+// Computed classes for animation states
+backdropClass = match isClosing {
+    true -> "modal-simple-backdrop modal-simple-backdrop--closing"
+    _ -> "modal-simple-backdrop"
+}
+
+modalClass = match isClosing {
+    true -> "modal-simple " ++ sizeClass ++ " modal-simple--closing"
+    _ -> "modal-simple " ++ sizeClass
+}
+
+// Display container class
+containerClass = match isOpen {
+    true -> "modal-simple-container"
+    _ -> "modal-simple-container modal-simple-container--hidden"
+}
+
+<div class={containerClass}>
+    <div
+        class={backdropClass}
+        click={handleBackdropClick}
+        aria-hidden="true"
+    ></div>
+
+    <div
+        class={modalClass}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-simple-title"
+        tabindex="-1"
+        keydown={handleKeyDown}
+    >
+        // Header section
+        <div class="modal-simple-header">
+            <div class="modal-simple-header-content">
+                {if title != ""}
+                    <h2 id="modal-simple-title" class="modal-simple-title">{title}</h2>
+                {/if}
+                {if props.subtitle}
+                    <p class="modal-simple-subtitle">{props.subtitle}</p>
+                {/if}
+            </div>
+            {if closable}
+                <button
+                    class="modal-simple-close"
+                    click={handleClose}
+                    aria-label="Close modal"
+                    type="button"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            {/if}
+        </div>
+
+        // Body section
+        <div class="modal-simple-body">
+            {children}
+        </div>
+
+        // Footer section
+        {if showFooter}
+            <div class="modal-simple-footer">
+                {if props.footerContent}
+                    {props.footerContent}
+                {:else}
+                    <button
+                        class="modal-simple-btn modal-simple-btn--secondary"
+                        click={handleClose}
+                        type="button"
+                    >
+                        {props.cancelText || "Cancel"}
+                    </button>
+                    <button
+                        class="modal-simple-btn modal-simple-btn--primary"
+                        click={handleConfirm}
+                        type="button"
+                    >
+                        {props.confirmText || "Confirm"}
+                    </button>
+                {/if}
+            </div>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.modal-simple-container {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-simple-container--hidden {
+    display: none;
+}
+
+/* Backdrop */
+.modal-simple-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: -1;
+    animation: modalSimpleBackdropIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes modalSimpleBackdropIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-simple-backdrop--closing {
+    animation: modalSimpleBackdropOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes modalSimpleBackdropOut {
+    to { opacity: 0; }
+}
+
+/* Modal */
+.modal-simple {
+    position: relative;
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-2xl);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    animation: modalSimpleIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes modalSimpleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-simple--closing {
+    animation: modalSimpleOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes modalSimpleOut {
+    to {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+}
+
+/* Size variants */
+.modal-simple-sm {
+    width: 100%;
+    max-width: 400px;
+}
+
+.modal-simple-md {
+    width: 100%;
+    max-width: 520px;
+}
+
+.modal-simple-lg {
+    width: 100%;
+    max-width: 680px;
+}
+
+.modal-simple-xl {
+    width: 100%;
+    max-width: 900px;
+}
+
+/* Header */
+.modal-simple-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: var(--flin-space-5) var(--flin-space-6);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    flex-shrink: 0;
+}
+
+.modal-simple-header-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.modal-simple-title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+    line-height: 1.4;
+}
+
+.modal-simple-subtitle {
+    margin: var(--flin-space-1) 0 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.modal-simple-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin: calc(var(--flin-space-1) * -1);
+    margin-left: var(--flin-space-3);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    color: var(--flin-fg-muted);
+    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.modal-simple-close:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.modal-simple-close:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.modal-simple-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Body */
+.modal-simple-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--flin-space-6);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    line-height: 1.6;
+}
+
+/* Footer */
+.modal-simple-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-top: 1px solid var(--flin-neutral-200);
+    flex-shrink: 0;
+}
+
+/* Buttons */
+.modal-simple-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    border: 1px solid transparent;
+}
+
+.modal-simple-btn--primary {
+    background-color: var(--flin-primary);
+    color: white;
+    border-color: var(--flin-primary);
+}
+
+.modal-simple-btn--primary:hover {
+    background-color: var(--flin-primary-hover);
+    border-color: var(--flin-primary-hover);
+}
+
+.modal-simple-btn--secondary {
+    background-color: transparent;
+    color: var(--flin-fg);
+    border-color: var(--flin-neutral-300);
+}
+
+.modal-simple-btn--secondary:hover {
+    background-color: var(--flin-neutral-100);
+    border-color: var(--flin-neutral-400);
+}
+
+.modal-simple-btn:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+/* Focus trap visual indicator */
+.modal-simple:focus {
+    outline: none;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+    .modal-simple {
+        width: calc(100vw - var(--flin-space-6));
+        max-height: calc(100vh - var(--flin-space-8));
+        margin: var(--flin-space-4);
+    }
+
+    .modal-simple-header {
+        padding: var(--flin-space-4);
+    }
+
+    .modal-simple-body {
+        padding: var(--flin-space-4);
+    }
+
+    .modal-simple-footer {
+        padding: var(--flin-space-3) var(--flin-space-4);
+        flex-direction: column-reverse;
+    }
+
+    .modal-simple-btn {
+        width: 100%;
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .modal-simple {
+    background-color: var(--flin-neutral-900);
+    border: 1px solid var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-simple-header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-simple-footer {
+    border-top-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-simple-close:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .modal-simple-btn--secondary {
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .modal-simple-btn--secondary:hover {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-500);
+}
+</style>

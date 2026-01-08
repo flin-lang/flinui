@@ -1,0 +1,416 @@
+// ============================================================================
+// ProfileLayout.flin — FlinUI PRO Shell Component
+// Profile page layout with header, avatar, and content sections
+// ============================================================================
+// Props:
+//   - user: User object with name, avatar, role, etc. (object or none)
+//   - coverImage: Cover image URL (string or none)
+//   - coverHeight: Height of cover image (string, default: "200px")
+//   - variant: Layout variant - centered, wide, sidebar (string, default: "centered")
+//   - showStats: Show stats section (boolean, default: true)
+//   - stats: Stats array (list or none)
+//   - showTabs: Show tabs navigation (boolean, default: true)
+//   - tabs: Tabs array (list)
+//   - activeTab: Currently active tab ID (string or none)
+//   - onTabChange: Callback when tab changes (function or none)
+// ============================================================================
+
+user = props.user || [
+    "name": "John Doe",
+    "avatar": none,
+    "role": "Software Engineer",
+    "location": "San Francisco, CA",
+    "verified": true
+]
+coverImage = props.coverImage || none
+coverHeight = props.coverHeight || "200px"
+variant = props.variant || "centered"
+showStats = props.showStats || true
+stats = props.stats || [
+    ["label": "Posts", "value": "142"],
+    ["label": "Followers", "value": "12.5K"],
+    ["label": "Following", "value": "284"]
+]
+showTabs = props.showTabs || true
+tabs = props.tabs || [
+    ["id": "posts", "label": "Posts"],
+    ["id": "about", "label": "About"],
+    ["id": "photos", "label": "Photos"],
+    ["id": "videos", "label": "Videos"]
+]
+activeTab = props.activeTab || "posts"
+onTabChange = props.onTabChange || none
+
+handleTabClick = (tabId) => {
+    if onTabChange != none {
+        onTabChange(tabId)
+    }
+}
+
+isActiveTab = (tabId) => tabId == activeTab
+
+// Get initials for avatar fallback
+getInitials = (name) => {
+    parts = name.split(" ")
+    {if parts.length >= 2 {
+        parts[0].charAt(0) + parts[1].charAt(0)
+    } else {
+        name.charAt(0)
+    }}
+}
+
+<div class="flin-profile-layout variant-{variant}" style="--cover-height: {coverHeight}">
+    // Cover image
+    <div class="profile-cover">
+        {if coverImage != none}
+            <img src={coverImage} alt="Cover" class="cover-image" />
+        {/if}
+        <div class="cover-overlay"></div>
+    </div>
+
+    // Profile header
+    <div class="profile-header">
+        <div class="profile-header-inner">
+            // Avatar
+            <div class="profile-avatar">
+                {if user.avatar != none}
+                    <img src={user.avatar} alt={user.name} class="avatar-image" />
+                {else}
+                    <div class="avatar-fallback">
+                        {getInitials(user.name)}
+                    </div>
+                {/if}
+                {if user.verified}
+                    <span class="verified-badge" title="Verified">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </span>
+                {/if}
+            </div>
+
+            // Info
+            <div class="profile-info">
+                <h1 class="profile-name">{user.name}</h1>
+                {if user.role != none}
+                    <p class="profile-role">{user.role}</p>
+                {/if}
+                {if user.location != none}
+                    <p class="profile-location">
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                        {user.location}
+                    </p>
+                {/if}
+            </div>
+
+            // Stats
+            {if showStats && stats != none}
+                <div class="profile-stats">
+                    {for stat in stats}
+                        <div class="stat-item">
+                            <span class="stat-value">{stat.value}</span>
+                            <span class="stat-label">{stat.label}</span>
+                        </div>
+                    {/for}
+                </div>
+            {/if}
+
+            // Actions
+            <div class="profile-actions">
+                {props.actions || none}
+            </div>
+        </div>
+    </div>
+
+    // Tabs navigation
+    {if showTabs}
+        <nav class="profile-tabs" role="tablist">
+            {for tab in tabs}
+                <button
+                    class="tab-item {if isActiveTab(tab.id)}active{/if}"
+                    click={() => handleTabClick(tab.id)}
+                    role="tab"
+                    aria-selected={isActiveTab(tab.id)}
+                >
+                    {tab.label}
+                    {if tab.count != none}
+                        <span class="tab-count">{tab.count}</span>
+                    {/if}
+                </button>
+            {/for}
+        </nav>
+    {/if}
+
+    // Content
+    <main class="profile-content">
+        {children}
+    </main>
+</div>
+
+<style scoped>
+.flin-profile-layout {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Cover */
+.profile-cover {
+    height: var(--cover-height);
+    position: relative;
+    background: linear-gradient(135deg, var(--flin-accent-gold) 0%, #f59e0b 100%);
+    overflow: hidden;
+}
+
+.cover-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cover-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.3));
+}
+
+/* Header */
+.profile-header {
+    position: relative;
+    background: var(--flin-bg-elevated);
+    border-bottom: 1px solid var(--flin-border-subtle);
+    margin-top: -60px;
+    padding-top: 0;
+}
+
+.profile-header-inner {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--flin-space-6);
+    padding: var(--flin-space-6);
+    padding-top: 0;
+}
+
+/* Avatar */
+.profile-avatar {
+    position: relative;
+    flex-shrink: 0;
+    margin-top: -40px;
+}
+
+.avatar-image,
+.avatar-fallback {
+    width: 120px;
+    height: 120px;
+    border-radius: var(--flin-radius-full);
+    border: 4px solid var(--flin-bg-elevated);
+}
+
+.avatar-image {
+    object-fit: cover;
+}
+
+.avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-accent-gold);
+    color: var(--flin-neutral-900);
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+}
+
+.verified-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-bg-elevated);
+    border-radius: var(--flin-radius-full);
+    color: #3b82f6;
+}
+
+/* Info */
+.profile-info {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: var(--flin-space-2);
+}
+
+.profile-name {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0;
+}
+
+.profile-role {
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-secondary);
+    margin: var(--flin-space-1) 0 0;
+}
+
+.profile-location {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-muted);
+    margin: var(--flin-space-2) 0 0;
+}
+
+/* Stats */
+.profile-stats {
+    display: flex;
+    gap: var(--flin-space-6);
+    padding-bottom: var(--flin-space-2);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+}
+
+.stat-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-muted);
+}
+
+/* Actions */
+.profile-actions {
+    display: flex;
+    gap: var(--flin-space-3);
+    padding-bottom: var(--flin-space-2);
+}
+
+/* Tabs */
+.profile-tabs {
+    display: flex;
+    gap: var(--flin-space-1);
+    padding: 0 var(--flin-space-6);
+    background: var(--flin-bg-elevated);
+    border-bottom: 1px solid var(--flin-border-subtle);
+    overflow-x: auto;
+}
+
+.tab-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-4) var(--flin-space-4);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--flin-text-secondary);
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    white-space: nowrap;
+    margin-bottom: -1px;
+}
+
+.tab-item:hover {
+    color: var(--flin-text-primary);
+}
+
+.tab-item.active {
+    color: var(--flin-accent-gold);
+    border-bottom-color: var(--flin-accent-gold);
+}
+
+.tab-count {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+}
+
+/* Content */
+.profile-content {
+    padding: var(--flin-space-6);
+}
+
+/* Variants */
+.variant-wide .profile-header-inner {
+    max-width: none;
+}
+
+.variant-sidebar .profile-content {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: var(--flin-space-6);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .profile-header-inner {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .profile-avatar {
+        margin-top: -60px;
+    }
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile-stats {
+        justify-content: center;
+    }
+
+    .profile-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .profile-tabs {
+        padding: 0 var(--flin-space-4);
+    }
+
+    .profile-content {
+        padding: var(--flin-space-4);
+    }
+
+    .variant-sidebar .profile-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .profile-header {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .avatar-image,
+[data-theme="dark"] .avatar-fallback {
+    border-color: var(--flin-bg-base);
+}
+
+[data-theme="dark"] .verified-badge {
+    background: var(--flin-bg-base);
+}
+
+[data-theme="dark"] .profile-tabs {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+</style>

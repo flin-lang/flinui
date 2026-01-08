@@ -1,0 +1,370 @@
+// TreeList.flin - FlinUI PRO
+// Hierarchical expandable/collapsible tree structure
+
+// Props with defaults
+items = props.items || []
+defaultExpandedKeys = props.defaultExpandedKeys || []
+selectable = props.selectable || true
+selectedKey = props.selectedKey || none
+checkable = props.checkable || false
+checkedKeys = props.checkedKeys || []
+expandOnClick = props.expandOnClick || true
+showIcons = props.showIcons || true
+showLines = props.showLines || false
+onSelect = props.onSelect || none
+onExpand = props.onExpand || none
+onCheck = props.onCheck || none
+
+// State for expanded nodes
+expandedKeys = defaultExpandedKeys
+
+// Toggle expand state
+handleToggle = {key} => {
+    if expandedKeys.includes(key) {
+        expandedKeys = expandedKeys.filter({k} => k != key)
+    } else {
+        expandedKeys = [...expandedKeys, key]
+    }
+    if onExpand != none {
+        onExpand(expandedKeys, key)
+    }
+}
+
+// Handle selection
+handleSelect = {item} => {
+    if onSelect != none {
+        onSelect(item)
+    }
+}
+
+// Handle checkbox
+handleCheck = {item} => {
+    if onCheck != none {
+        onCheck(item)
+    }
+}
+
+// Build class string
+treeClass = "tree-list" ++ {if showLines { " tree-list--lines" } else { "" }}
+
+<div class={treeClass} role="tree" aria-label="Tree navigation">
+    {for item in items}
+        <div class="tree-list__branch" style={"--depth: 0"}>
+            <div
+                class={
+                    "tree-list__node" ++
+                    {if selectable && selectedKey == (item.key || item.id) { " tree-list__node--selected" } else { "" }} ++
+                    {if item.disabled { " tree-list__node--disabled" } else { "" }}
+                }
+                role="treeitem"
+                aria-expanded={if item.children != none { expandedKeys.includes(item.key || item.id) } else { none }}
+                tabindex="0"
+                click={
+                    if expandOnClick && item.children != none {
+                        handleToggle(item.key || item.id)
+                    } else if selectable {
+                        handleSelect(item)
+                    }
+                }
+            >
+                // Expand/collapse button
+                {if item.children != none && item.children.length > 0}
+                    <button
+                        class={"tree-list__expander" ++ {if expandedKeys.includes(item.key || item.id) { " tree-list__expander--expanded" } else { "" }}}
+                        click={handleToggle(item.key || item.id)}
+                        aria-label="Toggle expand"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                {else}
+                    <span class="tree-list__expander-placeholder"></span>
+                {/if}
+
+                // Checkbox
+                {if checkable}
+                    <span
+                        class={"tree-list__checkbox" ++ {if checkedKeys.includes(item.key || item.id) { " tree-list__checkbox--checked" } else { "" }}}
+                        click={handleCheck(item)}
+                    >
+                        {if checkedKeys.includes(item.key || item.id)}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        {/if}
+                    </span>
+                {/if}
+
+                // Icon
+                {if showIcons && item.icon != none}
+                    <span class="tree-list__icon">{item.icon}</span>
+                {/if}
+
+                // Label
+                <span class="tree-list__label">{item.label || item.title || ""}</span>
+
+                // Badge
+                {if item.badge != none}
+                    <span class={"tree-list__badge tree-list__badge--" ++ (item.badgeVariant || "default")}>
+                        {item.badge}
+                    </span>
+                {/if}
+
+                // Actions
+                {if item.actions != none}
+                    <div class="tree-list__actions">
+                        {item.actions}
+                    </div>
+                {/if}
+            </div>
+
+            // Children (recursive rendering represented as nested divs)
+            {if item.children != none && item.children.length > 0 && expandedKeys.includes(item.key || item.id)}
+                <div class="tree-list__children" role="group">
+                    {for child in item.children}
+                        <div class="tree-list__branch" style={"--depth: 1"}>
+                            <div
+                                class={
+                                    "tree-list__node" ++
+                                    {if selectable && selectedKey == (child.key || child.id) { " tree-list__node--selected" } else { "" }}
+                                }
+                                role="treeitem"
+                                tabindex="-1"
+                            >
+                                {if child.children != none && child.children.length > 0}
+                                    <button class="tree-list__expander">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6"></polyline>
+                                        </svg>
+                                    </button>
+                                {else}
+                                    <span class="tree-list__expander-placeholder"></span>
+                                {/if}
+
+                                {if checkable}
+                                    <span class="tree-list__checkbox"></span>
+                                {/if}
+
+                                {if showIcons && child.icon != none}
+                                    <span class="tree-list__icon">{child.icon}</span>
+                                {/if}
+
+                                <span class="tree-list__label">{child.label || child.title || ""}</span>
+
+                                {if child.badge != none}
+                                    <span class={"tree-list__badge tree-list__badge--" ++ (child.badgeVariant || "default")}>
+                                        {child.badge}
+                                    </span>
+                                {/if}
+                            </div>
+                        </div>
+                    {/for}
+                </div>
+            {/if}
+        </div>
+    {/for}
+
+    // Empty state
+    {if items.length == 0}
+        <div class="tree-list__empty">
+            <span class="tree-list__empty-text">No items</span>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.tree-list {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    user-select: none;
+}
+
+.tree-list--lines .tree-list__children {
+    border-left: 1px dashed var(--flin-neutral-300);
+    margin-left: 11px;
+}
+
+.tree-list__branch {
+    padding-left: calc(var(--depth, 0) * 24px);
+}
+
+.tree-list__node {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-2);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+    outline: none;
+}
+
+.tree-list__node:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.tree-list__node:focus {
+    background-color: var(--flin-neutral-100);
+    outline: 2px solid var(--flin-primary);
+    outline-offset: -2px;
+}
+
+.tree-list__node--selected {
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.tree-list__node--selected:hover {
+    background-color: var(--flin-primary-light);
+}
+
+.tree-list__node--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.tree-list__expander {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    color: var(--flin-neutral-500);
+    cursor: pointer;
+    border-radius: var(--flin-radius-sm);
+    transition: transform var(--flin-transition-fast), color var(--flin-transition-fast);
+    padding: 0;
+}
+
+.tree-list__expander:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-200);
+}
+
+.tree-list__expander--expanded {
+    transform: rotate(90deg);
+}
+
+.tree-list__expander-placeholder {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.tree-list__checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-sm);
+    background: var(--flin-bg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.tree-list__checkbox:hover {
+    border-color: var(--flin-primary);
+}
+
+.tree-list__checkbox--checked {
+    border-color: var(--flin-primary);
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.tree-list__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--flin-neutral-500);
+}
+
+.tree-list__node--selected .tree-list__icon {
+    color: var(--flin-primary);
+}
+
+.tree-list__label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: var(--flin-font-medium);
+}
+
+.tree-list__badge {
+    flex-shrink: 0;
+    padding: 2px var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    border-radius: var(--flin-radius-full);
+}
+
+.tree-list__badge--default { background-color: var(--flin-neutral-100); color: var(--flin-neutral-700); }
+.tree-list__badge--success { background-color: var(--flin-success-light); color: var(--flin-success-dark); }
+.tree-list__badge--warning { background-color: var(--flin-warning-light); color: var(--flin-warning-dark); }
+.tree-list__badge--danger { background-color: var(--flin-danger-light); color: var(--flin-danger-dark); }
+.tree-list__badge--info { background-color: var(--flin-info-light); color: var(--flin-info-dark); }
+
+.tree-list__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    opacity: 0;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.tree-list__node:hover .tree-list__actions {
+    opacity: 1;
+}
+
+.tree-list__children {
+    margin-left: var(--flin-space-3);
+}
+
+.tree-list__empty {
+    padding: var(--flin-space-6);
+    text-align: center;
+}
+
+.tree-list__empty-text {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Dark theme */
+[data-theme="dark"] .tree-list__node:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .tree-list__node:focus {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .tree-list__node--selected {
+    background-color: rgba(var(--flin-primary-rgb), 0.2);
+}
+
+[data-theme="dark"] .tree-list__expander:hover {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .tree-list__checkbox {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .tree-list--lines .tree-list__children {
+    border-left-color: var(--flin-neutral-600);
+}
+</style>

@@ -1,0 +1,500 @@
+// AccountSwitcher.flin - FlinUI PRO Account Switcher Component
+// Multi-account dropdown with add account option
+
+// Props with defaults
+accounts = props.accounts || []
+activeAccount = props.activeAccount || none
+onSwitch = props.onSwitch
+onAddAccount = props.onAddAccount
+onManageAccounts = props.onManageAccounts
+showAddAccount = props.showAddAccount || true
+showManageAccounts = props.showManageAccounts || false
+maxVisible = props.maxVisible || 5
+placement = props.placement || "bottom-right"
+
+// State
+isOpen = false
+focusedIndex = -1
+
+// Get active account or first account
+currentAccount = {if activeAccount != none {
+    activeAccount
+} else if accounts.length > 0 {
+    accounts[0]
+} else {
+    ["name": "No Account", "email": "", "avatar": ""]
+}}
+
+// Toggle dropdown
+toggleDropdown = {
+    isOpen = !isOpen
+    if isOpen {
+        focusedIndex = -1
+    }
+}
+
+// Close dropdown
+closeDropdown = {
+    isOpen = false
+    focusedIndex = -1
+}
+
+// Handle account switch
+handleSwitch = fn(account) {
+    if onSwitch {
+        onSwitch(account)
+    }
+    closeDropdown()
+}
+
+// Handle add account
+handleAddAccount = {
+    if onAddAccount {
+        onAddAccount()
+    }
+    closeDropdown()
+}
+
+// Handle manage accounts
+handleManageAccounts = {
+    if onManageAccounts {
+        onManageAccounts()
+    }
+    closeDropdown()
+}
+
+// Get initials
+getInitials = fn(name) {
+    {if name != "" {
+        words = name.split(" ")
+        {if words.length > 1 {
+            words[0][0] ++ words[words.length - 1][0]
+        } else {
+            name[0]
+        }}
+    } else {
+        "?"
+    }}
+}
+
+// Keyboard navigation
+handleKeyDown = fn(e) {
+    if !isOpen {
+        if e.key == "Enter" || e.key == " " || e.key == "ArrowDown" {
+            e.preventDefault()
+            isOpen = true
+            focusedIndex = 0
+        }
+    } else {
+        totalItems = accounts.length + match showAddAccount { true -> 1, _ -> 0 } + match showManageAccounts { true -> 1, _ -> 0 }
+        match e.key {
+            "Escape" -> {
+                e.preventDefault()
+                closeDropdown()
+            }
+            "ArrowDown" -> {
+                e.preventDefault()
+                focusedIndex = (focusedIndex + 1) % totalItems
+            }
+            "ArrowUp" -> {
+                e.preventDefault()
+                focusedIndex = match focusedIndex <= 0 {
+                    true -> totalItems - 1
+                    _ -> focusedIndex - 1
+                }
+            }
+            "Enter" -> {
+                e.preventDefault()
+                if focusedIndex >= 0 && focusedIndex < accounts.length {
+                    handleSwitch(accounts[focusedIndex])
+                } else if focusedIndex == accounts.length && showAddAccount {
+                    handleAddAccount()
+                } else if showManageAccounts {
+                    handleManageAccounts()
+                }
+            }
+            _ -> {}
+        }
+    }
+}
+
+// Click outside handler
+handleClickOutside = fn(e) {
+    if isOpen {
+        closeDropdown()
+    }
+}
+
+// Placement class
+placementClass = match placement {
+    "bottom-left" -> "account-switcher-dropdown-bottom-left"
+    "top-right" -> "account-switcher-dropdown-top-right"
+    "top-left" -> "account-switcher-dropdown-top-left"
+    _ -> "account-switcher-dropdown-bottom-right"
+}
+
+// Dropdown classes
+dropdownClass = "account-switcher-dropdown " ++ placementClass ++ match isOpen {
+    true -> " account-switcher-dropdown-open"
+    _ -> ""
+}
+
+<div class="account-switcher" blur={handleClickOutside}>
+    <button
+        class="account-switcher-trigger"
+        click={toggleDropdown}
+        keydown={handleKeyDown}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+    >
+        <div class="account-switcher-avatar">
+            {if currentAccount.avatar != ""}
+                <img src={currentAccount.avatar} alt={currentAccount.name} class="account-switcher-avatar-img">
+            {else}
+                <span class="account-switcher-avatar-initials">{getInitials(currentAccount.name)}</span>
+            {/if}
+        </div>
+        <div class="account-switcher-info">
+            <span class="account-switcher-name">{currentAccount.name}</span>
+            {if currentAccount.email != ""}
+                <span class="account-switcher-email">{currentAccount.email}</span>
+            {/if}
+        </div>
+        <svg class="account-switcher-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+        </svg>
+    </button>
+
+    <div class={dropdownClass} role="listbox">
+        <div class="account-switcher-header">
+            <span class="account-switcher-header-title">Switch account</span>
+        </div>
+
+        <div class="account-switcher-list">
+            {for account, index in accounts}
+                {if index < maxVisible}
+                    <button
+                        class={"account-switcher-item" ++ match account.id == currentAccount.id { true -> " account-switcher-item-active", _ -> "" } ++ match index == focusedIndex { true -> " account-switcher-item-focused", _ -> "" }}
+                        click={fn() { handleSwitch(account) }}
+                        role="option"
+                        aria-selected={account.id == currentAccount.id}
+                    >
+                        <div class="account-switcher-item-avatar">
+                            {if account.avatar != ""}
+                                <img src={account.avatar} alt={account.name} class="account-switcher-avatar-img">
+                            {else}
+                                <span class="account-switcher-avatar-initials">{getInitials(account.name)}</span>
+                            {/if}
+                        </div>
+                        <div class="account-switcher-item-info">
+                            <span class="account-switcher-item-name">{account.name}</span>
+                            {if account.email != ""}
+                                <span class="account-switcher-item-email">{account.email}</span>
+                            {/if}
+                        </div>
+                        {if account.id == currentAccount.id}
+                            <svg class="account-switcher-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                        {/if}
+                    </button>
+                {/if}
+            {/for}
+        </div>
+
+        {if showAddAccount || showManageAccounts}
+            <div class="account-switcher-divider"></div>
+        {/if}
+
+        {if showAddAccount}
+            <button
+                class={"account-switcher-action" ++ match focusedIndex == accounts.length { true -> " account-switcher-item-focused", _ -> "" }}
+                click={handleAddAccount}
+            >
+                <svg class="account-switcher-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="16"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+                <span>Add another account</span>
+            </button>
+        {/if}
+
+        {if showManageAccounts}
+            <button
+                class={"account-switcher-action" ++ match focusedIndex == accounts.length + match showAddAccount { true -> 1, _ -> 0 } { true -> " account-switcher-item-focused", _ -> "" }}
+                click={handleManageAccounts}
+            >
+                <svg class="account-switcher-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m7.08 7.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m7.08-7.08l4.24-4.24"/>
+                </svg>
+                <span>Manage accounts</span>
+            </button>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+.account-switcher {
+    position: relative;
+    display: inline-block;
+}
+
+.account-switcher-trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    min-width: 200px;
+}
+
+.account-switcher-trigger:hover {
+    border-color: var(--flin-neutral-300);
+    background-color: var(--flin-neutral-50);
+}
+
+.account-switcher-trigger:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.account-switcher-trigger[aria-expanded="true"] {
+    border-color: var(--flin-primary);
+}
+
+.account-switcher-trigger[aria-expanded="true"] .account-switcher-chevron {
+    transform: rotate(180deg);
+}
+
+/* Avatar */
+.account-switcher-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-primary-light);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.account-switcher-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.account-switcher-avatar-initials {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-primary);
+    text-transform: uppercase;
+}
+
+/* Info */
+.account-switcher-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.account-switcher-name {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.account-switcher-email {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.account-switcher-chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+    transition: transform var(--flin-transition-fast);
+}
+
+/* Dropdown */
+.account-switcher-dropdown {
+    position: absolute;
+    z-index: var(--flin-z-dropdown);
+    min-width: 280px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all var(--flin-transition-fast);
+}
+
+.account-switcher-dropdown-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Placement */
+.account-switcher-dropdown-bottom-right {
+    top: 100%;
+    right: 0;
+    margin-top: var(--flin-space-2);
+}
+
+.account-switcher-dropdown-bottom-left {
+    top: 100%;
+    left: 0;
+    margin-top: var(--flin-space-2);
+}
+
+.account-switcher-dropdown-top-right {
+    bottom: 100%;
+    right: 0;
+    margin-bottom: var(--flin-space-2);
+}
+
+.account-switcher-dropdown-top-left {
+    bottom: 100%;
+    left: 0;
+    margin-bottom: var(--flin-space-2);
+}
+
+/* Header */
+.account-switcher-header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.account-switcher-header-title {
+    font-size: var(--flin-text-xs);
+    font-weight: 600;
+    color: var(--flin-fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* List */
+.account-switcher-list {
+    padding: var(--flin-space-2);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.account-switcher-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    width: 100%;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+    text-align: left;
+}
+
+.account-switcher-item:hover,
+.account-switcher-item-focused {
+    background-color: var(--flin-neutral-100);
+}
+
+.account-switcher-item-active {
+    background-color: var(--flin-primary-light);
+}
+
+.account-switcher-item-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-primary-light);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.account-switcher-item-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.account-switcher-item-name {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.account-switcher-item-email {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.account-switcher-check {
+    width: 18px;
+    height: 18px;
+    color: var(--flin-primary);
+    flex-shrink: 0;
+}
+
+/* Divider */
+.account-switcher-divider {
+    height: 1px;
+    margin: var(--flin-space-2) 0;
+    background-color: var(--flin-neutral-200);
+}
+
+/* Actions */
+.account-switcher-action {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    width: 100%;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+    text-align: left;
+}
+
+.account-switcher-action:hover,
+.account-switcher-action.account-switcher-item-focused {
+    background-color: var(--flin-neutral-100);
+}
+
+.account-switcher-action-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--flin-fg-muted);
+}
+</style>

@@ -1,0 +1,318 @@
+// ============================================================================
+// FooterColumns.flin — FlinUI PRO Navigation Component
+// Multi-column footer with link groups organized by category
+// ============================================================================
+// Props:
+//   - logo: Logo image URL or none for text (string)
+//   - logoText: Text to show with/instead of logo (string)
+//   - logoHref: Link for logo click (string)
+//   - description: Short description under logo (string)
+//   - columns: Array of link columns [{ title, links: [{ label, href }] }] (array)
+//   - copyright: Copyright text (string)
+//   - bottomLinks: Array of bottom links [{ label, href }] (array)
+//   - variant: Color scheme - light, dark (string)
+
+logo = props.logo || none
+logoText = props.logoText || "Brand"
+logoHref = props.logoHref || "/"
+description = props.description || none
+columns = props.columns || []
+copyright = props.copyright || "All rights reserved."
+bottomLinks = props.bottomLinks || []
+variant = props.variant || "light"
+
+// Get current year
+currentYear = new Date().getFullYear()
+
+// Variant classes
+variantClass = match variant {
+    "dark" => "footer-columns-dark"
+    _ => "footer-columns-light"
+}
+
+footerClass = "flin-footer-columns " ++ variantClass
+
+<footer class={footerClass}>
+    <div class="footer-container">
+        <div class="footer-main">
+            <!-- Brand Section -->
+            <div class="footer-brand-section">
+                <a href={logoHref} class="footer-brand">
+                    {if logo != none}
+                        <img src={logo} alt={logoText} class="footer-logo-img">
+                    {else}
+                        <div class="footer-logo-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                <path d="M2 17l10 5 10-5"/>
+                                <path d="M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                    {/if}
+                    <span class="footer-logo-text">{logoText}</span>
+                </a>
+                {if description != none}
+                    <p class="footer-description">{description}</p>
+                {/if}
+            </div>
+
+            <!-- Link Columns -->
+            <div class="footer-columns">
+                {for column in columns}
+                    <div class="footer-column">
+                        <h3 class="footer-column-title">{column.title}</h3>
+                        <ul class="footer-column-links">
+                            {for link in column.links}
+                                <li>
+                                    <a href={link.href} class="footer-column-link">
+                                        {link.label}
+                                        {if link.badge != none}
+                                            <span class="footer-link-badge">{link.badge}</span>
+                                        {/if}
+                                    </a>
+                                </li>
+                            {/for}
+                        </ul>
+                    </div>
+                {/for}
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="footer-bottom">
+            <p class="footer-copyright">
+                &copy; {currentYear} {logoText}. {copyright}
+            </p>
+            {if bottomLinks.length > 0}
+                <nav class="footer-bottom-nav" aria-label="Legal">
+                    {for link in bottomLinks}
+                        <a href={link.href} class="footer-bottom-link">{link.label}</a>
+                    {/for}
+                </nav>
+            {/if}
+        </div>
+    </div>
+</footer>
+
+<style scoped>
+.flin-footer-columns {
+    width: 100%;
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.footer-container {
+    max-width: var(--flin-container-screen-xl);
+    margin: 0 auto;
+    padding: var(--flin-space-12) var(--flin-space-4) var(--flin-space-8);
+}
+
+/* Light variant */
+.footer-columns-light {
+    background-color: var(--flin-bg);
+    color: var(--flin-fg);
+}
+
+.footer-columns-light .footer-description,
+.footer-columns-light .footer-column-link,
+.footer-columns-light .footer-copyright,
+.footer-columns-light .footer-bottom-link {
+    color: var(--flin-fg-muted);
+}
+
+.footer-columns-light .footer-column-link:hover,
+.footer-columns-light .footer-bottom-link:hover {
+    color: var(--flin-fg);
+}
+
+.footer-columns-light .footer-column-title {
+    color: var(--flin-fg);
+}
+
+/* Dark variant */
+.footer-columns-dark {
+    background-color: var(--flin-neutral-900);
+    color: var(--flin-neutral-50);
+    border-top-color: var(--flin-neutral-700);
+}
+
+.footer-columns-dark .footer-description,
+.footer-columns-dark .footer-column-link,
+.footer-columns-dark .footer-copyright,
+.footer-columns-dark .footer-bottom-link {
+    color: var(--flin-neutral-400);
+}
+
+.footer-columns-dark .footer-column-link:hover,
+.footer-columns-dark .footer-bottom-link:hover {
+    color: var(--flin-neutral-50);
+}
+
+.footer-columns-dark .footer-column-title {
+    color: var(--flin-neutral-50);
+}
+
+.footer-columns-dark .footer-logo-icon {
+    background-color: var(--flin-neutral-700);
+}
+
+.footer-columns-dark .footer-bottom {
+    border-top-color: var(--flin-neutral-800);
+}
+
+/* Main content grid */
+.footer-main {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--flin-space-10);
+}
+
+@media (min-width: 768px) {
+    .footer-main {
+        grid-template-columns: 1fr 2fr;
+        gap: var(--flin-space-12);
+    }
+}
+
+@media (min-width: 1024px) {
+    .footer-main {
+        grid-template-columns: 1.5fr 3fr;
+        gap: var(--flin-space-16);
+    }
+}
+
+/* Brand section */
+.footer-brand-section {
+    max-width: 320px;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    text-decoration: none;
+    color: inherit;
+    font-weight: var(--flin-font-bold);
+}
+
+.footer-logo-img {
+    height: 36px;
+    width: auto;
+}
+
+.footer-logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--flin-radius-md);
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.footer-logo-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.footer-logo-text {
+    font-size: var(--flin-text-xl);
+}
+
+.footer-description {
+    margin: var(--flin-space-4) 0 0 0;
+    font-size: var(--flin-text-sm);
+    line-height: var(--flin-leading-relaxed);
+}
+
+/* Columns */
+.footer-columns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--flin-space-8);
+}
+
+@media (min-width: 640px) {
+    .footer-columns {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .footer-columns {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.footer-column-title {
+    margin: 0 0 var(--flin-space-4) 0;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+}
+
+.footer-column-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+}
+
+.footer-column-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    text-decoration: none;
+    transition: color var(--flin-transition-fast);
+}
+
+.footer-link-badge {
+    display: inline-flex;
+    padding: var(--flin-space-0-5) var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    background-color: var(--flin-primary);
+    color: white;
+    border-radius: var(--flin-radius-full);
+}
+
+/* Bottom bar */
+.footer-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-4);
+    margin-top: var(--flin-space-10);
+    padding-top: var(--flin-space-8);
+    border-top: 1px solid var(--flin-neutral-200);
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .footer-bottom {
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+    }
+}
+
+.footer-copyright {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+}
+
+.footer-bottom-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--flin-space-4);
+}
+
+.footer-bottom-link {
+    font-size: var(--flin-text-sm);
+    text-decoration: none;
+    transition: color var(--flin-transition-fast);
+}
+</style>

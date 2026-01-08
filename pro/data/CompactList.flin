@@ -1,0 +1,296 @@
+// CompactList.flin - FlinUI PRO
+// Dense list with minimal spacing for lots of items
+
+// Props with defaults
+items = props.items || []
+selectable = props.selectable || false
+selectedKeys = props.selectedKeys || []
+multiSelect = props.multiSelect || false
+hoverable = props.hoverable || true
+striped = props.striped || false
+dividers = props.dividers || true
+size = props.size || "md"
+onSelect = props.onSelect || none
+onItemClick = props.onItemClick || none
+
+// Compute size class
+sizeClass = match size {
+    "xs" -> "compact-list--xs"
+    "sm" -> "compact-list--sm"
+    "lg" -> "compact-list--lg"
+    _ -> "compact-list--md"
+}
+
+// Build class string
+listClass = "compact-list " ++ sizeClass
+listClass = listClass ++ {if striped { " compact-list--striped" } else { "" }}
+listClass = listClass ++ {if dividers { " compact-list--dividers" } else { "" }}
+
+<div class={listClass} role="list">
+    {for item in items}
+        <div
+            class={
+                "compact-list__item" ++
+                {if hoverable { " compact-list__item--hoverable" } else { "" }} ++
+                {if selectable && selectedKeys.includes(item.key || item.id) { " compact-list__item--selected" } else { "" }}
+            }
+            role="listitem"
+            click={
+                if selectable && onSelect != none {
+                    onSelect(item)
+                } else if onItemClick != none {
+                    onItemClick(item)
+                }
+            }
+        >
+            // Checkbox for multi-select
+            {if selectable && multiSelect}
+                <div class="compact-list__checkbox">
+                    <input
+                        type="checkbox"
+                        checked={selectedKeys.includes(item.key || item.id)}
+                        class="compact-list__checkbox-input"
+                    >
+                </div>
+            {/if}
+
+            // Leading icon or indicator
+            {if item.icon != none}
+                <div class={"compact-list__icon compact-list__icon--" ++ (item.iconVariant || "default")}>
+                    {item.icon}
+                </div>
+            {/if}
+
+            // Status indicator dot
+            {if item.status != none}
+                <span class={"compact-list__status compact-list__status--" ++ item.status}></span>
+            {/if}
+
+            // Main content
+            <div class="compact-list__content">
+                <span class="compact-list__label">{item.label || item.title || ""}</span>
+                {if item.secondary != none}
+                    <span class="compact-list__secondary">{item.secondary}</span>
+                {/if}
+            </div>
+
+            // Value column (right-aligned)
+            {if item.value != none}
+                <div class="compact-list__value">{item.value}</div>
+            {/if}
+
+            // Badge
+            {if item.badge != none}
+                <span class={"compact-list__badge compact-list__badge--" ++ (item.badgeVariant || "default")}>
+                    {item.badge}
+                </span>
+            {/if}
+
+            // Trailing action
+            {if item.action != none}
+                <div class="compact-list__action">
+                    {item.action}
+                </div>
+            {/if}
+
+            // Chevron for navigation
+            {if item.showChevron}
+                <div class="compact-list__chevron">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+            {/if}
+        </div>
+    {/for}
+
+    // Empty state
+    {if items.length == 0}
+        <div class="compact-list__empty">
+            <span class="compact-list__empty-text">No items</span>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.compact-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background: var(--flin-bg);
+    border-radius: var(--flin-radius-md);
+    border: 1px solid var(--flin-neutral-200);
+    overflow: hidden;
+}
+
+/* Size variants */
+.compact-list--xs .compact-list__item { padding: var(--flin-space-1) var(--flin-space-2); font-size: var(--flin-text-xs); }
+.compact-list--sm .compact-list__item { padding: var(--flin-space-1) var(--flin-space-3); font-size: var(--flin-text-sm); }
+.compact-list--md .compact-list__item { padding: var(--flin-space-2) var(--flin-space-3); font-size: var(--flin-text-sm); }
+.compact-list--lg .compact-list__item { padding: var(--flin-space-3) var(--flin-space-4); font-size: var(--flin-text-base); }
+
+.compact-list--dividers .compact-list__item:not(:last-child) {
+    border-bottom: 1px solid var(--flin-neutral-100);
+}
+
+.compact-list--striped .compact-list__item:nth-child(even) {
+    background-color: var(--flin-neutral-50);
+}
+
+.compact-list__item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.compact-list__item--hoverable {
+    cursor: pointer;
+}
+
+.compact-list__item--hoverable:hover {
+    background-color: var(--flin-neutral-50);
+}
+
+.compact-list__item--selected {
+    background-color: var(--flin-primary-light);
+}
+
+.compact-list__item--selected:hover {
+    background-color: var(--flin-primary-light);
+}
+
+.compact-list__checkbox {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.compact-list__checkbox-input {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    accent-color: var(--flin-primary);
+}
+
+.compact-list__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: var(--flin-neutral-500);
+}
+
+.compact-list__icon--primary { color: var(--flin-primary); }
+.compact-list__icon--success { color: var(--flin-success); }
+.compact-list__icon--warning { color: var(--flin-warning); }
+.compact-list__icon--danger { color: var(--flin-danger); }
+.compact-list__icon--info { color: var(--flin-info); }
+
+.compact-list__status {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-neutral-400);
+}
+
+.compact-list__status--online { background-color: var(--flin-success); }
+.compact-list__status--offline { background-color: var(--flin-neutral-400); }
+.compact-list__status--busy { background-color: var(--flin-danger); }
+.compact-list__status--away { background-color: var(--flin-warning); }
+.compact-list__status--active { background-color: var(--flin-success); }
+.compact-list__status--inactive { background-color: var(--flin-neutral-400); }
+.compact-list__status--pending { background-color: var(--flin-warning); }
+.compact-list__status--error { background-color: var(--flin-danger); }
+
+.compact-list__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.compact-list__label {
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.compact-list__secondary {
+    color: var(--flin-fg-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.compact-list__value {
+    flex-shrink: 0;
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+    font-variant-numeric: tabular-nums;
+}
+
+.compact-list__badge {
+    flex-shrink: 0;
+    padding: 2px var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    border-radius: var(--flin-radius-full);
+    line-height: 1.2;
+}
+
+.compact-list__badge--default { background-color: var(--flin-neutral-100); color: var(--flin-neutral-700); }
+.compact-list__badge--success { background-color: var(--flin-success-light); color: var(--flin-success-dark); }
+.compact-list__badge--warning { background-color: var(--flin-warning-light); color: var(--flin-warning-dark); }
+.compact-list__badge--danger { background-color: var(--flin-danger-light); color: var(--flin-danger-dark); }
+.compact-list__badge--info { background-color: var(--flin-info-light); color: var(--flin-info-dark); }
+.compact-list__badge--primary { background-color: var(--flin-primary-light); color: var(--flin-primary); }
+
+.compact-list__action {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.compact-list__chevron {
+    flex-shrink: 0;
+    color: var(--flin-neutral-400);
+}
+
+.compact-list__empty {
+    padding: var(--flin-space-6);
+    text-align: center;
+}
+
+.compact-list__empty-text {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Dark theme */
+[data-theme="dark"] .compact-list {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .compact-list--dividers .compact-list__item:not(:last-child) {
+    border-bottom-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .compact-list--striped .compact-list__item:nth-child(even) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .compact-list__item--hoverable:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .compact-list__item--selected {
+    background-color: rgba(var(--flin-primary-rgb), 0.2);
+}
+</style>

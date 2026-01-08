@@ -1,0 +1,708 @@
+// ProductUpsell.flin - FlinUI PRO E-commerce Component
+// "Upgrade to Premium" section with comparison table and upgrade CTA
+
+// Props with defaults
+currentProduct = props.currentProduct || none
+upgradeProduct = props.upgradeProduct || none
+comparisonFeatures = props.comparisonFeatures || []
+title = props.title || "Upgrade to Premium"
+subtitle = props.subtitle || "Get more value with the premium version"
+onUpgrade = props.onUpgrade
+onKeepCurrent = props.onKeepCurrent
+currency = props.currency || "$"
+savings = props.savings || none
+
+// State
+showFullComparison = false
+
+// Computed values
+hasProducts = currentProduct != none && upgradeProduct != none
+priceDifference = {if upgradeProduct != none && currentProduct != none}
+    upgradeProduct.price - currentProduct.price
+{else}
+    0
+{/if}
+
+savingsAmount = savings || (currentProduct.price * 0.2)
+
+// Handlers
+fn handleUpgradeClick() {
+    {if onUpgrade != none}
+        onUpgrade(upgradeProduct)
+    {/if}
+}
+
+fn handleKeepCurrentClick() {
+    {if onKeepCurrent != none}
+        onKeepCurrent()
+    {/if}
+}
+
+fn toggleFullComparison() {
+    showFullComparison = !showFullComparison
+}
+
+<div class="product-upsell">
+    <div class="product-upsell-header">
+        <div>
+            <h2 class="product-upsell-title">{title}</h2>
+            <p class="product-upsell-subtitle">{subtitle}</p>
+        </div>
+        {if savings > 0}
+            <div class="product-upsell-badge">
+                <span class="product-upsell-badge-icon">💰</span>
+                <span>Save {currency}{savingsAmount}</span>
+            </div>
+        {/if}
+    </div>
+
+    {if hasProducts}
+        <div class="product-upsell-comparison">
+            <div class="product-upsell-column">
+                <div class="product-upsell-product-header">
+                    <h3 class="product-upsell-product-name">{currentProduct.name}</h3>
+                    <span class="product-upsell-current-badge">Current</span>
+                </div>
+
+                <div class="product-upsell-product-image">
+                    <img src={currentProduct.image || ""} alt={currentProduct.name} />
+                </div>
+
+                <div class="product-upsell-product-pricing">
+                    <span class="product-upsell-price">{currency}{currentProduct.price}</span>
+                    {if currentProduct.originalPrice != none}
+                        <span class="product-upsell-original-price">{currency}{currentProduct.originalPrice}</span>
+                    {/if}
+                </div>
+
+                <div class="product-upsell-description">{currentProduct.description || "Standard edition"}</div>
+
+                <button class="product-upsell-btn product-upsell-btn-secondary" click={handleKeepCurrentClick}>
+                    Keep Current
+                </button>
+            </div>
+
+            <div class="product-upsell-vs">
+                <span>vs</span>
+            </div>
+
+            <div class="product-upsell-column product-upsell-column-featured">
+                <div class="product-upsell-product-header">
+                    <h3 class="product-upsell-product-name">{upgradeProduct.name}</h3>
+                    <span class="product-upsell-premium-badge">Premium</span>
+                </div>
+
+                <div class="product-upsell-product-image">
+                    <img src={upgradeProduct.image || ""} alt={upgradeProduct.name} />
+                </div>
+
+                <div class="product-upsell-product-pricing">
+                    <span class="product-upsell-price">{currency}{upgradeProduct.price}</span>
+                    {if upgradeProduct.originalPrice != none}
+                        <span class="product-upsell-original-price">{currency}{upgradeProduct.originalPrice}</span>
+                    {/if}
+                    <div class="product-upsell-price-comparison">
+                        <span class="product-upsell-price-diff">+{currency}{priceDifference}/month</span>
+                    </div>
+                </div>
+
+                <div class="product-upsell-description">{upgradeProduct.description || "Premium edition with advanced features"}</div>
+
+                <button class="product-upsell-btn product-upsell-btn-primary" click={handleUpgradeClick}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Upgrade Now</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="product-upsell-features-preview">
+            <div class="product-upsell-features-header">
+                <h3 class="product-upsell-features-title">What's Included</h3>
+                <button class="product-upsell-toggle-btn" click={toggleFullComparison}>
+                    {if showFullComparison}
+                        <span>Hide comparison</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="18 15 12 9 6 15"/>
+                        </svg>
+                    {else}
+                        <span>Show comparison</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    {/if}
+                </button>
+            </div>
+
+            {if showFullComparison}
+                <div class="product-upsell-comparison-table">
+                    <div class="product-upsell-comparison-header">
+                        <div class="product-upsell-comparison-feature">Feature</div>
+                        <div class="product-upsell-comparison-column">{currentProduct.name}</div>
+                        <div class="product-upsell-comparison-column">{upgradeProduct.name}</div>
+                    </div>
+
+                    {for feature in comparisonFeatures}
+                        <div class="product-upsell-comparison-row">
+                            <div class="product-upsell-comparison-feature">
+                                <span class="product-upsell-feature-name">{feature.name}</span>
+                                {if feature.description != ""}
+                                    <p class="product-upsell-feature-description">{feature.description}</p>
+                                {/if}
+                            </div>
+                            <div class="product-upsell-comparison-column">
+                                {if feature.current}
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="check-icon">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                {else}
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="cross-icon">
+                                        <line x1="18" y1="6" x2="6" y2="18"/>
+                                        <line x1="6" y1="6" x2="18" y2="18"/>
+                                    </svg>
+                                {/if}
+                            </div>
+                            <div class="product-upsell-comparison-column">
+                                {if feature.premium}
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="check-icon">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                {else}
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="cross-icon">
+                                        <line x1="18" y1="6" x2="6" y2="18"/>
+                                        <line x1="6" y1="6" x2="18" y2="18"/>
+                                    </svg>
+                                {/if}
+                            </div>
+                        </div>
+                    {/for}
+                </div>
+            {else}
+                <div class="product-upsell-quick-comparison">
+                    {for i in [0, 1, 2]}
+                        {if i < comparisonFeatures.length}
+                            {feature = comparisonFeatures[i]}
+                            <div class="product-upsell-quick-item">
+                                <div class="product-upsell-quick-feature">
+                                    <span class="product-upsell-feature-name">{feature.name}</span>
+                                </div>
+                                <div class="product-upsell-quick-values">
+                                    <span class="product-upsell-quick-value" data-included={feature.current}>
+                                        {if feature.current}✓{else}✗{/if}
+                                    </span>
+                                    <span class="product-upsell-quick-value" data-included={feature.premium}>
+                                        {if feature.premium}✓{else}✗{/if}
+                                    </span>
+                                </div>
+                            </div>
+                        {/if}
+                    {/for}
+                </div>
+            {/if}
+        </div>
+
+        <div class="product-upsell-cta-section">
+            <div class="product-upsell-cta-text">
+                <p class="product-upsell-cta-main">Ready to upgrade your experience?</p>
+                <p class="product-upsell-cta-secondary">Start with a {upgradeProduct.trialDays || 30}-day free trial. No credit card required.</p>
+            </div>
+            <button class="product-upsell-cta-button" click={handleUpgradeClick}>
+                <span>Start Premium Trial</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </button>
+        </div>
+    {else}
+        <div class="product-upsell-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <line x1="9" y1="9" x2="15" y2="9"/>
+                <line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+            <p>Upgrade data not available</p>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+/* Container */
+.product-upsell {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-6);
+    padding: var(--flin-space-6);
+    background: linear-gradient(135deg, white 0%, var(--flin-neutral-50) 100%);
+    border-radius: var(--flin-radius-xl);
+    border: 1px solid var(--flin-neutral-200);
+}
+
+/* Header */
+.product-upsell-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--flin-space-4);
+}
+
+.product-upsell-title {
+    margin: 0 0 var(--flin-space-1) 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+}
+
+.product-upsell-subtitle {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-neutral-600);
+}
+
+/* Badge */
+.product-upsell-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background-color: var(--flin-success-light);
+    color: var(--flin-success-dark);
+    border-radius: var(--flin-radius-full);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    flex-shrink: 0;
+}
+
+.product-upsell-badge-icon {
+    font-size: var(--flin-text-base);
+}
+
+/* Comparison section */
+.product-upsell-comparison {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: var(--flin-space-4);
+    align-items: start;
+}
+
+/* Column */
+.product-upsell-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-5);
+    background-color: white;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+}
+
+.product-upsell-column-featured {
+    border: 2px solid var(--flin-primary);
+    box-shadow: var(--flin-shadow-lg);
+    position: relative;
+}
+
+.product-upsell-column-featured::before {
+    content: "Most Popular";
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--flin-space-1) var(--flin-space-3);
+    background-color: var(--flin-primary);
+    color: white;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-bold);
+    border-radius: var(--flin-radius-full);
+    white-space: nowrap;
+}
+
+/* Product header */
+.product-upsell-product-header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.product-upsell-product-name {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+    flex: 1;
+}
+
+.product-upsell-current-badge,
+.product-upsell-premium-badge {
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-bold);
+    border-radius: var(--flin-radius-sm);
+    white-space: nowrap;
+}
+
+.product-upsell-current-badge {
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-neutral-700);
+}
+
+.product-upsell-premium-badge {
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+/* Product image */
+.product-upsell-product-image {
+    width: 100%;
+    height: 200px;
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+    background-color: var(--flin-neutral-100);
+}
+
+.product-upsell-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Pricing */
+.product-upsell-product-pricing {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.product-upsell-price {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+}
+
+.product-upsell-original-price {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-neutral-500);
+    text-decoration: line-through;
+}
+
+.product-upsell-price-comparison {
+    padding-top: var(--flin-space-1);
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.product-upsell-price-diff {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-danger);
+}
+
+/* Description */
+.product-upsell-description {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-600);
+    line-height: 1.5;
+}
+
+/* Buttons */
+.product-upsell-btn {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    margin-top: auto;
+}
+
+.product-upsell-btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.product-upsell-btn-primary:hover {
+    background-color: var(--flin-primary-hover);
+    transform: scale(1.02);
+}
+
+.product-upsell-btn-secondary {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-700);
+    border: 1px solid var(--flin-neutral-300);
+}
+
+.product-upsell-btn-secondary:hover {
+    background-color: var(--flin-neutral-200);
+}
+
+/* VS divider */
+.product-upsell-vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-500);
+}
+
+/* Features section */
+.product-upsell-features-preview {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.product-upsell-features-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-upsell-features-title {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+}
+
+.product-upsell-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background-color: transparent;
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-neutral-700);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.product-upsell-toggle-btn:hover {
+    border-color: var(--flin-primary);
+    color: var(--flin-primary);
+}
+
+/* Comparison table */
+.product-upsell-comparison-table {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+.product-upsell-comparison-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-4);
+    background-color: var(--flin-neutral-100);
+    border-bottom: 2px solid var(--flin-neutral-200);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+}
+
+.product-upsell-comparison-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    align-items: center;
+}
+
+.product-upsell-comparison-row:last-child {
+    border-bottom: none;
+}
+
+.product-upsell-comparison-row:nth-child(even) {
+    background-color: var(--flin-neutral-50);
+}
+
+.product-upsell-comparison-feature {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.product-upsell-feature-name {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+}
+
+.product-upsell-feature-description {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-600);
+}
+
+.product-upsell-comparison-column {
+    display: flex;
+    justify-content: center;
+}
+
+.check-icon {
+    color: var(--flin-success);
+}
+
+.cross-icon {
+    color: var(--flin-neutral-400);
+}
+
+/* Quick comparison */
+.product-upsell-quick-comparison {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    background-color: var(--flin-neutral-50);
+    border-radius: var(--flin-radius-lg);
+}
+
+.product-upsell-quick-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: var(--flin-space-4);
+    align-items: center;
+}
+
+.product-upsell-quick-feature {
+    display: flex;
+    align-items: center;
+}
+
+.product-upsell-quick-values {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-2);
+}
+
+.product-upsell-quick-value {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-bold);
+}
+
+.product-upsell-quick-value[data-included="true"] {
+    color: var(--flin-success);
+}
+
+.product-upsell-quick-value[data-included="false"] {
+    color: var(--flin-neutral-400);
+}
+
+/* CTA Section */
+.product-upsell-cta-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-5);
+    background: linear-gradient(135deg, var(--flin-primary) 0%, var(--flin-primary-dark) 100%);
+    border-radius: var(--flin-radius-lg);
+    color: white;
+}
+
+.product-upsell-cta-main {
+    margin: 0 0 var(--flin-space-1) 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-bold);
+}
+
+.product-upsell-cta-secondary {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    opacity: 0.9;
+}
+
+.product-upsell-cta-button {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-5);
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
+    border-radius: var(--flin-radius-lg);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.product-upsell-cta-button:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: translateX(4px);
+}
+
+/* Empty state */
+.product-upsell-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-8);
+    color: var(--flin-neutral-500);
+}
+
+.product-upsell-empty svg {
+    color: var(--flin-neutral-400);
+}
+
+.product-upsell-empty p {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .product-upsell {
+        background: linear-gradient(135deg, var(--flin-neutral-800) 0%, var(--flin-neutral-900) 100%);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .product-upsell-column {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .product-upsell-product-name {
+        color: var(--flin-neutral-100);
+    }
+
+    .product-upsell-price {
+        color: var(--flin-neutral-100);
+    }
+}
+</style>

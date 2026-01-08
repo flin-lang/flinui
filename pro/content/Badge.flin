@@ -1,0 +1,287 @@
+// ============================================================================
+// Badge.flin — FlinUI PRO (Content)
+// Status badge with pill style and various options
+// ============================================================================
+// Props:
+//   variant: text - Color variant ("default", "primary", "success", "warning", "danger", "info") (default: "default")
+//   size: text - Size variant ("sm", "md", "lg") (default: "md")
+//   dot: boolean - Show status dot (default: false)
+//   dotPosition: text - Dot position ("left", "right") (default: "left")
+//   outlined: boolean - Use outlined style (default: false)
+//   rounded: text - Border radius ("full", "md", "sm") (default: "full")
+//   icon: slot - Optional icon slot (default: none)
+//   removable: boolean - Show remove button (default: false)
+//   onRemove: function - Remove callback (default: none)
+//   pulse: boolean - Add pulse animation to dot (default: false)
+// ============================================================================
+
+variant = props.variant || "default"
+size = props.size || "md"
+dot = props.dot || false
+dotPosition = props.dotPosition || "left"
+outlined = props.outlined || false
+rounded = props.rounded || "full"
+icon = props.icon || none
+removable = props.removable || false
+onRemove = props.onRemove || none
+pulse = props.pulse || false
+
+// Compute variant class
+variantClass = match variant {
+    "primary" -> "pro-badge--primary"
+    "success" -> "pro-badge--success"
+    "warning" -> "pro-badge--warning"
+    "danger" -> "pro-badge--danger"
+    "info" -> "pro-badge--info"
+    _ -> "pro-badge--default"
+}
+
+// Compute size class
+sizeClass = match size {
+    "sm" -> "pro-badge--sm"
+    "lg" -> "pro-badge--lg"
+    _ -> "pro-badge--md"
+}
+
+// Compute outlined class
+outlinedClass = match outlined {
+    true -> "pro-badge--outlined"
+    _ -> ""
+}
+
+// Compute rounded class
+roundedClass = match rounded {
+    "md" -> "pro-badge--rounded-md"
+    "sm" -> "pro-badge--rounded-sm"
+    _ -> "pro-badge--rounded-full"
+}
+
+// Compute dot position class
+dotPosClass = match dotPosition {
+    "right" -> "pro-badge--dot-right"
+    _ -> "pro-badge--dot-left"
+}
+
+// Compute pulse class
+pulseClass = match pulse {
+    true -> "pro-badge--pulse"
+    _ -> ""
+}
+
+<span class={"pro-badge " ++ variantClass ++ " " ++ sizeClass ++ " " ++ outlinedClass ++ " " ++ roundedClass ++ " " ++ dotPosClass ++ " " ++ pulseClass}>
+    {if dot && dotPosition == "left"}
+        <span class="pro-badge__dot"></span>
+    {/if}
+
+    {if icon != none}
+        <span class="pro-badge__icon">{icon}</span>
+    {/if}
+
+    <span class="pro-badge__content">{children}</span>
+
+    {if dot && dotPosition == "right"}
+        <span class="pro-badge__dot"></span>
+    {/if}
+
+    {if removable}
+        <button
+            class="pro-badge__remove"
+            click={onRemove}
+            aria-label="Remove"
+            type="button"
+        >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    {/if}
+</span>
+
+<style scoped>
+.pro-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-family: var(--flin-font-sans);
+    font-weight: var(--flin-font-medium);
+    line-height: 1;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Size variants */
+.pro-badge--sm {
+    padding: 2px var(--flin-space-2);
+    font-size: 10px;
+}
+
+.pro-badge--md {
+    padding: var(--flin-space-1) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+}
+
+.pro-badge--lg {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+}
+
+/* Rounded variants */
+.pro-badge--rounded-full { border-radius: var(--flin-radius-full); }
+.pro-badge--rounded-md { border-radius: var(--flin-radius-md); }
+.pro-badge--rounded-sm { border-radius: var(--flin-radius-sm); }
+
+/* Color variants - Solid */
+.pro-badge--default {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-700);
+}
+
+.pro-badge--primary {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.pro-badge--success {
+    background-color: var(--flin-success);
+    color: white;
+}
+
+.pro-badge--warning {
+    background-color: var(--flin-warning);
+    color: var(--flin-neutral-900);
+}
+
+.pro-badge--danger {
+    background-color: var(--flin-danger);
+    color: white;
+}
+
+.pro-badge--info {
+    background-color: var(--flin-info);
+    color: white;
+}
+
+/* Color variants - Outlined */
+.pro-badge--outlined {
+    background-color: transparent;
+    border: 1px solid currentColor;
+}
+
+.pro-badge--outlined.pro-badge--default {
+    color: var(--flin-neutral-600);
+    border-color: var(--flin-neutral-300);
+}
+
+.pro-badge--outlined.pro-badge--primary {
+    color: var(--flin-primary);
+}
+
+.pro-badge--outlined.pro-badge--success {
+    color: var(--flin-success);
+}
+
+.pro-badge--outlined.pro-badge--warning {
+    color: var(--flin-warning-dark);
+}
+
+.pro-badge--outlined.pro-badge--danger {
+    color: var(--flin-danger);
+}
+
+.pro-badge--outlined.pro-badge--info {
+    color: var(--flin-info);
+}
+
+/* Dot */
+.pro-badge__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--flin-radius-full);
+    background-color: currentColor;
+    flex-shrink: 0;
+}
+
+.pro-badge--lg .pro-badge__dot {
+    width: 8px;
+    height: 8px;
+}
+
+/* Pulse animation */
+.pro-badge--pulse .pro-badge__dot {
+    position: relative;
+}
+
+.pro-badge--pulse .pro-badge__dot::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: var(--flin-radius-full);
+    background-color: currentColor;
+    animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.4;
+        transform: scale(1.5);
+    }
+}
+
+/* Icon */
+.pro-badge__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pro-badge--sm .pro-badge__icon svg { width: 10px; height: 10px; }
+.pro-badge--md .pro-badge__icon svg { width: 12px; height: 12px; }
+.pro-badge--lg .pro-badge__icon svg { width: 14px; height: 14px; }
+
+/* Content */
+.pro-badge__content {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Remove button */
+.pro-badge__remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-left: var(--flin-space-1);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-full);
+    color: currentColor;
+    opacity: 0.7;
+    cursor: pointer;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.pro-badge__remove:hover {
+    opacity: 1;
+}
+
+.pro-badge--sm .pro-badge__remove svg { width: 10px; height: 10px; }
+.pro-badge--md .pro-badge__remove svg { width: 12px; height: 12px; }
+.pro-badge--lg .pro-badge__remove svg { width: 14px; height: 14px; }
+
+/* Dark theme */
+[data-theme="dark"] .pro-badge--default {
+    background-color: var(--flin-neutral-800);
+    color: var(--flin-neutral-300);
+}
+
+[data-theme="dark"] .pro-badge--outlined.pro-badge--default {
+    color: var(--flin-neutral-400);
+    border-color: var(--flin-neutral-600);
+}
+</style>

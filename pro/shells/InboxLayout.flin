@@ -1,0 +1,375 @@
+// ============================================================================
+// InboxLayout.flin — FlinUI PRO Shell Component
+// Email/message application layout with list and detail view
+// ============================================================================
+// Props:
+//   - listWidth: Width of message list (string, default: "380px")
+//   - showFilters: Show filter bar (boolean, default: true)
+//   - showPreview: Show message preview pane (boolean, default: true)
+//   - selectedMessage: Currently selected message ID (string or none)
+//   - messages: List of messages (list)
+//   - onSelectMessage: Callback when message is selected (function or none)
+//   - onComposeClick: Callback when compose button is clicked (function or none)
+// ============================================================================
+
+listWidth = props.listWidth || "380px"
+showFilters = props.showFilters || true
+showPreview = props.showPreview || true
+selectedMessage = props.selectedMessage || none
+messages = props.messages || []
+onSelectMessage = props.onSelectMessage || none
+onComposeClick = props.onComposeClick || none
+
+// Internal state
+mobileView = "list" // "list" or "detail"
+searchQuery = ""
+
+handleMessageClick = (messageId) => {
+    if onSelectMessage != none {
+        onSelectMessage(messageId)
+    }
+    mobileView = "detail"
+}
+
+handleBackClick = () => {
+    mobileView = "list"
+}
+
+handleComposeClick = () => {
+    if onComposeClick != none {
+        onComposeClick()
+    }
+}
+
+<div class="flin-inbox-layout {if mobileView == 'detail'}show-detail{/if}"
+     style="--list-width: {listWidth}">
+
+    // Sidebar (folders/labels)
+    <aside class="inbox-sidebar">
+        <button class="compose-btn" click={handleComposeClick}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+            </svg>
+            <span>Compose</span>
+        </button>
+
+        <nav class="folder-nav">
+            {props.folders || none}
+        </nav>
+
+        <div class="sidebar-footer">
+            {props.sidebarFooter || none}
+        </div>
+    </aside>
+
+    // Message list
+    <div class="inbox-list">
+        // Search bar
+        <div class="list-header">
+            <div class="search-bar">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                </svg>
+                <input
+                    type="text"
+                    class="search-input"
+                    placeholder="Search messages..."
+                    value={searchQuery}
+                    input={(e) => searchQuery = e.target.value}
+                />
+            </div>
+
+            {if showFilters}
+                <div class="filter-bar">
+                    {props.filters || none}
+                </div>
+            {/if}
+        </div>
+
+        // Messages
+        <div class="message-list" role="listbox">
+            {props.messageList || none}
+        </div>
+
+        // List footer
+        <div class="list-footer">
+            {props.listFooter || none}
+        </div>
+    </div>
+
+    // Message preview/detail
+    {if showPreview}
+        <main class="inbox-detail">
+            // Back button (mobile)
+            <button class="back-btn" click={handleBackClick} aria-label="Back to list">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+
+            {if selectedMessage != none}
+                <div class="message-detail">
+                    {children}
+                </div>
+            {else}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <p class="empty-text">Select a message to read</p>
+                </div>
+            {/if}
+        </main>
+    {/if}
+</div>
+
+<style scoped>
+.flin-inbox-layout {
+    display: flex;
+    height: 100vh;
+    background: var(--flin-bg-base);
+    overflow: hidden;
+}
+
+/* Sidebar */
+.inbox-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--flin-bg-elevated);
+    border-right: 1px solid var(--flin-border-subtle);
+    padding: var(--flin-space-4);
+}
+
+.compose-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    background: var(--flin-accent-gold);
+    color: var(--flin-neutral-900);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    margin-bottom: var(--flin-space-4);
+}
+
+.compose-btn:hover {
+    background: #d4a20a;
+}
+
+.folder-nav {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.sidebar-footer {
+    padding-top: var(--flin-space-4);
+    border-top: 1px solid var(--flin-border-subtle);
+}
+
+/* Message list */
+.inbox-list {
+    width: var(--list-width);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--flin-bg-elevated);
+    border-right: 1px solid var(--flin-border-subtle);
+}
+
+.list-header {
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.search-bar {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: var(--flin-space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--flin-text-muted);
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: var(--flin-space-3) var(--flin-space-3) var(--flin-space-3) var(--flin-space-10);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-primary);
+    outline: none;
+    transition: border-color var(--flin-transition-fast);
+}
+
+.search-input:focus {
+    border-color: var(--flin-accent-gold);
+}
+
+.search-input::placeholder {
+    color: var(--flin-text-muted);
+}
+
+.filter-bar {
+    display: flex;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-3);
+}
+
+.message-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.list-footer {
+    padding: var(--flin-space-3);
+    border-top: 1px solid var(--flin-border-subtle);
+}
+
+/* Message detail */
+.inbox-detail {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    position: relative;
+}
+
+.back-btn {
+    display: none;
+    position: absolute;
+    top: var(--flin-space-4);
+    left: var(--flin-space-4);
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-primary);
+    cursor: pointer;
+    z-index: 10;
+}
+
+.message-detail {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--flin-space-6);
+}
+
+/* Empty state */
+.empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-4);
+}
+
+.empty-icon {
+    color: var(--flin-text-muted);
+    opacity: 0.5;
+}
+
+.empty-text {
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-muted);
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .inbox-sidebar {
+        width: 64px;
+        padding: var(--flin-space-2);
+    }
+
+    .compose-btn span {
+        display: none;
+    }
+
+    .compose-btn {
+        padding: var(--flin-space-3);
+    }
+}
+
+@media (max-width: 768px) {
+    .inbox-sidebar {
+        display: none;
+    }
+
+    .inbox-list {
+        width: 100%;
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        transition: transform var(--flin-transition-normal);
+    }
+
+    .show-detail .inbox-list {
+        transform: translateX(-100%);
+    }
+
+    .inbox-detail {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        background: var(--flin-bg-base);
+        transform: translateX(100%);
+        transition: transform var(--flin-transition-normal);
+    }
+
+    .show-detail .inbox-detail {
+        transform: translateX(0);
+    }
+
+    .back-btn {
+        display: flex;
+    }
+
+    .message-detail {
+        padding-top: calc(var(--flin-space-6) + 48px);
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .inbox-sidebar,
+[data-theme="dark"] .inbox-list {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .list-header,
+[data-theme="dark"] .list-footer,
+[data-theme="dark"] .sidebar-footer {
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .search-input {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .back-btn {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+}
+</style>

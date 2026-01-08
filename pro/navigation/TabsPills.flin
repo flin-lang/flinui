@@ -1,0 +1,378 @@
+// ============================================================================
+// TabsPills.flin — FlinUI PRO Navigation Component
+// Pill-style tabs with rounded backgrounds
+// ============================================================================
+// Props:
+//   - tabs: List of tab objects with id, label, icon, count (list)
+//   - activeTab: Currently active tab id (string)
+//   - onChange: Callback when tab changes (function)
+//   - size: Size variant - sm, md, lg (string)
+//   - variant: Style variant - solid, soft, outline (string)
+//   - fullWidth: Stretch pills to full width (boolean)
+//   - color: Accent color - gold, blue, green, purple (string)
+
+tabs = props.tabs || [
+    ["id": "all", "label": "All", "count": 120],
+    ["id": "active", "label": "Active", "count": 45],
+    ["id": "pending", "label": "Pending", "count": 32],
+    ["id": "completed", "label": "Completed", "count": 43]
+]
+activeTab = props.activeTab || tabs[0].id
+onChange = props.onChange || none
+size = props.size || "md"
+variant = props.variant || "solid"
+fullWidth = props.fullWidth || false
+color = props.color || "gold"
+
+// Size class
+sizeClass = match size {
+    "sm" => "tabs-pills-sm"
+    "lg" => "tabs-pills-lg"
+    _ => "tabs-pills-md"
+}
+
+// Variant class
+variantClass = match variant {
+    "soft" => "tabs-pills-soft"
+    "outline" => "tabs-pills-outline"
+    _ => "tabs-pills-solid"
+}
+
+// Color class
+colorClass = match color {
+    "blue" => "tabs-pills-blue"
+    "green" => "tabs-pills-green"
+    "purple" => "tabs-pills-purple"
+    _ => "tabs-pills-gold"
+}
+
+// Full width class
+fullWidthClass = match fullWidth { true => " tabs-pills-full", _ => "" }
+
+// Handle tab click
+handleTabClick = (tabId) => {
+    if onChange != none {
+        onChange(tabId)
+    }
+}
+
+<div
+    class="flin-tabs-pills {sizeClass} {variantClass} {colorClass}{fullWidthClass}"
+    role="tablist"
+    aria-label="Pill tabs navigation"
+>
+    <div class="tabs-pills-container">
+        {for tab in tabs}
+            <button
+                class="tabs-pills-tab {if tab.id == activeTab}tabs-pills-tab-active{/if}"
+                role="tab"
+                aria-selected={tab.id == activeTab}
+                aria-controls="panel-{tab.id}"
+                id="tab-{tab.id}"
+                disabled={tab.disabled || false}
+                click={() => handleTabClick(tab.id)}
+            >
+                {if tab.icon != none}
+                    <span class="tabs-pills-icon">{tab.icon}</span>
+                {/if}
+                <span class="tabs-pills-label">{tab.label}</span>
+                {if tab.count != none}
+                    <span class="tabs-pills-count">{tab.count}</span>
+                {/if}
+            </button>
+        {/for}
+    </div>
+</div>
+
+<style scoped>
+.flin-tabs-pills {
+    display: flex;
+}
+
+.tabs-pills-container {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-1);
+    background: var(--flin-bg-surface);
+    border-radius: var(--flin-radius-full);
+}
+
+.tabs-pills-full {
+    width: 100%;
+}
+
+.tabs-pills-full .tabs-pills-container {
+    width: 100%;
+}
+
+.tabs-pills-full .tabs-pills-tab {
+    flex: 1;
+}
+
+.tabs-pills-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-weight: var(--flin-font-medium);
+    white-space: nowrap;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.tabs-pills-tab:focus-visible {
+    outline: 2px solid var(--flin-accent-gold);
+    outline-offset: 2px;
+}
+
+.tabs-pills-tab:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.tabs-pills-icon {
+    display: flex;
+    align-items: center;
+    font-size: 1.125em;
+}
+
+.tabs-pills-label {
+    display: inline-block;
+}
+
+.tabs-pills-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 var(--flin-space-1-5);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    border-radius: var(--flin-radius-full);
+    transition: all var(--flin-transition-fast);
+}
+
+/* Size variants */
+.tabs-pills-sm .tabs-pills-container {
+    gap: var(--flin-space-1);
+}
+
+.tabs-pills-sm .tabs-pills-tab {
+    padding: var(--flin-space-1) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+}
+
+.tabs-pills-sm .tabs-pills-count {
+    min-width: 16px;
+    height: 16px;
+    font-size: 10px;
+}
+
+.tabs-pills-md .tabs-pills-tab {
+    padding: var(--flin-space-1-5) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+}
+
+.tabs-pills-lg .tabs-pills-container {
+    padding: var(--flin-space-1-5);
+    gap: var(--flin-space-3);
+}
+
+.tabs-pills-lg .tabs-pills-tab {
+    padding: var(--flin-space-2) var(--flin-space-5);
+    font-size: var(--flin-text-base);
+}
+
+.tabs-pills-lg .tabs-pills-count {
+    min-width: 24px;
+    height: 24px;
+}
+
+/* Solid variant */
+.tabs-pills-solid .tabs-pills-tab {
+    color: var(--flin-text-tertiary);
+}
+
+.tabs-pills-solid .tabs-pills-tab:hover:not(:disabled):not(.tabs-pills-tab-active) {
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-elevated);
+}
+
+.tabs-pills-solid .tabs-pills-count {
+    background: var(--flin-bg-elevated);
+    color: var(--flin-text-tertiary);
+}
+
+.tabs-pills-solid .tabs-pills-tab-active .tabs-pills-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: inherit;
+}
+
+/* Color variants for solid */
+.tabs-pills-solid.tabs-pills-gold .tabs-pills-tab-active {
+    background: var(--flin-accent-gold);
+    color: var(--flin-bg-base);
+}
+
+.tabs-pills-solid.tabs-pills-blue .tabs-pills-tab-active {
+    background: #3b82f6;
+    color: white;
+}
+
+.tabs-pills-solid.tabs-pills-green .tabs-pills-tab-active {
+    background: #22c55e;
+    color: white;
+}
+
+.tabs-pills-solid.tabs-pills-purple .tabs-pills-tab-active {
+    background: #a855f7;
+    color: white;
+}
+
+/* Soft variant */
+.tabs-pills-soft .tabs-pills-container {
+    background: transparent;
+    padding: 0;
+}
+
+.tabs-pills-soft .tabs-pills-tab {
+    color: var(--flin-text-tertiary);
+}
+
+.tabs-pills-soft .tabs-pills-tab:hover:not(:disabled):not(.tabs-pills-tab-active) {
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-surface);
+}
+
+.tabs-pills-soft .tabs-pills-count {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-tertiary);
+}
+
+/* Soft color variants */
+.tabs-pills-soft.tabs-pills-gold .tabs-pills-tab-active {
+    background: rgba(234, 179, 8, 0.15);
+    color: var(--flin-accent-gold);
+}
+
+.tabs-pills-soft.tabs-pills-gold .tabs-pills-tab-active .tabs-pills-count {
+    background: var(--flin-accent-gold);
+    color: var(--flin-bg-base);
+}
+
+.tabs-pills-soft.tabs-pills-blue .tabs-pills-tab-active {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+}
+
+.tabs-pills-soft.tabs-pills-blue .tabs-pills-tab-active .tabs-pills-count {
+    background: #3b82f6;
+    color: white;
+}
+
+.tabs-pills-soft.tabs-pills-green .tabs-pills-tab-active {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.tabs-pills-soft.tabs-pills-green .tabs-pills-tab-active .tabs-pills-count {
+    background: #22c55e;
+    color: white;
+}
+
+.tabs-pills-soft.tabs-pills-purple .tabs-pills-tab-active {
+    background: rgba(168, 85, 247, 0.15);
+    color: #a855f7;
+}
+
+.tabs-pills-soft.tabs-pills-purple .tabs-pills-tab-active .tabs-pills-count {
+    background: #a855f7;
+    color: white;
+}
+
+/* Outline variant */
+.tabs-pills-outline .tabs-pills-container {
+    background: transparent;
+    padding: 0;
+}
+
+.tabs-pills-outline .tabs-pills-tab {
+    color: var(--flin-text-tertiary);
+    border: 1px solid transparent;
+}
+
+.tabs-pills-outline .tabs-pills-tab:hover:not(:disabled):not(.tabs-pills-tab-active) {
+    color: var(--flin-text-primary);
+    border-color: var(--flin-border-subtle);
+}
+
+.tabs-pills-outline .tabs-pills-count {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-tertiary);
+}
+
+/* Outline color variants */
+.tabs-pills-outline.tabs-pills-gold .tabs-pills-tab-active {
+    border-color: var(--flin-accent-gold);
+    color: var(--flin-accent-gold);
+}
+
+.tabs-pills-outline.tabs-pills-gold .tabs-pills-tab-active .tabs-pills-count {
+    background: var(--flin-accent-gold);
+    color: var(--flin-bg-base);
+}
+
+.tabs-pills-outline.tabs-pills-blue .tabs-pills-tab-active {
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.tabs-pills-outline.tabs-pills-blue .tabs-pills-tab-active .tabs-pills-count {
+    background: #3b82f6;
+    color: white;
+}
+
+.tabs-pills-outline.tabs-pills-green .tabs-pills-tab-active {
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+.tabs-pills-outline.tabs-pills-green .tabs-pills-tab-active .tabs-pills-count {
+    background: #22c55e;
+    color: white;
+}
+
+.tabs-pills-outline.tabs-pills-purple .tabs-pills-tab-active {
+    border-color: #a855f7;
+    color: #a855f7;
+}
+
+.tabs-pills-outline.tabs-pills-purple .tabs-pills-tab-active .tabs-pills-count {
+    background: #a855f7;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .tabs-pills-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        max-width: 100%;
+    }
+
+    .tabs-pills-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tabs-pills-tab {
+        flex-shrink: 0;
+    }
+}
+</style>

@@ -1,0 +1,448 @@
+// ModalConfirm.flin - FlinUI PRO Confirmation Modal
+// Confirmation dialog with yes/no actions and warning variant
+
+// Props with defaults
+isOpen = props.isOpen || false
+title = props.title || "Confirm Action"
+message = props.message || "Are you sure you want to proceed?"
+variant = props.variant || "default"
+confirmText = props.confirmText || "Confirm"
+cancelText = props.cancelText || "Cancel"
+loading = props.loading || false
+closeOnBackdrop = props.closeOnBackdrop || true
+onClose = props.onClose
+onConfirm = props.onConfirm
+onCancel = props.onCancel
+
+// Internal state
+isClosing = false
+
+// Handle close
+handleClose = {
+    if !loading {
+        isClosing = true
+        if onClose { onClose() }
+    }
+}
+
+// Handle backdrop click
+handleBackdropClick = {
+    if closeOnBackdrop && !loading {
+        isClosing = true
+        if onCancel { onCancel() }
+        if onClose { onClose() }
+    }
+}
+
+// Handle confirm
+handleConfirm = {
+    if !loading {
+        if onConfirm { onConfirm() }
+    }
+}
+
+// Handle cancel
+handleCancel = {
+    if !loading {
+        isClosing = true
+        if onCancel { onCancel() }
+        if onClose { onClose() }
+    }
+}
+
+// Handle escape key
+handleKeyDown = (event) => {
+    if event.key == "Escape" && !loading {
+        handleCancel()
+    }
+}
+
+// Variant classes and icons
+variantClass = match variant {
+    "danger" -> "modal-confirm--danger"
+    "warning" -> "modal-confirm--warning"
+    "info" -> "modal-confirm--info"
+    _ -> "modal-confirm--default"
+}
+
+// Icon path based on variant
+iconPath = match variant {
+    "danger" -> "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+    "warning" -> "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+    "info" -> "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    _ -> "M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+}
+
+// Computed classes
+backdropClass = match isClosing {
+    true -> "modal-confirm-backdrop modal-confirm-backdrop--closing"
+    _ -> "modal-confirm-backdrop"
+}
+
+modalClass = match isClosing {
+    true -> "modal-confirm " ++ variantClass ++ " modal-confirm--closing"
+    _ -> "modal-confirm " ++ variantClass
+}
+
+containerClass = match isOpen {
+    true -> "modal-confirm-container"
+    _ -> "modal-confirm-container modal-confirm-container--hidden"
+}
+
+// Button classes
+confirmBtnClass = match variant {
+    "danger" -> "modal-confirm-btn modal-confirm-btn--danger"
+    "warning" -> "modal-confirm-btn modal-confirm-btn--warning"
+    _ -> "modal-confirm-btn modal-confirm-btn--primary"
+}
+
+confirmBtnClassFinal = match loading {
+    true -> confirmBtnClass ++ " modal-confirm-btn--loading"
+    _ -> confirmBtnClass
+}
+
+<div class={containerClass}>
+    <div
+        class={backdropClass}
+        click={handleBackdropClick}
+        aria-hidden="true"
+    ></div>
+
+    <div
+        class={modalClass}
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="modal-confirm-title"
+        aria-describedby="modal-confirm-description"
+        tabindex="-1"
+        keydown={handleKeyDown}
+    >
+        // Icon
+        <div class="modal-confirm-icon-wrapper">
+            <div class="modal-confirm-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
+                </svg>
+            </div>
+        </div>
+
+        // Content
+        <div class="modal-confirm-content">
+            <h3 id="modal-confirm-title" class="modal-confirm-title">{title}</h3>
+            <p id="modal-confirm-description" class="modal-confirm-message">{message}</p>
+            {if props.details}
+                <div class="modal-confirm-details">{props.details}</div>
+            {/if}
+        </div>
+
+        // Actions
+        <div class="modal-confirm-actions">
+            <button
+                class="modal-confirm-btn modal-confirm-btn--secondary"
+                click={handleCancel}
+                type="button"
+                disabled={loading}
+            >
+                {cancelText}
+            </button>
+            <button
+                class={confirmBtnClassFinal}
+                click={handleConfirm}
+                type="button"
+                disabled={loading}
+            >
+                {if loading}
+                    <span class="modal-confirm-spinner"></span>
+                {/if}
+                <span>{confirmText}</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.modal-confirm-container {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-4);
+}
+
+.modal-confirm-container--hidden {
+    display: none;
+}
+
+/* Backdrop */
+.modal-confirm-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: -1;
+    animation: modalConfirmBackdropIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes modalConfirmBackdropIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-confirm-backdrop--closing {
+    animation: modalConfirmBackdropOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes modalConfirmBackdropOut {
+    to { opacity: 0; }
+}
+
+/* Modal */
+.modal-confirm {
+    position: relative;
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-2xl);
+    width: 100%;
+    max-width: 420px;
+    padding: var(--flin-space-6);
+    text-align: center;
+    animation: modalConfirmIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes modalConfirmIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-confirm--closing {
+    animation: modalConfirmOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes modalConfirmOut {
+    to {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+/* Icon wrapper */
+.modal-confirm-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--flin-space-4);
+}
+
+.modal-confirm-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+}
+
+.modal-confirm-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+/* Variant icon colors */
+.modal-confirm--default .modal-confirm-icon {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-600);
+}
+
+.modal-confirm--info .modal-confirm-icon {
+    background-color: var(--flin-info-light);
+    color: var(--flin-info);
+}
+
+.modal-confirm--warning .modal-confirm-icon {
+    background-color: var(--flin-warning-light);
+    color: var(--flin-warning);
+}
+
+.modal-confirm--danger .modal-confirm-icon {
+    background-color: var(--flin-danger-light);
+    color: var(--flin-danger);
+}
+
+/* Content */
+.modal-confirm-content {
+    margin-bottom: var(--flin-space-6);
+}
+
+.modal-confirm-title {
+    margin: 0 0 var(--flin-space-2) 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.modal-confirm-message {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.6;
+}
+
+.modal-confirm-details {
+    margin-top: var(--flin-space-4);
+    padding: var(--flin-space-3);
+    background-color: var(--flin-neutral-50);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    text-align: left;
+}
+
+/* Actions */
+.modal-confirm-actions {
+    display: flex;
+    gap: var(--flin-space-3);
+}
+
+/* Buttons */
+.modal-confirm-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    border: 1px solid transparent;
+}
+
+.modal-confirm-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.modal-confirm-btn--secondary {
+    background-color: white;
+    color: var(--flin-fg);
+    border-color: var(--flin-neutral-300);
+}
+
+.modal-confirm-btn--secondary:hover:not(:disabled) {
+    background-color: var(--flin-neutral-50);
+    border-color: var(--flin-neutral-400);
+}
+
+.modal-confirm-btn--primary {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.modal-confirm-btn--primary:hover:not(:disabled) {
+    background-color: var(--flin-primary-hover);
+}
+
+.modal-confirm-btn--warning {
+    background-color: var(--flin-warning);
+    color: white;
+}
+
+.modal-confirm-btn--warning:hover:not(:disabled) {
+    background-color: var(--flin-warning-active);
+}
+
+.modal-confirm-btn--danger {
+    background-color: var(--flin-danger);
+    color: white;
+}
+
+.modal-confirm-btn--danger:hover:not(:disabled) {
+    background-color: var(--flin-danger-active);
+}
+
+.modal-confirm-btn--loading {
+    pointer-events: none;
+}
+
+.modal-confirm-btn:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+/* Spinner */
+.modal-confirm-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: modalConfirmSpin 0.6s linear infinite;
+}
+
+@keyframes modalConfirmSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* Focus trap */
+.modal-confirm:focus {
+    outline: none;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+    .modal-confirm {
+        max-width: calc(100vw - var(--flin-space-8));
+        padding: var(--flin-space-5);
+    }
+
+    .modal-confirm-actions {
+        flex-direction: column-reverse;
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .modal-confirm {
+    background-color: var(--flin-neutral-900);
+    border: 1px solid var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-confirm--default .modal-confirm-icon {
+    background-color: var(--flin-neutral-800);
+    color: var(--flin-neutral-400);
+}
+
+[data-theme="dark"] .modal-confirm--info .modal-confirm-icon {
+    background-color: rgba(6, 182, 212, 0.15);
+}
+
+[data-theme="dark"] .modal-confirm--warning .modal-confirm-icon {
+    background-color: rgba(245, 158, 11, 0.15);
+}
+
+[data-theme="dark"] .modal-confirm--danger .modal-confirm-icon {
+    background-color: rgba(239, 68, 68, 0.15);
+}
+
+[data-theme="dark"] .modal-confirm-details {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .modal-confirm-btn--secondary {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .modal-confirm-btn--secondary:hover:not(:disabled) {
+    background-color: var(--flin-neutral-700);
+}
+</style>

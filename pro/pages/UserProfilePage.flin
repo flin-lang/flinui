@@ -1,0 +1,891 @@
+// UserProfilePage.flin - User profile with avatar, info, activity, and settings
+// FlinUI PRO - Page Template
+
+// Props with defaults
+user = props.user || none
+isOwnProfile = props.isOwnProfile || true
+onFollow = props.onFollow || none
+onMessage = props.onMessage || none
+onEdit = props.onEdit || none
+
+// Default user data
+defaultUser = {
+  id: "usr-001",
+  name: "Alex Johnson",
+  username: "@alexjohnson",
+  email: "alex@company.com",
+  avatar: none,
+  role: "Senior Developer",
+  company: "TechCorp Inc.",
+  location: "San Francisco, CA",
+  website: "https://alexjohnson.dev",
+  bio: "Building the future of web development. Passionate about clean code, open source, and teaching others. Always learning, always growing.",
+  joinedDate: "March 2024",
+  followers: 2847,
+  following: 156,
+  posts: 89,
+  isVerified: true,
+  socialLinks: {
+    twitter: "alexjohnson",
+    github: "alexjohnson",
+    linkedin: "alexjohnson"
+  }
+}
+
+profile = user || defaultUser
+
+// State
+activeTab = "posts"
+isFollowing = false
+showEditModal = false
+
+// Activity/Posts data
+recentPosts = [
+  { id: 1, content: "Just shipped a new feature! Really proud of the team's work on this one.", likes: 42, comments: 8, time: "2 hours ago" },
+  { id: 2, content: "Great article on modern CSS techniques. Worth reading for anyone building UIs.", likes: 28, comments: 3, time: "1 day ago" },
+  { id: 3, content: "Excited to announce I'll be speaking at DevConf 2026!", likes: 156, comments: 24, time: "3 days ago" }
+]
+
+// Stats data
+stats = [
+  { label: "Commits", value: "1,247" },
+  { label: "PRs Merged", value: "89" },
+  { label: "Reviews", value: "234" },
+  { label: "Projects", value: "12" }
+]
+
+<div class="profile-page">
+  <!-- Cover & Profile Header -->
+  <header class="profile-header">
+    <div class="cover-image">
+      <div class="cover-gradient"></div>
+    </div>
+    <div class="header-content">
+      <div class="avatar-section">
+        <div class="avatar-wrapper">
+          <Avatar size="xl" name={profile.name} />
+          {if profile.isVerified}
+            <div class="verified-badge" title="Verified">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+              </svg>
+            </div>
+          {/if}
+        </div>
+        <div class="profile-info">
+          <h1 class="profile-name">{profile.name}</h1>
+          <span class="profile-username">{profile.username}</span>
+          <p class="profile-role">{profile.role} at {profile.company}</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        {if isOwnProfile}
+          <Button variant="secondary" click={() => showEditModal = true}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Edit Profile
+          </Button>
+        {else}
+          <Button
+            variant={isFollowing ? "secondary" : "primary"}
+            click={() => isFollowing = !isFollowing}
+          >
+            {isFollowing ? "Following" : "Follow"}
+          </Button>
+          <Button variant="secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Message
+          </Button>
+        {/if}
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="profile-content">
+    <!-- Left Sidebar -->
+    <aside class="profile-sidebar">
+      <!-- Bio Card -->
+      <div class="sidebar-card bio-card">
+        <h3>About</h3>
+        <p class="bio-text">{profile.bio}</p>
+
+        <div class="info-list">
+          <div class="info-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>{profile.location}</span>
+          </div>
+          <div class="info-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+            <span>{profile.company}</span>
+          </div>
+          <div class="info-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            <a href={profile.website} target="_blank">{profile.website}</a>
+          </div>
+          <div class="info-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>Joined {profile.joinedDate}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Links -->
+      <div class="sidebar-card">
+        <h3>Connect</h3>
+        <div class="social-links">
+          <a href={"https://twitter.com/" + profile.socialLinks.twitter} class="social-link twitter" target="_blank">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+            </svg>
+            Twitter
+          </a>
+          <a href={"https://github.com/" + profile.socialLinks.github} class="social-link github" target="_blank">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            GitHub
+          </a>
+          <a href={"https://linkedin.com/in/" + profile.socialLinks.linkedin} class="social-link linkedin" target="_blank">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+            </svg>
+            LinkedIn
+          </a>
+        </div>
+      </div>
+
+      <!-- Stats Card -->
+      <div class="sidebar-card">
+        <h3>Stats</h3>
+        <div class="stats-grid">
+          {for stat in stats}
+            <div class="stat-item">
+              <span class="stat-value">{stat.value}</span>
+              <span class="stat-label">{stat.label}</span>
+            </div>
+          {/for}
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Feed -->
+    <main class="profile-main">
+      <!-- Profile Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-pill">
+          <span class="stat-number">{profile.posts}</span>
+          <span class="stat-text">Posts</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-number">{profile.followers.toLocaleString()}</span>
+          <span class="stat-text">Followers</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-number">{profile.following}</span>
+          <span class="stat-text">Following</span>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="profile-tabs">
+        <button
+          class={"tab-btn " + (activeTab == "posts" ? "active" : "")}
+          click={() => activeTab = "posts"}
+        >
+          Posts
+        </button>
+        <button
+          class={"tab-btn " + (activeTab == "projects" ? "active" : "")}
+          click={() => activeTab = "projects"}
+        >
+          Projects
+        </button>
+        <button
+          class={"tab-btn " + (activeTab == "activity" ? "active" : "")}
+          click={() => activeTab = "activity"}
+        >
+          Activity
+        </button>
+        <button
+          class={"tab-btn " + (activeTab == "likes" ? "active" : "")}
+          click={() => activeTab = "likes"}
+        >
+          Likes
+        </button>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="tab-content">
+        {if activeTab == "posts"}
+          <div class="posts-feed">
+            {for post in recentPosts}
+              <article class="post-card">
+                <div class="post-header">
+                  <Avatar size="md" name={profile.name} />
+                  <div class="post-meta">
+                    <span class="post-author">{profile.name}</span>
+                    <span class="post-time">{post.time}</span>
+                  </div>
+                  <button class="post-menu">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="1"></circle>
+                      <circle cx="19" cy="12" r="1"></circle>
+                      <circle cx="5" cy="12" r="1"></circle>
+                    </svg>
+                  </button>
+                </div>
+                <p class="post-content">{post.content}</p>
+                <div class="post-actions">
+                  <button class="action-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    <span>{post.likes}</span>
+                  </button>
+                  <button class="action-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>{post.comments}</span>
+                  </button>
+                  <button class="action-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="18" cy="5" r="3"></circle>
+                      <circle cx="6" cy="12" r="3"></circle>
+                      <circle cx="18" cy="19" r="3"></circle>
+                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                    </svg>
+                    <span>Share</span>
+                  </button>
+                </div>
+              </article>
+            {/for}
+          </div>
+        {/if}
+
+        {if activeTab == "projects"}
+          <div class="projects-grid">
+            <div class="project-card">
+              <div class="project-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                  <polyline points="2 17 12 22 22 17"></polyline>
+                  <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+              </div>
+              <h4>Design System</h4>
+              <p>A comprehensive UI component library</p>
+              <div class="project-stats">
+                <span>142 stars</span>
+                <span>23 forks</span>
+              </div>
+            </div>
+            <div class="project-card">
+              <div class="project-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
+                </svg>
+              </div>
+              <h4>CLI Tool</h4>
+              <p>Command line utility for developers</p>
+              <div class="project-stats">
+                <span>89 stars</span>
+                <span>12 forks</span>
+              </div>
+            </div>
+            <div class="project-card">
+              <div class="project-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                  <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                  <path d="M2 2l7.586 7.586"></path>
+                  <circle cx="11" cy="11" r="2"></circle>
+                </svg>
+              </div>
+              <h4>Analytics Dashboard</h4>
+              <p>Real-time data visualization platform</p>
+              <div class="project-stats">
+                <span>234 stars</span>
+                <span>45 forks</span>
+              </div>
+            </div>
+          </div>
+        {/if}
+
+        {if activeTab == "activity"}
+          <div class="activity-feed">
+            <div class="activity-item">
+              <div class="activity-icon commit">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <line x1="1.05" y1="12" x2="7" y2="12"></line>
+                  <line x1="17.01" y1="12" x2="22.96" y2="12"></line>
+                </svg>
+              </div>
+              <div class="activity-content">
+                <p>Pushed 3 commits to <strong>design-system</strong></p>
+                <span class="activity-time">2 hours ago</span>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon pr">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="18" cy="18" r="3"></circle>
+                  <circle cx="6" cy="6" r="3"></circle>
+                  <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
+                  <line x1="6" y1="9" x2="6" y2="21"></line>
+                </svg>
+              </div>
+              <div class="activity-content">
+                <p>Opened PR #142 on <strong>cli-tool</strong></p>
+                <span class="activity-time">5 hours ago</span>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon star">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </div>
+              <div class="activity-content">
+                <p>Starred <strong>flin-lang/flin</strong></p>
+                <span class="activity-time">1 day ago</span>
+              </div>
+            </div>
+          </div>
+        {/if}
+
+        {if activeTab == "likes"}
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <h3>No likes yet</h3>
+            <p>Posts that you like will appear here</p>
+          </div>
+        {/if}
+      </div>
+    </main>
+  </div>
+</div>
+
+<style scoped>
+.profile-page {
+  background: var(--flin-bg-secondary);
+  min-height: 100vh;
+}
+
+/* Header */
+.profile-header {
+  position: relative;
+  margin-bottom: var(--flin-space-6);
+}
+
+.cover-image {
+  height: 200px;
+  background: linear-gradient(135deg, var(--flin-accent-gold) 0%, #f59e0b 50%, #d97706 100%);
+  position: relative;
+}
+
+.cover-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(transparent, var(--flin-bg-secondary));
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--flin-space-6);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: -60px;
+  position: relative;
+  z-index: 10;
+}
+
+.avatar-section {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--flin-space-5);
+}
+
+.avatar-wrapper {
+  position: relative;
+}
+
+.avatar-wrapper :global(.avatar) {
+  width: 140px;
+  height: 140px;
+  border: 4px solid var(--flin-bg-secondary);
+  font-size: var(--flin-text-3xl);
+}
+
+.verified-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: var(--flin-accent-gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  border: 2px solid var(--flin-bg-secondary);
+}
+
+.profile-info {
+  padding-bottom: var(--flin-space-2);
+}
+
+.profile-name {
+  font-size: var(--flin-text-2xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-1);
+}
+
+.profile-username {
+  font-size: var(--flin-text-md);
+  color: var(--flin-text-tertiary);
+  display: block;
+  margin-bottom: var(--flin-space-1);
+}
+
+.profile-role {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--flin-space-3);
+  padding-bottom: var(--flin-space-2);
+}
+
+/* Main Content */
+.profile-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--flin-space-6) var(--flin-space-6);
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: var(--flin-space-6);
+}
+
+/* Sidebar */
+.profile-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-4);
+}
+
+.sidebar-card {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  padding: var(--flin-space-5);
+}
+
+.sidebar-card h3 {
+  font-size: var(--flin-text-md);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-4);
+}
+
+.bio-text {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--flin-space-4);
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-3);
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+.info-item svg {
+  color: var(--flin-text-tertiary);
+  flex-shrink: 0;
+}
+
+.info-item a {
+  color: var(--flin-accent-gold);
+  text-decoration: none;
+}
+
+/* Social Links */
+.social-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-2);
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-3);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-primary);
+  text-decoration: none;
+  font-size: var(--flin-text-sm);
+  transition: all 0.2s;
+}
+
+.social-link:hover {
+  background: var(--flin-bg-tertiary);
+}
+
+.social-link.twitter svg { color: #1da1f2; }
+.social-link.github svg { color: var(--flin-text-primary); }
+.social-link.linkedin svg { color: #0077b5; }
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--flin-space-3);
+}
+
+.stat-item {
+  text-align: center;
+  padding: var(--flin-space-3);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-md);
+}
+
+.stat-value {
+  display: block;
+  font-size: var(--flin-text-lg);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+}
+
+.stat-label {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+/* Main Feed */
+.profile-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-4);
+}
+
+.stats-bar {
+  display: flex;
+  gap: var(--flin-space-6);
+  padding: var(--flin-space-4);
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+}
+
+.stat-pill {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+}
+
+.stat-number {
+  font-size: var(--flin-text-lg);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+}
+
+.stat-text {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+/* Tabs */
+.profile-tabs {
+  display: flex;
+  gap: var(--flin-space-1);
+  background: var(--flin-bg-primary);
+  padding: var(--flin-space-2);
+  border-radius: var(--flin-radius-lg);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: var(--flin-space-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--flin-radius-md);
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  color: var(--flin-text-primary);
+}
+
+.tab-btn.active {
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+}
+
+/* Posts */
+.posts-feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-4);
+}
+
+.post-card {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  padding: var(--flin-space-5);
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  margin-bottom: var(--flin-space-4);
+}
+
+.post-meta {
+  flex: 1;
+}
+
+.post-author {
+  display: block;
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+}
+
+.post-time {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.post-menu {
+  background: transparent;
+  border: none;
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  padding: var(--flin-space-1);
+}
+
+.post-content {
+  font-size: var(--flin-text-md);
+  color: var(--flin-text-primary);
+  line-height: 1.6;
+  margin-bottom: var(--flin-space-4);
+}
+
+.post-actions {
+  display: flex;
+  gap: var(--flin-space-4);
+  padding-top: var(--flin-space-3);
+  border-top: 1px solid var(--flin-border-primary);
+}
+
+.post-actions .action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  background: transparent;
+  border: none;
+  color: var(--flin-text-tertiary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.post-actions .action-btn:hover {
+  color: var(--flin-accent-gold);
+}
+
+/* Projects Grid */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--flin-space-4);
+}
+
+.project-card {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  padding: var(--flin-space-5);
+}
+
+.project-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--flin-accent-gold);
+  margin-bottom: var(--flin-space-4);
+}
+
+.project-card h4 {
+  font-size: var(--flin-text-md);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.project-card p {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+  margin-bottom: var(--flin-space-3);
+}
+
+.project-stats {
+  display: flex;
+  gap: var(--flin-space-4);
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+/* Activity Feed */
+.activity-feed {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  padding: var(--flin-space-4);
+}
+
+.activity-item {
+  display: flex;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-3);
+}
+
+.activity-item:not(:last-child) {
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.activity-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.activity-icon.commit { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.activity-icon.pr { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+.activity-icon.star { background: rgba(234, 179, 8, 0.1); color: #eab308; }
+
+.activity-content p {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-primary);
+}
+
+.activity-content strong {
+  color: var(--flin-accent-gold);
+}
+
+.activity-time {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: var(--flin-space-12);
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+}
+
+.empty-state svg {
+  color: var(--flin-text-tertiary);
+  margin-bottom: var(--flin-space-4);
+}
+
+.empty-state h3 {
+  font-size: var(--flin-text-lg);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.empty-state p {
+  color: var(--flin-text-secondary);
+  font-size: var(--flin-text-sm);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .profile-content {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-sidebar {
+    order: 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: -80px;
+  }
+
+  .avatar-section {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-content {
+    padding: 0 var(--flin-space-4) var(--flin-space-4);
+  }
+
+  .stats-bar {
+    justify-content: center;
+  }
+}
+</style>

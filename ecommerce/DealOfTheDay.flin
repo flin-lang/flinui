@@ -1,0 +1,515 @@
+// DealOfTheDay.flin - FlinUI PRO E-commerce Component
+// Daily deal showcase with product details and countdown timer
+
+// Props with defaults
+title = props.title || "Deal of the Day"
+productName = props.productName || "Premium Product"
+description = props.description || "Amazing product at an unbeatable price"
+originalPrice = props.originalPrice || 199.99
+dealPrice = props.dealPrice || 99.99
+currency = props.currency || "$"
+imageUrl = props.imageUrl || none
+rating = props.rating || 4.5
+reviewCount = props.reviewCount || 128
+endTime = props.endTime || none
+features = props.features || []
+onClaim = props.onClaim
+badge = props.badge || "Today Only"
+variant = props.variant || "default"
+
+// State
+timeRemaining = none
+
+// Calculate discount
+discountPercent = Math.round(((originalPrice - dealPrice) / originalPrice) * 100)
+savings = originalPrice - dealPrice
+
+// Calculate time remaining
+fn updateTimeRemaining() {
+    {if endTime != none}
+        now = Date.now()
+        diff = endTime - now
+        {if diff > 0}
+            hours = Math.floor(diff / (1000 * 60 * 60))
+            minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+            seconds = Math.floor((diff % (1000 * 60)) / 1000)
+            timeRemaining = ["hours": hours, "minutes": minutes, "seconds": seconds]
+        {else}
+            timeRemaining = none
+        {/if}
+    {/if}
+}
+
+// Initialize timer
+onMount {
+    updateTimeRemaining()
+    {if endTime != none}
+        interval = setInterval(updateTimeRemaining, 1000)
+    {/if}
+}
+
+onUnmount {
+    {if interval != none}
+        clearInterval(interval)
+    {/if}
+}
+
+// Handle claim click
+fn handleClaimClick() {
+    {if onClaim != none}
+        onClaim()
+    {/if}
+}
+
+// Generate star rating
+fn renderStars() {
+    fullStars = Math.floor(rating)
+    hasHalfStar = (rating - fullStars) >= 0.5
+    emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
+}
+
+renderStars()
+
+variantClass = match variant {
+    "premium" -> "deal-premium"
+    "hot" -> "deal-hot"
+    _ -> "deal-default"
+}
+
+containerClass = "deal-of-day " ++ variantClass
+
+<div class={containerClass}>
+    <div class="deal-badge">{badge}</div>
+
+    <div class="deal-header">
+        <h2 class="deal-title">{title}</h2>
+        {if timeRemaining != none}
+            <div class="deal-timer-compact">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>{timeRemaining.hours}h {timeRemaining.minutes}m {timeRemaining.seconds}s</span>
+            </div>
+        {/if}
+    </div>
+
+    <div class="deal-content">
+        {if imageUrl != none}
+            <div class="deal-image-container">
+                <div class="deal-discount-tag">
+                    <span class="discount-percent">-{discountPercent}%</span>
+                    <span class="discount-label">OFF</span>
+                </div>
+                <img src={imageUrl} alt={productName} class="deal-image" />
+            </div>
+        {/if}
+
+        <div class="deal-details">
+            <h3 class="deal-product-name">{productName}</h3>
+
+            <div class="deal-rating">
+                <div class="rating-stars">
+                    {for i in 1..fullStars}
+                        <svg class="star-icon filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                    {/for}
+                    {if hasHalfStar}
+                        <svg class="star-icon half" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <defs>
+                                <linearGradient id="half-fill">
+                                    <stop offset="50%" stop-color="currentColor"/>
+                                    <stop offset="50%" stop-color="var(--flin-neutral-300)"/>
+                                </linearGradient>
+                            </defs>
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="url(#half-fill)"/>
+                        </svg>
+                    {/if}
+                    {for i in 1..emptyStars}
+                        <svg class="star-icon empty" width="16" height="16" viewBox="0 0 24 24" fill="var(--flin-neutral-300)">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                    {/for}
+                </div>
+                <span class="rating-value">{rating}</span>
+                <span class="rating-count">({reviewCount} reviews)</span>
+            </div>
+
+            <p class="deal-description">{description}</p>
+
+            {if features.length > 0}
+                <ul class="deal-features">
+                    {for feature in features}
+                        <li class="feature-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>{feature}</span>
+                        </li>
+                    {/for}
+                </ul>
+            {/if}
+
+            <div class="deal-pricing">
+                <div class="pricing-main">
+                    <span class="deal-price">{currency}{dealPrice}</span>
+                    <span class="original-price">{currency}{originalPrice}</span>
+                </div>
+                <div class="savings-badge">
+                    Save {currency}{savings}
+                </div>
+            </div>
+
+            <button class="deal-cta" click={handleClaimClick}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                    <line x1="7" y1="7" x2="7.01" y2="7"/>
+                </svg>
+                <span>Claim This Deal</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.deal-of-day {
+    position: relative;
+    background: white;
+    border-radius: var(--flin-radius-xl);
+    font-family: var(--flin-font-sans);
+    box-shadow: var(--flin-shadow-xl);
+    overflow: hidden;
+    border: 1px solid var(--flin-neutral-200);
+    transition: all var(--flin-transition-base);
+}
+
+.deal-of-day:hover {
+    box-shadow: var(--flin-shadow-2xl);
+    transform: translateY(-2px);
+}
+
+/* Variant styles */
+.deal-premium {
+    border-color: #f59e0b;
+    background: linear-gradient(135deg, #fffbeb 0%, white 100%);
+}
+
+.deal-hot {
+    border-color: var(--flin-danger);
+}
+
+/* Badge */
+.deal-badge {
+    position: absolute;
+    top: var(--flin-space-4);
+    right: var(--flin-space-4);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: linear-gradient(135deg, var(--flin-primary) 0%, var(--flin-primary-dark) 100%);
+    color: white;
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: var(--flin-radius-full);
+    box-shadow: var(--flin-shadow-md);
+    z-index: 10;
+}
+
+/* Header */
+.deal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--flin-space-4) var(--flin-space-6);
+    background: linear-gradient(135deg, var(--flin-neutral-50) 0%, white 100%);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.deal-title {
+    margin: 0;
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+}
+
+.deal-timer-compact {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: white;
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-danger);
+    box-shadow: var(--flin-shadow-sm);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Content layout */
+.deal-content {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: var(--flin-space-6);
+    padding: var(--flin-space-6);
+}
+
+/* Image */
+.deal-image-container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: var(--flin-neutral-50);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+.deal-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--flin-transition-base);
+}
+
+.deal-of-day:hover .deal-image {
+    transform: scale(1.05);
+}
+
+.deal-discount-tag {
+    position: absolute;
+    top: var(--flin-space-3);
+    left: var(--flin-space-3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: var(--flin-danger);
+    color: white;
+    border-radius: var(--flin-radius-md);
+    box-shadow: var(--flin-shadow-lg);
+    z-index: 5;
+}
+
+.discount-percent {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    line-height: 1;
+}
+
+.discount-label {
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    opacity: 0.9;
+}
+
+/* Details */
+.deal-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+}
+
+.deal-product-name {
+    margin: 0;
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+    line-height: 1.2;
+}
+
+/* Rating */
+.deal-rating {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.rating-stars {
+    display: flex;
+    gap: var(--flin-space-1);
+}
+
+.star-icon.filled {
+    color: #f59e0b;
+}
+
+.rating-value {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+}
+
+.rating-count {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-600);
+}
+
+/* Description */
+.deal-description {
+    margin: 0;
+    font-size: var(--flin-text-base);
+    color: var(--flin-neutral-700);
+    line-height: 1.6;
+}
+
+/* Features */
+.deal-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-700);
+}
+
+.feature-item svg {
+    color: var(--flin-success);
+    flex-shrink: 0;
+}
+
+/* Pricing */
+.deal-pricing {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-4);
+    background: var(--flin-neutral-50);
+    border-radius: var(--flin-radius-lg);
+    margin-top: auto;
+}
+
+.pricing-main {
+    display: flex;
+    align-items: baseline;
+    gap: var(--flin-space-3);
+}
+
+.deal-price {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-danger);
+}
+
+.original-price {
+    font-size: var(--flin-text-lg);
+    color: var(--flin-neutral-500);
+    text-decoration: line-through;
+}
+
+.savings-badge {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: var(--flin-success);
+    color: white;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-bold);
+    border-radius: var(--flin-radius-md);
+}
+
+/* CTA Button */
+.deal-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    padding: var(--flin-space-4);
+    background: linear-gradient(135deg, var(--flin-primary) 0%, var(--flin-primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-bold);
+    font-family: var(--flin-font-sans);
+    cursor: pointer;
+    transition: all var(--flin-transition-base);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.deal-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--flin-shadow-xl);
+}
+
+.deal-cta:active {
+    transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .deal-content {
+        grid-template-columns: 1fr;
+    }
+
+    .deal-image-container {
+        height: 250px;
+    }
+}
+
+@media (max-width: 640px) {
+    .deal-header {
+        flex-direction: column;
+        gap: var(--flin-space-2);
+        align-items: flex-start;
+    }
+
+    .deal-content {
+        padding: var(--flin-space-4);
+    }
+
+    .deal-pricing {
+        flex-direction: column;
+        gap: var(--flin-space-3);
+        align-items: stretch;
+    }
+
+    .savings-badge {
+        text-align: center;
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .deal-of-day {
+        background: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .deal-header {
+        background: var(--flin-neutral-900);
+        border-bottom-color: var(--flin-neutral-700);
+    }
+
+    .deal-title, .deal-product-name, .rating-value {
+        color: var(--flin-neutral-100);
+    }
+
+    .deal-timer-compact {
+        background: var(--flin-neutral-800);
+    }
+
+    .deal-description, .feature-item {
+        color: var(--flin-neutral-300);
+    }
+
+    .deal-pricing {
+        background: var(--flin-neutral-900);
+    }
+
+    .deal-image-container {
+        background: var(--flin-neutral-900);
+    }
+}
+</style>

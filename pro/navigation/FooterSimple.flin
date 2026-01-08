@@ -1,0 +1,211 @@
+// ============================================================================
+// FooterSimple.flin — FlinUI PRO Navigation Component
+// Basic footer with logo, copyright text, and horizontal links
+// ============================================================================
+// Props:
+//   - logo: Logo image URL or none for text (string)
+//   - logoText: Text to show with/instead of logo (string)
+//   - logoHref: Link for logo click (string)
+//   - links: Array of footer links [{ label, href }] (array)
+//   - copyright: Copyright text (string)
+//   - variant: Color scheme - light, dark (string)
+
+logo = props.logo || none
+logoText = props.logoText || "Brand"
+logoHref = props.logoHref || "/"
+links = props.links || []
+copyright = props.copyright || "All rights reserved."
+variant = props.variant || "light"
+
+// Get current year
+currentYear = new Date().getFullYear()
+
+// Variant classes
+variantClass = match variant {
+    "dark" => "footer-simple-dark"
+    _ => "footer-simple-light"
+}
+
+footerClass = "flin-footer-simple " ++ variantClass
+
+<footer class={footerClass}>
+    <div class="footer-container">
+        <div class="footer-content">
+            <!-- Logo -->
+            <a href={logoHref} class="footer-brand">
+                {if logo != none}
+                    <img src={logo} alt={logoText} class="footer-logo-img">
+                {else}
+                    <div class="footer-logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                {/if}
+                <span class="footer-logo-text">{logoText}</span>
+            </a>
+
+            <!-- Links -->
+            {if links.length > 0}
+                <nav class="footer-nav" aria-label="Footer navigation">
+                    {for link in links}
+                        <a href={link.href} class="footer-link">{link.label}</a>
+                    {/for}
+                </nav>
+            {/if}
+        </div>
+
+        <!-- Copyright -->
+        <div class="footer-bottom">
+            <p class="footer-copyright">
+                &copy; {currentYear} {logoText}. {copyright}
+            </p>
+        </div>
+    </div>
+</footer>
+
+<style scoped>
+.flin-footer-simple {
+    width: 100%;
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.footer-container {
+    max-width: var(--flin-container-screen-xl);
+    margin: 0 auto;
+    padding: var(--flin-space-8) var(--flin-space-4);
+}
+
+/* Light variant */
+.footer-simple-light {
+    background-color: var(--flin-bg);
+    color: var(--flin-fg);
+}
+
+.footer-simple-light .footer-link {
+    color: var(--flin-fg-muted);
+}
+
+.footer-simple-light .footer-link:hover {
+    color: var(--flin-fg);
+}
+
+.footer-simple-light .footer-copyright {
+    color: var(--flin-fg-muted);
+}
+
+/* Dark variant */
+.footer-simple-dark {
+    background-color: var(--flin-neutral-900);
+    color: var(--flin-neutral-50);
+    border-top-color: var(--flin-neutral-700);
+}
+
+.footer-simple-dark .footer-link {
+    color: var(--flin-neutral-400);
+}
+
+.footer-simple-dark .footer-link:hover {
+    color: var(--flin-neutral-50);
+}
+
+.footer-simple-dark .footer-copyright {
+    color: var(--flin-neutral-500);
+}
+
+.footer-simple-dark .footer-logo-icon {
+    background-color: var(--flin-neutral-700);
+}
+
+/* Content */
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-6);
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .footer-content {
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+    }
+}
+
+/* Brand */
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    text-decoration: none;
+    color: inherit;
+    font-weight: var(--flin-font-bold);
+}
+
+.footer-logo-img {
+    height: 32px;
+    width: auto;
+}
+
+.footer-logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--flin-radius-md);
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.footer-logo-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.footer-logo-text {
+    font-size: var(--flin-text-lg);
+}
+
+/* Navigation */
+.footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--flin-space-2);
+}
+
+@media (min-width: 768px) {
+    .footer-nav {
+        gap: var(--flin-space-4);
+    }
+}
+
+.footer-link {
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    text-decoration: none;
+    transition: color var(--flin-transition-fast);
+}
+
+/* Bottom */
+.footer-bottom {
+    margin-top: var(--flin-space-6);
+    padding-top: var(--flin-space-6);
+    border-top: 1px solid var(--flin-neutral-200);
+    text-align: center;
+}
+
+.footer-simple-dark .footer-bottom {
+    border-top-color: var(--flin-neutral-800);
+}
+
+.footer-copyright {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+}
+</style>

@@ -1,0 +1,424 @@
+// ImageUploader.flin - FlinUI Image Uploader Component
+// Image-specific uploader with preview, cropping, and validation
+
+// Props with defaults
+value = props.value || none
+accept = props.accept || "image/*"
+maxSize = props.maxSize || 5242880  // 5MB in bytes
+minWidth = props.minWidth || 0
+minHeight = props.minHeight || 0
+maxWidth = props.maxWidth || none
+maxHeight = props.maxHeight || none
+aspectRatio = props.aspectRatio || none
+disabled = props.disabled || false
+showCrop = props.showCrop || false
+shape = props.shape || "square"
+onChange = props.onChange
+onError = props.onError
+
+// State
+previewUrl = value
+isDragging = false
+error = none
+imageInfo = none
+
+// Format file size
+formatSize = fn(bytes) {
+    if bytes < 1024 {
+        bytes ++ " B"
+    } else if bytes < 1048576 {
+        (bytes / 1024).round(1) ++ " KB"
+    } else {
+        (bytes / 1048576).round(2) ++ " MB"
+    }
+}
+
+// Validate image
+validateImage = fn(file, width, height) {
+    if file.size > maxSize {
+        ["valid": false, "error": "Image too large. Max size: " ++ formatSize(maxSize)]
+    } else if width < minWidth || height < minHeight {
+        ["valid": false, "error": "Image too small. Min: " ++ minWidth ++ "x" ++ minHeight]
+    } else if maxWidth != none && width > maxWidth {
+        ["valid": false, "error": "Image too wide. Max width: " ++ maxWidth ++ "px"]
+    } else if maxHeight != none && height > maxHeight {
+        ["valid": false, "error": "Image too tall. Max height: " ++ maxHeight ++ "px"]
+    } else {
+        ["valid": true, "error": none]
+    }
+}
+
+// Handle file selection
+handleFileSelect = fn(file) {
+    if file {
+        // Create preview URL
+        previewUrl = URL.createObjectURL(file)
+        error = none
+        imageInfo = [
+            "name": file.name,
+            "size": file.size,
+            "type": file.type
+        ]
+        if onChange {
+            onChange(file)
+        }
+    }
+}
+
+// Handle input change
+handleInputChange = fn(e) {
+    if e.target.files && e.target.files.len > 0 {
+        handleFileSelect(e.target.files[0])
+    }
+}
+
+// Handle drag events
+handleDragEnter = fn(e) {
+    e.preventDefault()
+    if !disabled {
+        isDragging = true
+    }
+}
+
+handleDragLeave = fn(e) {
+    e.preventDefault()
+    isDragging = false
+}
+
+handleDrop = fn(e) {
+    e.preventDefault()
+    isDragging = false
+    if !disabled && e.dataTransfer.files && e.dataTransfer.files.len > 0 {
+        handleFileSelect(e.dataTransfer.files[0])
+    }
+}
+
+// Remove image
+removeImage = {
+    previewUrl = none
+    imageInfo = none
+    error = none
+    if onChange {
+        onChange(none)
+    }
+}
+
+// Compute classes
+disabledClass = match disabled { true -> " image-uploader-disabled", _ -> "" }
+draggingClass = match isDragging { true -> " image-uploader-dragging", _ -> "" }
+shapeClass = match shape {
+    "circle" -> " image-uploader-circle"
+    "rounded" -> " image-uploader-rounded"
+    _ -> " image-uploader-square"
+}
+hasPreviewClass = match previewUrl != none { true -> " image-uploader-has-preview", _ -> "" }
+containerClass = "image-uploader" ++ disabledClass ++ draggingClass ++ shapeClass ++ hasPreviewClass
+
+<div class={containerClass}>
+    <div
+        class="image-uploader-dropzone"
+        dragover={handleDragEnter}
+        dragleave={handleDragLeave}
+        drop={handleDrop}
+    >
+        <input
+            type="file"
+            class="image-uploader-input"
+            accept={accept}
+            disabled={disabled}
+            change={handleInputChange}
+            id="image-uploader-input"
+        >
+
+        {if previewUrl != none}
+            <div class="image-uploader-preview">
+                <img src={previewUrl} alt="Preview" class="image-uploader-image">
+                <div class="image-uploader-overlay">
+                    <label for="image-uploader-input" class="image-uploader-change">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/>
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        </svg>
+                        <span>Change</span>
+                    </label>
+                    <button type="button" class="image-uploader-remove" click={removeImage}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                        </svg>
+                        <span>Remove</span>
+                    </button>
+                </div>
+            </div>
+        {else}
+            <label for="image-uploader-input" class="image-uploader-label">
+                <div class="image-uploader-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                </div>
+                <div class="image-uploader-text">
+                    <span class="image-uploader-title">
+                        {if isDragging}
+                            Drop image here
+                        {else}
+                            Upload image
+                        {/if}
+                    </span>
+                    <span class="image-uploader-subtitle">
+                        Drag & drop or click to browse
+                    </span>
+                </div>
+                <div class="image-uploader-info">
+                    <span>Max {formatSize(maxSize)}</span>
+                    {if minWidth > 0 && minHeight > 0}
+                        <span>Min {minWidth}x{minHeight}px</span>
+                    {/if}
+                </div>
+            </label>
+        {/if}
+    </div>
+
+    {if error != none}
+        <div class="image-uploader-error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>{error}</span>
+        </div>
+    {/if}
+
+    {if imageInfo != none}
+        <div class="image-uploader-meta">
+            <span class="image-uploader-meta-name">{imageInfo.name}</span>
+            <span class="image-uploader-meta-size">{formatSize(imageInfo.size)}</span>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.image-uploader {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+    width: 100%;
+}
+
+/* Dropzone */
+.image-uploader-dropzone {
+    position: relative;
+    width: 200px;
+    height: 200px;
+}
+
+.image-uploader-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.image-uploader-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    height: 100%;
+    border: 2px dashed var(--flin-neutral-300);
+    background-color: var(--flin-neutral-50);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    text-align: center;
+    padding: var(--flin-space-4);
+}
+
+.image-uploader-label:hover {
+    border-color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+}
+
+.image-uploader-dragging .image-uploader-label {
+    border-color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+    border-style: solid;
+}
+
+/* Shape variants */
+.image-uploader-square .image-uploader-dropzone,
+.image-uploader-square .image-uploader-label,
+.image-uploader-square .image-uploader-preview {
+    border-radius: var(--flin-radius-lg);
+}
+
+.image-uploader-rounded .image-uploader-dropzone,
+.image-uploader-rounded .image-uploader-label,
+.image-uploader-rounded .image-uploader-preview {
+    border-radius: var(--flin-radius-xl);
+}
+
+.image-uploader-circle .image-uploader-dropzone,
+.image-uploader-circle .image-uploader-label,
+.image-uploader-circle .image-uploader-preview {
+    border-radius: 50%;
+}
+
+/* Icon and text */
+.image-uploader-icon {
+    color: var(--flin-fg-muted);
+}
+
+.image-uploader-icon svg {
+    width: var(--flin-space-10);
+    height: var(--flin-space-10);
+}
+
+.image-uploader-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.image-uploader-title {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.image-uploader-subtitle {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+.image-uploader-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+/* Preview */
+.image-uploader-preview {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.image-uploader-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-uploader-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    background-color: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.image-uploader-preview:hover .image-uploader-overlay {
+    opacity: 1;
+}
+
+.image-uploader-change,
+.image-uploader-remove {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.image-uploader-change {
+    background-color: white;
+    color: var(--flin-fg);
+}
+
+.image-uploader-change:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.image-uploader-remove {
+    background-color: var(--flin-danger);
+    color: white;
+    border: none;
+}
+
+.image-uploader-remove:hover {
+    background-color: var(--flin-danger-dark);
+}
+
+.image-uploader-change svg,
+.image-uploader-remove svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+/* Error */
+.image-uploader-error {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background-color: var(--flin-danger-light);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-danger);
+}
+
+.image-uploader-error svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+    flex-shrink: 0;
+}
+
+/* Meta info */
+.image-uploader-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+.image-uploader-meta-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 150px;
+}
+
+/* Disabled state */
+.image-uploader-disabled .image-uploader-label {
+    background-color: var(--flin-bg-muted);
+    border-color: var(--flin-neutral-200);
+    cursor: not-allowed;
+}
+
+.image-uploader-disabled .image-uploader-title,
+.image-uploader-disabled .image-uploader-subtitle {
+    color: var(--flin-fg-muted);
+}
+</style>

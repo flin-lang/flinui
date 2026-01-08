@@ -1,0 +1,1141 @@
+// KanbanPage.flin - Kanban board with drag-and-drop columns and cards
+// FlinUI PRO - Page Template
+
+// Props with defaults
+title = props.title || "Project Board"
+projectId = props.projectId || "proj-001"
+columns = props.columns || []
+onCardMove = props.onCardMove || none
+onCardCreate = props.onCardCreate || none
+onCardUpdate = props.onCardUpdate || none
+
+// State
+showAddColumn = false
+showAddCard = none
+selectedCard = none
+filterAssignee = "all"
+searchQuery = ""
+
+// Default columns with cards
+defaultColumns = [
+  {
+    id: "backlog",
+    title: "Backlog",
+    color: "gray",
+    cards: [
+      { id: 1, title: "Research competitor analysis", description: "Analyze top 5 competitors", priority: "low", assignee: "Alice", tags: ["research"], comments: 2, attachments: 0 },
+      { id: 2, title: "Define API specifications", description: "Document REST API endpoints", priority: "medium", assignee: "Bob", tags: ["docs", "api"], comments: 5, attachments: 1 }
+    ]
+  },
+  {
+    id: "todo",
+    title: "To Do",
+    color: "blue",
+    cards: [
+      { id: 3, title: "Design system components", description: "Create Button, Input, Card components", priority: "high", assignee: "Carol", tags: ["design", "ui"], comments: 8, attachments: 3 },
+      { id: 4, title: "Setup CI/CD pipeline", description: "Configure GitHub Actions", priority: "high", assignee: "Dave", tags: ["devops"], comments: 3, attachments: 0 },
+      { id: 5, title: "User authentication flow", description: "Implement login/register", priority: "medium", assignee: "Eve", tags: ["auth", "backend"], comments: 12, attachments: 2 }
+    ]
+  },
+  {
+    id: "in-progress",
+    title: "In Progress",
+    color: "yellow",
+    cards: [
+      { id: 6, title: "Dashboard layout", description: "Build responsive dashboard grid", priority: "high", assignee: "Carol", tags: ["ui", "frontend"], comments: 6, attachments: 1 },
+      { id: 7, title: "Database schema design", description: "Design PostgreSQL tables", priority: "medium", assignee: "Bob", tags: ["database"], comments: 4, attachments: 2 }
+    ]
+  },
+  {
+    id: "review",
+    title: "Review",
+    color: "purple",
+    cards: [
+      { id: 8, title: "Landing page redesign", description: "New hero section and features", priority: "medium", assignee: "Alice", tags: ["design", "marketing"], comments: 15, attachments: 5 }
+    ]
+  },
+  {
+    id: "done",
+    title: "Done",
+    color: "green",
+    cards: [
+      { id: 9, title: "Project setup", description: "Initialize repository and configs", priority: "low", assignee: "Dave", tags: ["setup"], comments: 2, attachments: 0 },
+      { id: 10, title: "Design mockups", description: "Create Figma designs", priority: "high", assignee: "Carol", tags: ["design"], comments: 20, attachments: 8 }
+    ]
+  }
+]
+
+columnList = columns.length > 0 ? columns : defaultColumns
+
+// Team members for filter
+teamMembers = ["Alice", "Bob", "Carol", "Dave", "Eve"]
+
+<div class="kanban-page">
+  <!-- Header -->
+  <header class="kanban-header">
+    <div class="header-left">
+      <h1 class="page-title">{title}</h1>
+      <div class="board-meta">
+        <span class="meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          5 members
+        </span>
+        <span class="meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          Due Jan 31, 2026
+        </span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          type="text"
+          placeholder="Search cards..."
+          value={searchQuery}
+          input={(e) => searchQuery = e.target.value}
+        />
+      </div>
+      <div class="filter-group">
+        <select class="filter-select" value={filterAssignee} change={(e) => filterAssignee = e.target.value}>
+          <option value="all">All Members</option>
+          {for member in teamMembers}
+            <option value={member}>{member}</option>
+          {/for}
+        </select>
+      </div>
+      <div class="team-avatars">
+        {for member in teamMembers}
+          <Avatar size="sm" name={member} />
+        {/for}
+        <button class="add-member-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+      <Button variant="secondary" size="sm">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
+        Filter
+      </Button>
+      <Button variant="secondary" size="sm">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="1"></circle>
+          <circle cx="19" cy="12" r="1"></circle>
+          <circle cx="5" cy="12" r="1"></circle>
+        </svg>
+      </Button>
+    </div>
+  </header>
+
+  <!-- Board -->
+  <div class="kanban-board">
+    {for column in columnList}
+      <div class="kanban-column">
+        <div class={"column-header " + column.color}>
+          <div class="column-title-group">
+            <span class={"column-dot " + column.color}></span>
+            <h3 class="column-title">{column.title}</h3>
+            <span class="card-count">{column.cards.length}</span>
+          </div>
+          <button class="column-menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="19" cy="12" r="1"></circle>
+              <circle cx="5" cy="12" r="1"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <div class="column-content">
+          {for card in column.cards}
+            <div class={"kanban-card priority-" + card.priority} click={() => selectedCard = card}>
+              <div class="card-header">
+                <div class="card-tags">
+                  {for tag in card.tags}
+                    <span class="card-tag">{tag}</span>
+                  {/for}
+                </div>
+                <span class={"priority-indicator " + card.priority}></span>
+              </div>
+              <h4 class="card-title">{card.title}</h4>
+              <p class="card-description">{card.description}</p>
+              <div class="card-footer">
+                <div class="card-assignee">
+                  <Avatar size="xs" name={card.assignee} />
+                  <span>{card.assignee}</span>
+                </div>
+                <div class="card-stats">
+                  {if card.comments > 0}
+                    <span class="stat-item">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                      </svg>
+                      {card.comments}
+                    </span>
+                  {/if}
+                  {if card.attachments > 0}
+                    <span class="stat-item">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                      </svg>
+                      {card.attachments}
+                    </span>
+                  {/if}
+                </div>
+              </div>
+            </div>
+          {/for}
+
+          <button class="add-card-btn" click={() => showAddCard = column.id}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Card
+          </button>
+        </div>
+      </div>
+    {/for}
+
+    <!-- Add Column -->
+    <div class="add-column">
+      {if showAddColumn}
+        <div class="add-column-form">
+          <input type="text" placeholder="Column title" autofocus />
+          <div class="form-actions">
+            <Button variant="primary" size="sm">Add</Button>
+            <Button variant="ghost" size="sm" click={() => showAddColumn = false}>Cancel</Button>
+          </div>
+        </div>
+      {else}
+        <button class="add-column-btn" click={() => showAddColumn = true}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Column
+        </button>
+      {/if}
+    </div>
+  </div>
+
+  <!-- Card Detail Modal -->
+  {if selectedCard}
+    <div class="modal-overlay" click={() => selectedCard = none}>
+      <div class="modal card-modal" click={(e) => e.stopPropagation()}>
+        <div class="modal-header">
+          <div class="modal-title-section">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            </svg>
+            <div>
+              <input type="text" class="card-title-input" value={selectedCard.title} />
+              <span class="card-column-info">in list <strong>To Do</strong></span>
+            </div>
+          </div>
+          <button class="close-btn" click={() => selectedCard = none}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="modal-main">
+            <!-- Members -->
+            <div class="detail-section">
+              <h4>Members</h4>
+              <div class="members-list">
+                <Avatar size="sm" name={selectedCard.assignee} />
+                <button class="add-member-btn small">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Labels -->
+            <div class="detail-section">
+              <h4>Labels</h4>
+              <div class="labels-list">
+                {for tag in selectedCard.tags}
+                  <span class="label-chip">{tag}</span>
+                {/for}
+                <button class="add-label-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="detail-section">
+              <h4>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="17" y1="10" x2="3" y2="10"></line>
+                  <line x1="21" y1="6" x2="3" y2="6"></line>
+                  <line x1="21" y1="14" x2="3" y2="14"></line>
+                  <line x1="17" y1="18" x2="3" y2="18"></line>
+                </svg>
+                Description
+              </h4>
+              <textarea class="description-input" placeholder="Add a more detailed description...">{selectedCard.description}</textarea>
+            </div>
+
+            <!-- Activity -->
+            <div class="detail-section">
+              <h4>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                Activity
+              </h4>
+              <div class="activity-input">
+                <Avatar size="sm" name="You" />
+                <input type="text" placeholder="Write a comment..." />
+              </div>
+              <div class="activity-list">
+                <div class="activity-item">
+                  <Avatar size="xs" name={selectedCard.assignee} />
+                  <div class="activity-content">
+                    <p><strong>{selectedCard.assignee}</strong> added this card to To Do</p>
+                    <span class="activity-time">2 days ago</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-sidebar">
+            <h4>Add to card</h4>
+            <div class="sidebar-actions">
+              <button class="sidebar-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Members
+              </button>
+              <button class="sidebar-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                  <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                </svg>
+                Labels
+              </button>
+              <button class="sidebar-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 11 12 14 22 4"></polyline>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                Checklist
+              </button>
+              <button class="sidebar-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                Due Date
+              </button>
+              <button class="sidebar-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+                Attachment
+              </button>
+            </div>
+
+            <h4>Actions</h4>
+            <div class="sidebar-actions">
+              <button class="sidebar-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14"></path>
+                  <path d="M12 5l7 7-7 7"></path>
+                </svg>
+                Move
+              </button>
+              <button class="sidebar-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copy
+              </button>
+              <button class="sidebar-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="21 8 21 21 3 21 3 8"></polyline>
+                  <rect x="1" y="3" width="22" height="5"></rect>
+                </svg>
+                Archive
+              </button>
+              <button class="sidebar-btn danger">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  <!-- Add Card Modal -->
+  {if showAddCard}
+    <div class="modal-overlay" click={() => showAddCard = none}>
+      <div class="modal add-card-modal" click={(e) => e.stopPropagation()}>
+        <div class="modal-header">
+          <h2>Add Card</h2>
+          <button class="close-btn" click={() => showAddCard = none}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" placeholder="Enter card title" />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea placeholder="Add description"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Assignee</label>
+              <select>
+                <option value="">Select member</option>
+                {for member in teamMembers}
+                  <option value={member}>{member}</option>
+                {/for}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Priority</label>
+              <select>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <Button variant="secondary" click={() => showAddCard = none}>Cancel</Button>
+          <Button variant="primary">Add Card</Button>
+        </div>
+      </div>
+    </div>
+  {/if}
+</div>
+
+<style scoped>
+.kanban-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--flin-bg-secondary);
+}
+
+/* Header */
+.kanban-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--flin-space-4) var(--flin-space-6);
+  background: var(--flin-bg-primary);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.page-title {
+  font-size: var(--flin-text-xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-1);
+}
+
+.board-meta {
+  display: flex;
+  gap: var(--flin-space-4);
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  padding: var(--flin-space-2) var(--flin-space-3);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-md);
+  width: 200px;
+}
+
+.search-box svg {
+  color: var(--flin-text-tertiary);
+}
+
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+  width: 100%;
+}
+
+.filter-select {
+  padding: var(--flin-space-2) var(--flin-space-3);
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  background: var(--flin-bg-primary);
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+}
+
+.team-avatars {
+  display: flex;
+  align-items: center;
+}
+
+.team-avatars :global(.avatar) {
+  margin-left: -8px;
+  border: 2px solid var(--flin-bg-primary);
+}
+
+.team-avatars :global(.avatar):first-child {
+  margin-left: 0;
+}
+
+.add-member-btn {
+  width: 32px;
+  height: 32px;
+  border: 2px dashed var(--flin-border-primary);
+  background: transparent;
+  border-radius: 50%;
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -8px;
+}
+
+.add-member-btn:hover {
+  border-color: var(--flin-accent-gold);
+  color: var(--flin-accent-gold);
+}
+
+/* Board */
+.kanban-board {
+  flex: 1;
+  display: flex;
+  gap: var(--flin-space-4);
+  padding: var(--flin-space-4) var(--flin-space-6);
+  overflow-x: auto;
+}
+
+/* Column */
+.kanban-column {
+  flex-shrink: 0;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  max-height: calc(100vh - 160px);
+}
+
+.column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--flin-space-3) var(--flin-space-4);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.column-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+}
+
+.column-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.column-dot.gray { background: #6b7280; }
+.column-dot.blue { background: #3b82f6; }
+.column-dot.yellow { background: #eab308; }
+.column-dot.purple { background: #a855f7; }
+.column-dot.green { background: #22c55e; }
+
+.column-title {
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.card-count {
+  padding: 2px var(--flin-space-2);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-sm);
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.column-menu {
+  background: transparent;
+  border: none;
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  padding: var(--flin-space-1);
+  border-radius: var(--flin-radius-sm);
+}
+
+.column-menu:hover {
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+}
+
+.column-content {
+  flex: 1;
+  padding: var(--flin-space-3);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-3);
+}
+
+/* Card */
+.kanban-card {
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-md);
+  padding: var(--flin-space-3);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.kanban-card:hover {
+  border-color: var(--flin-border-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--flin-space-2);
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.card-tag {
+  padding: 2px var(--flin-space-2);
+  background: var(--flin-bg-tertiary);
+  border-radius: var(--flin-radius-sm);
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-secondary);
+}
+
+.priority-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.priority-indicator.low { background: #22c55e; }
+.priority-indicator.medium { background: #eab308; }
+.priority-indicator.high { background: #ef4444; }
+
+.card-title {
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.card-description {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+  margin-bottom: var(--flin-space-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-assignee {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-secondary);
+}
+
+.card-stats {
+  display: flex;
+  gap: var(--flin-space-3);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.add-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--flin-space-2);
+  padding: var(--flin-space-3);
+  background: transparent;
+  border: 1px dashed var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-tertiary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-card-btn:hover {
+  border-color: var(--flin-accent-gold);
+  color: var(--flin-accent-gold);
+}
+
+/* Add Column */
+.add-column {
+  flex-shrink: 0;
+  width: 300px;
+}
+
+.add-column-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--flin-space-2);
+  width: 100%;
+  padding: var(--flin-space-4);
+  background: var(--flin-bg-primary);
+  border: 1px dashed var(--flin-border-primary);
+  border-radius: var(--flin-radius-lg);
+  color: var(--flin-text-tertiary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-column-btn:hover {
+  border-color: var(--flin-accent-gold);
+  color: var(--flin-accent-gold);
+}
+
+.add-column-form {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  padding: var(--flin-space-3);
+}
+
+.add-column-form input {
+  width: 100%;
+  padding: var(--flin-space-2);
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+  margin-bottom: var(--flin-space-2);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--flin-space-2);
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--flin-space-8);
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.modal {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  width: 100%;
+  max-width: 800px;
+}
+
+/* Card Modal */
+.card-modal .modal-header {
+  padding: var(--flin-space-4);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.modal-title-section {
+  display: flex;
+  gap: var(--flin-space-3);
+  flex: 1;
+}
+
+.modal-title-section svg {
+  color: var(--flin-text-tertiary);
+  margin-top: var(--flin-space-1);
+}
+
+.card-title-input {
+  font-size: var(--flin-text-lg);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+}
+
+.card-column-info {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-tertiary);
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  padding: var(--flin-space-1);
+}
+
+.card-modal .modal-body {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: var(--flin-space-4);
+  padding: var(--flin-space-4);
+}
+
+.modal-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-4);
+}
+
+.detail-section h4 {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-3);
+}
+
+.members-list {
+  display: flex;
+  gap: var(--flin-space-2);
+}
+
+.add-member-btn.small {
+  width: 28px;
+  height: 28px;
+  margin-left: 0;
+}
+
+.labels-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--flin-space-2);
+}
+
+.label-chip {
+  padding: var(--flin-space-1) var(--flin-space-3);
+  background: var(--flin-accent-gold);
+  color: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-sm);
+  font-size: var(--flin-text-xs);
+  font-weight: 500;
+}
+
+.add-label-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px dashed var(--flin-border-primary);
+  background: transparent;
+  border-radius: var(--flin-radius-sm);
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.description-input {
+  width: 100%;
+  min-height: 100px;
+  padding: var(--flin-space-3);
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+  resize: vertical;
+}
+
+.activity-input {
+  display: flex;
+  gap: var(--flin-space-3);
+  margin-bottom: var(--flin-space-4);
+}
+
+.activity-input input {
+  flex: 1;
+  padding: var(--flin-space-2) var(--flin-space-3);
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-3);
+}
+
+.activity-item {
+  display: flex;
+  gap: var(--flin-space-3);
+}
+
+.activity-content p {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-primary);
+}
+
+.activity-time {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.modal-sidebar h4 {
+  font-size: var(--flin-text-xs);
+  font-weight: 600;
+  color: var(--flin-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--flin-space-2);
+  margin-top: var(--flin-space-4);
+}
+
+.modal-sidebar h4:first-child {
+  margin-top: 0;
+}
+
+.sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-1);
+}
+
+.sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  padding: var(--flin-space-2);
+  background: var(--flin-bg-secondary);
+  border: none;
+  border-radius: var(--flin-radius-sm);
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sidebar-btn:hover {
+  background: var(--flin-bg-tertiary);
+}
+
+.sidebar-btn svg {
+  color: var(--flin-text-tertiary);
+}
+
+.sidebar-btn.danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.sidebar-btn.danger:hover svg {
+  color: #ef4444;
+}
+
+/* Add Card Modal */
+.add-card-modal {
+  max-width: 500px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--flin-space-4);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.modal-header h2 {
+  font-size: var(--flin-text-lg);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.add-card-modal .modal-body {
+  padding: var(--flin-space-4);
+}
+
+.form-group {
+  margin-bottom: var(--flin-space-4);
+}
+
+.form-group label {
+  display: block;
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: var(--flin-space-3);
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--flin-space-3);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-4);
+  border-top: 1px solid var(--flin-border-primary);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .kanban-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--flin-space-4);
+  }
+
+  .header-right {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .kanban-board {
+    padding: var(--flin-space-4);
+  }
+
+  .kanban-column {
+    width: 280px;
+  }
+
+  .card-modal .modal-body {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-sidebar {
+    order: -1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--flin-space-2);
+  }
+
+  .modal-sidebar h4 {
+    grid-column: span 2;
+  }
+}
+</style>

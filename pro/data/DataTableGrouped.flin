@@ -1,0 +1,461 @@
+// FlinUI PRO DataTableGrouped Component
+// Rows grouped by category with collapsible groups
+
+// Props with defaults
+columns = props.columns || []
+data = props.data || []
+loading = props.loading || false
+emptyText = props.emptyText || "No data available"
+striped = props.striped || false
+hoverable = props.hoverable || true
+bordered = props.bordered || false
+groupBy = props.groupBy || none
+groupLabel = props.groupLabel || none
+defaultExpandedGroups = props.defaultExpandedGroups || "all"
+onGroupToggle = props.onGroupToggle || none
+
+// State - track collapsed groups
+collapsedGroups = match defaultExpandedGroups {
+    "all" -> []
+    "none" -> []
+    _ -> []
+}
+
+// Computed classes
+stripedClass = match striped {
+    true -> " pro-datatable-grouped--striped"
+    _ -> ""
+}
+
+hoverableClass = match hoverable {
+    true -> " pro-datatable-grouped--hoverable"
+    _ -> ""
+}
+
+borderedClass = match bordered {
+    true -> " pro-datatable-grouped--bordered"
+    _ -> ""
+}
+
+tableClass = "pro-datatable-grouped" ++ stripedClass ++ hoverableClass ++ borderedClass
+
+// Group data by the specified key
+groupedData = () => {
+    if groupBy == none {
+        { "All": data }
+    } else {
+        groups = {}
+        for row in data {
+            groupKey = row[groupBy] || "Uncategorized"
+            if groups[groupKey] == none {
+                groups[groupKey] = []
+            }
+            groups[groupKey].push(row)
+        }
+        groups
+    }
+}
+
+groups = groupedData()
+groupKeys = Object.keys(groups)
+
+// Initialize collapsed state based on defaultExpandedGroups
+{if defaultExpandedGroups == "none"}
+    collapsedGroups = [...groupKeys]
+{/if}
+
+// Group handlers
+isGroupCollapsed = (groupKey) => {
+    collapsedGroups.includes(groupKey)
+}
+
+toggleGroup = (groupKey) => {
+    if isGroupCollapsed(groupKey) {
+        collapsedGroups = collapsedGroups.filter((g) => g != groupKey)
+    } else {
+        collapsedGroups = [...collapsedGroups, groupKey]
+    }
+
+    if onGroupToggle != none {
+        onGroupToggle(groupKey, !isGroupCollapsed(groupKey))
+    }
+}
+
+expandAllGroups = {
+    collapsedGroups = []
+}
+
+collapseAllGroups = {
+    collapsedGroups = [...groupKeys]
+}
+
+getGroupLabel = (groupKey) => {
+    if groupLabel != none {
+        groupLabel(groupKey)
+    } else {
+        groupKey
+    }
+}
+
+<div class="pro-datatable-grouped-container">
+    <div class="pro-datatable-grouped__toolbar">
+        <span class="pro-datatable-grouped__group-info">
+            {groupKeys.length} groups | {data.length} total rows
+        </span>
+        <div class="pro-datatable-grouped__toolbar-actions">
+            <button
+                class="pro-datatable-grouped__action-btn"
+                click={expandAllGroups}
+            >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="7 13 12 18 17 13"/>
+                    <polyline points="7 6 12 11 17 6"/>
+                </svg>
+                Expand all
+            </button>
+            <button
+                class="pro-datatable-grouped__action-btn"
+                click={collapseAllGroups}
+            >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="17 11 12 6 7 11"/>
+                    <polyline points="17 18 12 13 7 18"/>
+                </svg>
+                Collapse all
+            </button>
+        </div>
+    </div>
+
+    <div class="pro-datatable-grouped__wrapper">
+        <table class={tableClass}>
+            <thead class="pro-datatable-grouped__head">
+                <tr class="pro-datatable-grouped__row pro-datatable-grouped__row--header">
+                    {for column in columns}
+                        <th class="pro-datatable-grouped__header" scope="col">
+                            {column.label || column.key}
+                        </th>
+                    {/for}
+                </tr>
+            </thead>
+
+            <tbody class="pro-datatable-grouped__body">
+                {if loading}
+                    <tr class="pro-datatable-grouped__row">
+                        <td class="pro-datatable-grouped__cell pro-datatable-grouped__loading" colspan={columns.length}>
+                            <div class="pro-datatable-grouped__spinner"></div>
+                            <span>Loading data...</span>
+                        </td>
+                    </tr>
+                {else if data.length == 0}
+                    <tr class="pro-datatable-grouped__row">
+                        <td class="pro-datatable-grouped__cell pro-datatable-grouped__empty" colspan={columns.length}>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M3 9h18"/>
+                                <path d="M9 21V9"/>
+                            </svg>
+                            <span>{emptyText}</span>
+                        </td>
+                    </tr>
+                {else}
+                    {for groupKey in groupKeys}
+                        <tr
+                            class={"pro-datatable-grouped__row pro-datatable-grouped__row--group" ++ (if isGroupCollapsed(groupKey) { " pro-datatable-grouped__row--collapsed" } else { "" })}
+                            click={toggleGroup(groupKey)}
+                        >
+                            <td class="pro-datatable-grouped__group-cell" colspan={columns.length}>
+                                <div class="pro-datatable-grouped__group-header">
+                                    <button
+                                        class={"pro-datatable-grouped__expand-btn" ++ (if isGroupCollapsed(groupKey) { "" } else { " pro-datatable-grouped__expand-btn--expanded" })}
+                                        aria-expanded={!isGroupCollapsed(groupKey)}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6"/>
+                                        </svg>
+                                    </button>
+                                    <span class="pro-datatable-grouped__group-label">
+                                        {getGroupLabel(groupKey)}
+                                    </span>
+                                    <span class="pro-datatable-grouped__group-count">
+                                        ({groups[groupKey].length} items)
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {if !isGroupCollapsed(groupKey)}
+                            {for row in groups[groupKey]}
+                                <tr class="pro-datatable-grouped__row pro-datatable-grouped__row--data">
+                                    {for column in columns}
+                                        <td class="pro-datatable-grouped__cell">
+                                            {row[column.key]}
+                                        </td>
+                                    {/for}
+                                </tr>
+                            {/for}
+                        {/if}
+                    {/for}
+                {/if}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style scoped>
+.pro-datatable-grouped-container {
+    font-family: var(--flin-font-sans);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+.pro-datatable-grouped__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background: var(--flin-neutral-50);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+    gap: var(--flin-space-3);
+    flex-wrap: wrap;
+}
+
+.pro-datatable-grouped__group-info {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-grouped__toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.pro-datatable-grouped__action-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-1-5) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.pro-datatable-grouped__action-btn:hover {
+    color: var(--flin-fg);
+    border-color: var(--flin-neutral-300);
+}
+
+.pro-datatable-grouped__wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pro-datatable-grouped {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--flin-text-sm);
+    text-align: left;
+}
+
+.pro-datatable-grouped__head {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-grouped__header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    white-space: nowrap;
+    border-bottom: var(--flin-space-0-5) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-grouped__row {
+    transition: background-color var(--flin-transition-fast);
+}
+
+.pro-datatable-grouped__row--group {
+    cursor: pointer;
+    background: var(--flin-neutral-100);
+}
+
+.pro-datatable-grouped__row--group:hover {
+    background: var(--flin-neutral-200);
+}
+
+.pro-datatable-grouped__group-cell {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-grouped__group-header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.pro-datatable-grouped__expand-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-size-6);
+    height: var(--flin-size-6);
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    border-radius: var(--flin-radius-sm);
+    transition: all var(--flin-transition-fast);
+}
+
+.pro-datatable-grouped__expand-btn svg {
+    transition: transform var(--flin-transition-fast);
+}
+
+.pro-datatable-grouped__expand-btn--expanded svg {
+    transform: rotate(90deg);
+}
+
+.pro-datatable-grouped__expand-btn--expanded {
+    color: var(--flin-primary);
+}
+
+.pro-datatable-grouped__group-label {
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+}
+
+.pro-datatable-grouped__group-count {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-grouped__row--data .pro-datatable-grouped__cell:first-child {
+    padding-left: var(--flin-space-8);
+}
+
+.pro-datatable-grouped__cell {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    color: var(--flin-fg);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+/* Variants */
+.pro-datatable-grouped--striped .pro-datatable-grouped__row--data:nth-child(even) {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-grouped--hoverable .pro-datatable-grouped__row--data:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.pro-datatable-grouped--bordered .pro-datatable-grouped__header,
+.pro-datatable-grouped--bordered .pro-datatable-grouped__cell,
+.pro-datatable-grouped--bordered .pro-datatable-grouped__group-cell {
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+/* Loading state */
+.pro-datatable-grouped__loading {
+    text-align: center;
+    padding: var(--flin-space-10) var(--flin-space-4);
+}
+
+.pro-datatable-grouped__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-grouped__spinner {
+    width: var(--flin-icon-lg);
+    height: var(--flin-icon-lg);
+    border: var(--flin-space-0-5) solid var(--flin-neutral-200);
+    border-top-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    animation: pro-datatable-grouped-spin var(--flin-duration-slow) linear infinite;
+}
+
+@keyframes pro-datatable-grouped-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty state */
+.pro-datatable-grouped__empty {
+    text-align: center;
+    padding: var(--flin-space-12) var(--flin-space-4);
+}
+
+.pro-datatable-grouped__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-grouped__empty svg {
+    color: var(--flin-neutral-300);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .pro-datatable-grouped-container {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-grouped__toolbar {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-grouped__action-btn {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .pro-datatable-grouped__head {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-grouped__header,
+[data-theme="dark"] .pro-datatable-grouped__cell,
+[data-theme="dark"] .pro-datatable-grouped__group-cell {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-grouped__row--group {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-grouped__row--group:hover {
+    background: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-grouped--striped .pro-datatable-grouped__row--data:nth-child(even) {
+    background-color: var(--flin-neutral-850);
+}
+
+[data-theme="dark"] .pro-datatable-grouped--hoverable .pro-datatable-grouped__row--data:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-grouped__spinner {
+    border-color: var(--flin-neutral-700);
+    border-top-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .pro-datatable-grouped__empty svg {
+    color: var(--flin-neutral-600);
+}
+</style>

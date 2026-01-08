@@ -1,0 +1,422 @@
+// ============================================================================
+// WizardLayout.flin — FlinUI PRO Shell Component
+// Step-by-step wizard/flow layout
+// ============================================================================
+// Props:
+//   - steps: Array of step objects (list)
+//     Each step: { id, title, description (optional), icon (optional) }
+//   - currentStep: Current step index (number, default: 0)
+//   - variant: Style variant - horizontal, vertical (string, default: "horizontal")
+//   - showStepNumbers: Show step numbers (boolean, default: true)
+//   - allowStepClick: Allow clicking on steps to navigate (boolean, default: false)
+//   - onStepChange: Callback when step changes (function or none)
+//   - onComplete: Callback when wizard completes (function or none)
+// ============================================================================
+
+steps = props.steps || [
+    ["id": "account", "title": "Account", "description": "Create your account"],
+    ["id": "profile", "title": "Profile", "description": "Set up your profile"],
+    ["id": "preferences", "title": "Preferences", "description": "Configure settings"],
+    ["id": "complete", "title": "Complete", "description": "Finish setup"]
+]
+currentStep = props.currentStep || 0
+variant = props.variant || "horizontal"
+showStepNumbers = props.showStepNumbers || true
+allowStepClick = props.allowStepClick || false
+onStepChange = props.onStepChange || none
+onComplete = props.onComplete || none
+
+totalSteps = steps.length
+isFirstStep = currentStep == 0
+isLastStep = currentStep == totalSteps - 1
+
+getStepStatus = (index) => {
+    if index < currentStep { "completed" }
+    else if index == currentStep { "current" }
+    else { "pending" }
+}
+
+handleStepClick = (index) => {
+    if allowStepClick && index < currentStep && onStepChange != none {
+        onStepChange(index)
+    }
+}
+
+handlePrevious = () => {
+    if !isFirstStep && onStepChange != none {
+        onStepChange(currentStep - 1)
+    }
+}
+
+handleNext = () => {
+    if isLastStep {
+        if onComplete != none {
+            onComplete()
+        }
+    } else if onStepChange != none {
+        onStepChange(currentStep + 1)
+    }
+}
+
+<div class="flin-wizard-layout variant-{variant}">
+    // Step indicator
+    <nav class="wizard-steps" aria-label="Progress">
+        <ol class="steps-list">
+            {for step, index in steps}
+                <li class="step-item status-{getStepStatus(index)}"
+                    click={() => handleStepClick(index)}>
+
+                    // Connector line (before step, except first)
+                    {if index > 0}
+                        <div class="step-connector"></div>
+                    {/if}
+
+                    // Step marker
+                    <div class="step-marker {if allowStepClick && index < currentStep}clickable{/if}">
+                        {if getStepStatus(index) == "completed"}
+                            <svg class="check-icon" width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                        {else if showStepNumbers}
+                            <span class="step-number">{index + 1}</span>
+                        {else if step.icon != none}
+                            <span class="step-icon">{step.icon}</span>
+                        {else}
+                            <span class="step-dot"></span>
+                        {/if}
+                    </div>
+
+                    // Step content
+                    <div class="step-content">
+                        <span class="step-title">{step.title}</span>
+                        {if step.description != none}
+                            <span class="step-description">{step.description}</span>
+                        {/if}
+                    </div>
+                </li>
+            {/for}
+        </ol>
+    </nav>
+
+    // Step content area
+    <main class="wizard-content">
+        <div class="content-inner">
+            {children}
+        </div>
+    </main>
+
+    // Navigation buttons
+    <footer class="wizard-footer">
+        <div class="footer-left">
+            {props.footerLeft || none}
+        </div>
+
+        <div class="footer-actions">
+            <button
+                class="wizard-btn btn-secondary"
+                click={handlePrevious}
+                disabled={isFirstStep}
+            >
+                Previous
+            </button>
+
+            <button
+                class="wizard-btn btn-primary"
+                click={handleNext}
+            >
+                {if isLastStep}Complete{else}Next{/if}
+            </button>
+        </div>
+    </footer>
+</div>
+
+<style scoped>
+.flin-wizard-layout {
+    display: flex;
+    flex-direction: column;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--flin-space-6);
+}
+
+/* Steps navigation */
+.wizard-steps {
+    margin-bottom: var(--flin-space-8);
+}
+
+.steps-list {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.step-item {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+}
+
+/* Connector */
+.step-connector {
+    position: absolute;
+    top: 16px;
+    right: 50%;
+    left: calc(-50% + 16px);
+    height: 2px;
+    background: var(--flin-border-subtle);
+}
+
+.status-completed .step-connector {
+    background: var(--flin-accent-gold);
+}
+
+/* Marker */
+.step-marker {
+    position: relative;
+    z-index: 1;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--flin-radius-full);
+    background: var(--flin-bg-surface);
+    border: 2px solid var(--flin-border-subtle);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-muted);
+    flex-shrink: 0;
+    transition: all var(--flin-transition-fast);
+}
+
+.status-current .step-marker {
+    background: var(--flin-accent-gold);
+    border-color: var(--flin-accent-gold);
+    color: var(--flin-neutral-900);
+}
+
+.status-completed .step-marker {
+    background: var(--flin-accent-gold);
+    border-color: var(--flin-accent-gold);
+    color: var(--flin-neutral-900);
+}
+
+.step-marker.clickable {
+    cursor: pointer;
+}
+
+.step-marker.clickable:hover {
+    transform: scale(1.1);
+}
+
+.step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--flin-radius-full);
+    background: currentColor;
+}
+
+.check-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Step content */
+.step-content {
+    margin-left: var(--flin-space-3);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.step-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-secondary);
+    white-space: nowrap;
+}
+
+.status-current .step-title {
+    color: var(--flin-text-primary);
+}
+
+.step-description {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+    margin-top: var(--flin-space-1);
+    white-space: nowrap;
+}
+
+/* Content area */
+.wizard-content {
+    flex: 1;
+    min-height: 300px;
+}
+
+.content-inner {
+    padding: var(--flin-space-6);
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-lg);
+}
+
+/* Footer */
+.wizard-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--flin-space-6);
+    padding-top: var(--flin-space-6);
+    border-top: 1px solid var(--flin-border-subtle);
+}
+
+.footer-actions {
+    display: flex;
+    gap: var(--flin-space-3);
+}
+
+.wizard-btn {
+    padding: var(--flin-space-3) var(--flin-space-6);
+    border-radius: var(--flin-radius-md);
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.btn-secondary {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    color: var(--flin-text-secondary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--flin-bg-surface-hover);
+    color: var(--flin-text-primary);
+}
+
+.btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--flin-accent-gold);
+    border: 1px solid var(--flin-accent-gold);
+    color: var(--flin-neutral-900);
+}
+
+.btn-primary:hover {
+    background: #d4a20a;
+}
+
+/* Vertical variant */
+.variant-vertical {
+    flex-direction: row;
+    max-width: 1200px;
+}
+
+.variant-vertical .wizard-steps {
+    width: 240px;
+    flex-shrink: 0;
+    margin-bottom: 0;
+    margin-right: var(--flin-space-8);
+}
+
+.variant-vertical .steps-list {
+    flex-direction: column;
+}
+
+.variant-vertical .step-item {
+    flex: none;
+    padding-bottom: var(--flin-space-4);
+}
+
+.variant-vertical .step-connector {
+    top: 32px;
+    bottom: 0;
+    left: 15px;
+    right: auto;
+    width: 2px;
+    height: auto;
+}
+
+.variant-vertical .wizard-content {
+    flex: 1;
+}
+
+.variant-vertical .wizard-footer {
+    margin-left: calc(240px + var(--flin-space-8));
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .flin-wizard-layout {
+        padding: var(--flin-space-4);
+    }
+
+    .variant-vertical {
+        flex-direction: column;
+    }
+
+    .variant-vertical .wizard-steps {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: var(--flin-space-6);
+    }
+
+    .variant-vertical .steps-list {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .variant-vertical .step-item {
+        flex: 1;
+        padding-bottom: 0;
+    }
+
+    .variant-vertical .step-connector {
+        top: 16px;
+        left: calc(-50% + 16px);
+        right: 50%;
+        bottom: auto;
+        width: auto;
+        height: 2px;
+    }
+
+    .variant-vertical .wizard-footer {
+        margin-left: 0;
+    }
+
+    .step-content {
+        display: none;
+    }
+
+    .content-inner {
+        padding: var(--flin-space-4);
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .step-marker {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .content-inner {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .wizard-footer {
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .btn-secondary {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+}
+</style>

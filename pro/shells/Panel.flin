@@ -1,0 +1,267 @@
+// ============================================================================
+// Panel.flin — FlinUI PRO Shell Component
+// Panel container for grouped content
+// ============================================================================
+// Props:
+//   - variant: Style variant - default, outline, filled, ghost (string, default: "default")
+//   - status: Status color - none, info, success, warning, error (string, default: "none")
+//   - padding: Content padding - none, sm, md, lg (string, default: "md")
+//   - radius: Border radius - none, sm, md, lg (string, default: "md")
+//   - collapsible: Allow panel to collapse (boolean, default: false)
+//   - collapsed: Initial collapsed state (boolean, default: false)
+//   - showIcon: Show status icon (boolean, default: true)
+//   - title: Panel title (string or none)
+//   - onToggle: Callback when collapsed state changes (function or none)
+// ============================================================================
+
+variant = props.variant || "default"
+status = props.status || "none"
+padding = props.padding || "md"
+radius = props.radius || "md"
+collapsible = props.collapsible || false
+collapsed = props.collapsed || false
+showIcon = props.showIcon || true
+title = props.title || none
+onToggle = props.onToggle || none
+
+// State
+isCollapsed = collapsed
+
+// Compute padding value
+paddingValue = match padding {
+    "none" -> "0"
+    "sm" -> "var(--flin-space-3)"
+    "md" -> "var(--flin-space-4)"
+    "lg" -> "var(--flin-space-6)"
+    _ -> "var(--flin-space-4)"
+}
+
+// Compute radius value
+radiusValue = match radius {
+    "none" -> "0"
+    "sm" -> "var(--flin-radius-sm)"
+    "md" -> "var(--flin-radius-md)"
+    "lg" -> "var(--flin-radius-lg)"
+    _ -> "var(--flin-radius-md)"
+}
+
+// Build class
+panelClass = "flin-panel variant-{variant} status-{status} {if isCollapsed}collapsed{/if}"
+
+toggleCollapse = () => {
+    if collapsible {
+        isCollapsed = !isCollapsed
+        if onToggle != none {
+            onToggle(isCollapsed)
+        }
+    }
+}
+
+<div class={panelClass}
+     style="--panel-padding: {paddingValue}; --panel-radius: {radiusValue}">
+
+    // Header (if title or collapsible)
+    {if title != none || collapsible}
+        <header class="panel-header {if collapsible}collapsible{/if}" click={toggleCollapse}>
+            <div class="header-content">
+                {if showIcon && status != "none"}
+                    <span class="status-icon">
+                        {match status {
+                            "info" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                            "success" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            "warning" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                            "error" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                            _ -> none
+                        }}
+                    </span>
+                {/if}
+
+                {if title != none}
+                    <h4 class="panel-title">{title}</h4>
+                {/if}
+            </div>
+
+            <div class="header-actions">
+                {props.actions || none}
+
+                {if collapsible}
+                    <span class="collapse-icon">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </span>
+                {/if}
+            </div>
+        </header>
+    {/if}
+
+    // Content
+    <div class="panel-content">
+        {children}
+    </div>
+
+    // Footer
+    {if props.footer != none}
+        <footer class="panel-footer">
+            {props.footer}
+        </footer>
+    {/if}
+</div>
+
+<style scoped>
+.flin-panel {
+    border-radius: var(--panel-radius);
+    overflow: hidden;
+}
+
+/* Variants */
+.variant-default {
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+}
+
+.variant-outline {
+    background: transparent;
+    border: 1px solid var(--flin-border-default);
+}
+
+.variant-filled {
+    background: var(--flin-bg-surface);
+    border: none;
+}
+
+.variant-ghost {
+    background: transparent;
+    border: none;
+}
+
+/* Status colors */
+.status-info {
+    --status-color: #3b82f6;
+    --status-bg: rgba(59, 130, 246, 0.1);
+}
+
+.status-success {
+    --status-color: #22c55e;
+    --status-bg: rgba(34, 197, 94, 0.1);
+}
+
+.status-warning {
+    --status-color: #f59e0b;
+    --status-bg: rgba(245, 158, 11, 0.1);
+}
+
+.status-error {
+    --status-color: #ef4444;
+    --status-bg: rgba(239, 68, 68, 0.1);
+}
+
+.status-info.variant-filled,
+.status-success.variant-filled,
+.status-warning.variant-filled,
+.status-error.variant-filled {
+    background: var(--status-bg);
+}
+
+.status-info.variant-outline,
+.status-success.variant-outline,
+.status-warning.variant-outline,
+.status-error.variant-outline {
+    border-color: var(--status-color);
+}
+
+/* Header */
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    padding: var(--panel-padding);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.panel-header.collapsible {
+    cursor: pointer;
+    user-select: none;
+}
+
+.panel-header.collapsible:hover {
+    background: var(--flin-bg-surface);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    flex: 1;
+    min-width: 0;
+}
+
+.status-icon {
+    display: flex;
+    color: var(--status-color);
+    flex-shrink: 0;
+}
+
+.panel-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.collapse-icon {
+    display: flex;
+    color: var(--flin-text-muted);
+    transition: transform var(--flin-transition-fast);
+}
+
+.collapsed .collapse-icon {
+    transform: rotate(-90deg);
+}
+
+/* Content */
+.panel-content {
+    padding: var(--panel-padding);
+}
+
+.collapsed .panel-content {
+    display: none;
+}
+
+/* Footer */
+.panel-footer {
+    padding: var(--panel-padding);
+    border-top: 1px solid var(--flin-border-subtle);
+    background: var(--flin-bg-surface);
+}
+
+.collapsed .panel-footer {
+    display: none;
+}
+
+/* Dark theme */
+[data-theme="dark"] .variant-default {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .variant-filled {
+    background: var(--flin-bg-surface);
+}
+
+[data-theme="dark"] .panel-header {
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .panel-footer {
+    border-color: var(--flin-border-default);
+    background: var(--flin-bg-surface);
+}
+</style>

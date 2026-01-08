@@ -1,0 +1,381 @@
+// ProductColorPicker.flin - FlinUI PRO E-commerce Component
+// Color swatch selector with active state, color names, and availability tracking
+
+// Props with defaults
+colors = props.colors || [
+    { id: "black", name: "Black", hex: "#000000" },
+    { id: "white", name: "White", hex: "#FFFFFF" },
+    { id: "blue", name: "Navy Blue", hex: "#1E40AF" }
+]
+selectedColor = props.selectedColor || none
+onColorChange = props.onColorChange
+showColorName = props.showColorName || true
+showHex = props.showHex || false
+size = props.size || "md"
+
+// State
+activeColorId = if selectedColor != none then selectedColor else (if colors.length > 0 then colors[0].id else none)
+
+// Handlers
+fn handleColorSelect(colorId) {
+    activeColorId = colorId
+    selectedColor = colorId
+
+    // Find the color object
+    selectedColorObj = none
+    {each colors as color}
+        if color.id == colorId {
+            selectedColorObj = color
+        }
+    {/each}
+
+    if onColorChange {
+        onColorChange({ id: colorId, ...selectedColorObj })
+    }
+}
+
+// Get current color object
+fn getCurrentColor() {
+    result = none
+    {each colors as color}
+        if color.id == activeColorId {
+            result = color
+        }
+    {/each}
+    return result
+}
+
+currentColor = getCurrentColor()
+
+// Size class
+sizeClass = match size {
+    "sm" -> "color-picker-sm"
+    "lg" -> "color-picker-lg"
+    _ -> "color-picker-md"
+}
+
+// Check if color is unavailable
+fn isColorUnavailable(color) {
+    return color.available == false
+}
+
+<div class="color-picker-container {sizeClass}">
+    <!-- Label -->
+    <label class="color-picker-label">
+        Color{if currentColor != none}:{/if}
+        {if currentColor != none && showColorName}
+            <span class="color-picker-selected">{currentColor.name}</span>
+        {/if}
+    </label>
+
+    <!-- Color Swatches -->
+    <div class="color-picker-swatches">
+        {each colors as color}
+            <button
+                class="color-swatch {if color.id == activeColorId}active{/if} {if isColorUnavailable(color)}unavailable{/if}"
+                style={"background-color: " ++ color.hex}
+                click={fn() { handleColorSelect(color.id) }}
+                disabled={isColorUnavailable(color)}
+                title={color.name}
+                aria-label={"Select " ++ color.name}
+                role="radio"
+                aria-checked={color.id == activeColorId}
+            >
+                {if color.id == activeColorId}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                {/if}
+
+                {if isColorUnavailable(color)}
+                    <div class="color-unavailable-overlay">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </div>
+                {/if}
+            </button>
+        {/each}
+    </div>
+
+    <!-- Selected Color Details -->
+    {if currentColor != none}
+        <div class="color-picker-details">
+            <div class="color-detail-item">
+                <span class="color-detail-label">Color Name:</span>
+                <span class="color-detail-value">{currentColor.name}</span>
+            </div>
+
+            {if showHex}
+                <div class="color-detail-item">
+                    <span class="color-detail-label">Hex Code:</span>
+                    <span class="color-detail-value">{currentColor.hex}</span>
+                </div>
+            {/if}
+
+            {if currentColor.available == false}
+                <div class="color-detail-item color-detail-unavailable">
+                    <span class="color-detail-label">Stock Status:</span>
+                    <span class="color-detail-value">Out of Stock</span>
+                </div>
+            {else}
+                <div class="color-detail-item color-detail-available">
+                    <span class="color-detail-label">Stock Status:</span>
+                    <span class="color-detail-value">In Stock</span>
+                </div>
+            {/if}
+        </div>
+    {/if}
+
+    <!-- Help Text -->
+    <p class="color-picker-hint">
+        {if colors.length > 0}
+            Available colors: {colors.length}
+        {else}
+            No colors available
+        {/if}
+    </p>
+</div>
+
+<style scoped>
+/* Container */
+.color-picker-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    width: 100%;
+}
+
+/* Label */
+.color-picker-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.color-picker-selected {
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-primary);
+}
+
+/* Swatches Container */
+.color-picker-swatches {
+    display: flex;
+    gap: var(--flin-space-3);
+    flex-wrap: wrap;
+}
+
+/* Size Variants */
+.color-picker-sm .color-picker-swatches {
+    gap: var(--flin-space-2);
+}
+
+.color-picker-lg .color-picker-swatches {
+    gap: var(--flin-space-4);
+}
+
+/* Color Swatch Button */
+.color-swatch {
+    position: relative;
+    flex-shrink: 0;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    border: 3px solid transparent;
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--flin-transition-fast);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.color-swatch:hover:not(:disabled) {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.color-swatch:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.color-swatch.active {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light), 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.color-swatch:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Size Swatch Variants */
+.color-picker-sm .color-swatch {
+    width: 40px;
+    height: 40px;
+    border-width: 2px;
+}
+
+.color-picker-lg .color-swatch {
+    width: 60px;
+    height: 60px;
+    border-width: 4px;
+}
+
+/* Checkmark */
+.color-swatch svg {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* Unavailable Overlay */
+.color-unavailable-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: var(--flin-radius-full);
+    color: var(--flin-danger);
+}
+
+.color-swatch.unavailable {
+    background: repeating-linear-gradient(
+        45deg,
+        currentColor,
+        currentColor 10px,
+        rgba(0, 0, 0, 0.2) 10px,
+        rgba(0, 0, 0, 0.2) 20px
+    ) !important;
+}
+
+/* Details Section */
+.color-picker-details {
+    padding: var(--flin-space-3);
+    background-color: var(--flin-neutral-50);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.color-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--flin-space-2) 0;
+}
+
+.color-detail-item:not(:last-child) {
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.color-detail-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-neutral-600);
+}
+
+.color-detail-value {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+}
+
+.color-detail-available .color-detail-value {
+    color: var(--flin-success);
+}
+
+.color-detail-unavailable .color-detail-value {
+    color: var(--flin-danger);
+}
+
+/* Hint Text */
+.color-picker-hint {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-500);
+    margin: 0;
+    text-align: center;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .color-picker-label {
+        color: var(--flin-neutral-100);
+    }
+
+    .color-picker-details {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .color-detail-item:not(:last-child) {
+        border-bottom-color: var(--flin-neutral-700);
+    }
+
+    .color-detail-label {
+        color: var(--flin-neutral-400);
+    }
+
+    .color-detail-value {
+        color: var(--flin-neutral-100);
+    }
+
+    .color-picker-hint {
+        color: var(--flin-neutral-500);
+    }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .color-picker-swatches {
+        justify-content: space-around;
+    }
+
+    .color-swatch {
+        width: 45px;
+        height: 45px;
+    }
+
+    .color-picker-details {
+        padding: var(--flin-space-2);
+    }
+
+    .color-detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--flin-space-1);
+    }
+}
+
+/* Accessibility */
+.color-swatch:focus {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .color-swatch {
+        transition: none;
+    }
+
+    .color-swatch:hover:not(:disabled) {
+        transform: none;
+    }
+}
+</style>

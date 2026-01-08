@@ -1,0 +1,417 @@
+// ============================================================================
+// Page404.flin — FlinUI PRO Page Template
+// Not found (404) error page with search and navigation options
+// ============================================================================
+// Props:
+//   - title: Error title (string)
+//   - message: Error message (string)
+//   - homeUrl: Home page URL (string)
+//   - showSearch: Show search input (boolean)
+//   - suggestedLinks: List of suggested links (list)
+//   - onSearch: Search callback (function or none)
+
+title = props.title || "Page not found"
+message = props.message || "Sorry, we couldn't find the page you're looking for. Perhaps you've mistyped the URL or the page has been moved."
+homeUrl = props.homeUrl || "/"
+showSearch = props.showSearch || true
+onSearch = props.onSearch || none
+
+suggestedLinks = props.suggestedLinks || [
+    ["title": "Home", "description": "Go back to the homepage", "url": "/", "icon": "home"],
+    ["title": "Documentation", "description": "Read our documentation", "url": "/docs", "icon": "book"],
+    ["title": "Blog", "description": "Read our latest posts", "url": "/blog", "icon": "edit"],
+    ["title": "Support", "description": "Contact our support team", "url": "/support", "icon": "help"]
+]
+
+searchQuery = ""
+
+handleSearch = () => {
+    if onSearch != none && searchQuery != "" {
+        onSearch(searchQuery)
+    }
+}
+
+getLinkIcon = (iconName) => match iconName {
+    "home" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    "book" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    "edit" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    "help" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    _ => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+}
+
+<div class="page-404">
+    <div class="page-404__container">
+        // Error Illustration
+        <div class="page-404__illustration">
+            <span class="page-404__code">404</span>
+            <svg class="page-404__graphic" viewBox="0 0 200 200" fill="none">
+                <circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="2" stroke-dasharray="8 4" opacity="0.2"/>
+                <circle cx="100" cy="100" r="60" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4" opacity="0.3"/>
+                <circle cx="100" cy="100" r="40" fill="currentColor" opacity="0.1"/>
+                <text x="100" y="108" text-anchor="middle" fill="currentColor" font-size="24" font-weight="bold">?</text>
+            </svg>
+        </div>
+
+        // Error Message
+        <h1 class="page-404__title">{title}</h1>
+        <p class="page-404__message">{message}</p>
+
+        // Search (Optional)
+        {if showSearch}
+            <form class="page-404__search" submit={handleSearch}>
+                <div class="page-404__search-wrapper">
+                    <svg class="page-404__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    <input
+                        type="text"
+                        class="page-404__search-input"
+                        placeholder="Search for pages..."
+                        value={searchQuery}
+                        change={(e) => searchQuery = e.target.value}
+                    />
+                    <button type="submit" class="page-404__search-button">
+                        Search
+                    </button>
+                </div>
+            </form>
+        {/if}
+
+        // Actions
+        <div class="page-404__actions">
+            <a href={homeUrl} class="page-404__button page-404__button--primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back to Home
+            </a>
+            <button class="page-404__button page-404__button--secondary" click={() => history.back()}>
+                Go Back
+            </button>
+        </div>
+
+        // Suggested Links
+        <div class="page-404__suggestions">
+            <h2 class="page-404__suggestions-title">Popular Pages</h2>
+            <div class="page-404__suggestions-grid">
+                {for link in suggestedLinks}
+                    <a href={link.url} class="page-404__suggestion-card">
+                        <div class="page-404__suggestion-icon">
+                            {getLinkIcon(link.icon)}
+                        </div>
+                        <div class="page-404__suggestion-content">
+                            <h3 class="page-404__suggestion-title">{link.title}</h3>
+                            <p class="page-404__suggestion-description">{link.description}</p>
+                        </div>
+                        <svg class="page-404__suggestion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                {/for}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.page-404 {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-8) var(--flin-space-6);
+    background: var(--flin-bg-base);
+    font-family: var(--flin-font-sans);
+}
+
+.page-404__container {
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Illustration */
+.page-404__illustration {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto var(--flin-space-8);
+}
+
+.page-404__code {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4rem;
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-accent-gold);
+    z-index: 1;
+    text-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);
+}
+
+.page-404__graphic {
+    width: 100%;
+    height: 100%;
+    color: var(--flin-accent-gold);
+    animation: page-404-pulse 3s ease-in-out infinite;
+}
+
+@keyframes page-404-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Content */
+.page-404__title {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.page-404__message {
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-secondary);
+    line-height: 1.7;
+    margin: 0 0 var(--flin-space-8) 0;
+}
+
+/* Search */
+.page-404__search {
+    margin-bottom: var(--flin-space-6);
+}
+
+.page-404__search-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-default);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-1);
+    transition: all var(--flin-transition-fast);
+}
+
+.page-404__search-wrapper:focus-within {
+    border-color: var(--flin-accent-gold);
+    box-shadow: 0 0 0 3px var(--flin-accent-gold-light);
+}
+
+.page-404__search-icon {
+    width: 20px;
+    height: 20px;
+    margin-left: var(--flin-space-3);
+    color: var(--flin-text-muted);
+}
+
+.page-404__search-input {
+    flex: 1;
+    padding: var(--flin-space-3);
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-primary);
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+.page-404__search-input::placeholder {
+    color: var(--flin-text-muted);
+}
+
+.page-404__search-button {
+    padding: var(--flin-space-3) var(--flin-space-5);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background: var(--flin-accent-gold);
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.page-404__search-button:hover {
+    background: var(--flin-accent-gold-hover);
+}
+
+/* Actions */
+.page-404__actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-4);
+    margin-bottom: var(--flin-space-12);
+}
+
+.page-404__button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-6);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    border-radius: var(--flin-radius-lg);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.page-404__button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.page-404__button--primary {
+    color: white;
+    background: var(--flin-accent-gold);
+    border: none;
+}
+
+.page-404__button--primary:hover {
+    background: var(--flin-accent-gold-hover);
+    transform: translateY(-1px);
+}
+
+.page-404__button--secondary {
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-default);
+}
+
+.page-404__button--secondary:hover {
+    background: var(--flin-bg-elevated);
+    border-color: var(--flin-border-strong);
+}
+
+/* Suggestions */
+.page-404__suggestions {
+    padding-top: var(--flin-space-8);
+    border-top: 1px solid var(--flin-border-subtle);
+}
+
+.page-404__suggestions-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 0 var(--flin-space-6) 0;
+}
+
+.page-404__suggestions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--flin-space-4);
+}
+
+.page-404__suggestion-card {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-4);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-lg);
+    text-decoration: none;
+    text-align: left;
+    transition: all var(--flin-transition-fast);
+}
+
+.page-404__suggestion-card:hover {
+    border-color: var(--flin-accent-gold);
+    box-shadow: var(--flin-shadow-md);
+}
+
+.page-404__suggestion-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-accent-gold-light);
+    border-radius: var(--flin-radius-md);
+    flex-shrink: 0;
+}
+
+.page-404__suggestion-icon svg {
+    width: 20px;
+    height: 20px;
+    color: var(--flin-accent-gold);
+}
+
+.page-404__suggestion-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.page-404__suggestion-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-1) 0;
+}
+
+.page-404__suggestion-description {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-tertiary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.page-404__suggestion-arrow {
+    width: 16px;
+    height: 16px;
+    color: var(--flin-text-muted);
+    flex-shrink: 0;
+    transition: transform var(--flin-transition-fast);
+}
+
+.page-404__suggestion-card:hover .page-404__suggestion-arrow {
+    transform: translateX(4px);
+    color: var(--flin-accent-gold);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .page-404__code {
+        font-size: 3rem;
+    }
+
+    .page-404__title {
+        font-size: var(--flin-text-2xl);
+    }
+
+    .page-404__actions {
+        flex-direction: column;
+    }
+
+    .page-404__suggestions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .page-404__search-wrapper {
+        flex-direction: column;
+        padding: var(--flin-space-2);
+    }
+
+    .page-404__search-icon {
+        display: none;
+    }
+
+    .page-404__search-input {
+        width: 100%;
+        text-align: center;
+    }
+
+    .page-404__search-button {
+        width: 100%;
+    }
+}
+
+/* Dark Theme */
+[data-theme="dark"] .page-404__search-wrapper {
+    background: var(--flin-bg-elevated);
+}
+</style>

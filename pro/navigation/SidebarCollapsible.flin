@@ -1,0 +1,399 @@
+// ============================================================================
+// SidebarCollapsible.flin — FlinUI PRO Navigation Component
+// Sidebar that can expand/collapse with smooth animation
+// ============================================================================
+// Props:
+//   - items: Navigation items array (list)
+//     Each item: { id, label, href, icon, tooltip (optional), badge (optional) }
+//   - collapsed: Whether sidebar is collapsed (boolean, default: false)
+//   - onToggle: Callback when collapse state changes (function or none)
+//   - width: Expanded sidebar width (string, default: "260px")
+//   - collapsedWidth: Collapsed sidebar width (string, default: "72px")
+//   - activeItem: Currently active item ID (string or none)
+//   - onItemClick: Callback when item is clicked (function or none)
+//   - showToggleButton: Show collapse toggle button (boolean, default: true)
+// ============================================================================
+
+items = props.items || [
+    ["id": "dashboard", "label": "Dashboard", "href": "/dashboard", "icon": "home", "tooltip": "Dashboard"],
+    ["id": "analytics", "label": "Analytics", "href": "/analytics", "icon": "chart", "tooltip": "Analytics"],
+    ["id": "users", "label": "Users", "href": "/users", "icon": "users", "tooltip": "Users", "badge": "5"],
+    ["id": "messages", "label": "Messages", "href": "/messages", "icon": "mail", "tooltip": "Messages", "badge": "12"],
+    ["id": "files", "label": "Files", "href": "/files", "icon": "folder", "tooltip": "Files"],
+    ["id": "settings", "label": "Settings", "href": "/settings", "icon": "cog", "tooltip": "Settings"]
+]
+collapsed = props.collapsed || false
+onToggle = props.onToggle || none
+width = props.width || "260px"
+collapsedWidth = props.collapsedWidth || "72px"
+activeItem = props.activeItem || "dashboard"
+onItemClick = props.onItemClick || none
+showToggleButton = props.showToggleButton || true
+
+handleToggle = () => {
+    collapsed = !collapsed
+    if onToggle != none {
+        onToggle(collapsed)
+    }
+}
+
+handleItemClick = (item) => {
+    if onItemClick != none {
+        onItemClick(item)
+    }
+}
+
+isActive = (itemId) => itemId == activeItem
+
+currentWidth = match collapsed { true -> collapsedWidth, _ -> width }
+collapsedClass = match collapsed { true -> " collapsed", _ -> "" }
+
+<aside class={"flin-sidebar-collapsible" ++ collapsedClass} style="width: {currentWidth}">
+    <div class="sidebar-header">
+        {if !collapsed}
+            <span class="sidebar-logo">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <rect width="28" height="28" rx="6" fill="var(--flin-accent-gold)"/>
+                    <path d="M8 14h12M14 8v12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </span>
+            <span class="sidebar-brand">FlinUI</span>
+        {else}
+            <span class="sidebar-logo">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <rect width="28" height="28" rx="6" fill="var(--flin-accent-gold)"/>
+                    <path d="M8 14h12M14 8v12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </span>
+        {/if}
+    </div>
+
+    <nav class="sidebar-nav">
+        <ul class="sidebar-list">
+            {for item in items}
+                <li class="sidebar-item">
+                    <a
+                        href={item.href}
+                        class="sidebar-link {if isActive(item.id)}active{/if}"
+                        click={(e) => {
+                            e.preventDefault()
+                            handleItemClick(item)
+                        }}
+                        aria-current={if isActive(item.id)}"page"{else}none{/if}
+                        title={if collapsed}{item.tooltip || item.label}{else}none{/if}
+                        data-tooltip={item.tooltip || item.label}
+                    >
+                        <span class="sidebar-icon">
+                            {match item.icon {
+                                "home" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+                                "chart" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+                                "users" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
+                                "mail" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+                                "folder" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>
+                                "cog" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+                                _ -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="3"/></svg>
+                            }}
+                        </span>
+                        {if !collapsed}
+                            <span class="sidebar-label">{item.label}</span>
+                            {if item.badge != none}
+                                <span class="sidebar-badge">{item.badge}</span>
+                            {/if}
+                        {else}
+                            {if item.badge != none}
+                                <span class="sidebar-badge-dot"></span>
+                            {/if}
+                        {/if}
+                    </a>
+                    {if collapsed}
+                        <div class="sidebar-tooltip">{item.tooltip || item.label}</div>
+                    {/if}
+                </li>
+            {/for}
+        </ul>
+    </nav>
+
+    {if showToggleButton}
+        <div class="sidebar-footer">
+            <button
+                class="sidebar-toggle"
+                click={handleToggle}
+                aria-label={if collapsed}"Expand sidebar"{else}"Collapse sidebar"{/if}
+                type="button"
+            >
+                <span class="toggle-icon">
+                    {if collapsed}
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    {else}
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    {/if}
+                </span>
+                {if !collapsed}
+                    <span class="toggle-label">Collapse</span>
+                {/if}
+            </button>
+        </div>
+    {/if}
+</aside>
+
+<style scoped>
+.flin-sidebar-collapsible {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--flin-bg-elevated);
+    border-right: 1px solid var(--flin-border-subtle);
+    transition: width var(--flin-transition-normal) var(--flin-ease-out);
+    overflow: hidden;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-border-subtle);
+    flex-shrink: 0;
+    min-height: 64px;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sidebar-brand {
+    font-family: var(--flin-font-heading);
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.collapsed .sidebar-brand {
+    opacity: 0;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--flin-space-2);
+}
+
+.sidebar-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.sidebar-item {
+    margin: 0;
+    position: relative;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    border-radius: var(--flin-radius-md);
+    text-decoration: none;
+    color: var(--flin-text-secondary);
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    transition: all var(--flin-transition-fast);
+    cursor: pointer;
+    white-space: nowrap;
+    position: relative;
+}
+
+.sidebar-link:hover {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-primary);
+}
+
+.sidebar-link.active {
+    background: rgba(234, 179, 8, 0.1);
+    color: var(--flin-accent-gold);
+}
+
+.sidebar-link.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 24px;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+}
+
+.sidebar-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.sidebar-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 1;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.collapsed .sidebar-label {
+    opacity: 0;
+    width: 0;
+}
+
+.sidebar-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 var(--flin-space-2);
+    background: var(--flin-accent-gold);
+    color: var(--flin-neutral-900);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    border-radius: var(--flin-radius-full);
+    transition: opacity var(--flin-transition-fast);
+}
+
+.sidebar-badge-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+}
+
+/* Tooltip for collapsed state */
+.sidebar-tooltip {
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: var(--flin-neutral-900);
+    color: white;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    border-radius: var(--flin-radius-md);
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--flin-transition-fast);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.sidebar-tooltip::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-right-color: var(--flin-neutral-900);
+}
+
+.collapsed .sidebar-item:hover .sidebar-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sidebar-footer {
+    padding: var(--flin-space-3);
+    border-top: 1px solid var(--flin-border-subtle);
+    flex-shrink: 0;
+}
+
+.sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-secondary);
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.sidebar-toggle:hover {
+    background: var(--flin-bg-hover);
+    color: var(--flin-text-primary);
+}
+
+.toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.toggle-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.collapsed .toggle-label {
+    display: none;
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-sidebar-collapsible {
+    background: var(--flin-bg-base);
+    border-right-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .sidebar-header,
+[data-theme="dark"] .sidebar-footer {
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .sidebar-toggle {
+    background: var(--flin-bg-elevated);
+    border-color: var(--flin-border-default);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .flin-sidebar-collapsible {
+        width: 100% !important;
+    }
+
+    .flin-sidebar-collapsible.collapsed {
+        width: 72px !important;
+    }
+}
+</style>

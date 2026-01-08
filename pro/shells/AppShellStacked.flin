@@ -1,0 +1,175 @@
+// ============================================================================
+// AppShellStacked.flin — FlinUI PRO Shell Component
+// Navbar + main content stacked application layout
+// ============================================================================
+// Props:
+//   - navbarHeight: Height of the navbar (string, default: "64px")
+//   - navbarFixed: Fixed navbar position (boolean, default: true)
+//   - navbarBorder: Show bottom border (boolean, default: true)
+//   - navbarShadow: Show shadow (boolean, default: false)
+//   - navbarTransparent: Transparent background (boolean, default: false)
+//   - showFooter: Show footer area (boolean, default: false)
+//   - footerFixed: Fixed footer position (boolean, default: false)
+// ============================================================================
+
+navbarHeight = props.navbarHeight || "64px"
+navbarFixed = props.navbarFixed || true
+navbarBorder = props.navbarBorder || true
+navbarShadow = props.navbarShadow || false
+navbarTransparent = props.navbarTransparent || false
+showFooter = props.showFooter || false
+footerFixed = props.footerFixed || false
+
+// Build classes
+navbarClasses = "app-navbar"
+navbarClasses = {if navbarFixed { navbarClasses + " navbar-fixed" } else { navbarClasses }}
+navbarClasses = {if navbarBorder { navbarClasses + " navbar-border" } else { navbarClasses }}
+navbarClasses = {if navbarShadow { navbarClasses + " navbar-shadow" } else { navbarClasses }}
+navbarClasses = {if navbarTransparent { navbarClasses + " navbar-transparent" } else { navbarClasses }}
+
+footerClasses = {if footerFixed { "app-footer footer-fixed" } else { "app-footer" }}
+
+<div class="flin-app-shell-stacked">
+    // Navbar
+    <header class={navbarClasses} style="height: {navbarHeight}">
+        <div class="navbar-inner">
+            {props.navbar || none}
+        </div>
+    </header>
+
+    // Main content
+    <main class="app-main" style="--navbar-height: {navbarHeight}">
+        <div class="main-content">
+            {children}
+        </div>
+    </main>
+
+    // Footer
+    {if showFooter}
+        <footer class={footerClasses}>
+            <div class="footer-inner">
+                {props.footer || none}
+            </div>
+        </footer>
+    {/if}
+</div>
+
+<style scoped>
+.flin-app-shell-stacked {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--flin-bg-base);
+}
+
+/* Navbar */
+.app-navbar {
+    display: flex;
+    align-items: center;
+    background: var(--flin-bg-elevated);
+    z-index: 100;
+    flex-shrink: 0;
+}
+
+.navbar-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.navbar-border {
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.navbar-shadow {
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.navbar-transparent {
+    background: transparent;
+}
+
+.navbar-inner {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--flin-space-6);
+    max-width: 100%;
+    height: 100%;
+}
+
+/* Main content */
+.app-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar-fixed + .app-main,
+.app-navbar.navbar-fixed ~ .app-main {
+    padding-top: var(--navbar-height);
+}
+
+.main-content {
+    flex: 1;
+    padding: var(--flin-space-6);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Footer */
+.app-footer {
+    background: var(--flin-bg-elevated);
+    border-top: 1px solid var(--flin-border-subtle);
+    flex-shrink: 0;
+}
+
+.footer-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+.footer-inner {
+    padding: var(--flin-space-4) var(--flin-space-6);
+}
+
+/* When both navbar and footer are fixed, adjust main padding */
+.flin-app-shell-stacked:has(.navbar-fixed):has(.footer-fixed) .main-content {
+    padding-bottom: calc(var(--flin-space-6) + 60px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .navbar-inner {
+        padding: 0 var(--flin-space-4);
+    }
+
+    .main-content {
+        padding: var(--flin-space-4);
+    }
+
+    .footer-inner {
+        padding: var(--flin-space-4);
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .app-navbar {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .navbar-transparent {
+    background: transparent;
+}
+
+[data-theme="dark"] .app-footer {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+</style>

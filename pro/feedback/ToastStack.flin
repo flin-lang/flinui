@@ -1,0 +1,258 @@
+// ToastStack.flin - FlinUI PRO Toast Stack Container
+// Container for managing multiple stacked toast notifications
+
+// Props with defaults
+toasts = props.toasts || []
+position = props.position || "top-right"
+maxVisible = props.maxVisible || 5
+gap = props.gap || 12
+onDismiss = props.onDismiss
+reverseOrder = props.reverseOrder || false
+
+// Handle dismiss a specific toast
+handleDismiss = {
+    if onDismiss { onDismiss() }
+}
+
+// Position class
+positionClass = match position {
+    "top-left" -> "toast-stack--top-left"
+    "top-center" -> "toast-stack--top-center"
+    "bottom-right" -> "toast-stack--bottom-right"
+    "bottom-left" -> "toast-stack--bottom-left"
+    "bottom-center" -> "toast-stack--bottom-center"
+    _ -> "toast-stack--top-right"
+}
+
+// Reverse class for bottom positions
+reverseClass = match reverseOrder { true -> " toast-stack--reverse", _ -> "" }
+
+// Gap style
+gapStyle = "gap: " ++ gap ++ "px"
+
+// Has hidden toasts
+hiddenCount = 0
+
+<div
+    class={"flin-pro-toast-stack " ++ positionClass ++ reverseClass}
+    style={gapStyle}
+    role="region"
+    aria-label="Notifications"
+    aria-live="polite"
+>
+    {if hiddenCount > 0}
+        <div class="toast-stack__counter">
+            +{hiddenCount} more
+        </div>
+    {/if}
+
+    <div class="toast-stack__list">
+        {children}
+    </div>
+
+    <div class="toast-stack__empty" aria-hidden="true">
+        <!-- Placeholder for empty state -->
+    </div>
+</div>
+
+<style scoped>
+.flin-pro-toast-stack {
+    position: fixed;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+    max-height: calc(100vh - var(--flin-space-8));
+    overflow: hidden;
+}
+
+.toast-stack__list {
+    display: flex;
+    flex-direction: column;
+    gap: inherit;
+}
+
+.toast-stack__list > * {
+    pointer-events: auto;
+    position: relative;
+    animation: toastStackSlideIn var(--flin-transition-normal) ease-out;
+}
+
+/* Position variants */
+.toast-stack--top-right {
+    top: var(--flin-space-4);
+    right: var(--flin-space-4);
+    align-items: flex-end;
+}
+
+.toast-stack--top-left {
+    top: var(--flin-space-4);
+    left: var(--flin-space-4);
+    align-items: flex-start;
+}
+
+.toast-stack--top-center {
+    top: var(--flin-space-4);
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+}
+
+.toast-stack--bottom-right {
+    bottom: var(--flin-space-4);
+    right: var(--flin-space-4);
+    align-items: flex-end;
+    flex-direction: column-reverse;
+}
+
+.toast-stack--bottom-left {
+    bottom: var(--flin-space-4);
+    left: var(--flin-space-4);
+    align-items: flex-start;
+    flex-direction: column-reverse;
+}
+
+.toast-stack--bottom-center {
+    bottom: var(--flin-space-4);
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+    flex-direction: column-reverse;
+}
+
+/* Reverse order */
+.toast-stack--reverse .toast-stack__list {
+    flex-direction: column-reverse;
+}
+
+/* Animations */
+@keyframes toastStackSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.toast-stack--bottom-right .toast-stack__list > *,
+.toast-stack--bottom-left .toast-stack__list > *,
+.toast-stack--bottom-center .toast-stack__list > * {
+    animation-name: toastStackSlideInBottom;
+}
+
+@keyframes toastStackSlideInBottom {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Stacking effect for many toasts */
+.toast-stack__list > *:nth-child(n+4) {
+    opacity: 0.6;
+    transform: scale(0.95);
+}
+
+.toast-stack__list > *:nth-child(n+5) {
+    opacity: 0.3;
+    transform: scale(0.9);
+}
+
+.toast-stack__list > *:nth-child(n+6) {
+    display: none;
+}
+
+/* Counter for hidden toasts */
+.toast-stack__counter {
+    pointer-events: auto;
+    background: var(--flin-neutral-700);
+    color: white;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    border-radius: var(--flin-radius-full);
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    margin-bottom: var(--flin-space-2);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.toast-stack__counter:hover {
+    background: var(--flin-neutral-600);
+}
+
+.toast-stack--bottom-right .toast-stack__counter,
+.toast-stack--bottom-left .toast-stack__counter,
+.toast-stack--bottom-center .toast-stack__counter {
+    margin-bottom: 0;
+    margin-top: var(--flin-space-2);
+    order: 1;
+}
+
+/* Empty state */
+.toast-stack__empty {
+    display: none;
+}
+
+/* Hover effects - show all toasts on hover */
+.flin-pro-toast-stack:hover .toast-stack__list > * {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Transition for smooth stacking */
+.toast-stack__list > * {
+    transition: opacity var(--flin-transition-fast), transform var(--flin-transition-fast);
+}
+
+/* Expanded view on hover */
+.flin-pro-toast-stack:hover .toast-stack__list > *:nth-child(n+6) {
+    display: block;
+    animation: toastStackExpand var(--flin-transition-fast) ease-out;
+}
+
+@keyframes toastStackExpand {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .toast-stack__counter {
+    background: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .toast-stack__counter:hover {
+    background: var(--flin-neutral-500);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .flin-pro-toast-stack {
+        left: var(--flin-space-4);
+        right: var(--flin-space-4);
+        transform: none;
+    }
+
+    .toast-stack--top-center,
+    .toast-stack--bottom-center {
+        left: var(--flin-space-4);
+        transform: none;
+    }
+
+    .toast-stack__list > * {
+        width: 100%;
+    }
+}
+</style>

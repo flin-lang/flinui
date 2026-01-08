@@ -1,0 +1,418 @@
+// BrandFilter.flin - FlinUI PRO E-commerce Component
+// Brand checkbox list with search and product counts
+
+// Props with defaults
+brands = props.brands || []
+selectedBrands = props.selectedBrands || []
+showSearch = props.showSearch || true
+showCounts = props.showCounts || true
+maxVisible = props.maxVisible || 8
+onChange = props.onChange
+
+// Internal state
+searchQuery = ""
+isExpanded = false
+
+// Filter brands by search query
+filteredBrands = brands.filter(fn(brand) {
+    if searchQuery == "" {
+        return true
+    }
+    return brand.name.toLowerCase().includes(searchQuery.toLowerCase())
+})
+
+// Get visible brands
+visibleBrands = isExpanded ? filteredBrands : filteredBrands.slice(0, maxVisible)
+hasMore = filteredBrands.length > maxVisible
+moreCount = filteredBrands.length - maxVisible
+
+// Check if brand is selected
+fn isBrandSelected(brandId) {
+    return selectedBrands.includes(brandId)
+}
+
+// Handle brand toggle
+fn handleBrandToggle(brandId) {
+    newSelected = []
+    if isBrandSelected(brandId) {
+        newSelected = selectedBrands.filter(fn(id) { return id != brandId })
+    } else {
+        newSelected = [...selectedBrands, brandId]
+    }
+
+    if onChange {
+        onChange(newSelected)
+    }
+}
+
+// Handle search input
+fn handleSearchInput(e) {
+    searchQuery = e.target.value
+    isExpanded = false
+}
+
+// Clear search
+fn handleClearSearch() {
+    searchQuery = ""
+}
+
+// Toggle expand/collapse
+fn handleToggleExpand() {
+    isExpanded = !isExpanded
+}
+
+// Clear all selections
+fn handleClearAll() {
+    if onChange {
+        onChange([])
+    }
+}
+
+// Selected count
+selectedCount = selectedBrands.length
+hasSelections = selectedCount > 0
+
+<div class="brand-filter">
+    <div class="brand-filter-header">
+        <label class="brand-filter-label">Brand</label>
+        {if hasSelections}
+            <button class="brand-filter-clear" click={handleClearAll}>
+                Clear ({selectedCount})
+            </button>
+        {/if}
+    </div>
+
+    {if showSearch}
+        <div class="brand-filter-search">
+            <div class="brand-filter-search-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+            </div>
+            <input
+                type="text"
+                class="brand-filter-search-input"
+                placeholder="Search brands..."
+                value={searchQuery}
+                input={handleSearchInput}
+            />
+            {if searchQuery != ""}
+                <button class="brand-filter-search-clear" click={handleClearSearch}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="brand-filter-list">
+        {for brand in visibleBrands}
+            <label class="brand-filter-item">
+                <input
+                    type="checkbox"
+                    class="brand-filter-checkbox"
+                    checked={isBrandSelected(brand.id)}
+                    change={fn() { handleBrandToggle(brand.id) }}
+                />
+                <span class="brand-filter-checkmark"></span>
+                <span class="brand-filter-name">{brand.name}</span>
+                {if showCounts && brand.count}
+                    <span class="brand-filter-count">({brand.count})</span>
+                {/if}
+            </label>
+        {/for}
+
+        {if filteredBrands.length == 0}
+            <div class="brand-filter-empty">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+                <p>No brands found</p>
+            </div>
+        {/if}
+    </div>
+
+    {if hasMore}
+        <button class="brand-filter-toggle" click={handleToggleExpand}>
+            {if isExpanded}
+                Show less
+            {else}
+                Show {moreCount} more
+            {/if}
+            <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="brand-filter-toggle-icon"
+                style="transform: rotate({isExpanded ? 180 : 0}deg)"
+            >
+                <polyline points="6 9 12 15 18 9"/>
+            </svg>
+        </button>
+    {/if}
+</div>
+
+<style scoped>
+/* Container */
+.brand-filter {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    background-color: white;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+}
+
+/* Header */
+.brand-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand-filter-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+}
+
+.brand-filter-clear {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-primary);
+    background: transparent;
+    border: none;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.brand-filter-clear:hover {
+    background-color: var(--flin-primary-light);
+}
+
+/* Search */
+.brand-filter-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.brand-filter-search-icon {
+    position: absolute;
+    left: var(--flin-space-3);
+    display: flex;
+    align-items: center;
+    color: var(--flin-neutral-400);
+    pointer-events: none;
+}
+
+.brand-filter-search-input {
+    flex: 1;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-900);
+    background-color: var(--flin-neutral-50);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    padding-left: 36px;
+    padding-right: 36px;
+    transition: all var(--flin-transition-fast);
+}
+
+.brand-filter-search-input:focus {
+    outline: none;
+    border-color: var(--flin-primary);
+    background-color: white;
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.brand-filter-search-input::placeholder {
+    color: var(--flin-neutral-400);
+}
+
+.brand-filter-search-clear {
+    position: absolute;
+    right: var(--flin-space-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    color: var(--flin-neutral-500);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.brand-filter-search-clear:hover {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-700);
+}
+
+/* List */
+.brand-filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+/* Item */
+.brand-filter-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-2);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.brand-filter-item:hover {
+    background-color: var(--flin-neutral-50);
+}
+
+/* Checkbox */
+.brand-filter-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.brand-filter-checkmark {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-sm);
+    background-color: white;
+    transition: all var(--flin-transition-fast);
+}
+
+.brand-filter-checkbox:checked + .brand-filter-checkmark {
+    background-color: var(--flin-primary);
+    border-color: var(--flin-primary);
+}
+
+.brand-filter-checkbox:checked + .brand-filter-checkmark::after {
+    content: "";
+    position: absolute;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translate(-50%, -50%);
+    margin-left: 6px;
+    margin-top: 2px;
+}
+
+/* Name and Count */
+.brand-filter-name {
+    flex: 1;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-900);
+}
+
+.brand-filter-count {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-500);
+}
+
+/* Empty State */
+.brand-filter-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-6);
+    color: var(--flin-neutral-400);
+    text-align: center;
+}
+
+.brand-filter-empty p {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    margin: 0;
+}
+
+/* Toggle Button */
+.brand-filter-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+    border: 1px solid var(--flin-primary);
+    border-style: dashed;
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-2);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.brand-filter-toggle:hover {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.brand-filter-toggle-icon {
+    transition: transform var(--flin-transition-normal);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .brand-filter {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .brand-filter-label,
+    .brand-filter-name {
+        color: var(--flin-neutral-100);
+    }
+
+    .brand-filter-search-input {
+        background-color: var(--flin-neutral-900);
+        border-color: var(--flin-neutral-700);
+        color: var(--flin-neutral-100);
+    }
+
+    .brand-filter-search-input:focus {
+        background-color: var(--flin-neutral-800);
+    }
+
+    .brand-filter-item:hover {
+        background-color: var(--flin-neutral-700);
+    }
+
+    .brand-filter-checkmark {
+        background-color: var(--flin-neutral-900);
+        border-color: var(--flin-neutral-600);
+    }
+}
+</style>

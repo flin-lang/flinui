@@ -1,0 +1,371 @@
+// NotificationDropdown.flin - FlinUI PRO Notification Dropdown Component
+// Dropdown list for displaying notifications with mark as read and clear actions
+
+// Props with defaults
+notifications = props.notifications || []
+onMarkRead = props.onMarkRead
+onClear = props.onClear
+onSelect = props.onSelect
+maxHeight = props.maxHeight || 400
+emptyMessage = props.emptyMessage || "No notifications"
+emptyIcon = props.emptyIcon || true
+open = props.open || false
+onClose = props.onClose
+
+// Internal state
+isOpen = open
+isExiting = false
+
+// Handle close
+handleClose = {
+    isExiting = true
+    isOpen = false
+    if onClose { onClose() }
+}
+
+// Handle backdrop click
+handleBackdropClick = {
+    handleClose()
+}
+
+// Handle mark all as read
+handleMarkAllRead = {
+    if onMarkRead { onMarkRead() }
+}
+
+// Handle clear all
+handleClearAll = {
+    if onClear { onClear() }
+}
+
+// Handle notification click
+handleNotificationClick = {
+    if onSelect { onSelect() }
+}
+
+// Display class
+displayClass = match isOpen { true -> "notification-dropdown--open", _ -> "notification-dropdown--closed" }
+
+// Exiting class
+exitingClass = match isExiting { true -> " notification-dropdown--exiting", _ -> "" }
+
+// Max height style
+maxHeightStyle = "max-height: " ++ maxHeight ++ "px"
+
+// Has notifications
+hasNotifications = true
+unreadCount = 0
+
+<div class={"flin-pro-notification-dropdown " ++ displayClass ++ exitingClass}>
+    {if isOpen}
+        <div class="notification-dropdown__backdrop" click={handleBackdropClick}></div>
+    {/if}
+
+    <div class="notification-dropdown__panel" role="dialog" aria-label="Notifications">
+        <div class="notification-dropdown__header">
+            <h3 class="notification-dropdown__title">Notifications</h3>
+            {if unreadCount > 0}
+                <span class="notification-dropdown__badge">{unreadCount} new</span>
+            {/if}
+            <div class="notification-dropdown__actions">
+                <button
+                    class="notification-dropdown__action"
+                    click={handleMarkAllRead}
+                    type="button"
+                    aria-label="Mark all as read"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </button>
+                <button
+                    class="notification-dropdown__action"
+                    click={handleClose}
+                    type="button"
+                    aria-label="Close notifications"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="notification-dropdown__list" style={maxHeightStyle}>
+            {if hasNotifications}
+                <div class="notification-dropdown__items">
+                    {children}
+                </div>
+            {/if}
+
+            {if !hasNotifications}
+                <div class="notification-dropdown__empty">
+                    {if emptyIcon}
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                    {/if}
+                    <p>{emptyMessage}</p>
+                </div>
+            {/if}
+        </div>
+
+        <div class="notification-dropdown__footer">
+            <button
+                class="notification-dropdown__clear"
+                click={handleClearAll}
+                type="button"
+            >
+                Clear all notifications
+            </button>
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.flin-pro-notification-dropdown {
+    position: relative;
+}
+
+.notification-dropdown--closed .notification-dropdown__panel {
+    display: none;
+}
+
+.notification-dropdown--open .notification-dropdown__panel {
+    display: flex;
+}
+
+/* Backdrop */
+.notification-dropdown__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9997;
+}
+
+/* Panel */
+.notification-dropdown__panel {
+    position: absolute;
+    top: calc(100% + var(--flin-space-2));
+    right: 0;
+    width: 380px;
+    max-width: calc(100vw - var(--flin-space-8));
+    background: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-xl);
+    z-index: 9998;
+    flex-direction: column;
+    overflow: hidden;
+    animation: notificationDropdownSlideIn var(--flin-transition-fast) ease-out;
+}
+
+@keyframes notificationDropdownSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.notification-dropdown--exiting .notification-dropdown__panel {
+    animation: notificationDropdownSlideOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes notificationDropdownSlideOut {
+    to {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+}
+
+/* Header */
+.notification-dropdown__header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.notification-dropdown__title {
+    font-size: var(--flin-text-base);
+    font-weight: 600;
+    color: var(--flin-fg);
+    margin: 0;
+    flex: 1;
+}
+
+.notification-dropdown__badge {
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    color: var(--flin-primary);
+    background: var(--flin-primary-light);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-full);
+}
+
+.notification-dropdown__actions {
+    display: flex;
+    gap: var(--flin-space-1);
+}
+
+.notification-dropdown__action {
+    background: transparent;
+    border: none;
+    padding: var(--flin-space-2);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-fg-muted);
+    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.notification-dropdown__action:hover {
+    color: var(--flin-fg);
+    background: var(--flin-neutral-100);
+}
+
+.notification-dropdown__action:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.notification-dropdown__action svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* List */
+.notification-dropdown__list {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.notification-dropdown__items {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Notification item styles (for children) */
+.notification-dropdown__items > * {
+    display: flex;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-100);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.notification-dropdown__items > *:hover {
+    background: var(--flin-neutral-50);
+}
+
+.notification-dropdown__items > *:last-child {
+    border-bottom: none;
+}
+
+/* Empty state */
+.notification-dropdown__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-8);
+    text-align: center;
+    color: var(--flin-fg-muted);
+}
+
+.notification-dropdown__empty svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--flin-space-3);
+    opacity: 0.5;
+}
+
+.notification-dropdown__empty p {
+    font-size: var(--flin-text-sm);
+    margin: 0;
+}
+
+/* Footer */
+.notification-dropdown__footer {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+    background: var(--flin-neutral-50);
+}
+
+.notification-dropdown__clear {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.notification-dropdown__clear:hover {
+    color: var(--flin-danger);
+    background: var(--flin-danger-light);
+}
+
+.notification-dropdown__clear:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+/* Dark theme */
+[data-theme="dark"] .notification-dropdown__panel {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .notification-dropdown__header,
+[data-theme="dark"] .notification-dropdown__footer {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .notification-dropdown__footer {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .notification-dropdown__action:hover {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .notification-dropdown__items > *:hover {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .notification-dropdown__items > * {
+    border-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .notification-dropdown__clear:hover {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .notification-dropdown__panel {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-width: 100%;
+        border-radius: var(--flin-radius-xl) var(--flin-radius-xl) 0 0;
+        max-height: 80vh;
+    }
+
+    .notification-dropdown__backdrop {
+        background: rgba(0, 0, 0, 0.5);
+    }
+}
+</style>

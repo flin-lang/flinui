@@ -1,0 +1,323 @@
+// FlinUI PRO DataTable Component
+// Full-featured table with headers, rows, and optional actions per row
+
+// Props with defaults
+columns = props.columns || []
+data = props.data || []
+loading = props.loading || false
+emptyText = props.emptyText || "No data available"
+striped = props.striped || false
+hoverable = props.hoverable || true
+bordered = props.bordered || false
+actions = props.actions || none
+onAction = props.onAction || none
+rowKey = props.rowKey || "id"
+
+// Computed classes
+stripedClass = match striped {
+    true -> " pro-datatable--striped"
+    _ -> ""
+}
+
+hoverableClass = match hoverable {
+    true -> " pro-datatable--hoverable"
+    _ -> ""
+}
+
+borderedClass = match bordered {
+    true -> " pro-datatable--bordered"
+    _ -> ""
+}
+
+tableClass = "pro-datatable" ++ stripedClass ++ hoverableClass ++ borderedClass
+
+// Action handler
+handleAction = (action, row) => {
+    if onAction != none {
+        onAction(action, row)
+    }
+}
+
+<div class="pro-datatable-container">
+    <div class="pro-datatable__wrapper">
+        <table class={tableClass}>
+            <thead class="pro-datatable__head">
+                <tr class="pro-datatable__row pro-datatable__row--header">
+                    {for column in columns}
+                        <th class="pro-datatable__header" scope="col">
+                            {column.label || column.key}
+                        </th>
+                    {/for}
+                    {if actions != none}
+                        <th class="pro-datatable__header pro-datatable__header--actions" scope="col">
+                            Actions
+                        </th>
+                    {/if}
+                </tr>
+            </thead>
+
+            <tbody class="pro-datatable__body">
+                {if loading}
+                    <tr class="pro-datatable__row">
+                        <td class="pro-datatable__cell pro-datatable__loading" colspan={columns.length + 1}>
+                            <div class="pro-datatable__spinner"></div>
+                            <span>Loading data...</span>
+                        </td>
+                    </tr>
+                {else if data.length == 0}
+                    <tr class="pro-datatable__row">
+                        <td class="pro-datatable__cell pro-datatable__empty" colspan={columns.length + 1}>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M3 9h18"/>
+                                <path d="M9 21V9"/>
+                            </svg>
+                            <span>{emptyText}</span>
+                        </td>
+                    </tr>
+                {else}
+                    {for row in data}
+                        <tr class="pro-datatable__row" data-row-key={row[rowKey]}>
+                            {for column in columns}
+                                <td class="pro-datatable__cell">
+                                    {if column.render != none}
+                                        {column.render(row[column.key], row)}
+                                    {else}
+                                        {row[column.key]}
+                                    {/if}
+                                </td>
+                            {/for}
+                            {if actions != none}
+                                <td class="pro-datatable__cell pro-datatable__cell--actions">
+                                    <div class="pro-datatable__actions">
+                                        {for action in actions}
+                                            <button
+                                                class={"pro-datatable__action-btn pro-datatable__action-btn--" ++ action.variant}
+                                                click={handleAction(action.key, row)}
+                                                title={action.label}
+                                                aria-label={action.label}
+                                            >
+                                                {if action.icon != none}
+                                                    {action.icon}
+                                                {else}
+                                                    {action.label}
+                                                {/if}
+                                            </button>
+                                        {/for}
+                                    </div>
+                                </td>
+                            {/if}
+                        </tr>
+                    {/for}
+                {/if}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style scoped>
+.pro-datatable-container {
+    font-family: var(--flin-font-sans);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+.pro-datatable__wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pro-datatable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--flin-text-sm);
+    text-align: left;
+}
+
+.pro-datatable__head {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable__header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    white-space: nowrap;
+    border-bottom: var(--flin-space-0-5) solid var(--flin-neutral-200);
+}
+
+.pro-datatable__header--actions {
+    text-align: center;
+    width: var(--flin-size-32);
+}
+
+.pro-datatable__row {
+    transition: background-color var(--flin-transition-fast);
+}
+
+.pro-datatable__cell {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    color: var(--flin-fg);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable__body .pro-datatable__row:last-child .pro-datatable__cell {
+    border-bottom: none;
+}
+
+.pro-datatable__cell--actions {
+    text-align: center;
+}
+
+/* Actions */
+.pro-datatable__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-1);
+}
+
+.pro-datatable__action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-size-8);
+    height: var(--flin-size-8);
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    color: var(--flin-fg-muted);
+    transition: all var(--flin-transition-fast);
+}
+
+.pro-datatable__action-btn:hover {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-fg);
+}
+
+.pro-datatable__action-btn--primary:hover {
+    background-color: color-mix(in srgb, var(--flin-primary) 10%, var(--flin-bg));
+    color: var(--flin-primary);
+}
+
+.pro-datatable__action-btn--danger:hover {
+    background-color: color-mix(in srgb, var(--flin-danger) 10%, var(--flin-bg));
+    color: var(--flin-danger);
+}
+
+.pro-datatable__action-btn--success:hover {
+    background-color: color-mix(in srgb, var(--flin-success) 10%, var(--flin-bg));
+    color: var(--flin-success);
+}
+
+/* Striped variant */
+.pro-datatable--striped .pro-datatable__body .pro-datatable__row:nth-child(even) {
+    background-color: var(--flin-neutral-50);
+}
+
+/* Hoverable variant */
+.pro-datatable--hoverable .pro-datatable__body .pro-datatable__row:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+/* Bordered variant */
+.pro-datatable--bordered .pro-datatable__header,
+.pro-datatable--bordered .pro-datatable__cell {
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+/* Loading state */
+.pro-datatable__loading {
+    text-align: center;
+    padding: var(--flin-space-10) var(--flin-space-4);
+}
+
+.pro-datatable__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable__spinner {
+    width: var(--flin-icon-lg);
+    height: var(--flin-icon-lg);
+    border: var(--flin-space-0-5) solid var(--flin-neutral-200);
+    border-top-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    animation: pro-datatable-spin var(--flin-duration-slow) linear infinite;
+}
+
+@keyframes pro-datatable-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty state */
+.pro-datatable__empty {
+    text-align: center;
+    padding: var(--flin-space-12) var(--flin-space-4);
+}
+
+.pro-datatable__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable__empty svg {
+    color: var(--flin-neutral-300);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .pro-datatable-container {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable__head {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable__header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable__cell {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable--striped .pro-datatable__body .pro-datatable__row:nth-child(even) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable--hoverable .pro-datatable__body .pro-datatable__row:hover {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable--bordered .pro-datatable__header,
+[data-theme="dark"] .pro-datatable--bordered .pro-datatable__cell {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable__action-btn:hover {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable__spinner {
+    border-color: var(--flin-neutral-700);
+    border-top-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .pro-datatable__empty svg {
+    color: var(--flin-neutral-600);
+}
+</style>

@@ -1,0 +1,352 @@
+// ============================================================================
+// FlyoutMenu.flin — FlinUI PRO Navigation Component
+// Hover-triggered dropdown menu for single nav items with icons and descriptions
+// ============================================================================
+// Props:
+//   - trigger: Trigger button text (string)
+//   - items: Array of menu items [{ label, href, description, icon, badge }] (array)
+//   - placement: Menu placement - bottom-start, bottom-center, bottom-end (string)
+//   - showArrow: Show arrow indicator on trigger (boolean)
+//   - variant: Color scheme - light, dark (string)
+//   - width: Menu width - auto, sm, md, lg (string)
+
+trigger = props.trigger || "Menu"
+items = props.items || []
+placement = props.placement || "bottom-start"
+showArrow = props.showArrow || true
+variant = props.variant || "light"
+width = props.width || "md"
+
+// State
+isOpen = false
+
+openMenu = {
+    isOpen = true
+}
+
+closeMenu = {
+    isOpen = false
+}
+
+// Variant classes
+variantClass = match variant {
+    "dark" => "flyout-dark"
+    _ => "flyout-light"
+}
+
+// Placement classes
+placementClass = match placement {
+    "bottom-center" => "flyout-center"
+    "bottom-end" => "flyout-end"
+    _ => "flyout-start"
+}
+
+// Width classes
+widthClass = match width {
+    "auto" => "flyout-width-auto"
+    "sm" => "flyout-width-sm"
+    "lg" => "flyout-width-lg"
+    _ => "flyout-width-md"
+}
+
+// Open class
+openClass = match isOpen {
+    true => " flyout-open"
+    _ => ""
+}
+
+flyoutClass = "flin-flyout-menu " ++ variantClass ++ " " ++ placementClass ++ " " ++ widthClass ++ openClass
+
+<div
+    class={flyoutClass}
+    mouseenter={openMenu}
+    mouseleave={closeMenu}
+>
+    <button class="flyout-trigger" aria-expanded={isOpen} aria-haspopup="true">
+        <span class="flyout-trigger-text">{trigger}</span>
+        {if showArrow}
+            <svg class="flyout-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+            </svg>
+        {/if}
+    </button>
+
+    <div class="flyout-panel" role="menu">
+        <div class="flyout-content">
+            {for item in items}
+                {if item.divider == true}
+                    <div class="flyout-divider"></div>
+                {else}
+                    <a href={item.href} class="flyout-item" role="menuitem" click={closeMenu}>
+                        {if item.icon != none}
+                            <span class="flyout-item-icon">{item.icon}</span>
+                        {/if}
+                        <div class="flyout-item-content">
+                            <span class="flyout-item-label">
+                                {item.label}
+                                {if item.badge != none}
+                                    <span class="flyout-item-badge">{item.badge}</span>
+                                {/if}
+                            </span>
+                            {if item.description != none}
+                                <span class="flyout-item-desc">{item.description}</span>
+                            {/if}
+                        </div>
+                        {if item.external == true}
+                            <svg class="flyout-item-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                <polyline points="15 3 21 3 21 9"/>
+                                <line x1="10" y1="14" x2="21" y2="3"/>
+                            </svg>
+                        {/if}
+                    </a>
+                {/if}
+            {/for}
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.flin-flyout-menu {
+    position: relative;
+    display: inline-flex;
+}
+
+/* Trigger */
+.flyout-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.flyout-light .flyout-trigger {
+    color: var(--flin-fg-muted);
+}
+
+.flyout-light .flyout-trigger:hover,
+.flyout-light.flyout-open .flyout-trigger {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.flyout-dark .flyout-trigger {
+    color: var(--flin-neutral-400);
+}
+
+.flyout-dark .flyout-trigger:hover,
+.flyout-dark.flyout-open .flyout-trigger {
+    color: var(--flin-neutral-50);
+    background-color: var(--flin-neutral-800);
+}
+
+.flyout-arrow {
+    width: 14px;
+    height: 14px;
+    transition: transform var(--flin-transition-fast);
+}
+
+.flyout-open .flyout-arrow {
+    transform: rotate(180deg);
+}
+
+/* Panel */
+.flyout-panel {
+    position: absolute;
+    top: 100%;
+    margin-top: var(--flin-space-2);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all var(--flin-transition-fast);
+    z-index: var(--flin-z-dropdown);
+}
+
+.flyout-open .flyout-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Placement */
+.flyout-start .flyout-panel {
+    left: 0;
+}
+
+.flyout-center .flyout-panel {
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+}
+
+.flyout-center.flyout-open .flyout-panel {
+    transform: translateX(-50%) translateY(0);
+}
+
+.flyout-end .flyout-panel {
+    right: 0;
+}
+
+/* Width variants */
+.flyout-width-auto .flyout-panel {
+    min-width: 200px;
+    width: max-content;
+}
+
+.flyout-width-sm .flyout-panel {
+    width: 200px;
+}
+
+.flyout-width-md .flyout-panel {
+    width: 280px;
+}
+
+.flyout-width-lg .flyout-panel {
+    width: 360px;
+}
+
+/* Light panel */
+.flyout-light .flyout-panel {
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+}
+
+/* Dark panel */
+.flyout-dark .flyout-panel {
+    background-color: var(--flin-neutral-800);
+    border: 1px solid var(--flin-neutral-700);
+}
+
+/* Content */
+.flyout-content {
+    padding: var(--flin-space-2);
+}
+
+/* Item */
+.flyout-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    text-decoration: none;
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.flyout-light .flyout-item {
+    color: var(--flin-fg);
+}
+
+.flyout-light .flyout-item:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.flyout-dark .flyout-item {
+    color: var(--flin-neutral-50);
+}
+
+.flyout-dark .flyout-item:hover {
+    background-color: var(--flin-neutral-700);
+}
+
+/* Item icon */
+.flyout-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: var(--flin-radius-md);
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.flyout-dark .flyout-item-icon {
+    background-color: var(--flin-neutral-700);
+    color: var(--flin-primary);
+}
+
+.flyout-item-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Item content */
+.flyout-item-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+    flex: 1;
+    min-width: 0;
+}
+
+.flyout-item-label {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+}
+
+.flyout-item-badge {
+    display: inline-flex;
+    padding: var(--flin-space-0-5) var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    background-color: var(--flin-primary);
+    color: white;
+    border-radius: var(--flin-radius-full);
+}
+
+.flyout-item-desc {
+    font-size: var(--flin-text-xs);
+    line-height: var(--flin-leading-relaxed);
+}
+
+.flyout-light .flyout-item-desc {
+    color: var(--flin-fg-muted);
+}
+
+.flyout-dark .flyout-item-desc {
+    color: var(--flin-neutral-400);
+}
+
+/* External link indicator */
+.flyout-item-external {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.flyout-light .flyout-item-external {
+    color: var(--flin-fg-muted);
+}
+
+.flyout-dark .flyout-item-external {
+    color: var(--flin-neutral-500);
+}
+
+/* Divider */
+.flyout-divider {
+    height: 1px;
+    margin: var(--flin-space-2) 0;
+}
+
+.flyout-light .flyout-divider {
+    background-color: var(--flin-neutral-200);
+}
+
+.flyout-dark .flyout-divider {
+    background-color: var(--flin-neutral-700);
+}
+</style>

@@ -1,0 +1,239 @@
+// ============================================================================
+// Card.flin — FlinUI PRO Shell Component
+// Content card container with header, body, and footer sections
+// ============================================================================
+// Props:
+//   - title: Card title (string or none)
+//   - subtitle: Card subtitle (string or none)
+//   - padding: Content padding - none, sm, md, lg (string, default: "md")
+//   - shadow: Shadow level - none, sm, md, lg (string, default: "md")
+//   - radius: Border radius - none, sm, md, lg, xl (string, default: "lg")
+//   - bordered: Show border (boolean, default: true)
+//   - hoverable: Add hover effect (boolean, default: false)
+//   - clickable: Make entire card clickable (boolean, default: false)
+//   - selected: Show selected state (boolean, default: false)
+//   - headerDivider: Show divider below header (boolean, default: false)
+//   - footerDivider: Show divider above footer (boolean, default: true)
+//   - onClick: Callback when card is clicked (function or none)
+// ============================================================================
+
+title = props.title || none
+subtitle = props.subtitle || none
+padding = props.padding || "md"
+shadow = props.shadow || "md"
+radius = props.radius || "lg"
+bordered = props.bordered || true
+hoverable = props.hoverable || false
+clickable = props.clickable || false
+selected = props.selected || false
+headerDivider = props.headerDivider || false
+footerDivider = props.footerDivider || true
+onClick = props.onClick || none
+
+// Compute padding value
+paddingValue = match padding {
+    "none" -> "0"
+    "sm" -> "var(--flin-space-3)"
+    "md" -> "var(--flin-space-4)"
+    "lg" -> "var(--flin-space-6)"
+    _ -> "var(--flin-space-4)"
+}
+
+// Compute shadow value
+shadowValue = match shadow {
+    "none" -> "none"
+    "sm" -> "var(--flin-shadow-sm)"
+    "md" -> "var(--flin-shadow-md)"
+    "lg" -> "var(--flin-shadow-lg)"
+    _ -> "var(--flin-shadow-md)"
+}
+
+// Compute radius value
+radiusValue = match radius {
+    "none" -> "0"
+    "sm" -> "var(--flin-radius-sm)"
+    "md" -> "var(--flin-radius-md)"
+    "lg" -> "var(--flin-radius-lg)"
+    "xl" -> "var(--flin-radius-xl)"
+    _ -> "var(--flin-radius-lg)"
+}
+
+// Build classes
+cardClasses = "flin-card-container"
+cardClasses = {if bordered { cardClasses + " bordered" } else { cardClasses }}
+cardClasses = {if hoverable { cardClasses + " hoverable" } else { cardClasses }}
+cardClasses = {if clickable { cardClasses + " clickable" } else { cardClasses }}
+cardClasses = {if selected { cardClasses + " selected" } else { cardClasses }}
+
+handleClick = (e) => {
+    if onClick != none {
+        onClick(e)
+    }
+}
+
+<article class={cardClasses}
+         style="--card-padding: {paddingValue}; --card-shadow: {shadowValue}; --card-radius: {radiusValue}"
+         click={clickable ? handleClick : none}
+         role={if clickable { "button" } else { none }}
+         tabindex={if clickable { "0" } else { none }}>
+
+    // Header
+    {if title != none || props.header != none || props.headerAction != none}
+        <header class="card-header {if headerDivider}with-divider{/if}">
+            <div class="header-content">
+                {if props.header != none}
+                    {props.header}
+                {else}
+                    {if title != none}
+                        <h3 class="card-title">{title}</h3>
+                    {/if}
+                    {if subtitle != none}
+                        <p class="card-subtitle">{subtitle}</p>
+                    {/if}
+                {/if}
+            </div>
+
+            {if props.headerAction != none}
+                <div class="header-action">
+                    {props.headerAction}
+                </div>
+            {/if}
+        </header>
+    {/if}
+
+    // Body
+    <div class="card-body">
+        {children}
+    </div>
+
+    // Footer
+    {if props.footer != none}
+        <footer class="card-footer {if footerDivider}with-divider{/if}">
+            {props.footer}
+        </footer>
+    {/if}
+</article>
+
+<style scoped>
+.flin-card-container {
+    display: flex;
+    flex-direction: column;
+    background: var(--flin-bg-elevated);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    transition: all var(--flin-transition-fast);
+}
+
+/* Bordered */
+.bordered {
+    border: 1px solid var(--flin-border-subtle);
+}
+
+/* Hoverable */
+.hoverable:hover {
+    box-shadow: var(--flin-shadow-lg);
+    transform: translateY(-2px);
+}
+
+/* Clickable */
+.clickable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.clickable:active {
+    transform: translateY(0);
+}
+
+.clickable:focus-visible {
+    outline: 2px solid var(--flin-accent-gold);
+    outline-offset: 2px;
+}
+
+/* Selected */
+.selected {
+    border-color: var(--flin-accent-gold);
+    box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.2);
+}
+
+/* Header */
+.card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    padding: var(--card-padding);
+}
+
+.card-header.with-divider {
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.header-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-title {
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0;
+}
+
+.card-subtitle {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    margin: var(--flin-space-1) 0 0;
+}
+
+.header-action {
+    flex-shrink: 0;
+}
+
+/* Body */
+.card-body {
+    flex: 1;
+    padding: var(--card-padding);
+}
+
+.card-header + .card-body {
+    padding-top: 0;
+}
+
+.card-body:has(+ .card-footer) {
+    padding-bottom: 0;
+}
+
+/* Footer */
+.card-footer {
+    padding: var(--card-padding);
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+.card-footer.with-divider {
+    border-top: 1px solid var(--flin-border-subtle);
+    background: var(--flin-bg-surface);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-card-container {
+    background: var(--flin-bg-base);
+}
+
+[data-theme="dark"] .bordered {
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .card-header.with-divider,
+[data-theme="dark"] .card-footer.with-divider {
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .card-footer.with-divider {
+    background: var(--flin-bg-surface);
+}
+</style>

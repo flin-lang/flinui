@@ -1,0 +1,221 @@
+// ============================================================================
+// ProgressBar.flin — FlinUI PRO Data Component
+// Linear progress indicator with label, value, colors, and sizes
+// ============================================================================
+// Props:
+//   - value: Current progress value 0-100 (number)
+//   - label: Label text above the bar (string or none)
+//   - showValue: Show percentage value (boolean)
+//   - size: Bar height - sm, md, lg (string)
+//   - color: Bar color - default, success, warning, danger, info (string)
+//   - striped: Show striped pattern (boolean)
+//   - animated: Animate stripes (boolean)
+//   - indeterminate: Show loading animation (boolean)
+
+value = props.value || 0
+label = props.label || none
+showValue = props.showValue || true
+size = props.size || "md"
+color = props.color || "default"
+striped = props.striped || false
+animated = props.animated || false
+indeterminate = props.indeterminate || false
+
+// Clamp value between 0 and 100
+progressValue = Math.min(Math.max(value, 0), 100)
+
+// Size classes
+sizeClass = match size {
+    "sm" => "progress-sm"
+    "lg" => "progress-lg"
+    _ => "progress-md"
+}
+
+// Color classes
+colorClass = match color {
+    "success" => "progress-success"
+    "warning" => "progress-warning"
+    "danger" => "progress-danger"
+    "info" => "progress-info"
+    _ => "progress-default"
+}
+
+<div class="flin-progress-bar">
+    {if label != none || showValue}
+        <div class="progress-header">
+            {if label != none}
+                <span class="progress-label">{label}</span>
+            {/if}
+            {if showValue && !indeterminate}
+                <span class="progress-value">{progressValue}%</span>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="progress-track {sizeClass}">
+        <div
+            class="progress-fill {colorClass} {if striped}progress-striped{/if} {if animated}progress-animated{/if} {if indeterminate}progress-indeterminate{/if}"
+            style="width: {if indeterminate}100{else}{progressValue}{/if}%"
+            role="progressbar"
+            aria-valuenow={progressValue}
+            aria-valuemin="0"
+            aria-valuemax="100"
+        ></div>
+    </div>
+</div>
+
+<style scoped>
+.flin-progress-bar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+    width: 100%;
+}
+
+.progress-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+}
+
+.progress-label {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-primary);
+}
+
+.progress-value {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+    width: 100%;
+    background: var(--flin-bg-surface);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-sm {
+    height: 4px;
+}
+
+.progress-md {
+    height: 8px;
+}
+
+.progress-lg {
+    height: 12px;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: var(--flin-radius-full);
+    transition: width var(--flin-transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Colors */
+.progress-default {
+    background: linear-gradient(90deg, var(--flin-accent-gold), #f59e0b);
+}
+
+.progress-success {
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.progress-warning {
+    background: linear-gradient(90deg, #eab308, #ca8a04);
+}
+
+.progress-danger {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.progress-info {
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+}
+
+/* Striped pattern */
+.progress-striped {
+    background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.15) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.15) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 1rem 1rem;
+}
+
+.progress-default.progress-striped {
+    background-color: var(--flin-accent-gold);
+}
+
+.progress-success.progress-striped {
+    background-color: #22c55e;
+}
+
+.progress-warning.progress-striped {
+    background-color: #eab308;
+}
+
+.progress-danger.progress-striped {
+    background-color: #ef4444;
+}
+
+.progress-info.progress-striped {
+    background-color: #3b82f6;
+}
+
+/* Animated stripes */
+.progress-animated {
+    animation: progress-stripes 1s linear infinite;
+}
+
+@keyframes progress-stripes {
+    from {
+        background-position: 1rem 0;
+    }
+    to {
+        background-position: 0 0;
+    }
+}
+
+/* Indeterminate loading */
+.progress-indeterminate {
+    animation: progress-indeterminate 1.5s ease-in-out infinite;
+    width: 30% !important;
+}
+
+@keyframes progress-indeterminate {
+    0% {
+        transform: translateX(-100%);
+    }
+    50% {
+        transform: translateX(200%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .progress-label {
+        font-size: var(--flin-text-xs);
+    }
+
+    .progress-value {
+        font-size: var(--flin-text-xs);
+    }
+}
+</style>

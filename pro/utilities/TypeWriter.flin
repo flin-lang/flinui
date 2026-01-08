@@ -1,0 +1,146 @@
+// ============================================================================
+// TypeWriter.flin — FlinUI PRO Utility Component
+// Typing effect for text animation
+// ============================================================================
+// Props:
+//   - text: Text to type (string or list of strings for multiple lines)
+//   - speed: Typing speed in ms per character (number, default: 50)
+//   - delay: Delay before starting in ms (number, default: 0)
+//   - cursor: Show blinking cursor (boolean, default: true)
+//   - cursorChar: Cursor character (string, default: "|")
+//   - loop: Loop the animation (boolean, default: false)
+//   - loopDelay: Delay between loops in ms (number, default: 1500)
+//   - deleteSpeed: Delete speed in ms per character (number, default: 30)
+//   - pauseOnComplete: Pause duration after completing in ms (number, default: 1000)
+//   - onComplete: Callback when typing completes (function or none)
+// ============================================================================
+
+text = props.text || "Hello, World!"
+speed = props.speed || 50
+delay = props.delay || 0
+cursor = props.cursor || true
+cursorChar = props.cursorChar || "|"
+loop = props.loop || false
+loopDelay = props.loopDelay || 1500
+deleteSpeed = props.deleteSpeed || 30
+pauseOnComplete = props.pauseOnComplete || 1000
+onComplete = props.onComplete || none
+
+// State
+displayText = ""
+currentIndex = 0
+isDeleting = false
+isComplete = false
+isPaused = false
+
+// Get text to type (support array)
+textsToType = {if Array.isArray(text) { text } else { [text] }}
+currentTextIndex = 0
+currentText = textsToType[0]
+
+// Type next character
+typeNextChar = () => {
+    if isPaused { return }
+
+    if !isDeleting {
+        // Typing
+        if currentIndex < currentText.length {
+            displayText = currentText.substring(0, currentIndex + 1)
+            currentIndex++
+            setTimeout(typeNextChar, speed)
+        } else {
+            // Finished typing current text
+            if loop || currentTextIndex < textsToType.length - 1 {
+                // Pause before deleting
+                isPaused = true
+                setTimeout(() => {
+                    isPaused = false
+                    isDeleting = true
+                    typeNextChar()
+                }, pauseOnComplete)
+            } else {
+                // All done
+                isComplete = true
+                if onComplete != none {
+                    onComplete()
+                }
+            }
+        }
+    } else {
+        // Deleting
+        if currentIndex > 0 {
+            currentIndex--
+            displayText = currentText.substring(0, currentIndex)
+            setTimeout(typeNextChar, deleteSpeed)
+        } else {
+            // Finished deleting
+            isDeleting = false
+
+            // Move to next text
+            currentTextIndex++
+            if currentTextIndex >= textsToType.length {
+                if loop {
+                    currentTextIndex = 0
+                } else {
+                    isComplete = true
+                    return
+                }
+            }
+
+            currentText = textsToType[currentTextIndex]
+
+            // Pause before typing next
+            setTimeout(typeNextChar, loopDelay)
+        }
+    }
+}
+
+// Lifecycle
+onMount = () => {
+    setTimeout(typeNextChar, delay)
+}
+
+<span class="flin-typewriter {if isComplete}complete{/if}">
+    <span class="typewriter-text">{displayText}</span>
+    {if cursor}
+        <span class="typewriter-cursor {if isComplete && !loop}hidden{/if}">{cursorChar}</span>
+    {/if}
+</span>
+
+<style scoped>
+.flin-typewriter {
+    display: inline;
+}
+
+.typewriter-text {
+    white-space: pre-wrap;
+}
+
+.typewriter-cursor {
+    display: inline-block;
+    animation: blink 1s step-end infinite;
+    color: currentColor;
+}
+
+.typewriter-cursor.hidden {
+    opacity: 0;
+    animation: none;
+}
+
+@keyframes blink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .typewriter-cursor {
+        animation: none;
+        opacity: 1;
+    }
+}
+</style>

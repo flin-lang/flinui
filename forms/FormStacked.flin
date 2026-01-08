@@ -1,0 +1,76 @@
+// FormStacked.flin - FlinUI Stacked Form Layout Component
+// Vertical form layout with labels above inputs
+
+// Props with defaults
+gap = props.gap || "md"
+labelWidth = props.labelWidth || "auto"
+
+// Map gap sizes
+gapClass = match gap {
+    "none" -> "form-stacked-gap-none"
+    "sm" -> "form-stacked-gap-sm"
+    "lg" -> "form-stacked-gap-lg"
+    "xl" -> "form-stacked-gap-xl"
+    _ -> "form-stacked-gap-md"
+}
+
+containerClass = "form-stacked " ++ gapClass
+
+<div class={containerClass}>
+    {children}
+</div>
+
+<style scoped>
+.form-stacked {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Gap variants */
+.form-stacked-gap-none {
+    gap: 0;
+}
+
+.form-stacked-gap-sm {
+    gap: var(--flin-space-2);
+}
+
+.form-stacked-gap-md {
+    gap: var(--flin-space-4);
+}
+
+.form-stacked-gap-lg {
+    gap: var(--flin-space-6);
+}
+
+.form-stacked-gap-xl {
+    gap: var(--flin-space-8);
+}
+
+/* Style nested form fields for stacked layout */
+.form-stacked :global(.form-field) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.form-stacked :global(.form-field label) {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+}
+
+.form-stacked :global(.form-field-required label::after) {
+    content: " *";
+    color: var(--flin-danger);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .form-stacked-gap-lg,
+    .form-stacked-gap-xl {
+        gap: var(--flin-space-4);
+    }
+}
+</style>

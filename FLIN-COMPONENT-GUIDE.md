@@ -1,288 +1,139 @@
-# 🚨 CRITICAL INSTRUCTIONS: FLIN Component System
+# FLIN Component System Explained
 
-**READ THIS FIRST** before writing ANY FLIN code or FlinUI components!
-
----
-
-## ⚡ THE CORE RULE
-
-```
-╔═══════════════════════════════════════════════════════════════════════════╗
-║                                                                           ║
-║  FLIN HAS NO IMPORTS. COMPONENTS WORK LIKE HTML TAGS.                    ║
-║                                                                           ║
-║  Just use <Button /> — No import statements needed!                      ║
-║                                                                           ║
-╚═══════════════════════════════════════════════════════════════════════════╝
-```
+**Date**: January 8, 2026
+**Status**: Architecture Documentation
 
 ---
 
-## ❌ COMMON MISTAKES (That AI/Claude Often Makes)
+## 🎯 Core Philosophy
 
-### 1. **NEVER Use Import Statements**
+> **"If you know HTML, you know FLIN."**
+
+**FLIN eliminates `import` statements entirely.**
+
+Components work like HTML tags — just use them!
 
 ```flin
-// ❌ WRONG — This does NOT exist in FLIN!
+// ❌ WRONG (JavaScript thinking)
 import { Button } from "./Button.flin"
-import Button from "../components/Button.flin"
-import { AIChatbot, ChatInput } from "../flinui/pro/ai/index.flin"
+<Button label="Click" />
 
-// ✅ CORRECT — Just use the component!
-<Button label="Click me" />
-<AIChatbot title="Assistant" />
-<ChatInput placeholder="Type..." />
+// ✅ CORRECT (FLIN way)
+<Button label="Click" />
 ```
 
-**Why?** FLIN eliminates `import` statements entirely. Components are auto-discovered.
+**That's it.** FLIN finds `Button.flin` automatically.
 
 ---
 
-### 2. **NEVER Use Export Statements**
+## 🏗️ How It Works (Architecture)
 
-```flin
-// ❌ WRONG — This does NOT exist in FLIN!
-export default function Button() { ... }
-export { Button, Card, Alert }
-export const MyComponent = ...
+### 1. **Component Detection** (Parser)
 
-// ✅ CORRECT — The file IS the component!
-// Button.flin:
-<button class="btn">{props.label}</button>
+When parsing `<Button />`:
 
-// That's it! The file exports itself automatically.
-```
-
-**Why?** The `.flin` file itself is the component. No export keyword needed.
-
----
-
-### 3. **NEVER Use Arrow Functions (Yet)**
-
-```flin
-// ❌ WRONG — Arrow functions not implemented!
-onClick={(e) => { count++ }}
-messages.map((msg) => msg.content)
-items.filter((x) => x > 0)
-
-// ✅ CORRECT — Use function declarations or inline expressions
-fn handleClick(e) {
-    count++
+```rust
+// src/parser/ast.rs
+pub struct ViewElement {
+    pub name: String,           // "Button"
+    pub is_component: bool,     // true (PascalCase detected)
+    // ...
 }
-
-// Or for simple cases:
-click={count++}
-
-// For mapping/filtering, use for loops:
-{for msg in messages}
-    <div>{msg.content}</div>
-{/for}
 ```
 
-**Status**: Arrow functions are on the roadmap but NOT implemented yet.
+**Rule**: Any tag starting with uppercase = component
+- `<button>` → HTML element
+- `<Button>` → FLIN component
+- `<AIChatbot>` → FLIN component
 
----
+### 2. **Component Registry** (Discovery)
 
-### 4. **NEVER Use Svelte-Style Syntax**
-
-```flin
-// ❌ WRONG — Svelte directives don't work!
-{#if condition}          // Use {if condition}
-{#each items as item}    // Use {for item in items}
-{@html content}          // Not implemented yet
-bind:value={name}        // Use value={name}
-on:click={handler}       // Use click={handler}
-class:active={isActive}  // Pre-compute: class={if isActive then "active" else ""}
-
-// ✅ CORRECT — FLIN syntax
-{if condition}
-    <div>Content</div>
-{/if}
-
-{for item in items}
-    <li>{item}</li>
-{/for}
-
-<input value={name} />
-<button click={handleClick}>Click</button>
-```
-
----
-
-### 5. **NEVER Use Optional Chaining (Yet)**
-
-```flin
-// ❌ WRONG — Optional chaining not implemented!
-obj?.field
-obj?.method?.()
-arr?.[0]
-
-// ✅ CORRECT — Use explicit checks
-{if obj and obj.field}
-    {obj.field}
-{/if}
-
-// Or use default values
-field = if obj then obj.field else "default"
-```
-
-**Status**: Optional chaining (`?.`) is on the roadmap.
-
----
-
-### 6. **NEVER Use Nullish Coalescing (Yet)**
-
-```flin
-// ❌ WRONG — Nullish coalescing not implemented!
-value = input ?? default
-title = props.title ?? "Untitled"
-
-// ✅ CORRECT — Use OR operator
-value = input or default
-title = props.title or "Untitled"
-
-// Note: 'or' returns the first truthy value
-```
-
-**Status**: Nullish coalescing (`??`) is on the roadmap.
-
----
-
-### 7. **NEVER Use Destructuring (Yet)**
-
-```flin
-// ❌ WRONG — Destructuring not fully implemented!
-[x, y] = point
-["name": name, "age": age] = user
-[first, ...rest] = list
-
-// ✅ CORRECT — Access properties directly
-x = point[0]
-y = point[1]
-name = user.name
-age = user.age
-```
-
-**Status**: Basic array assignment works, but not object destructuring or rest patterns.
-
----
-
-### 8. **NEVER Hardcode Colors/Values**
-
-```flin
-// ❌ WRONG — Use design tokens!
-<button style="color: #3b82f6; padding: 16px;">
-
-// ✅ CORRECT — Use CSS variables
-<button style="color: var(--flin-primary); padding: var(--flin-space-4);">
-
-// Or use classes with tokens:
-<button class="btn">
-
-<style>
-.btn {
-    color: var(--flin-primary);
-    padding: var(--flin-space-4);
+```rust
+// src/components/registry.rs
+pub struct ComponentRegistry {
+    components: HashMap<String, CompiledComponent>,
+    search_paths: Vec<PathBuf>,
 }
-</style>
 ```
 
-**Why?** All FlinUI components use design tokens for consistency and themability.
+**What it does:**
+1. Maintains a cache of compiled components
+2. Searches configured paths for `.flin` files
+3. Hot-reloads when files change
 
----
+**Search algorithm:**
+```rust
+// For <Button />, searches:
+search_paths = [
+    "./",
+    "./components/",
+    "./icons/",
+    "./flinui/basic/",
+    "./flinui/pro/ai/",
+    // ... all configured paths
+]
 
-### 9. **NEVER Use Complex Type Annotations**
+filenames = [
+    "Button.flin",      // Exact match
+    "button.flin",      // Lowercase
+]
+
+// Returns first match found
+```
+
+### 3. **Component Rendering** (Runtime)
+
+```rust
+// src/vm/renderer.rs
+pub fn render_element_with_context(element, vm, ctx) {
+    if element.is_component {
+        // 1. Look up component in registry
+        let component = ctx.registry.find_component(&element.name)?;
+
+        // 2. Extract props from attributes
+        let props = extract_props(element.attributes);
+
+        // 3. Render component with props
+        return render_component(component, props, vm);
+    }
+
+    // Regular HTML element
+    render_html_element(element)
+}
+```
+
+### 4. **Component Context** (Props Access)
+
+Inside `Button.flin`:
 
 ```flin
-// ❌ WRONG — Complex types not implemented!
-fn process(data: Array<Map<string, int>>) -> Promise<Result<T, E>>
+// Automatically available:
+props.label       // From <Button label="Click" />
+props.onClick     // From <Button onClick={handler} />
+props.variant     // From <Button variant="primary" />
 
-// ✅ CORRECT — Use simple types
-fn process(data: [any]) -> any
-
-// FLIN has:
-// - int, float, bool, text
-// - [type] for lists
-// - [key: value] for maps
-// - Custom entity types
+// Use them:
+<button click={props.onClick} class="btn-{props.variant}">
+    {props.label}
+</button>
 ```
 
-**Status**: Generic types, unions, and advanced types are on the roadmap.
+**No import, no export, no boilerplate.**
 
 ---
 
-### 10. **NEVER Use Module System Thinking**
+## 📂 Directory Structure
 
-```flin
-// ❌ WRONG — No module system!
-import * as Utils from "./utils"
-const { helper1, helper2 } = require("./helpers")
-
-// ✅ CORRECT — Everything is global or scoped
-// Just define functions in your file:
-fn helper1() { ... }
-fn helper2() { ... }
-
-// Or use components:
-<UtilityComponent />
-```
-
-**Why?** FLIN has no module system. All code in a file is in the file's scope.
-
----
-
-## ✅ WHAT WORKS RIGHT NOW
-
-### Core Language Features
-
-- ✅ Variables: `x = 10`
-- ✅ Types: `name: text = "John"`
-- ✅ Functions: `fn add(a, b) { return a + b }`
-- ✅ If/else: `if condition { } else { }`
-- ✅ For loops: `for item in items { }`
-- ✅ While loops: `while condition { }`
-- ✅ Match: `match value { 1 -> "one", _ -> "other" }`
-- ✅ Entities: `entity User { name: text }`
-- ✅ Operators: `+`, `-`, `*`, `/`, `%`, `**`, `==`, `!=`, `<`, `>`, `and`, `or`, `not`
-- ✅ Lists: `[1, 2, 3]`
-- ✅ Maps: `["key": value]`
-- ✅ String interpolation: `` `Hello ${name}` ``
-- ✅ Template literals: `` `Count: ${count}` ``
-
-### View Features
-
-- ✅ HTML-like syntax: `<div class="container">`
-- ✅ Components: `<Button label="Click" />`
-- ✅ Props access: `props.label`, `props.onClick`
-- ✅ Event handlers: `click={handleClick}`, `click={count++}`
-- ✅ Interpolation: `{variable}`, `{expression}`
-- ✅ Conditionals: `{if}...{else}...{/if}`
-- ✅ Loops: `{for item in items}...{/for}`
-- ✅ Loops with index: `{for item, idx in items}`
-- ✅ Scoped styles: `<style scoped>`
-- ✅ CSS variables: `var(--flin-primary)`
-
-### Entity/Database Features
-
-- ✅ Entity declarations: `entity Todo { ... }`
-- ✅ CRUD operations: `Todo.create()`, `Todo.all`, `Todo.find()`, `Todo.where()`
-- ✅ Temporal queries: Time-travel, history, soft deletes
-- ✅ Relationships: Foreign keys, cascading deletes
-- ✅ Reactivity: Auto-update on entity changes
-
----
-
-## 📂 How Component Discovery Works
-
-### File Structure Example
+### Example Project
 
 ```
 myapp/
-├── app.flin              # Your app
-├── components/           # Your custom components
+├── app.flin                 # Main app
+├── components/              # Custom components
 │   ├── Button.flin
-│   └── Card.flin
-└── flinui/               # FlinUI library
+│   ├── Card.flin
+│   └── Header.flin
+└── flinui/                  # FlinUI library
     ├── basic/
     │   ├── Button.flin
     │   ├── Avatar.flin
@@ -294,290 +145,252 @@ myapp/
             └── ChatMessages.flin
 ```
 
-### Auto-Discovery Rules
+### Configuration (Auto)
 
-When you write `<Button />`, FLIN searches in this order:
+```bash
+# When you run:
+flin dev myapp/app.flin
 
-1. `./Button.flin` (current directory)
-2. `./components/Button.flin` (components subdirectory)
-3. `./flinui/basic/Button.flin` (FlinUI categories)
-4. `./flinui/layout/Button.flin`
-5. `./flinui/data/Button.flin`
-6. ... (all configured search paths)
+# FLIN automatically configures search paths:
+search_paths = [
+    "myapp/",                    # App directory
+    "myapp/components/",         # Components subdirectory
+    "flinui/",                   # FlinUI root
+    "flinui/basic/",             # FlinUI categories
+    "flinui/pro/ai/",
+    # ... all discovered directories
+]
+```
 
-**First match wins!**
-
-### Naming Rules
-
-- Component files MUST use PascalCase: `Button.flin`, `AIChatbot.flin`
-- Component tags MUST start with uppercase: `<Button>`, `<AIChatbot>`
-- HTML elements are lowercase: `<button>`, `<div>`
+**Result**: All components are available everywhere!
 
 ---
 
-## 🎨 FlinUI Component Usage
+## 🎨 FlinUI Usage Examples
 
-### Basic Example
+### Using Basic Components
 
 ```flin
 // app.flin
 name = ""
-count = 0
+showAlert = false
 
 <div>
-    <!-- All components auto-discovered from flinui/ -->
+    <!-- No imports! Just use them: -->
     <Input value={name} placeholder="Your name" />
 
     <Button
-        label="Increment"
+        label="Submit"
         variant="primary"
-        size="lg"
-        click={count++}
+        click={showAlert = true}
     />
 
-    {if count > 0}
-        <Alert type="success" message="Count: {count}" />
+    {if showAlert}
+        <Alert type="success" message="Hello {name}!" />
     {/if}
 </div>
 ```
 
-### PRO Components Example
+**FLIN automatically finds:**
+- `flinui/forms/Input.flin`
+- `flinui/basic/Button.flin`
+- `flinui/feedback/Alert.flin`
+
+### Using PRO Components
 
 ```flin
 // chat.flin
 messages = []
+model = "claude-sonnet-4-5"
+
+fn handleSend(text) {
+    messages.push(["role": "user", "content": text])
+}
 
 <div>
-    <!-- Zero imports! Auto-discovered from flinui/pro/ai/ -->
+    <!-- Zero imports needed! -->
     <AIChatbot
         title="FLIN Assistant"
-        model="claude-sonnet-4-5"
+        model={model}
         showReasoningPanel={true}
     />
 
     <ChatMessages
         messages={messages}
         showAvatars={true}
-        showTimestamps={true}
     />
 
-    <ChatInput
-        placeholder="Ask about FLIN..."
-        showFileUpload={true}
-    />
+    <ChatInput onSend={handleSend} />
 </div>
 ```
 
+**FLIN automatically finds:**
+- `flinui/pro/ai/AIChatbot.flin`
+- `flinui/pro/ai/ChatMessages.flin`
+- `flinui/pro/ai/ChatInput.flin`
+
 ---
 
-## 🔧 Writing FlinUI Components
+## 🚀 Why This Is Revolutionary
 
-### Component Structure
+### Comparison
+
+| Framework | Component Usage | Lines of Boilerplate |
+|-----------|----------------|----------------------|
+| **React** | `import { Button } from './Button'`<br>`export default App` | 2+ per file |
+| **Vue** | `import Button from './Button.vue'`<br>`export default { components: { Button } }` | 3+ per file |
+| **Svelte** | `import Button from './Button.svelte'` | 1+ per file |
+| **FLIN** | `<Button />` | **0** ✨ |
+
+### Benefits
+
+1. **Zero Boilerplate**
+   No imports, no exports, no module system to learn
+
+2. **HTML-Like Simplicity**
+   If you know HTML, you know FLIN components
+
+3. **No Build Step Required**
+   Components are discovered at runtime
+
+4. **Instant Hot Reload**
+   Change component → refresh → updated (no rebuild)
+
+5. **No Dependency Hell**
+   No `node_modules`, no version conflicts
+
+6. **Auto-Discovery**
+   Add `Button.flin` → immediately available everywhere
+
+---
+
+## 🔧 Implementation Status
+
+### ✅ Currently Implemented
+
+- [x] Component detection (PascalCase check)
+- [x] ComponentRegistry with caching
+- [x] Auto-discovery from search paths
+- [x] Props extraction and validation
+- [x] Component rendering with context
+- [x] Hot reload support (file change detection)
+- [x] Nested component support
+- [x] Scoped styles in components
+
+### 📋 Planned Enhancements
+
+- [ ] **Search path configuration** (if needed - auto-discovery works well)
+  ```flin
+  // Could be configured via CLI flags:
+  // flin dev app.flin --components ./components --components ../flinui
+  ```
+
+- [ ] **Component slots** (like Vue/Svelte)
+  ```flin
+  // Card.flin
+  <div class="card">
+      <slot />  <!-- Children go here -->
+  </div>
+
+  // Usage:
+  <Card>
+      <h1>Title</h1>
+      <p>Content</p>
+  </Card>
+  ```
+
+- [ ] **Named slots**
+  ```flin
+  // Layout.flin
+  <div>
+      <header><slot name="header" /></header>
+      <main><slot /></main>
+      <footer><slot name="footer" /></footer>
+  </div>
+  ```
+
+- [ ] **Default slot content**
+  ```flin
+  <slot>Default content if no children</slot>
+  ```
+
+- [ ] **Component lifecycle hooks**
+  ```flin
+  // Already supported! No arrow functions needed
+  onMount {
+      print("Component mounted!")
+  }
+
+  onUnmount {
+      print("Component destroyed!")
+  }
+  ```
+
+- [ ] **Async components**
+  ```flin
+  <AsyncComponent loading={<Spinner />}>
+      <!-- Loaded content -->
+  </AsyncComponent>
+  ```
+
+---
+
+## 💡 Advanced Patterns
+
+### Component Composition
 
 ```flin
-// components/Card.flin
-
-// 1. Extract props (with defaults)
-title = props.title or "Untitled"
-content = props.content or ""
-variant = props.variant or "default"
-
-// 2. Compute derived values
-cardClass = "card card-" + variant
-
-// 3. Render view
-<div class={cardClass}>
+// Card.flin
+<div class="card">
     <div class="card-header">
-        <h3>{title}</h3>
+        {props.title}
     </div>
     <div class="card-body">
-        {content}
+        {props.children}  <!-- Children passed from parent -->
     </div>
 </div>
 
-// 4. Add scoped styles
-<style>
-.card {
-    border: 1px solid var(--flin-border-subtle);
-    border-radius: var(--flin-radius-lg);
-    padding: var(--flin-space-4);
-    background: var(--flin-bg-surface);
-}
-
-.card-header h3 {
-    margin: 0;
-    color: var(--flin-text-primary);
-    font-size: var(--flin-text-lg);
-}
-
-.card-body {
-    margin-top: var(--flin-space-3);
-    color: var(--flin-text-secondary);
-}
-
-/* Variants */
-.card-default {
-    border-color: var(--flin-border-subtle);
-}
-
-.card-primary {
-    border-color: var(--flin-primary);
-    background: var(--flin-primary-light);
-}
-
-.card-danger {
-    border-color: var(--flin-danger);
-    background: var(--flin-danger-light);
-}
-</style>
+// App.flin
+<Card title="My Card">
+    <!-- Children content: -->
+    <p>This is the content</p>
+    <Button label="Action" />
+</Card>
 ```
 
-### Component Props Best Practices
+**Note**: Children support already works! Slots feature will add named slots and defaults.
 
-1. **Always provide defaults**:
-   ```flin
-   label = props.label or "Click"
-   variant = props.variant or "primary"
-   size = props.size or "md"
-   ```
-
-2. **Use design tokens**:
-   ```flin
-   color: var(--flin-primary)
-   padding: var(--flin-space-4)
-   font-size: var(--flin-text-base)
-   ```
-
-3. **Pre-compute classes**:
-   ```flin
-   // ❌ WRONG
-   <div class={if variant == "primary" then "btn-primary" else "btn-default"}>
-
-   // ✅ CORRECT
-   btnClass = if variant == "primary" then "btn-primary" else "btn-default"
-   <div class={btnClass}>
-   ```
-
-4. **Keep it simple**:
-   - Avoid complex logic in views
-   - Extract calculations to variables
-   - Use clear, descriptive names
-
----
-
-## 🚨 Error Messages You'll See (And How to Fix Them)
-
-### 1. "Component not found: Button"
-
-**Cause**: FLIN can't find `Button.flin` in search paths.
-
-**Fix**:
-- Check file exists: `flinui/basic/Button.flin`
-- Check naming: Must be PascalCase
-- Check location: Must be in a discovered directory
-
-### 2. "Expected expression, found ','"
-
-**Cause**: Using syntax that's not implemented (like arrow functions).
+### Conditional Components
 
 ```flin
-// ❌ WRONG
-onChange={(value) => { currentValue = value }}
+view = "list"  // or "grid"
 
-// ✅ CORRECT
-fn handleChange(value) {
-    currentValue = value
-}
-onChange={handleChange}
+{if view == "list"}
+    <ListView items={items} />
+{else}
+    <GridView items={items} />
+{/if}
 ```
 
-### 3. "Expected '{' after if condition"
-
-**Cause**: Using Svelte syntax instead of FLIN syntax.
+### Dynamic Components
 
 ```flin
-// ❌ WRONG
-{#if condition}
+componentName = "Button"  // Could be from user input
 
-// ✅ CORRECT
-{if condition}
-```
-
-### 4. "Parse error at 'import'"
-
-**Cause**: Using import statements.
-
-```flin
-// ❌ WRONG
-import { Button } from "./Button.flin"
-
-// ✅ CORRECT
-// Delete the import line!
-<Button label="Click" />
-```
-
-### 5. "Optional chaining not supported"
-
-**Cause**: Using `?.` operator.
-
-```flin
-// ❌ WRONG
-value = obj?.field
-
-// ✅ CORRECT
-value = if obj then obj.field else none
+<!-- NOT YET SUPPORTED, but planned: -->
+<{componentName} label="Dynamic" />
 ```
 
 ---
 
-## 📚 Philosophy: Why FLIN Is Different
+## 🎓 For Developers Coming From...
 
-### The 1995 + 2025 Principle
-
-**FLIN = "Write apps like 1995. With the power of 2025."**
-
-```html
-<!-- 1995: HTML -->
-<button>Click me</button>
-```
-
-```flin
-<!-- 2025: FLIN -->
-<Button label="Click me" />
-```
-
-**Same simplicity. More power.**
-
-### Zero Boilerplate
-
-| Framework | Boilerplate per File |
-|-----------|---------------------|
-| React | `import React`, `import Button`, `export default` (3 lines) |
-| Vue | `import`, `export default`, `components: {}` (4+ lines) |
-| Svelte | `import Button` (1 line) |
-| **FLIN** | **0 lines** ✨ |
-
-### No Configuration
-
-- ❌ No `package.json`
-- ❌ No `node_modules/`
-- ❌ No webpack/vite config
-- ❌ No babel/typescript config
-- ❌ No build step
-- ✅ Just write `.flin` files and run!
-
----
-
-## 🎓 Learning Resources
-
-### For Developers Coming From...
-
-#### React
+### From React
 
 ```jsx
-// React
-import { useState } from 'react';
-import Button from './Button';
+// ❌ React way
+import React, { useState } from 'react';
+import Button from './components/Button';
 
 export default function Counter() {
     const [count, setCount] = useState(0);
@@ -586,44 +399,47 @@ export default function Counter() {
 ```
 
 ```flin
-// FLIN
+// ✅ FLIN way
 count = 0
 <Button click={count++}>{count}</Button>
 ```
 
-#### Vue
+### From Vue
 
 ```vue
-<!-- Vue -->
+<!-- ❌ Vue way -->
 <script setup>
 import { ref } from 'vue'
-import Button from './Button.vue'
+import Button from './components/Button.vue'
+
 const count = ref(0)
 </script>
+
 <template>
   <Button @click="count++">{{ count }}</Button>
 </template>
 ```
 
 ```flin
-// FLIN
+// ✅ FLIN way
 count = 0
 <Button click={count++}>{count}</Button>
 ```
 
-#### Svelte
+### From Svelte
 
 ```svelte
-<!-- Svelte -->
+<!-- ❌ Svelte way -->
 <script>
 import Button from './Button.svelte';
 let count = 0;
 </script>
+
 <Button on:click={() => count++}>{count}</Button>
 ```
 
 ```flin
-// FLIN
+// ✅ FLIN way
 count = 0
 <Button click={count++}>{count}</Button>
 ```
@@ -632,27 +448,25 @@ count = 0
 
 ---
 
-## 🔗 See Also
-
-- **CLAUDE.md** — Main developer instructions
-- **_private/FLIN-COMPONENT-SYSTEM-EXPLAINED.md** — Deep dive on architecture
-- **_private/FLIN-SYNTAX-ROADMAP.md** — Complete feature roadmap (820 features)
-- **_private/docs/02-FLIN-LANGUAGE-SPEC.md** — Language specification
-- **README.md** — Project overview
-
----
-
 ## 🐘 The FLIN Motto
 
-> **É flîn nù** — It Remembers Things (Fongbé, Benin 🇧🇯)
+> **"Write apps like 1995. With the power of 2025."**
 
 Components in FLIN work like `<img>` and `<button>` in HTML.
 You don't import HTML tags. You just use them.
 
-**Same with FLIN components.**
+Same with FLIN components.
+
+---
+
+## 📚 See Also
+
+- `_private/docs/02-FLIN-LANGUAGE-SPEC.md` — Section 8.9 (Components)
+- `_private/docs/16-FLIN-UI-LIBRARY-SPEC.md` — FlinUI architecture
+- `src/components/registry.rs` — Component registry implementation
+- `src/vm/renderer.rs` — Component rendering logic
 
 ---
 
 **Last Updated**: January 8, 2026
-**Author**: Claude Opus 4.5 (AI CTO, ZeroSuite Inc.)
-**For**: All developers and AI assistants working with FLIN/FlinUI
+**Author**: Claude (AI CTO, ZeroSuite Inc.)

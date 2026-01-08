@@ -1,0 +1,304 @@
+// ============================================================================
+// CodeBlock.flin — FlinUI PRO
+// Syntax highlighted code block with copy button
+// ============================================================================
+// Props:
+//   code: text - The code content (default: "")
+//   language: text - Programming language (default: "plaintext")
+//   filename: text - Optional filename to display (default: none)
+//   showLineNumbers: boolean - Show line numbers (default: false)
+//   highlightLines: array - Lines to highlight (default: [])
+//   maxHeight: text - Max height with scroll (default: none)
+//   theme: text - Color theme ("dark", "light") (default: "dark")
+// ============================================================================
+
+code = props.code || ""
+language = props.language || "plaintext"
+filename = props.filename || none
+showLineNumbers = props.showLineNumbers || false
+highlightLines = props.highlightLines || []
+maxHeight = props.maxHeight || none
+theme = props.theme || "dark"
+
+// State for copy button
+copied = false
+
+// Copy to clipboard handler
+onCopy = {
+    // Copy code to clipboard
+    navigator.clipboard.writeText(code)
+    copied = true
+    // Reset after 2 seconds
+    setTimeout({ copied = false }, 2000)
+}
+
+// Split code into lines for line numbers
+lines = code.split("\n")
+
+// Compute theme class
+themeClass = match theme {
+    "light" -> "code-block--light"
+    _ -> "code-block--dark"
+}
+
+// Compute line numbers class
+lineNumbersClass = match showLineNumbers {
+    true -> "code-block--with-lines"
+    _ -> ""
+}
+
+<div class={"code-block " ++ themeClass ++ " " ++ lineNumbersClass}>
+    // Header with language and filename
+    <div class="code-block__header">
+        <div class="code-block__info">
+            {if filename != none}
+                <span class="code-block__filename">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    {filename}
+                </span>
+            {else}
+                <span class="code-block__language">{language}</span>
+            {/if}
+        </div>
+        <button
+            class="code-block__copy"
+            click={onCopy}
+            aria-label="Copy code"
+            type="button"
+        >
+            {if copied}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Copied!</span>
+            {else}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                </svg>
+                <span>Copy</span>
+            {/if}
+        </button>
+    </div>
+
+    // Code content
+    <div
+        class="code-block__content"
+        style={if maxHeight != none { "max-height: " ++ maxHeight ++ "; overflow-y: auto;" } else { "" }}
+    >
+        {if showLineNumbers}
+            <div class="code-block__lines">
+                {for i, line in lines}
+                    <div class={"code-block__line " ++ {if highlightLines.includes(i + 1) { "code-block__line--highlighted" } else { "" }}}>
+                        <span class="code-block__line-number">{i + 1}</span>
+                        <span class="code-block__line-content">{line}</span>
+                    </div>
+                {/for}
+            </div>
+        {else}
+            <pre class="code-block__pre"><code class="code-block__code">{code}</code></pre>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+.code-block {
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-sm);
+}
+
+/* Dark theme (default) */
+.code-block--dark {
+    background: var(--flin-neutral-900);
+    border: 1px solid var(--flin-neutral-800);
+}
+
+.code-block--dark .code-block__header {
+    background: var(--flin-neutral-800);
+    border-bottom: 1px solid var(--flin-neutral-700);
+}
+
+.code-block--dark .code-block__language,
+.code-block--dark .code-block__filename {
+    color: var(--flin-neutral-400);
+}
+
+.code-block--dark .code-block__code,
+.code-block--dark .code-block__line-content {
+    color: var(--flin-neutral-100);
+}
+
+.code-block--dark .code-block__line-number {
+    color: var(--flin-neutral-500);
+}
+
+.code-block--dark .code-block__line--highlighted {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+.code-block--dark .code-block__copy {
+    color: var(--flin-neutral-400);
+}
+
+.code-block--dark .code-block__copy:hover {
+    color: var(--flin-neutral-100);
+    background: var(--flin-neutral-700);
+}
+
+/* Light theme */
+.code-block--light {
+    background: var(--flin-neutral-50);
+    border: 1px solid var(--flin-neutral-200);
+}
+
+.code-block--light .code-block__header {
+    background: var(--flin-neutral-100);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.code-block--light .code-block__language,
+.code-block--light .code-block__filename {
+    color: var(--flin-neutral-600);
+}
+
+.code-block--light .code-block__code,
+.code-block--light .code-block__line-content {
+    color: var(--flin-neutral-800);
+}
+
+.code-block--light .code-block__line-number {
+    color: var(--flin-neutral-400);
+}
+
+.code-block--light .code-block__line--highlighted {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.code-block--light .code-block__copy {
+    color: var(--flin-neutral-500);
+}
+
+.code-block--light .code-block__copy:hover {
+    color: var(--flin-neutral-800);
+    background: var(--flin-neutral-200);
+}
+
+/* Header */
+.code-block__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--flin-space-2) var(--flin-space-4);
+}
+
+.code-block__info {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.code-block__language {
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.code-block__filename {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+}
+
+.code-block__copy {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+/* Content */
+.code-block__content {
+    padding: var(--flin-space-4);
+    overflow-x: auto;
+}
+
+.code-block__pre {
+    margin: 0;
+}
+
+.code-block__code {
+    white-space: pre;
+    word-break: normal;
+    word-wrap: normal;
+}
+
+/* Line numbers */
+.code-block__lines {
+    display: flex;
+    flex-direction: column;
+}
+
+.code-block__line {
+    display: flex;
+    padding: 0 var(--flin-space-2);
+    margin: 0 calc(-1 * var(--flin-space-4));
+    padding-left: var(--flin-space-4);
+    padding-right: var(--flin-space-4);
+}
+
+.code-block__line--highlighted {
+    border-left: 3px solid var(--flin-primary);
+    padding-left: calc(var(--flin-space-4) - 3px);
+}
+
+.code-block__line-number {
+    display: inline-block;
+    width: 3ch;
+    text-align: right;
+    padding-right: var(--flin-space-4);
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.code-block__line-content {
+    white-space: pre;
+    flex: 1;
+}
+
+/* Scrollbar styling */
+.code-block__content::-webkit-scrollbar {
+    height: 8px;
+}
+
+.code-block--dark .code-block__content::-webkit-scrollbar-track {
+    background: var(--flin-neutral-800);
+}
+
+.code-block--dark .code-block__content::-webkit-scrollbar-thumb {
+    background: var(--flin-neutral-600);
+    border-radius: 4px;
+}
+
+.code-block--light .code-block__content::-webkit-scrollbar-track {
+    background: var(--flin-neutral-100);
+}
+
+.code-block--light .code-block__content::-webkit-scrollbar-thumb {
+    background: var(--flin-neutral-300);
+    border-radius: 4px;
+}
+</style>

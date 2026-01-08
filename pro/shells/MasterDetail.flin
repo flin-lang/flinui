@@ -1,0 +1,256 @@
+// ============================================================================
+// MasterDetail.flin — FlinUI PRO Shell Component
+// List + detail view layout pattern
+// ============================================================================
+// Props:
+//   - masterWidth: Width of master (list) panel (string, default: "320px")
+//   - selectedId: Currently selected item ID (string or none)
+//   - showMasterHeader: Show header in master panel (boolean, default: true)
+//   - showDetailHeader: Show header in detail panel (boolean, default: true)
+//   - emptyText: Text to show when no item selected (string)
+//   - onSelect: Callback when item is selected (function or none)
+// ============================================================================
+
+masterWidth = props.masterWidth || "320px"
+selectedId = props.selectedId || none
+showMasterHeader = props.showMasterHeader || true
+showDetailHeader = props.showDetailHeader || true
+emptyText = props.emptyText || "Select an item to view details"
+onSelect = props.onSelect || none
+
+// State for mobile view
+mobileView = "master" // "master" or "detail"
+
+handleSelect = (id) => {
+    if onSelect != none {
+        onSelect(id)
+    }
+    mobileView = "detail"
+}
+
+handleBack = () => {
+    mobileView = "master"
+    if onSelect != none {
+        onSelect(none)
+    }
+}
+
+<div class="flin-master-detail {if selectedId != none}has-selection{/if} mobile-view-{mobileView}"
+     style="--master-width: {masterWidth}">
+
+    // Master panel (list)
+    <aside class="master-panel">
+        {if showMasterHeader}
+            <header class="master-header">
+                {props.masterHeader || none}
+            </header>
+        {/if}
+
+        <div class="master-content">
+            {props.master || none}
+        </div>
+
+        {if props.masterFooter != none}
+            <footer class="master-footer">
+                {props.masterFooter}
+            </footer>
+        {/if}
+    </aside>
+
+    // Detail panel
+    <main class="detail-panel">
+        {if showDetailHeader}
+            <header class="detail-header">
+                <button class="back-btn" click={handleBack} aria-label="Back to list">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+                {props.detailHeader || none}
+            </header>
+        {/if}
+
+        <div class="detail-content">
+            {if selectedId != none}
+                {children}
+            {else}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                    <p class="empty-text">{emptyText}</p>
+                </div>
+            {/if}
+        </div>
+
+        {if props.detailFooter != none}
+            <footer class="detail-footer">
+                {props.detailFooter}
+            </footer>
+        {/if}
+    </main>
+</div>
+
+<style scoped>
+.flin-master-detail {
+    display: flex;
+    height: 100%;
+    background: var(--flin-bg-base);
+    overflow: hidden;
+}
+
+/* Master panel */
+.master-panel {
+    width: var(--master-width);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--flin-bg-elevated);
+    border-right: 1px solid var(--flin-border-subtle);
+}
+
+.master-header {
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-border-subtle);
+    flex-shrink: 0;
+}
+
+.master-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.master-footer {
+    padding: var(--flin-space-3);
+    border-top: 1px solid var(--flin-border-subtle);
+    flex-shrink: 0;
+}
+
+/* Detail panel */
+.detail-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    background: var(--flin-bg-elevated);
+    border-bottom: 1px solid var(--flin-border-subtle);
+    flex-shrink: 0;
+}
+
+.back-btn {
+    display: none;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.back-btn:hover {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-primary);
+}
+
+.detail-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--flin-space-6);
+}
+
+.detail-footer {
+    padding: var(--flin-space-4);
+    background: var(--flin-bg-elevated);
+    border-top: 1px solid var(--flin-border-subtle);
+    flex-shrink: 0;
+}
+
+/* Empty state */
+.empty-state {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-4);
+}
+
+.empty-icon {
+    color: var(--flin-text-muted);
+    opacity: 0.5;
+}
+
+.empty-text {
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-muted);
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .master-panel {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        z-index: 1;
+        transform: translateX(0);
+        transition: transform var(--flin-transition-normal);
+    }
+
+    .mobile-view-detail .master-panel {
+        transform: translateX(-100%);
+    }
+
+    .detail-panel {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        background: var(--flin-bg-base);
+        transform: translateX(100%);
+        transition: transform var(--flin-transition-normal);
+    }
+
+    .mobile-view-detail .detail-panel {
+        transform: translateX(0);
+    }
+
+    .back-btn {
+        display: flex;
+    }
+
+    .detail-content {
+        padding: var(--flin-space-4);
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .master-panel {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .master-header,
+[data-theme="dark"] .master-footer,
+[data-theme="dark"] .detail-header,
+[data-theme="dark"] .detail-footer {
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .detail-header,
+[data-theme="dark"] .detail-footer {
+    background: var(--flin-bg-base);
+}
+</style>

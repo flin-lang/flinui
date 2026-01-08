@@ -1,0 +1,351 @@
+// ModalFullscreen.flin - FlinUI PRO Fullscreen Modal
+// Full-screen modal with close button and smooth transitions
+
+// Props with defaults
+isOpen = props.isOpen || false
+title = props.title || ""
+showHeader = props.showHeader || true
+closable = props.closable || true
+closePosition = props.closePosition || "top-right"
+theme = props.theme || "light"
+onClose = props.onClose
+
+// Internal state
+isClosing = false
+
+// Handle close with animation
+handleClose = {
+    if closable {
+        isClosing = true
+        if onClose { onClose() }
+    }
+}
+
+// Handle escape key
+handleKeyDown = (event) => {
+    if event.key == "Escape" && closable {
+        handleClose()
+    }
+}
+
+// Theme class
+themeClass = match theme {
+    "dark" -> "modal-fullscreen--dark"
+    "transparent" -> "modal-fullscreen--transparent"
+    _ -> "modal-fullscreen--light"
+}
+
+// Close button position class
+closePositionClass = match closePosition {
+    "top-left" -> "modal-fullscreen-close--top-left"
+    "top-center" -> "modal-fullscreen-close--top-center"
+    _ -> "modal-fullscreen-close--top-right"
+}
+
+// Computed classes
+modalClass = match isClosing {
+    true -> "modal-fullscreen " ++ themeClass ++ " modal-fullscreen--closing"
+    _ -> "modal-fullscreen " ++ themeClass
+}
+
+containerClass = match isOpen {
+    true -> "modal-fullscreen-container"
+    _ -> "modal-fullscreen-container modal-fullscreen-container--hidden"
+}
+
+<div class={containerClass}>
+    <div
+        class={modalClass}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-fullscreen-title"
+        tabindex="-1"
+        keydown={handleKeyDown}
+    >
+        // Close button
+        {if closable}
+            <button
+                class={"modal-fullscreen-close " ++ closePositionClass}
+                click={handleClose}
+                aria-label="Close fullscreen modal"
+                type="button"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                {if props.closeText}
+                    <span class="modal-fullscreen-close-text">{props.closeText}</span>
+                {/if}
+            </button>
+        {/if}
+
+        // Header
+        {if showHeader && (title != "" || props.subtitle)}
+            <header class="modal-fullscreen-header">
+                {if title != ""}
+                    <h1 id="modal-fullscreen-title" class="modal-fullscreen-title">{title}</h1>
+                {/if}
+                {if props.subtitle}
+                    <p class="modal-fullscreen-subtitle">{props.subtitle}</p>
+                {/if}
+            </header>
+        {/if}
+
+        // Content
+        <div class="modal-fullscreen-content">
+            {children}
+        </div>
+
+        // Footer (optional)
+        {if props.footerContent}
+            <footer class="modal-fullscreen-footer">
+                {props.footerContent}
+            </footer>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.modal-fullscreen-container {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+}
+
+.modal-fullscreen-container--hidden {
+    display: none;
+}
+
+/* Modal */
+.modal-fullscreen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalFullscreenIn var(--flin-transition-slow) ease-out;
+}
+
+@keyframes modalFullscreenIn {
+    from {
+        opacity: 0;
+        transform: scale(1.02);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-fullscreen--closing {
+    animation: modalFullscreenOut var(--flin-transition-normal) ease-in forwards;
+}
+
+@keyframes modalFullscreenOut {
+    to {
+        opacity: 0;
+        transform: scale(1.02);
+    }
+}
+
+/* Theme variants */
+.modal-fullscreen--light {
+    background-color: var(--flin-bg);
+    color: var(--flin-fg);
+}
+
+.modal-fullscreen--dark {
+    background-color: var(--flin-neutral-900);
+    color: var(--flin-neutral-100);
+}
+
+.modal-fullscreen--transparent {
+    background-color: rgba(0, 0, 0, 0.95);
+    color: white;
+}
+
+/* Close button */
+.modal-fullscreen-close {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-4);
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(8px);
+    border: none;
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+    color: inherit;
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    transition: all var(--flin-transition-fast);
+    z-index: 10;
+}
+
+.modal-fullscreen-close:hover {
+    background: rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+}
+
+.modal-fullscreen-close:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.modal-fullscreen-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Close button positions */
+.modal-fullscreen-close--top-right {
+    top: var(--flin-space-6);
+    right: var(--flin-space-6);
+}
+
+.modal-fullscreen-close--top-left {
+    top: var(--flin-space-6);
+    left: var(--flin-space-6);
+}
+
+.modal-fullscreen-close--top-center {
+    top: var(--flin-space-6);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.modal-fullscreen-close--top-center:hover {
+    transform: translateX(-50%) scale(1.05);
+}
+
+.modal-fullscreen-close-text {
+    display: none;
+}
+
+/* Header */
+.modal-fullscreen-header {
+    flex-shrink: 0;
+    text-align: center;
+    padding: var(--flin-space-16) var(--flin-space-8) var(--flin-space-8);
+}
+
+.modal-fullscreen-title {
+    margin: 0 0 var(--flin-space-2) 0;
+    font-size: var(--flin-text-4xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.modal-fullscreen-subtitle {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    opacity: 0.7;
+}
+
+/* Content */
+.modal-fullscreen-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--flin-space-8);
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Footer */
+.modal-fullscreen-footer {
+    flex-shrink: 0;
+    padding: var(--flin-space-6) var(--flin-space-8);
+    border-top: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+/* Light theme specific */
+.modal-fullscreen--light .modal-fullscreen-close {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--flin-fg);
+}
+
+.modal-fullscreen--light .modal-fullscreen-close:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme specific */
+.modal-fullscreen--dark .modal-fullscreen-close,
+.modal-fullscreen--transparent .modal-fullscreen-close {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.modal-fullscreen--dark .modal-fullscreen-close:hover,
+.modal-fullscreen--transparent .modal-fullscreen-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-fullscreen--dark .modal-fullscreen-footer {
+    border-top-color: var(--flin-neutral-700);
+}
+
+/* Focus trap */
+.modal-fullscreen:focus {
+    outline: none;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+    .modal-fullscreen-close {
+        top: var(--flin-space-4);
+        right: var(--flin-space-4);
+        padding: var(--flin-space-2) var(--flin-space-3);
+    }
+
+    .modal-fullscreen-close--top-left {
+        left: var(--flin-space-4);
+    }
+
+    .modal-fullscreen-header {
+        padding: var(--flin-space-12) var(--flin-space-4) var(--flin-space-6);
+    }
+
+    .modal-fullscreen-title {
+        font-size: var(--flin-text-2xl);
+    }
+
+    .modal-fullscreen-subtitle {
+        font-size: var(--flin-text-base);
+    }
+
+    .modal-fullscreen-content {
+        padding: var(--flin-space-4);
+    }
+
+    .modal-fullscreen-footer {
+        padding: var(--flin-space-4);
+    }
+}
+
+/* Large screens - show close text */
+@media (min-width: 768px) {
+    .modal-fullscreen-close-text {
+        display: inline;
+    }
+}
+
+/* System dark mode override for light theme */
+[data-theme="dark"] .modal-fullscreen--light {
+    background-color: var(--flin-neutral-900);
+    color: var(--flin-neutral-100);
+}
+
+[data-theme="dark"] .modal-fullscreen--light .modal-fullscreen-close {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--flin-neutral-100);
+}
+
+[data-theme="dark"] .modal-fullscreen--light .modal-fullscreen-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .modal-fullscreen--light .modal-fullscreen-footer {
+    border-top-color: var(--flin-neutral-700);
+}
+</style>

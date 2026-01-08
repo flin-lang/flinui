@@ -1,0 +1,796 @@
+// ============================================================================
+// PricingPage.flin — FlinUI PRO Page Template
+// Pricing display page with plan comparison, features, and FAQs
+// ============================================================================
+// Props:
+//   - title: Page title (string)
+//   - subtitle: Page subtitle (string)
+//   - plans: List of pricing plan objects (list)
+//   - features: List of feature comparison objects (list)
+//   - faqs: List of FAQ objects (list)
+//   - billingCycle: Current billing cycle "monthly" or "yearly" (string)
+//   - onSelectPlan: Plan selection callback (function or none)
+
+title = props.title || "Simple, transparent pricing"
+subtitle = props.subtitle || "Choose the plan that's right for you. All plans include a 14-day free trial."
+
+billingCycle = props.billingCycle || "monthly"
+
+plans = props.plans || [
+    [
+        "id": "starter",
+        "name": "Starter",
+        "description": "Perfect for individuals and small projects",
+        "priceMonthly": 0,
+        "priceYearly": 0,
+        "currency": "$",
+        "features": ["Up to 3 projects", "Basic analytics", "Community support", "1 team member"],
+        "cta": "Get Started",
+        "popular": false
+    ],
+    [
+        "id": "pro",
+        "name": "Pro",
+        "description": "For growing teams and businesses",
+        "priceMonthly": 29,
+        "priceYearly": 290,
+        "currency": "$",
+        "features": ["Unlimited projects", "Advanced analytics", "Priority support", "Up to 10 team members", "Custom integrations", "API access"],
+        "cta": "Start Free Trial",
+        "popular": true
+    ],
+    [
+        "id": "enterprise",
+        "name": "Enterprise",
+        "description": "For large organizations with custom needs",
+        "priceMonthly": 99,
+        "priceYearly": 990,
+        "currency": "$",
+        "features": ["Everything in Pro", "Unlimited team members", "Dedicated support", "Custom contracts", "SLA guarantee", "SSO/SAML", "Advanced security"],
+        "cta": "Contact Sales",
+        "popular": false
+    ]
+]
+
+featureCategories = props.featureCategories || [
+    [
+        "name": "Core Features",
+        "features": [
+            ["name": "Projects", "starter": "3", "pro": "Unlimited", "enterprise": "Unlimited"],
+            ["name": "Team members", "starter": "1", "pro": "10", "enterprise": "Unlimited"],
+            ["name": "Storage", "starter": "1 GB", "pro": "100 GB", "enterprise": "Unlimited"],
+            ["name": "API access", "starter": false, "pro": true, "enterprise": true]
+        ]
+    ],
+    [
+        "name": "Analytics",
+        "features": [
+            ["name": "Basic analytics", "starter": true, "pro": true, "enterprise": true],
+            ["name": "Advanced analytics", "starter": false, "pro": true, "enterprise": true],
+            ["name": "Custom reports", "starter": false, "pro": false, "enterprise": true]
+        ]
+    ],
+    [
+        "name": "Support",
+        "features": [
+            ["name": "Community support", "starter": true, "pro": true, "enterprise": true],
+            ["name": "Email support", "starter": false, "pro": true, "enterprise": true],
+            ["name": "Priority support", "starter": false, "pro": true, "enterprise": true],
+            ["name": "Dedicated support", "starter": false, "pro": false, "enterprise": true]
+        ]
+    ]
+]
+
+faqs = props.faqs || [
+    ["question": "Can I switch plans at any time?", "answer": "Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle."],
+    ["question": "What payment methods do you accept?", "answer": "We accept all major credit cards, PayPal, and bank transfers for enterprise customers."],
+    ["question": "Is there a free trial?", "answer": "Yes, all paid plans include a 14-day free trial. No credit card required to start."],
+    ["question": "What happens when I exceed my limits?", "answer": "We'll notify you when you're approaching your limits and give you the option to upgrade your plan."],
+    ["question": "Do you offer refunds?", "answer": "Yes, we offer a 30-day money-back guarantee on all paid plans. No questions asked."],
+    ["question": "Can I cancel my subscription?", "answer": "Yes, you can cancel your subscription at any time from your account settings. Your access will continue until the end of your billing period."]
+]
+
+onSelectPlan = props.onSelectPlan || none
+
+expandedFaq = none
+
+toggleBilling = () => {
+    billingCycle = match billingCycle {
+        "monthly" => "yearly"
+        _ => "monthly"
+    }
+}
+
+toggleFaq = (index) => {
+    expandedFaq = match expandedFaq {
+        index => none
+        _ => index
+    }
+}
+
+handleSelectPlan = (planId) => {
+    if onSelectPlan != none {
+        onSelectPlan(planId)
+    }
+}
+
+getPrice = (plan) => {
+    price = match billingCycle {
+        "yearly" => plan.priceYearly
+        _ => plan.priceMonthly
+    }
+    price
+}
+
+getPeriod = () => match billingCycle {
+    "yearly" => "/year"
+    _ => "/month"
+}
+
+<div class="pricing-page">
+    // Hero Section
+    <section class="pricing-hero">
+        <div class="pricing-hero__container">
+            <h1 class="pricing-hero__title">{title}</h1>
+            <p class="pricing-hero__subtitle">{subtitle}</p>
+
+            // Billing Toggle
+            <div class="pricing-toggle">
+                <span class={match billingCycle { "monthly" => "pricing-toggle__label pricing-toggle__label--active" _ => "pricing-toggle__label" }}>
+                    Monthly
+                </span>
+                <button class="pricing-toggle__switch" click={toggleBilling} aria-label="Toggle billing cycle">
+                    <span class={match billingCycle { "yearly" => "pricing-toggle__knob pricing-toggle__knob--yearly" _ => "pricing-toggle__knob" }}></span>
+                </button>
+                <span class={match billingCycle { "yearly" => "pricing-toggle__label pricing-toggle__label--active" _ => "pricing-toggle__label" }}>
+                    Yearly
+                    <span class="pricing-toggle__badge">Save 20%</span>
+                </span>
+            </div>
+        </div>
+    </section>
+
+    // Pricing Cards Section
+    <section class="pricing-cards">
+        <div class="pricing-cards__container">
+            {for plan in plans}
+                <div class={match plan.popular { true => "pricing-card pricing-card--popular" _ => "pricing-card" }}>
+                    {if plan.popular}
+                        <div class="pricing-card__badge">Most Popular</div>
+                    {/if}
+                    <div class="pricing-card__header">
+                        <h2 class="pricing-card__name">{plan.name}</h2>
+                        <p class="pricing-card__description">{plan.description}</p>
+                    </div>
+                    <div class="pricing-card__price">
+                        <span class="pricing-card__currency">{plan.currency}</span>
+                        <span class="pricing-card__amount">{getPrice(plan)}</span>
+                        <span class="pricing-card__period">{getPeriod()}</span>
+                    </div>
+                    <ul class="pricing-card__features">
+                        {for feature in plan.features}
+                            <li class="pricing-card__feature">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                {feature}
+                            </li>
+                        {/for}
+                    </ul>
+                    <button
+                        class={match plan.popular { true => "pricing-card__cta pricing-card__cta--primary" _ => "pricing-card__cta" }}
+                        click={() => handleSelectPlan(plan.id)}
+                    >
+                        {plan.cta}
+                    </button>
+                </div>
+            {/for}
+        </div>
+    </section>
+
+    // Feature Comparison Section
+    <section class="pricing-comparison">
+        <div class="pricing-comparison__container">
+            <h2 class="pricing-comparison__title">Compare plans</h2>
+            <p class="pricing-comparison__subtitle">See which plan is right for your needs</p>
+
+            <div class="pricing-comparison__table-wrapper">
+                <table class="pricing-comparison__table">
+                    <thead>
+                        <tr>
+                            <th class="pricing-comparison__feature-header">Features</th>
+                            <th class="pricing-comparison__plan-header">Starter</th>
+                            <th class="pricing-comparison__plan-header pricing-comparison__plan-header--popular">Pro</th>
+                            <th class="pricing-comparison__plan-header">Enterprise</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {for category in featureCategories}
+                            <tr class="pricing-comparison__category-row">
+                                <td colspan="4" class="pricing-comparison__category">{category.name}</td>
+                            </tr>
+                            {for feature in category.features}
+                                <tr class="pricing-comparison__row">
+                                    <td class="pricing-comparison__feature-name">{feature.name}</td>
+                                    <td class="pricing-comparison__value">
+                                        {match feature.starter {
+                                            true => <svg class="pricing-comparison__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                            false => <svg class="pricing-comparison__x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                            _ => <span>{feature.starter}</span>
+                                        }}
+                                    </td>
+                                    <td class="pricing-comparison__value pricing-comparison__value--popular">
+                                        {match feature.pro {
+                                            true => <svg class="pricing-comparison__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                            false => <svg class="pricing-comparison__x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                            _ => <span>{feature.pro}</span>
+                                        }}
+                                    </td>
+                                    <td class="pricing-comparison__value">
+                                        {match feature.enterprise {
+                                            true => <svg class="pricing-comparison__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                            false => <svg class="pricing-comparison__x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                            _ => <span>{feature.enterprise}</span>
+                                        }}
+                                    </td>
+                                </tr>
+                            {/for}
+                        {/for}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    // FAQ Section
+    <section class="pricing-faq">
+        <div class="pricing-faq__container">
+            <h2 class="pricing-faq__title">Frequently asked questions</h2>
+            <p class="pricing-faq__subtitle">Everything you need to know about our pricing</p>
+
+            <div class="pricing-faq__list">
+                {for faq, index in faqs}
+                    <div class={match expandedFaq { index => "pricing-faq__item pricing-faq__item--expanded" _ => "pricing-faq__item" }}>
+                        <button class="pricing-faq__question" click={() => toggleFaq(index)}>
+                            <span>{faq.question}</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <div class="pricing-faq__answer">
+                            <p>{faq.answer}</p>
+                        </div>
+                    </div>
+                {/for}
+            </div>
+        </div>
+    </section>
+
+    // CTA Section
+    <section class="pricing-cta">
+        <div class="pricing-cta__container">
+            <h2 class="pricing-cta__title">Still have questions?</h2>
+            <p class="pricing-cta__subtitle">
+                Our team is here to help. Contact us for personalized assistance.
+            </p>
+            <div class="pricing-cta__actions">
+                <a href="/contact" class="pricing-cta__button pricing-cta__button--primary">
+                    Contact Sales
+                </a>
+                <a href="/docs" class="pricing-cta__button pricing-cta__button--secondary">
+                    View Documentation
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style scoped>
+.pricing-page {
+    font-family: var(--flin-font-sans);
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-base);
+}
+
+/* Hero Section */
+.pricing-hero {
+    padding: var(--flin-space-20) var(--flin-space-6);
+    background: linear-gradient(180deg, var(--flin-bg-surface) 0%, var(--flin-bg-base) 100%);
+    text-align: center;
+}
+
+.pricing-hero__container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.pricing-hero__title {
+    font-size: 3rem;
+    font-weight: var(--flin-font-bold);
+    line-height: 1.1;
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.pricing-hero__subtitle {
+    font-size: var(--flin-text-xl);
+    color: var(--flin-text-secondary);
+    margin: 0 0 var(--flin-space-8) 0;
+}
+
+/* Billing Toggle */
+.pricing-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+.pricing-toggle__label {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-tertiary);
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    transition: color var(--flin-transition-fast);
+}
+
+.pricing-toggle__label--active {
+    color: var(--flin-text-primary);
+}
+
+.pricing-toggle__badge {
+    font-size: 10px;
+    font-weight: var(--flin-font-bold);
+    padding: 2px var(--flin-space-2);
+    background: var(--flin-accent-gold-light);
+    color: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+}
+
+.pricing-toggle__switch {
+    width: 48px;
+    height: 26px;
+    padding: 2px;
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-default);
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+    position: relative;
+    transition: all var(--flin-transition-fast);
+}
+
+.pricing-toggle__switch:hover {
+    border-color: var(--flin-accent-gold);
+}
+
+.pricing-toggle__knob {
+    width: 20px;
+    height: 20px;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform var(--flin-transition-fast);
+}
+
+.pricing-toggle__knob--yearly {
+    transform: translateX(22px);
+}
+
+/* Pricing Cards */
+.pricing-cards {
+    padding: var(--flin-space-12) var(--flin-space-6);
+}
+
+.pricing-cards__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--flin-space-6);
+    align-items: start;
+}
+
+.pricing-card {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-8);
+    position: relative;
+    transition: all var(--flin-transition-fast);
+}
+
+.pricing-card:hover {
+    border-color: var(--flin-border-default);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.pricing-card--popular {
+    border-color: var(--flin-accent-gold);
+    box-shadow: 0 0 0 1px var(--flin-accent-gold), var(--flin-shadow-xl);
+    transform: scale(1.02);
+}
+
+.pricing-card__badge {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-bold);
+    padding: var(--flin-space-1) var(--flin-space-3);
+    background: var(--flin-accent-gold);
+    color: white;
+    border-radius: var(--flin-radius-full);
+}
+
+.pricing-card__header {
+    margin-bottom: var(--flin-space-6);
+}
+
+.pricing-card__name {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.pricing-card__description {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    margin: 0;
+}
+
+.pricing-card__price {
+    display: flex;
+    align-items: baseline;
+    gap: var(--flin-space-1);
+    margin-bottom: var(--flin-space-6);
+}
+
+.pricing-card__currency {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+}
+
+.pricing-card__amount {
+    font-size: 3.5rem;
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    line-height: 1;
+}
+
+.pricing-card__period {
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-tertiary);
+}
+
+.pricing-card__features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--flin-space-8) 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+}
+
+.pricing-card__feature {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+}
+
+.pricing-card__feature svg {
+    width: 16px;
+    height: 16px;
+    color: var(--flin-success);
+    flex-shrink: 0;
+}
+
+.pricing-card__cta {
+    width: 100%;
+    padding: var(--flin-space-3) var(--flin-space-6);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-default);
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.pricing-card__cta:hover {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-strong);
+}
+
+.pricing-card__cta--primary {
+    color: white;
+    background: var(--flin-accent-gold);
+    border: none;
+}
+
+.pricing-card__cta--primary:hover {
+    background: var(--flin-accent-gold-hover);
+}
+
+/* Feature Comparison */
+.pricing-comparison {
+    padding: var(--flin-space-20) var(--flin-space-6);
+    background: var(--flin-bg-surface);
+}
+
+.pricing-comparison__container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.pricing-comparison__title {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    text-align: center;
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.pricing-comparison__subtitle {
+    font-size: var(--flin-text-lg);
+    color: var(--flin-text-secondary);
+    text-align: center;
+    margin: 0 0 var(--flin-space-12) 0;
+}
+
+.pricing-comparison__table-wrapper {
+    overflow-x: auto;
+}
+
+.pricing-comparison__table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pricing-comparison__feature-header,
+.pricing-comparison__plan-header {
+    padding: var(--flin-space-4);
+    text-align: center;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-elevated);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.pricing-comparison__feature-header {
+    text-align: left;
+    width: 40%;
+}
+
+.pricing-comparison__plan-header--popular {
+    background: var(--flin-accent-gold-light);
+    color: var(--flin-accent-gold);
+}
+
+.pricing-comparison__category-row td {
+    padding: var(--flin-space-4);
+    background: var(--flin-bg-base);
+}
+
+.pricing-comparison__category {
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--flin-text-tertiary);
+}
+
+.pricing-comparison__row td {
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.pricing-comparison__feature-name {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+}
+
+.pricing-comparison__value {
+    text-align: center;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-primary);
+}
+
+.pricing-comparison__value--popular {
+    background: rgba(234, 179, 8, 0.05);
+}
+
+.pricing-comparison__check {
+    width: 20px;
+    height: 20px;
+    color: var(--flin-success);
+}
+
+.pricing-comparison__x {
+    width: 20px;
+    height: 20px;
+    color: var(--flin-text-muted);
+}
+
+/* FAQ Section */
+.pricing-faq {
+    padding: var(--flin-space-20) var(--flin-space-6);
+}
+
+.pricing-faq__container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.pricing-faq__title {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    text-align: center;
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.pricing-faq__subtitle {
+    font-size: var(--flin-text-lg);
+    color: var(--flin-text-secondary);
+    text-align: center;
+    margin: 0 0 var(--flin-space-12) 0;
+}
+
+.pricing-faq__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+}
+
+.pricing-faq__item {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+.pricing-faq__question {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-4) var(--flin-space-5);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-primary);
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.pricing-faq__question:hover {
+    background: var(--flin-bg-elevated);
+}
+
+.pricing-faq__question svg {
+    width: 20px;
+    height: 20px;
+    color: var(--flin-text-tertiary);
+    transition: transform var(--flin-transition-fast);
+}
+
+.pricing-faq__item--expanded .pricing-faq__question svg {
+    transform: rotate(180deg);
+}
+
+.pricing-faq__answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--flin-transition-normal);
+}
+
+.pricing-faq__item--expanded .pricing-faq__answer {
+    max-height: 200px;
+}
+
+.pricing-faq__answer p {
+    padding: 0 var(--flin-space-5) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* CTA Section */
+.pricing-cta {
+    padding: var(--flin-space-20) var(--flin-space-6);
+    background: var(--flin-bg-surface);
+    text-align: center;
+}
+
+.pricing-cta__container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.pricing-cta__title {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-3) 0;
+}
+
+.pricing-cta__subtitle {
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-secondary);
+    margin: 0 0 var(--flin-space-6) 0;
+}
+
+.pricing-cta__actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-4);
+}
+
+.pricing-cta__button {
+    padding: var(--flin-space-3) var(--flin-space-6);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    border-radius: var(--flin-radius-lg);
+    text-decoration: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.pricing-cta__button--primary {
+    color: white;
+    background: var(--flin-accent-gold);
+}
+
+.pricing-cta__button--primary:hover {
+    background: var(--flin-accent-gold-hover);
+}
+
+.pricing-cta__button--secondary {
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-default);
+}
+
+.pricing-cta__button--secondary:hover {
+    background: var(--flin-bg-base);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .pricing-cards__container {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+    }
+
+    .pricing-card--popular {
+        transform: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .pricing-hero__title {
+        font-size: 2.25rem;
+    }
+
+    .pricing-toggle {
+        flex-direction: column;
+        gap: var(--flin-space-2);
+    }
+
+    .pricing-cta__actions {
+        flex-direction: column;
+    }
+}
+</style>

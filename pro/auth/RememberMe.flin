@@ -1,0 +1,296 @@
+// RememberMe.flin - FlinUI PRO Authentication Component
+// Remember me checkbox with forgot password link row
+
+// Props with defaults
+checked = props.checked || false
+disabled = props.disabled || false
+label = props.label || "Remember me"
+helpText = props.helpText || none
+showForgotPassword = props.showForgotPassword || true
+forgotPasswordLabel = props.forgotPasswordLabel || "Forgot password?"
+forgotPasswordUrl = props.forgotPasswordUrl || "/forgot-password"
+size = props.size || "md"
+onChange = props.onChange
+onForgotPassword = props.onForgotPassword
+
+// Handle checkbox change
+handleChange = (e) => {
+    if onChange {
+        onChange(e.target.checked)
+    }
+}
+
+// Handle forgot password click
+handleForgotClick = (e) => {
+    if onForgotPassword {
+        e.preventDefault()
+        onForgotPassword()
+    }
+}
+
+// Compute size class
+sizeClass = match size {
+    "sm" -> "remember-me--sm"
+    "lg" -> "remember-me--lg"
+    _ -> "remember-me--md"
+}
+
+// Compute disabled class
+disabledClass = match disabled {
+    true -> " remember-me--disabled"
+    _ -> ""
+}
+
+<div class={"remember-me " ++ sizeClass ++ disabledClass}>
+    <label class="remember-me__checkbox">
+        <input
+            type="checkbox"
+            class="remember-me__input"
+            checked={checked}
+            disabled={disabled}
+            change={handleChange}
+        />
+        <span class="remember-me__checkmark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+        </span>
+        <span class="remember-me__content">
+            <span class="remember-me__label">{label}</span>
+            {if helpText != none}
+                <span class="remember-me__help">{helpText}</span>
+            {/if}
+        </span>
+    </label>
+
+    {if showForgotPassword}
+        <a
+            href={forgotPasswordUrl}
+            class="remember-me__forgot"
+            click={handleForgotClick}
+        >
+            {forgotPasswordLabel}
+        </a>
+    {/if}
+</div>
+
+<style scoped>
+.remember-me {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    width: 100%;
+}
+
+.remember-me__checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-2);
+    cursor: pointer;
+    user-select: none;
+}
+
+.remember-me__input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.remember-me__checkmark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background-color: var(--flin-bg);
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-sm);
+    transition: all var(--flin-transition-fast);
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.remember-me__checkmark svg {
+    width: 12px;
+    height: 12px;
+    color: white;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all var(--flin-transition-fast);
+}
+
+.remember-me__input:checked + .remember-me__checkmark {
+    background-color: var(--flin-primary);
+    border-color: var(--flin-primary);
+}
+
+.remember-me__input:checked + .remember-me__checkmark svg {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.remember-me__input:focus-visible + .remember-me__checkmark {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.remember-me__checkbox:hover .remember-me__checkmark {
+    border-color: var(--flin-neutral-400);
+}
+
+.remember-me__input:checked + .remember-me__checkmark:hover {
+    background-color: var(--flin-primary-hover);
+    border-color: var(--flin-primary-hover);
+}
+
+.remember-me__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-0-5);
+}
+
+.remember-me__label {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+    line-height: 1.4;
+}
+
+.remember-me__help {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    line-height: 1.4;
+}
+
+.remember-me__forgot {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-primary);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--flin-transition-fast);
+}
+
+.remember-me__forgot:hover {
+    color: var(--flin-primary-hover);
+    text-decoration: underline;
+}
+
+.remember-me__forgot:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+    border-radius: var(--flin-radius-sm);
+}
+
+/* Size variants */
+.remember-me--sm .remember-me__checkmark {
+    width: 16px;
+    height: 16px;
+}
+
+.remember-me--sm .remember-me__checkmark svg {
+    width: 10px;
+    height: 10px;
+}
+
+.remember-me--sm .remember-me__label {
+    font-size: var(--flin-text-xs);
+}
+
+.remember-me--sm .remember-me__help {
+    font-size: var(--flin-text-2xs);
+}
+
+.remember-me--sm .remember-me__forgot {
+    font-size: var(--flin-text-xs);
+}
+
+.remember-me--lg .remember-me__checkmark {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+}
+
+.remember-me--lg .remember-me__checkmark svg {
+    width: 14px;
+    height: 14px;
+}
+
+.remember-me--lg .remember-me__label {
+    font-size: var(--flin-text-base);
+}
+
+.remember-me--lg .remember-me__help {
+    font-size: var(--flin-text-sm);
+}
+
+.remember-me--lg .remember-me__forgot {
+    font-size: var(--flin-text-base);
+}
+
+/* Disabled state */
+.remember-me--disabled {
+    pointer-events: none;
+}
+
+.remember-me--disabled .remember-me__checkbox {
+    cursor: not-allowed;
+}
+
+.remember-me--disabled .remember-me__checkmark {
+    background-color: var(--flin-bg-muted);
+    border-color: var(--flin-neutral-200);
+}
+
+.remember-me--disabled .remember-me__input:checked + .remember-me__checkmark {
+    background-color: var(--flin-neutral-400);
+    border-color: var(--flin-neutral-400);
+}
+
+.remember-me--disabled .remember-me__label,
+.remember-me--disabled .remember-me__help {
+    color: var(--flin-fg-muted);
+}
+
+.remember-me--disabled .remember-me__forgot {
+    color: var(--flin-fg-muted);
+}
+
+/* Dark theme */
+[data-theme="dark"] .remember-me__checkmark {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .remember-me__checkbox:hover .remember-me__checkmark {
+    border-color: var(--flin-neutral-500);
+}
+
+[data-theme="dark"] .remember-me--disabled .remember-me__checkmark {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .remember-me {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--flin-space-2);
+    }
+
+    .remember-me__forgot {
+        margin-left: calc(18px + var(--flin-space-2));
+    }
+
+    .remember-me--sm .remember-me__forgot {
+        margin-left: calc(16px + var(--flin-space-2));
+    }
+
+    .remember-me--lg .remember-me__forgot {
+        margin-left: calc(20px + var(--flin-space-2));
+    }
+}
+</style>

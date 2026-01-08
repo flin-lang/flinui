@@ -1,0 +1,433 @@
+// ModalSlideOver.flin - FlinUI PRO Slide-Over Panel
+// Slide-in panel from edge (right/left) with smooth transitions
+
+// Props with defaults
+isOpen = props.isOpen || false
+title = props.title || ""
+position = props.position || "right"
+size = props.size || "md"
+closable = props.closable || true
+closeOnBackdrop = props.closeOnBackdrop || true
+showFooter = props.showFooter || false
+onClose = props.onClose
+
+// Internal state
+isClosing = false
+
+// Handle close with animation
+handleClose = {
+    if closable {
+        isClosing = true
+        if onClose { onClose() }
+    }
+}
+
+// Handle backdrop click
+handleBackdropClick = {
+    if closeOnBackdrop && closable {
+        handleClose()
+    }
+}
+
+// Handle escape key
+handleKeyDown = (event) => {
+    if event.key == "Escape" && closable {
+        handleClose()
+    }
+}
+
+// Position class
+positionClass = match position {
+    "left" -> "modal-slideover--left"
+    _ -> "modal-slideover--right"
+}
+
+// Size class
+sizeClass = match size {
+    "sm" -> "modal-slideover--sm"
+    "lg" -> "modal-slideover--lg"
+    "xl" -> "modal-slideover--xl"
+    "full" -> "modal-slideover--full"
+    _ -> "modal-slideover--md"
+}
+
+// Computed classes
+backdropClass = match isClosing {
+    true -> "modal-slideover-backdrop modal-slideover-backdrop--closing"
+    _ -> "modal-slideover-backdrop"
+}
+
+panelClass = match isClosing {
+    true -> "modal-slideover-panel " ++ positionClass ++ " " ++ sizeClass ++ " modal-slideover-panel--closing"
+    _ -> "modal-slideover-panel " ++ positionClass ++ " " ++ sizeClass
+}
+
+containerClass = match isOpen {
+    true -> "modal-slideover-container"
+    _ -> "modal-slideover-container modal-slideover-container--hidden"
+}
+
+<div class={containerClass}>
+    // Backdrop
+    <div
+        class={backdropClass}
+        click={handleBackdropClick}
+        aria-hidden="true"
+    ></div>
+
+    // Panel
+    <div
+        class={panelClass}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-slideover-title"
+        tabindex="-1"
+        keydown={handleKeyDown}
+    >
+        // Header
+        <div class="modal-slideover-header">
+            <div class="modal-slideover-header-content">
+                {if title != ""}
+                    <h2 id="modal-slideover-title" class="modal-slideover-title">{title}</h2>
+                {/if}
+                {if props.subtitle}
+                    <p class="modal-slideover-subtitle">{props.subtitle}</p>
+                {/if}
+            </div>
+            {if closable}
+                <button
+                    class="modal-slideover-close"
+                    click={handleClose}
+                    aria-label="Close panel"
+                    type="button"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            {/if}
+        </div>
+
+        // Content
+        <div class="modal-slideover-content">
+            {children}
+        </div>
+
+        // Footer (optional)
+        {if showFooter}
+            <div class="modal-slideover-footer">
+                {if props.footerContent}
+                    {props.footerContent}
+                {:else}
+                    <button
+                        class="modal-slideover-btn modal-slideover-btn--secondary"
+                        click={handleClose}
+                        type="button"
+                    >
+                        {props.cancelText || "Cancel"}
+                    </button>
+                    {if props.onSave}
+                        <button
+                            class="modal-slideover-btn modal-slideover-btn--primary"
+                            click={props.onSave}
+                            type="button"
+                        >
+                            {props.saveText || "Save"}
+                        </button>
+                    {/if}
+                {/if}
+            </div>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.modal-slideover-container {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.modal-slideover-container--hidden {
+    display: none;
+}
+
+/* Backdrop */
+.modal-slideover-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    animation: slideoverBackdropIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes slideoverBackdropIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-slideover-backdrop--closing {
+    animation: slideoverBackdropOut var(--flin-transition-normal) ease-in forwards;
+}
+
+@keyframes slideoverBackdropOut {
+    to { opacity: 0; }
+}
+
+/* Panel base */
+.modal-slideover-panel {
+    position: fixed;
+    top: 0;
+    height: 100vh;
+    background-color: var(--flin-bg);
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--flin-shadow-2xl);
+}
+
+.modal-slideover-panel:focus {
+    outline: none;
+}
+
+/* Position variants */
+.modal-slideover--right {
+    right: 0;
+    animation: slideoverRightIn var(--flin-transition-slow) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-slideover--right.modal-slideover-panel--closing {
+    animation: slideoverRightOut var(--flin-transition-normal) ease-in forwards;
+}
+
+@keyframes slideoverRightIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes slideoverRightOut {
+    to { transform: translateX(100%); }
+}
+
+.modal-slideover--left {
+    left: 0;
+    animation: slideoverLeftIn var(--flin-transition-slow) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-slideover--left.modal-slideover-panel--closing {
+    animation: slideoverLeftOut var(--flin-transition-normal) ease-in forwards;
+}
+
+@keyframes slideoverLeftIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes slideoverLeftOut {
+    to { transform: translateX(-100%); }
+}
+
+/* Size variants */
+.modal-slideover--sm {
+    width: 100%;
+    max-width: 320px;
+}
+
+.modal-slideover--md {
+    width: 100%;
+    max-width: 440px;
+}
+
+.modal-slideover--lg {
+    width: 100%;
+    max-width: 600px;
+}
+
+.modal-slideover--xl {
+    width: 100%;
+    max-width: 800px;
+}
+
+.modal-slideover--full {
+    width: 100vw;
+    max-width: none;
+}
+
+/* Header */
+.modal-slideover-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-5) var(--flin-space-6);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    flex-shrink: 0;
+}
+
+.modal-slideover-header-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.modal-slideover-title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.modal-slideover-subtitle {
+    margin: var(--flin-space-1) 0 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.modal-slideover-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin: calc(var(--flin-space-1) * -1);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    color: var(--flin-fg-muted);
+    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+    flex-shrink: 0;
+}
+
+.modal-slideover-close:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.modal-slideover-close:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.modal-slideover-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Content */
+.modal-slideover-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--flin-space-6);
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Footer */
+.modal-slideover-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-top: 1px solid var(--flin-neutral-200);
+    background-color: var(--flin-neutral-50);
+    flex-shrink: 0;
+}
+
+/* Buttons */
+.modal-slideover-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    border: 1px solid transparent;
+}
+
+.modal-slideover-btn--primary {
+    background-color: var(--flin-primary);
+    color: white;
+    border-color: var(--flin-primary);
+}
+
+.modal-slideover-btn--primary:hover {
+    background-color: var(--flin-primary-hover);
+    border-color: var(--flin-primary-hover);
+}
+
+.modal-slideover-btn--secondary {
+    background-color: white;
+    color: var(--flin-fg);
+    border-color: var(--flin-neutral-300);
+}
+
+.modal-slideover-btn--secondary:hover {
+    background-color: var(--flin-neutral-50);
+    border-color: var(--flin-neutral-400);
+}
+
+.modal-slideover-btn:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+    .modal-slideover--sm,
+    .modal-slideover--md,
+    .modal-slideover--lg,
+    .modal-slideover--xl {
+        max-width: 100vw;
+    }
+
+    .modal-slideover-header {
+        padding: var(--flin-space-4);
+    }
+
+    .modal-slideover-content {
+        padding: var(--flin-space-4);
+    }
+
+    .modal-slideover-footer {
+        padding: var(--flin-space-3) var(--flin-space-4);
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .modal-slideover-panel {
+    background-color: var(--flin-neutral-900);
+    border-left: 1px solid var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-slideover--left {
+    border-left: none;
+    border-right: 1px solid var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-slideover-header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-slideover-footer {
+    border-top-color: var(--flin-neutral-700);
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .modal-slideover-close:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .modal-slideover-btn--secondary {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .modal-slideover-btn--secondary:hover {
+    background-color: var(--flin-neutral-700);
+    border-color: var(--flin-neutral-500);
+}
+</style>

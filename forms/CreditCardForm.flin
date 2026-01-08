@@ -1,0 +1,485 @@
+// CreditCardForm.flin - FlinUI Credit Card Form Component
+// Complete credit card input with validation and card detection
+
+// Props with defaults
+cardNumber = props.cardNumber || ""
+cardName = props.cardName || ""
+expiryDate = props.expiryDate || ""
+cvv = props.cvv || ""
+disabled = props.disabled || false
+showCardPreview = props.showCardPreview || true
+onCardNumberChange = props.onCardNumberChange
+onCardNameChange = props.onCardNameChange
+onExpiryChange = props.onExpiryChange
+onCvvChange = props.onCvvChange
+onComplete = props.onComplete
+
+// State
+cardType = "unknown"
+isFlipped = false
+errors = []
+
+// Detect card type from number
+detectCardType = fn(number) {
+    cleaned = number.replace(/\s/g, "")
+    if cleaned.startsWith("4") {
+        "visa"
+    } else if cleaned.startsWith("5") || (cleaned.startsWith("2") && cleaned.len >= 2 && cleaned[1] >= "2" && cleaned[1] <= "7") {
+        "mastercard"
+    } else if cleaned.startsWith("34") || cleaned.startsWith("37") {
+        "amex"
+    } else if cleaned.startsWith("6011") || cleaned.startsWith("65") {
+        "discover"
+    } else {
+        "unknown"
+    }
+}
+
+// Format card number with spaces
+formatCardNumber = fn(value) {
+    cleaned = value.replace(/\D/g, "")
+    maxLen = match cardType { "amex" -> 15, _ -> 16 }
+    truncated = cleaned.slice(0, maxLen)
+
+    // Format: XXXX XXXX XXXX XXXX or XXXX XXXXXX XXXXX (Amex)
+    if cardType == "amex" {
+        parts = []
+        if truncated.len > 0 { parts.push(truncated.slice(0, 4)) }
+        if truncated.len > 4 { parts.push(truncated.slice(4, 10)) }
+        if truncated.len > 10 { parts.push(truncated.slice(10, 15)) }
+        parts.join(" ")
+    } else {
+        truncated.match(/.{1,4}/g).join(" ")
+    }
+}
+
+// Format expiry date
+formatExpiry = fn(value) {
+    cleaned = value.replace(/\D/g, "")
+    if cleaned.len >= 2 {
+        cleaned.slice(0, 2) ++ "/" ++ cleaned.slice(2, 4)
+    } else {
+        cleaned
+    }
+}
+
+// Handle card number input
+handleCardNumber = fn(e) {
+    raw = e.target.value.replace(/\D/g, "")
+    cardType = detectCardType(raw)
+    formatted = formatCardNumber(raw)
+    if onCardNumberChange {
+        onCardNumberChange(formatted)
+    }
+}
+
+// Handle card name input
+handleCardName = fn(e) {
+    if onCardNameChange {
+        onCardNameChange(e.target.value.toUpperCase())
+    }
+}
+
+// Handle expiry input
+handleExpiry = fn(e) {
+    formatted = formatExpiry(e.target.value)
+    if onExpiryChange {
+        onExpiryChange(formatted)
+    }
+}
+
+// Handle CVV input
+handleCvv = fn(e) {
+    maxLen = match cardType { "amex" -> 4, _ -> 3 }
+    cleaned = e.target.value.replace(/\D/g, "").slice(0, maxLen)
+    if onCvvChange {
+        onCvvChange(cleaned)
+    }
+}
+
+// Flip card to show CVV
+flipCard = { isFlipped = true }
+unflipCard = { isFlipped = false }
+
+// Mask card number for display
+maskCardNumber = fn(num) {
+    cleaned = num.replace(/\s/g, "")
+    if cleaned.len > 4 {
+        masked = "**** **** **** " ++ cleaned.slice(-4)
+        masked
+    } else {
+        num
+    }
+}
+
+// Compute classes
+disabledClass = match disabled { true -> " credit-card-form-disabled", _ -> "" }
+containerClass = "credit-card-form" ++ disabledClass
+
+// Card preview flip class
+flipClass = match isFlipped { true -> " card-flipped", _ -> "" }
+
+<div class={containerClass}>
+    {if showCardPreview}
+        <div class={"credit-card-preview" ++ flipClass}>
+            <div class="credit-card-front">
+                <div class="credit-card-chip">
+                    <svg viewBox="0 0 50 40">
+                        <rect x="0" y="0" width="50" height="40" rx="5" fill="#d4af37"/>
+                        <line x1="0" y1="13" x2="50" y2="13" stroke="#b8860b" stroke-width="2"/>
+                        <line x1="0" y1="20" x2="50" y2="20" stroke="#b8860b" stroke-width="2"/>
+                        <line x1="0" y1="27" x2="50" y2="27" stroke="#b8860b" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="credit-card-type">
+                    {if cardType == "visa"}
+                        <span class="card-logo visa">VISA</span>
+                    {else if cardType == "mastercard"}
+                        <span class="card-logo mastercard">MC</span>
+                    {else if cardType == "amex"}
+                        <span class="card-logo amex">AMEX</span>
+                    {else if cardType == "discover"}
+                        <span class="card-logo discover">DISC</span>
+                    {else}
+                        <span class="card-logo unknown">CARD</span>
+                    {/if}
+                </div>
+                <div class="credit-card-number">
+                    {if cardNumber != ""}
+                        {cardNumber}
+                    {else}
+                        **** **** **** ****
+                    {/if}
+                </div>
+                <div class="credit-card-details">
+                    <div class="credit-card-name">
+                        <span class="credit-card-label">Card Holder</span>
+                        <span class="credit-card-value">{if cardName != "" then cardName else "YOUR NAME"}</span>
+                    </div>
+                    <div class="credit-card-expiry">
+                        <span class="credit-card-label">Expires</span>
+                        <span class="credit-card-value">{if expiryDate != "" then expiryDate else "MM/YY"}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="credit-card-back">
+                <div class="credit-card-stripe"></div>
+                <div class="credit-card-cvv-band">
+                    <span class="credit-card-cvv-label">CVV</span>
+                    <span class="credit-card-cvv-value">{if cvv != "" then "***" else "***"}</span>
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    <div class="credit-card-inputs">
+        <div class="credit-card-field credit-card-field-number">
+            <label class="credit-card-field-label">Card Number</label>
+            <div class="credit-card-field-input-wrapper">
+                <input
+                    type="text"
+                    class="credit-card-field-input"
+                    value={cardNumber}
+                    placeholder="1234 5678 9012 3456"
+                    disabled={disabled}
+                    input={handleCardNumber}
+                    maxlength="19"
+                    autocomplete="cc-number"
+                >
+                <span class="credit-card-field-icon">
+                    {if cardType == "visa"}
+                        <span class="card-icon visa">VISA</span>
+                    {else if cardType == "mastercard"}
+                        <span class="card-icon mastercard">MC</span>
+                    {else if cardType == "amex"}
+                        <span class="card-icon amex">AMEX</span>
+                    {else}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                            <line x1="1" y1="10" x2="23" y2="10"/>
+                        </svg>
+                    {/if}
+                </span>
+            </div>
+        </div>
+
+        <div class="credit-card-field credit-card-field-name">
+            <label class="credit-card-field-label">Cardholder Name</label>
+            <input
+                type="text"
+                class="credit-card-field-input"
+                value={cardName}
+                placeholder="JOHN DOE"
+                disabled={disabled}
+                input={handleCardName}
+                autocomplete="cc-name"
+            >
+        </div>
+
+        <div class="credit-card-row">
+            <div class="credit-card-field credit-card-field-expiry">
+                <label class="credit-card-field-label">Expiry Date</label>
+                <input
+                    type="text"
+                    class="credit-card-field-input"
+                    value={expiryDate}
+                    placeholder="MM/YY"
+                    disabled={disabled}
+                    input={handleExpiry}
+                    maxlength="5"
+                    autocomplete="cc-exp"
+                >
+            </div>
+
+            <div class="credit-card-field credit-card-field-cvv">
+                <label class="credit-card-field-label">CVV</label>
+                <input
+                    type="text"
+                    class="credit-card-field-input"
+                    value={cvv}
+                    placeholder={match cardType { "amex" -> "1234", _ -> "123" }}
+                    disabled={disabled}
+                    input={handleCvv}
+                    focus={flipCard}
+                    blur={unflipCard}
+                    maxlength={match cardType { "amex" -> "4", _ -> "3" }}
+                    autocomplete="cc-csc"
+                >
+            </div>
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.credit-card-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-6);
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Card Preview */
+.credit-card-preview {
+    perspective: 1000px;
+    height: 200px;
+}
+
+.credit-card-front,
+.credit-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--flin-radius-xl);
+    backface-visibility: hidden;
+    transition: transform 0.6s;
+    padding: var(--flin-space-5);
+    color: white;
+}
+
+.credit-card-front {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.credit-card-back {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: rotateY(180deg);
+}
+
+.card-flipped .credit-card-front {
+    transform: rotateY(180deg);
+}
+
+.card-flipped .credit-card-back {
+    transform: rotateY(0deg);
+}
+
+.credit-card-chip {
+    width: 50px;
+    height: 40px;
+}
+
+.credit-card-type {
+    position: absolute;
+    top: var(--flin-space-5);
+    right: var(--flin-space-5);
+}
+
+.card-logo {
+    font-size: var(--flin-text-lg);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+
+.credit-card-number {
+    font-size: var(--flin-text-xl);
+    font-family: var(--flin-font-mono);
+    letter-spacing: 0.15em;
+    margin-top: var(--flin-space-4);
+}
+
+.credit-card-details {
+    display: flex;
+    justify-content: space-between;
+}
+
+.credit-card-name,
+.credit-card-expiry {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.credit-card-label {
+    font-size: var(--flin-text-xs);
+    opacity: 0.7;
+    text-transform: uppercase;
+}
+
+.credit-card-value {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+/* Card Back */
+.credit-card-stripe {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background-color: #333;
+}
+
+.credit-card-cvv-band {
+    position: absolute;
+    top: 90px;
+    left: var(--flin-space-5);
+    right: var(--flin-space-5);
+    height: 40px;
+    background-color: white;
+    border-radius: var(--flin-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 var(--flin-space-3);
+    gap: var(--flin-space-2);
+}
+
+.credit-card-cvv-label {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+.credit-card-cvv-value {
+    font-family: var(--flin-font-mono);
+    color: var(--flin-fg);
+    font-style: italic;
+}
+
+/* Form Inputs */
+.credit-card-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.credit-card-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.credit-card-field-label {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+}
+
+.credit-card-field-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.credit-card-field-input {
+    width: 100%;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3);
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.credit-card-field-input:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.credit-card-field-input::placeholder {
+    color: var(--flin-fg-muted);
+    font-family: var(--flin-font-sans);
+}
+
+.credit-card-field-number .credit-card-field-input {
+    padding-right: var(--flin-space-12);
+}
+
+.credit-card-field-icon {
+    position: absolute;
+    right: var(--flin-space-3);
+    display: flex;
+    align-items: center;
+    color: var(--flin-fg-muted);
+}
+
+.credit-card-field-icon svg {
+    width: var(--flin-icon-md);
+    height: var(--flin-icon-md);
+}
+
+.card-icon {
+    font-size: var(--flin-text-xs);
+    font-weight: 700;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+}
+
+.card-icon.visa { background-color: #1a1f71; color: white; }
+.card-icon.mastercard { background-color: #eb001b; color: white; }
+.card-icon.amex { background-color: #006fcf; color: white; }
+
+.credit-card-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--flin-space-4);
+}
+
+/* Disabled state */
+.credit-card-form-disabled .credit-card-field-input {
+    background-color: var(--flin-bg-muted);
+    border-color: var(--flin-neutral-200);
+    cursor: not-allowed;
+    color: var(--flin-fg-muted);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .credit-card-preview {
+        height: 180px;
+    }
+
+    .credit-card-number {
+        font-size: var(--flin-text-lg);
+    }
+}
+</style>

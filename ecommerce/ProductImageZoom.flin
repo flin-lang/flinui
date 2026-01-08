@@ -1,0 +1,352 @@
+// ProductImageZoom.flin - FlinUI PRO E-commerce Component
+// Magnifying glass effect with hover zoom and smooth transitions
+
+// Props with defaults
+image = props.image || ""
+alt = props.alt || "Product image"
+zoomLevel = props.zoomLevel || 2
+showMagnifier = props.showMagnifier || true
+magnifierSize = props.magnifierSize || 100
+
+// State
+isHovering = false
+mouseX = 0
+mouseY = 0
+magnifierX = 0
+magnifierY = 0
+
+// Computed values
+hasImage = image != ""
+magnifierSizePx = magnifierSize ++ "px"
+zoomTransform = "scale(" ++ zoomLevel ++ ")"
+
+// Handlers
+fn handleMouseEnter(event) {
+    isHovering = true
+}
+
+fn handleMouseLeave() {
+    isHovering = false
+}
+
+fn handleMouseMove(event) {
+    if isHovering && hasImage {
+        rect = event.currentTarget.getBoundingClientRect()
+
+        // Calculate position relative to the image
+        relX = event.clientX - rect.left
+        relY = event.clientY - rect.top
+
+        // Store for magnifier positioning
+        mouseX = relX
+        mouseY = relY
+
+        // Calculate magnifier position
+        magnifierX = relX - (magnifierSize / 2)
+        magnifierY = relY - (magnifierSize / 2)
+
+        // Clamp values to keep magnifier in bounds
+        if magnifierX < 0 {
+            magnifierX = 0
+        }
+        if magnifierY < 0 {
+            magnifierY = 0
+        }
+        if magnifierX > (rect.width - magnifierSize) {
+            magnifierX = rect.width - magnifierSize
+        }
+        if magnifierY > (rect.height - magnifierSize) {
+            magnifierY = rect.height - magnifierSize
+        }
+    }
+}
+
+<div class="zoom-container">
+    <div
+        class="zoom-image-wrapper {if isHovering}active{/if}"
+        mousemove={handleMouseMove}
+        mouseenter={handleMouseEnter}
+        mouseleave={handleMouseLeave}
+    >
+        <!-- Main Image -->
+        <div class="zoom-main-image">
+            {if hasImage}
+                <img
+                    src={image}
+                    alt={alt}
+                    class="zoom-img"
+                />
+            {else}
+                <div class="zoom-placeholder">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <path d="M21 15l-5-5L5 21"/>
+                    </svg>
+                </div>
+            {/if}
+        </div>
+
+        <!-- Magnifier Circle -->
+        {if showMagnifier && isHovering && hasImage}
+            <div
+                class="zoom-magnifier"
+                style={
+                    "left: " ++ magnifierX ++ "px; " ++
+                    "top: " ++ magnifierY ++ "px; " ++
+                    "width: " ++ magnifierSizePx ++ "; " ++
+                    "height: " ++ magnifierSizePx ++ ";"
+                }
+            >
+                <img
+                    src={image}
+                    alt={alt}
+                    class="zoom-magnified-img"
+                    style={
+                        "width: " ++ (100 * zoomLevel) ++ "%; " ++
+                        "height: " ++ (100 * zoomLevel) ++ "%; " ++
+                        "left: " ++ (-mouseX * (zoomLevel - 1)) ++ "px; " ++
+                        "top: " ++ (-mouseY * (zoomLevel - 1)) ++ "px;"
+                    }
+                />
+            </div>
+        {/if}
+
+        <!-- Hover Hint -->
+        {if !isHovering && hasImage}
+            <div class="zoom-hint">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M17 17l4 4"/>
+                </svg>
+                <span>Hover to zoom</span>
+            </div>
+        {/if}
+
+        <!-- Zoom Level Indicator -->
+        {if isHovering && hasImage}
+            <div class="zoom-level-indicator">
+                {zoomLevel}x zoom
+            </div>
+        {/if}
+    </div>
+
+    <!-- Thumbnail Strip (Optional Alternate View) -->
+    <div class="zoom-info">
+        <p class="zoom-instruction">
+            {if hasImage}
+                Move your mouse over the image to zoom in
+            {else}
+                No image available
+            {/if}
+        </p>
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.zoom-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    width: 100%;
+}
+
+/* Image Wrapper */
+.zoom-image-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    background-color: var(--flin-neutral-50);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-in;
+    transition: all var(--flin-transition-base);
+    user-select: none;
+}
+
+.zoom-image-wrapper.active {
+    cursor: zoom-out;
+    box-shadow: 0 0 0 2px var(--flin-primary);
+}
+
+/* Main Image */
+.zoom-main-image {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zoom-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+}
+
+.zoom-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-neutral-400);
+    width: 100%;
+    height: 100%;
+}
+
+/* Magnifier */
+.zoom-magnifier {
+    position: absolute;
+    border: 2px solid var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    background-color: white;
+    overflow: hidden;
+    box-shadow: var(--flin-shadow-lg), inset 0 0 0 2px var(--flin-primary);
+    transition: none;
+    pointer-events: none;
+}
+
+.zoom-magnified-img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Hover Hint */
+.zoom-hint {
+    position: absolute;
+    bottom: var(--flin-space-4);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: var(--flin-space-2) var(--flin-space-4);
+    border-radius: var(--flin-radius-full);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    animation: fadeIn 0.3s ease-out;
+    pointer-events: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Zoom Level Indicator */
+.zoom-level-indicator {
+    position: absolute;
+    top: var(--flin-space-3);
+    right: var(--flin-space-3);
+    background-color: var(--flin-primary);
+    color: white;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    border-radius: var(--flin-radius-md);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    animation: slideInDown 0.3s ease-out;
+    pointer-events: none;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Info */
+.zoom-info {
+    padding: var(--flin-space-3);
+    background-color: var(--flin-neutral-50);
+    border-radius: var(--flin-radius-md);
+    border: 1px solid var(--flin-neutral-200);
+}
+
+.zoom-instruction {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-600);
+    margin: 0;
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .zoom-image-wrapper {
+        background-color: var(--flin-neutral-900);
+    }
+
+    .zoom-image-wrapper.active {
+        box-shadow: 0 0 0 2px var(--flin-primary);
+    }
+
+    .zoom-magnifier {
+        background-color: var(--flin-neutral-800);
+    }
+
+    .zoom-info {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .zoom-instruction {
+        color: var(--flin-neutral-400);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .zoom-image-wrapper {
+        aspect-ratio: auto;
+        min-height: 300px;
+    }
+
+    .zoom-hint {
+        padding: var(--flin-space-2) var(--flin-space-3);
+        font-size: var(--flin-text-xs);
+    }
+
+    .zoom-level-indicator {
+        font-size: var(--flin-text-xs);
+        padding: var(--flin-space-1) var(--flin-space-2);
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .zoom-image-wrapper {
+        transition: none;
+    }
+
+    .zoom-hint,
+    .zoom-level-indicator {
+        animation: none;
+    }
+}
+</style>

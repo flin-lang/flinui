@@ -1,0 +1,364 @@
+// Dropdown.flin - FlinUI PRO Dropdown Component
+// Action dropdown menu with keyboard navigation and divider support
+
+// Props with defaults
+items = props.items || []
+placement = props.placement || "bottom-start"
+dividers = props.dividers || false
+trigger = props.trigger || "click"
+width = props.width || 200
+onSelect = props.onSelect
+disabled = props.disabled || false
+
+// Internal state
+isOpen = false
+isExiting = false
+activeIndex = -1
+
+// Handle toggle
+handleToggle = {
+    if !disabled {
+        if isOpen {
+            handleClose()
+        }
+        if !isOpen {
+            isOpen = true
+            isExiting = false
+            activeIndex = 0
+        }
+    }
+}
+
+// Handle close
+handleClose = {
+    isExiting = true
+    isOpen = false
+    activeIndex = -1
+}
+
+// Handle backdrop click
+handleBackdropClick = {
+    handleClose()
+}
+
+// Handle item select
+handleSelect = {
+    if onSelect { onSelect() }
+    handleClose()
+}
+
+// Handle keyboard navigation
+handleKeyDown = {
+    // Escape closes
+    handleClose()
+}
+
+// Placement class
+placementClass = match placement {
+    "bottom" -> "dropdown--bottom"
+    "bottom-end" -> "dropdown--bottom-end"
+    "top" -> "dropdown--top"
+    "top-start" -> "dropdown--top-start"
+    "top-end" -> "dropdown--top-end"
+    _ -> "dropdown--bottom-start"
+}
+
+// Dividers class
+dividersClass = match dividers { true -> " dropdown--with-dividers", _ -> "" }
+
+// Exiting class
+exitingClass = match isExiting { true -> " dropdown--exiting", _ -> "" }
+
+// Disabled class
+disabledClass = match disabled { true -> " dropdown-wrapper--disabled", _ -> "" }
+
+// Width style
+widthStyle = "min-width: " ++ width ++ "px"
+
+<div class={"flin-pro-dropdown-wrapper" ++ disabledClass}>
+    <div
+        class="dropdown__trigger"
+        click={handleToggle}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+    >
+        {children}
+    </div>
+
+    {if isOpen}
+        <div
+            class="dropdown__backdrop"
+            click={handleBackdropClick}
+            aria-hidden="true"
+        ></div>
+
+        <div
+            class={"flin-pro-dropdown " ++ placementClass ++ dividersClass ++ exitingClass}
+            style={widthStyle}
+            role="listbox"
+            tabindex="-1"
+            keydown={handleKeyDown}
+        >
+            <div class="dropdown__content">
+                <div class="dropdown__list" role="group">
+                    <!-- Items render here via children -->
+                </div>
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-pro-dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-wrapper--disabled {
+    cursor: not-allowed;
+}
+
+.dropdown-wrapper--disabled .dropdown__trigger {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* Trigger */
+.dropdown__trigger {
+    cursor: pointer;
+    display: inline-block;
+}
+
+/* Backdrop */
+.dropdown__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9997;
+}
+
+/* Dropdown */
+.flin-pro-dropdown {
+    position: absolute;
+    z-index: 9998;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+    overflow: hidden;
+    animation: dropdownFadeIn var(--flin-transition-fast) ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown--exiting {
+    animation: dropdownFadeOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes dropdownFadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+}
+
+/* Content */
+.dropdown__content {
+    padding: var(--flin-space-1);
+}
+
+.dropdown__list {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Item styling (for children) */
+.dropdown__list > * {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+    border: none;
+    background: transparent;
+    text-align: left;
+    width: 100%;
+}
+
+.dropdown__list > *:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.dropdown__list > *:focus {
+    outline: none;
+    background-color: var(--flin-neutral-100);
+}
+
+.dropdown__list > *:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: -2px;
+}
+
+/* Icon in items */
+.dropdown__list > * svg {
+    width: 16px;
+    height: 16px;
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+}
+
+/* Dividers variant */
+.dropdown--with-dividers .dropdown__list > * {
+    border-radius: 0;
+}
+
+.dropdown--with-dividers .dropdown__list > *:not(:last-child) {
+    border-bottom: 1px solid var(--flin-neutral-100);
+}
+
+.dropdown--with-dividers .dropdown__list > *:first-child {
+    border-radius: var(--flin-radius-md) var(--flin-radius-md) 0 0;
+}
+
+.dropdown--with-dividers .dropdown__list > *:last-child {
+    border-radius: 0 0 var(--flin-radius-md) var(--flin-radius-md);
+}
+
+/* Disabled items */
+.dropdown__list > *[disabled],
+.dropdown__list > *.dropdown-item--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Danger items */
+.dropdown__list > *.dropdown-item--danger {
+    color: var(--flin-danger);
+}
+
+.dropdown__list > *.dropdown-item--danger:hover {
+    background-color: var(--flin-danger-light);
+}
+
+.dropdown__list > *.dropdown-item--danger svg {
+    color: var(--flin-danger);
+}
+
+/* Separator */
+.dropdown__separator {
+    height: 1px;
+    background-color: var(--flin-neutral-200);
+    margin: var(--flin-space-1) 0;
+}
+
+/* Group label */
+.dropdown__label {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+    font-weight: 600;
+    color: var(--flin-fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Position: Bottom Start (default) */
+.dropdown--bottom-start {
+    top: 100%;
+    left: 0;
+    margin-top: var(--flin-space-1);
+}
+
+/* Position: Bottom */
+.dropdown--bottom {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: var(--flin-space-1);
+}
+
+/* Position: Bottom End */
+.dropdown--bottom-end {
+    top: 100%;
+    right: 0;
+    margin-top: var(--flin-space-1);
+}
+
+/* Position: Top */
+.dropdown--top {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: var(--flin-space-1);
+    animation-name: dropdownFadeInTop;
+}
+
+/* Position: Top Start */
+.dropdown--top-start {
+    bottom: 100%;
+    left: 0;
+    margin-bottom: var(--flin-space-1);
+    animation-name: dropdownFadeInTop;
+}
+
+/* Position: Top End */
+.dropdown--top-end {
+    bottom: 100%;
+    right: 0;
+    margin-bottom: var(--flin-space-1);
+    animation-name: dropdownFadeInTop;
+}
+
+@keyframes dropdownFadeInTop {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Focus styling */
+.flin-pro-dropdown:focus {
+    outline: none;
+}
+
+/* Max height with scroll */
+.dropdown__content {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-pro-dropdown {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .dropdown__list > *:hover,
+[data-theme="dark"] .dropdown__list > *:focus {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .dropdown--with-dividers .dropdown__list > *:not(:last-child) {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .dropdown__separator {
+    background-color: var(--flin-neutral-700);
+}
+</style>

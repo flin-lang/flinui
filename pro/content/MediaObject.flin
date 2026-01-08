@@ -1,0 +1,291 @@
+// ============================================================================
+// MediaObject.flin — FlinUI PRO
+// Image + text horizontal layout (classic media object pattern)
+// ============================================================================
+// Props:
+//   imageSrc: text - Image source URL (default: none)
+//   imageAlt: text - Image alt text (default: "")
+//   imageSize: text - Image size ("sm", "md", "lg", "xl") (default: "md")
+//   imageShape: text - Image shape ("circle", "rounded", "square") (default: "rounded")
+//   title: text - Title text (default: none)
+//   subtitle: text - Subtitle text (default: none)
+//   description: text - Description text (default: none)
+//   meta: text - Meta text (timestamp, etc.) (default: none)
+//   href: text - Link for the entire media object (default: none)
+//   align: text - Vertical alignment ("top", "center", "bottom") (default: "top")
+//   reverse: boolean - Reverse image/content order (default: false)
+//   variant: text - Style variant ("default", "bordered", "elevated") (default: "default")
+//   actions: slot - Action buttons slot (default: none)
+// ============================================================================
+
+imageSrc = props.imageSrc || none
+imageAlt = props.imageAlt || ""
+imageSize = props.imageSize || "md"
+imageShape = props.imageShape || "rounded"
+title = props.title || none
+subtitle = props.subtitle || none
+description = props.description || none
+meta = props.meta || none
+href = props.href || none
+align = props.align || "top"
+reverse = props.reverse || false
+variant = props.variant || "default"
+actions = props.actions || none
+
+// Compute size class
+sizeClass = match imageSize {
+    "sm" -> "media-object--sm"
+    "lg" -> "media-object--lg"
+    "xl" -> "media-object--xl"
+    _ -> "media-object--md"
+}
+
+// Compute shape class
+shapeClass = match imageShape {
+    "circle" -> "media-object--circle"
+    "square" -> "media-object--square"
+    _ -> "media-object--rounded"
+}
+
+// Compute align class
+alignClass = match align {
+    "center" -> "media-object--align-center"
+    "bottom" -> "media-object--align-bottom"
+    _ -> "media-object--align-top"
+}
+
+// Compute reverse class
+reverseClass = match reverse {
+    true -> "media-object--reverse"
+    _ -> ""
+}
+
+// Compute variant class
+variantClass = match variant {
+    "bordered" -> "media-object--bordered"
+    "elevated" -> "media-object--elevated"
+    _ -> "media-object--default"
+}
+
+mediaContent = <div class={"media-object " ++ sizeClass ++ " " ++ shapeClass ++ " " ++ alignClass ++ " " ++ reverseClass ++ " " ++ variantClass}>
+    // Media (image)
+    {if imageSrc != none}
+        <div class="media-object__media">
+            <img class="media-object__image" src={imageSrc} alt={imageAlt}>
+        </div>
+    {else}
+        <div class="media-object__media media-object__placeholder">
+            <svg width="40%" height="40%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+        </div>
+    {/if}
+
+    // Content
+    <div class="media-object__content">
+        <div class="media-object__header">
+            <div class="media-object__text">
+                {if title != none}
+                    <h4 class="media-object__title">{title}</h4>
+                {/if}
+                {if subtitle != none}
+                    <p class="media-object__subtitle">{subtitle}</p>
+                {/if}
+            </div>
+            {if meta != none}
+                <span class="media-object__meta">{meta}</span>
+            {/if}
+        </div>
+
+        {if description != none}
+            <p class="media-object__description">{description}</p>
+        {/if}
+
+        {if actions != none}
+            <div class="media-object__actions">
+                {actions}
+            </div>
+        {/if}
+
+        {if children}
+            <div class="media-object__body">
+                {children}
+            </div>
+        {/if}
+    </div>
+</div>
+
+{if href != none}
+    <a href={href} class="media-object__link">
+        {mediaContent}
+    </a>
+{else}
+    {mediaContent}
+{/if}
+
+<style scoped>
+.media-object {
+    display: flex;
+    gap: var(--flin-space-4);
+}
+
+.media-object__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.media-object__link:hover .media-object__title {
+    color: var(--flin-primary);
+}
+
+/* Alignment */
+.media-object--align-top { align-items: flex-start; }
+.media-object--align-center { align-items: center; }
+.media-object--align-bottom { align-items: flex-end; }
+
+/* Reverse */
+.media-object--reverse {
+    flex-direction: row-reverse;
+}
+
+/* Variants */
+.media-object--default {
+    background: transparent;
+}
+
+.media-object--bordered {
+    padding: var(--flin-space-4);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+}
+
+.media-object--elevated {
+    padding: var(--flin-space-4);
+    background: var(--flin-bg);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-md);
+}
+
+/* Media (image container) */
+.media-object__media {
+    flex-shrink: 0;
+    overflow: hidden;
+    background: var(--flin-neutral-100);
+}
+
+.media-object__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-neutral-400);
+}
+
+/* Size variants for media */
+.media-object--sm .media-object__media { width: 48px; height: 48px; }
+.media-object--md .media-object__media { width: 64px; height: 64px; }
+.media-object--lg .media-object__media { width: 96px; height: 96px; }
+.media-object--xl .media-object__media { width: 128px; height: 128px; }
+
+/* Shape variants for media */
+.media-object--circle .media-object__media { border-radius: var(--flin-radius-full); }
+.media-object--rounded .media-object__media { border-radius: var(--flin-radius-lg); }
+.media-object--square .media-object__media { border-radius: var(--flin-radius-sm); }
+
+/* Image */
+.media-object__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Content */
+.media-object__content {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Header */
+.media-object__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--flin-space-2);
+}
+
+.media-object__text {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Title */
+.media-object__title {
+    margin: 0;
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    line-height: 1.4;
+    transition: color var(--flin-transition-fast);
+}
+
+.media-object--lg .media-object__title,
+.media-object--xl .media-object__title {
+    font-size: var(--flin-text-lg);
+}
+
+/* Subtitle */
+.media-object__subtitle {
+    margin: var(--flin-space-1) 0 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.4;
+}
+
+/* Meta */
+.media-object__meta {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    white-space: nowrap;
+}
+
+/* Description */
+.media-object__description {
+    margin: var(--flin-space-2) 0 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.6;
+}
+
+.media-object--lg .media-object__description,
+.media-object--xl .media-object__description {
+    font-size: var(--flin-text-base);
+}
+
+/* Actions */
+.media-object__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-3);
+}
+
+/* Body (children slot) */
+.media-object__body {
+    margin-top: var(--flin-space-3);
+}
+
+/* Dark theme */
+[data-theme="dark"] .media-object--bordered {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .media-object__media {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .media-object__placeholder {
+    color: var(--flin-neutral-600);
+}
+</style>

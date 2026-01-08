@@ -1,0 +1,177 @@
+// CartBadge.flin - FlinUI PRO E-commerce Component
+// Shopping cart icon with item count badge and pulse animation
+
+// Props with defaults
+itemCount = props.itemCount || 0
+size = props.size || "md"
+showPulse = props.showPulse || false
+onClick = props.onClick
+variant = props.variant || "primary"
+
+// Computed classes
+sizeClass = match size {
+    "sm" -> "cart-badge-sm"
+    "lg" -> "cart-badge-lg"
+    _ -> "cart-badge-md"
+}
+
+variantClass = match variant {
+    "secondary" -> "cart-badge-secondary"
+    "danger" -> "cart-badge-danger"
+    _ -> "cart-badge-primary"
+}
+
+pulseClass = match showPulse {
+    true -> " cart-badge-pulse"
+    _ -> ""
+}
+
+iconSize = match size {
+    "sm" -> "20"
+    "lg" -> "32"
+    _ -> "24"
+}
+
+// Show badge only if items exist
+showBadge = itemCount > 0
+badgeText = match itemCount {
+    n if n > 99 -> "99+"
+    _ -> itemCount
+}
+
+containerClass = "cart-badge-container " ++ sizeClass ++ pulseClass
+badgeWrapperClass = "cart-badge-wrapper " ++ variantClass
+
+<button class={containerClass} click={onClick} aria-label="Shopping cart">
+    <div class="cart-badge-icon">
+        <svg
+            width={iconSize}
+            height={iconSize}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <circle cx="9" cy="21" r="1"/>
+            <circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+    </div>
+
+    {if showBadge}
+        <span class={badgeWrapperClass}>
+            {badgeText}
+        </span>
+    {/if}
+</button>
+
+<style scoped>
+/* Container */
+.cart-badge-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: var(--flin-space-2);
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+    color: var(--flin-neutral-700);
+}
+
+.cart-badge-container:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.cart-badge-container:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+/* Icon wrapper */
+.cart-badge-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Size variants */
+.cart-badge-sm {
+    padding: var(--flin-space-1);
+}
+
+.cart-badge-md {
+    padding: var(--flin-space-2);
+}
+
+.cart-badge-lg {
+    padding: var(--flin-space-3);
+}
+
+/* Badge wrapper */
+.cart-badge-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 var(--flin-space-1);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-bold);
+    line-height: 1;
+    border-radius: var(--flin-radius-full);
+    border: 2px solid white;
+    color: white;
+    transform: translate(25%, -25%);
+}
+
+/* Badge variants */
+.cart-badge-primary {
+    background-color: var(--flin-primary);
+}
+
+.cart-badge-secondary {
+    background-color: var(--flin-secondary);
+}
+
+.cart-badge-danger {
+    background-color: var(--flin-danger);
+}
+
+/* Pulse animation */
+.cart-badge-pulse .cart-badge-wrapper {
+    animation: cart-badge-pulse-animation 0.8s ease-in-out;
+}
+
+@keyframes cart-badge-pulse-animation {
+    0%, 100% {
+        transform: translate(25%, -25%) scale(1);
+    }
+    50% {
+        transform: translate(25%, -25%) scale(1.2);
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .cart-badge-container {
+        color: var(--flin-neutral-200);
+    }
+
+    .cart-badge-container:hover {
+        background-color: var(--flin-neutral-800);
+    }
+
+    .cart-badge-wrapper {
+        border-color: var(--flin-neutral-900);
+    }
+}
+</style>

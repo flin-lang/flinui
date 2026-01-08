@@ -1,0 +1,607 @@
+// ProductQuickView.flin - FlinUI PRO E-commerce Component
+// Modal quick view with essential product info, add to cart, and view details link
+
+// Props with defaults
+image = props.image || ""
+name = props.name || "Product Name"
+description = props.description || ""
+price = props.price || 0
+originalPrice = props.originalPrice || none
+rating = props.rating || 0
+reviews = props.reviews || 0
+inStock = props.inStock || true
+onClose = props.onClose
+onAddToCart = props.onAddToCart
+onViewDetails = props.onViewDetails
+size = props.size || "md"
+
+// State
+quantity = 1
+isOpen = props.isOpen || false
+
+// Computed values
+hasDiscount = originalPrice != none && originalPrice > price
+discountPercent = if hasDiscount then {
+    ((originalPrice - price) / originalPrice * 100).toFixed(0)
+} else {
+    0
+}
+formattedPrice = "$" ++ price
+formattedOriginal = if hasDiscount then "$" ++ originalPrice else ""
+hasRating = rating > 0
+
+// Handlers
+fn handleQuantityChange(newQty) {
+    if newQty > 0 && newQty <= 99 {
+        quantity = newQty
+    }
+}
+
+fn handleAddToCart() {
+    if onAddToCart {
+        onAddToCart({ quantity, name, price })
+    }
+}
+
+fn handleViewDetails() {
+    if onViewDetails {
+        onViewDetails()
+    }
+    if onClose {
+        onClose()
+    }
+}
+
+fn handleClose() {
+    if onClose {
+        onClose()
+    }
+}
+
+// Size class
+sizeClass = match size {
+    "sm" -> "quick-view-sm"
+    "lg" -> "quick-view-lg"
+    _ -> "quick-view-md"
+}
+
+{if isOpen}
+    <div class="quick-view-overlay" click={handleClose}>
+        <div class="quick-view-modal {sizeClass}" click={fn(e) { e.stopPropagation() }}>
+            <button class="quick-view-close" click={handleClose} aria-label="Close quick view">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+
+            <div class="quick-view-content">
+                <!-- Image -->
+                <div class="quick-view-image-section">
+                    {if image != ""}
+                        <img src={image} alt={name} class="quick-view-image" />
+                    {else}
+                        <div class="quick-view-image-placeholder">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <path d="M21 15l-5-5L5 21"/>
+                            </svg>
+                        </div>
+                    {/if}
+
+                    {if hasDiscount}
+                        <div class="quick-view-badge">{discountPercent}% OFF</div>
+                    {/if}
+                </div>
+
+                <!-- Info Section -->
+                <div class="quick-view-info-section">
+                    <!-- Title -->
+                    <h2 class="quick-view-title">{name}</h2>
+
+                    <!-- Rating -->
+                    {if hasRating}
+                        <div class="quick-view-rating">
+                            <div class="quick-view-stars">
+                                {each [1, 2, 3, 4, 5] as star}
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill={if star <= rating then "currentColor" else "none"} stroke="currentColor" stroke-width="2">
+                                        <polygon points="12 2 15.09 10.26 24 10.35 17.77 16.01 20.16 24.02 12 18.35 3.84 24.02 6.23 16.01 0 10.35 8.91 10.26 12 2"/>
+                                    </svg>
+                                {/each}
+                            </div>
+                            <span class="quick-view-rating-text">{rating} ({reviews} reviews)</span>
+                        </div>
+                    {/if}
+
+                    <!-- Description -->
+                    {if description != ""}
+                        <p class="quick-view-description">{description}</p>
+                    {/if}
+
+                    <!-- Pricing -->
+                    <div class="quick-view-pricing">
+                        <span class="quick-view-price">{formattedPrice}</span>
+                        {if hasDiscount}
+                            <span class="quick-view-original-price">{formattedOriginal}</span>
+                        {/if}
+                    </div>
+
+                    <!-- Stock Status -->
+                    <div class="quick-view-stock">
+                        {if inStock}
+                            <span class="quick-view-stock-badge in-stock">In Stock</span>
+                        {else}
+                            <span class="quick-view-stock-badge out-of-stock">Out of Stock</span>
+                        {/if}
+                    </div>
+
+                    <!-- Quantity Selector -->
+                    {if inStock}
+                        <div class="quick-view-quantity">
+                            <label class="quick-view-quantity-label">Quantity:</label>
+                            <div class="quick-view-quantity-control">
+                                <button
+                                    class="quick-view-qty-btn"
+                                    click={fn() { handleQuantityChange(quantity - 1) }}
+                                    disabled={quantity <= 1}
+                                    aria-label="Decrease quantity"
+                                >
+                                    −
+                                </button>
+                                <input
+                                    type="number"
+                                    class="quick-view-qty-input"
+                                    value={quantity}
+                                    min="1"
+                                    max="99"
+                                    change={fn(e) { handleQuantityChange(e.target.value) }}
+                                />
+                                <button
+                                    class="quick-view-qty-btn"
+                                    click={fn() { handleQuantityChange(quantity + 1) }}
+                                    disabled={quantity >= 99}
+                                    aria-label="Increase quantity"
+                                >
+                                    +
+                                </button>
+                            </div>
+                        </div>
+                    {/if}
+
+                    <!-- Actions -->
+                    <div class="quick-view-actions">
+                        <button
+                            class="quick-view-btn quick-view-btn-primary"
+                            click={handleAddToCart}
+                            disabled={!inStock}
+                            aria-label="Add to cart"
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="9" cy="21" r="1"/>
+                                <circle cx="20" cy="21" r="1"/>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                            </svg>
+                            Add to Cart
+                        </button>
+                        <button
+                            class="quick-view-btn quick-view-btn-secondary"
+                            click={handleViewDetails}
+                            aria-label="View full details"
+                        >
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}
+
+<style scoped>
+/* Overlay */
+.quick-view-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+    padding: var(--flin-space-4);
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Modal */
+.quick-view-modal {
+    background-color: white;
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-2xl);
+    position: relative;
+    display: flex;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(40px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Sizes */
+.quick-view-md {
+    width: 90%;
+    max-width: 600px;
+}
+
+.quick-view-sm {
+    width: 85%;
+    max-width: 400px;
+}
+
+.quick-view-lg {
+    width: 95%;
+    max-width: 800px;
+}
+
+/* Close button */
+.quick-view-close {
+    position: absolute;
+    top: var(--flin-space-3);
+    right: var(--flin-space-3);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-neutral-500);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.quick-view-close:hover {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-900);
+}
+
+/* Content */
+.quick-view-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--flin-space-6);
+    padding: var(--flin-space-6);
+    width: 100%;
+}
+
+/* Image Section */
+.quick-view-image-section {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--flin-neutral-50);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+    aspect-ratio: 1;
+    min-height: 300px;
+}
+
+.quick-view-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.quick-view-image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-neutral-400);
+    width: 100%;
+    height: 100%;
+}
+
+.quick-view-badge {
+    position: absolute;
+    top: var(--flin-space-3);
+    right: var(--flin-space-3);
+    background-color: var(--flin-danger);
+    color: white;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-bold);
+}
+
+/* Info Section */
+.quick-view-info-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.quick-view-title {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* Rating */
+.quick-view-rating {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.quick-view-stars {
+    display: flex;
+    gap: var(--flin-space-1);
+    color: var(--flin-warning);
+}
+
+.quick-view-rating-text {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-600);
+}
+
+/* Description */
+.quick-view-description {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-600);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Pricing */
+.quick-view-pricing {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+.quick-view-price {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-primary);
+}
+
+.quick-view-original-price {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-neutral-500);
+    text-decoration: line-through;
+}
+
+/* Stock */
+.quick-view-stock {
+    display: flex;
+}
+
+.quick-view-stock-badge {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+}
+
+.quick-view-stock-badge.in-stock {
+    background-color: var(--flin-success-light);
+    color: var(--flin-success);
+}
+
+.quick-view-stock-badge.out-of-stock {
+    background-color: var(--flin-danger-light);
+    color: var(--flin-danger);
+}
+
+/* Quantity */
+.quick-view-quantity {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.quick-view-quantity-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+}
+
+.quick-view-quantity-control {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    background-color: var(--flin-neutral-50);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-2);
+}
+
+.quick-view-qty-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background-color: white;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-sm);
+    color: var(--flin-neutral-700);
+    cursor: pointer;
+    font-weight: var(--flin-font-bold);
+    transition: all var(--flin-transition-fast);
+}
+
+.quick-view-qty-btn:hover:not(:disabled) {
+    background-color: var(--flin-primary);
+    border-color: var(--flin-primary);
+    color: white;
+}
+
+.quick-view-qty-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.quick-view-qty-input {
+    width: 50px;
+    padding: var(--flin-space-2);
+    text-align: center;
+    border: none;
+    background: transparent;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+}
+
+.quick-view-qty-input::-webkit-outer-spin-button,
+.quick-view-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Actions */
+.quick-view-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    margin-top: auto;
+}
+
+.quick-view-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.quick-view-btn-primary {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.quick-view-btn-primary:hover:not(:disabled) {
+    background-color: var(--flin-primary-dark);
+}
+
+.quick-view-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.quick-view-btn-secondary {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-900);
+    border: 1px solid var(--flin-neutral-200);
+}
+
+.quick-view-btn-secondary:hover {
+    background-color: var(--flin-neutral-200);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .quick-view-modal {
+        background-color: var(--flin-neutral-800);
+    }
+
+    .quick-view-close:hover {
+        background-color: var(--flin-neutral-700);
+        color: var(--flin-neutral-100);
+    }
+
+    .quick-view-image-section {
+        background-color: var(--flin-neutral-900);
+    }
+
+    .quick-view-title,
+    .quick-view-qty-input {
+        color: var(--flin-neutral-100);
+    }
+
+    .quick-view-description,
+    .quick-view-rating-text {
+        color: var(--flin-neutral-400);
+    }
+
+    .quick-view-quantity-control {
+        background-color: var(--flin-neutral-900);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .quick-view-qty-btn {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-600);
+        color: var(--flin-neutral-300);
+    }
+
+    .quick-view-btn-secondary {
+        background-color: var(--flin-neutral-700);
+        color: var(--flin-neutral-100);
+        border-color: var(--flin-neutral-600);
+    }
+
+    .quick-view-btn-secondary:hover {
+        background-color: var(--flin-neutral-600);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .quick-view-content {
+        grid-template-columns: 1fr;
+        gap: var(--flin-space-4);
+        padding: var(--flin-space-4);
+    }
+
+    .quick-view-md,
+    .quick-view-lg {
+        width: 95%;
+        max-width: 100%;
+    }
+
+    .quick-view-image-section {
+        min-height: 250px;
+    }
+}
+</style>

@@ -1,0 +1,408 @@
+// ============================================================================
+// BlogPostFeatured.flin — FlinUI PRO
+// Featured/hero post card for highlighting main content
+// ============================================================================
+// Props:
+//   title: text - Post title (required)
+//   excerpt: text - Short description/excerpt (default: "")
+//   image: text - Cover image URL (required for best display)
+//   href: text - Link to full post (default: "#")
+//   date: text - Publication date (default: none)
+//   readTime: text - Estimated read time (default: none)
+//   author: object - Author info {name, avatar, title} (default: none)
+//   category: text - Post category (default: none)
+//   categoryColor: text - Category badge color (default: "primary")
+//   variant: text - Layout variant ("overlay", "side", "stacked") (default: "overlay")
+//   size: text - Size variant ("md", "lg", "xl") (default: "lg")
+// ============================================================================
+
+title = props.title || "Featured Post"
+excerpt = props.excerpt || ""
+image = props.image || none
+href = props.href || "#"
+date = props.date || none
+readTime = props.readTime || none
+author = props.author || none
+category = props.category || none
+categoryColor = props.categoryColor || "primary"
+variant = props.variant || "overlay"
+size = props.size || "lg"
+
+// Compute variant class
+variantClass = match variant {
+    "side" -> "featured-post--side"
+    "stacked" -> "featured-post--stacked"
+    _ -> "featured-post--overlay"
+}
+
+// Compute size class
+sizeClass = match size {
+    "md" -> "featured-post--md"
+    "xl" -> "featured-post--xl"
+    _ -> "featured-post--lg"
+}
+
+// Compute category color class
+categoryColorClass = match categoryColor {
+    "success" -> "featured-post__category--success"
+    "warning" -> "featured-post__category--warning"
+    "danger" -> "featured-post__category--danger"
+    "info" -> "featured-post__category--info"
+    _ -> "featured-post__category--primary"
+}
+
+<article class={"featured-post " ++ variantClass ++ " " ++ sizeClass}>
+    {if image != none}
+        <div class="featured-post__image-wrapper">
+            <img class="featured-post__image" src={image} alt={title}>
+            {if variant == "overlay"}
+                <div class="featured-post__overlay"></div>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="featured-post__content">
+        {if category != none}
+            <span class={"featured-post__category " ++ categoryColorClass}>{category}</span>
+        {/if}
+
+        <a href={href} class="featured-post__title-link">
+            <h2 class="featured-post__title">{title}</h2>
+        </a>
+
+        {if excerpt != ""}
+            <p class="featured-post__excerpt">{excerpt}</p>
+        {/if}
+
+        <div class="featured-post__meta">
+            {if author != none}
+                <div class="featured-post__author">
+                    {if author.avatar != none}
+                        <img class="featured-post__author-avatar" src={author.avatar} alt={author.name || "Author"}>
+                    {/if}
+                    <div class="featured-post__author-info">
+                        <span class="featured-post__author-name">{author.name || "Anonymous"}</span>
+                        {if author.title != none}
+                            <span class="featured-post__author-title">{author.title}</span>
+                        {/if}
+                    </div>
+                </div>
+            {/if}
+
+            <div class="featured-post__details">
+                {if date != none}
+                    <span class="featured-post__date">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        {date}
+                    </span>
+                {/if}
+                {if readTime != none}
+                    <span class="featured-post__read-time">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        {readTime}
+                    </span>
+                {/if}
+            </div>
+        </div>
+
+        <a href={href} class="featured-post__cta">
+            Read Article
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        </a>
+    </div>
+</article>
+
+<style scoped>
+.featured-post {
+    position: relative;
+    display: flex;
+    border-radius: var(--flin-radius-xl);
+    overflow: hidden;
+    background: var(--flin-bg);
+}
+
+/* Overlay variant */
+.featured-post--overlay {
+    min-height: 500px;
+}
+
+.featured-post--overlay .featured-post__image-wrapper {
+    position: absolute;
+    inset: 0;
+}
+
+.featured-post--overlay .featured-post__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%);
+}
+
+.featured-post--overlay .featured-post__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: var(--flin-space-8);
+    color: white;
+    width: 100%;
+}
+
+.featured-post--overlay .featured-post__title,
+.featured-post--overlay .featured-post__excerpt,
+.featured-post--overlay .featured-post__author-name,
+.featured-post--overlay .featured-post__date,
+.featured-post--overlay .featured-post__read-time {
+    color: white;
+}
+
+.featured-post--overlay .featured-post__author-title {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.featured-post--overlay .featured-post__cta {
+    color: white;
+    border-color: white;
+}
+
+.featured-post--overlay .featured-post__cta:hover {
+    background: white;
+    color: var(--flin-neutral-900);
+}
+
+/* Side variant */
+.featured-post--side {
+    flex-direction: row;
+    border: 1px solid var(--flin-neutral-200);
+}
+
+.featured-post--side .featured-post__image-wrapper {
+    width: 50%;
+    flex-shrink: 0;
+}
+
+.featured-post--side .featured-post__content {
+    flex: 1;
+    padding: var(--flin-space-8);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Stacked variant */
+.featured-post--stacked {
+    flex-direction: column;
+    border: 1px solid var(--flin-neutral-200);
+}
+
+.featured-post--stacked .featured-post__image-wrapper {
+    aspect-ratio: 21 / 9;
+}
+
+.featured-post--stacked .featured-post__content {
+    padding: var(--flin-space-8);
+}
+
+/* Size variants */
+.featured-post--md { min-height: 400px; }
+.featured-post--lg { min-height: 500px; }
+.featured-post--xl { min-height: 600px; }
+
+.featured-post--side.featured-post--md,
+.featured-post--stacked.featured-post--md { min-height: auto; }
+
+.featured-post--side.featured-post--lg,
+.featured-post--stacked.featured-post--lg { min-height: auto; }
+
+/* Image */
+.featured-post__image-wrapper {
+    overflow: hidden;
+}
+
+.featured-post__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--flin-transition-slow);
+}
+
+.featured-post:hover .featured-post__image {
+    transform: scale(1.05);
+}
+
+/* Category */
+.featured-post__category {
+    display: inline-block;
+    padding: var(--flin-space-1) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: var(--flin-radius-full);
+    margin-bottom: var(--flin-space-4);
+    width: fit-content;
+}
+
+.featured-post__category--primary {
+    background: var(--flin-primary);
+    color: white;
+}
+
+.featured-post__category--success {
+    background: var(--flin-success);
+    color: white;
+}
+
+.featured-post__category--warning {
+    background: var(--flin-warning);
+    color: var(--flin-neutral-900);
+}
+
+.featured-post__category--danger {
+    background: var(--flin-danger);
+    color: white;
+}
+
+.featured-post__category--info {
+    background: var(--flin-info);
+    color: white;
+}
+
+/* Title */
+.featured-post__title-link {
+    text-decoration: none;
+}
+
+.featured-post__title {
+    margin: 0 0 var(--flin-space-4) 0;
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-fg);
+    line-height: 1.2;
+}
+
+.featured-post--xl .featured-post__title {
+    font-size: var(--flin-text-4xl);
+}
+
+/* Excerpt */
+.featured-post__excerpt {
+    margin: 0 0 var(--flin-space-6) 0;
+    font-size: var(--flin-text-lg);
+    color: var(--flin-fg-muted);
+    line-height: 1.6;
+    max-width: 600px;
+}
+
+/* Meta */
+.featured-post__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--flin-space-4);
+    margin-bottom: var(--flin-space-6);
+}
+
+.featured-post__author {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+.featured-post__author-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--flin-radius-full);
+    object-fit: cover;
+}
+
+.featured-post__author-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.featured-post__author-name {
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+}
+
+.featured-post__author-title {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.featured-post__details {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-4);
+}
+
+.featured-post__date,
+.featured-post__read-time {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* CTA */
+.featured-post__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-6);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-primary);
+    text-decoration: none;
+    border: 2px solid var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    transition: all var(--flin-transition-fast);
+    width: fit-content;
+    margin-top: auto;
+}
+
+.featured-post__cta:hover {
+    background: var(--flin-primary);
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .featured-post--side {
+        flex-direction: column;
+    }
+
+    .featured-post--side .featured-post__image-wrapper {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+    }
+
+    .featured-post__title {
+        font-size: var(--flin-text-2xl);
+    }
+
+    .featured-post--xl .featured-post__title {
+        font-size: var(--flin-text-3xl);
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .featured-post--side,
+[data-theme="dark"] .featured-post--stacked {
+    border-color: var(--flin-neutral-700);
+}
+</style>

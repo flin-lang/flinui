@@ -1,0 +1,634 @@
+// ============================================================================
+// ComingSoonPage.flin — FlinUI PRO Page Template
+// Pre-launch coming soon page with countdown and email capture
+// ============================================================================
+// Props:
+//   - title: Page title (string)
+//   - subtitle: Page subtitle (string)
+//   - launchDate: Launch date string (string)
+//   - features: List of upcoming feature highlights (list)
+//   - backgroundStyle: Background style "gradient" | "particles" | "simple" (string)
+//   - socialLinks: List of social links (list)
+//   - onSubscribe: Subscribe callback (function or none)
+
+title = props.title || "Something amazing is coming"
+subtitle = props.subtitle || "We're working hard to bring you an incredible new product. Be the first to know when we launch."
+launchDate = props.launchDate || "February 1, 2025"
+backgroundStyle = props.backgroundStyle || "gradient"
+
+features = props.features || [
+    ["icon": "zap", "title": "Lightning Fast", "description": "Optimized for speed"],
+    ["icon": "shield", "title": "Secure", "description": "Enterprise-grade security"],
+    ["icon": "sparkles", "title": "Intuitive", "description": "Easy to use interface"]
+]
+
+socialLinks = props.socialLinks || [
+    ["name": "Twitter", "url": "https://twitter.com", "icon": "twitter"],
+    ["name": "LinkedIn", "url": "https://linkedin.com", "icon": "linkedin"],
+    ["name": "Instagram", "url": "https://instagram.com", "icon": "instagram"]
+]
+
+onSubscribe = props.onSubscribe || none
+
+email = ""
+isSubscribed = false
+isLoading = false
+
+// Countdown
+countdown = ["days": 30, "hours": 12, "minutes": 45, "seconds": 30]
+
+handleSubscribe = () => {
+    if email != "" {
+        isLoading = true
+        if onSubscribe != none {
+            onSubscribe(email)
+        }
+        isLoading = false
+        isSubscribed = true
+    }
+}
+
+getFeatureIcon = (iconName) => match iconName {
+    "zap" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    "shield" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    "sparkles" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+    _ => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+}
+
+getSocialIcon = (iconName) => match iconName {
+    "twitter" => <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+    "linkedin" => <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+    "instagram" => <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+    _ => <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+}
+
+<div class={"coming-soon-page coming-soon-page--" ++ backgroundStyle}>
+    // Decorative Elements
+    <div class="coming-soon-page__bg-effects">
+        <div class="coming-soon-page__circle coming-soon-page__circle--1"></div>
+        <div class="coming-soon-page__circle coming-soon-page__circle--2"></div>
+        <div class="coming-soon-page__circle coming-soon-page__circle--3"></div>
+    </div>
+
+    <div class="coming-soon-page__container">
+        // Logo/Brand
+        <div class="coming-soon-page__brand">
+            <div class="coming-soon-page__logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+            </div>
+        </div>
+
+        // Main Content
+        <div class="coming-soon-page__content">
+            <span class="coming-soon-page__badge">Coming Soon</span>
+            <h1 class="coming-soon-page__title">{title}</h1>
+            <p class="coming-soon-page__subtitle">{subtitle}</p>
+        </div>
+
+        // Countdown
+        <div class="coming-soon-page__countdown">
+            <p class="coming-soon-page__launch-date">Launching {launchDate}</p>
+            <div class="coming-soon-page__countdown-grid">
+                <div class="coming-soon-page__countdown-item">
+                    <span class="coming-soon-page__countdown-value">{countdown.days}</span>
+                    <span class="coming-soon-page__countdown-label">Days</span>
+                </div>
+                <div class="coming-soon-page__countdown-item">
+                    <span class="coming-soon-page__countdown-value">{countdown.hours}</span>
+                    <span class="coming-soon-page__countdown-label">Hours</span>
+                </div>
+                <div class="coming-soon-page__countdown-item">
+                    <span class="coming-soon-page__countdown-value">{countdown.minutes}</span>
+                    <span class="coming-soon-page__countdown-label">Minutes</span>
+                </div>
+                <div class="coming-soon-page__countdown-item">
+                    <span class="coming-soon-page__countdown-value">{countdown.seconds}</span>
+                    <span class="coming-soon-page__countdown-label">Seconds</span>
+                </div>
+            </div>
+        </div>
+
+        // Email Signup
+        <div class="coming-soon-page__signup">
+            {if isSubscribed}
+                <div class="coming-soon-page__signup-success">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    <span>You're on the list! We'll notify you at launch.</span>
+                </div>
+            {else}
+                <form class="coming-soon-page__signup-form" submit={handleSubscribe}>
+                    <input
+                        type="email"
+                        class="coming-soon-page__signup-input"
+                        placeholder="Enter your email address"
+                        value={email}
+                        change={(e) => email = e.target.value}
+                        disabled={isLoading}
+                        required
+                    />
+                    <button
+                        type="submit"
+                        class="coming-soon-page__signup-button"
+                        disabled={isLoading}
+                    >
+                        {if isLoading}
+                            <span class="coming-soon-page__spinner"></span>
+                        {else}
+                            Notify Me
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        {/if}
+                    </button>
+                </form>
+                <p class="coming-soon-page__signup-note">
+                    Join 2,500+ others waiting for launch. No spam, ever.
+                </p>
+            {/if}
+        </div>
+
+        // Features Preview
+        <div class="coming-soon-page__features">
+            {for feature in features}
+                <div class="coming-soon-page__feature">
+                    <div class="coming-soon-page__feature-icon">
+                        {getFeatureIcon(feature.icon)}
+                    </div>
+                    <div class="coming-soon-page__feature-content">
+                        <h3 class="coming-soon-page__feature-title">{feature.title}</h3>
+                        <p class="coming-soon-page__feature-description">{feature.description}</p>
+                    </div>
+                </div>
+            {/for}
+        </div>
+
+        // Social Links
+        <div class="coming-soon-page__social">
+            <p class="coming-soon-page__social-label">Follow us for updates</p>
+            <div class="coming-soon-page__social-links">
+                {for link in socialLinks}
+                    <a href={link.url} class="coming-soon-page__social-link" target="_blank" rel="noopener" aria-label={link.name}>
+                        {getSocialIcon(link.icon)}
+                    </a>
+                {/for}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.coming-soon-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-8) var(--flin-space-6);
+    font-family: var(--flin-font-sans);
+    position: relative;
+    overflow: hidden;
+}
+
+.coming-soon-page--gradient {
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b4e 100%);
+}
+
+.coming-soon-page--simple {
+    background: var(--flin-bg-base);
+}
+
+/* Background Effects */
+.coming-soon-page__bg-effects {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.coming-soon-page__circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.3;
+}
+
+.coming-soon-page__circle--1 {
+    width: 400px;
+    height: 400px;
+    background: var(--flin-accent-gold);
+    top: -100px;
+    right: -100px;
+    animation: coming-soon-float 15s ease-in-out infinite;
+}
+
+.coming-soon-page__circle--2 {
+    width: 300px;
+    height: 300px;
+    background: #a855f7;
+    bottom: -50px;
+    left: -50px;
+    animation: coming-soon-float 12s ease-in-out infinite reverse;
+}
+
+.coming-soon-page__circle--3 {
+    width: 200px;
+    height: 200px;
+    background: #3b82f6;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: coming-soon-pulse 8s ease-in-out infinite;
+}
+
+@keyframes coming-soon-float {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(30px, 30px); }
+}
+
+@keyframes coming-soon-pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.2; }
+}
+
+.coming-soon-page__container {
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* Brand */
+.coming-soon-page__brand {
+    margin-bottom: var(--flin-space-8);
+}
+
+.coming-soon-page__logo {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-xl);
+    margin: 0 auto;
+    box-shadow: 0 0 40px rgba(234, 179, 8, 0.4);
+}
+
+.coming-soon-page__logo svg {
+    width: 32px;
+    height: 32px;
+    color: white;
+}
+
+/* Content */
+.coming-soon-page__content {
+    margin-bottom: var(--flin-space-8);
+}
+
+.coming-soon-page__badge {
+    display: inline-block;
+    padding: var(--flin-space-1) var(--flin-space-4);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--flin-accent-gold);
+    background: rgba(234, 179, 8, 0.15);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    border-radius: var(--flin-radius-full);
+    margin-bottom: var(--flin-space-6);
+}
+
+.coming-soon-page__title {
+    font-size: var(--flin-text-4xl);
+    font-weight: var(--flin-font-bold);
+    color: white;
+    line-height: 1.1;
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.coming-soon-page--simple .coming-soon-page__title {
+    color: var(--flin-text-primary);
+}
+
+.coming-soon-page__subtitle {
+    font-size: var(--flin-text-lg);
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.coming-soon-page--simple .coming-soon-page__subtitle {
+    color: var(--flin-text-secondary);
+}
+
+/* Countdown */
+.coming-soon-page__countdown {
+    margin-bottom: var(--flin-space-8);
+}
+
+.coming-soon-page__launch-date {
+    font-size: var(--flin-text-sm);
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.coming-soon-page--simple .coming-soon-page__launch-date {
+    color: var(--flin-text-tertiary);
+}
+
+.coming-soon-page__countdown-grid {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-4);
+}
+
+.coming-soon-page__countdown-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.coming-soon-page__countdown-value {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-space-3) var(--flin-space-4);
+    min-width: 70px;
+    font-variant-numeric: tabular-nums;
+    backdrop-filter: blur(10px);
+}
+
+.coming-soon-page--simple .coming-soon-page__countdown-value {
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-subtle);
+}
+
+.coming-soon-page__countdown-label {
+    font-size: var(--flin-text-xs);
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: var(--flin-space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.coming-soon-page--simple .coming-soon-page__countdown-label {
+    color: var(--flin-text-tertiary);
+}
+
+/* Signup */
+.coming-soon-page__signup {
+    margin-bottom: var(--flin-space-10);
+}
+
+.coming-soon-page__signup-form {
+    display: flex;
+    gap: var(--flin-space-2);
+    max-width: 450px;
+    margin: 0 auto var(--flin-space-3);
+}
+
+.coming-soon-page__signup-input {
+    flex: 1;
+    padding: var(--flin-space-4);
+    font-size: var(--flin-text-base);
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--flin-radius-lg);
+    outline: none;
+    backdrop-filter: blur(10px);
+    transition: all var(--flin-transition-fast);
+}
+
+.coming-soon-page--simple .coming-soon-page__signup-input {
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+}
+
+.coming-soon-page__signup-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.coming-soon-page--simple .coming-soon-page__signup-input::placeholder {
+    color: var(--flin-text-muted);
+}
+
+.coming-soon-page__signup-input:focus {
+    border-color: var(--flin-accent-gold);
+    box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.2);
+}
+
+.coming-soon-page__signup-button {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-4) var(--flin-space-6);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: #0f0f23;
+    background: var(--flin-accent-gold);
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    white-space: nowrap;
+}
+
+.coming-soon-page__signup-button:hover:not(:disabled) {
+    background: var(--flin-accent-gold-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(234, 179, 8, 0.3);
+}
+
+.coming-soon-page__signup-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.coming-soon-page__signup-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.coming-soon-page__spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: coming-soon-spin 0.6s linear infinite;
+}
+
+@keyframes coming-soon-spin {
+    to { transform: rotate(360deg); }
+}
+
+.coming-soon-page__signup-note {
+    font-size: var(--flin-text-sm);
+    color: rgba(255, 255, 255, 0.4);
+    margin: 0;
+}
+
+.coming-soon-page--simple .coming-soon-page__signup-note {
+    color: var(--flin-text-muted);
+}
+
+.coming-soon-page__signup-success {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-4);
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: var(--flin-radius-lg);
+    color: #22c55e;
+}
+
+.coming-soon-page__signup-success svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Features */
+.coming-soon-page__features {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-8);
+    margin-bottom: var(--flin-space-10);
+    flex-wrap: wrap;
+}
+
+.coming-soon-page__feature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 150px;
+}
+
+.coming-soon-page__feature-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--flin-radius-lg);
+    margin-bottom: var(--flin-space-3);
+}
+
+.coming-soon-page--simple .coming-soon-page__feature-icon {
+    background: var(--flin-accent-gold-light);
+}
+
+.coming-soon-page__feature-icon svg {
+    width: 24px;
+    height: 24px;
+    color: var(--flin-accent-gold);
+}
+
+.coming-soon-page__feature-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    margin: 0 0 var(--flin-space-1) 0;
+}
+
+.coming-soon-page--simple .coming-soon-page__feature-title {
+    color: var(--flin-text-primary);
+}
+
+.coming-soon-page__feature-description {
+    font-size: var(--flin-text-xs);
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0;
+}
+
+.coming-soon-page--simple .coming-soon-page__feature-description {
+    color: var(--flin-text-tertiary);
+}
+
+/* Social */
+.coming-soon-page__social-label {
+    font-size: var(--flin-text-sm);
+    color: rgba(255, 255, 255, 0.4);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.coming-soon-page--simple .coming-soon-page__social-label {
+    color: var(--flin-text-tertiary);
+}
+
+.coming-soon-page__social-links {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-3);
+}
+
+.coming-soon-page__social-link {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--flin-radius-full);
+    color: rgba(255, 255, 255, 0.7);
+    transition: all var(--flin-transition-fast);
+}
+
+.coming-soon-page--simple .coming-soon-page__social-link {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-subtle);
+    color: var(--flin-text-secondary);
+}
+
+.coming-soon-page__social-link:hover {
+    background: var(--flin-accent-gold);
+    border-color: var(--flin-accent-gold);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.coming-soon-page__social-link svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .coming-soon-page__title {
+        font-size: var(--flin-text-2xl);
+    }
+
+    .coming-soon-page__countdown-grid {
+        gap: var(--flin-space-2);
+    }
+
+    .coming-soon-page__countdown-value {
+        font-size: var(--flin-text-xl);
+        min-width: 55px;
+        padding: var(--flin-space-2) var(--flin-space-3);
+    }
+
+    .coming-soon-page__signup-form {
+        flex-direction: column;
+    }
+
+    .coming-soon-page__features {
+        gap: var(--flin-space-6);
+    }
+}
+</style>

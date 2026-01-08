@@ -1,0 +1,433 @@
+// ============================================================================
+// ProductCardCompact.flin — FlinUI PRO E-Commerce
+// Horizontal compact product card layout for lists and sidebars
+// ============================================================================
+// Props:
+//   - image: Product image URL (string)
+//   - imageAlt: Alt text for image (string)
+//   - title: Product name (string)
+//   - price: Product price (number)
+//   - originalPrice: Original price for discount display (number or none)
+//   - currency: Currency code (string, default "USD")
+//   - rating: Product rating 0-5 (number)
+//   - inStock: Stock status (boolean, default true)
+//   - stockCount: Quantity in stock (number, optional)
+//   - badge: Badge text (e.g., "Sale", "New") (string or none)
+//   - badgeColor: Badge color variant (string: "gold", "emerald", "rose")
+//   - onAddToCart: Add to cart handler (function or none)
+//   - onRemove: Remove handler (function or none)
+
+image = props.image || "/placeholder-product.png"
+imageAlt = props.imageAlt || props.title || "Product image"
+title = props.title || "Product Name"
+price = props.price || 0
+originalPrice = props.originalPrice || none
+currency = props.currency || "USD"
+rating = props.rating || 0
+inStock = props.inStock != false
+stockCount = props.stockCount || none
+badge = props.badge || none
+badgeColor = props.badgeColor || "gold"
+onAddToCart = props.onAddToCart || none
+onRemove = props.onRemove || none
+
+// State
+imageLoaded = false
+
+// Computed values
+hasDiscount = originalPrice != none && originalPrice > price
+discountPercent = 0
+if hasDiscount {
+    discountPercent = math_round((originalPrice - price) / originalPrice * 100)
+}
+
+hasLowStock = stockCount != none && stockCount > 0 && stockCount <= 5
+
+// Format price with currency
+formatPrice = fn(amount) {
+    if currency == "USD" {
+        return "$" + amount.toFixed(2)
+    }
+    if currency == "EUR" {
+        return "€" + amount.toFixed(2)
+    }
+    if currency == "GBP" {
+        return "£" + amount.toFixed(2)
+    }
+    return currency + " " + amount.toFixed(2)
+}
+
+// Generate star rating display
+generateStars = fn(ratingValue) {
+    stars = ""
+    fullStars = math_floor(ratingValue)
+
+    for i in 1..5 {
+        if i <= fullStars {
+            stars = stars + "★"
+        } else {
+            stars = stars + "☆"
+        }
+    }
+    return stars
+}
+
+handleImageLoad = fn() {
+    imageLoaded = true
+}
+
+handleAddToCart = fn() {
+    if onAddToCart != none && inStock {
+        onAddToCart()
+    }
+}
+
+handleRemove = fn() {
+    if onRemove != none {
+        onRemove()
+    }
+}
+
+<div class="flin-product-card-compact">
+    <style>
+        .flin-product-card-compact {
+            position: relative;
+            display: flex;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-card);
+            transition: all var(--flin-transition-normal);
+            box-shadow: var(--flin-shadow-sm);
+        }
+
+        .flin-product-card-compact:hover {
+            border-color: var(--flin-border-medium);
+            box-shadow: var(--flin-shadow-md);
+            transform: translateX(4px);
+        }
+
+        /* Image Container */
+        .card-image-wrapper {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            flex-shrink: 0;
+            overflow: hidden;
+            background: var(--flin-bg-elevated);
+            border-radius: var(--flin-radius-md);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--flin-transition-normal);
+        }
+
+        .flin-product-card-compact:hover .card-image {
+            transform: scale(1.05);
+        }
+
+        .card-image.loading {
+            opacity: 0;
+        }
+
+        .card-image.loaded {
+            opacity: 1;
+            animation: fadeIn var(--flin-transition-normal);
+        }
+
+        /* Badge */
+        .card-badge {
+            position: absolute;
+            top: var(--flin-space-2);
+            left: var(--flin-space-2);
+            padding: var(--flin-space-1) var(--flin-space-2);
+            font-size: var(--flin-text-2xs);
+            font-weight: var(--flin-font-bold);
+            border-radius: var(--flin-radius-badge);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: var(--flin-z-10);
+        }
+
+        .card-badge.gold {
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+        }
+
+        .card-badge.emerald {
+            background: var(--flin-accent-emerald);
+            color: var(--flin-text-inverse);
+        }
+
+        .card-badge.rose {
+            background: var(--flin-accent-rose);
+            color: var(--flin-text-inverse);
+        }
+
+        /* Content Section */
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-between;
+            min-width: 0;
+        }
+
+        .card-header {
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .card-title {
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin: 0;
+            line-height: var(--flin-leading-snug);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Rating */
+        .card-rating {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+            margin-top: var(--flin-space-1);
+        }
+
+        .rating-stars {
+            color: var(--flin-accent-gold);
+            font-size: 0.875rem;
+            letter-spacing: 1px;
+        }
+
+        /* Stock Status */
+        .stock-indicator {
+            font-size: var(--flin-text-2xs);
+            font-weight: var(--flin-font-medium);
+            padding: var(--flin-space-1) var(--flin-space-2);
+            border-radius: var(--flin-radius-sm);
+            width: fit-content;
+            margin-top: var(--flin-space-2);
+        }
+
+        .stock-indicator.in-stock {
+            background: var(--flin-bg-success);
+            color: var(--flin-accent-emerald);
+        }
+
+        .stock-indicator.low-stock {
+            background: var(--flin-bg-warning);
+            color: var(--flin-accent-amber);
+        }
+
+        .stock-indicator.out-of-stock {
+            background: var(--flin-bg-error);
+            color: var(--flin-accent-rose);
+        }
+
+        /* Price & Actions */
+        .card-footer {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            justify-content: space-between;
+            margin-top: var(--flin-space-3);
+        }
+
+        .card-price-group {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .card-price {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-accent-gold);
+        }
+
+        .card-original-price {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-muted);
+            text-decoration: line-through;
+        }
+
+        .card-discount {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-accent-rose);
+            background: var(--flin-bg-error);
+            padding: var(--flin-space-1) var(--flin-space-2);
+            border-radius: var(--flin-radius-sm);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: var(--flin-space-2);
+        }
+
+        .action-btn {
+            padding: var(--flin-space-2) var(--flin-space-3);
+            border: none;
+            border-radius: var(--flin-radius-button);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .action-btn.add-cart {
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+        }
+
+        .action-btn.add-cart:hover {
+            background: var(--flin-accent-gold-bright);
+            box-shadow: var(--flin-shadow-glow-gold);
+        }
+
+        .action-btn.remove {
+            background: transparent;
+            color: var(--flin-text-muted);
+            border: 1px solid var(--flin-border-subtle);
+            padding: var(--flin-space-2);
+            width: 32px;
+            height: 32px;
+        }
+
+        .action-btn.remove:hover {
+            background: var(--flin-bg-hover);
+            color: var(--flin-accent-rose);
+            border-color: var(--flin-accent-rose);
+        }
+
+        .action-btn:disabled {
+            background: var(--flin-bg-hover);
+            color: var(--flin-text-muted);
+            cursor: not-allowed;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .flin-product-card-compact {
+                gap: var(--flin-space-3);
+                padding: var(--flin-space-3);
+            }
+
+            .card-image-wrapper {
+                width: 100px;
+                height: 100px;
+            }
+
+            .card-title {
+                font-size: var(--flin-text-sm);
+            }
+
+            .card-price {
+                font-size: var(--flin-text-base);
+            }
+
+            .card-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--flin-space-2);
+            }
+        }
+    </style>
+
+    <!-- Image -->
+    <div class="card-image-wrapper">
+        <img
+            src={image}
+            alt={imageAlt}
+            class="card-image {imageLoaded ? 'loaded' : 'loading'}"
+            load={handleImageLoad}
+        />
+
+        {if badge != none}
+            <div class="card-badge {badgeColor}">
+                {badge}
+            </div>
+        {/if}
+    </div>
+
+    <!-- Content -->
+    <div class="card-content">
+        <div>
+            <div class="card-header">
+                <h4 class="card-title">{title}</h4>
+
+                {if rating > 0}
+                    <div class="card-rating">
+                        <span class="rating-stars">{generateStars(rating)}</span>
+                    </div>
+                {/if}
+            </div>
+
+            {if hasLowStock}
+                <div class="stock-indicator low-stock">
+                    Only {stockCount} left
+                </div>
+            {else if !inStock}
+                <div class="stock-indicator out-of-stock">
+                    Out of Stock
+                </div>
+            {else}
+                <div class="stock-indicator in-stock">
+                    In Stock
+                </div>
+            {/if}
+        </div>
+
+        <div class="card-footer">
+            <div class="card-price-group">
+                <span class="card-price">{formatPrice(price)}</span>
+
+                {if hasDiscount}
+                    <span class="card-original-price">{formatPrice(originalPrice)}</span>
+                    <span class="card-discount">-{discountPercent}%</span>
+                {/if}
+            </div>
+
+            <div class="action-buttons">
+                {if onAddToCart != none}
+                    <button
+                        class="action-btn add-cart"
+                        click={handleAddToCart}
+                        disabled={!inStock}
+                    >
+                        Add
+                    </button>
+                {/if}
+
+                {if onRemove != none}
+                    <button
+                        class="action-btn remove"
+                        click={handleRemove}
+                        title="Remove"
+                    >
+                        ✕
+                    </button>
+                {/if}
+            </div>
+        </div>
+    </div>
+</div>

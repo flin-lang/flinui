@@ -1,0 +1,56 @@
+// ============================================================================
+// FlinUI PRO — Content & Media Components
+// ============================================================================
+//
+// Typography (5):
+//   - ArticleContent    Blog post body with styled prose
+//   - Prose             Rich text styling container
+//   - Heading           Styled headings (h1-h6) with anchors
+//   - Quote             Blockquote styles (simple, featured, pull-quote)
+//   - CodeBlock         Syntax highlighted code with copy button
+//
+// Blog (8):
+//   - BlogPostCard      Blog preview card with image, title, excerpt
+//   - BlogPostGrid      Blog listing grid/list view
+//   - BlogPostFeatured  Featured/hero post card
+//   - BlogPostHeader    Post title + meta (author, date, read time)
+//   - AuthorCard        Author info card with avatar, bio
+//   - TableOfContents   Article navigation sidebar
+//   - ReadingProgress   Scroll progress indicator bar
+//   - ShareButtons      Social share buttons (Twitter, LinkedIn, Facebook)
+//
+// Media (7):
+//   - Avatar            User avatar with sizes, shapes, status
+//   - AvatarGroup       Stacked avatars with +N overflow
+//   - MediaObject       Image + text horizontal layout
+//   - CardImage         Card with featured image
+//   - Banner            Promotional banner with CTA
+//   - Badge             Status badge (pill style)
+//   - Chip              Tag/chip component with remove option
+//
+// ============================================================================
+// Usage: Components are auto-discovered. Just use them!
+//
+//   <BlogPostCard
+//       title="My Blog Post"
+//       excerpt="A short description..."
+//       image="/images/cover.jpg"
+//       author={["name": "John Doe", "avatar": "/avatars/john.jpg"]}
+//   />
+//
+//   <ShareButtons
+//       url="https://example.com/post"
+//       title="Check out this article"
+//       platforms={["twitter", "linkedin", "facebook"]}
+//   />
+//
+//   <AvatarGroup
+//       avatars={[
+//           ["src": "/avatar1.jpg", "name": "Alice"],
+//           ["src": "/avatar2.jpg", "name": "Bob"],
+//           ["src": "/avatar3.jpg", "name": "Charlie"]
+//       ]}
+//       max={3}
+//   />
+//
+// ============================================================================

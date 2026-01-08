@@ -1,0 +1,247 @@
+// ============================================================================
+// Prose.flin — FlinUI PRO
+// Rich text styling container for rendered content
+// ============================================================================
+// Props:
+//   size: text - Text size ("sm", "base", "lg", "xl") (default: "base")
+//   color: text - Text color variant ("default", "muted", "inverted") (default: "default")
+//   centered: boolean - Center text alignment (default: false)
+//   tight: boolean - Reduce spacing between elements (default: false)
+// ============================================================================
+
+size = props.size || "base"
+color = props.color || "default"
+centered = props.centered || false
+tight = props.tight || false
+
+// Compute size class
+sizeClass = match size {
+    "sm" -> "prose--sm"
+    "lg" -> "prose--lg"
+    "xl" -> "prose--xl"
+    _ -> "prose--base"
+}
+
+// Compute color class
+colorClass = match color {
+    "muted" -> "prose--muted"
+    "inverted" -> "prose--inverted"
+    _ -> "prose--default"
+}
+
+// Compute alignment class
+alignClass = match centered {
+    true -> "prose--centered"
+    _ -> ""
+}
+
+// Compute spacing class
+spacingClass = match tight {
+    true -> "prose--tight"
+    _ -> ""
+}
+
+<div class={"prose " ++ sizeClass ++ " " ++ colorClass ++ " " ++ alignClass ++ " " ++ spacingClass}>
+    {children}
+</div>
+
+<style scoped>
+.prose {
+    font-family: var(--flin-font-sans);
+    line-height: 1.7;
+}
+
+/* Size variants */
+.prose--sm {
+    font-size: var(--flin-text-sm);
+}
+
+.prose--base {
+    font-size: var(--flin-text-base);
+}
+
+.prose--lg {
+    font-size: var(--flin-text-lg);
+}
+
+.prose--xl {
+    font-size: var(--flin-text-xl);
+    line-height: 1.8;
+}
+
+/* Color variants */
+.prose--default {
+    color: var(--flin-fg);
+}
+
+.prose--muted {
+    color: var(--flin-fg-muted);
+}
+
+.prose--inverted {
+    color: var(--flin-bg);
+}
+
+/* Alignment */
+.prose--centered {
+    text-align: center;
+}
+
+/* Spacing variants */
+.prose > * + * {
+    margin-top: var(--flin-space-4);
+}
+
+.prose--tight > * + * {
+    margin-top: var(--flin-space-2);
+}
+
+/* Headings */
+.prose h1 {
+    font-size: 2.25em;
+    font-weight: var(--flin-font-bold);
+    line-height: 1.2;
+    margin-top: 0;
+    margin-bottom: var(--flin-space-4);
+}
+
+.prose h2 {
+    font-size: 1.75em;
+    font-weight: var(--flin-font-bold);
+    line-height: 1.3;
+    margin-top: var(--flin-space-8);
+}
+
+.prose h3 {
+    font-size: 1.375em;
+    font-weight: var(--flin-font-semibold);
+    line-height: 1.4;
+    margin-top: var(--flin-space-6);
+}
+
+.prose h4 {
+    font-size: 1.125em;
+    font-weight: var(--flin-font-semibold);
+    line-height: 1.5;
+    margin-top: var(--flin-space-5);
+}
+
+/* Paragraphs */
+.prose p {
+    margin: 0;
+}
+
+/* Links */
+.prose a {
+    color: var(--flin-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color var(--flin-transition-fast);
+}
+
+.prose a:hover {
+    color: var(--flin-primary-dark);
+}
+
+.prose--inverted a {
+    color: var(--flin-primary-light);
+}
+
+/* Lists */
+.prose ul,
+.prose ol {
+    padding-left: 1.5em;
+}
+
+.prose li {
+    margin-top: var(--flin-space-1);
+}
+
+.prose li::marker {
+    color: var(--flin-fg-muted);
+}
+
+/* Bold and italic */
+.prose strong {
+    font-weight: var(--flin-font-semibold);
+}
+
+.prose em {
+    font-style: italic;
+}
+
+/* Code */
+.prose code {
+    font-family: var(--flin-font-mono);
+    font-size: 0.875em;
+    background: var(--flin-neutral-100);
+    padding: 0.2em 0.4em;
+    border-radius: var(--flin-radius-sm);
+}
+
+.prose--inverted code {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Blockquotes */
+.prose blockquote {
+    border-left: 3px solid var(--flin-primary);
+    padding-left: var(--flin-space-4);
+    font-style: italic;
+    color: var(--flin-fg-muted);
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Horizontal rules */
+.prose hr {
+    border: none;
+    height: 1px;
+    background: var(--flin-neutral-200);
+    margin: var(--flin-space-8) 0;
+}
+
+/* Images */
+.prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--flin-radius-md);
+}
+
+/* Tables */
+.prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+.prose th,
+.prose td {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    border: 1px solid var(--flin-neutral-200);
+    text-align: left;
+}
+
+.prose th {
+    background: var(--flin-neutral-50);
+    font-weight: var(--flin-font-semibold);
+}
+
+/* Dark theme */
+[data-theme="dark"] .prose code {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .prose th {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .prose th,
+[data-theme="dark"] .prose td {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .prose hr {
+    background: var(--flin-neutral-700);
+}
+</style>

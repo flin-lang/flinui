@@ -1,0 +1,418 @@
+// SearchBar.flin - FlinUI PRO E-commerce Component
+// Search input with autocomplete, suggestions dropdown, and recent searches
+
+// Props with defaults
+placeholder = props.placeholder || "Search products..."
+value = props.value || ""
+onSearch = props.onSearch
+onInput = props.onInput
+onFocus = props.onFocus
+onBlur = props.onBlur
+suggestions = props.suggestions || []
+recentSearches = props.recentSearches || []
+showSuggestions = props.showSuggestions || true
+showRecentSearches = props.showRecentSearches || true
+loading = props.loading || false
+disabled = props.disabled || false
+size = props.size || "md"
+variant = props.variant || "default"
+
+// State
+localValue = value
+isFocused = false
+showDropdown = false
+
+// Update local value when prop changes
+function syncValue() {
+    if value != localValue {
+        localValue = value
+    }
+}
+
+syncValue()
+
+// Handle input change
+function handleInput(event) {
+    localValue = event.target.value
+    showDropdown = localValue.length > 0 || (localValue.length == 0 && recentSearches.length > 0)
+
+    if onInput {
+        onInput(localValue)
+    }
+}
+
+// Handle search submit
+function handleSubmit(event) {
+    event.preventDefault()
+    if onSearch && localValue.trim() != "" {
+        onSearch(localValue)
+        showDropdown = false
+    }
+}
+
+// Handle focus
+function handleFocus() {
+    isFocused = true
+    showDropdown = localValue.length > 0 || recentSearches.length > 0
+
+    if onFocus {
+        onFocus()
+    }
+}
+
+// Handle blur (with delay to allow click on suggestions)
+function handleBlur() {
+    setTimeout(fn() {
+        isFocused = false
+        showDropdown = false
+    }, 200)
+
+    if onBlur {
+        onBlur()
+    }
+}
+
+// Handle suggestion click
+function handleSuggestionClick(suggestion) {
+    localValue = suggestion.text || suggestion
+    if onSearch {
+        onSearch(localValue)
+    }
+    showDropdown = false
+}
+
+// Handle recent search click
+function handleRecentClick(searchText) {
+    localValue = searchText
+    if onSearch {
+        onSearch(searchText)
+    }
+    showDropdown = false
+}
+
+// Clear input
+function handleClear() {
+    localValue = ""
+    showDropdown = false
+    if onInput {
+        onInput("")
+    }
+}
+
+// Size class
+sizeClass = match size {
+    "sm" -> "search-bar-sm"
+    "lg" -> "search-bar-lg"
+    _ -> "search-bar-md"
+}
+
+// Variant class
+variantClass = "search-bar-" ++ variant
+
+<div class="search-bar-container {sizeClass} {variantClass}">
+    <style scoped>
+        .search-bar-container {
+            position: relative;
+            width: 100%;
+            font-family: var(--flin-font-sans);
+        }
+
+        .search-form {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-light);
+            border-radius: var(--flin-radius-lg);
+            transition: all var(--flin-transition-fast);
+        }
+
+        .search-input-wrapper:hover {
+            border-color: var(--flin-border-medium);
+        }
+
+        .search-input-wrapper.focused {
+            border-color: var(--flin-primary);
+            box-shadow: 0 0 0 3px var(--flin-primary-light);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: var(--flin-space-3);
+            display: flex;
+            align-items: center;
+            color: var(--flin-text-muted);
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: var(--flin-space-3) var(--flin-space-12) var(--flin-space-3) var(--flin-space-10);
+            background: transparent;
+            border: none;
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--flin-text-muted);
+        }
+
+        .search-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .search-actions {
+            position: absolute;
+            right: var(--flin-space-2);
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+        }
+
+        .clear-button,
+        .search-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            background: transparent;
+            border: none;
+            border-radius: var(--flin-radius-md);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            color: var(--flin-text-muted);
+        }
+
+        .clear-button:hover,
+        .search-button:hover {
+            background: var(--flin-bg-hover);
+            color: var(--flin-text-primary);
+        }
+
+        .search-button {
+            background: var(--flin-primary);
+            color: white;
+        }
+
+        .search-button:hover {
+            background: var(--flin-primary-dark);
+        }
+
+        .search-button.loading {
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Dropdown */
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + var(--flin-space-2));
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: none;
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-light);
+            border-radius: var(--flin-radius-lg);
+            box-shadow: var(--flin-shadow-lg);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .search-dropdown.visible {
+            display: block;
+        }
+
+        .dropdown-section {
+            padding: var(--flin-space-2);
+        }
+
+        .dropdown-section:not(:last-child) {
+            border-bottom: 1px solid var(--flin-border-light);
+        }
+
+        .dropdown-section-title {
+            padding: var(--flin-space-2) var(--flin-space-3);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-3);
+            background: transparent;
+            border: none;
+            border-radius: var(--flin-radius-md);
+            cursor: pointer;
+            transition: background var(--flin-transition-fast);
+            width: 100%;
+            text-align: left;
+        }
+
+        .dropdown-item:hover {
+            background: var(--flin-bg-hover);
+        }
+
+        .dropdown-item-icon {
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-muted);
+        }
+
+        .dropdown-item-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .dropdown-item-text {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-primary);
+            font-weight: var(--flin-font-medium);
+        }
+
+        .dropdown-item-meta {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-muted);
+            margin-top: var(--flin-space-1);
+        }
+
+        /* Size variants */
+        .search-bar-sm .search-input {
+            padding: var(--flin-space-2) var(--flin-space-10) var(--flin-space-2) var(--flin-space-8);
+            font-size: var(--flin-text-sm);
+        }
+
+        .search-bar-lg .search-input {
+            padding: var(--flin-space-4) var(--flin-space-14) var(--flin-space-4) var(--flin-space-12);
+            font-size: var(--flin-text-lg);
+        }
+
+        /* Variant styles */
+        .search-bar-hero .search-input-wrapper {
+            border-width: 2px;
+            box-shadow: var(--flin-shadow-md);
+        }
+
+        @media (max-width: 640px) {
+            .search-input {
+                font-size: var(--flin-text-sm);
+            }
+
+            .search-dropdown {
+                max-height: 300px;
+            }
+        }
+    </style>
+
+    <form class="search-form" submit={handleSubmit}>
+        <div class="search-input-wrapper {if isFocused}focused{/if}">
+            <div class="search-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+            </div>
+
+            <input
+                type="text"
+                class="search-input"
+                placeholder={placeholder}
+                value={localValue}
+                input={handleInput}
+                focus={handleFocus}
+                blur={handleBlur}
+                disabled={disabled}
+                aria-label="Search"
+            />
+
+            <div class="search-actions">
+                {if localValue != ""}
+                    <button
+                        type="button"
+                        class="clear-button"
+                        click={handleClear}
+                        aria-label="Clear search"
+                    >
+                        ✕
+                    </button>
+                {/if}
+
+                <button
+                    type="submit"
+                    class="search-button {if loading}loading{/if}"
+                    disabled={disabled || loading}
+                    aria-label="Submit search"
+                >
+                    {if loading}
+                        <span class="loading-spinner">⌛</span>
+                    {else}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14m-7-7 7 7-7 7"/>
+                        </svg>
+                    {/if}
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Dropdown -->
+    {if showDropdown && (suggestions.length > 0 || recentSearches.length > 0)}
+        <div class="search-dropdown visible">
+            <!-- Recent Searches -->
+            {if showRecentSearches && recentSearches.length > 0 && localValue == ""}
+                <div class="dropdown-section">
+                    <div class="dropdown-section-title">Recent Searches</div>
+                    {each recentSearches as recent}
+                        <button class="dropdown-item" click={fn() { handleRecentClick(recent) }}>
+                            <span class="dropdown-item-icon">🕐</span>
+                            <div class="dropdown-item-content">
+                                <div class="dropdown-item-text">{recent}</div>
+                            </div>
+                        </button>
+                    {/each}
+                </div>
+            {/if}
+
+            <!-- Suggestions -->
+            {if showSuggestions && suggestions.length > 0 && localValue != ""}
+                <div class="dropdown-section">
+                    <div class="dropdown-section-title">Suggestions</div>
+                    {each suggestions as suggestion}
+                        <button class="dropdown-item" click={fn() { handleSuggestionClick(suggestion) }}>
+                            <span class="dropdown-item-icon">🔍</span>
+                            <div class="dropdown-item-content">
+                                <div class="dropdown-item-text">{suggestion.text || suggestion}</div>
+                                {if suggestion.category}
+                                    <div class="dropdown-item-meta">in {suggestion.category}</div>
+                                {/if}
+                            </div>
+                        </button>
+                    {/each}
+                </div>
+            {/if}
+        </div>
+    {/if}
+</div>

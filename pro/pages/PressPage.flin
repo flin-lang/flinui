@@ -1,0 +1,765 @@
+// ============================================================================
+// PressPage.flin — FlinUI PRO Page Template
+// News and press releases page with media kit and contact info
+// ============================================================================
+// Props:
+//   - companyName: Company name (string)
+//   - pressReleases: List of press release objects (list)
+//   - mediaLogos: List of media outlet logos (list)
+//   - pressContact: Press contact information (object)
+
+companyName = props.companyName || "Company"
+
+pressReleases = props.pressReleases || [
+    ["id": 1, "date": "January 5, 2025", "title": "Company Announces Series B Funding Round of $50M", "excerpt": "The funding will accelerate product development and global expansion efforts.", "category": "Funding", "url": "#"],
+    ["id": 2, "date": "December 15, 2024", "title": "Company Named to Forbes Cloud 100 List", "excerpt": "Recognition highlights the company's rapid growth and market impact.", "category": "Awards", "url": "#"],
+    ["id": 3, "date": "November 20, 2024", "title": "New Enterprise Features Launch", "excerpt": "Advanced security, compliance, and team management capabilities now available.", "category": "Product", "url": "#"],
+    ["id": 4, "date": "October 8, 2024", "title": "Company Expands to European Market", "excerpt": "New offices in London and Berlin to serve growing customer base.", "category": "Expansion", "url": "#"],
+    ["id": 5, "date": "September 1, 2024", "title": "Partnership with Major Tech Company Announced", "excerpt": "Strategic partnership to integrate services and expand reach.", "category": "Partnership", "url": "#"],
+    ["id": 6, "date": "August 15, 2024", "title": "Company Surpasses 100,000 Customer Milestone", "excerpt": "Rapid adoption across startups and enterprises drives growth.", "category": "Milestone", "url": "#"]
+]
+
+mediaLogos = props.mediaLogos || [
+    ["name": "TechCrunch", "url": "#"],
+    ["name": "Forbes", "url": "#"],
+    ["name": "Wired", "url": "#"],
+    ["name": "VentureBeat", "url": "#"],
+    ["name": "The Verge", "url": "#"],
+    ["name": "Bloomberg", "url": "#"]
+]
+
+pressContact = props.pressContact || [
+    "name": "Sarah Mitchell",
+    "title": "Head of Communications",
+    "email": "press@company.com",
+    "phone": "+1 (555) 123-4567"
+]
+
+companyFacts = [
+    ["label": "Founded", "value": "2020"],
+    ["label": "Headquarters", "value": "San Francisco, CA"],
+    ["label": "Employees", "value": "150+"],
+    ["label": "Customers", "value": "100,000+"],
+    ["label": "Funding", "value": "$75M"],
+    ["label": "Valuation", "value": "$500M"]
+]
+
+categories = ["All", "Funding", "Product", "Awards", "Partnership", "Expansion", "Milestone"]
+selectedCategory = "All"
+
+filterPressReleases = () => {
+    if selectedCategory == "All" {
+        pressReleases
+    } else {
+        pressReleases.filter((p) => p.category == selectedCategory)
+    }
+}
+
+getCategoryColor = (category) => match category {
+    "Funding" => "green"
+    "Product" => "blue"
+    "Awards" => "gold"
+    "Partnership" => "purple"
+    "Expansion" => "cyan"
+    "Milestone" => "orange"
+    _ => "gray"
+}
+
+<div class="press-page">
+    // Hero Section
+    <section class="press-hero">
+        <div class="press-hero__container">
+            <span class="press-hero__eyebrow">Newsroom</span>
+            <h1 class="press-hero__title">{companyName} Press Center</h1>
+            <p class="press-hero__subtitle">
+                Latest news, press releases, and media resources from {companyName}.
+            </p>
+        </div>
+    </section>
+
+    // Featured In Section
+    <section class="press-featured">
+        <div class="press-featured__container">
+            <p class="press-featured__label">As featured in</p>
+            <div class="press-featured__logos">
+                {for logo in mediaLogos}
+                    <a href={logo.url} class="press-featured__logo" target="_blank" rel="noopener">
+                        <span>{logo.name}</span>
+                    </a>
+                {/for}
+            </div>
+        </div>
+    </section>
+
+    // Main Content
+    <section class="press-main">
+        <div class="press-main__container">
+            // Press Releases
+            <div class="press-releases">
+                <div class="press-releases__header">
+                    <h2 class="press-releases__title">Press Releases</h2>
+                    <p class="press-releases__subtitle">All the latest news and announcements</p>
+                </div>
+
+                // Category Filter
+                <div class="press-releases__filter">
+                    {for cat in categories}
+                        <button
+                            class={match selectedCategory { cat => "press-releases__filter-btn press-releases__filter-btn--active" _ => "press-releases__filter-btn" }}
+                            click={() => selectedCategory = cat}
+                        >
+                            {cat}
+                        </button>
+                    {/for}
+                </div>
+
+                // Press Release List
+                <div class="press-releases__list">
+                    {for release in filterPressReleases()}
+                        <article class="press-release-card">
+                            <div class="press-release-card__header">
+                                <time class="press-release-card__date">{release.date}</time>
+                                <span class={"press-release-card__category press-release-card__category--" ++ getCategoryColor(release.category)}>
+                                    {release.category}
+                                </span>
+                            </div>
+                            <h3 class="press-release-card__title">
+                                <a href={release.url}>{release.title}</a>
+                            </h3>
+                            <p class="press-release-card__excerpt">{release.excerpt}</p>
+                            <a href={release.url} class="press-release-card__link">
+                                Read more
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </article>
+                    {/for}
+
+                    {if filterPressReleases().length == 0}
+                        <div class="press-releases__empty">
+                            <p>No press releases found in this category.</p>
+                        </div>
+                    {/if}
+                </div>
+            </div>
+
+            // Sidebar
+            <aside class="press-sidebar">
+                // Company Facts
+                <div class="press-sidebar__section">
+                    <h3 class="press-sidebar__title">Company Facts</h3>
+                    <div class="press-facts">
+                        {for fact in companyFacts}
+                            <div class="press-facts__item">
+                                <span class="press-facts__label">{fact.label}</span>
+                                <span class="press-facts__value">{fact.value}</span>
+                            </div>
+                        {/for}
+                    </div>
+                </div>
+
+                // Media Kit
+                <div class="press-sidebar__section">
+                    <h3 class="press-sidebar__title">Media Kit</h3>
+                    <p class="press-sidebar__text">
+                        Download our brand assets including logos, screenshots, and executive bios.
+                    </p>
+                    <a href="#" class="press-sidebar__download">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Download Media Kit
+                    </a>
+                    <div class="press-sidebar__assets">
+                        <a href="#" class="press-sidebar__asset">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                            Logos (ZIP)
+                        </a>
+                        <a href="#" class="press-sidebar__asset">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            Fact Sheet (PDF)
+                        </a>
+                        <a href="#" class="press-sidebar__asset">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                            Executive Bios
+                        </a>
+                    </div>
+                </div>
+
+                // Press Contact
+                <div class="press-sidebar__section">
+                    <h3 class="press-sidebar__title">Press Contact</h3>
+                    <div class="press-contact">
+                        <div class="press-contact__avatar">
+                            {pressContact.name.charAt(0)}
+                        </div>
+                        <div class="press-contact__info">
+                            <span class="press-contact__name">{pressContact.name}</span>
+                            <span class="press-contact__title">{pressContact.title}</span>
+                        </div>
+                    </div>
+                    <div class="press-contact__details">
+                        <a href={"mailto:" ++ pressContact.email} class="press-contact__link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                            </svg>
+                            {pressContact.email}
+                        </a>
+                        <a href={"tel:" ++ pressContact.phone} class="press-contact__link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/>
+                            </svg>
+                            {pressContact.phone}
+                        </a>
+                    </div>
+                </div>
+
+                // Newsletter Signup
+                <div class="press-sidebar__section press-sidebar__section--highlight">
+                    <h3 class="press-sidebar__title">Stay Updated</h3>
+                    <p class="press-sidebar__text">
+                        Subscribe to receive press releases directly to your inbox.
+                    </p>
+                    <form class="press-newsletter">
+                        <input
+                            type="email"
+                            class="press-newsletter__input"
+                            placeholder="Enter your email"
+                        />
+                        <button type="submit" class="press-newsletter__button">Subscribe</button>
+                    </form>
+                </div>
+            </aside>
+        </div>
+    </section>
+</div>
+
+<style scoped>
+.press-page {
+    font-family: var(--flin-font-sans);
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-base);
+}
+
+/* Hero Section */
+.press-hero {
+    padding: var(--flin-space-20) var(--flin-space-6);
+    background: linear-gradient(180deg, var(--flin-bg-surface) 0%, var(--flin-bg-base) 100%);
+    text-align: center;
+}
+
+.press-hero__container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.press-hero__eyebrow {
+    display: inline-block;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--flin-space-4);
+}
+
+.press-hero__title {
+    font-size: 3rem;
+    font-weight: var(--flin-font-bold);
+    line-height: 1.1;
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.press-hero__subtitle {
+    font-size: var(--flin-text-xl);
+    color: var(--flin-text-secondary);
+    margin: 0;
+}
+
+/* Featured In Section */
+.press-featured {
+    padding: var(--flin-space-12) var(--flin-space-6);
+    background: var(--flin-bg-surface);
+    border-top: 1px solid var(--flin-border-subtle);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.press-featured__container {
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.press-featured__label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-tertiary);
+    margin: 0 0 var(--flin-space-6) 0;
+}
+
+.press-featured__logos {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--flin-space-8);
+}
+
+.press-featured__logo {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-muted);
+    text-decoration: none;
+    opacity: 0.6;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.press-featured__logo:hover {
+    opacity: 1;
+}
+
+/* Main Content */
+.press-main {
+    padding: var(--flin-space-16) var(--flin-space-6);
+}
+
+.press-main__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: var(--flin-space-12);
+}
+
+/* Press Releases */
+.press-releases__header {
+    margin-bottom: var(--flin-space-6);
+}
+
+.press-releases__title {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.press-releases__subtitle {
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-secondary);
+    margin: 0;
+}
+
+.press-releases__filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-space-2);
+    margin-bottom: var(--flin-space-8);
+}
+
+.press-releases__filter-btn {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-secondary);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.press-releases__filter-btn:hover {
+    border-color: var(--flin-border-default);
+    color: var(--flin-text-primary);
+}
+
+.press-releases__filter-btn--active {
+    background: var(--flin-accent-gold);
+    border-color: var(--flin-accent-gold);
+    color: white;
+}
+
+.press-releases__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-6);
+}
+
+.press-release-card {
+    padding: var(--flin-space-6);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    transition: all var(--flin-transition-fast);
+}
+
+.press-release-card:hover {
+    border-color: var(--flin-border-default);
+    box-shadow: var(--flin-shadow-md);
+}
+
+.press-release-card__header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    margin-bottom: var(--flin-space-3);
+}
+
+.press-release-card__date {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-tertiary);
+}
+
+.press-release-card__category {
+    font-size: 11px;
+    font-weight: var(--flin-font-semibold);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.press-release-card__category--green {
+    background: var(--flin-success-light);
+    color: var(--flin-success);
+}
+
+.press-release-card__category--blue {
+    background: var(--flin-info-light);
+    color: var(--flin-info);
+}
+
+.press-release-card__category--gold {
+    background: var(--flin-accent-gold-light);
+    color: var(--flin-accent-gold);
+}
+
+.press-release-card__category--purple {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+}
+
+.press-release-card__category--cyan {
+    background: rgba(6, 182, 212, 0.1);
+    color: #06b6d4;
+}
+
+.press-release-card__category--orange {
+    background: var(--flin-warning-light);
+    color: var(--flin-warning);
+}
+
+.press-release-card__category--gray {
+    background: var(--flin-bg-elevated);
+    color: var(--flin-text-secondary);
+}
+
+.press-release-card__title {
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.press-release-card__title a {
+    color: var(--flin-text-primary);
+    text-decoration: none;
+    transition: color var(--flin-transition-fast);
+}
+
+.press-release-card__title a:hover {
+    color: var(--flin-accent-gold);
+}
+
+.press-release-card__excerpt {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    line-height: 1.6;
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.press-release-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-accent-gold);
+    text-decoration: none;
+    transition: gap var(--flin-transition-fast);
+}
+
+.press-release-card__link:hover {
+    gap: var(--flin-space-2);
+}
+
+.press-release-card__link svg {
+    width: 16px;
+    height: 16px;
+}
+
+.press-releases__empty {
+    text-align: center;
+    padding: var(--flin-space-12);
+    color: var(--flin-text-muted);
+}
+
+/* Sidebar */
+.press-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-6);
+}
+
+.press-sidebar__section {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-6);
+}
+
+.press-sidebar__section--highlight {
+    background: var(--flin-accent-gold-light);
+    border-color: var(--flin-accent-gold);
+}
+
+.press-sidebar__title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--flin-text-tertiary);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.press-sidebar__text {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    line-height: 1.6;
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+/* Company Facts */
+.press-facts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--flin-space-3);
+}
+
+.press-facts__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.press-facts__label {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-tertiary);
+}
+
+.press-facts__value {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+}
+
+/* Media Kit */
+.press-sidebar__download {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    padding: var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-lg);
+    text-decoration: none;
+    transition: all var(--flin-transition-fast);
+    margin-bottom: var(--flin-space-4);
+}
+
+.press-sidebar__download:hover {
+    background: var(--flin-accent-gold-hover);
+}
+
+.press-sidebar__download svg {
+    width: 18px;
+    height: 18px;
+}
+
+.press-sidebar__assets {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.press-sidebar__asset {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    text-decoration: none;
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+}
+
+.press-sidebar__asset:hover {
+    background: var(--flin-bg-elevated);
+    color: var(--flin-text-primary);
+}
+
+.press-sidebar__asset svg {
+    width: 16px;
+    height: 16px;
+    color: var(--flin-text-tertiary);
+}
+
+/* Press Contact */
+.press-contact {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    margin-bottom: var(--flin-space-4);
+}
+
+.press-contact__avatar {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-bold);
+    color: white;
+}
+
+.press-contact__info {
+    display: flex;
+    flex-direction: column;
+}
+
+.press-contact__name {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+}
+
+.press-contact__title {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-tertiary);
+}
+
+.press-contact__details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.press-contact__link {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    text-decoration: none;
+    transition: color var(--flin-transition-fast);
+}
+
+.press-contact__link:hover {
+    color: var(--flin-accent-gold);
+}
+
+.press-contact__link svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Newsletter */
+.press-newsletter {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.press-newsletter__input {
+    width: 100%;
+    padding: var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-default);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.press-newsletter__input:focus {
+    border-color: var(--flin-accent-gold);
+    box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.2);
+}
+
+.press-newsletter__button {
+    padding: var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background: var(--flin-accent-gold);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.press-newsletter__button:hover {
+    background: var(--flin-accent-gold-hover);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .press-main__container {
+        grid-template-columns: 1fr;
+    }
+
+    .press-sidebar {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .press-hero__title {
+        font-size: 2.25rem;
+    }
+
+    .press-featured__logos {
+        flex-direction: column;
+        gap: var(--flin-space-4);
+    }
+
+    .press-sidebar {
+        grid-template-columns: 1fr;
+    }
+}
+</style>

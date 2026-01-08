@@ -1,0 +1,346 @@
+// ============================================================================
+// Timeline.flin — FlinUI PRO Data Component
+// Vertical event timeline with dates, icons, and content
+// ============================================================================
+// Props:
+//   - events: List of event objects with date, title, content, icon, color (list)
+//   - variant: Style variant - default, alternating, compact (string)
+//   - showConnector: Show connecting line (boolean)
+//   - animated: Animate events on scroll (boolean)
+
+events = props.events || [
+    ["date": "Jan 15, 2024", "time": "10:30 AM", "title": "Project Kickoff", "content": "Initial meeting with stakeholders to discuss project scope and objectives.", "icon": "🚀", "color": "gold"],
+    ["date": "Jan 22, 2024", "time": "2:00 PM", "title": "Design Review", "content": "Presented wireframes and received feedback from the design team.", "icon": "🎨", "color": "blue"],
+    ["date": "Feb 5, 2024", "time": "9:00 AM", "title": "Development Sprint 1", "content": "Started implementation of core features including authentication and dashboard.", "icon": "💻", "color": "green"],
+    ["date": "Feb 19, 2024", "time": "4:00 PM", "title": "Testing Phase", "content": "QA team began comprehensive testing and bug identification.", "icon": "🧪", "color": "purple"],
+    ["date": "Mar 1, 2024", "time": "11:00 AM", "title": "Launch", "content": "Successfully deployed to production environment.", "icon": "🎉", "color": "gold"]
+]
+variant = props.variant || "default"
+showConnector = props.showConnector || true
+animated = props.animated || true
+
+// Variant class
+variantClass = match variant {
+    "alternating" => "timeline-alternating"
+    "compact" => "timeline-compact"
+    _ => "timeline-default"
+}
+
+<div class="flin-timeline {variantClass} {if animated}timeline-animated{/if}">
+    {for event, index in events}
+        <div class="timeline-item" data-color={event.color || "gold"}>
+            {if showConnector && index < events.length - 1}
+                <div class="timeline-connector"></div>
+            {/if}
+
+            <div class="timeline-marker">
+                <div class="marker-icon">
+                    {event.icon || "●"}
+                </div>
+            </div>
+
+            <div class="timeline-content">
+                <div class="timeline-header">
+                    <div class="timeline-date">
+                        <span class="date-text">{event.date}</span>
+                        {if event.time != none}
+                            <span class="time-text">{event.time}</span>
+                        {/if}
+                    </div>
+                </div>
+
+                <div class="timeline-card">
+                    <h4 class="timeline-title">{event.title}</h4>
+                    {if event.content != none}
+                        <p class="timeline-description">{event.content}</p>
+                    {/if}
+                    {if event.tags != none}
+                        <div class="timeline-tags">
+                            {for tag in event.tags}
+                                <span class="timeline-tag">{tag}</span>
+                            {/for}
+                        </div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    {/for}
+</div>
+
+<style scoped>
+.flin-timeline {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: var(--flin-space-4) 0;
+}
+
+.timeline-item {
+    display: flex;
+    gap: var(--flin-space-4);
+    position: relative;
+    padding-bottom: var(--flin-space-8);
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+/* Connector line */
+.timeline-connector {
+    position: absolute;
+    left: 19px;
+    top: 40px;
+    bottom: 0;
+    width: 2px;
+    background: var(--flin-border-subtle);
+}
+
+/* Marker */
+.timeline-marker {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+}
+
+.marker-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-bg-elevated);
+    border: 2px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-full);
+    font-size: 1.125rem;
+    transition: all var(--flin-transition-fast);
+}
+
+/* Color variants */
+.timeline-item[data-color="gold"] .marker-icon {
+    border-color: var(--flin-accent-gold);
+    background: rgba(234, 179, 8, 0.1);
+}
+
+.timeline-item[data-color="blue"] .marker-icon {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.timeline-item[data-color="green"] .marker-icon {
+    border-color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.timeline-item[data-color="purple"] .marker-icon {
+    border-color: #a855f7;
+    background: rgba(168, 85, 247, 0.1);
+}
+
+.timeline-item[data-color="red"] .marker-icon {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Content */
+.timeline-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.timeline-header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    margin-bottom: var(--flin-space-2);
+}
+
+.timeline-date {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.date-text {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-secondary);
+}
+
+.time-text {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    background: var(--flin-bg-surface);
+    border-radius: var(--flin-radius-sm);
+}
+
+.timeline-card {
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-space-4);
+    transition: all var(--flin-transition-fast);
+}
+
+.timeline-card:hover {
+    border-color: var(--flin-border-default);
+    box-shadow: var(--flin-shadow-card);
+}
+
+.timeline-title {
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.timeline-description {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.timeline-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-3);
+}
+
+.timeline-tag {
+    font-size: var(--flin-text-xs);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-tertiary);
+    border-radius: var(--flin-radius-sm);
+}
+
+/* Alternating variant */
+.timeline-alternating {
+    padding-left: 50%;
+}
+
+.timeline-alternating .timeline-item:nth-child(even) {
+    flex-direction: row-reverse;
+    text-align: right;
+    padding-left: calc(50% + var(--flin-space-4));
+    margin-left: calc(-50% - var(--flin-space-4));
+}
+
+.timeline-alternating .timeline-item:nth-child(odd) {
+    padding-right: calc(50% + var(--flin-space-4));
+    margin-right: calc(-50% - var(--flin-space-4));
+}
+
+.timeline-alternating .timeline-connector {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Compact variant */
+.timeline-compact .timeline-marker {
+    width: 24px;
+    height: 24px;
+}
+
+.timeline-compact .marker-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+}
+
+.timeline-compact .timeline-connector {
+    left: 11px;
+    top: 28px;
+}
+
+.timeline-compact .timeline-card {
+    padding: var(--flin-space-3);
+}
+
+.timeline-compact .timeline-title {
+    font-size: var(--flin-text-sm);
+}
+
+.timeline-compact .timeline-description {
+    font-size: var(--flin-text-xs);
+}
+
+/* Animation */
+.timeline-animated .timeline-item {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: timeline-fade-in 0.5s ease-out forwards;
+}
+
+.timeline-animated .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+.timeline-animated .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+.timeline-animated .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+.timeline-animated .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+.timeline-animated .timeline-item:nth-child(5) { animation-delay: 0.5s; }
+.timeline-animated .timeline-item:nth-child(6) { animation-delay: 0.6s; }
+.timeline-animated .timeline-item:nth-child(7) { animation-delay: 0.7s; }
+.timeline-animated .timeline-item:nth-child(8) { animation-delay: 0.8s; }
+
+@keyframes timeline-fade-in {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .timeline-alternating {
+        padding-left: 0;
+    }
+
+    .timeline-alternating .timeline-item:nth-child(even),
+    .timeline-alternating .timeline-item:nth-child(odd) {
+        flex-direction: row;
+        text-align: left;
+        padding-left: 0;
+        padding-right: 0;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .timeline-alternating .timeline-connector {
+        left: 19px;
+        transform: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .timeline-item {
+        gap: var(--flin-space-3);
+    }
+
+    .timeline-marker {
+        width: 32px;
+        height: 32px;
+    }
+
+    .marker-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.875rem;
+    }
+
+    .timeline-connector {
+        left: 15px;
+        top: 36px;
+    }
+
+    .timeline-card {
+        padding: var(--flin-space-3);
+    }
+}
+</style>

@@ -1,0 +1,704 @@
+// ============================================================================
+// NavbarWithDropdown.flin — FlinUI PRO Navigation Component
+// Navbar with dropdown menus for navigation items with nested options
+// ============================================================================
+// Props:
+//   - logo: Logo image URL or none for default (string)
+//   - logoText: Text to show with/instead of logo (string)
+//   - logoHref: Link for logo click (string)
+//   - links: Array of nav links [{ label, href, active, dropdown: [{ label, href, description, icon }] }] (array)
+//   - ctaLabel: CTA button text (string)
+//   - ctaHref: CTA button link (string)
+//   - variant: Color scheme - light, dark (string)
+
+logo = props.logo || none
+logoText = props.logoText || "Brand"
+logoHref = props.logoHref || "/"
+links = props.links || []
+ctaLabel = props.ctaLabel || none
+ctaHref = props.ctaHref || none
+variant = props.variant || "light"
+
+// State
+mobileOpen = false
+activeDropdown = none
+
+toggleMobile = {
+    mobileOpen = !mobileOpen
+    activeDropdown = none
+}
+
+closeMobile = {
+    mobileOpen = false
+    activeDropdown = none
+}
+
+openDropdown = fn(index) {
+    activeDropdown = index
+}
+
+closeDropdown = {
+    activeDropdown = none
+}
+
+toggleDropdown = fn(index) {
+    if activeDropdown == index {
+        activeDropdown = none
+    } else {
+        activeDropdown = index
+    }
+}
+
+// Variant classes
+variantClass = match variant {
+    "dark" => "navbar-dropdown-dark"
+    _ => "navbar-dropdown-light"
+}
+
+// Mobile menu class
+mobileClass = match mobileOpen {
+    true => " navbar-mobile-open"
+    _ => ""
+}
+
+navbarClass = "flin-navbar-dropdown " ++ variantClass ++ mobileClass
+
+<nav class={navbarClass} role="navigation" aria-label="Main navigation">
+    <div class="navbar-container">
+        <!-- Logo -->
+        <a href={logoHref} class="navbar-brand">
+            {if logo != none}
+                <img src={logo} alt={logoText} class="navbar-logo-img">
+            {else}
+                <div class="navbar-logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+            {/if}
+            <span class="navbar-logo-text">{logoText}</span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <div class="navbar-nav">
+            {for link, index in links}
+                {if link.dropdown != none}
+                    <div
+                        class="navbar-dropdown-wrapper"
+                        mouseenter={fn() { openDropdown(index) }}
+                        mouseleave={closeDropdown}
+                    >
+                        <button
+                            class={"navbar-link navbar-link-dropdown" ++ (match link.active { true => " navbar-link-active", _ => "" })}
+                            aria-expanded={activeDropdown == index}
+                            aria-haspopup="true"
+                        >
+                            {link.label}
+                            <svg class="navbar-dropdown-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <div class={"navbar-dropdown-menu" ++ (match activeDropdown == index { true => " navbar-dropdown-open", _ => "" })}>
+                            <div class="navbar-dropdown-content">
+                                {for item in link.dropdown}
+                                    <a href={item.href} class="navbar-dropdown-item" click={closeDropdown}>
+                                        {if item.icon != none}
+                                            <span class="navbar-dropdown-icon">{item.icon}</span>
+                                        {/if}
+                                        <div class="navbar-dropdown-item-content">
+                                            <span class="navbar-dropdown-item-label">{item.label}</span>
+                                            {if item.description != none}
+                                                <span class="navbar-dropdown-item-desc">{item.description}</span>
+                                            {/if}
+                                        </div>
+                                    </a>
+                                {/for}
+                            </div>
+                        </div>
+                    </div>
+                {else}
+                    <a
+                        href={link.href}
+                        class={"navbar-link" ++ (match link.active { true => " navbar-link-active", _ => "" })}
+                    >
+                        {link.label}
+                    </a>
+                {/if}
+            {/for}
+        </div>
+
+        <!-- Actions -->
+        <div class="navbar-actions">
+            {if ctaLabel != none}
+                <a href={ctaHref} class="navbar-cta">{ctaLabel}</a>
+            {/if}
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button
+            class="navbar-toggle"
+            click={toggleMobile}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileOpen}
+        >
+            {if mobileOpen}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            {else}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            {/if}
+        </button>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="navbar-mobile">
+        <div class="navbar-mobile-inner">
+            {for link, index in links}
+                {if link.dropdown != none}
+                    <div class="navbar-mobile-dropdown">
+                        <button
+                            class={"navbar-mobile-dropdown-btn" ++ (match activeDropdown == index { true => " navbar-mobile-dropdown-open", _ => "" })}
+                            click={fn() { toggleDropdown(index) }}
+                        >
+                            {link.label}
+                            <svg class="navbar-mobile-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        {if activeDropdown == index}
+                            <div class="navbar-mobile-dropdown-content">
+                                {for item in link.dropdown}
+                                    <a href={item.href} class="navbar-mobile-dropdown-item" click={closeMobile}>
+                                        {if item.icon != none}
+                                            <span class="navbar-mobile-dropdown-icon">{item.icon}</span>
+                                        {/if}
+                                        <div class="navbar-mobile-dropdown-text">
+                                            <span class="navbar-mobile-dropdown-label">{item.label}</span>
+                                            {if item.description != none}
+                                                <span class="navbar-mobile-dropdown-desc">{item.description}</span>
+                                            {/if}
+                                        </div>
+                                    </a>
+                                {/for}
+                            </div>
+                        {/if}
+                    </div>
+                {else}
+                    <a
+                        href={link.href}
+                        class={"navbar-mobile-link" ++ (match link.active { true => " navbar-mobile-link-active", _ => "" })}
+                        click={closeMobile}
+                    >
+                        {link.label}
+                    </a>
+                {/if}
+            {/for}
+            {if ctaLabel != none}
+                <a href={ctaHref} class="navbar-mobile-cta" click={closeMobile}>{ctaLabel}</a>
+            {/if}
+        </div>
+    </div>
+</nav>
+
+<style scoped>
+.flin-navbar-dropdown {
+    width: 100%;
+    border-bottom: 1px solid var(--flin-neutral-200);
+    position: relative;
+    z-index: var(--flin-z-navbar);
+}
+
+.navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: var(--flin-container-screen-xl);
+    height: 64px;
+    margin: 0 auto;
+    padding: 0 var(--flin-space-4);
+}
+
+/* Light variant */
+.navbar-dropdown-light {
+    background-color: var(--flin-bg);
+    color: var(--flin-fg);
+}
+
+.navbar-dropdown-light .navbar-link {
+    color: var(--flin-fg-muted);
+}
+
+.navbar-dropdown-light .navbar-link:hover,
+.navbar-dropdown-light .navbar-link-active {
+    color: var(--flin-fg);
+}
+
+.navbar-dropdown-light .navbar-dropdown-menu {
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+}
+
+/* Dark variant */
+.navbar-dropdown-dark {
+    background-color: var(--flin-neutral-900);
+    color: var(--flin-neutral-50);
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+.navbar-dropdown-dark .navbar-link {
+    color: var(--flin-neutral-400);
+}
+
+.navbar-dropdown-dark .navbar-link:hover,
+.navbar-dropdown-dark .navbar-link-active {
+    color: var(--flin-neutral-50);
+}
+
+.navbar-dropdown-dark .navbar-dropdown-menu {
+    background-color: var(--flin-neutral-800);
+    border: 1px solid var(--flin-neutral-700);
+}
+
+.navbar-dropdown-dark .navbar-dropdown-item:hover {
+    background-color: var(--flin-neutral-700);
+}
+
+.navbar-dropdown-dark .navbar-dropdown-item-desc {
+    color: var(--flin-neutral-400);
+}
+
+/* Brand/Logo */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    text-decoration: none;
+    color: inherit;
+    font-weight: var(--flin-font-bold);
+}
+
+.navbar-logo-img {
+    height: 32px;
+    width: auto;
+}
+
+.navbar-logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--flin-radius-md);
+    background: var(--flin-primary);
+    color: white;
+}
+
+.navbar-logo-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.navbar-logo-text {
+    font-size: var(--flin-text-lg);
+}
+
+/* Navigation links */
+.navbar-nav {
+    display: none;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+@media (min-width: 1024px) {
+    .navbar-nav {
+        display: flex;
+    }
+}
+
+.navbar-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    text-decoration: none;
+    border: none;
+    background: transparent;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-link:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.navbar-dropdown-dark .navbar-link:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+.navbar-dropdown-chevron {
+    width: 14px;
+    height: 14px;
+    transition: transform var(--flin-transition-fast);
+}
+
+.navbar-link-dropdown[aria-expanded="true"] .navbar-dropdown-chevron {
+    transform: rotate(180deg);
+}
+
+/* Dropdown menu */
+.navbar-dropdown-wrapper {
+    position: relative;
+}
+
+.navbar-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    min-width: 280px;
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-dropdown-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.navbar-dropdown-content {
+    padding: var(--flin-space-2);
+}
+
+.navbar-dropdown-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    text-decoration: none;
+    color: inherit;
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.navbar-dropdown-item:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.navbar-dropdown-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: var(--flin-radius-md);
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.navbar-dropdown-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.navbar-dropdown-item-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.navbar-dropdown-item-label {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+}
+
+.navbar-dropdown-dark .navbar-dropdown-item-label {
+    color: var(--flin-neutral-50);
+}
+
+.navbar-dropdown-item-desc {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    line-height: var(--flin-leading-relaxed);
+}
+
+/* Actions */
+.navbar-actions {
+    display: none;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+@media (min-width: 1024px) {
+    .navbar-actions {
+        display: flex;
+    }
+}
+
+.navbar-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-cta:hover {
+    background-color: var(--flin-primary-hover);
+}
+
+/* Mobile toggle */
+.navbar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.navbar-toggle:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.navbar-dropdown-dark .navbar-toggle:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+.navbar-toggle svg {
+    width: 24px;
+    height: 24px;
+}
+
+@media (min-width: 1024px) {
+    .navbar-toggle {
+        display: none;
+    }
+}
+
+/* Mobile menu */
+.navbar-mobile {
+    display: none;
+    border-top: 1px solid var(--flin-neutral-200);
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+}
+
+.navbar-dropdown-dark .navbar-mobile {
+    border-top-color: var(--flin-neutral-700);
+}
+
+.navbar-mobile-open .navbar-mobile {
+    display: block;
+}
+
+@media (min-width: 1024px) {
+    .navbar-mobile {
+        display: none !important;
+    }
+}
+
+.navbar-mobile-inner {
+    display: flex;
+    flex-direction: column;
+    padding: var(--flin-space-4);
+    gap: var(--flin-space-1);
+}
+
+.navbar-mobile-link {
+    display: block;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-medium);
+    text-decoration: none;
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-dropdown-light .navbar-mobile-link {
+    color: var(--flin-fg-muted);
+}
+
+.navbar-dropdown-light .navbar-mobile-link:hover,
+.navbar-dropdown-light .navbar-mobile-link-active {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.navbar-dropdown-dark .navbar-mobile-link {
+    color: var(--flin-neutral-400);
+}
+
+.navbar-dropdown-dark .navbar-mobile-link:hover,
+.navbar-dropdown-dark .navbar-mobile-link-active {
+    color: var(--flin-neutral-50);
+    background-color: var(--flin-neutral-800);
+}
+
+/* Mobile dropdown */
+.navbar-mobile-dropdown {
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar-mobile-dropdown-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-medium);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-dropdown-light .navbar-mobile-dropdown-btn {
+    color: var(--flin-fg-muted);
+}
+
+.navbar-dropdown-light .navbar-mobile-dropdown-btn:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.navbar-dropdown-dark .navbar-mobile-dropdown-btn {
+    color: var(--flin-neutral-400);
+}
+
+.navbar-dropdown-dark .navbar-mobile-dropdown-btn:hover {
+    color: var(--flin-neutral-50);
+    background-color: var(--flin-neutral-800);
+}
+
+.navbar-mobile-chevron {
+    width: 18px;
+    height: 18px;
+    transition: transform var(--flin-transition-fast);
+}
+
+.navbar-mobile-dropdown-open .navbar-mobile-chevron {
+    transform: rotate(180deg);
+}
+
+.navbar-mobile-dropdown-content {
+    display: flex;
+    flex-direction: column;
+    padding: var(--flin-space-2) 0 var(--flin-space-2) var(--flin-space-4);
+    gap: var(--flin-space-1);
+}
+
+.navbar-mobile-dropdown-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    text-decoration: none;
+    color: inherit;
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.navbar-mobile-dropdown-item:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.navbar-dropdown-dark .navbar-mobile-dropdown-item:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+.navbar-mobile-dropdown-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: var(--flin-radius-md);
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.navbar-mobile-dropdown-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.navbar-mobile-dropdown-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.navbar-mobile-dropdown-label {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+}
+
+.navbar-dropdown-light .navbar-mobile-dropdown-label {
+    color: var(--flin-fg);
+}
+
+.navbar-dropdown-dark .navbar-mobile-dropdown-label {
+    color: var(--flin-neutral-50);
+}
+
+.navbar-mobile-dropdown-desc {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    line-height: var(--flin-leading-relaxed);
+}
+
+.navbar-mobile-cta {
+    display: block;
+    width: 100%;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    margin-top: var(--flin-space-2);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    text-align: center;
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-mobile-cta:hover {
+    background-color: var(--flin-primary-hover);
+}
+</style>

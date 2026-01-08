@@ -1,0 +1,391 @@
+// LogoutConfirm.flin - FlinUI PRO Logout Confirmation Modal
+// Confirmation dialog for logout action
+
+// Props with defaults
+isOpen = props.isOpen || false
+onConfirm = props.onConfirm
+onCancel = props.onCancel
+userName = props.userName || "User"
+title = props.title || "Log out?"
+message = props.message || none
+confirmLabel = props.confirmLabel || "Log out"
+cancelLabel = props.cancelLabel || "Cancel"
+showWarning = props.showWarning || true
+
+// State
+isLoading = false
+
+// Default message
+displayMessage = {if message != none {
+    message
+} else {
+    "Are you sure you want to log out of your account?"
+}}
+
+// Handle confirm
+handleConfirm = {
+    isLoading = true
+    if onConfirm {
+        onConfirm()
+    }
+}
+
+// Handle cancel
+handleCancel = {
+    if onCancel {
+        onCancel()
+    }
+}
+
+// Handle backdrop click
+handleBackdropClick = fn(e) {
+    if e.target == e.currentTarget && !isLoading {
+        handleCancel()
+    }
+}
+
+// Handle escape key
+handleKeyDown = fn(e) {
+    if e.key == "Escape" && !isLoading {
+        handleCancel()
+    }
+}
+
+// Overlay classes
+overlayClass = "logout-confirm-overlay" ++ match isOpen {
+    true -> " logout-confirm-overlay-visible"
+    _ -> ""
+}
+
+{if isOpen}
+    <div
+        class={overlayClass}
+        click={handleBackdropClick}
+        keydown={handleKeyDown}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="logout-confirm-title"
+    >
+        <div class="logout-confirm-modal">
+            <div class="logout-confirm-header">
+                <div class="logout-confirm-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                </div>
+                <button
+                    class="logout-confirm-close"
+                    click={handleCancel}
+                    disabled={isLoading}
+                    aria-label="Close"
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="logout-confirm-content">
+                <h2 id="logout-confirm-title" class="logout-confirm-title">{title}</h2>
+                <p class="logout-confirm-message">{displayMessage}</p>
+
+                {if showWarning}
+                    <div class="logout-confirm-warning">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <span>You'll need to sign in again to access your account.</span>
+                    </div>
+                {/if}
+            </div>
+
+            <div class="logout-confirm-user">
+                <div class="logout-confirm-user-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <span class="logout-confirm-user-name">{userName}</span>
+            </div>
+
+            <div class="logout-confirm-actions">
+                <button
+                    class="logout-confirm-btn logout-confirm-btn-cancel"
+                    click={handleCancel}
+                    disabled={isLoading}
+                >
+                    {cancelLabel}
+                </button>
+                <button
+                    class="logout-confirm-btn logout-confirm-btn-confirm"
+                    click={handleConfirm}
+                    disabled={isLoading}
+                >
+                    {if isLoading}
+                        <svg class="logout-confirm-spinner" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="32" stroke-dashoffset="32">
+                                <animate attributeName="stroke-dashoffset" values="32;0;32" dur="1s" repeatCount="indefinite"/>
+                            </circle>
+                        </svg>
+                        Logging out...
+                    {else}
+                        {confirmLabel}
+                    {/if}
+                </button>
+            </div>
+        </div>
+    </div>
+{/if}
+
+<style scoped>
+.logout-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--flin-z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-4);
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--flin-transition-normal);
+}
+
+.logout-confirm-overlay-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.logout-confirm-modal {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 400px;
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-xl);
+    animation: logout-confirm-appear 0.2s ease-out;
+    overflow: hidden;
+}
+
+@keyframes logout-confirm-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Header */
+.logout-confirm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.logout-confirm-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-danger-light);
+}
+
+.logout-confirm-icon svg {
+    width: 20px;
+    height: 20px;
+    color: var(--flin-danger);
+}
+
+.logout-confirm-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.logout-confirm-close:hover:not(:disabled) {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-fg);
+}
+
+.logout-confirm-close:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.logout-confirm-close svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Content */
+.logout-confirm-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-6);
+}
+
+.logout-confirm-title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.logout-confirm-message {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.5;
+}
+
+/* Warning */
+.logout-confirm-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    background-color: var(--flin-warning-light);
+    border-radius: var(--flin-radius-md);
+}
+
+.logout-confirm-warning svg {
+    width: 16px;
+    height: 16px;
+    color: var(--flin-warning);
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.logout-confirm-warning span {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-warning-dark);
+    line-height: 1.4;
+}
+
+/* User info */
+.logout-confirm-user {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4) var(--flin-space-6);
+    background-color: var(--flin-neutral-50);
+    border-top: 1px solid var(--flin-neutral-200);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.logout-confirm-user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-neutral-200);
+}
+
+.logout-confirm-user-avatar svg {
+    width: 18px;
+    height: 18px;
+    color: var(--flin-fg-muted);
+}
+
+.logout-confirm-user-name {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+}
+
+/* Actions */
+.logout-confirm-actions {
+    display: flex;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4) var(--flin-space-6);
+}
+
+.logout-confirm-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    flex: 1;
+    height: var(--flin-height-sm);
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.logout-confirm-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.logout-confirm-btn-cancel {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-fg);
+}
+
+.logout-confirm-btn-cancel:hover:not(:disabled) {
+    background-color: var(--flin-neutral-200);
+}
+
+.logout-confirm-btn-confirm {
+    background-color: var(--flin-danger);
+    color: white;
+}
+
+.logout-confirm-btn-confirm:hover:not(:disabled) {
+    background-color: var(--flin-danger-dark);
+}
+
+.logout-confirm-spinner {
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .logout-confirm-modal {
+        max-width: none;
+        margin: var(--flin-space-4);
+    }
+
+    .logout-confirm-actions {
+        flex-direction: column-reverse;
+    }
+}
+</style>

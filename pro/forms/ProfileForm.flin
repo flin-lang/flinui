@@ -1,0 +1,949 @@
+// ProfileForm.flin - FlinUI PRO Profile Edit Form Component
+// Complete user profile edit form with avatar upload, validation, and social links
+
+// Props with defaults
+title = props.title || "Edit Profile"
+subtitle = props.subtitle || "Update your personal information"
+initialData = props.initialData || []
+showAvatar = props.showAvatar || true
+showVerifiedBadge = props.showVerifiedBadge || false
+isEmailVerified = props.isEmailVerified || false
+showSocialLinks = props.showSocialLinks || true
+onSubmit = props.submit
+onCancel = props.cancel
+onAvatarChange = props.avatarChange
+disabled = props.disabled || false
+maxBioLength = props.maxBioLength || 500
+
+// State - Form fields
+fullName = initialData.fullName || ""
+email = initialData.email || ""
+phone = initialData.phone || ""
+bio = initialData.bio || ""
+location = initialData.location || ""
+website = initialData.website || ""
+twitter = initialData.twitter || ""
+linkedin = initialData.linkedin || ""
+github = initialData.github || ""
+avatarUrl = initialData.avatarUrl || ""
+avatarPreview = initialData.avatarUrl || ""
+
+// State - UI
+isLoading = false
+errors = [
+    "fullName": none,
+    "email": none,
+    "phone": none,
+    "bio": none,
+    "website": none,
+    "twitter": none,
+    "linkedin": none,
+    "github": none
+]
+activeSection = "personal"
+
+// Validation functions
+validateFullName = fn(value) {
+    if value == "" {
+        "Full name is required"
+    } else if value.len < 2 {
+        "Name must be at least 2 characters"
+    } else {
+        none
+    }
+}
+
+validateEmail = fn(value) {
+    if value == "" {
+        "Email is required"
+    } else if !value.includes("@") || !value.includes(".") {
+        "Please enter a valid email address"
+    } else {
+        none
+    }
+}
+
+validatePhone = fn(value) {
+    if value != "" && value.len < 10 {
+        "Please enter a valid phone number"
+    } else {
+        none
+    }
+}
+
+validateBio = fn(value) {
+    if value.len > maxBioLength {
+        "Bio must be " ++ maxBioLength ++ " characters or less"
+    } else {
+        none
+    }
+}
+
+validateUrl = fn(value) {
+    if value != "" && !value.startsWith("http://") && !value.startsWith("https://") {
+        "Please enter a valid URL starting with http:// or https://"
+    } else {
+        none
+    }
+}
+
+validateSocialHandle = fn(value, platform) {
+    if value != "" && value.includes(" ") {
+        "Username cannot contain spaces"
+    } else {
+        none
+    }
+}
+
+// Handle input changes
+handleInputChange = fn(field, value) {
+    match field {
+        "fullName" -> { fullName = value; errors.fullName = none }
+        "email" -> { email = value; errors.email = none }
+        "phone" -> { phone = value; errors.phone = none }
+        "bio" -> { bio = value; errors.bio = none }
+        "location" -> { location = value }
+        "website" -> { website = value; errors.website = none }
+        "twitter" -> { twitter = value; errors.twitter = none }
+        "linkedin" -> { linkedin = value; errors.linkedin = none }
+        "github" -> { github = value; errors.github = none }
+        _ -> {}
+    }
+}
+
+// Handle avatar file selection
+handleAvatarSelect = fn(e) {
+    file = e.target.files[0]
+    if file {
+        reader = FileReader.new()
+        reader.onload = fn(event) {
+            avatarPreview = event.target.result
+        }
+        reader.readAsDataURL(file)
+        if onAvatarChange {
+            onAvatarChange(file)
+        }
+    }
+}
+
+// Trigger file input click
+triggerAvatarUpload = {
+    document.getElementById("profile-avatar-input").click()
+}
+
+// Remove avatar
+removeAvatar = {
+    avatarPreview = ""
+    avatarUrl = ""
+    if onAvatarChange {
+        onAvatarChange(none)
+    }
+}
+
+// Validate all fields
+validateAll = fn() {
+    errors.fullName = validateFullName(fullName)
+    errors.email = validateEmail(email)
+    errors.phone = validatePhone(phone)
+    errors.bio = validateBio(bio)
+    errors.website = validateUrl(website)
+    errors.twitter = validateSocialHandle(twitter, "twitter")
+    errors.linkedin = validateSocialHandle(linkedin, "linkedin")
+    errors.github = validateSocialHandle(github, "github")
+
+    hasErrors = errors.fullName != none || errors.email != none ||
+                errors.phone != none || errors.bio != none ||
+                errors.website != none || errors.twitter != none ||
+                errors.linkedin != none || errors.github != none
+
+    !hasErrors
+}
+
+// Handle form submission
+handleSubmit = {
+    event.preventDefault()
+
+    if validateAll() {
+        isLoading = true
+        if onSubmit {
+            onSubmit([
+                "fullName": fullName,
+                "email": email,
+                "phone": phone,
+                "bio": bio,
+                "location": location,
+                "website": website,
+                "twitter": twitter,
+                "linkedin": linkedin,
+                "github": github,
+                "avatarUrl": avatarPreview
+            ])
+        }
+        isLoading = false
+    }
+}
+
+// Handle cancel
+handleCancel = {
+    if onCancel {
+        onCancel()
+    }
+}
+
+// Compute classes
+disabledClass = match disabled || isLoading { true -> " profile-form-disabled", _ -> "" }
+containerClass = "profile-form" ++ disabledClass
+
+// Bio character count
+bioRemaining = maxBioLength - bio.len
+bioCountClass = match bioRemaining < 50 {
+    true -> match bioRemaining < 0 { true -> " danger", _ -> " warning" },
+    _ -> ""
+}
+
+<div class={containerClass}>
+    <div class="profile-form-header">
+        <h2 class="profile-form-title">{title}</h2>
+        <p class="profile-form-subtitle">{subtitle}</p>
+    </div>
+
+    <form class="profile-form-body" submit={handleSubmit} novalidate>
+        {if showAvatar}
+            <div class="profile-form-section">
+                <h3 class="profile-form-section-title">Profile Photo</h3>
+                <div class="profile-form-avatar-section">
+                    <div class="profile-form-avatar">
+                        {if avatarPreview != ""}
+                            <img src={avatarPreview} alt="Profile avatar" class="profile-form-avatar-img">
+                        {else}
+                            <div class="profile-form-avatar-placeholder">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </div>
+                        {/if}
+                    </div>
+                    <div class="profile-form-avatar-actions">
+                        <input
+                            type="file"
+                            id="profile-avatar-input"
+                            class="profile-form-avatar-input"
+                            accept="image/*"
+                            change={handleAvatarSelect}
+                        >
+                        <button
+                            type="button"
+                            class="profile-form-btn profile-form-btn-secondary"
+                            click={triggerAvatarUpload}
+                            disabled={disabled || isLoading}
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Upload Photo
+                        </button>
+                        {if avatarPreview != ""}
+                            <button
+                                type="button"
+                                class="profile-form-btn profile-form-btn-ghost"
+                                click={removeAvatar}
+                                disabled={disabled || isLoading}
+                            >
+                                Remove
+                            </button>
+                        {/if}
+                    </div>
+                    <p class="profile-form-avatar-hint">JPG, PNG or GIF. Max 2MB.</p>
+                </div>
+            </div>
+        {/if}
+
+        <div class="profile-form-section">
+            <h3 class="profile-form-section-title">Personal Information</h3>
+            <div class="profile-form-grid">
+                <div class={"profile-form-field" ++ (match errors.fullName { none -> "", _ -> " has-error" })}>
+                    <label class="profile-form-label" for="profile-fullname">
+                        Full Name <span class="profile-form-required">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="profile-fullname"
+                        class="profile-form-input"
+                        value={fullName}
+                        placeholder="Enter your full name"
+                        disabled={disabled || isLoading}
+                        input={fn(e) { handleInputChange("fullName", e.target.value) }}
+                        autocomplete="name"
+                    >
+                    {if errors.fullName != none}
+                        <span class="profile-form-error">{errors.fullName}</span>
+                    {/if}
+                </div>
+
+                <div class={"profile-form-field" ++ (match errors.email { none -> "", _ -> " has-error" })}>
+                    <label class="profile-form-label" for="profile-email">
+                        Email Address <span class="profile-form-required">*</span>
+                        {if showVerifiedBadge && isEmailVerified}
+                            <span class="profile-form-verified-badge">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Verified
+                            </span>
+                        {/if}
+                    </label>
+                    <input
+                        type="email"
+                        id="profile-email"
+                        class="profile-form-input"
+                        value={email}
+                        placeholder="you@example.com"
+                        disabled={disabled || isLoading}
+                        input={fn(e) { handleInputChange("email", e.target.value) }}
+                        autocomplete="email"
+                    >
+                    {if errors.email != none}
+                        <span class="profile-form-error">{errors.email}</span>
+                    {/if}
+                </div>
+
+                <div class={"profile-form-field" ++ (match errors.phone { none -> "", _ -> " has-error" })}>
+                    <label class="profile-form-label" for="profile-phone">Phone Number</label>
+                    <input
+                        type="tel"
+                        id="profile-phone"
+                        class="profile-form-input"
+                        value={phone}
+                        placeholder="+1 (555) 000-0000"
+                        disabled={disabled || isLoading}
+                        input={fn(e) { handleInputChange("phone", e.target.value) }}
+                        autocomplete="tel"
+                    >
+                    {if errors.phone != none}
+                        <span class="profile-form-error">{errors.phone}</span>
+                    {/if}
+                </div>
+
+                <div class="profile-form-field">
+                    <label class="profile-form-label" for="profile-location">Location</label>
+                    <div class="profile-form-input-with-icon">
+                        <svg class="profile-form-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        <input
+                            type="text"
+                            id="profile-location"
+                            class="profile-form-input has-icon"
+                            value={location}
+                            placeholder="City, Country"
+                            disabled={disabled || isLoading}
+                            input={fn(e) { handleInputChange("location", e.target.value) }}
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <div class={"profile-form-field profile-form-field-full" ++ (match errors.bio { none -> "", _ -> " has-error" })}>
+                <label class="profile-form-label" for="profile-bio">
+                    Bio
+                    <span class={"profile-form-char-count" ++ bioCountClass}>{bioRemaining} characters remaining</span>
+                </label>
+                <textarea
+                    id="profile-bio"
+                    class="profile-form-textarea"
+                    value={bio}
+                    placeholder="Write a short bio about yourself..."
+                    rows="4"
+                    disabled={disabled || isLoading}
+                    input={fn(e) { handleInputChange("bio", e.target.value) }}
+                ></textarea>
+                {if errors.bio != none}
+                    <span class="profile-form-error">{errors.bio}</span>
+                {/if}
+            </div>
+        </div>
+
+        <div class="profile-form-section">
+            <h3 class="profile-form-section-title">Online Presence</h3>
+            <div class={"profile-form-field profile-form-field-full" ++ (match errors.website { none -> "", _ -> " has-error" })}>
+                <label class="profile-form-label" for="profile-website">Website</label>
+                <div class="profile-form-input-with-icon">
+                    <svg class="profile-form-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="2" y1="12" x2="22" y2="12"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                    <input
+                        type="url"
+                        id="profile-website"
+                        class="profile-form-input has-icon"
+                        value={website}
+                        placeholder="https://yourwebsite.com"
+                        disabled={disabled || isLoading}
+                        input={fn(e) { handleInputChange("website", e.target.value) }}
+                        autocomplete="url"
+                    >
+                </div>
+                {if errors.website != none}
+                    <span class="profile-form-error">{errors.website}</span>
+                {/if}
+            </div>
+        </div>
+
+        {if showSocialLinks}
+            <div class="profile-form-section">
+                <h3 class="profile-form-section-title">Social Links</h3>
+                <div class="profile-form-social-grid">
+                    <div class={"profile-form-field" ++ (match errors.twitter { none -> "", _ -> " has-error" })}>
+                        <label class="profile-form-label" for="profile-twitter">
+                            <svg class="profile-form-social-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                            X (Twitter)
+                        </label>
+                        <div class="profile-form-input-with-prefix">
+                            <span class="profile-form-input-prefix">x.com/</span>
+                            <input
+                                type="text"
+                                id="profile-twitter"
+                                class="profile-form-input has-prefix"
+                                value={twitter}
+                                placeholder="username"
+                                disabled={disabled || isLoading}
+                                input={fn(e) { handleInputChange("twitter", e.target.value) }}
+                            >
+                        </div>
+                        {if errors.twitter != none}
+                            <span class="profile-form-error">{errors.twitter}</span>
+                        {/if}
+                    </div>
+
+                    <div class={"profile-form-field" ++ (match errors.linkedin { none -> "", _ -> " has-error" })}>
+                        <label class="profile-form-label" for="profile-linkedin">
+                            <svg class="profile-form-social-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                            LinkedIn
+                        </label>
+                        <div class="profile-form-input-with-prefix">
+                            <span class="profile-form-input-prefix">linkedin.com/in/</span>
+                            <input
+                                type="text"
+                                id="profile-linkedin"
+                                class="profile-form-input has-prefix"
+                                value={linkedin}
+                                placeholder="username"
+                                disabled={disabled || isLoading}
+                                input={fn(e) { handleInputChange("linkedin", e.target.value) }}
+                            >
+                        </div>
+                        {if errors.linkedin != none}
+                            <span class="profile-form-error">{errors.linkedin}</span>
+                        {/if}
+                    </div>
+
+                    <div class={"profile-form-field" ++ (match errors.github { none -> "", _ -> " has-error" })}>
+                        <label class="profile-form-label" for="profile-github">
+                            <svg class="profile-form-social-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                            </svg>
+                            GitHub
+                        </label>
+                        <div class="profile-form-input-with-prefix">
+                            <span class="profile-form-input-prefix">github.com/</span>
+                            <input
+                                type="text"
+                                id="profile-github"
+                                class="profile-form-input has-prefix"
+                                value={github}
+                                placeholder="username"
+                                disabled={disabled || isLoading}
+                                input={fn(e) { handleInputChange("github", e.target.value) }}
+                            >
+                        </div>
+                        {if errors.github != none}
+                            <span class="profile-form-error">{errors.github}</span>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+        {/if}
+
+        <div class="profile-form-actions">
+            <button
+                type="button"
+                class="profile-form-btn profile-form-btn-secondary"
+                click={handleCancel}
+                disabled={isLoading}
+            >
+                Cancel
+            </button>
+            <button
+                type="submit"
+                class="profile-form-btn profile-form-btn-primary"
+                disabled={disabled || isLoading}
+            >
+                {if isLoading}
+                    <svg class="profile-form-spinner" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="32" stroke-dashoffset="32">
+                            <animate attributeName="stroke-dashoffset" values="32;0;32" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                    Saving...
+                {else}
+                    Save Changes
+                {/if}
+            </button>
+        </div>
+    </form>
+</div>
+
+<style scoped>
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-6);
+    width: 100%;
+    max-width: 680px;
+    padding: var(--flin-space-8);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+/* Header */
+.profile-form-header {
+    padding-bottom: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.profile-form-title {
+    margin: 0;
+    font-size: var(--flin-text-xl);
+    font-weight: 700;
+    color: var(--flin-fg);
+}
+
+.profile-form-subtitle {
+    margin: var(--flin-space-1) 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Form body */
+.profile-form-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-8);
+}
+
+/* Sections */
+.profile-form-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.profile-form-section-title {
+    margin: 0;
+    font-size: var(--flin-text-base);
+    font-weight: 600;
+    color: var(--flin-fg);
+    padding-bottom: var(--flin-space-2);
+    border-bottom: 1px solid var(--flin-neutral-100);
+}
+
+/* Avatar section */
+.profile-form-avatar-section {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-6);
+}
+
+.profile-form-avatar {
+    flex-shrink: 0;
+    width: 96px;
+    height: 96px;
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    background-color: var(--flin-neutral-100);
+    border: 3px solid var(--flin-neutral-200);
+}
+
+.profile-form-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-form-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-neutral-400);
+}
+
+.profile-form-avatar-placeholder svg {
+    width: 48px;
+    height: 48px;
+}
+
+.profile-form-avatar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+    padding-top: var(--flin-space-2);
+}
+
+.profile-form-avatar-input {
+    display: none;
+}
+
+.profile-form-avatar-hint {
+    margin: 0;
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+/* Grid layout */
+.profile-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--flin-space-4);
+}
+
+.profile-form-social-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: var(--flin-space-4);
+}
+
+@media (min-width: 640px) {
+    .profile-form-social-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .profile-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-form-avatar-section {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}
+
+/* Form fields */
+.profile-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.profile-form-field-full {
+    grid-column: 1 / -1;
+}
+
+.profile-form-label {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+}
+
+.profile-form-required {
+    color: var(--flin-danger);
+}
+
+.profile-form-char-count {
+    margin-left: auto;
+    font-size: var(--flin-text-xs);
+    font-weight: 400;
+    color: var(--flin-fg-muted);
+}
+
+.profile-form-char-count.warning {
+    color: var(--flin-warning);
+}
+
+.profile-form-char-count.danger {
+    color: var(--flin-danger);
+}
+
+/* Verified badge */
+.profile-form-verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: 2px var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    color: var(--flin-success);
+    background-color: var(--flin-success-light);
+    border-radius: var(--flin-radius-full);
+}
+
+.profile-form-verified-badge svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Social icons in labels */
+.profile-form-social-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--flin-fg-muted);
+}
+
+/* Input styles */
+.profile-form-input {
+    width: 100%;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.profile-form-input:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.profile-form-input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.profile-form-input:disabled {
+    background-color: var(--flin-neutral-50);
+    cursor: not-allowed;
+}
+
+.has-error .profile-form-input {
+    border-color: var(--flin-danger);
+}
+
+.has-error .profile-form-input:focus {
+    box-shadow: 0 0 0 3px var(--flin-danger-light);
+}
+
+/* Input with icon */
+.profile-form-input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.profile-form-input-icon {
+    position: absolute;
+    left: var(--flin-space-3);
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+    color: var(--flin-fg-muted);
+    pointer-events: none;
+}
+
+.profile-form-input.has-icon {
+    padding-left: var(--flin-space-10);
+}
+
+/* Input with prefix */
+.profile-form-input-with-prefix {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+    transition: all var(--flin-transition-fast);
+}
+
+.profile-form-input-with-prefix:focus-within {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.has-error .profile-form-input-with-prefix {
+    border-color: var(--flin-danger);
+}
+
+.profile-form-input-prefix {
+    display: flex;
+    align-items: center;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    background-color: var(--flin-neutral-50);
+    border-right: 1px solid var(--flin-neutral-300);
+    white-space: nowrap;
+}
+
+.profile-form-input.has-prefix {
+    flex: 1;
+    border: none;
+    border-radius: 0;
+}
+
+.profile-form-input.has-prefix:focus {
+    box-shadow: none;
+}
+
+/* Textarea */
+.profile-form-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: var(--flin-space-3);
+    font-size: var(--flin-text-base);
+    font-family: inherit;
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    resize: vertical;
+    transition: all var(--flin-transition-fast);
+}
+
+.profile-form-textarea:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.profile-form-textarea::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.profile-form-textarea:disabled {
+    background-color: var(--flin-neutral-50);
+    cursor: not-allowed;
+}
+
+.has-error .profile-form-textarea {
+    border-color: var(--flin-danger);
+}
+
+/* Error message */
+.profile-form-error {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-danger);
+}
+
+/* Buttons */
+.profile-form-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.profile-form-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.profile-form-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.profile-form-btn-primary {
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+}
+
+.profile-form-btn-primary:hover:not(:disabled) {
+    background-color: var(--flin-primary-dark);
+}
+
+.profile-form-btn-secondary {
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+}
+
+.profile-form-btn-secondary:hover:not(:disabled) {
+    background-color: var(--flin-neutral-50);
+    border-color: var(--flin-neutral-400);
+}
+
+.profile-form-btn-ghost {
+    color: var(--flin-fg-muted);
+    background: none;
+    border: none;
+}
+
+.profile-form-btn-ghost:hover:not(:disabled) {
+    color: var(--flin-danger);
+}
+
+/* Actions bar */
+.profile-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--flin-space-3);
+    padding-top: var(--flin-space-6);
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+/* Spinner */
+.profile-form-spinner {
+    width: 18px;
+    height: 18px;
+    animation: profile-spin 1s linear infinite;
+}
+
+@keyframes profile-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Disabled state */
+.profile-form-disabled {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .profile-form {
+        padding: var(--flin-space-5);
+    }
+
+    .profile-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .profile-form-actions .profile-form-btn {
+        width: 100%;
+    }
+
+    .profile-form-input-prefix {
+        font-size: var(--flin-text-xs);
+        padding: 0 var(--flin-space-2);
+    }
+}
+</style>

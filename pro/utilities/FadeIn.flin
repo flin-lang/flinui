@@ -1,0 +1,108 @@
+// ============================================================================
+// FadeIn.flin — FlinUI PRO Utility Component
+// Fade animation wrapper for smooth entrance effects
+// ============================================================================
+// Props:
+//   - duration: Animation duration in ms (number, default: 500)
+//   - delay: Delay before animation starts in ms (number, default: 0)
+//   - direction: Fade direction - none, up, down, left, right (string, default: "up")
+//   - distance: Movement distance in px (number, default: 20)
+//   - easing: CSS easing function (string, default: "ease-out")
+//   - triggerOnView: Trigger animation when in view (boolean, default: true)
+//   - threshold: Intersection threshold 0-1 (number, default: 0.1)
+//   - once: Only animate once (boolean, default: true)
+//   - stagger: Stagger delay for multiple children in ms (number, default: 0)
+// ============================================================================
+
+duration = props.duration || 500
+delay = props.delay || 0
+direction = props.direction || "up"
+distance = props.distance || 20
+easing = props.easing || "ease-out"
+triggerOnView = props.triggerOnView || true
+threshold = props.threshold || 0.1
+once = props.once || true
+stagger = props.stagger || 0
+
+// State
+isVisible = !triggerOnView
+hasAnimated = false
+
+// Compute transform based on direction
+getInitialTransform = () => {
+    match direction {
+        "up" -> "translateY({distance}px)"
+        "down" -> "translateY(-{distance}px)"
+        "left" -> "translateX({distance}px)"
+        "right" -> "translateX(-{distance}px)"
+        _ -> "none"
+    }
+}
+
+// Handle intersection
+handleIntersection = (entries) => {
+    for entry in entries {
+        if entry.isIntersecting {
+            if !hasAnimated || !once {
+                isVisible = true
+                hasAnimated = true
+            }
+        } else if !once {
+            isVisible = false
+        }
+    }
+}
+
+// Lifecycle
+onMount = () => {
+    if triggerOnView {
+        observer = new IntersectionObserver(handleIntersection, {
+            threshold: threshold
+        })
+        observer.observe(element)
+    } else {
+        // Trigger after delay if not using intersection
+        setTimeout(() => { isVisible = true }, delay)
+    }
+}
+
+<div class="flin-fade-in {if isVisible}visible{/if}"
+     style="--fade-duration: {duration}ms; --fade-delay: {delay}ms; --fade-easing: {easing}; --fade-transform: {getInitialTransform()}; --stagger-delay: {stagger}ms">
+    {children}
+</div>
+
+<style scoped>
+.flin-fade-in {
+    opacity: 0;
+    transform: var(--fade-transform);
+    transition: opacity var(--fade-duration) var(--fade-easing) var(--fade-delay),
+                transform var(--fade-duration) var(--fade-easing) var(--fade-delay);
+    will-change: opacity, transform;
+}
+
+.flin-fade-in.visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* Stagger children */
+.flin-fade-in > *:nth-child(1) { transition-delay: calc(var(--fade-delay) + var(--stagger-delay) * 0); }
+.flin-fade-in > *:nth-child(2) { transition-delay: calc(var(--fade-delay) + var(--stagger-delay) * 1); }
+.flin-fade-in > *:nth-child(3) { transition-delay: calc(var(--fade-delay) + var(--stagger-delay) * 2); }
+.flin-fade-in > *:nth-child(4) { transition-delay: calc(var(--fade-delay) + var(--stagger-delay) * 3); }
+.flin-fade-in > *:nth-child(5) { transition-delay: calc(var(--fade-delay) + var(--stagger-delay) * 4); }
+.flin-fade-in > *:nth-child(6) { transition-delay: calc(var(--fade-delay) + var(--stagger-delay) * 5); }
+.flin-fade-in > *:nth-child(7) { transition-delay: calc(var(--fade-delay) + var(--stagger-delay) * 6); }
+.flin-fade-in > *:nth-child(8) { transition-delay: calc(var(--fade-delay) + var(--stagger-delay) * 7); }
+.flin-fade-in > *:nth-child(9) { transition-delay: calc(var(--fade-delay) + var(--stagger-delay) * 8); }
+.flin-fade-in > *:nth-child(10) { transition-delay: calc(var(--fade-delay) + var(--stagger-delay) * 9); }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .flin-fade-in {
+        transition: none;
+        opacity: 1;
+        transform: none;
+    }
+}
+</style>

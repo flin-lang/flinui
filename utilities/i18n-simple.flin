@@ -1,0 +1,305 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// FLIN i18n — Simple Approach (< 500 translation keys)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// 📖 USAGE:
+//   1. Copy this entire file into your project
+//   2. Add your translations to the `translations` map below
+//   3. Use `t("key")` in your templates
+//
+// ✅ GOOD FOR:
+//   • Small apps, landing pages, portfolios
+//   • < 500 translation keys
+//   • Simple setup, zero config
+//
+// ❌ NOT GOOD FOR:
+//   • E-commerce sites (1000+ keys)
+//   • Large apps (use i18n-namespaces.flin instead)
+//
+// 🔗 INSPIRED BY:
+//   • Next.js next-intl (simple dictionaries)
+//   • Nuxt i18n (basic setup)
+//   • SolidJS @solid-primitives/i18n
+//
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. TRANSLATION STORAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+translations = [
+    "en": [
+        // Navigation
+        "nav.home": "Home",
+        "nav.components": "Components",
+        "nav.docs": "Documentation",
+        "nav.examples": "Examples",
+        "nav.pro": "PRO",
+        "nav.github": "GitHub",
+
+        // Common UI
+        "common.loading": "Loading...",
+        "common.save": "Save",
+        "common.cancel": "Cancel",
+        "common.delete": "Delete",
+        "common.edit": "Edit",
+        "common.add": "Add",
+        "common.search": "Search",
+        "common.filter": "Filter",
+
+        // Greetings with interpolation
+        "greeting.hello": "Hello {{name}}!",
+        "greeting.welcome": "Welcome to {{appName}}",
+
+        // Plurals
+        "items.count": [
+            "zero": "No items",
+            "one": "1 item",
+            "other": "{{count}} items"
+        ],
+
+        "users.count": [
+            "zero": "No users online",
+            "one": "1 user online",
+            "other": "{{count}} users online"
+        ]
+    ],
+
+    "fr": [
+        // Navigation
+        "nav.home": "Accueil",
+        "nav.components": "Composants",
+        "nav.docs": "Documentation",
+        "nav.examples": "Exemples",
+        "nav.pro": "PRO",
+        "nav.github": "GitHub",
+
+        // Common UI
+        "common.loading": "Chargement...",
+        "common.save": "Enregistrer",
+        "common.cancel": "Annuler",
+        "common.delete": "Supprimer",
+        "common.edit": "Modifier",
+        "common.add": "Ajouter",
+        "common.search": "Rechercher",
+        "common.filter": "Filtrer",
+
+        // Greetings with interpolation
+        "greeting.hello": "Bonjour {{name}} !",
+        "greeting.welcome": "Bienvenue sur {{appName}}",
+
+        // Plurals
+        "items.count": [
+            "zero": "Aucun article",
+            "one": "1 article",
+            "other": "{{count}} articles"
+        ],
+
+        "users.count": [
+            "zero": "Aucun utilisateur en ligne",
+            "one": "1 utilisateur en ligne",
+            "other": "{{count}} utilisateurs en ligne"
+        ]
+    ],
+
+    "ar": [
+        // Navigation (Arabic)
+        "nav.home": "الرئيسية",
+        "nav.components": "المكونات",
+        "nav.docs": "التوثيق",
+        "nav.examples": "أمثلة",
+        "nav.pro": "احترافي",
+        "nav.github": "GitHub",
+
+        // Common UI
+        "common.loading": "جاري التحميل...",
+        "common.save": "حفظ",
+        "common.cancel": "إلغاء",
+        "common.delete": "حذف",
+        "common.edit": "تعديل",
+        "common.add": "إضافة",
+        "common.search": "بحث",
+        "common.filter": "تصفية",
+
+        // Greetings
+        "greeting.hello": "مرحبا {{name}}!",
+        "greeting.welcome": "مرحبا بك في {{appName}}",
+
+        // Plurals (Arabic has complex plural rules, simplified here)
+        "items.count": [
+            "zero": "لا توجد عناصر",
+            "one": "عنصر واحد",
+            "other": "{{count}} عناصر"
+        ],
+
+        "users.count": [
+            "zero": "لا يوجد مستخدمون متصلون",
+            "one": "مستخدم واحد متصل",
+            "other": "{{count}} مستخدمون متصلون"
+        ]
+    ]
+]
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. STATE
+// ─────────────────────────────────────────────────────────────────────────────
+
+currentLang = "en"  // Will be auto-detected in onMount
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. TRANSLATION FUNCTIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Simple translation lookup with nested key support
+// Example: t("nav.home") → "Home"
+fn t(key) {
+    parts = key.split(".")
+    dict = translations[currentLang]
+
+    // Navigate nested keys
+    for part in parts {
+        if dict == none {
+            // Try fallback to English
+            dict = translations["en"]
+            for p in parts {
+                if dict == none { return key }
+                dict = dict[p]
+            }
+            return dict ?? key
+        }
+        dict = dict[part]
+    }
+
+    // Fallback to English if not found in current language
+    if dict == none {
+        fallback_dict = translations["en"]
+        for part in parts {
+            if fallback_dict == none { return key }
+            fallback_dict = fallback_dict[part]
+        }
+        return fallback_dict ?? key
+    }
+
+    return dict
+}
+
+// Translation with variable interpolation
+// Example: t_with("greeting.hello", ["name": "Juste"]) → "Hello Juste!"
+fn t_with(key, vars) {
+    text = t(key)
+
+    // Replace {{var}} placeholders
+    for [k, v] in vars {
+        placeholder = "{{" + k + "}}"
+        text = text.replace(placeholder, v.to_text())
+    }
+
+    return text
+}
+
+// Plural helper with count-based rules
+// Example: plural(5, "items.count") → "5 items"
+fn plural(count, key) {
+    rules = t(key)
+
+    // If t() returned a plain string (no plural rules), just return it
+    if rules.type() == "text" {
+        return rules
+    }
+
+    // Apply plural rules
+    if count == 0 && rules["zero"] != none {
+        return t_with(rules["zero"], ["count": count])
+    }
+
+    if count == 1 && rules["one"] != none {
+        return t_with(rules["one"], ["count": count])
+    }
+
+    // Default to "other" form
+    other_form = rules["other"] ?? rules
+    return t_with(other_form, ["count": count])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. CURRENCY FORMATTING
+// ─────────────────────────────────────────────────────────────────────────────
+
+fn format_currency(amount, currency) {
+    configs = [
+        "USD": ["symbol": "$", "position": "before"],
+        "EUR": ["symbol": "€", "position": "after"],
+        "GBP": ["symbol": "£", "position": "before"],
+        "JPY": ["symbol": "¥", "position": "before"],
+        "CNY": ["symbol": "¥", "position": "before"],
+        "XOF": ["symbol": "CFA", "position": "after"],  // West African franc
+        "XAF": ["symbol": "FCFA", "position": "after"], // Central African franc
+        "MAD": ["symbol": "DH", "position": "after"],   // Moroccan dirham
+        "EGP": ["symbol": "E£", "position": "before"],  // Egyptian pound
+        "ZAR": ["symbol": "R", "position": "before"]    // South African rand
+    ]
+
+    config = configs[currency] ?? configs["USD"]
+    formatted = amount.format(2)  // Format with 2 decimals
+
+    if config["position"] == "before" {
+        return config["symbol"] + formatted
+    } else {
+        return formatted + " " + config["symbol"]
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. DATE FORMATTING (uses FLIN's built-in locale-aware formatting)
+// ─────────────────────────────────────────────────────────────────────────────
+
+fn format_date(date, format_str) {
+    return date.format(format_str)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. LANGUAGE DETECTION & PERSISTENCE
+// ─────────────────────────────────────────────────────────────────────────────
+
+fn detect_language() {
+    // 1. Check localStorage first (user preference)
+    stored = localStorage.get("flin_lang")
+    if stored != none && translations[stored] != none {
+        return stored
+    }
+
+    // 2. Check browser language
+    browser_lang = navigator.language.split("-")[0]  // "en-US" → "en"
+    if translations[browser_lang] != none {
+        return browser_lang
+    }
+
+    // 3. Fallback to English
+    return "en"
+}
+
+fn set_language(lang_code) {
+    if translations[lang_code] == none {
+        return  // Invalid language code
+    }
+
+    currentLang = lang_code
+    localStorage.set("flin_lang", lang_code)
+    document.documentElement.setAttribute("lang", lang_code)
+
+    // Set text direction for RTL languages
+    if lang_code == "ar" || lang_code == "he" {
+        document.documentElement.setAttribute("dir", "rtl")
+    } else {
+        document.documentElement.setAttribute("dir", "ltr")
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. AUTO-DETECT ON PAGE LOAD
+// ─────────────────────────────────────────────────────────────────────────────
+
+onMount {
+    currentLang = detect_language()
+    set_language(currentLang)  // Apply language settings
+}

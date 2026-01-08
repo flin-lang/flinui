@@ -1,0 +1,369 @@
+// FormStepper.flin - FlinUI Multi-Step Form Wizard Component
+// Step-by-step form with progress indicator
+
+// Props with defaults
+steps = props.steps || []
+currentStep = props.currentStep || 0
+onChange = props.onChange
+showProgress = props.showProgress || true
+variant = props.variant || "default"
+allowStepClick = props.allowStepClick || false
+
+// Total steps
+totalSteps = steps.len
+
+// Progress percentage
+progressPercent = match totalSteps > 0 {
+    true -> ((currentStep + 1) / totalSteps) * 100
+    _ -> 0
+}
+
+// Compute variant class
+variantClass = match variant {
+    "pills" -> " form-stepper-pills"
+    "dots" -> " form-stepper-dots"
+    "numbered" -> " form-stepper-numbered"
+    _ -> ""
+}
+
+containerClass = "form-stepper" ++ variantClass
+
+// Navigation functions
+goToStep = fn(stepIndex) {
+    if allowStepClick && stepIndex >= 0 && stepIndex < totalSteps && onChange {
+        onChange(stepIndex)
+    }
+}
+
+goNext = {
+    if currentStep < totalSteps - 1 && onChange {
+        onChange(currentStep + 1)
+    }
+}
+
+goPrev = {
+    if currentStep > 0 && onChange {
+        onChange(currentStep - 1)
+    }
+}
+
+// Check step state
+isStepComplete = fn(index) {
+    index < currentStep
+}
+
+isStepCurrent = fn(index) {
+    index == currentStep
+}
+
+isStepClickable = fn(index) {
+    allowStepClick && index <= currentStep
+}
+
+<div class={containerClass}>
+    {if showProgress}
+        <div class="form-stepper-progress">
+            <div class="form-stepper-progress-bar" style={"width: " ++ progressPercent ++ "%"}></div>
+        </div>
+    {/if}
+
+    <div class="form-stepper-header">
+        {for step, index in steps}
+            <div
+                class={"form-stepper-step" ++ (match isStepComplete(index) { true -> " step-complete", _ -> "" }) ++ (match isStepCurrent(index) { true -> " step-current", _ -> "" }) ++ (match isStepClickable(index) { true -> " step-clickable", _ -> "" })}
+                click={goToStep(index)}
+            >
+                <div class="form-stepper-step-indicator">
+                    {if isStepComplete(index)}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    {else}
+                        <span>{index + 1}</span>
+                    {/if}
+                </div>
+                <div class="form-stepper-step-content">
+                    <span class="form-stepper-step-title">{step.title || "Step " ++ (index + 1)}</span>
+                    {if step.description != none}
+                        <span class="form-stepper-step-description">{step.description}</span>
+                    {/if}
+                </div>
+                {if index < totalSteps - 1}
+                    <div class="form-stepper-connector"></div>
+                {/if}
+            </div>
+        {/for}
+    </div>
+
+    <div class="form-stepper-content">
+        {children}
+    </div>
+
+    <div class="form-stepper-actions">
+        <button
+            type="button"
+            class="form-stepper-btn form-stepper-btn-prev"
+            disabled={currentStep == 0}
+            click={goPrev}
+        >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Previous
+        </button>
+        <span class="form-stepper-indicator">
+            Step {currentStep + 1} of {totalSteps}
+        </span>
+        {if currentStep < totalSteps - 1}
+            <button
+                type="button"
+                class="form-stepper-btn form-stepper-btn-next"
+                click={goNext}
+            >
+                Next
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </button>
+        {else}
+            <button
+                type="submit"
+                class="form-stepper-btn form-stepper-btn-submit"
+            >
+                Submit
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+            </button>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+.form-stepper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-6);
+    width: 100%;
+}
+
+/* Progress bar */
+.form-stepper-progress {
+    height: 4px;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.form-stepper-progress-bar {
+    height: 100%;
+    background-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    transition: width var(--flin-transition-normal);
+}
+
+/* Header with steps */
+.form-stepper-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-2);
+}
+
+.form-stepper-step {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+    flex: 1;
+    position: relative;
+}
+
+.form-stepper-step-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-space-8);
+    height: var(--flin-space-8);
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-neutral-100);
+    border: 2px solid var(--flin-neutral-300);
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+    transition: all var(--flin-transition-fast);
+}
+
+.form-stepper-step-indicator svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.step-current .form-stepper-step-indicator {
+    background-color: var(--flin-primary);
+    border-color: var(--flin-primary);
+    color: white;
+}
+
+.step-complete .form-stepper-step-indicator {
+    background-color: var(--flin-success);
+    border-color: var(--flin-success);
+    color: white;
+}
+
+.step-clickable {
+    cursor: pointer;
+}
+
+.step-clickable:hover .form-stepper-step-indicator {
+    transform: scale(1.1);
+}
+
+.form-stepper-step-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+    padding-top: var(--flin-space-1);
+}
+
+.form-stepper-step-title {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.step-current .form-stepper-step-title {
+    color: var(--flin-primary);
+}
+
+.form-stepper-step-description {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+/* Connector line */
+.form-stepper-connector {
+    position: absolute;
+    top: var(--flin-space-4);
+    left: calc(var(--flin-space-8) + var(--flin-space-2));
+    right: var(--flin-space-2);
+    height: 2px;
+    background-color: var(--flin-neutral-200);
+}
+
+.step-complete .form-stepper-connector {
+    background-color: var(--flin-success);
+}
+
+/* Content area */
+.form-stepper-content {
+    padding: var(--flin-space-6);
+    background-color: var(--flin-neutral-50);
+    border-radius: var(--flin-radius-lg);
+    border: 1px solid var(--flin-neutral-200);
+}
+
+/* Actions */
+.form-stepper-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+}
+
+.form-stepper-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.form-stepper-btn svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.form-stepper-btn-prev {
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    color: var(--flin-fg);
+}
+
+.form-stepper-btn-prev:hover:not(:disabled) {
+    background-color: var(--flin-neutral-100);
+}
+
+.form-stepper-btn-prev:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.form-stepper-btn-next {
+    background-color: var(--flin-primary);
+    border: 1px solid var(--flin-primary);
+    color: white;
+}
+
+.form-stepper-btn-next:hover {
+    background-color: var(--flin-primary-dark);
+}
+
+.form-stepper-btn-submit {
+    background-color: var(--flin-success);
+    border: 1px solid var(--flin-success);
+    color: white;
+}
+
+.form-stepper-btn-submit:hover {
+    background-color: var(--flin-success-dark);
+}
+
+.form-stepper-indicator {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Variants */
+.form-stepper-pills .form-stepper-step-indicator {
+    border-radius: var(--flin-radius-md);
+}
+
+.form-stepper-dots .form-stepper-step-indicator {
+    width: var(--flin-space-3);
+    height: var(--flin-space-3);
+}
+
+.form-stepper-dots .form-stepper-step-indicator span {
+    display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-stepper-header {
+        flex-direction: column;
+        gap: var(--flin-space-4);
+    }
+
+    .form-stepper-connector {
+        display: none;
+    }
+
+    .form-stepper-step-content {
+        display: none;
+    }
+
+    .form-stepper-step {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .form-stepper-actions {
+        flex-wrap: wrap;
+    }
+}
+</style>

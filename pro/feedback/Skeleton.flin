@@ -1,0 +1,234 @@
+// Skeleton.flin - FlinUI PRO Skeleton Loading Component
+// Loading placeholder with shimmer animation and multiple variants
+
+// Props with defaults
+variant = props.variant || "rectangle"
+width = props.width || "100%"
+height = props.height || "auto"
+count = props.count || 1
+gap = props.gap || "var(--flin-space-3)"
+animate = props.animate || true
+rounded = props.rounded || false
+className = props.className || ""
+
+// Compute dimensions based on variant
+computedWidth = match variant {
+    "circle" -> props.size || "48px"
+    "avatar" -> props.size || "40px"
+    "button" -> "120px"
+    "badge" -> "60px"
+    "icon" -> "24px"
+    _ -> width
+}
+
+computedHeight = match variant {
+    "circle" -> props.size || "48px"
+    "avatar" -> props.size || "40px"
+    "text" -> "1em"
+    "title" -> "1.5em"
+    "paragraph" -> "0.875em"
+    "button" -> "36px"
+    "badge" -> "24px"
+    "icon" -> "24px"
+    _ -> height
+}
+
+// Border radius based on variant
+borderRadius = match variant {
+    "circle" -> "50%"
+    "avatar" -> "50%"
+    "text" -> "var(--flin-radius-sm)"
+    "title" -> "var(--flin-radius-sm)"
+    "paragraph" -> "var(--flin-radius-sm)"
+    "button" -> "var(--flin-radius-lg)"
+    "badge" -> "var(--flin-radius-full)"
+    "icon" -> "var(--flin-radius-md)"
+    _ -> match rounded { true -> "var(--flin-radius-lg)", _ -> "var(--flin-radius-md)" }
+}
+
+// Animation class
+animationClass = match animate {
+    true -> "skeleton--animated"
+    _ -> ""
+}
+
+// Build items array for count
+items = []
+i = 0
+{while i < count}
+    items = items ++ [i]
+    i = i + 1
+{/while}
+
+// Compute varying widths for text variants
+getItemWidth = (index) => {
+    match variant {
+        "paragraph" -> match index % 3 {
+            0 -> "100%"
+            1 -> "95%"
+            _ -> "85%"
+        }
+        "text" -> match index % 4 {
+            0 -> "100%"
+            1 -> "90%"
+            2 -> "95%"
+            _ -> "80%"
+        }
+        _ -> computedWidth
+    }
+}
+
+<div
+    class={"skeleton-container " ++ className}
+    style={"gap: " ++ gap ++ ";"}
+    aria-hidden="true"
+    aria-label="Loading content"
+>
+    {for (item, index) in items}
+        <div
+            class={"skeleton " ++ animationClass}
+            style={
+                "--skeleton-width: " ++ getItemWidth(index) ++ ";" ++
+                "--skeleton-height: " ++ computedHeight ++ ";" ++
+                "--skeleton-radius: " ++ borderRadius ++ ";"
+            }
+        ></div>
+    {/for}
+</div>
+
+<style scoped>
+/* Container */
+.skeleton-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Skeleton base */
+.skeleton {
+    display: block;
+    width: var(--skeleton-width);
+    height: var(--skeleton-height);
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--skeleton-radius);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shimmer animation */
+.skeleton--animated::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Variant-specific adjustments */
+
+/* Circle and avatar maintain aspect ratio */
+.skeleton[style*="--skeleton-radius: 50%"] {
+    flex-shrink: 0;
+}
+
+/* Text variants display inline-block for natural flow */
+.skeleton-container[data-variant="text"],
+.skeleton-container[data-variant="paragraph"] {
+    gap: var(--flin-space-2);
+}
+
+/* Row layout option */
+.skeleton-container.skeleton-container--row {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+/* Pulse animation variant */
+.skeleton--pulse {
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+.skeleton--pulse::after {
+    display: none;
+}
+
+@keyframes skeletonPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.4;
+    }
+}
+
+/* Wave animation variant */
+.skeleton--wave::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.5) 20%,
+        rgba(255, 255, 255, 0.8) 50%,
+        rgba(255, 255, 255, 0.5) 80%,
+        transparent 100%
+    );
+    animation: skeletonWave 2s ease-in-out infinite;
+}
+
+@keyframes skeletonWave {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Responsive sizing */
+@media (max-width: 640px) {
+    .skeleton-container {
+        gap: var(--flin-space-2);
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .skeleton {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .skeleton--animated::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 100%
+    );
+}
+
+[data-theme="dark"] .skeleton--wave::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 20%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.08) 80%,
+        transparent 100%
+    );
+}
+</style>

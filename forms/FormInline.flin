@@ -1,0 +1,136 @@
+// FormInline.flin - FlinUI Inline Form Layout Component
+// Horizontal form layout with labels beside inputs
+
+// Props with defaults
+gap = props.gap || "md"
+labelWidth = props.labelWidth || "200px"
+labelAlign = props.labelAlign || "right"
+responsive = props.responsive || true
+
+// Map gap sizes
+gapClass = match gap {
+    "none" -> "form-inline-gap-none"
+    "sm" -> "form-inline-gap-sm"
+    "lg" -> "form-inline-gap-lg"
+    "xl" -> "form-inline-gap-xl"
+    _ -> "form-inline-gap-md"
+}
+
+// Label alignment
+alignClass = match labelAlign {
+    "left" -> " form-inline-label-left"
+    "center" -> " form-inline-label-center"
+    _ -> " form-inline-label-right"
+}
+
+// Responsive class
+responsiveClass = match responsive {
+    true -> " form-inline-responsive"
+    _ -> ""
+}
+
+containerClass = "form-inline " ++ gapClass ++ alignClass ++ responsiveClass
+
+<div class={containerClass} style={"--form-label-width: " ++ labelWidth}>
+    {children}
+</div>
+
+<style scoped>
+.form-inline {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Gap variants */
+.form-inline-gap-none {
+    gap: 0;
+}
+
+.form-inline-gap-sm {
+    gap: var(--flin-space-2);
+}
+
+.form-inline-gap-md {
+    gap: var(--flin-space-4);
+}
+
+.form-inline-gap-lg {
+    gap: var(--flin-space-6);
+}
+
+.form-inline-gap-xl {
+    gap: var(--flin-space-8);
+}
+
+/* Style nested form fields for inline layout */
+.form-inline :global(.form-field) {
+    display: grid;
+    grid-template-columns: var(--form-label-width, 200px) 1fr;
+    gap: var(--flin-space-4);
+    align-items: start;
+}
+
+.form-inline :global(.form-field label) {
+    padding-top: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+    line-height: var(--flin-height-sm);
+}
+
+/* Label alignment variants */
+.form-inline-label-left :global(.form-field label) {
+    text-align: left;
+}
+
+.form-inline-label-center :global(.form-field label) {
+    text-align: center;
+}
+
+.form-inline-label-right :global(.form-field label) {
+    text-align: right;
+}
+
+/* Required field indicator */
+.form-inline :global(.form-field-required label::after) {
+    content: " *";
+    color: var(--flin-danger);
+}
+
+/* Input wrapper for inline layout */
+.form-inline :global(.form-field-input) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+/* Help text and error positioning */
+.form-inline :global(.form-help),
+.form-inline :global(.form-error) {
+    grid-column: 2;
+    font-size: var(--flin-text-xs);
+}
+
+/* Responsive: stack on mobile */
+.form-inline-responsive :global(.form-field) {
+    @media (max-width: 640px) {
+        grid-template-columns: 1fr;
+        gap: var(--flin-space-1);
+    }
+}
+
+.form-inline-responsive :global(.form-field label) {
+    @media (max-width: 640px) {
+        text-align: left;
+        padding-top: 0;
+    }
+}
+
+.form-inline-responsive :global(.form-help),
+.form-inline-responsive :global(.form-error) {
+    @media (max-width: 640px) {
+        grid-column: 1;
+    }
+}
+</style>

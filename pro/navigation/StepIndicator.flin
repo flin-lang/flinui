@@ -1,0 +1,514 @@
+// ============================================================================
+// StepIndicator.flin — FlinUI PRO Navigation Component
+// Multi-step progress indicator with numbered steps and connecting lines
+// ============================================================================
+// Props:
+//   - steps: List of step objects with label, description, icon (list)
+//   - currentStep: Current active step (1-indexed) (number)
+//   - variant: Orientation - horizontal, vertical (string)
+//   - size: Size variant - sm, md, lg (string)
+//   - showLabels: Show step labels (boolean)
+//   - clickable: Allow clicking on steps (boolean)
+//   - onStepClick: Callback when step is clicked (function or none)
+//   - color: Accent color - gold, blue, green, purple (string)
+
+steps = props.steps || [
+    ["label": "Account", "description": "Create your account"],
+    ["label": "Details", "description": "Personal information"],
+    ["label": "Verify", "description": "Verify your email"],
+    ["label": "Complete", "description": "Setup complete"]
+]
+currentStep = props.currentStep || 1
+variant = props.variant || "horizontal"
+size = props.size || "md"
+showLabels = props.showLabels || true
+clickable = props.clickable || false
+onStepClick = props.onStepClick || none
+color = props.color || "gold"
+
+// Size class
+sizeClass = match size {
+    "sm" => "step-indicator-sm"
+    "lg" => "step-indicator-lg"
+    _ => "step-indicator-md"
+}
+
+// Variant class
+variantClass = match variant {
+    "vertical" => "step-indicator-vertical"
+    _ => "step-indicator-horizontal"
+}
+
+// Color class
+colorClass = match color {
+    "blue" => "step-indicator-blue"
+    "green" => "step-indicator-green"
+    "purple" => "step-indicator-purple"
+    _ => "step-indicator-gold"
+}
+
+// Get step status
+getStepStatus = (index) => {
+    stepNum = index + 1
+    if stepNum < currentStep {
+        return "completed"
+    } else if stepNum == currentStep {
+        return "active"
+    } else {
+        return "pending"
+    }
+}
+
+// Handle step click
+handleStepClick = (index) => {
+    if clickable && onStepClick != none {
+        onStepClick(index + 1)
+    }
+}
+
+<div
+    class="flin-step-indicator {variantClass} {sizeClass} {colorClass}"
+    role="navigation"
+    aria-label="Progress steps"
+>
+    {for step, index in steps}
+        <div
+            class="step-item step-{getStepStatus(index)} {if clickable}step-clickable{/if}"
+            click={() => handleStepClick(index)}
+        >
+            <div class="step-marker">
+                <div class="step-circle">
+                    {if getStepStatus(index) == "completed"}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    {else}
+                        <span class="step-number">{index + 1}</span>
+                    {/if}
+                </div>
+                {if index < steps.length - 1}
+                    <div class="step-connector">
+                        <div class="connector-track"></div>
+                        <div class="connector-progress {if getStepStatus(index) == 'completed'}connector-filled{/if}"></div>
+                    </div>
+                {/if}
+            </div>
+
+            {if showLabels}
+                <div class="step-content">
+                    <span class="step-label">{step.label}</span>
+                    {if step.description != none && variant == "vertical"}
+                        <span class="step-description">{step.description}</span>
+                    {/if}
+                </div>
+            {/if}
+        </div>
+    {/for}
+</div>
+
+<style scoped>
+.flin-step-indicator {
+    display: flex;
+    width: 100%;
+}
+
+/* Horizontal layout */
+.step-indicator-horizontal {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.step-indicator-horizontal .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+}
+
+.step-indicator-horizontal .step-item:last-child {
+    flex: 0 0 auto;
+}
+
+.step-indicator-horizontal .step-marker {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.step-indicator-horizontal .step-item:last-child .step-marker {
+    width: auto;
+}
+
+.step-indicator-horizontal .step-connector {
+    flex: 1;
+    height: 2px;
+    position: relative;
+    margin: 0 var(--flin-space-2);
+}
+
+/* Vertical layout */
+.step-indicator-vertical {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.step-indicator-vertical .step-item {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    position: relative;
+    min-height: 60px;
+}
+
+.step-indicator-vertical .step-item:last-child {
+    min-height: auto;
+}
+
+.step-indicator-vertical .step-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.step-indicator-vertical .step-connector {
+    width: 2px;
+    flex: 1;
+    min-height: 24px;
+    position: relative;
+    margin: var(--flin-space-2) 0;
+}
+
+.step-indicator-vertical .step-content {
+    margin-left: var(--flin-space-4);
+    padding-bottom: var(--flin-space-4);
+}
+
+/* Step circle */
+.step-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--flin-radius-full);
+    background: var(--flin-bg-elevated);
+    border: 2px solid var(--flin-border-subtle);
+    transition: all var(--flin-transition-fast);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.step-number {
+    font-family: var(--flin-font-sans);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-tertiary);
+}
+
+.step-circle svg {
+    stroke: currentColor;
+}
+
+/* Connector */
+.connector-track {
+    position: absolute;
+    inset: 0;
+    background: var(--flin-border-subtle);
+    border-radius: var(--flin-radius-full);
+}
+
+.connector-progress {
+    position: absolute;
+    background: var(--flin-border-subtle);
+    border-radius: var(--flin-radius-full);
+    transition: all var(--flin-transition-normal);
+}
+
+.step-indicator-horizontal .connector-progress {
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+}
+
+.step-indicator-horizontal .connector-filled {
+    width: 100%;
+}
+
+.step-indicator-vertical .connector-progress {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+}
+
+.step-indicator-vertical .connector-filled {
+    height: 100%;
+}
+
+/* Step content */
+.step-content {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.step-indicator-horizontal .step-content {
+    margin-top: var(--flin-space-3);
+}
+
+.step-indicator-vertical .step-content {
+    text-align: left;
+    padding-top: var(--flin-space-0-5);
+}
+
+.step-label {
+    font-family: var(--flin-font-sans);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-tertiary);
+    transition: color var(--flin-transition-fast);
+}
+
+.step-description {
+    font-family: var(--flin-font-sans);
+    color: var(--flin-text-muted);
+    margin-top: var(--flin-space-1);
+}
+
+/* Clickable */
+.step-clickable {
+    cursor: pointer;
+}
+
+.step-clickable:hover .step-circle {
+    border-color: var(--flin-border-default);
+}
+
+.step-clickable.step-pending:hover .step-label {
+    color: var(--flin-text-secondary);
+}
+
+/* Size variants */
+.step-indicator-sm .step-circle {
+    width: 28px;
+    height: 28px;
+}
+
+.step-indicator-sm .step-number {
+    font-size: var(--flin-text-xs);
+}
+
+.step-indicator-sm .step-circle svg {
+    width: 12px;
+    height: 12px;
+}
+
+.step-indicator-sm .step-label {
+    font-size: var(--flin-text-xs);
+}
+
+.step-indicator-sm .step-description {
+    font-size: var(--flin-text-xs);
+}
+
+.step-indicator-md .step-circle {
+    width: 36px;
+    height: 36px;
+}
+
+.step-indicator-md .step-number {
+    font-size: var(--flin-text-sm);
+}
+
+.step-indicator-md .step-circle svg {
+    width: 16px;
+    height: 16px;
+}
+
+.step-indicator-md .step-label {
+    font-size: var(--flin-text-sm);
+}
+
+.step-indicator-md .step-description {
+    font-size: var(--flin-text-xs);
+}
+
+.step-indicator-lg .step-circle {
+    width: 48px;
+    height: 48px;
+}
+
+.step-indicator-lg .step-number {
+    font-size: var(--flin-text-base);
+}
+
+.step-indicator-lg .step-circle svg {
+    width: 20px;
+    height: 20px;
+}
+
+.step-indicator-lg .step-label {
+    font-size: var(--flin-text-base);
+}
+
+.step-indicator-lg .step-description {
+    font-size: var(--flin-text-sm);
+}
+
+/* States */
+.step-completed .step-circle {
+    color: var(--flin-bg-base);
+}
+
+.step-completed .step-label {
+    color: var(--flin-text-primary);
+}
+
+.step-active .step-circle {
+    background: var(--flin-bg-elevated);
+}
+
+.step-active .step-label {
+    font-weight: var(--flin-font-semibold);
+}
+
+/* Color variants */
+.step-indicator-gold .step-completed .step-circle {
+    background: var(--flin-accent-gold);
+    border-color: var(--flin-accent-gold);
+}
+
+.step-indicator-gold .step-active .step-circle {
+    border-color: var(--flin-accent-gold);
+    box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.15);
+}
+
+.step-indicator-gold .step-active .step-number {
+    color: var(--flin-accent-gold);
+}
+
+.step-indicator-gold .step-active .step-label {
+    color: var(--flin-accent-gold);
+}
+
+.step-indicator-gold .connector-filled {
+    background: var(--flin-accent-gold);
+}
+
+.step-indicator-blue .step-completed .step-circle {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.step-indicator-blue .step-active .step-circle {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+.step-indicator-blue .step-active .step-number {
+    color: #3b82f6;
+}
+
+.step-indicator-blue .step-active .step-label {
+    color: #3b82f6;
+}
+
+.step-indicator-blue .connector-filled {
+    background: #3b82f6;
+}
+
+.step-indicator-green .step-completed .step-circle {
+    background: #22c55e;
+    border-color: #22c55e;
+}
+
+.step-indicator-green .step-active .step-circle {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+}
+
+.step-indicator-green .step-active .step-number {
+    color: #22c55e;
+}
+
+.step-indicator-green .step-active .step-label {
+    color: #22c55e;
+}
+
+.step-indicator-green .connector-filled {
+    background: #22c55e;
+}
+
+.step-indicator-purple .step-completed .step-circle {
+    background: #a855f7;
+    border-color: #a855f7;
+}
+
+.step-indicator-purple .step-active .step-circle {
+    border-color: #a855f7;
+    box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
+}
+
+.step-indicator-purple .step-active .step-number {
+    color: #a855f7;
+}
+
+.step-indicator-purple .step-active .step-label {
+    color: #a855f7;
+}
+
+.step-indicator-purple .connector-filled {
+    background: #a855f7;
+}
+
+/* Responsive - horizontal becomes vertical on small screens */
+@media (max-width: 640px) {
+    .step-indicator-horizontal {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .step-indicator-horizontal .step-item {
+        flex-direction: row;
+        flex: none;
+        width: 100%;
+        min-height: 60px;
+    }
+
+    .step-indicator-horizontal .step-item:last-child {
+        min-height: auto;
+    }
+
+    .step-indicator-horizontal .step-marker {
+        flex-direction: column;
+        width: auto;
+    }
+
+    .step-indicator-horizontal .step-connector {
+        width: 2px;
+        height: auto;
+        flex: 1;
+        min-height: 24px;
+        margin: var(--flin-space-2) 0;
+    }
+
+    .step-indicator-horizontal .connector-progress {
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 0;
+    }
+
+    .step-indicator-horizontal .connector-filled {
+        width: 100%;
+        height: 100%;
+    }
+
+    .step-indicator-horizontal .step-content {
+        margin-top: 0;
+        margin-left: var(--flin-space-4);
+        text-align: left;
+        padding-bottom: var(--flin-space-4);
+    }
+}
+</style>

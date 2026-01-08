@@ -1,0 +1,318 @@
+// RatingFilter.flin - FlinUI PRO E-commerce Component
+// Star rating filter with "X stars & up" checkboxes and review counts
+
+// Props with defaults
+selectedRating = props.selectedRating || 0
+showReviewCounts = props.showReviewCounts || true
+reviewCounts = props.reviewCounts || [
+    ["rating": 5, "count": 0],
+    ["rating": 4, "count": 0],
+    ["rating": 3, "count": 0],
+    ["rating": 2, "count": 0],
+    ["rating": 1, "count": 0]
+]
+onChange = props.onChange
+
+// Rating options (descending order)
+ratingOptions = [5, 4, 3, 2, 1]
+
+// Get review count for rating
+fn getReviewCount(rating) {
+    for item in reviewCounts {
+        if item.rating == rating {
+            return item.count
+        }
+    }
+    return 0
+}
+
+// Format review count
+fn formatReviewCount(count) {
+    if count == 0 {
+        return ""
+    }
+    if count >= 1000 {
+        return (count / 1000).toFixed(1) ++ "k"
+    }
+    return count.toString()
+}
+
+// Check if rating is selected
+fn isRatingSelected(rating) {
+    return selectedRating == rating
+}
+
+// Handle rating selection
+fn handleRatingSelect(rating) {
+    newRating = isRatingSelected(rating) ? 0 : rating
+    if onChange {
+        onChange(newRating)
+    }
+}
+
+// Clear filter
+fn handleClear() {
+    if onChange {
+        onChange(0)
+    }
+}
+
+// Render stars
+fn renderStars(rating) {
+    stars = []
+    for i in 1..5 {
+        if i <= rating {
+            stars.push("filled")
+        } else {
+            stars.push("empty")
+        }
+    }
+    return stars
+}
+
+hasSelection = selectedRating > 0
+
+<div class="rating-filter">
+    <div class="rating-filter-header">
+        <label class="rating-filter-label">Customer Rating</label>
+        {if hasSelection}
+            <button class="rating-filter-clear" click={handleClear}>Clear</button>
+        {/if}
+    </div>
+
+    <div class="rating-filter-list">
+        {for rating in ratingOptions}
+            <label class="rating-filter-item">
+                <input
+                    type="radio"
+                    name="rating"
+                    class="rating-filter-radio"
+                    checked={isRatingSelected(rating)}
+                    change={fn() { handleRatingSelect(rating) }}
+                />
+                <span class="rating-filter-checkmark"></span>
+
+                <div class="rating-filter-stars">
+                    {for i in 1..5}
+                        {if i <= rating}
+                            <svg class="rating-filter-star rating-filter-star-filled" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        {else}
+                            <svg class="rating-filter-star rating-filter-star-empty" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        {/if}
+                    {/for}
+                </div>
+
+                <span class="rating-filter-text">& up</span>
+
+                {if showReviewCounts}
+                    <span class="rating-filter-count">
+                        {formatReviewCount(getReviewCount(rating))}
+                    </span>
+                {/if}
+            </label>
+        {/for}
+    </div>
+
+    {if hasSelection}
+        <div class="rating-filter-active">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Showing {selectedRating}+ star products</span>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+/* Container */
+.rating-filter {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    background-color: white;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+}
+
+/* Header */
+.rating-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rating-filter-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+}
+
+.rating-filter-clear {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-primary);
+    background: transparent;
+    border: none;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.rating-filter-clear:hover {
+    background-color: var(--flin-primary-light);
+}
+
+/* List */
+.rating-filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+/* Item */
+.rating-filter-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.rating-filter-item:hover {
+    background-color: var(--flin-neutral-50);
+}
+
+/* Radio Button */
+.rating-filter-radio {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.rating-filter-checkmark {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: 50%;
+    background-color: white;
+    transition: all var(--flin-transition-fast);
+}
+
+.rating-filter-radio:checked + .rating-filter-checkmark {
+    border-color: var(--flin-primary);
+    border-width: 6px;
+}
+
+/* Stars */
+.rating-filter-stars {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.rating-filter-star {
+    flex-shrink: 0;
+}
+
+.rating-filter-star-filled {
+    color: var(--flin-warning);
+}
+
+.rating-filter-star-empty {
+    color: var(--flin-neutral-300);
+}
+
+/* Text and Count */
+.rating-filter-text {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-600);
+}
+
+.rating-filter-count {
+    margin-left: auto;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-neutral-500);
+    background-color: var(--flin-neutral-100);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-full);
+}
+
+/* Active Filter Display */
+.rating-filter-active {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    background-color: var(--flin-success-light);
+    border: 1px solid var(--flin-success);
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-success-dark);
+}
+
+.rating-filter-active svg {
+    flex-shrink: 0;
+    color: var(--flin-success);
+}
+
+.rating-filter-active span {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .rating-filter {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .rating-filter-label {
+        color: var(--flin-neutral-100);
+    }
+
+    .rating-filter-item:hover {
+        background-color: var(--flin-neutral-700);
+    }
+
+    .rating-filter-checkmark {
+        background-color: var(--flin-neutral-900);
+        border-color: var(--flin-neutral-600);
+    }
+
+    .rating-filter-star-empty {
+        color: var(--flin-neutral-600);
+    }
+
+    .rating-filter-text {
+        color: var(--flin-neutral-300);
+    }
+
+    .rating-filter-count {
+        background-color: var(--flin-neutral-700);
+        color: var(--flin-neutral-300);
+    }
+
+    .rating-filter-active {
+        background-color: rgba(34, 197, 94, 0.1);
+        border-color: var(--flin-success);
+        color: var(--flin-success-light);
+    }
+}
+</style>

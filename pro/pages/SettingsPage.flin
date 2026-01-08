@@ -1,0 +1,1437 @@
+// SettingsPage.flin - Application settings with sections, forms, and preferences
+// FlinUI PRO - Page Template
+
+// Props with defaults
+title = props.title || "Settings"
+user = props.user || none
+onSave = props.onSave || none
+
+// Default user settings
+defaultSettings = {
+  profile: {
+    name: "Alex Johnson",
+    email: "alex@company.com",
+    username: "alexjohnson",
+    phone: "+1 (555) 123-4567",
+    timezone: "America/Los_Angeles",
+    language: "en"
+  },
+  notifications: {
+    email: true,
+    push: true,
+    sms: false,
+    marketing: false,
+    updates: true,
+    digest: "daily"
+  },
+  privacy: {
+    profilePublic: true,
+    showActivity: true,
+    showEmail: false,
+    allowTagging: true
+  },
+  appearance: {
+    theme: "system",
+    fontSize: "medium",
+    compactMode: false,
+    animations: true
+  },
+  security: {
+    twoFactor: true,
+    sessionTimeout: "30",
+    loginAlerts: true
+  }
+}
+
+settings = user || defaultSettings
+
+// State
+activeSection = "profile"
+hasChanges = false
+showDeleteModal = false
+showSuccessToast = false
+
+// Navigation sections
+sections = [
+  { id: "profile", label: "Profile", icon: "user" },
+  { id: "notifications", label: "Notifications", icon: "bell" },
+  { id: "privacy", label: "Privacy", icon: "shield" },
+  { id: "appearance", label: "Appearance", icon: "palette" },
+  { id: "security", label: "Security", icon: "lock" },
+  { id: "billing", label: "Billing", icon: "credit-card" },
+  { id: "integrations", label: "Integrations", icon: "plug" },
+  { id: "danger", label: "Danger Zone", icon: "alert" }
+]
+
+<div class="settings-page">
+  <!-- Header -->
+  <header class="settings-header">
+    <h1 class="page-title">{title}</h1>
+    <p class="page-subtitle">Manage your account settings and preferences</p>
+  </header>
+
+  <div class="settings-layout">
+    <!-- Sidebar Navigation -->
+    <nav class="settings-nav">
+      {for section in sections}
+        <button
+          class={"nav-item " + (activeSection == section.id ? "active" : "") + (section.id == "danger" ? " danger" : "")}
+          click={() => activeSection = section.id}
+        >
+          {if section.icon == "user"}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          {/if}
+          {if section.icon == "bell"}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          {/if}
+          {if section.icon == "shield"}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          {/if}
+          {if section.icon == "palette"}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="13.5" cy="6.5" r=".5"></circle>
+              <circle cx="17.5" cy="10.5" r=".5"></circle>
+              <circle cx="8.5" cy="7.5" r=".5"></circle>
+              <circle cx="6.5" cy="12.5" r=".5"></circle>
+              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.555C21.965 6.012 17.461 2 12 2z"></path>
+            </svg>
+          {/if}
+          {if section.icon == "lock"}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          {/if}
+          {if section.icon == "credit-card"}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+              <line x1="1" y1="10" x2="23" y2="10"></line>
+            </svg>
+          {/if}
+          {if section.icon == "plug"}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v10"></path>
+              <path d="M18.4 6.6a9 9 0 1 1-12.77.04"></path>
+            </svg>
+          {/if}
+          {if section.icon == "alert"}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          {/if}
+          <span>{section.label}</span>
+        </button>
+      {/for}
+    </nav>
+
+    <!-- Settings Content -->
+    <main class="settings-content">
+      <!-- Profile Section -->
+      {if activeSection == "profile"}
+        <section class="settings-section">
+          <div class="section-header">
+            <h2>Profile Information</h2>
+            <p>Update your personal details and public profile</p>
+          </div>
+
+          <div class="settings-card">
+            <div class="avatar-upload">
+              <Avatar size="xl" name={settings.profile.name} />
+              <div class="avatar-actions">
+                <Button variant="secondary" size="sm">Change Photo</Button>
+                <Button variant="ghost" size="sm">Remove</Button>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" value={settings.profile.name} />
+              </div>
+              <div class="form-group">
+                <label>Username</label>
+                <div class="input-prefix">
+                  <span class="prefix">@</span>
+                  <input type="text" value={settings.profile.username} />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" value={settings.profile.email} />
+              </div>
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" value={settings.profile.phone} />
+              </div>
+              <div class="form-group">
+                <label>Timezone</label>
+                <select value={settings.profile.timezone}>
+                  <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                  <option value="America/Denver">Mountain Time (MT)</option>
+                  <option value="America/Chicago">Central Time (CT)</option>
+                  <option value="America/New_York">Eastern Time (ET)</option>
+                  <option value="Europe/London">London (GMT)</option>
+                  <option value="Europe/Paris">Paris (CET)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Language</label>
+                <select value={settings.profile.language}>
+                  <option value="en">English</option>
+                  <option value="es">Spanish</option>
+                  <option value="fr">French</option>
+                  <option value="de">German</option>
+                  <option value="ja">Japanese</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label>Bio</label>
+              <textarea placeholder="Tell us about yourself..."></textarea>
+            </div>
+          </div>
+        </section>
+      {/if}
+
+      <!-- Notifications Section -->
+      {if activeSection == "notifications"}
+        <section class="settings-section">
+          <div class="section-header">
+            <h2>Notification Preferences</h2>
+            <p>Choose how and when you want to be notified</p>
+          </div>
+
+          <div class="settings-card">
+            <h3>Notification Channels</h3>
+            <div class="toggle-list">
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-label">Email Notifications</span>
+                  <span class="toggle-description">Receive notifications via email</span>
+                </div>
+                <Toggle checked={settings.notifications.email} />
+              </div>
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-label">Push Notifications</span>
+                  <span class="toggle-description">Receive push notifications on your devices</span>
+                </div>
+                <Toggle checked={settings.notifications.push} />
+              </div>
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-label">SMS Notifications</span>
+                  <span class="toggle-description">Receive important alerts via SMS</span>
+                </div>
+                <Toggle checked={settings.notifications.sms} />
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3>Notification Types</h3>
+            <div class="toggle-list">
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-label">Product Updates</span>
+                  <span class="toggle-description">New features and improvements</span>
+                </div>
+                <Toggle checked={settings.notifications.updates} />
+              </div>
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-label">Marketing Emails</span>
+                  <span class="toggle-description">Promotions, tips, and newsletters</span>
+                </div>
+                <Toggle checked={settings.notifications.marketing} />
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3>Email Digest</h3>
+            <div class="radio-group">
+              <label class="radio-item">
+                <input type="radio" name="digest" value="realtime" checked={settings.notifications.digest == "realtime"} />
+                <span class="radio-label">Real-time</span>
+                <span class="radio-description">Get notified immediately</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="digest" value="daily" checked={settings.notifications.digest == "daily"} />
+                <span class="radio-label">Daily Digest</span>
+                <span class="radio-description">Once per day summary</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="digest" value="weekly" checked={settings.notifications.digest == "weekly"} />
+                <span class="radio-label">Weekly Digest</span>
+                <span class="radio-description">Once per week summary</span>
+              </label>
+            </div>
+          </div>
+        </section>
+      {/if}
+
+      <!-- Privacy Section -->
+      {if activeSection == "privacy"}
+        <section class="settings-section">
+          <div class="section-header">
+            <h2>Privacy Settings</h2>
+            <p>Control your privacy and data sharing preferences</p>
+          </div>
+
+          <div class="settings-card">
+            <h3>Profile Visibility</h3>
+            <div class="toggle-list">
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-label">Public Profile</span>
+                  <span class="toggle-description">Allow anyone to view your profile</span>
+                </div>
+                <Toggle checked={settings.privacy.profilePublic} />
+              </div>
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-label">Show Activity Status</span>
+                  <span class="toggle-description">Let others see when you're online</span>
+                </div>
+                <Toggle checked={settings.privacy.showActivity} />
+              </div>
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-label">Show Email Address</span>
+                  <span class="toggle-description">Display email on your public profile</span>
+                </div>
+                <Toggle checked={settings.privacy.showEmail} />
+              </div>
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-label">Allow Tagging</span>
+                  <span class="toggle-description">Let others tag you in posts and comments</span>
+                </div>
+                <Toggle checked={settings.privacy.allowTagging} />
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3>Data & Privacy</h3>
+            <div class="action-list">
+              <button class="action-item">
+                <span>Download Your Data</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </button>
+              <button class="action-item">
+                <span>View Privacy Policy</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </section>
+      {/if}
+
+      <!-- Appearance Section -->
+      {if activeSection == "appearance"}
+        <section class="settings-section">
+          <div class="section-header">
+            <h2>Appearance</h2>
+            <p>Customize how the app looks and feels</p>
+          </div>
+
+          <div class="settings-card">
+            <h3>Theme</h3>
+            <div class="theme-selector">
+              <label class={"theme-option " + (settings.appearance.theme == "light" ? "selected" : "")}>
+                <input type="radio" name="theme" value="light" />
+                <div class="theme-preview light">
+                  <div class="preview-header"></div>
+                  <div class="preview-content"></div>
+                </div>
+                <span>Light</span>
+              </label>
+              <label class={"theme-option " + (settings.appearance.theme == "dark" ? "selected" : "")}>
+                <input type="radio" name="theme" value="dark" />
+                <div class="theme-preview dark">
+                  <div class="preview-header"></div>
+                  <div class="preview-content"></div>
+                </div>
+                <span>Dark</span>
+              </label>
+              <label class={"theme-option " + (settings.appearance.theme == "system" ? "selected" : "")}>
+                <input type="radio" name="theme" value="system" />
+                <div class="theme-preview system">
+                  <div class="preview-header"></div>
+                  <div class="preview-content"></div>
+                </div>
+                <span>System</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3>Display Options</h3>
+            <div class="form-group">
+              <label>Font Size</label>
+              <select value={settings.appearance.fontSize}>
+                <option value="small">Small</option>
+                <option value="medium">Medium (Default)</option>
+                <option value="large">Large</option>
+              </select>
+            </div>
+
+            <div class="toggle-list">
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-label">Compact Mode</span>
+                  <span class="toggle-description">Reduce spacing for more content</span>
+                </div>
+                <Toggle checked={settings.appearance.compactMode} />
+              </div>
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-label">Animations</span>
+                  <span class="toggle-description">Enable smooth transitions and effects</span>
+                </div>
+                <Toggle checked={settings.appearance.animations} />
+              </div>
+            </div>
+          </div>
+        </section>
+      {/if}
+
+      <!-- Security Section -->
+      {if activeSection == "security"}
+        <section class="settings-section">
+          <div class="section-header">
+            <h2>Security</h2>
+            <p>Protect your account with advanced security options</p>
+          </div>
+
+          <div class="settings-card">
+            <h3>Password</h3>
+            <p class="card-description">Last changed 3 months ago</p>
+            <Button variant="secondary">Change Password</Button>
+          </div>
+
+          <div class="settings-card">
+            <h3>Two-Factor Authentication</h3>
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <span class="toggle-label">Enable 2FA</span>
+                <span class="toggle-description">Add an extra layer of security</span>
+              </div>
+              <Toggle checked={settings.security.twoFactor} />
+            </div>
+            {if settings.security.twoFactor}
+              <div class="tfa-status">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <span>Two-factor authentication is enabled</span>
+              </div>
+            {/if}
+          </div>
+
+          <div class="settings-card">
+            <h3>Session Management</h3>
+            <div class="form-group">
+              <label>Auto-logout after inactivity</label>
+              <select value={settings.security.sessionTimeout}>
+                <option value="15">15 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="60">1 hour</option>
+                <option value="never">Never</option>
+              </select>
+            </div>
+
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <span class="toggle-label">Login Alerts</span>
+                <span class="toggle-description">Get notified of new sign-ins</span>
+              </div>
+              <Toggle checked={settings.security.loginAlerts} />
+            </div>
+
+            <div class="sessions-list">
+              <h4>Active Sessions</h4>
+              <div class="session-item current">
+                <div class="session-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                </div>
+                <div class="session-info">
+                  <span class="session-device">MacBook Pro - Chrome</span>
+                  <span class="session-location">San Francisco, CA - Current session</span>
+                </div>
+              </div>
+              <div class="session-item">
+                <div class="session-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                  </svg>
+                </div>
+                <div class="session-info">
+                  <span class="session-device">iPhone 15 - Safari</span>
+                  <span class="session-location">San Francisco, CA - 2 hours ago</span>
+                </div>
+                <button class="revoke-btn">Revoke</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      {/if}
+
+      <!-- Billing Section -->
+      {if activeSection == "billing"}
+        <section class="settings-section">
+          <div class="section-header">
+            <h2>Billing & Plans</h2>
+            <p>Manage your subscription and payment methods</p>
+          </div>
+
+          <div class="settings-card plan-card">
+            <div class="current-plan">
+              <div class="plan-badge">Current Plan</div>
+              <h3>Pro Plan</h3>
+              <p class="plan-price">$29<span>/month</span></p>
+              <p class="plan-renewal">Renews on February 15, 2026</p>
+            </div>
+            <Button variant="secondary">Change Plan</Button>
+          </div>
+
+          <div class="settings-card">
+            <h3>Payment Method</h3>
+            <div class="payment-method">
+              <div class="card-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                  <line x1="1" y1="10" x2="23" y2="10"></line>
+                </svg>
+              </div>
+              <div class="card-details">
+                <span class="card-number">**** **** **** 4242</span>
+                <span class="card-expiry">Expires 12/27</span>
+              </div>
+              <Button variant="ghost" size="sm">Update</Button>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3>Billing History</h3>
+            <div class="billing-table">
+              <div class="billing-row header">
+                <span>Date</span>
+                <span>Description</span>
+                <span>Amount</span>
+                <span>Invoice</span>
+              </div>
+              <div class="billing-row">
+                <span>Jan 15, 2026</span>
+                <span>Pro Plan - Monthly</span>
+                <span>$29.00</span>
+                <a href="#">Download</a>
+              </div>
+              <div class="billing-row">
+                <span>Dec 15, 2025</span>
+                <span>Pro Plan - Monthly</span>
+                <span>$29.00</span>
+                <a href="#">Download</a>
+              </div>
+              <div class="billing-row">
+                <span>Nov 15, 2025</span>
+                <span>Pro Plan - Monthly</span>
+                <span>$29.00</span>
+                <a href="#">Download</a>
+              </div>
+            </div>
+          </div>
+        </section>
+      {/if}
+
+      <!-- Integrations Section -->
+      {if activeSection == "integrations"}
+        <section class="settings-section">
+          <div class="section-header">
+            <h2>Integrations</h2>
+            <p>Connect with your favorite tools and services</p>
+          </div>
+
+          <div class="integrations-grid">
+            <div class="integration-card connected">
+              <div class="integration-logo github">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+              </div>
+              <div class="integration-info">
+                <h4>GitHub</h4>
+                <span class="integration-status">Connected</span>
+              </div>
+              <Button variant="ghost" size="sm">Disconnect</Button>
+            </div>
+
+            <div class="integration-card connected">
+              <div class="integration-logo slack">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/>
+                </svg>
+              </div>
+              <div class="integration-info">
+                <h4>Slack</h4>
+                <span class="integration-status">Connected</span>
+              </div>
+              <Button variant="ghost" size="sm">Disconnect</Button>
+            </div>
+
+            <div class="integration-card">
+              <div class="integration-logo google">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+              </div>
+              <div class="integration-info">
+                <h4>Google Drive</h4>
+                <span class="integration-status available">Available</span>
+              </div>
+              <Button variant="secondary" size="sm">Connect</Button>
+            </div>
+
+            <div class="integration-card">
+              <div class="integration-logo notion">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.98-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466l1.823 1.447zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.886l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952l1.448.327s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.14c-.093-.514.28-.886.747-.933l3.222-.187zM2.877.747L16.29 0c1.309-.093 1.635.373 2.148.466l3.362 2.334c1.354.98 1.823 1.073 1.823 1.913v16.24c0 1.027-.374 1.634-1.682 1.727l-15.457.933c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.307-.793-1.96V2.474C.6 1.447.974.84 2.877.747z"/>
+                </svg>
+              </div>
+              <div class="integration-info">
+                <h4>Notion</h4>
+                <span class="integration-status available">Available</span>
+              </div>
+              <Button variant="secondary" size="sm">Connect</Button>
+            </div>
+          </div>
+        </section>
+      {/if}
+
+      <!-- Danger Zone Section -->
+      {if activeSection == "danger"}
+        <section class="settings-section danger-section">
+          <div class="section-header">
+            <h2>Danger Zone</h2>
+            <p>Irreversible and destructive actions</p>
+          </div>
+
+          <div class="settings-card danger-card">
+            <div class="danger-item">
+              <div class="danger-info">
+                <h4>Export Account Data</h4>
+                <p>Download all your data in a portable format</p>
+              </div>
+              <Button variant="secondary">Export Data</Button>
+            </div>
+
+            <div class="danger-item">
+              <div class="danger-info">
+                <h4>Deactivate Account</h4>
+                <p>Temporarily disable your account. You can reactivate anytime.</p>
+              </div>
+              <Button variant="secondary">Deactivate</Button>
+            </div>
+
+            <div class="danger-item">
+              <div class="danger-info">
+                <h4>Delete Account</h4>
+                <p>Permanently delete your account and all associated data. This action cannot be undone.</p>
+              </div>
+              <Button variant="danger" click={() => showDeleteModal = true}>Delete Account</Button>
+            </div>
+          </div>
+        </section>
+      {/if}
+
+      <!-- Save Button -->
+      <div class="save-bar">
+        <Button variant="primary">Save Changes</Button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  {if showDeleteModal}
+    <div class="modal-overlay" click={() => showDeleteModal = false}>
+      <div class="modal danger-modal" click={(e) => e.stopPropagation()}>
+        <div class="modal-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        <h2>Delete Account?</h2>
+        <p>This action is permanent and cannot be undone. All your data will be permanently deleted.</p>
+        <div class="form-group">
+          <label>Type "DELETE" to confirm</label>
+          <input type="text" placeholder="DELETE" />
+        </div>
+        <div class="modal-actions">
+          <Button variant="secondary" click={() => showDeleteModal = false}>Cancel</Button>
+          <Button variant="danger">Delete Forever</Button>
+        </div>
+      </div>
+    </div>
+  {/if}
+</div>
+
+<style scoped>
+.settings-page {
+  padding: var(--flin-space-6);
+  background: var(--flin-bg-secondary);
+  min-height: 100vh;
+}
+
+.settings-header {
+  margin-bottom: var(--flin-space-6);
+}
+
+.page-title {
+  font-size: var(--flin-text-2xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+}
+
+.page-subtitle {
+  color: var(--flin-text-secondary);
+  font-size: var(--flin-text-sm);
+  margin-top: var(--flin-space-1);
+}
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: var(--flin-space-6);
+  max-width: 1200px;
+}
+
+/* Navigation */
+.settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-1);
+  position: sticky;
+  top: var(--flin-space-6);
+  height: fit-content;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-3) var(--flin-space-4);
+  background: transparent;
+  border: none;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-secondary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.nav-item:hover {
+  background: var(--flin-bg-primary);
+  color: var(--flin-text-primary);
+}
+
+.nav-item.active {
+  background: var(--flin-bg-primary);
+  color: var(--flin-accent-gold);
+}
+
+.nav-item.danger {
+  color: #ef4444;
+}
+
+.nav-item.danger:hover,
+.nav-item.danger.active {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Content */
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-6);
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-4);
+}
+
+.section-header h2 {
+  font-size: var(--flin-text-xl);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.section-header p {
+  color: var(--flin-text-secondary);
+  font-size: var(--flin-text-sm);
+  margin-top: var(--flin-space-1);
+}
+
+.settings-card {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  padding: var(--flin-space-5);
+}
+
+.settings-card h3 {
+  font-size: var(--flin-text-md);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-4);
+}
+
+.card-description {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+  margin-bottom: var(--flin-space-4);
+}
+
+/* Avatar Upload */
+.avatar-upload {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-4);
+  margin-bottom: var(--flin-space-6);
+  padding-bottom: var(--flin-space-6);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.avatar-actions {
+  display: flex;
+  gap: var(--flin-space-2);
+}
+
+/* Form */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--flin-space-4);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-2);
+}
+
+.form-group.full-width {
+  grid-column: span 2;
+}
+
+.form-group label {
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: var(--flin-space-3);
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.input-prefix {
+  display: flex;
+  align-items: center;
+  background: var(--flin-bg-secondary);
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  overflow: hidden;
+}
+
+.input-prefix .prefix {
+  padding: var(--flin-space-3);
+  background: var(--flin-bg-tertiary);
+  color: var(--flin-text-tertiary);
+  border-right: 1px solid var(--flin-border-primary);
+}
+
+.input-prefix input {
+  border: none;
+  flex: 1;
+}
+
+/* Toggle List */
+.toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-4);
+}
+
+.toggle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggle-info {
+  flex: 1;
+}
+
+.toggle-label {
+  display: block;
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+}
+
+.toggle-description {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+/* Radio Group */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-3);
+}
+
+.radio-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-3);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-md);
+  cursor: pointer;
+}
+
+.radio-item input {
+  margin-top: 4px;
+}
+
+.radio-label {
+  display: block;
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+}
+
+.radio-description {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+/* Action List */
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-2);
+}
+
+.action-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--flin-space-3);
+  background: var(--flin-bg-secondary);
+  border: none;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.action-item:hover {
+  background: var(--flin-bg-tertiary);
+}
+
+.action-item svg {
+  color: var(--flin-text-tertiary);
+}
+
+/* Theme Selector */
+.theme-selector {
+  display: flex;
+  gap: var(--flin-space-4);
+}
+
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--flin-space-2);
+  cursor: pointer;
+}
+
+.theme-option input {
+  display: none;
+}
+
+.theme-preview {
+  width: 100px;
+  height: 70px;
+  border-radius: var(--flin-radius-md);
+  border: 2px solid var(--flin-border-primary);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.theme-option.selected .theme-preview {
+  border-color: var(--flin-accent-gold);
+}
+
+.theme-preview .preview-header {
+  height: 20px;
+}
+
+.theme-preview .preview-content {
+  height: 50px;
+}
+
+.theme-preview.light .preview-header { background: #f3f4f6; }
+.theme-preview.light .preview-content { background: #ffffff; }
+.theme-preview.dark .preview-header { background: #1f2937; }
+.theme-preview.dark .preview-content { background: #111827; }
+.theme-preview.system .preview-header { background: linear-gradient(90deg, #f3f4f6 50%, #1f2937 50%); }
+.theme-preview.system .preview-content { background: linear-gradient(90deg, #ffffff 50%, #111827 50%); }
+
+.theme-option span {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+.theme-option.selected span {
+  color: var(--flin-accent-gold);
+}
+
+/* 2FA Status */
+.tfa-status {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  padding: var(--flin-space-3);
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: var(--flin-radius-md);
+  color: #22c55e;
+  font-size: var(--flin-text-sm);
+  margin-top: var(--flin-space-4);
+}
+
+/* Sessions */
+.sessions-list {
+  margin-top: var(--flin-space-4);
+  padding-top: var(--flin-space-4);
+  border-top: 1px solid var(--flin-border-primary);
+}
+
+.sessions-list h4 {
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-3);
+}
+
+.session-item {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-3);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-md);
+  margin-bottom: var(--flin-space-2);
+}
+
+.session-item.current {
+  border: 1px solid var(--flin-accent-gold);
+}
+
+.session-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--flin-bg-tertiary);
+  border-radius: var(--flin-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--flin-text-tertiary);
+}
+
+.session-info {
+  flex: 1;
+}
+
+.session-device {
+  display: block;
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+}
+
+.session-location {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.revoke-btn {
+  padding: var(--flin-space-2) var(--flin-space-3);
+  background: transparent;
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-secondary);
+  font-size: var(--flin-text-xs);
+  cursor: pointer;
+}
+
+.revoke-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* Plan Card */
+.plan-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.plan-badge {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-accent-gold);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: var(--flin-space-1);
+}
+
+.current-plan h3 {
+  margin-bottom: var(--flin-space-1);
+}
+
+.plan-price {
+  font-size: var(--flin-text-2xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+}
+
+.plan-price span {
+  font-size: var(--flin-text-sm);
+  font-weight: 400;
+  color: var(--flin-text-tertiary);
+}
+
+.plan-renewal {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+  margin-top: var(--flin-space-1);
+}
+
+/* Payment Method */
+.payment-method {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-4);
+  padding: var(--flin-space-4);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-md);
+}
+
+.card-icon {
+  width: 48px;
+  height: 32px;
+  background: var(--flin-bg-tertiary);
+  border-radius: var(--flin-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--flin-text-tertiary);
+}
+
+.card-details {
+  flex: 1;
+}
+
+.card-number {
+  display: block;
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+}
+
+.card-expiry {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+/* Billing Table */
+.billing-table {
+  margin-top: var(--flin-space-4);
+}
+
+.billing-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr;
+  padding: var(--flin-space-3);
+  font-size: var(--flin-text-sm);
+}
+
+.billing-row.header {
+  color: var(--flin-text-tertiary);
+  font-weight: 600;
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.billing-row:not(.header) {
+  color: var(--flin-text-primary);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.billing-row a {
+  color: var(--flin-accent-gold);
+  text-decoration: none;
+}
+
+/* Integrations */
+.integrations-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--flin-space-4);
+}
+
+.integration-card {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-4);
+  padding: var(--flin-space-4);
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  border: 1px solid var(--flin-border-primary);
+}
+
+.integration-card.connected {
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.integration-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--flin-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.integration-logo.github { background: var(--flin-bg-secondary); color: var(--flin-text-primary); }
+.integration-logo.slack { background: var(--flin-bg-secondary); }
+.integration-logo.google { background: var(--flin-bg-secondary); }
+.integration-logo.notion { background: var(--flin-bg-secondary); color: var(--flin-text-primary); }
+
+.integration-info {
+  flex: 1;
+}
+
+.integration-info h4 {
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.integration-status {
+  font-size: var(--flin-text-xs);
+  color: #22c55e;
+}
+
+.integration-status.available {
+  color: var(--flin-text-tertiary);
+}
+
+/* Danger Zone */
+.danger-section .section-header h2 {
+  color: #ef4444;
+}
+
+.danger-card {
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.danger-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--flin-space-4);
+}
+
+.danger-item:not(:last-child) {
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.danger-info h4 {
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.danger-info p {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+  margin-top: var(--flin-space-1);
+}
+
+/* Save Bar */
+.save-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--flin-space-4);
+  border-top: 1px solid var(--flin-border-primary);
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  padding: var(--flin-space-6);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.danger-modal {
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.modal-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--flin-space-4);
+  color: #ef4444;
+}
+
+.modal h2 {
+  font-size: var(--flin-text-xl);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.modal > p {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+  margin-bottom: var(--flin-space-4);
+}
+
+.modal .form-group {
+  text-align: left;
+  margin-bottom: var(--flin-space-4);
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--flin-space-3);
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .integrations-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .settings-page {
+    padding: var(--flin-space-4);
+  }
+
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    position: static;
+  }
+
+  .nav-item {
+    flex: 1;
+    min-width: 100px;
+    justify-content: center;
+  }
+
+  .nav-item span {
+    display: none;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group.full-width {
+    grid-column: span 1;
+  }
+
+  .plan-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--flin-space-4);
+  }
+
+  .billing-row {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--flin-space-2);
+  }
+}
+</style>

@@ -1,0 +1,263 @@
+// ============================================================================
+// CalendarMini.flin — FlinUI PRO Data Component
+// Small compact month view calendar widget
+// ============================================================================
+// Props:
+//   - selectedDate: Currently selected date (Date or none)
+//   - events: List of event objects with date property (list)
+//   - onDateSelect: Callback when date is selected (function or none)
+//   - highlightToday: Highlight today's date (boolean)
+//   - showHeader: Show month/year header with navigation (boolean)
+
+selectedDate = props.selectedDate || new Date()
+events = props.events || []
+onDateSelect = props.onDateSelect || none
+highlightToday = props.highlightToday || true
+showHeader = props.showHeader || true
+
+currentMonth = selectedDate.getMonth()
+currentYear = selectedDate.getFullYear()
+
+monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+weekdays = ["S", "M", "T", "W", "T", "F", "S"]
+
+getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate()
+getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay()
+
+daysInMonth = getDaysInMonth(currentYear, currentMonth)
+firstDay = getFirstDayOfMonth(currentYear, currentMonth)
+
+// Build calendar array
+calendarDays = []
+{for i in range(0, firstDay)}
+    calendarDays.push(none)
+{/for}
+{for day in range(1, daysInMonth + 1)}
+    calendarDays.push(day)
+{/for}
+
+hasEvent = (day) => {
+    if day == none { return false }
+    dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    return events.some(e => e.date == dateStr)
+}
+
+isToday = (day) => {
+    if day == none { return false }
+    today = new Date()
+    return highlightToday && day == today.getDate() && currentMonth == today.getMonth() && currentYear == today.getFullYear()
+}
+
+isSelected = (day) => {
+    if day == none { return false }
+    return day == selectedDate.getDate() && currentMonth == selectedDate.getMonth() && currentYear == selectedDate.getFullYear()
+}
+
+<div class="flin-calendar-mini">
+    {if showHeader}
+        <div class="mini-header">
+            <button
+                class="mini-nav"
+                click={() => {
+                    if currentMonth == 0 {
+                        currentMonth = 11
+                        currentYear = currentYear - 1
+                    } else {
+                        currentMonth = currentMonth - 1
+                    }
+                }}
+            >
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+                </svg>
+            </button>
+
+            <span class="mini-title">{monthsShort[currentMonth]} {currentYear}</span>
+
+            <button
+                class="mini-nav"
+                click={() => {
+                    if currentMonth == 11 {
+                        currentMonth = 0
+                        currentYear = currentYear + 1
+                    } else {
+                        currentMonth = currentMonth + 1
+                    }
+                }}
+            >
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+                </svg>
+            </button>
+        </div>
+    {/if}
+
+    <div class="mini-grid">
+        {for day in weekdays}
+            <div class="mini-weekday">{day}</div>
+        {/for}
+
+        {for day in calendarDays}
+            <div
+                class="mini-day {if day == none}empty{/if} {if isToday(day)}today{/if} {if isSelected(day)}selected{/if} {if hasEvent(day)}has-event{/if}"
+                click={() => {
+                    if day != none {
+                        selectedDate = new Date(currentYear, currentMonth, day)
+                        if onDateSelect != none {
+                            onDateSelect(selectedDate)
+                        }
+                    }
+                }}
+            >
+                {if day != none}
+                    <span class="day-num">{day}</span>
+                    {if hasEvent(day)}
+                        <span class="event-indicator"></span>
+                    {/if}
+                {/if}
+            </div>
+        {/for}
+    </div>
+</div>
+
+<style scoped>
+.flin-calendar-mini {
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-space-3);
+    width: 240px;
+}
+
+.mini-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--flin-space-3);
+}
+
+.mini-nav {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-sm);
+    color: var(--flin-text-tertiary);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.mini-nav:hover {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+    color: var(--flin-text-primary);
+}
+
+.mini-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+}
+
+.mini-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.mini-weekday {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    font-size: 10px;
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-muted);
+    text-transform: uppercase;
+}
+
+.mini-day {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.mini-day:hover:not(.empty) {
+    background: var(--flin-bg-surface);
+}
+
+.mini-day.empty {
+    cursor: default;
+}
+
+.day-num {
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-secondary);
+    line-height: 1;
+}
+
+.mini-day:hover:not(.empty) .day-num {
+    color: var(--flin-text-primary);
+}
+
+.mini-day.today {
+    background: var(--flin-bg-surface);
+}
+
+.mini-day.today .day-num {
+    color: var(--flin-accent-gold);
+    font-weight: var(--flin-font-bold);
+}
+
+.mini-day.selected {
+    background: var(--flin-accent-gold);
+}
+
+.mini-day.selected .day-num {
+    color: var(--flin-bg-base);
+    font-weight: var(--flin-font-bold);
+}
+
+.mini-day.selected:hover {
+    background: var(--flin-accent-gold-light);
+}
+
+.event-indicator {
+    position: absolute;
+    bottom: 3px;
+    width: 4px;
+    height: 4px;
+    border-radius: var(--flin-radius-full);
+    background: var(--flin-accent-gold);
+}
+
+.mini-day.selected .event-indicator {
+    background: var(--flin-bg-base);
+}
+
+/* Weekend styling */
+.mini-day:nth-child(7n + 1) .day-num,
+.mini-day:nth-child(7n) .day-num {
+    color: var(--flin-text-muted);
+}
+
+.mini-day:nth-child(7n + 1):hover .day-num,
+.mini-day:nth-child(7n):hover .day-num {
+    color: var(--flin-text-secondary);
+}
+
+.mini-day.selected:nth-child(7n + 1) .day-num,
+.mini-day.selected:nth-child(7n) .day-num {
+    color: var(--flin-bg-base);
+}
+</style>

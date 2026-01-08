@@ -1,0 +1,122 @@
+// ============================================================================
+// SlideIn.flin — FlinUI PRO Utility Component
+// Slide animation wrapper for dynamic entrance effects
+// ============================================================================
+// Props:
+//   - direction: Slide direction - left, right, up, down (string, default: "left")
+//   - duration: Animation duration in ms (number, default: 400)
+//   - delay: Delay before animation starts in ms (number, default: 0)
+//   - distance: Slide distance - sm, md, lg, xl, full or custom px (string, default: "md")
+//   - easing: CSS easing function (string, default: "cubic-bezier(0.16, 1, 0.3, 1)")
+//   - triggerOnView: Trigger animation when in view (boolean, default: true)
+//   - threshold: Intersection threshold 0-1 (number, default: 0.1)
+//   - once: Only animate once (boolean, default: true)
+//   - overflow: Container overflow - hidden, visible (string, default: "hidden")
+// ============================================================================
+
+direction = props.direction || "left"
+duration = props.duration || 400
+delay = props.delay || 0
+distance = props.distance || "md"
+easing = props.easing || "cubic-bezier(0.16, 1, 0.3, 1)"
+triggerOnView = props.triggerOnView || true
+threshold = props.threshold || 0.1
+once = props.once || true
+overflow = props.overflow || "hidden"
+
+// State
+isVisible = !triggerOnView
+hasAnimated = false
+
+// Compute distance value
+distanceValue = match distance {
+    "sm" -> "20px"
+    "md" -> "40px"
+    "lg" -> "80px"
+    "xl" -> "120px"
+    "full" -> "100%"
+    _ -> distance
+}
+
+// Compute initial transform
+getInitialTransform = () => {
+    match direction {
+        "left" -> "translateX(-{distanceValue})"
+        "right" -> "translateX({distanceValue})"
+        "up" -> "translateY(-{distanceValue})"
+        "down" -> "translateY({distanceValue})"
+        _ -> "translateX(-{distanceValue})"
+    }
+}
+
+// Handle intersection
+handleIntersection = (entries) => {
+    for entry in entries {
+        if entry.isIntersecting {
+            if !hasAnimated || !once {
+                isVisible = true
+                hasAnimated = true
+            }
+        } else if !once {
+            isVisible = false
+        }
+    }
+}
+
+// Lifecycle
+onMount = () => {
+    if triggerOnView {
+        observer = new IntersectionObserver(handleIntersection, {
+            threshold: threshold
+        })
+        observer.observe(element)
+    } else {
+        setTimeout(() => { isVisible = true }, delay)
+    }
+}
+
+<div class="flin-slide-in direction-{direction} {if isVisible}visible{/if}"
+     style="--slide-duration: {duration}ms; --slide-delay: {delay}ms; --slide-easing: {easing}; --slide-transform: {getInitialTransform()}; overflow: {overflow}">
+    <div class="slide-content">
+        {children}
+    </div>
+</div>
+
+<style scoped>
+.flin-slide-in {
+    position: relative;
+}
+
+.slide-content {
+    transform: var(--slide-transform);
+    opacity: 0;
+    transition: transform var(--slide-duration) var(--slide-easing) var(--slide-delay),
+                opacity var(--slide-duration) var(--slide-easing) var(--slide-delay);
+    will-change: transform, opacity;
+}
+
+.visible .slide-content {
+    transform: none;
+    opacity: 1;
+}
+
+/* Direction-specific overflow */
+.direction-left,
+.direction-right {
+    overflow-x: hidden;
+}
+
+.direction-up,
+.direction-down {
+    overflow-y: hidden;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .slide-content {
+        transition: none;
+        transform: none;
+        opacity: 1;
+    }
+}
+</style>

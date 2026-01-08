@@ -1,0 +1,318 @@
+// ============================================================================
+// BlogPostHeader.flin — FlinUI PRO
+// Post title + meta (author, date, read time)
+// ============================================================================
+// Props:
+//   title: text - Post title (required)
+//   subtitle: text - Optional subtitle (default: none)
+//   date: text - Publication date (default: none)
+//   updatedDate: text - Last updated date (default: none)
+//   readTime: text - Estimated read time (default: none)
+//   author: object - Author info {name, avatar, title, href} (default: none)
+//   category: text - Post category (default: none)
+//   categoryHref: text - Category link (default: none)
+//   tags: array - Array of tag strings (default: [])
+//   variant: text - Layout variant ("default", "centered", "minimal") (default: "default")
+//   size: text - Title size ("md", "lg", "xl") (default: "lg")
+// ============================================================================
+
+title = props.title || "Post Title"
+subtitle = props.subtitle || none
+date = props.date || none
+updatedDate = props.updatedDate || none
+readTime = props.readTime || none
+author = props.author || none
+category = props.category || none
+categoryHref = props.categoryHref || none
+tags = props.tags || []
+variant = props.variant || "default"
+size = props.size || "lg"
+
+// Compute variant class
+variantClass = match variant {
+    "centered" -> "post-header--centered"
+    "minimal" -> "post-header--minimal"
+    _ -> "post-header--default"
+}
+
+// Compute size class
+sizeClass = match size {
+    "md" -> "post-header--md"
+    "xl" -> "post-header--xl"
+    _ -> "post-header--lg"
+}
+
+<header class={"post-header " ++ variantClass ++ " " ++ sizeClass}>
+    // Category and tags
+    {if category != none || tags.length > 0}
+        <div class="post-header__taxonomies">
+            {if category != none}
+                {if categoryHref != none}
+                    <a href={categoryHref} class="post-header__category">{category}</a>
+                {else}
+                    <span class="post-header__category">{category}</span>
+                {/if}
+            {/if}
+            {if tags.length > 0}
+                <div class="post-header__tags">
+                    {for tag in tags}
+                        <span class="post-header__tag">{tag}</span>
+                    {/for}
+                </div>
+            {/if}
+        </div>
+    {/if}
+
+    // Title
+    <h1 class="post-header__title">{title}</h1>
+
+    // Subtitle
+    {if subtitle != none}
+        <p class="post-header__subtitle">{subtitle}</p>
+    {/if}
+
+    // Meta info
+    <div class="post-header__meta">
+        // Author
+        {if author != none}
+            <div class="post-header__author">
+                {if author.avatar != none}
+                    {if author.href != none}
+                        <a href={author.href} class="post-header__author-avatar-link">
+                            <img class="post-header__author-avatar" src={author.avatar} alt={author.name || "Author"}>
+                        </a>
+                    {else}
+                        <img class="post-header__author-avatar" src={author.avatar} alt={author.name || "Author"}>
+                    {/if}
+                {/if}
+                <div class="post-header__author-info">
+                    {if author.href != none}
+                        <a href={author.href} class="post-header__author-name">{author.name || "Anonymous"}</a>
+                    {else}
+                        <span class="post-header__author-name">{author.name || "Anonymous"}</span>
+                    {/if}
+                    {if author.title != none}
+                        <span class="post-header__author-title">{author.title}</span>
+                    {/if}
+                </div>
+            </div>
+        {/if}
+
+        // Date and read time
+        <div class="post-header__details">
+            {if date != none}
+                <span class="post-header__date">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    {date}
+                </span>
+            {/if}
+
+            {if updatedDate != none}
+                <span class="post-header__updated">
+                    Updated {updatedDate}
+                </span>
+            {/if}
+
+            {if readTime != none}
+                <span class="post-header__read-time">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    {readTime}
+                </span>
+            {/if}
+        </div>
+    </div>
+
+    // Divider
+    {if variant != "minimal"}
+        <div class="post-header__divider"></div>
+    {/if}
+</header>
+
+<style scoped>
+.post-header {
+    margin-bottom: var(--flin-space-8);
+}
+
+/* Variant: centered */
+.post-header--centered {
+    text-align: center;
+}
+
+.post-header--centered .post-header__meta {
+    justify-content: center;
+}
+
+.post-header--centered .post-header__taxonomies {
+    justify-content: center;
+}
+
+/* Variant: minimal */
+.post-header--minimal .post-header__meta {
+    padding-bottom: 0;
+}
+
+/* Taxonomies (category + tags) */
+.post-header__taxonomies {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--flin-space-3);
+    margin-bottom: var(--flin-space-4);
+}
+
+.post-header__category {
+    display: inline-block;
+    padding: var(--flin-space-1) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--flin-primary);
+    color: white;
+    border-radius: var(--flin-radius-full);
+    text-decoration: none;
+    transition: background var(--flin-transition-fast);
+}
+
+a.post-header__category:hover {
+    background: var(--flin-primary-dark);
+}
+
+.post-header__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-space-2);
+}
+
+.post-header__tag {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.post-header__tag::before {
+    content: "#";
+    color: var(--flin-primary);
+}
+
+/* Title */
+.post-header__title {
+    margin: 0 0 var(--flin-space-4) 0;
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-fg);
+    line-height: 1.2;
+}
+
+.post-header--md .post-header__title {
+    font-size: var(--flin-text-2xl);
+}
+
+.post-header--lg .post-header__title {
+    font-size: var(--flin-text-4xl);
+}
+
+.post-header--xl .post-header__title {
+    font-size: var(--flin-text-5xl);
+}
+
+/* Subtitle */
+.post-header__subtitle {
+    margin: 0 0 var(--flin-space-6) 0;
+    font-size: var(--flin-text-xl);
+    color: var(--flin-fg-muted);
+    line-height: 1.5;
+    max-width: 700px;
+}
+
+.post-header--centered .post-header__subtitle {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Meta */
+.post-header__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--flin-space-6);
+    padding-bottom: var(--flin-space-6);
+}
+
+.post-header__author {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+.post-header__author-avatar-link {
+    display: block;
+}
+
+.post-header__author-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--flin-radius-full);
+    object-fit: cover;
+}
+
+.post-header__author-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.post-header__author-name {
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    text-decoration: none;
+}
+
+a.post-header__author-name:hover {
+    color: var(--flin-primary);
+}
+
+.post-header__author-title {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.post-header__details {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--flin-space-4);
+}
+
+.post-header__date,
+.post-header__read-time {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.post-header__updated {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    font-style: italic;
+}
+
+/* Divider */
+.post-header__divider {
+    height: 1px;
+    background: var(--flin-neutral-200);
+}
+
+/* Dark theme */
+[data-theme="dark"] .post-header__divider {
+    background: var(--flin-neutral-700);
+}
+</style>

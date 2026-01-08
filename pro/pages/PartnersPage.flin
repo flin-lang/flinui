@@ -1,0 +1,914 @@
+// ============================================================================
+// PartnersPage.flin — FlinUI PRO Page Template
+// Partner showcase page with logos, partner tiers, and CTA
+// ============================================================================
+// Props:
+//   - title: Page title (string)
+//   - subtitle: Page subtitle (string)
+//   - partners: List of partner objects (list)
+//   - partnerTypes: List of partner type categories (list)
+//   - benefits: List of partner benefits (list)
+//   - onBecomePartner: Callback for partner signup (function or none)
+
+title = props.title || "Our Partners"
+subtitle = props.subtitle || "We work with industry leaders to deliver exceptional solutions for our customers."
+
+partnerTypes = props.partnerTypes || ["All", "Technology", "Solutions", "Consulting", "Integration"]
+selectedType = "All"
+
+partners = props.partners || [
+    ["name": "TechCorp", "type": "Technology", "tier": "Premier", "logo": none, "description": "Cloud infrastructure and hosting solutions."],
+    ["name": "DataFlow", "type": "Technology", "tier": "Premier", "logo": none, "description": "Real-time data streaming and analytics."],
+    ["name": "SecureNet", "type": "Technology", "tier": "Premier", "logo": none, "description": "Enterprise security and compliance."],
+    ["name": "CloudBase", "type": "Technology", "tier": "Elite", "logo": none, "description": "Scalable cloud computing platform."],
+    ["name": "AppMakers", "type": "Solutions", "tier": "Elite", "logo": none, "description": "Custom application development."],
+    ["name": "DevOps Pro", "type": "Solutions", "tier": "Elite", "logo": none, "description": "CI/CD and automation solutions."],
+    ["name": "ConsultX", "type": "Consulting", "tier": "Premier", "logo": none, "description": "Digital transformation consulting."],
+    ["name": "StrategyFirst", "type": "Consulting", "tier": "Elite", "logo": none, "description": "Business strategy and advisory."],
+    ["name": "IntegrateHub", "type": "Integration", "tier": "Premier", "logo": none, "description": "API integration specialists."],
+    ["name": "ConnectAll", "type": "Integration", "tier": "Standard", "logo": none, "description": "System integration services."],
+    ["name": "SmartSystems", "type": "Technology", "tier": "Standard", "logo": none, "description": "IoT and smart device solutions."],
+    ["name": "AnalyticsPlus", "type": "Solutions", "tier": "Standard", "logo": none, "description": "Business intelligence tools."]
+]
+
+benefits = props.benefits || [
+    ["icon": "badge", "title": "Partner Certification", "description": "Get certified and showcase your expertise to potential clients."],
+    ["icon": "support", "title": "Priority Support", "description": "Access to dedicated partner support and technical resources."],
+    ["icon": "revenue", "title": "Revenue Sharing", "description": "Earn commissions on referrals and joint opportunities."],
+    ["icon": "marketing", "title": "Co-Marketing", "description": "Joint marketing campaigns and lead generation activities."],
+    ["icon": "training", "title": "Training & Resources", "description": "Exclusive access to training materials and documentation."],
+    ["icon": "listing", "title": "Partner Directory", "description": "Featured listing in our partner directory for visibility."]
+]
+
+tiers = [
+    ["name": "Premier", "color": "gold", "benefits": ["Priority co-marketing", "Dedicated partner manager", "Early access to features", "Premium listing"]],
+    ["name": "Elite", "color": "purple", "benefits": ["Co-marketing support", "Technical training", "Partner portal access", "Featured listing"]],
+    ["name": "Standard", "color": "blue", "benefits": ["Partner resources", "Basic training", "Directory listing", "Community access"]]
+]
+
+onBecomePartner = props.onBecomePartner || none
+
+filterPartners = () => {
+    if selectedType == "All" {
+        partners
+    } else {
+        partners.filter((p) => p.type == selectedType)
+    }
+}
+
+getTierColor = (tier) => match tier {
+    "Premier" => "gold"
+    "Elite" => "purple"
+    "Standard" => "blue"
+    _ => "gray"
+}
+
+getBenefitIcon = (iconName) => match iconName {
+    "badge" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15l-2 5 2-2 2 2-2-5z"/><circle cx="12" cy="8" r="6"/></svg>
+    "support" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    "revenue" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    "marketing" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 11 18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+    "training" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M12 7v6l3 2"/></svg>
+    "listing" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+    _ => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+}
+
+handleBecomePartner = () => {
+    if onBecomePartner != none {
+        onBecomePartner()
+    }
+}
+
+<div class="partners-page">
+    // Hero Section
+    <section class="partners-hero">
+        <div class="partners-hero__container">
+            <span class="partners-hero__eyebrow">Partner Ecosystem</span>
+            <h1 class="partners-hero__title">{title}</h1>
+            <p class="partners-hero__subtitle">{subtitle}</p>
+            <button class="partners-hero__cta" click={handleBecomePartner}>
+                Become a Partner
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+    </section>
+
+    // Featured Partners
+    <section class="partners-featured">
+        <div class="partners-featured__container">
+            <h2 class="partners-featured__title">Trusted by industry leaders</h2>
+            <div class="partners-featured__grid">
+                {for partner in partners.filter((p) => p.tier == "Premier")}
+                    <div class="partners-featured__logo">
+                        {if partner.logo != none}
+                            <img src={partner.logo} alt={partner.name} />
+                        {else}
+                            <span>{partner.name}</span>
+                        {/if}
+                    </div>
+                {/for}
+            </div>
+        </div>
+    </section>
+
+    // Partner Tiers Section
+    <section class="partners-tiers">
+        <div class="partners-tiers__container">
+            <div class="partners-tiers__header">
+                <span class="partners-tiers__eyebrow">Partner Tiers</span>
+                <h2 class="partners-tiers__title">Choose your partnership level</h2>
+                <p class="partners-tiers__subtitle">
+                    Select the tier that best fits your business and unlock exclusive benefits.
+                </p>
+            </div>
+            <div class="partners-tiers__grid">
+                {for tier in tiers}
+                    <div class={"partners-tier-card partners-tier-card--" ++ tier.color}>
+                        <div class={"partners-tier-card__badge partners-tier-card__badge--" ++ tier.color}>
+                            {tier.name}
+                        </div>
+                        <h3 class="partners-tier-card__title">{tier.name} Partner</h3>
+                        <ul class="partners-tier-card__benefits">
+                            {for benefit in tier.benefits}
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                    {benefit}
+                                </li>
+                            {/for}
+                        </ul>
+                        <button class={"partners-tier-card__button partners-tier-card__button--" ++ tier.color}>
+                            Apply Now
+                        </button>
+                    </div>
+                {/for}
+            </div>
+        </div>
+    </section>
+
+    // Partner Directory
+    <section class="partners-directory">
+        <div class="partners-directory__container">
+            <div class="partners-directory__header">
+                <span class="partners-directory__eyebrow">Partner Directory</span>
+                <h2 class="partners-directory__title">Find the right partner</h2>
+                <p class="partners-directory__subtitle">
+                    Explore our network of certified partners across industries.
+                </p>
+            </div>
+
+            // Type Filter
+            <div class="partners-directory__filter">
+                {for type in partnerTypes}
+                    <button
+                        class={match selectedType { type => "partners-directory__filter-btn partners-directory__filter-btn--active" _ => "partners-directory__filter-btn" }}
+                        click={() => selectedType = type}
+                    >
+                        {type}
+                    </button>
+                {/for}
+            </div>
+
+            // Partner Grid
+            <div class="partners-directory__grid">
+                {for partner in filterPartners()}
+                    <div class="partners-card">
+                        <div class={"partners-card__tier partners-card__tier--" ++ getTierColor(partner.tier)}>
+                            {partner.tier}
+                        </div>
+                        <div class="partners-card__logo">
+                            {if partner.logo != none}
+                                <img src={partner.logo} alt={partner.name} />
+                            {else}
+                                <span>{partner.name.charAt(0)}</span>
+                            {/if}
+                        </div>
+                        <h3 class="partners-card__name">{partner.name}</h3>
+                        <span class="partners-card__type">{partner.type}</span>
+                        <p class="partners-card__description">{partner.description}</p>
+                        <a href="#" class="partners-card__link">
+                            Learn more
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
+                {/for}
+
+                {if filterPartners().length == 0}
+                    <div class="partners-directory__empty">
+                        <p>No partners found in this category.</p>
+                    </div>
+                {/if}
+            </div>
+        </div>
+    </section>
+
+    // Benefits Section
+    <section class="partners-benefits">
+        <div class="partners-benefits__container">
+            <div class="partners-benefits__header">
+                <span class="partners-benefits__eyebrow">Why Partner With Us</span>
+                <h2 class="partners-benefits__title">Grow your business together</h2>
+                <p class="partners-benefits__subtitle">
+                    Join our partner ecosystem and access exclusive resources, support, and opportunities.
+                </p>
+            </div>
+            <div class="partners-benefits__grid">
+                {for benefit in benefits}
+                    <div class="partners-benefit-card">
+                        <div class="partners-benefit-card__icon">
+                            {getBenefitIcon(benefit.icon)}
+                        </div>
+                        <h3 class="partners-benefit-card__title">{benefit.title}</h3>
+                        <p class="partners-benefit-card__description">{benefit.description}</p>
+                    </div>
+                {/for}
+            </div>
+        </div>
+    </section>
+
+    // CTA Section
+    <section class="partners-cta">
+        <div class="partners-cta__container">
+            <h2 class="partners-cta__title">Ready to partner with us?</h2>
+            <p class="partners-cta__subtitle">
+                Join our growing network of partners and unlock new opportunities for your business.
+            </p>
+            <div class="partners-cta__actions">
+                <button class="partners-cta__button partners-cta__button--primary" click={handleBecomePartner}>
+                    Become a Partner
+                </button>
+                <a href="/contact" class="partners-cta__button partners-cta__button--secondary">
+                    Contact Us
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style scoped>
+.partners-page {
+    font-family: var(--flin-font-sans);
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-base);
+}
+
+/* Hero Section */
+.partners-hero {
+    padding: var(--flin-space-20) var(--flin-space-6);
+    background: linear-gradient(180deg, var(--flin-bg-surface) 0%, var(--flin-bg-base) 100%);
+    text-align: center;
+}
+
+.partners-hero__container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.partners-hero__eyebrow {
+    display: inline-block;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--flin-space-4);
+}
+
+.partners-hero__title {
+    font-size: 3rem;
+    font-weight: var(--flin-font-bold);
+    line-height: 1.1;
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.partners-hero__subtitle {
+    font-size: var(--flin-text-xl);
+    color: var(--flin-text-secondary);
+    margin: 0 0 var(--flin-space-8) 0;
+}
+
+.partners-hero__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-4) var(--flin-space-8);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background: var(--flin-accent-gold);
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.partners-hero__cta:hover {
+    background: var(--flin-accent-gold-hover);
+    transform: translateY(-2px);
+}
+
+.partners-hero__cta svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Featured Partners */
+.partners-featured {
+    padding: var(--flin-space-16) var(--flin-space-6);
+    background: var(--flin-bg-surface);
+    border-top: 1px solid var(--flin-border-subtle);
+}
+
+.partners-featured__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.partners-featured__title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 0 var(--flin-space-8) 0;
+}
+
+.partners-featured__grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--flin-space-12);
+}
+
+.partners-featured__logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.partners-featured__logo:hover {
+    opacity: 1;
+}
+
+.partners-featured__logo img {
+    max-height: 40px;
+    width: auto;
+}
+
+.partners-featured__logo span {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-muted);
+}
+
+/* Partner Tiers */
+.partners-tiers {
+    padding: var(--flin-space-20) var(--flin-space-6);
+}
+
+.partners-tiers__container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.partners-tiers__header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto var(--flin-space-12);
+}
+
+.partners-tiers__eyebrow {
+    display: inline-block;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--flin-space-4);
+}
+
+.partners-tiers__title {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.partners-tiers__subtitle {
+    font-size: var(--flin-text-lg);
+    color: var(--flin-text-secondary);
+    margin: 0;
+}
+
+.partners-tiers__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--flin-space-6);
+}
+
+.partners-tier-card {
+    padding: var(--flin-space-8);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    text-align: center;
+    position: relative;
+    transition: all var(--flin-transition-fast);
+}
+
+.partners-tier-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.partners-tier-card--gold {
+    border-color: var(--flin-accent-gold);
+}
+
+.partners-tier-card--purple {
+    border-color: #a855f7;
+}
+
+.partners-tier-card--blue {
+    border-color: #3b82f6;
+}
+
+.partners-tier-card__badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--flin-space-1) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-bold);
+    border-radius: var(--flin-radius-full);
+    text-transform: uppercase;
+}
+
+.partners-tier-card__badge--gold {
+    background: var(--flin-accent-gold);
+    color: white;
+}
+
+.partners-tier-card__badge--purple {
+    background: #a855f7;
+    color: white;
+}
+
+.partners-tier-card__badge--blue {
+    background: #3b82f6;
+    color: white;
+}
+
+.partners-tier-card__title {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: var(--flin-space-4) 0 var(--flin-space-6) 0;
+}
+
+.partners-tier-card__benefits {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--flin-space-6) 0;
+    text-align: left;
+}
+
+.partners-tier-card__benefits li {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    padding: var(--flin-space-2) 0;
+}
+
+.partners-tier-card__benefits svg {
+    width: 16px;
+    height: 16px;
+    color: var(--flin-success);
+    flex-shrink: 0;
+}
+
+.partners-tier-card__button {
+    width: 100%;
+    padding: var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.partners-tier-card__button--gold {
+    background: var(--flin-accent-gold);
+    color: white;
+}
+
+.partners-tier-card__button--gold:hover {
+    background: var(--flin-accent-gold-hover);
+}
+
+.partners-tier-card__button--purple {
+    background: #a855f7;
+    color: white;
+}
+
+.partners-tier-card__button--purple:hover {
+    background: #9333ea;
+}
+
+.partners-tier-card__button--blue {
+    background: #3b82f6;
+    color: white;
+}
+
+.partners-tier-card__button--blue:hover {
+    background: #2563eb;
+}
+
+/* Partner Directory */
+.partners-directory {
+    padding: var(--flin-space-20) var(--flin-space-6);
+    background: var(--flin-bg-surface);
+}
+
+.partners-directory__container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.partners-directory__header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto var(--flin-space-8);
+}
+
+.partners-directory__eyebrow {
+    display: inline-block;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--flin-space-4);
+}
+
+.partners-directory__title {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.partners-directory__subtitle {
+    font-size: var(--flin-text-lg);
+    color: var(--flin-text-secondary);
+    margin: 0;
+}
+
+.partners-directory__filter {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--flin-space-2);
+    margin-bottom: var(--flin-space-8);
+}
+
+.partners-directory__filter-btn {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-secondary);
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.partners-directory__filter-btn:hover {
+    border-color: var(--flin-border-default);
+    color: var(--flin-text-primary);
+}
+
+.partners-directory__filter-btn--active {
+    background: var(--flin-accent-gold);
+    border-color: var(--flin-accent-gold);
+    color: white;
+}
+
+.partners-directory__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--flin-space-6);
+}
+
+.partners-card {
+    padding: var(--flin-space-6);
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    text-align: center;
+    position: relative;
+    transition: all var(--flin-transition-fast);
+}
+
+.partners-card:hover {
+    border-color: var(--flin-accent-gold);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.partners-card__tier {
+    position: absolute;
+    top: var(--flin-space-3);
+    right: var(--flin-space-3);
+    font-size: 10px;
+    font-weight: var(--flin-font-bold);
+    padding: 2px var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    text-transform: uppercase;
+}
+
+.partners-card__tier--gold {
+    background: var(--flin-accent-gold-light);
+    color: var(--flin-accent-gold);
+}
+
+.partners-card__tier--purple {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+}
+
+.partners-card__tier--blue {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.partners-card__logo {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-bg-surface);
+    border-radius: var(--flin-radius-lg);
+    margin: 0 auto var(--flin-space-4);
+}
+
+.partners-card__logo img {
+    max-width: 48px;
+    max-height: 48px;
+}
+
+.partners-card__logo span {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-accent-gold);
+}
+
+.partners-card__name {
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-1) 0;
+}
+
+.partners-card__type {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-tertiary);
+}
+
+.partners-card__description {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    line-height: 1.5;
+    margin: var(--flin-space-3) 0;
+}
+
+.partners-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-accent-gold);
+    text-decoration: none;
+}
+
+.partners-card__link:hover {
+    gap: var(--flin-space-2);
+}
+
+.partners-card__link svg {
+    width: 14px;
+    height: 14px;
+}
+
+.partners-directory__empty {
+    grid-column: span 4;
+    text-align: center;
+    padding: var(--flin-space-12);
+    color: var(--flin-text-muted);
+}
+
+/* Benefits Section */
+.partners-benefits {
+    padding: var(--flin-space-20) var(--flin-space-6);
+}
+
+.partners-benefits__container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.partners-benefits__header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto var(--flin-space-12);
+}
+
+.partners-benefits__eyebrow {
+    display: inline-block;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--flin-space-4);
+}
+
+.partners-benefits__title {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.partners-benefits__subtitle {
+    font-size: var(--flin-text-lg);
+    color: var(--flin-text-secondary);
+    margin: 0;
+}
+
+.partners-benefits__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--flin-space-6);
+}
+
+.partners-benefit-card {
+    padding: var(--flin-space-6);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    text-align: center;
+}
+
+.partners-benefit-card__icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-accent-gold-light);
+    border-radius: var(--flin-radius-full);
+    margin: 0 auto var(--flin-space-4);
+}
+
+.partners-benefit-card__icon svg {
+    width: 24px;
+    height: 24px;
+    color: var(--flin-accent-gold);
+}
+
+.partners-benefit-card__title {
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.partners-benefit-card__description {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* CTA Section */
+.partners-cta {
+    padding: var(--flin-space-20) var(--flin-space-6);
+    background: linear-gradient(135deg, var(--flin-accent-gold) 0%, #e6a817 100%);
+    text-align: center;
+}
+
+.partners-cta__container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.partners-cta__title {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: white;
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.partners-cta__subtitle {
+    font-size: var(--flin-text-lg);
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0 0 var(--flin-space-8) 0;
+}
+
+.partners-cta__actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-4);
+}
+
+.partners-cta__button {
+    padding: var(--flin-space-4) var(--flin-space-8);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    border-radius: var(--flin-radius-lg);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.partners-cta__button--primary {
+    color: var(--flin-accent-gold);
+    background: white;
+    border: none;
+}
+
+.partners-cta__button--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.partners-cta__button--secondary {
+    color: white;
+    background: transparent;
+    border: 2px solid white;
+}
+
+.partners-cta__button--secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .partners-tiers__grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .partners-directory__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .partners-directory__empty {
+        grid-column: span 2;
+    }
+
+    .partners-benefits__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .partners-hero__title {
+        font-size: 2.25rem;
+    }
+
+    .partners-directory__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .partners-directory__empty {
+        grid-column: span 1;
+    }
+
+    .partners-benefits__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .partners-cta__actions {
+        flex-direction: column;
+    }
+}
+</style>

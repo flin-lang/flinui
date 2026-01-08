@@ -1,0 +1,310 @@
+// ============================================================================
+// SettingsLayout.flin — FlinUI PRO Shell Component
+// Settings page layout with navigation tabs/sidebar
+// ============================================================================
+// Props:
+//   - title: Settings page title (string, default: "Settings")
+//   - description: Settings page description (string or none)
+//   - variant: Layout variant - sidebar, tabs (string, default: "sidebar")
+//   - navWidth: Navigation width for sidebar variant (string, default: "240px")
+//   - sections: Navigation sections (list)
+//     Each section: { id, label, icon (optional), badge (optional) }
+//   - activeSection: Currently active section ID (string or none)
+//   - onSectionChange: Callback when section changes (function or none)
+// ============================================================================
+
+title = props.title || "Settings"
+description = props.description || none
+variant = props.variant || "sidebar"
+navWidth = props.navWidth || "240px"
+sections = props.sections || [
+    ["id": "general", "label": "General", "icon": "cog"],
+    ["id": "profile", "label": "Profile", "icon": "user"],
+    ["id": "security", "label": "Security", "icon": "shield"],
+    ["id": "notifications", "label": "Notifications", "icon": "bell"],
+    ["id": "billing", "label": "Billing", "icon": "credit-card"],
+    ["id": "integrations", "label": "Integrations", "icon": "plug"]
+]
+activeSection = props.activeSection || "general"
+onSectionChange = props.onSectionChange || none
+
+handleSectionClick = (sectionId) => {
+    if onSectionChange != none {
+        onSectionChange(sectionId)
+    }
+}
+
+isActive = (sectionId) => sectionId == activeSection
+
+<div class="flin-settings-layout {if variant == 'tabs'}variant-tabs{else}variant-sidebar{/if}"
+     style="--nav-width: {navWidth}">
+
+    // Header
+    <header class="settings-header">
+        <div class="header-content">
+            <h1 class="settings-title">{title}</h1>
+            {if description != none}
+                <p class="settings-description">{description}</p>
+            {/if}
+        </div>
+        <div class="header-actions">
+            {props.headerActions || none}
+        </div>
+    </header>
+
+    // Body
+    <div class="settings-body">
+        // Navigation
+        <nav class="settings-nav" role="navigation" aria-label="Settings navigation">
+            {if variant == "tabs"}
+                <div class="nav-tabs">
+                    {for section in sections}
+                        <button
+                            class="nav-tab {if isActive(section.id)}active{/if}"
+                            click={() => handleSectionClick(section.id)}
+                            aria-current={if isActive(section.id)}"page"{else}none{/if}
+                        >
+                            {section.label}
+                            {if section.badge != none}
+                                <span class="nav-badge">{section.badge}</span>
+                            {/if}
+                        </button>
+                    {/for}
+                </div>
+            {else}
+                <ul class="nav-list">
+                    {for section in sections}
+                        <li>
+                            <button
+                                class="nav-item {if isActive(section.id)}active{/if}"
+                                click={() => handleSectionClick(section.id)}
+                                aria-current={if isActive(section.id)}"page"{else}none{/if}
+                            >
+                                {if section.icon != none}
+                                    <span class="nav-icon">
+                                        {match section.icon {
+                                            "cog" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+                                            "user" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+                                            "shield" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                            "bell" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
+                                            "credit-card" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/><path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/></svg>
+                                            "plug" -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/></svg>
+                                            _ -> <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="3"/></svg>
+                                        }}
+                                    </span>
+                                {/if}
+                                <span class="nav-label">{section.label}</span>
+                                {if section.badge != none}
+                                    <span class="nav-badge">{section.badge}</span>
+                                {/if}
+                            </button>
+                        </li>
+                    {/for}
+                </ul>
+            {/if}
+        </nav>
+
+        // Content
+        <main class="settings-content">
+            {children}
+        </main>
+    </div>
+</div>
+
+<style scoped>
+.flin-settings-layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--flin-space-6);
+}
+
+/* Header */
+.settings-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--flin-space-6);
+    padding-bottom: var(--flin-space-6);
+    border-bottom: 1px solid var(--flin-border-subtle);
+    gap: var(--flin-space-4);
+}
+
+.settings-title {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0;
+}
+
+.settings-description {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    margin: var(--flin-space-1) 0 0;
+}
+
+.header-actions {
+    flex-shrink: 0;
+}
+
+/* Body */
+.settings-body {
+    display: flex;
+    gap: var(--flin-space-8);
+}
+
+/* Navigation - Sidebar variant */
+.variant-sidebar .settings-nav {
+    width: var(--nav-width);
+    flex-shrink: 0;
+}
+
+.nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    width: 100%;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-secondary);
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.nav-item:hover {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-primary);
+}
+
+.nav-item.active {
+    background: rgba(234, 179, 8, 0.1);
+    color: var(--flin-accent-gold);
+}
+
+.nav-icon {
+    display: flex;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.nav-label {
+    flex: 1;
+}
+
+.nav-badge {
+    font-size: var(--flin-text-xs);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    background: var(--flin-accent-gold);
+    color: var(--flin-neutral-900);
+    border-radius: var(--flin-radius-full);
+    font-weight: var(--flin-font-semibold);
+}
+
+/* Navigation - Tabs variant */
+.variant-tabs .settings-body {
+    flex-direction: column;
+}
+
+.variant-tabs .settings-nav {
+    width: 100%;
+    margin-bottom: var(--flin-space-6);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.nav-tabs {
+    display: flex;
+    gap: var(--flin-space-1);
+    overflow-x: auto;
+    padding-bottom: var(--flin-space-1);
+}
+
+.nav-tab {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-4);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--flin-text-secondary);
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    margin-bottom: -1px;
+}
+
+.nav-tab:hover {
+    color: var(--flin-text-primary);
+}
+
+.nav-tab.active {
+    color: var(--flin-accent-gold);
+    border-bottom-color: var(--flin-accent-gold);
+}
+
+/* Content */
+.settings-content {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .flin-settings-layout {
+        padding: var(--flin-space-4);
+    }
+
+    .variant-sidebar .settings-body {
+        flex-direction: column;
+    }
+
+    .variant-sidebar .settings-nav {
+        width: 100%;
+        margin-bottom: var(--flin-space-4);
+    }
+
+    .nav-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .nav-item {
+        padding: var(--flin-space-2) var(--flin-space-3);
+    }
+
+    .nav-icon {
+        display: none;
+    }
+
+    .settings-header {
+        flex-direction: column;
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .settings-header {
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .variant-tabs .settings-nav {
+    border-color: var(--flin-border-default);
+}
+</style>

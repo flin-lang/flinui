@@ -1,0 +1,310 @@
+// ============================================================================
+// BlogPostCard.flin — FlinUI PRO
+// Blog preview card with image, title, excerpt
+// ============================================================================
+// Props:
+//   title: text - Post title (required)
+//   excerpt: text - Short description/excerpt (default: "")
+//   image: text - Cover image URL (default: none)
+//   href: text - Link to full post (default: "#")
+//   date: text - Publication date (default: none)
+//   readTime: text - Estimated read time (default: none)
+//   author: object - Author info {name, avatar} (default: none)
+//   category: text - Post category (default: none)
+//   categoryColor: text - Category badge color (default: "primary")
+//   variant: text - Card style ("default", "horizontal", "minimal") (default: "default")
+// ============================================================================
+
+title = props.title || "Untitled Post"
+excerpt = props.excerpt || ""
+image = props.image || none
+href = props.href || "#"
+date = props.date || none
+readTime = props.readTime || none
+author = props.author || none
+category = props.category || none
+categoryColor = props.categoryColor || "primary"
+variant = props.variant || "default"
+
+// Compute variant class
+variantClass = match variant {
+    "horizontal" -> "blog-card--horizontal"
+    "minimal" -> "blog-card--minimal"
+    _ -> "blog-card--default"
+}
+
+// Compute category color class
+categoryColorClass = match categoryColor {
+    "success" -> "blog-card__category--success"
+    "warning" -> "blog-card__category--warning"
+    "danger" -> "blog-card__category--danger"
+    "info" -> "blog-card__category--info"
+    _ -> "blog-card__category--primary"
+}
+
+<article class={"blog-card " ++ variantClass}>
+    {if image != none && variant != "minimal"}
+        <a href={href} class="blog-card__image-link">
+            <div class="blog-card__image-wrapper">
+                <img class="blog-card__image" src={image} alt={title}>
+                {if category != none}
+                    <span class={"blog-card__category " ++ categoryColorClass}>{category}</span>
+                {/if}
+            </div>
+        </a>
+    {/if}
+
+    <div class="blog-card__content">
+        {if category != none && (variant == "minimal" || image == none)}
+            <span class={"blog-card__category blog-card__category--inline " ++ categoryColorClass}>{category}</span>
+        {/if}
+
+        <a href={href} class="blog-card__title-link">
+            <h3 class="blog-card__title">{title}</h3>
+        </a>
+
+        {if excerpt != ""}
+            <p class="blog-card__excerpt">{excerpt}</p>
+        {/if}
+
+        <div class="blog-card__meta">
+            {if author != none}
+                <div class="blog-card__author">
+                    {if author.avatar != none}
+                        <img class="blog-card__author-avatar" src={author.avatar} alt={author.name || "Author"}>
+                    {/if}
+                    <span class="blog-card__author-name">{author.name || "Anonymous"}</span>
+                </div>
+            {/if}
+
+            <div class="blog-card__details">
+                {if date != none}
+                    <span class="blog-card__date">{date}</span>
+                {/if}
+                {if date != none && readTime != none}
+                    <span class="blog-card__separator">-</span>
+                {/if}
+                {if readTime != none}
+                    <span class="blog-card__read-time">{readTime}</span>
+                {/if}
+            </div>
+        </div>
+    </div>
+</article>
+
+<style scoped>
+.blog-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--flin-bg);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--flin-neutral-200);
+    transition: all var(--flin-transition-base);
+}
+
+.blog-card:hover {
+    box-shadow: var(--flin-shadow-lg);
+    border-color: var(--flin-neutral-300);
+}
+
+/* Horizontal variant */
+.blog-card--horizontal {
+    flex-direction: row;
+}
+
+.blog-card--horizontal .blog-card__image-wrapper {
+    width: 280px;
+    min-height: 200px;
+    flex-shrink: 0;
+}
+
+.blog-card--horizontal .blog-card__content {
+    flex: 1;
+}
+
+/* Minimal variant */
+.blog-card--minimal {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+.blog-card--minimal:hover {
+    box-shadow: none;
+}
+
+/* Image */
+.blog-card__image-link {
+    display: block;
+    text-decoration: none;
+}
+
+.blog-card__image-wrapper {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+}
+
+.blog-card--horizontal .blog-card__image-wrapper {
+    aspect-ratio: auto;
+}
+
+.blog-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--flin-transition-base);
+}
+
+.blog-card:hover .blog-card__image {
+    transform: scale(1.05);
+}
+
+/* Category badge */
+.blog-card__category {
+    position: absolute;
+    top: var(--flin-space-3);
+    left: var(--flin-space-3);
+    padding: var(--flin-space-1) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: var(--flin-radius-full);
+}
+
+.blog-card__category--inline {
+    position: static;
+    display: inline-block;
+    margin-bottom: var(--flin-space-2);
+}
+
+.blog-card__category--primary {
+    background: var(--flin-primary);
+    color: white;
+}
+
+.blog-card__category--success {
+    background: var(--flin-success);
+    color: white;
+}
+
+.blog-card__category--warning {
+    background: var(--flin-warning);
+    color: var(--flin-neutral-900);
+}
+
+.blog-card__category--danger {
+    background: var(--flin-danger);
+    color: white;
+}
+
+.blog-card__category--info {
+    background: var(--flin-info);
+    color: white;
+}
+
+/* Content */
+.blog-card__content {
+    padding: var(--flin-space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+}
+
+.blog-card--minimal .blog-card__content {
+    padding: 0;
+}
+
+/* Title */
+.blog-card__title-link {
+    text-decoration: none;
+}
+
+.blog-card__title {
+    margin: 0;
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-fg);
+    line-height: 1.3;
+    transition: color var(--flin-transition-fast);
+}
+
+.blog-card__title-link:hover .blog-card__title {
+    color: var(--flin-primary);
+}
+
+/* Excerpt */
+.blog-card__excerpt {
+    margin: 0;
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg-muted);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Meta */
+.blog-card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--flin-space-3);
+    margin-top: auto;
+    padding-top: var(--flin-space-3);
+    border-top: 1px solid var(--flin-neutral-100);
+}
+
+.blog-card--minimal .blog-card__meta {
+    border-top: none;
+    padding-top: 0;
+}
+
+.blog-card__author {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.blog-card__author-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--flin-radius-full);
+    object-fit: cover;
+}
+
+.blog-card__author-name {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+}
+
+.blog-card__details {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.blog-card__separator {
+    color: var(--flin-neutral-300);
+}
+
+/* Dark theme */
+[data-theme="dark"] .blog-card {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .blog-card:hover {
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .blog-card__meta {
+    border-top-color: var(--flin-neutral-700);
+}
+</style>

@@ -1,0 +1,379 @@
+// PaymentForm.flin - FlinUI PRO Payment Form Component
+// Complete payment form with card validation and type detection
+
+// Props with defaults
+onSubmit = props.onSubmit
+showSaveCard = props.showSaveCard || true
+disabled = props.disabled || false
+processing = props.processing || false
+
+// Form state
+cardNumber = ""
+cardName = ""
+expiryDate = ""
+cvv = ""
+saveCard = false
+
+// Validation state
+cardNumberValid = false
+expiryValid = false
+cvvValid = false
+cardType = "unknown"
+
+// Card type detection
+function detectCardType(number) {
+    cleanNumber = number.replace(" ", "")
+
+    {if cleanNumber.startsWith("4")}
+        return "visa"
+    {else if cleanNumber.startsWith("5")}
+        return "mastercard"
+    {else if cleanNumber.startsWith("3")}
+        return "amex"
+    {else if cleanNumber.startsWith("6")}
+        return "discover"
+    {else}
+        return "unknown"
+    {/if}
+}
+
+// Format card number with spaces
+function formatCardNumber(value) {
+    clean = value.replace(" ", "").substring(0, 16)
+    formatted = ""
+    i = 0
+
+    {for char in clean}
+        {if i > 0 && i % 4 == 0}
+            formatted = formatted ++ " "
+        {/if}
+        formatted = formatted ++ char
+        i = i + 1
+    {/for}
+
+    return formatted
+}
+
+// Format expiry date (MM/YY)
+function formatExpiry(value) {
+    clean = value.replace("/", "").substring(0, 4)
+
+    {if clean.length >= 2}
+        return clean.substring(0, 2) ++ "/" ++ clean.substring(2)
+    {else}
+        return clean
+    {/if}
+}
+
+// Validate card number (Luhn algorithm simplified)
+function validateCardNumber(number) {
+    clean = number.replace(" ", "")
+    return clean.length >= 13 && clean.length <= 19
+}
+
+// Validate expiry date
+function validateExpiry(expiry) {
+    parts = expiry.split("/")
+    {if parts.length != 2}
+        return false
+    {/if}
+
+    month = parseInt(parts[0])
+    year = parseInt(parts[1])
+
+    return month >= 1 && month <= 12 && year >= 24
+}
+
+// Validate CVV
+function validateCVV(cvv) {
+    return cvv.length >= 3 && cvv.length <= 4
+}
+
+// Handle form submission
+function handleSubmit() {
+    {if cardNumberValid && expiryValid && cvvValid && onSubmit}
+        onSubmit({
+            cardNumber: cardNumber,
+            cardName: cardName,
+            expiryDate: expiryDate,
+            cvv: cvv,
+            saveCard: saveCard,
+            cardType: cardType
+        })
+    {/if}
+}
+
+// Update handlers
+function handleCardNumberChange(value) {
+    cardNumber = formatCardNumber(value)
+    cardNumberValid = validateCardNumber(cardNumber)
+    cardType = detectCardType(cardNumber)
+}
+
+function handleExpiryChange(value) {
+    expiryDate = formatExpiry(value)
+    expiryValid = validateExpiry(expiryDate)
+}
+
+function handleCVVChange(value) {
+    cvv = value.substring(0, 4)
+    cvvValid = validateCVV(cvv)
+}
+
+isFormValid = cardNumberValid && expiryValid && cvvValid && cardName.length > 0
+
+<div class="payment-form">
+    <style scoped>
+        .payment-form {
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-card);
+            padding: var(--flin-space-6);
+            box-shadow: var(--flin-shadow-card);
+        }
+
+        .form-header {
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .form-title {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            color: var(--flin-text-muted);
+            font-size: var(--flin-text-sm);
+        }
+
+        .lock-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .form-group {
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .form-label {
+            display: block;
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-secondary);
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: var(--flin-space-3);
+            font-size: var(--flin-text-base);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-input);
+            background: var(--flin-bg-deep);
+            color: var(--flin-text-primary);
+            transition: border-color var(--flin-transition-fast);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--flin-accent-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .form-input.valid {
+            border-color: var(--flin-status-success);
+        }
+
+        .form-input.invalid {
+            border-color: var(--flin-status-error);
+        }
+
+        .card-icon {
+            position: absolute;
+            right: var(--flin-space-3);
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 20px;
+            opacity: 0.6;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--flin-space-4);
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            margin: var(--flin-space-4) 0;
+        }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-label {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            cursor: pointer;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: var(--flin-space-3);
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-deep);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            border: none;
+            border-radius: var(--flin-radius-button);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .submit-button:hover:not(:disabled) {
+            background: var(--flin-accent-gold-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--flin-shadow-button);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .card-types {
+            display: flex;
+            gap: var(--flin-space-2);
+            margin-top: var(--flin-space-4);
+            padding-top: var(--flin-space-4);
+            border-top: 1px solid var(--flin-border-subtle);
+        }
+
+        .card-type-icon {
+            width: 40px;
+            height: 28px;
+            opacity: 0.4;
+            transition: opacity var(--flin-transition-fast);
+        }
+
+        .card-type-icon.active {
+            opacity: 1;
+        }
+    </style>
+
+    <div class="form-header">
+        <div class="form-title">Payment Information</div>
+        <div class="security-badge">
+            <svg class="lock-icon" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 1a3 3 0 0 0-3 3v1H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V4a3 3 0 0 0-3-3zm2 4V4a2 2 0 1 0-4 0v1h4z"/>
+            </svg>
+            Secure payment processing
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Card Number</label>
+        <div class="input-wrapper">
+            <input
+                type="text"
+                class="form-input {if cardNumber.length > 0}{if cardNumberValid}valid{else}invalid{/if}{/if}"
+                placeholder="1234 5678 9012 3456"
+                value={cardNumber}
+                input={(e) => handleCardNumberChange(e.target.value)}
+                disabled={disabled || processing}
+            />
+            {if cardType != "unknown"}
+                <span class="card-icon">💳</span>
+            {/if}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Name on Card</label>
+        <input
+            type="text"
+            class="form-input"
+            placeholder="John Doe"
+            value={cardName}
+            input={(e) => cardName = e.target.value}
+            disabled={disabled || processing}
+        />
+    </div>
+
+    <div class="two-column">
+        <div class="form-group">
+            <label class="form-label">Expiry Date</label>
+            <input
+                type="text"
+                class="form-input {if expiryDate.length > 0}{if expiryValid}valid{else}invalid{/if}{/if}"
+                placeholder="MM/YY"
+                value={expiryDate}
+                input={(e) => handleExpiryChange(e.target.value)}
+                disabled={disabled || processing}
+            />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">CVV</label>
+            <input
+                type="password"
+                class="form-input {if cvv.length > 0}{if cvvValid}valid{else}invalid{/if}{/if}"
+                placeholder="123"
+                value={cvv}
+                input={(e) => handleCVVChange(e.target.value)}
+                disabled={disabled || processing}
+                maxlength="4"
+            />
+        </div>
+    </div>
+
+    {if showSaveCard}
+        <div class="checkbox-wrapper">
+            <input
+                type="checkbox"
+                class="checkbox"
+                id="save-card"
+                checked={saveCard}
+                change={(e) => saveCard = e.target.checked}
+                disabled={disabled || processing}
+            />
+            <label class="checkbox-label" for="save-card">
+                Save card for future purchases
+            </label>
+        </div>
+    {/if}
+
+    <button
+        class="submit-button"
+        click={handleSubmit}
+        disabled={!isFormValid || disabled || processing}
+    >
+        {if processing}
+            Processing...
+        {else}
+            Complete Payment
+        {/if}
+    </button>
+
+    <div class="card-types">
+        <span class="card-type-icon {if cardType == 'visa'}active{/if}">VISA</span>
+        <span class="card-type-icon {if cardType == 'mastercard'}active{/if}">MC</span>
+        <span class="card-type-icon {if cardType == 'amex'}active{/if}">AMEX</span>
+        <span class="card-type-icon {if cardType == 'discover'}active{/if}">DISC</span>
+    </div>
+</div>

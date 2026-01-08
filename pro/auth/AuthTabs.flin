@@ -1,0 +1,690 @@
+// AuthTabs.flin - FlinUI PRO Authentication Component
+// Tabbed login/register interface
+
+// Props with defaults
+defaultTab = props.defaultTab || "login"
+loginLabel = props.loginLabel || "Sign in"
+registerLabel = props.registerLabel || "Sign up"
+showSocialLogin = props.showSocialLogin || false
+socialProviders = props.socialProviders || ["google", "github"]
+loading = props.loading || false
+loginError = props.loginError || none
+registerError = props.registerError || none
+onLogin = props.onLogin
+onRegister = props.onRegister
+onSocialLogin = props.onSocialLogin
+forgotPasswordUrl = props.forgotPasswordUrl || "/forgot-password"
+termsUrl = props.termsUrl || "/terms"
+privacyUrl = props.privacyUrl || "/privacy"
+
+// Internal state
+activeTab = defaultTab
+
+// Login form state
+loginEmail = ""
+loginPassword = ""
+rememberMe = false
+
+// Register form state
+registerName = ""
+registerEmail = ""
+registerPassword = ""
+acceptTerms = false
+
+// Password strength
+passwordStrength = 0
+
+// Switch tab
+switchTab = (tab) => {
+    activeTab = tab
+}
+
+// Update password strength
+handleRegisterPasswordChange = (e) => {
+    registerPassword = e.target.value
+    strength = 0
+    if registerPassword.length >= 8 { strength = strength + 1 }
+    if /[A-Z]/.test(registerPassword) { strength = strength + 1 }
+    if /[a-z]/.test(registerPassword) { strength = strength + 1 }
+    if /[0-9]/.test(registerPassword) { strength = strength + 1 }
+    if /[^A-Za-z0-9]/.test(registerPassword) { strength = strength + 1 }
+    passwordStrength = strength
+}
+
+// Handle login submit
+handleLoginSubmit = {
+    if onLogin {
+        onLogin({
+            email: loginEmail,
+            password: loginPassword,
+            rememberMe: rememberMe
+        })
+    }
+}
+
+// Handle register submit
+handleRegisterSubmit = {
+    if onRegister {
+        onRegister({
+            name: registerName,
+            email: registerEmail,
+            password: registerPassword,
+            acceptTerms: acceptTerms
+        })
+    }
+}
+
+// Handle social login
+handleSocialLogin = (provider) => {
+    if onSocialLogin {
+        onSocialLogin(provider)
+    }
+}
+
+// Compute tab classes
+loginTabClass = match activeTab {
+    "login" -> "auth-tabs__tab auth-tabs__tab--active"
+    _ -> "auth-tabs__tab"
+}
+
+registerTabClass = match activeTab {
+    "register" -> "auth-tabs__tab auth-tabs__tab--active"
+    _ -> "auth-tabs__tab"
+}
+
+// Compute loading class
+loadingClass = match loading {
+    true -> " auth-tabs--loading"
+    _ -> ""
+}
+
+// Compute strength class
+strengthClass = match passwordStrength {
+    0 -> "strength--empty"
+    1 -> "strength--weak"
+    2 -> "strength--weak"
+    3 -> "strength--medium"
+    4 -> "strength--strong"
+    _ -> "strength--very-strong"
+}
+
+<div class={"auth-tabs" ++ loadingClass}>
+    <div class="auth-tabs__header">
+        <button
+            type="button"
+            class={loginTabClass}
+            click={() => switchTab("login")}
+            disabled={loading}
+        >
+            {loginLabel}
+        </button>
+        <button
+            type="button"
+            class={registerTabClass}
+            click={() => switchTab("register")}
+            disabled={loading}
+        >
+            {registerLabel}
+        </button>
+        <div class="auth-tabs__indicator" data-tab={activeTab}></div>
+    </div>
+
+    <div class="auth-tabs__content">
+        {if showSocialLogin && socialProviders.length > 0}
+            <div class="auth-tabs__social">
+                {for provider in socialProviders}
+                    <button
+                        type="button"
+                        class={"auth-tabs__social-btn auth-tabs__social-btn--" ++ provider}
+                        click={() => handleSocialLogin(provider)}
+                        disabled={loading}
+                    >
+                        {match provider {
+                            "google" -> <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                            "github" -> <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            _ -> <span>{provider}</span>
+                        }}
+                        <span>
+                            {match provider {
+                                "google" -> "Google"
+                                "github" -> "GitHub"
+                                _ -> provider
+                            }}
+                        </span>
+                    </button>
+                {/for}
+            </div>
+
+            <div class="auth-tabs__divider">
+                <span>or</span>
+            </div>
+        {/if}
+
+        {if activeTab == "login"}
+            {if loginError != none}
+                <div class="auth-tabs__error" role="alert">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span>{loginError}</span>
+                </div>
+            {/if}
+
+            <form class="auth-tabs__form" submit={handleLoginSubmit}>
+                <div class="auth-tabs__field">
+                    <label class="auth-tabs__label" for="tabs-login-email">Email</label>
+                    <input
+                        type="email"
+                        id="tabs-login-email"
+                        class="auth-tabs__input"
+                        placeholder="you@example.com"
+                        value={loginEmail}
+                        change={(e) => loginEmail = e.target.value}
+                        disabled={loading}
+                        required
+                        autocomplete="email"
+                    />
+                </div>
+
+                <div class="auth-tabs__field">
+                    <label class="auth-tabs__label" for="tabs-login-password">Password</label>
+                    <input
+                        type="password"
+                        id="tabs-login-password"
+                        class="auth-tabs__input"
+                        placeholder="Enter password"
+                        value={loginPassword}
+                        change={(e) => loginPassword = e.target.value}
+                        disabled={loading}
+                        required
+                        autocomplete="current-password"
+                    />
+                </div>
+
+                <div class="auth-tabs__options">
+                    <label class="auth-tabs__remember">
+                        <input
+                            type="checkbox"
+                            checked={rememberMe}
+                            change={(e) => rememberMe = e.target.checked}
+                            disabled={loading}
+                        />
+                        <span>Remember me</span>
+                    </label>
+                    <a href={forgotPasswordUrl} class="auth-tabs__forgot">
+                        Forgot password?
+                    </a>
+                </div>
+
+                <button
+                    type="submit"
+                    class="auth-tabs__submit"
+                    disabled={loading}
+                >
+                    {if loading}
+                        <span class="auth-tabs__spinner"></span>
+                        <span>Signing in...</span>
+                    {else}
+                        <span>Sign in</span>
+                    {/if}
+                </button>
+            </form>
+        {else}
+            {if registerError != none}
+                <div class="auth-tabs__error" role="alert">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span>{registerError}</span>
+                </div>
+            {/if}
+
+            <form class="auth-tabs__form" submit={handleRegisterSubmit}>
+                <div class="auth-tabs__field">
+                    <label class="auth-tabs__label" for="tabs-register-name">Full name</label>
+                    <input
+                        type="text"
+                        id="tabs-register-name"
+                        class="auth-tabs__input"
+                        placeholder="John Doe"
+                        value={registerName}
+                        change={(e) => registerName = e.target.value}
+                        disabled={loading}
+                        required
+                        autocomplete="name"
+                    />
+                </div>
+
+                <div class="auth-tabs__field">
+                    <label class="auth-tabs__label" for="tabs-register-email">Email</label>
+                    <input
+                        type="email"
+                        id="tabs-register-email"
+                        class="auth-tabs__input"
+                        placeholder="you@example.com"
+                        value={registerEmail}
+                        change={(e) => registerEmail = e.target.value}
+                        disabled={loading}
+                        required
+                        autocomplete="email"
+                    />
+                </div>
+
+                <div class="auth-tabs__field">
+                    <label class="auth-tabs__label" for="tabs-register-password">Password</label>
+                    <input
+                        type="password"
+                        id="tabs-register-password"
+                        class="auth-tabs__input"
+                        placeholder="Create password"
+                        value={registerPassword}
+                        change={handleRegisterPasswordChange}
+                        disabled={loading}
+                        required
+                        autocomplete="new-password"
+                    />
+                    {if registerPassword.length > 0}
+                        <div class="auth-tabs__strength">
+                            <div class={"auth-tabs__strength-bar " ++ strengthClass}>
+                                <div class="auth-tabs__strength-fill"></div>
+                            </div>
+                        </div>
+                    {/if}
+                </div>
+
+                <label class="auth-tabs__terms">
+                    <input
+                        type="checkbox"
+                        checked={acceptTerms}
+                        change={(e) => acceptTerms = e.target.checked}
+                        disabled={loading}
+                        required
+                    />
+                    <span>
+                        I agree to the
+                        <a href={termsUrl} target="_blank">Terms</a>
+                        and
+                        <a href={privacyUrl} target="_blank">Privacy</a>
+                    </span>
+                </label>
+
+                <button
+                    type="submit"
+                    class="auth-tabs__submit"
+                    disabled={loading || !acceptTerms}
+                >
+                    {if loading}
+                        <span class="auth-tabs__spinner"></span>
+                        <span>Creating account...</span>
+                    {else}
+                        <span>Create account</span>
+                    {/if}
+                </button>
+            </form>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+.auth-tabs {
+    width: 100%;
+    max-width: 400px;
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-lg);
+    border: 1px solid var(--flin-neutral-200);
+    padding: var(--flin-space-6);
+}
+
+.auth-tabs__header {
+    display: flex;
+    position: relative;
+    background-color: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-1);
+    margin-bottom: var(--flin-space-5);
+}
+
+.auth-tabs__tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg-muted);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    position: relative;
+    z-index: 1;
+}
+
+.auth-tabs__tab:hover:not(:disabled):not(.auth-tabs__tab--active) {
+    color: var(--flin-fg);
+}
+
+.auth-tabs__tab--active {
+    color: var(--flin-fg);
+}
+
+.auth-tabs__tab:disabled {
+    cursor: not-allowed;
+}
+
+.auth-tabs__indicator {
+    position: absolute;
+    top: var(--flin-space-1);
+    bottom: var(--flin-space-1);
+    width: calc(50% - var(--flin-space-1));
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-sm);
+    box-shadow: var(--flin-shadow-sm);
+    transition: transform var(--flin-transition-fast);
+}
+
+.auth-tabs__indicator[data-tab="login"] {
+    transform: translateX(0);
+    left: var(--flin-space-1);
+}
+
+.auth-tabs__indicator[data-tab="register"] {
+    transform: translateX(100%);
+    left: var(--flin-space-1);
+}
+
+.auth-tabs__content {
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-tabs__social {
+    display: flex;
+    gap: var(--flin-space-3);
+    margin-bottom: var(--flin-space-4);
+}
+
+.auth-tabs__social-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    height: 40px;
+    padding: 0 var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.auth-tabs__social-btn:hover:not(:disabled) {
+    background-color: var(--flin-bg-muted);
+    border-color: var(--flin-neutral-400);
+}
+
+.auth-tabs__social-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.auth-tabs__social-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.auth-tabs__divider {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    margin-bottom: var(--flin-space-4);
+    color: var(--flin-fg-muted);
+    font-size: var(--flin-text-xs);
+    text-transform: uppercase;
+}
+
+.auth-tabs__divider::before,
+.auth-tabs__divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: var(--flin-neutral-200);
+}
+
+.auth-tabs__error {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    background-color: var(--flin-danger-light);
+    color: var(--flin-danger);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    margin-bottom: var(--flin-space-4);
+}
+
+.auth-tabs__error svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.auth-tabs__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.auth-tabs__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1-5);
+}
+
+.auth-tabs__label {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+}
+
+.auth-tabs__input {
+    width: 100%;
+    height: 40px;
+    padding: 0 var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.auth-tabs__input:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.auth-tabs__input:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.auth-tabs__input:disabled {
+    background-color: var(--flin-bg-muted);
+    cursor: not-allowed;
+}
+
+.auth-tabs__input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.auth-tabs__strength {
+    margin-top: var(--flin-space-1);
+}
+
+.auth-tabs__strength-bar {
+    height: 3px;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.auth-tabs__strength-fill {
+    height: 100%;
+    transition: width var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.strength--empty .auth-tabs__strength-fill { width: 0; }
+.strength--weak .auth-tabs__strength-fill { width: 33%; background-color: var(--flin-danger); }
+.strength--medium .auth-tabs__strength-fill { width: 66%; background-color: var(--flin-warning); }
+.strength--strong .auth-tabs__strength-fill { width: 85%; background-color: var(--flin-success); }
+.strength--very-strong .auth-tabs__strength-fill { width: 100%; background-color: var(--flin-success); }
+
+.auth-tabs__options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.auth-tabs__remember {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    cursor: pointer;
+}
+
+.auth-tabs__remember input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--flin-primary);
+    cursor: pointer;
+}
+
+.auth-tabs__forgot {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-primary);
+    text-decoration: none;
+}
+
+.auth-tabs__forgot:hover {
+    text-decoration: underline;
+}
+
+.auth-tabs__terms {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+}
+
+.auth-tabs__terms input {
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+    accent-color: var(--flin-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.auth-tabs__terms a {
+    color: var(--flin-primary);
+    text-decoration: none;
+}
+
+.auth-tabs__terms a:hover {
+    text-decoration: underline;
+}
+
+.auth-tabs__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    height: 40px;
+    padding: 0 var(--flin-space-4);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.auth-tabs__submit:hover:not(:disabled) {
+    background-color: var(--flin-primary-hover);
+}
+
+.auth-tabs__submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.auth-tabs__spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: auth-tabs-spin 0.6s linear infinite;
+}
+
+@keyframes auth-tabs-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Loading state */
+.auth-tabs--loading {
+    pointer-events: none;
+}
+
+/* Dark theme */
+[data-theme="dark"] .auth-tabs {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .auth-tabs__header {
+    background-color: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .auth-tabs__indicator {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .auth-tabs__input {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .auth-tabs__social-btn {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .auth-tabs__divider::before,
+[data-theme="dark"] .auth-tabs__divider::after {
+    background-color: var(--flin-neutral-600);
+}
+</style>

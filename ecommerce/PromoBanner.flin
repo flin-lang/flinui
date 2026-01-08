@@ -1,0 +1,362 @@
+// PromoBanner.flin - FlinUI PRO E-commerce Component
+// Eye-catching promotional banner with countdown timer and dismissible option
+
+// Props with defaults
+title = props.title || "Limited Time Offer!"
+description = props.description || "Get amazing deals on our products"
+ctaText = props.ctaText || "Shop Now"
+ctaLink = props.ctaLink || "#"
+onCta = props.onCta
+endTime = props.endTime || none
+dismissible = props.dismissible || true
+onDismiss = props.onDismiss
+variant = props.variant || "primary"
+showIcon = props.showIcon || true
+
+// State
+dismissed = false
+timeRemaining = none
+
+// Calculate time remaining
+fn updateTimeRemaining() {
+    {if endTime != none}
+        now = Date.now()
+        diff = endTime - now
+        {if diff > 0}
+            days = Math.floor(diff / (1000 * 60 * 60 * 24))
+            hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+            minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+            seconds = Math.floor((diff % (1000 * 60)) / 1000)
+            timeRemaining = ["days": days, "hours": hours, "minutes": minutes, "seconds": seconds]
+        {else}
+            timeRemaining = none
+        {/if}
+    {/if}
+}
+
+// Initialize and update every second
+onMount {
+    updateTimeRemaining()
+    {if endTime != none}
+        interval = setInterval(updateTimeRemaining, 1000)
+    {/if}
+}
+
+onUnmount {
+    {if interval != none}
+        clearInterval(interval)
+    {/if}
+}
+
+// Handle dismiss
+fn handleDismiss() {
+    dismissed = true
+    {if onDismiss != none}
+        onDismiss()
+    {/if}
+}
+
+// Handle CTA click
+fn handleCtaClick() {
+    {if onCta != none}
+        onCta()
+    {/if}
+}
+
+// Variant classes
+variantClass = match variant {
+    "secondary" -> "promo-banner-secondary"
+    "danger" -> "promo-banner-danger"
+    "success" -> "promo-banner-success"
+    "gradient" -> "promo-banner-gradient"
+    _ -> "promo-banner-primary"
+}
+
+containerClass = "promo-banner " ++ variantClass
+
+{if !dismissed}
+    <div class={containerClass}>
+        <div class="promo-banner-content">
+            <div class="promo-banner-text">
+                {if showIcon}
+                    <div class="promo-banner-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                            <line x1="7" y1="7" x2="7.01" y2="7"/>
+                        </svg>
+                    </div>
+                {/if}
+
+                <div class="promo-banner-info">
+                    <h3 class="promo-banner-title">{title}</h3>
+                    <p class="promo-banner-description">{description}</p>
+                </div>
+            </div>
+
+            {if timeRemaining != none}
+                <div class="promo-banner-timer">
+                    <div class="timer-segment">
+                        <span class="timer-value">{timeRemaining.days}</span>
+                        <span class="timer-label">Days</span>
+                    </div>
+                    <div class="timer-separator">:</div>
+                    <div class="timer-segment">
+                        <span class="timer-value">{timeRemaining.hours}</span>
+                        <span class="timer-label">Hours</span>
+                    </div>
+                    <div class="timer-separator">:</div>
+                    <div class="timer-segment">
+                        <span class="timer-value">{timeRemaining.minutes}</span>
+                        <span class="timer-label">Min</span>
+                    </div>
+                    <div class="timer-separator">:</div>
+                    <div class="timer-segment">
+                        <span class="timer-value">{timeRemaining.seconds}</span>
+                        <span class="timer-label">Sec</span>
+                    </div>
+                </div>
+            {/if}
+
+            <button class="promo-banner-cta" click={handleCtaClick}>
+                {ctaText}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </button>
+        </div>
+
+        {if dismissible}
+            <button class="promo-banner-dismiss" click={handleDismiss} aria-label="Dismiss">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        {/if}
+    </div>
+{/if}
+
+<style scoped>
+/* Container */
+.promo-banner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-radius: var(--flin-radius-lg);
+    font-family: var(--flin-font-sans);
+    animation: promo-banner-slide-in 0.4s ease-out;
+    box-shadow: var(--flin-shadow-md);
+}
+
+@keyframes promo-banner-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Variant styles */
+.promo-banner-primary {
+    background: linear-gradient(135deg, var(--flin-primary) 0%, var(--flin-primary-dark) 100%);
+    color: white;
+}
+
+.promo-banner-secondary {
+    background: linear-gradient(135deg, var(--flin-secondary) 0%, var(--flin-secondary-dark) 100%);
+    color: white;
+}
+
+.promo-banner-danger {
+    background: linear-gradient(135deg, var(--flin-danger) 0%, var(--flin-danger-dark) 100%);
+    color: white;
+}
+
+.promo-banner-success {
+    background: linear-gradient(135deg, var(--flin-success) 0%, var(--flin-success-dark) 100%);
+    color: white;
+}
+
+.promo-banner-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    color: white;
+}
+
+/* Content layout */
+.promo-banner-content {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-6);
+    flex: 1;
+    flex-wrap: wrap;
+}
+
+.promo-banner-text {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    flex: 1;
+    min-width: 250px;
+}
+
+.promo-banner-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--flin-radius-full);
+    flex-shrink: 0;
+}
+
+.promo-banner-info {
+    flex: 1;
+}
+
+.promo-banner-title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-bold);
+    line-height: 1.3;
+}
+
+.promo-banner-description {
+    margin: var(--flin-space-1) 0 0;
+    font-size: var(--flin-text-sm);
+    opacity: 0.95;
+    line-height: 1.4;
+}
+
+/* Timer */
+.promo-banner-timer {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--flin-radius-md);
+    backdrop-filter: blur(10px);
+}
+
+.timer-segment {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 40px;
+}
+
+.timer-value {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.timer-label {
+    font-size: var(--flin-text-xs);
+    opacity: 0.9;
+    margin-top: var(--flin-space-1);
+}
+
+.timer-separator {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    opacity: 0.6;
+    animation: timer-blink 1s infinite;
+}
+
+@keyframes timer-blink {
+    0%, 49% { opacity: 0.6; }
+    50%, 100% { opacity: 0.2; }
+}
+
+/* CTA Button */
+.promo-banner-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2-5) var(--flin-space-4);
+    background: white;
+    color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    font-family: var(--flin-font-sans);
+    cursor: pointer;
+    transition: all var(--flin-transition-base);
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.promo-banner-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.promo-banner-cta:active {
+    transform: translateY(0);
+}
+
+/* Dismiss button */
+.promo-banner-dismiss {
+    position: absolute;
+    top: var(--flin-space-2);
+    right: var(--flin-space-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: var(--flin-radius-full);
+    color: white;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.promo-banner-dismiss:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .promo-banner {
+        padding: var(--flin-space-3) var(--flin-space-4);
+    }
+
+    .promo-banner-content {
+        flex-direction: column;
+        gap: var(--flin-space-3);
+        align-items: stretch;
+    }
+
+    .promo-banner-text {
+        min-width: auto;
+    }
+
+    .promo-banner-timer {
+        justify-content: center;
+    }
+
+    .promo-banner-cta {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .timer-segment {
+        min-width: 35px;
+    }
+
+    .timer-value {
+        font-size: var(--flin-text-lg);
+    }
+}
+</style>

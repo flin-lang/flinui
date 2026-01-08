@@ -1,0 +1,43 @@
+// FlinUI PRO - Feedback Components
+// Advanced notification, popup, popover, modal, and loading components
+
+// ============================================================
+// NOTIFICATIONS (7 components)
+// ============================================================
+// Toast.flin - Brief notification toast with variants and positions
+// ToastWithAction.flin - Toast with action button (Undo, Retry, etc.)
+// ToastStack.flin - Container for managing multiple stacked toasts
+// AlertBanner.flin - Full-width page-top banner alerts
+// AlertInline.flin - Contextual inline alerts for forms and content
+// NotificationBell.flin - Bell icon with unread notification badge
+// NotificationDropdown.flin - Dropdown notification list with actions
+
+// ============================================================
+// POPUPS & POPOVERS (6 components)
+// ============================================================
+// Tooltip.flin - Hover/click info tooltip with rich content support
+// Popover.flin - Click-triggered popup with header and content
+// HoverCard.flin - Rich preview card on hover with delay support
+// Dropdown.flin - Action dropdown menu with keyboard navigation
+// ContextMenu.flin - Right-click context menu with shortcuts
+// CommandMenu.flin - Command palette (Cmd+K) for quick actions
+
+// ============================================================
+// MODALS (8 components)
+// ============================================================
+// ModalSimple.flin - Basic modal dialog
+// ModalWithForm.flin - Modal with form content
+// ModalAlert.flin - Alert/warning modal
+// ModalConfirm.flin - Confirmation modal with actions
+// ModalFullscreen.flin - Full-screen modal
+// ModalSlideOver.flin - Slide-over panel modal
+// ModalStepper.flin - Multi-step wizard modal
+// ModalImage.flin - Image lightbox modal
+
+// ============================================================
+// LOADING STATES (4 components)
+// ============================================================
+// Skeleton.flin - Base skeleton loading placeholder
+// SkeletonCard.flin - Card skeleton loading state
+// SkeletonTable.flin - Table skeleton loading state
+// SpinnerOverlay.flin - Full-screen loading spinner overlay

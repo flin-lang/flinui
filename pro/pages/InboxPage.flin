@@ -1,0 +1,1162 @@
+// InboxPage.flin - Email/message inbox with folders, conversation view, and compose
+// FlinUI PRO - Page Template
+
+// Props with defaults
+title = props.title || "Inbox"
+messages = props.messages || []
+folders = props.folders || []
+onSend = props.onSend || none
+onDelete = props.onDelete || none
+onArchive = props.onArchive || none
+
+// State
+activeFolder = "inbox"
+selectedMessage = none
+showCompose = false
+searchQuery = ""
+selectedMessages = []
+
+// Default folders
+defaultFolders = [
+  { id: "inbox", label: "Inbox", icon: "inbox", count: 24 },
+  { id: "starred", label: "Starred", icon: "star", count: 8 },
+  { id: "sent", label: "Sent", icon: "send", count: 0 },
+  { id: "drafts", label: "Drafts", icon: "file", count: 3 },
+  { id: "archive", label: "Archive", icon: "archive", count: 0 },
+  { id: "spam", label: "Spam", icon: "alert", count: 2 },
+  { id: "trash", label: "Trash", icon: "trash", count: 0 }
+]
+
+folderList = folders.length > 0 ? folders : defaultFolders
+
+// Default messages
+defaultMessages = [
+  { id: 1, from: "Sarah Johnson", email: "sarah@company.com", subject: "Q4 Marketing Strategy Review", preview: "Hi team, I wanted to share the updated marketing strategy for Q4. Please review the attached document...", time: "10:30 AM", read: false, starred: true, hasAttachment: true },
+  { id: 2, from: "DevOps Team", email: "devops@company.com", subject: "Deployment Complete - v2.5.0", preview: "The latest deployment has been completed successfully. All services are running as expected...", time: "9:15 AM", read: false, starred: false, hasAttachment: false },
+  { id: 3, from: "Mike Chen", email: "mike@company.com", subject: "Re: Project Timeline", preview: "Thanks for the update. I've reviewed the timeline and have a few suggestions...", time: "Yesterday", read: true, starred: false, hasAttachment: false },
+  { id: 4, from: "HR Department", email: "hr@company.com", subject: "Annual Performance Review Schedule", preview: "Dear team, please find below the schedule for annual performance reviews...", time: "Yesterday", read: true, starred: true, hasAttachment: true },
+  { id: 5, from: "Alex Thompson", email: "alex@company.com", subject: "Design System Updates", preview: "Hey! I've pushed the latest updates to the design system. Can you review when you have time?", time: "2 days ago", read: true, starred: false, hasAttachment: false },
+  { id: 6, from: "Support Ticket #4521", email: "support@company.com", subject: "Re: Issue with Dashboard Loading", preview: "We've identified the issue and a fix has been deployed. Please let us know if you're still experiencing...", time: "3 days ago", read: true, starred: false, hasAttachment: false }
+]
+
+messageList = messages.length > 0 ? messages : defaultMessages
+
+// Computed
+unreadCount = messageList.filter(m => !m.read).length
+
+<div class="inbox-page">
+  <!-- Sidebar -->
+  <aside class="inbox-sidebar">
+    <div class="sidebar-header">
+      <Button variant="primary" size="md" click={() => showCompose = true}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Compose
+      </Button>
+    </div>
+
+    <nav class="folder-nav">
+      {for folder in folderList}
+        <button
+          class={"folder-item " + (activeFolder == folder.id ? "active" : "")}
+          click={() => activeFolder = folder.id}
+        >
+          <span class="folder-icon">
+            {if folder.icon == "inbox"}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+                <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+              </svg>
+            {/if}
+            {if folder.icon == "star"}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            {/if}
+            {if folder.icon == "send"}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            {/if}
+            {if folder.icon == "file"}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            {/if}
+            {if folder.icon == "archive"}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="21 8 21 21 3 21 3 8"></polyline>
+                <rect x="1" y="3" width="22" height="5"></rect>
+                <line x1="10" y1="12" x2="14" y2="12"></line>
+              </svg>
+            {/if}
+            {if folder.icon == "alert"}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            {/if}
+            {if folder.icon == "trash"}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            {/if}
+          </span>
+          <span class="folder-label">{folder.label}</span>
+          {if folder.count > 0}
+            <span class={"folder-count " + (folder.id == "inbox" ? "primary" : "")}>{folder.count}</span>
+          {/if}
+        </button>
+      {/for}
+    </nav>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="labels-section">
+      <h4 class="section-title">Labels</h4>
+      <div class="labels-list">
+        <button class="label-item">
+          <span class="label-dot work"></span>
+          <span>Work</span>
+        </button>
+        <button class="label-item">
+          <span class="label-dot personal"></span>
+          <span>Personal</span>
+        </button>
+        <button class="label-item">
+          <span class="label-dot important"></span>
+          <span>Important</span>
+        </button>
+        <button class="label-item add-label">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Add Label</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="storage-info">
+      <div class="storage-bar">
+        <div class="storage-used" style="width: 45%"></div>
+      </div>
+      <span class="storage-text">4.5 GB of 10 GB used</span>
+    </div>
+  </aside>
+
+  <!-- Message List -->
+  <main class="message-list-panel">
+    <div class="list-header">
+      <div class="search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          type="text"
+          placeholder="Search messages..."
+          value={searchQuery}
+          input={(e) => searchQuery = e.target.value}
+        />
+      </div>
+      <div class="list-actions">
+        <button class="action-btn" title="Refresh">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+        </button>
+        <button class="action-btn" title="Filter">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    {if selectedMessages.length > 0}
+      <div class="bulk-actions-bar">
+        <span>{selectedMessages.length} selected</span>
+        <div class="bulk-buttons">
+          <button class="bulk-btn" title="Archive">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="21 8 21 21 3 21 3 8"></polyline>
+              <rect x="1" y="3" width="22" height="5"></rect>
+            </svg>
+          </button>
+          <button class="bulk-btn" title="Mark as read">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+          <button class="bulk-btn" title="Delete">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    {/if}
+
+    <div class="message-list">
+      {for message in messageList}
+        <div
+          class={"message-item " + (message.read ? "" : "unread") + (selectedMessage?.id == message.id ? " selected" : "")}
+          click={() => selectedMessage = message}
+        >
+          <div class="message-checkbox">
+            <input type="checkbox" click={(e) => e.stopPropagation()} />
+          </div>
+          <button class={"star-btn " + (message.starred ? "starred" : "")} click={(e) => { e.stopPropagation(); message.starred = !message.starred }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill={message.starred ? "currentColor" : "none"} stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </button>
+          <Avatar size="sm" name={message.from} />
+          <div class="message-content">
+            <div class="message-header">
+              <span class="message-from">{message.from}</span>
+              <span class="message-time">{message.time}</span>
+            </div>
+            <div class="message-subject">{message.subject}</div>
+            <div class="message-preview">{message.preview}</div>
+          </div>
+          {if message.hasAttachment}
+            <div class="attachment-indicator">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+              </svg>
+            </div>
+          {/if}
+        </div>
+      {/for}
+    </div>
+  </main>
+
+  <!-- Message Detail -->
+  <aside class="message-detail-panel">
+    {if selectedMessage}
+      <div class="detail-header">
+        <div class="detail-actions">
+          <button class="action-btn" title="Archive">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="21 8 21 21 3 21 3 8"></polyline>
+              <rect x="1" y="3" width="22" height="5"></rect>
+            </svg>
+          </button>
+          <button class="action-btn" title="Delete">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+          <button class="action-btn" title="Mark as unread">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+          </button>
+          <button class="action-btn" title="More">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="19" cy="12" r="1"></circle>
+              <circle cx="5" cy="12" r="1"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-content">
+        <h2 class="detail-subject">{selectedMessage.subject}</h2>
+
+        <div class="sender-info">
+          <Avatar size="md" name={selectedMessage.from} />
+          <div class="sender-details">
+            <span class="sender-name">{selectedMessage.from}</span>
+            <span class="sender-email">{selectedMessage.email}</span>
+          </div>
+          <span class="message-date">{selectedMessage.time}</span>
+        </div>
+
+        <div class="message-body">
+          <p>Hi,</p>
+          <p>{selectedMessage.preview}</p>
+          <p>Please let me know if you have any questions or need any clarification on the points mentioned above.</p>
+          <p>Looking forward to your response.</p>
+          <p>Best regards,<br/>{selectedMessage.from}</p>
+        </div>
+
+        {if selectedMessage.hasAttachment}
+          <div class="attachments-section">
+            <h4>Attachments (2)</h4>
+            <div class="attachments-list">
+              <div class="attachment-item">
+                <div class="attachment-icon pdf">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                  </svg>
+                </div>
+                <div class="attachment-info">
+                  <span class="attachment-name">Q4_Strategy.pdf</span>
+                  <span class="attachment-size">2.4 MB</span>
+                </div>
+                <button class="download-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                </button>
+              </div>
+              <div class="attachment-item">
+                <div class="attachment-icon sheet">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                  </svg>
+                </div>
+                <div class="attachment-info">
+                  <span class="attachment-name">Budget_2026.xlsx</span>
+                  <span class="attachment-size">856 KB</span>
+                </div>
+                <button class="download-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        {/if}
+      </div>
+
+      <div class="reply-section">
+        <div class="reply-actions">
+          <Button variant="primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 17 4 12 9 7"></polyline>
+              <path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
+            </svg>
+            Reply
+          </Button>
+          <Button variant="secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 17 20 12 15 7"></polyline>
+              <path d="M4 18v-2a4 4 0 0 1 4-4h12"></path>
+            </svg>
+            Forward
+          </Button>
+        </div>
+      </div>
+    {else}
+      <div class="no-message-selected">
+        <div class="empty-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+        </div>
+        <h3>Select a message</h3>
+        <p>Choose a message from the list to view its contents</p>
+      </div>
+    {/if}
+  </aside>
+
+  <!-- Compose Modal -->
+  {if showCompose}
+    <div class="compose-modal">
+      <div class="compose-header">
+        <h3>New Message</h3>
+        <div class="compose-actions">
+          <button class="minimize-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+          <button class="close-btn" click={() => showCompose = false}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="compose-body">
+        <div class="compose-field">
+          <label>To</label>
+          <input type="text" placeholder="Recipients" />
+        </div>
+        <div class="compose-field">
+          <label>Subject</label>
+          <input type="text" placeholder="Subject" />
+        </div>
+        <div class="compose-editor">
+          <textarea placeholder="Write your message..."></textarea>
+        </div>
+      </div>
+      <div class="compose-footer">
+        <Button variant="primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+          Send
+        </Button>
+        <div class="compose-tools">
+          <button class="tool-btn" title="Attach file">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+            </svg>
+          </button>
+          <button class="tool-btn" title="Insert link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+          </button>
+          <button class="tool-btn" title="Insert emoji">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+              <line x1="9" y1="9" x2="9.01" y2="9"></line>
+              <line x1="15" y1="9" x2="15.01" y2="9"></line>
+            </svg>
+          </button>
+        </div>
+        <button class="discard-btn" click={() => showCompose = false}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  {/if}
+</div>
+
+<style scoped>
+.inbox-page {
+  display: grid;
+  grid-template-columns: 240px 380px 1fr;
+  height: 100vh;
+  background: var(--flin-bg-secondary);
+}
+
+/* Sidebar */
+.inbox-sidebar {
+  background: var(--flin-bg-primary);
+  border-right: 1px solid var(--flin-border-primary);
+  display: flex;
+  flex-direction: column;
+  padding: var(--flin-space-4);
+}
+
+.sidebar-header {
+  margin-bottom: var(--flin-space-4);
+}
+
+.sidebar-header :global(.btn) {
+  width: 100%;
+}
+
+.folder-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-1);
+}
+
+.folder-item {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-2) var(--flin-space-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-secondary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.folder-item:hover {
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+}
+
+.folder-item.active {
+  background: var(--flin-bg-secondary);
+  color: var(--flin-accent-gold);
+}
+
+.folder-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+}
+
+.folder-label {
+  flex: 1;
+}
+
+.folder-count {
+  padding: var(--flin-space-1) var(--flin-space-2);
+  background: var(--flin-bg-tertiary);
+  border-radius: var(--flin-radius-sm);
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.folder-count.primary {
+  background: var(--flin-accent-gold);
+  color: var(--flin-bg-primary);
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--flin-border-primary);
+  margin: var(--flin-space-4) 0;
+}
+
+.section-title {
+  font-size: var(--flin-text-xs);
+  font-weight: 600;
+  color: var(--flin-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--flin-space-2);
+  padding: 0 var(--flin-space-3);
+}
+
+.labels-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-1);
+}
+
+.label-item {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-2) var(--flin-space-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-secondary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.label-item:hover {
+  background: var(--flin-bg-secondary);
+}
+
+.label-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.label-dot.work { background: #3b82f6; }
+.label-dot.personal { background: #22c55e; }
+.label-dot.important { background: #ef4444; }
+
+.label-item.add-label {
+  color: var(--flin-text-tertiary);
+}
+
+.storage-info {
+  margin-top: auto;
+  padding-top: var(--flin-space-4);
+}
+
+.storage-bar {
+  height: 4px;
+  background: var(--flin-bg-tertiary);
+  border-radius: var(--flin-radius-full);
+  overflow: hidden;
+  margin-bottom: var(--flin-space-2);
+}
+
+.storage-used {
+  height: 100%;
+  background: var(--flin-accent-gold);
+  border-radius: var(--flin-radius-full);
+}
+
+.storage-text {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+/* Message List Panel */
+.message-list-panel {
+  background: var(--flin-bg-primary);
+  border-right: 1px solid var(--flin-border-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.list-header {
+  display: flex;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-4);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  flex: 1;
+  padding: var(--flin-space-2) var(--flin-space-3);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-md);
+}
+
+.search-box svg {
+  color: var(--flin-text-tertiary);
+}
+
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+  width: 100%;
+}
+
+.list-actions {
+  display: flex;
+  gap: var(--flin-space-1);
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+}
+
+.bulk-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--flin-space-3) var(--flin-space-4);
+  background: var(--flin-bg-secondary);
+  border-bottom: 1px solid var(--flin-border-primary);
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-primary);
+}
+
+.bulk-buttons {
+  display: flex;
+  gap: var(--flin-space-2);
+}
+
+.bulk-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bulk-btn:hover {
+  background: var(--flin-bg-tertiary);
+  color: var(--flin-text-primary);
+}
+
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.message-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-3) var(--flin-space-4);
+  border-bottom: 1px solid var(--flin-border-primary);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.message-item:hover {
+  background: var(--flin-bg-secondary);
+}
+
+.message-item.selected {
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.message-item.unread {
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.message-item.unread .message-from,
+.message-item.unread .message-subject {
+  font-weight: 600;
+}
+
+.message-checkbox {
+  padding-top: var(--flin-space-1);
+}
+
+.star-btn {
+  background: transparent;
+  border: none;
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  padding: var(--flin-space-1);
+}
+
+.star-btn.starred {
+  color: var(--flin-accent-gold);
+}
+
+.message-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--flin-space-1);
+}
+
+.message-from {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-primary);
+}
+
+.message-time {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+  white-space: nowrap;
+}
+
+.message-subject {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.message-preview {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachment-indicator {
+  color: var(--flin-text-tertiary);
+  padding-top: var(--flin-space-1);
+}
+
+/* Message Detail Panel */
+.message-detail-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--flin-bg-primary);
+}
+
+.detail-header {
+  padding: var(--flin-space-4);
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.detail-actions {
+  display: flex;
+  gap: var(--flin-space-2);
+}
+
+.detail-content {
+  flex: 1;
+  padding: var(--flin-space-5);
+  overflow-y: auto;
+}
+
+.detail-subject {
+  font-size: var(--flin-text-xl);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-4);
+}
+
+.sender-info {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  padding-bottom: var(--flin-space-4);
+  border-bottom: 1px solid var(--flin-border-primary);
+  margin-bottom: var(--flin-space-4);
+}
+
+.sender-details {
+  flex: 1;
+}
+
+.sender-name {
+  display: block;
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.sender-email {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.message-date {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.message-body {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-primary);
+  line-height: 1.7;
+}
+
+.message-body p {
+  margin-bottom: var(--flin-space-4);
+}
+
+.attachments-section {
+  margin-top: var(--flin-space-6);
+  padding-top: var(--flin-space-4);
+  border-top: 1px solid var(--flin-border-primary);
+}
+
+.attachments-section h4 {
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-3);
+}
+
+.attachments-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-2);
+}
+
+.attachment-item {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-3);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-md);
+}
+
+.attachment-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--flin-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attachment-icon.pdf {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.attachment-icon.sheet {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.attachment-info {
+  flex: 1;
+}
+
+.attachment-name {
+  display: block;
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-primary);
+}
+
+.attachment-size {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.download-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.download-btn:hover {
+  background: var(--flin-bg-tertiary);
+  color: var(--flin-accent-gold);
+}
+
+.reply-section {
+  padding: var(--flin-space-4);
+  border-top: 1px solid var(--flin-border-primary);
+}
+
+.reply-actions {
+  display: flex;
+  gap: var(--flin-space-3);
+}
+
+.no-message-selected {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--flin-space-6);
+}
+
+.empty-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--flin-bg-secondary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--flin-text-tertiary);
+  margin-bottom: var(--flin-space-4);
+}
+
+.no-message-selected h3 {
+  font-size: var(--flin-text-lg);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.no-message-selected p {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+/* Compose Modal */
+.compose-modal {
+  position: fixed;
+  bottom: var(--flin-space-4);
+  right: var(--flin-space-4);
+  width: 560px;
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+}
+
+.compose-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--flin-space-3) var(--flin-space-4);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-lg) var(--flin-radius-lg) 0 0;
+}
+
+.compose-header h3 {
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.compose-actions {
+  display: flex;
+  gap: var(--flin-space-1);
+}
+
+.minimize-btn,
+.close-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: var(--flin-radius-sm);
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.minimize-btn:hover,
+.close-btn:hover {
+  background: var(--flin-bg-tertiary);
+  color: var(--flin-text-primary);
+}
+
+.compose-body {
+  padding: var(--flin-space-4);
+}
+
+.compose-field {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-2) 0;
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.compose-field label {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-tertiary);
+  min-width: 60px;
+}
+
+.compose-field input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+}
+
+.compose-editor {
+  margin-top: var(--flin-space-3);
+}
+
+.compose-editor textarea {
+  width: 100%;
+  height: 200px;
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+  resize: none;
+  line-height: 1.6;
+}
+
+.compose-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-3) var(--flin-space-4);
+  border-top: 1px solid var(--flin-border-primary);
+}
+
+.compose-tools {
+  display: flex;
+  gap: var(--flin-space-1);
+  flex: 1;
+}
+
+.tool-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-btn:hover {
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+}
+
+.discard-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.discard-btn:hover {
+  color: #ef4444;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .inbox-page {
+    grid-template-columns: 200px 1fr;
+  }
+
+  .message-detail-panel {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .inbox-page {
+    grid-template-columns: 1fr;
+  }
+
+  .inbox-sidebar {
+    display: none;
+  }
+
+  .compose-modal {
+    width: calc(100% - var(--flin-space-8));
+    left: var(--flin-space-4);
+    right: var(--flin-space-4);
+  }
+}
+</style>

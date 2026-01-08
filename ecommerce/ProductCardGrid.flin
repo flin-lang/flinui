@@ -1,0 +1,404 @@
+// ============================================================================
+// ProductCardGrid.flin — FlinUI PRO E-Commerce
+// Responsive grid container for product cards with flexible column configuration
+// ============================================================================
+// Props:
+//   - products: Array of product objects (array)
+//   - columns: Number of columns (number: 2, 3, 4, default 3)
+//   - gap: Gap between cards (string: "sm", "md", "lg", default "md")
+//   - cardVariant: Variant for all cards (string: "basic", "hover", "compact", "large")
+//   - onProductClick: Handler when product is clicked (function or none)
+//   - onAddToCart: Handler when add to cart is clicked (function or none)
+//   - onQuickView: Handler when quick view is clicked (function or none)
+//   - loading: Show loading skeleton (boolean)
+//   - emptyMessage: Message when no products (string, default "No products found")
+//   - minCardWidth: Minimum card width for responsive (string, e.g., "280px")
+//   - autoColumns: Enable auto-flow columns based on container (boolean, default false)
+
+products = props.products || []
+columns = props.columns || 3
+gap = props.gap || "md"
+cardVariant = props.cardVariant || "basic"
+onProductClick = props.onProductClick || none
+onAddToCart = props.onAddToCart || none
+onQuickView = props.onQuickView || none
+loading = props.loading || false
+emptyMessage = props.emptyMessage || "No products found"
+minCardWidth = props.minCardWidth || "280px"
+autoColumns = props.autoColumns || false
+
+// State
+currentPage = 1
+itemsPerPage = 12
+
+// Computed
+hasProducts = products.length > 0
+displayProducts = products
+
+// Get gap size
+getGapSize = fn() {
+    if gap == "sm" { return "var(--flin-space-2)" }
+    if gap == "lg" { return "var(--flin-space-6)" }
+    return "var(--flin-space-4)"
+}
+
+// Get grid columns value
+getGridColumns = fn() {
+    if autoColumns {
+        return "auto-fit"
+    }
+    if columns == 2 { return "2" }
+    if columns == 4 { return "4" }
+    return "3"
+}
+
+// Handle product card click
+handleProductClick = fn(product) {
+    if onProductClick != none {
+        onProductClick(product)
+    }
+}
+
+// Handle add to cart
+handleAddToCart = fn(product) {
+    if onAddToCart != none {
+        onAddToCart(product)
+    }
+}
+
+// Handle quick view
+handleQuickView = fn(product) {
+    if onQuickView != none {
+        onQuickView(product)
+    }
+}
+
+<div class="flin-product-grid-wrapper">
+    <style>
+        .flin-product-grid-wrapper {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 var(--flin-space-4);
+        }
+
+        /* Main Grid Container */
+        .flin-product-grid {
+            display: grid;
+            grid-template-columns: repeat(var(--grid-columns), minmax(var(--min-card-width), 1fr));
+            gap: var(--grid-gap);
+            width: 100%;
+        }
+
+        .flin-product-grid.auto-flow {
+            grid-template-columns: repeat(auto-fit, minmax(var(--min-card-width), 1fr));
+        }
+
+        .flin-product-grid.cols-2 {
+            --grid-columns: 2;
+        }
+
+        .flin-product-grid.cols-3 {
+            --grid-columns: 3;
+        }
+
+        .flin-product-grid.cols-4 {
+            --grid-columns: 4;
+        }
+
+        /* Grid Item */
+        .grid-item {
+            animation: fadeInUp 0.5s ease-out backwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stagger animation delays */
+        .grid-item:nth-child(1) { animation-delay: 0ms; }
+        .grid-item:nth-child(2) { animation-delay: 50ms; }
+        .grid-item:nth-child(3) { animation-delay: 100ms; }
+        .grid-item:nth-child(4) { animation-delay: 150ms; }
+        .grid-item:nth-child(5) { animation-delay: 200ms; }
+        .grid-item:nth-child(6) { animation-delay: 250ms; }
+        .grid-item:nth-child(7) { animation-delay: 300ms; }
+        .grid-item:nth-child(8) { animation-delay: 350ms; }
+        .grid-item:nth-child(9) { animation-delay: 400ms; }
+        .grid-item:nth-child(10) { animation-delay: 450ms; }
+        .grid-item:nth-child(11) { animation-delay: 500ms; }
+        .grid-item:nth-child(12) { animation-delay: 550ms; }
+
+        /* Empty State */
+        .grid-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--flin-space-20) var(--flin-space-8);
+            text-align: center;
+            grid-column: 1 / -1;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            color: var(--flin-text-muted);
+            margin-bottom: var(--flin-space-4);
+            opacity: 0.5;
+        }
+
+        .empty-message {
+            font-size: var(--flin-text-xl);
+            color: var(--flin-text-secondary);
+            font-weight: var(--flin-font-medium);
+        }
+
+        /* Loading Skeleton */
+        .grid-loading {
+            display: grid;
+            grid-template-columns: repeat(var(--grid-columns), minmax(var(--min-card-width), 1fr));
+            gap: var(--grid-gap);
+            width: 100%;
+        }
+
+        .grid-loading.auto-flow {
+            grid-template-columns: repeat(auto-fit, minmax(var(--min-card-width), 1fr));
+        }
+
+        .skeleton-card {
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-card);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            animation: skeleton-pulse 1.5s ease-in-out infinite;
+        }
+
+        .skeleton-image {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: var(--flin-bg-elevated);
+        }
+
+        .skeleton-content {
+            padding: var(--flin-space-5);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .skeleton-title {
+            height: 24px;
+            background: var(--flin-bg-elevated);
+            border-radius: var(--flin-radius-md);
+            margin-bottom: var(--flin-space-3);
+            width: 80%;
+        }
+
+        .skeleton-text {
+            height: 16px;
+            background: var(--flin-bg-elevated);
+            border-radius: var(--flin-radius-md);
+            margin-bottom: var(--flin-space-2);
+            width: 100%;
+        }
+
+        .skeleton-text.short {
+            width: 60%;
+        }
+
+        .skeleton-price {
+            height: 32px;
+            background: var(--flin-bg-elevated);
+            border-radius: var(--flin-radius-md);
+            margin-top: auto;
+            margin-bottom: var(--flin-space-3);
+            width: 40%;
+        }
+
+        .skeleton-button {
+            height: 44px;
+            background: var(--flin-bg-elevated);
+            border-radius: var(--flin-radius-button);
+            width: 100%;
+        }
+
+        @keyframes skeleton-pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1280px) {
+            .flin-product-grid.cols-4 {
+                --grid-columns: 3;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .flin-product-grid.cols-4,
+            .flin-product-grid.cols-3 {
+                --grid-columns: 2;
+            }
+
+            .flin-product-grid-wrapper {
+                padding: 0 var(--flin-space-3);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flin-product-grid {
+                --grid-columns: 2;
+            }
+
+            .grid-loading {
+                --grid-columns: 2;
+            }
+
+            .flin-product-grid-wrapper {
+                padding: 0 var(--flin-space-2);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .flin-product-grid,
+            .grid-loading {
+                --grid-columns: 1;
+            }
+
+            .grid-empty-state {
+                padding: var(--flin-space-12) var(--flin-space-4);
+            }
+
+            .empty-icon {
+                font-size: 3rem;
+            }
+
+            .empty-message {
+                font-size: var(--flin-text-lg);
+            }
+
+            .flin-product-grid-wrapper {
+                padding: 0 var(--flin-space-2);
+            }
+        }
+    </style>
+
+    {if loading}
+        <!-- Loading Skeleton -->
+        <div class="grid-loading cols-{columns} {autoColumns ? 'auto-flow' : ''}" style="--grid-gap: {getGapSize()}; --min-card-width: {minCardWidth};">
+            {for i in 1..8}
+                <div class="skeleton-card">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-content">
+                        <div class="skeleton-title"></div>
+                        <div class="skeleton-text"></div>
+                        <div class="skeleton-text short"></div>
+                        <div class="skeleton-price"></div>
+                        <div class="skeleton-button"></div>
+                    </div>
+                </div>
+            {/for}
+        </div>
+    {else}
+        {if !hasProducts}
+            <!-- Empty State -->
+            <div class="flin-product-grid cols-{columns} {autoColumns ? 'auto-flow' : ''}" style="--grid-gap: {getGapSize()}; --min-card-width: {minCardWidth};">
+                <div class="grid-empty-state">
+                    <div class="empty-icon">📦</div>
+                    <p class="empty-message">{emptyMessage}</p>
+                </div>
+            </div>
+        {else}
+            <!-- Product Grid -->
+            <div class="flin-product-grid cols-{columns} {autoColumns ? 'auto-flow' : ''}" style="--grid-gap: {getGapSize()}; --min-card-width: {minCardWidth};">
+                {for product in displayProducts}
+                    <div class="grid-item">
+                        {if cardVariant == "hover"}
+                            <ProductCardHover
+                                image={product.image}
+                                imageAlt={product.imageAlt}
+                                title={product.title}
+                                price={product.price}
+                                originalPrice={product.originalPrice}
+                                currency={product.currency}
+                                rating={product.rating}
+                                reviewCount={product.reviewCount}
+                                category={product.category}
+                                badge={product.badge}
+                                badgeColor={product.badgeColor}
+                                inStock={product.inStock}
+                                onAddToCart={() => handleAddToCart(product)}
+                                onQuickView={() => handleQuickView(product)}
+                                onWishlist={() => handleProductClick(product)}
+                            />
+                        {else if cardVariant == "compact"}
+                            <ProductCardCompact
+                                image={product.image}
+                                imageAlt={product.imageAlt}
+                                title={product.title}
+                                price={product.price}
+                                originalPrice={product.originalPrice}
+                                currency={product.currency}
+                                rating={product.rating}
+                                badge={product.badge}
+                                badgeColor={product.badgeColor}
+                                inStock={product.inStock}
+                                stockCount={product.stockCount}
+                                onAddToCart={() => handleAddToCart(product)}
+                                onRemove={() => handleProductClick(product)}
+                            />
+                        {else if cardVariant == "large"}
+                            <ProductCardLarge
+                                image={product.image}
+                                imageAlt={product.imageAlt}
+                                title={product.title}
+                                description={product.description}
+                                price={product.price}
+                                originalPrice={product.originalPrice}
+                                currency={product.currency}
+                                rating={product.rating}
+                                reviewCount={product.reviewCount}
+                                features={product.features}
+                                badge={product.badge}
+                                badgeColor={product.badgeColor}
+                                inStock={product.inStock}
+                                onAddToCart={() => handleAddToCart(product)}
+                                onQuickView={() => handleQuickView(product)}
+                                onViewDetails={() => handleProductClick(product)}
+                            />
+                        {else}
+                            <ProductCardBasic
+                                image={product.image}
+                                imageAlt={product.imageAlt}
+                                title={product.title}
+                                price={product.price}
+                                originalPrice={product.originalPrice}
+                                currency={product.currency}
+                                rating={product.rating}
+                                reviewCount={product.reviewCount}
+                                badge={product.badge}
+                                badgeColor={product.badgeColor}
+                                inStock={product.inStock}
+                                onAddToCart={() => handleAddToCart(product)}
+                            />
+                        {/if}
+                    </div>
+                {/for}
+            </div>
+        {/if}
+    {/if}
+</div>

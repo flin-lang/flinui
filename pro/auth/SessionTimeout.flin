@@ -1,0 +1,364 @@
+// SessionTimeout.flin - FlinUI PRO Session Timeout Component
+// Session timeout warning modal with countdown
+
+// Props with defaults
+timeRemaining = props.timeRemaining || 300
+onExtend = props.onExtend
+onLogout = props.onLogout
+warningThreshold = props.warningThreshold || 60
+autoLogout = props.autoLogout || true
+title = props.title || "Session Expiring"
+message = props.message || "Your session is about to expire due to inactivity."
+
+// State
+isVisible = false
+countdown = timeRemaining
+isExtending = false
+
+// Show modal when below threshold
+isVisible = countdown <= warningThreshold && countdown > 0
+
+// Format time remaining
+formatTime = fn(seconds) {
+    minutes = Math.floor(seconds / 60)
+    secs = seconds % 60
+    {if minutes > 0 {
+        minutes ++ ":" ++ match secs < 10 { true -> "0" ++ secs, _ -> secs }
+    } else {
+        secs ++ "s"
+    }}
+}
+
+// Calculate progress percentage
+progressPercent = (countdown / warningThreshold) * 100
+
+// Determine urgency level
+urgencyClass = match countdown {
+    _ if countdown <= 10 -> "session-timeout-critical"
+    _ if countdown <= 30 -> "session-timeout-warning"
+    _ -> "session-timeout-normal"
+}
+
+// Handle extend session
+handleExtend = {
+    isExtending = true
+    if onExtend {
+        onExtend()
+    }
+    countdown = timeRemaining
+    isExtending = false
+}
+
+// Handle logout
+handleLogout = {
+    if onLogout {
+        onLogout()
+    }
+}
+
+// Auto logout when countdown reaches 0
+checkAutoLogout = {
+    if countdown <= 0 && autoLogout {
+        handleLogout()
+    }
+}
+
+// Overlay classes
+overlayClass = "session-timeout-overlay" ++ match isVisible {
+    true -> " session-timeout-overlay-visible"
+    _ -> ""
+}
+
+// Modal classes
+modalClass = "session-timeout-modal " ++ urgencyClass
+
+{if isVisible}
+    <div class={overlayClass} role="dialog" aria-modal="true" aria-labelledby="session-timeout-title">
+        <div class={modalClass}>
+            <div class="session-timeout-icon">
+                {if countdown <= 10}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                {else}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                {/if}
+            </div>
+
+            <div class="session-timeout-content">
+                <h2 id="session-timeout-title" class="session-timeout-title">{title}</h2>
+                <p class="session-timeout-message">{message}</p>
+            </div>
+
+            <div class="session-timeout-timer">
+                <div class="session-timeout-countdown">{formatTime(countdown)}</div>
+                <div class="session-timeout-progress">
+                    <div class="session-timeout-progress-bar" style={"width: " ++ progressPercent ++ "%"}></div>
+                </div>
+                <span class="session-timeout-label">until automatic logout</span>
+            </div>
+
+            <div class="session-timeout-actions">
+                <button
+                    class="session-timeout-btn session-timeout-btn-extend"
+                    click={handleExtend}
+                    disabled={isExtending}
+                >
+                    {if isExtending}
+                        <svg class="session-timeout-spinner" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="32" stroke-dashoffset="32">
+                                <animate attributeName="stroke-dashoffset" values="32;0;32" dur="1s" repeatCount="indefinite"/>
+                            </circle>
+                        </svg>
+                        Extending...
+                    {else}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 4v6h-6"/>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                        </svg>
+                        Stay logged in
+                    {/if}
+                </button>
+                <button
+                    class="session-timeout-btn session-timeout-btn-logout"
+                    click={handleLogout}
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    Log out now
+                </button>
+            </div>
+        </div>
+    </div>
+{/if}
+
+<style scoped>
+.session-timeout-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--flin-z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-4);
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--flin-transition-normal);
+}
+
+.session-timeout-overlay-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.session-timeout-modal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-5);
+    width: 100%;
+    max-width: 400px;
+    padding: var(--flin-space-8);
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-xl);
+    text-align: center;
+    animation: session-timeout-appear 0.3s ease-out;
+}
+
+@keyframes session-timeout-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Icon */
+.session-timeout-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-warning-light);
+}
+
+.session-timeout-icon svg {
+    width: 32px;
+    height: 32px;
+    color: var(--flin-warning);
+}
+
+.session-timeout-critical .session-timeout-icon {
+    background-color: var(--flin-danger-light);
+    animation: session-timeout-pulse 1s ease-in-out infinite;
+}
+
+.session-timeout-critical .session-timeout-icon svg {
+    color: var(--flin-danger);
+}
+
+@keyframes session-timeout-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Content */
+.session-timeout-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.session-timeout-title {
+    margin: 0;
+    font-size: var(--flin-text-xl);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.session-timeout-message {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.5;
+}
+
+/* Timer */
+.session-timeout-timer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+}
+
+.session-timeout-countdown {
+    font-size: var(--flin-text-4xl);
+    font-weight: 700;
+    color: var(--flin-fg);
+    font-variant-numeric: tabular-nums;
+}
+
+.session-timeout-critical .session-timeout-countdown {
+    color: var(--flin-danger);
+}
+
+.session-timeout-progress {
+    width: 100%;
+    height: 6px;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.session-timeout-progress-bar {
+    height: 100%;
+    background-color: var(--flin-warning);
+    border-radius: var(--flin-radius-full);
+    transition: width 1s linear;
+}
+
+.session-timeout-critical .session-timeout-progress-bar {
+    background-color: var(--flin-danger);
+}
+
+.session-timeout-label {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+/* Actions */
+.session-timeout-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    width: 100%;
+}
+
+.session-timeout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    height: var(--flin-height-md);
+    font-size: var(--flin-text-base);
+    font-weight: 600;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.session-timeout-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.session-timeout-btn-extend {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.session-timeout-btn-extend:hover:not(:disabled) {
+    background-color: var(--flin-primary-dark);
+}
+
+.session-timeout-btn-extend:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.session-timeout-btn-logout {
+    background-color: transparent;
+    color: var(--flin-fg-muted);
+    border: 1px solid var(--flin-neutral-200);
+}
+
+.session-timeout-btn-logout:hover {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-fg);
+}
+
+.session-timeout-spinner {
+    width: 18px;
+    height: 18px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .session-timeout-modal {
+        padding: var(--flin-space-6);
+    }
+
+    .session-timeout-countdown {
+        font-size: var(--flin-text-3xl);
+    }
+}
+</style>

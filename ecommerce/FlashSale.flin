@@ -1,0 +1,451 @@
+// FlashSale.flin - FlinUI PRO E-commerce Component
+// Flash sale card with countdown timer and stock progress bar
+
+// Props with defaults
+title = props.title || "Flash Sale"
+productName = props.productName || "Limited Edition Product"
+originalPrice = props.originalPrice || 99.99
+salePrice = props.salePrice || 49.99
+currency = props.currency || "$"
+endTime = props.endTime || none
+totalStock = props.totalStock || 100
+remainingStock = props.remainingStock || 45
+imageUrl = props.imageUrl || none
+onShopNow = props.onShopNow
+variant = props.variant || "hot"
+
+// State
+timeRemaining = none
+
+// Calculate discount percentage
+discountPercent = Math.round(((originalPrice - salePrice) / originalPrice) * 100)
+
+// Calculate stock percentage
+stockPercent = (remainingStock / totalStock) * 100
+soldCount = totalStock - remainingStock
+
+// Determine urgency level
+urgencyLevel = match stockPercent {
+    p if p < 20 -> "critical"
+    p if p < 50 -> "low"
+    _ -> "normal"
+}
+
+// Calculate time remaining
+fn updateTimeRemaining() {
+    {if endTime != none}
+        now = Date.now()
+        diff = endTime - now
+        {if diff > 0}
+            hours = Math.floor(diff / (1000 * 60 * 60))
+            minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+            seconds = Math.floor((diff % (1000 * 60)) / 1000)
+            timeRemaining = ["hours": hours, "minutes": minutes, "seconds": seconds]
+        {else}
+            timeRemaining = none
+        {/if}
+    {/if}
+}
+
+// Initialize timer
+onMount {
+    updateTimeRemaining()
+    {if endTime != none}
+        interval = setInterval(updateTimeRemaining, 1000)
+    {/if}
+}
+
+onUnmount {
+    {if interval != none}
+        clearInterval(interval)
+    {/if}
+}
+
+// Handle shop click
+fn handleShopClick() {
+    {if onShopNow != none}
+        onShopNow()
+    {/if}
+}
+
+// Variant class
+variantClass = match variant {
+    "cool" -> "flash-sale-cool"
+    "electric" -> "flash-sale-electric"
+    _ -> "flash-sale-hot"
+}
+
+containerClass = "flash-sale-card " ++ variantClass
+
+<div class={containerClass}>
+    <div class="flash-sale-header">
+        <div class="flash-sale-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            <span>{title}</span>
+        </div>
+        <div class="flash-sale-discount">-{discountPercent}%</div>
+    </div>
+
+    {if imageUrl != none}
+        <div class="flash-sale-image">
+            <img src={imageUrl} alt={productName} />
+            <div class="flash-sale-overlay"></div>
+        </div>
+    {/if}
+
+    <div class="flash-sale-content">
+        <h3 class="flash-sale-product-name">{productName}</h3>
+
+        <div class="flash-sale-pricing">
+            <span class="flash-sale-sale-price">{currency}{salePrice}</span>
+            <span class="flash-sale-original-price">{currency}{originalPrice}</span>
+        </div>
+
+        {if timeRemaining != none}
+            <div class="flash-sale-timer">
+                <span class="timer-label">Ends in:</span>
+                <div class="timer-display">
+                    <div class="timer-box">
+                        <span class="timer-value">{timeRemaining.hours}</span>
+                        <span class="timer-unit">h</span>
+                    </div>
+                    <span class="timer-colon">:</span>
+                    <div class="timer-box">
+                        <span class="timer-value">{timeRemaining.minutes}</span>
+                        <span class="timer-unit">m</span>
+                    </div>
+                    <span class="timer-colon">:</span>
+                    <div class="timer-box">
+                        <span class="timer-value">{timeRemaining.seconds}</span>
+                        <span class="timer-unit">s</span>
+                    </div>
+                </div>
+            </div>
+        {/if}
+
+        <div class="flash-sale-stock">
+            <div class="stock-info">
+                <span class="stock-label">Only {remainingStock} left!</span>
+                <span class="stock-sold">{soldCount} sold</span>
+            </div>
+            <div class="stock-progress-container">
+                <div class="stock-progress-bar" style="width: {stockPercent}%" data-urgency={urgencyLevel}></div>
+            </div>
+        </div>
+
+        <button class="flash-sale-cta" click={handleShopClick}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1"/>
+                <circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            <span>Shop Now</span>
+        </button>
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.flash-sale-card {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: var(--flin-radius-xl);
+    overflow: hidden;
+    font-family: var(--flin-font-sans);
+    box-shadow: var(--flin-shadow-lg);
+    transition: all var(--flin-transition-base);
+    border: 2px solid transparent;
+    animation: flash-sale-glow 2s ease-in-out infinite;
+}
+
+.flash-sale-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--flin-shadow-xl);
+}
+
+/* Variant styles */
+.flash-sale-hot {
+    border-color: var(--flin-danger);
+}
+
+@keyframes flash-sale-glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(220, 38, 38, 0.5);
+    }
+}
+
+.flash-sale-cool {
+    border-color: var(--flin-info);
+}
+
+.flash-sale-electric {
+    border-color: #8b5cf6;
+}
+
+/* Header */
+.flash-sale-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--flin-space-3);
+    background: linear-gradient(135deg, var(--flin-danger) 0%, #dc2626 100%);
+    color: white;
+}
+
+.flash-sale-cool .flash-sale-header {
+    background: linear-gradient(135deg, var(--flin-info) 0%, #0ea5e9 100%);
+}
+
+.flash-sale-electric .flash-sale-header {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.flash-sale-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.flash-sale-discount {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    padding: var(--flin-space-1) var(--flin-space-3);
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: var(--flin-radius-full);
+}
+
+/* Image */
+.flash-sale-image {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background: var(--flin-neutral-100);
+}
+
+.flash-sale-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--flin-transition-base);
+}
+
+.flash-sale-card:hover .flash-sale-image img {
+    transform: scale(1.05);
+}
+
+.flash-sale-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+}
+
+/* Content */
+.flash-sale-content {
+    padding: var(--flin-space-4);
+}
+
+.flash-sale-product-name {
+    margin: 0 0 var(--flin-space-3);
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+    line-height: 1.3;
+}
+
+/* Pricing */
+.flash-sale-pricing {
+    display: flex;
+    align-items: baseline;
+    gap: var(--flin-space-2);
+    margin-bottom: var(--flin-space-3);
+}
+
+.flash-sale-sale-price {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-danger);
+}
+
+.flash-sale-original-price {
+    font-size: var(--flin-text-base);
+    color: var(--flin-neutral-500);
+    text-decoration: line-through;
+}
+
+/* Timer */
+.flash-sale-timer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+    margin-bottom: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    background: var(--flin-neutral-50);
+    border-radius: var(--flin-radius-md);
+}
+
+.timer-label {
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-600);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.timer-display {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    justify-content: center;
+}
+
+.timer-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--flin-space-2);
+    background: white;
+    border-radius: var(--flin-radius-md);
+    min-width: 50px;
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.timer-value {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.timer-unit {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-500);
+    margin-top: var(--flin-space-1);
+}
+
+.timer-colon {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-400);
+}
+
+/* Stock progress */
+.flash-sale-stock {
+    margin-bottom: var(--flin-space-4);
+}
+
+.stock-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+}
+
+.stock-label {
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-danger);
+}
+
+.stock-sold {
+    color: var(--flin-neutral-600);
+}
+
+.stock-progress-container {
+    height: 8px;
+    background: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.stock-progress-bar {
+    height: 100%;
+    background: var(--flin-success);
+    transition: width var(--flin-transition-base);
+    border-radius: var(--flin-radius-full);
+}
+
+.stock-progress-bar[data-urgency="low"] {
+    background: var(--flin-warning);
+}
+
+.stock-progress-bar[data-urgency="critical"] {
+    background: var(--flin-danger);
+    animation: stock-pulse 1s ease-in-out infinite;
+}
+
+@keyframes stock-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* CTA Button */
+.flash-sale-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    padding: var(--flin-space-3);
+    background: linear-gradient(135deg, var(--flin-primary) 0%, var(--flin-primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-bold);
+    font-family: var(--flin-font-sans);
+    cursor: pointer;
+    transition: all var(--flin-transition-base);
+    box-shadow: var(--flin-shadow-md);
+}
+
+.flash-sale-cta:hover {
+    transform: scale(1.02);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.flash-sale-cta:active {
+    transform: scale(0.98);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .flash-sale-card {
+        background: var(--flin-neutral-800);
+    }
+
+    .flash-sale-product-name {
+        color: var(--flin-neutral-100);
+    }
+
+    .flash-sale-timer {
+        background: var(--flin-neutral-700);
+    }
+
+    .timer-box {
+        background: var(--flin-neutral-800);
+    }
+
+    .timer-value {
+        color: var(--flin-neutral-100);
+    }
+
+    .stock-progress-container {
+        background: var(--flin-neutral-700);
+    }
+}
+</style>

@@ -1,0 +1,457 @@
+// VerifyEmailPage.flin - FlinUI PRO Authentication Component
+// Email verification page with success/pending/error states
+
+// Props with defaults
+title = props.title || "Verify your email"
+subtitle = props.subtitle || "We've sent a verification link to your email address."
+email = props.email || none
+logo = props.logo || none
+logoAlt = props.logoAlt || "Logo"
+loginUrl = props.loginUrl || "/login"
+loading = props.loading || false
+error = props.error || none
+verified = props.verified || false
+verifiedMessage = props.verifiedMessage || "Your email has been verified successfully!"
+onResend = props.onResend
+onVerify = props.onVerify
+resendCooldown = props.resendCooldown || 60
+
+// Internal state
+cooldownRemaining = 0
+canResend = true
+
+// Handle resend
+handleResend = {
+    if canResend && onResend {
+        onResend({ email: email })
+        canResend = false
+        cooldownRemaining = resendCooldown
+        // Start countdown (simulated - in real app would use setInterval)
+    }
+}
+
+// Compute loading class
+loadingClass = match loading {
+    true -> " verify-email--loading"
+    _ -> ""
+}
+
+<div class={"verify-email" ++ loadingClass}>
+    <div class="verify-email__container">
+        <div class="verify-email__header">
+            {if logo != none}
+                <img src={logo} alt={logoAlt} class="verify-email__logo" />
+            {/if}
+
+            {if verified}
+                <div class="verify-email__success-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+                <h1 class="verify-email__title">Email verified!</h1>
+                <p class="verify-email__subtitle">{verifiedMessage}</p>
+            {else}
+                <div class="verify-email__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                </div>
+                <h1 class="verify-email__title">{title}</h1>
+                <p class="verify-email__subtitle">{subtitle}</p>
+            {/if}
+        </div>
+
+        {if !verified}
+            {if email != none}
+                <div class="verify-email__email-display">
+                    <span class="verify-email__email-label">Sent to:</span>
+                    <span class="verify-email__email-value">{email}</span>
+                </div>
+            {/if}
+
+            {if error != none}
+                <div class="verify-email__error" role="alert">
+                    <svg class="verify-email__error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span>{error}</span>
+                </div>
+            {/if}
+
+            <div class="verify-email__instructions">
+                <div class="verify-email__step">
+                    <span class="verify-email__step-number">1</span>
+                    <span class="verify-email__step-text">Check your email inbox</span>
+                </div>
+                <div class="verify-email__step">
+                    <span class="verify-email__step-number">2</span>
+                    <span class="verify-email__step-text">Click the verification link</span>
+                </div>
+                <div class="verify-email__step">
+                    <span class="verify-email__step-number">3</span>
+                    <span class="verify-email__step-text">Return to sign in</span>
+                </div>
+            </div>
+
+            <div class="verify-email__resend">
+                <p class="verify-email__resend-text">
+                    Didn't receive the email?
+                </p>
+                <button
+                    type="button"
+                    class="verify-email__resend-btn"
+                    click={handleResend}
+                    disabled={loading || !canResend}
+                >
+                    {if loading}
+                        <span class="verify-email__spinner"></span>
+                        <span>Sending...</span>
+                    {else if !canResend}
+                        <span>Resend in {cooldownRemaining}s</span>
+                    {else}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+                        </svg>
+                        <span>Resend verification email</span>
+                    {/if}
+                </button>
+            </div>
+
+            <div class="verify-email__tips">
+                <p class="verify-email__tips-title">Can't find the email?</p>
+                <ul class="verify-email__tips-list">
+                    <li>Check your spam or junk folder</li>
+                    <li>Make sure you entered the correct email</li>
+                    <li>Wait a few minutes and refresh</li>
+                </ul>
+            </div>
+        {else}
+            <a href={loginUrl} class="verify-email__continue-btn">
+                Continue to sign in
+            </a>
+        {/if}
+
+        <a href={loginUrl} class="verify-email__back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span>Back to sign in</span>
+        </a>
+    </div>
+</div>
+
+<style scoped>
+.verify-email {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-4);
+    background-color: var(--flin-bg-muted);
+}
+
+.verify-email__container {
+    width: 100%;
+    max-width: 440px;
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-lg);
+    padding: var(--flin-space-8);
+}
+
+.verify-email__header {
+    text-align: center;
+    margin-bottom: var(--flin-space-6);
+}
+
+.verify-email__logo {
+    height: 48px;
+    width: auto;
+    margin-bottom: var(--flin-space-4);
+}
+
+.verify-email__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background-color: var(--flin-primary-light);
+    border-radius: var(--flin-radius-full);
+    margin-bottom: var(--flin-space-4);
+}
+
+.verify-email__icon svg {
+    width: 32px;
+    height: 32px;
+    color: var(--flin-primary);
+}
+
+.verify-email__success-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background-color: var(--flin-success-light);
+    border-radius: var(--flin-radius-full);
+    margin-bottom: var(--flin-space-4);
+}
+
+.verify-email__success-icon svg {
+    width: 32px;
+    height: 32px;
+    color: var(--flin-success);
+}
+
+.verify-email__title {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-fg);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.verify-email__subtitle {
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg-muted);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.verify-email__email-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-4);
+    background-color: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-md);
+    margin-bottom: var(--flin-space-4);
+}
+
+.verify-email__email-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.verify-email__email-value {
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+}
+
+.verify-email__error {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    background-color: var(--flin-danger-light);
+    color: var(--flin-danger);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    margin-bottom: var(--flin-space-4);
+}
+
+.verify-email__error-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.verify-email__instructions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    margin-bottom: var(--flin-space-6);
+}
+
+.verify-email__step {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+.verify-email__step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    flex-shrink: 0;
+}
+
+.verify-email__step-text {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+}
+
+.verify-email__resend {
+    text-align: center;
+    margin-bottom: var(--flin-space-6);
+}
+
+.verify-email__resend-text {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    margin: 0 0 var(--flin-space-3) 0;
+}
+
+.verify-email__resend-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.verify-email__resend-btn:hover:not(:disabled) {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.verify-email__resend-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.verify-email__resend-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.verify-email__spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: verify-spin 0.6s linear infinite;
+}
+
+@keyframes verify-spin {
+    to { transform: rotate(360deg); }
+}
+
+.verify-email__tips {
+    background-color: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-4);
+    margin-bottom: var(--flin-space-4);
+}
+
+.verify-email__tips-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.verify-email__tips-list {
+    margin: 0;
+    padding-left: var(--flin-space-4);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    line-height: 1.6;
+}
+
+.verify-email__tips-list li {
+    margin-bottom: var(--flin-space-1);
+}
+
+.verify-email__continue-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-4);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-medium);
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    text-decoration: none;
+    transition: all var(--flin-transition-fast);
+    margin-bottom: var(--flin-space-4);
+}
+
+.verify-email__continue-btn:hover {
+    background-color: var(--flin-primary-hover);
+}
+
+.verify-email__back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg-muted);
+    text-decoration: none;
+    transition: color var(--flin-transition-fast);
+}
+
+.verify-email__back:hover {
+    color: var(--flin-fg);
+}
+
+.verify-email__back svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Loading state */
+.verify-email--loading {
+    pointer-events: none;
+}
+
+/* Dark theme */
+[data-theme="dark"] .verify-email {
+    background-color: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .verify-email__container {
+    background-color: var(--flin-neutral-800);
+    border: 1px solid var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .verify-email__email-display {
+    background-color: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .verify-email__tips {
+    background-color: var(--flin-neutral-900);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .verify-email__container {
+        padding: var(--flin-space-6);
+        border-radius: var(--flin-radius-lg);
+    }
+}
+</style>

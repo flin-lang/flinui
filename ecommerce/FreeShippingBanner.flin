@@ -1,0 +1,326 @@
+// FreeShippingBanner.flin - FlinUI PRO E-commerce Component
+// Free shipping notification with progress bar and threshold tracker
+
+// Props with defaults
+cartTotal = props.cartTotal || 0
+threshold = props.threshold || 50
+currency = props.currency || "$"
+freeShippingMessage = props.freeShippingMessage || "You qualify for FREE shipping!"
+progressMessage = props.progressMessage || "Add {amount} more for FREE shipping"
+variant = props.variant || "primary"
+showIcon = props.showIcon || true
+position = props.position || "top"
+
+// Calculate progress
+remaining = threshold - cartTotal
+qualified = cartTotal >= threshold
+progress = Math.min((cartTotal / threshold) * 100, 100)
+
+// Format currency
+fn formatCurrency(amount) {
+    currency ++ Math.abs(amount).toFixed(2)
+}
+
+// Dynamic message
+message = match qualified {
+    true -> freeShippingMessage
+    _ -> progressMessage.replace("{amount}", formatCurrency(remaining))
+}
+
+// Variant class
+variantClass = match variant {
+    "success" -> "shipping-banner-success"
+    "info" -> "shipping-banner-info"
+    "accent" -> "shipping-banner-accent"
+    _ -> "shipping-banner-primary"
+}
+
+positionClass = match position {
+    "bottom" -> "shipping-banner-bottom"
+    _ -> "shipping-banner-top"
+}
+
+containerClass = "shipping-banner " ++ variantClass ++ " " ++ positionClass ++ (qualified ? " shipping-banner-qualified" : "")
+
+<div class={containerClass}>
+    <div class="shipping-banner-content">
+        {if showIcon}
+            <div class="shipping-icon">
+                {if qualified}
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                {else}
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13"/>
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                        <circle cx="5.5" cy="18.5" r="2.5"/>
+                        <circle cx="18.5" cy="18.5" r="2.5"/>
+                    </svg>
+                {/if}
+            </div>
+        {/if}
+
+        <div class="shipping-text">
+            <p class="shipping-message">{message}</p>
+
+            {if !qualified}
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {progress}%"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span class="progress-current">{formatCurrency(cartTotal)}</span>
+                        <span class="progress-target">{formatCurrency(threshold)}</span>
+                    </div>
+                </div>
+            {/if}
+        </div>
+
+        {if qualified}
+            <div class="celebration-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/>
+                </svg>
+            </div>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.shipping-banner {
+    display: flex;
+    align-items: center;
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-radius: var(--flin-radius-lg);
+    font-family: var(--flin-font-sans);
+    box-shadow: var(--flin-shadow-md);
+    transition: all var(--flin-transition-base);
+    animation: shipping-banner-slide-down 0.3s ease-out;
+}
+
+@keyframes shipping-banner-slide-down {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.shipping-banner-bottom {
+    animation: shipping-banner-slide-up 0.3s ease-out;
+}
+
+@keyframes shipping-banner-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Variant styles */
+.shipping-banner-primary {
+    background: linear-gradient(135deg, var(--flin-primary) 0%, var(--flin-primary-dark) 100%);
+    color: white;
+}
+
+.shipping-banner-success {
+    background: linear-gradient(135deg, var(--flin-success) 0%, var(--flin-success-dark) 100%);
+    color: white;
+}
+
+.shipping-banner-info {
+    background: linear-gradient(135deg, var(--flin-info) 0%, var(--flin-info-dark) 100%);
+    color: white;
+}
+
+.shipping-banner-accent {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+}
+
+/* Qualified state */
+.shipping-banner-qualified {
+    animation: shipping-banner-celebrate 0.6s ease-out;
+}
+
+@keyframes shipping-banner-celebrate {
+    0%, 100% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(1.02);
+    }
+    75% {
+        transform: scale(0.98);
+    }
+}
+
+/* Content layout */
+.shipping-banner-content {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-4);
+    width: 100%;
+}
+
+/* Icon */
+.shipping-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--flin-radius-full);
+    flex-shrink: 0;
+}
+
+.shipping-banner-qualified .shipping-icon {
+    background: rgba(255, 255, 255, 0.25);
+    animation: icon-pulse 1s ease-in-out infinite;
+}
+
+@keyframes icon-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Text content */
+.shipping-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.shipping-message {
+    margin: 0;
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    line-height: 1.4;
+}
+
+/* Progress bar */
+.progress-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1-5);
+}
+
+.progress-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: white;
+    border-radius: var(--flin-radius-full);
+    transition: width var(--flin-transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-fill::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 100%
+    );
+    animation: progress-shimmer 1.5s infinite;
+}
+
+@keyframes progress-shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    opacity: 0.95;
+}
+
+/* Celebration icon */
+.celebration-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    animation: celebration-rotate 2s linear infinite;
+}
+
+@keyframes celebration-rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .shipping-banner {
+        padding: var(--flin-space-3) var(--flin-space-4);
+    }
+
+    .shipping-banner-content {
+        gap: var(--flin-space-3);
+    }
+
+    .shipping-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .shipping-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .shipping-message {
+        font-size: var(--flin-text-sm);
+    }
+
+    .progress-labels {
+        font-size: 10px;
+    }
+}
+
+/* Dark mode - enhanced visibility */
+@media (prefers-color-scheme: dark) {
+    .shipping-banner {
+        box-shadow: var(--flin-shadow-lg);
+    }
+}
+</style>

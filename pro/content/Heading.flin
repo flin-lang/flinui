@@ -1,0 +1,195 @@
+// ============================================================================
+// Heading.flin — FlinUI PRO
+// Styled headings (h1-h6) with optional anchors
+// ============================================================================
+// Props:
+//   level: number - Heading level 1-6 (default: 1)
+//   id: text - Anchor ID for linking (default: none)
+//   anchor: boolean - Show clickable anchor link (default: false)
+//   variant: text - Style variant ("default", "gradient", "underline") (default: "default")
+//   weight: text - Font weight ("normal", "medium", "semibold", "bold") (default: "bold")
+//   color: text - Color variant ("default", "muted", "primary") (default: "default")
+// ============================================================================
+
+level = props.level || 1
+id = props.id || none
+anchor = props.anchor || false
+variant = props.variant || "default"
+weight = props.weight || "bold"
+color = props.color || "default"
+
+// Compute variant class
+variantClass = match variant {
+    "gradient" -> "heading--gradient"
+    "underline" -> "heading--underline"
+    _ -> "heading--default"
+}
+
+// Compute weight class
+weightClass = match weight {
+    "normal" -> "heading--weight-normal"
+    "medium" -> "heading--weight-medium"
+    "semibold" -> "heading--weight-semibold"
+    _ -> "heading--weight-bold"
+}
+
+// Compute color class
+colorClass = match color {
+    "muted" -> "heading--muted"
+    "primary" -> "heading--primary"
+    _ -> "heading--color-default"
+}
+
+// Compute level class
+levelClass = "heading--h" ++ level
+
+headingClass = "heading " ++ levelClass ++ " " ++ variantClass ++ " " ++ weightClass ++ " " ++ colorClass
+
+<div class={headingClass}>
+    {match level {
+        1 -> <h1 id={id} class="heading__text">
+            {if anchor && id != none}
+                <a href={"#" ++ id} class="heading__anchor" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"></path>
+                    </svg>
+                </a>
+            {/if}
+            <span class="heading__content">{children}</span>
+        </h1>
+        2 -> <h2 id={id} class="heading__text">
+            {if anchor && id != none}
+                <a href={"#" ++ id} class="heading__anchor" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"></path>
+                    </svg>
+                </a>
+            {/if}
+            <span class="heading__content">{children}</span>
+        </h2>
+        3 -> <h3 id={id} class="heading__text">
+            {if anchor && id != none}
+                <a href={"#" ++ id} class="heading__anchor" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"></path>
+                    </svg>
+                </a>
+            {/if}
+            <span class="heading__content">{children}</span>
+        </h3>
+        4 -> <h4 id={id} class="heading__text">
+            {if anchor && id != none}
+                <a href={"#" ++ id} class="heading__anchor" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"></path>
+                    </svg>
+                </a>
+            {/if}
+            <span class="heading__content">{children}</span>
+        </h4>
+        5 -> <h5 id={id} class="heading__text">
+            {if anchor && id != none}
+                <a href={"#" ++ id} class="heading__anchor" aria-hidden="true">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"></path>
+                    </svg>
+                </a>
+            {/if}
+            <span class="heading__content">{children}</span>
+        </h5>
+        _ -> <h6 id={id} class="heading__text">
+            {if anchor && id != none}
+                <a href={"#" ++ id} class="heading__anchor" aria-hidden="true">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"></path>
+                    </svg>
+                </a>
+            {/if}
+            <span class="heading__content">{children}</span>
+        </h6>
+    }}
+</div>
+
+<style scoped>
+.heading {
+    font-family: var(--flin-font-sans);
+    line-height: 1.2;
+}
+
+.heading__text {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    position: relative;
+}
+
+.heading__content {
+    display: inline;
+}
+
+/* Level sizes */
+.heading--h1 { font-size: var(--flin-text-4xl); }
+.heading--h2 { font-size: var(--flin-text-3xl); }
+.heading--h3 { font-size: var(--flin-text-2xl); }
+.heading--h4 { font-size: var(--flin-text-xl); }
+.heading--h5 { font-size: var(--flin-text-lg); }
+.heading--h6 { font-size: var(--flin-text-base); }
+
+/* Weight variants */
+.heading--weight-normal .heading__text { font-weight: var(--flin-font-normal); }
+.heading--weight-medium .heading__text { font-weight: var(--flin-font-medium); }
+.heading--weight-semibold .heading__text { font-weight: var(--flin-font-semibold); }
+.heading--weight-bold .heading__text { font-weight: var(--flin-font-bold); }
+
+/* Color variants */
+.heading--color-default .heading__text { color: var(--flin-fg); }
+.heading--muted .heading__text { color: var(--flin-fg-muted); }
+.heading--primary .heading__text { color: var(--flin-primary); }
+
+/* Variant: gradient */
+.heading--gradient .heading__content {
+    background: linear-gradient(135deg, var(--flin-primary) 0%, var(--flin-info) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Variant: underline */
+.heading--underline .heading__text {
+    padding-bottom: var(--flin-space-2);
+    border-bottom: 3px solid var(--flin-primary);
+    display: inline-flex;
+}
+
+/* Anchor link */
+.heading__anchor {
+    display: inline-flex;
+    align-items: center;
+    color: var(--flin-fg-muted);
+    opacity: 0;
+    transition: opacity var(--flin-transition-fast);
+    text-decoration: none;
+    margin-left: calc(-1 * var(--flin-space-6));
+    padding-right: var(--flin-space-2);
+}
+
+.heading:hover .heading__anchor {
+    opacity: 1;
+}
+
+.heading__anchor:hover {
+    color: var(--flin-primary);
+}
+
+/* Scroll margin for anchor links */
+.heading__text[id] {
+    scroll-margin-top: var(--flin-space-20, 5rem);
+}
+</style>

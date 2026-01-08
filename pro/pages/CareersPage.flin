@@ -1,0 +1,722 @@
+// ============================================================================
+// CareersPage.flin — FlinUI PRO Page Template
+// Job listings page with positions, benefits, and company culture
+// ============================================================================
+// Props:
+//   - title: Page title (string)
+//   - subtitle: Page subtitle (string)
+//   - companyName: Company name (string)
+//   - positions: List of job position objects (list)
+//   - benefits: List of benefit objects (list)
+//   - departments: List of departments for filtering (list)
+//   - onApply: Apply callback (function or none)
+
+title = props.title || "Join our team"
+subtitle = props.subtitle || "Help us build the future of technology. We're looking for passionate people to join our mission."
+companyName = props.companyName || "Company"
+
+departments = props.departments || ["All", "Engineering", "Design", "Product", "Marketing", "Sales", "Operations"]
+selectedDepartment = "All"
+
+positions = props.positions || [
+    ["id": 1, "title": "Senior Frontend Engineer", "department": "Engineering", "location": "Remote", "type": "Full-time", "salary": "$140k - $180k"],
+    ["id": 2, "title": "Backend Engineer", "department": "Engineering", "location": "San Francisco, CA", "type": "Full-time", "salary": "$130k - $170k"],
+    ["id": 3, "title": "Product Designer", "department": "Design", "location": "Remote", "type": "Full-time", "salary": "$120k - $160k"],
+    ["id": 4, "title": "UX Researcher", "department": "Design", "location": "New York, NY", "type": "Full-time", "salary": "$100k - $140k"],
+    ["id": 5, "title": "Product Manager", "department": "Product", "location": "San Francisco, CA", "type": "Full-time", "salary": "$150k - $190k"],
+    ["id": 6, "title": "Marketing Manager", "department": "Marketing", "location": "Remote", "type": "Full-time", "salary": "$90k - $120k"],
+    ["id": 7, "title": "Sales Development Rep", "department": "Sales", "location": "Austin, TX", "type": "Full-time", "salary": "$60k - $80k + Commission"],
+    ["id": 8, "title": "DevOps Engineer", "department": "Engineering", "location": "Remote", "type": "Full-time", "salary": "$140k - $175k"]
+]
+
+benefits = props.benefits || [
+    ["icon": "health", "title": "Health & Wellness", "description": "Comprehensive medical, dental, and vision coverage for you and your family."],
+    ["icon": "vacation", "title": "Unlimited PTO", "description": "Take the time you need to rest, recharge, and explore."],
+    ["icon": "remote", "title": "Remote First", "description": "Work from anywhere in the world. We believe in flexibility."],
+    ["icon": "equity", "title": "Equity", "description": "Own a piece of what you're building with competitive equity packages."],
+    ["icon": "learning", "title": "Learning Budget", "description": "$2,000 annual budget for courses, books, and conferences."],
+    ["icon": "parental", "title": "Parental Leave", "description": "16 weeks paid leave for all new parents."],
+    ["icon": "equipment", "title": "Home Office Setup", "description": "$1,500 to create your perfect workspace at home."],
+    ["icon": "retirement", "title": "401(k) Match", "description": "4% match to help you save for your future."]
+]
+
+onApply = props.onApply || none
+
+filterPositions = () => {
+    if selectedDepartment == "All" {
+        positions
+    } else {
+        positions.filter((p) => p.department == selectedDepartment)
+    }
+}
+
+handleApply = (positionId) => {
+    if onApply != none {
+        onApply(positionId)
+    }
+}
+
+getBenefitIcon = (iconName) => match iconName {
+    "health" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    "vacation" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+    "remote" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    "equity" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    "learning" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    "parental" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    "equipment" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    "retirement" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+    _ => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+}
+
+<div class="careers-page">
+    // Hero Section
+    <section class="careers-hero">
+        <div class="careers-hero__container">
+            <h1 class="careers-hero__title">{title}</h1>
+            <p class="careers-hero__subtitle">{subtitle}</p>
+            <div class="careers-hero__stats">
+                <div class="careers-hero__stat">
+                    <span class="careers-hero__stat-value">{positions.length}</span>
+                    <span class="careers-hero__stat-label">Open Positions</span>
+                </div>
+                <div class="careers-hero__stat">
+                    <span class="careers-hero__stat-value">50+</span>
+                    <span class="careers-hero__stat-label">Team Members</span>
+                </div>
+                <div class="careers-hero__stat">
+                    <span class="careers-hero__stat-value">12</span>
+                    <span class="careers-hero__stat-label">Countries</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    // Culture Section
+    <section class="careers-culture">
+        <div class="careers-culture__container">
+            <div class="careers-culture__content">
+                <span class="careers-culture__eyebrow">Our Culture</span>
+                <h2 class="careers-culture__title">A place where you can do your best work</h2>
+                <p class="careers-culture__text">
+                    We believe great products are built by great teams. That's why we invest in creating an
+                    environment where everyone can thrive. We value diversity of thought, encourage
+                    experimentation, and celebrate both successes and learnings.
+                </p>
+                <p class="careers-culture__text">
+                    Our team spans across the globe, united by a shared mission to make technology more
+                    accessible. Whether you're working from our office or your home, you'll be part of
+                    a collaborative community that supports your growth.
+                </p>
+            </div>
+            <div class="careers-culture__images">
+                <div class="careers-culture__image-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span>Team Photo</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    // Benefits Section
+    <section class="careers-benefits">
+        <div class="careers-benefits__container">
+            <div class="careers-benefits__header">
+                <span class="careers-benefits__eyebrow">Benefits & Perks</span>
+                <h2 class="careers-benefits__title">We take care of our team</h2>
+                <p class="careers-benefits__subtitle">
+                    Competitive compensation is just the beginning. Here's what else you get.
+                </p>
+            </div>
+            <div class="careers-benefits__grid">
+                {for benefit in benefits}
+                    <div class="careers-benefit-card">
+                        <div class="careers-benefit-card__icon">
+                            {getBenefitIcon(benefit.icon)}
+                        </div>
+                        <h3 class="careers-benefit-card__title">{benefit.title}</h3>
+                        <p class="careers-benefit-card__description">{benefit.description}</p>
+                    </div>
+                {/for}
+            </div>
+        </div>
+    </section>
+
+    // Positions Section
+    <section class="careers-positions">
+        <div class="careers-positions__container">
+            <div class="careers-positions__header">
+                <span class="careers-positions__eyebrow">Open Positions</span>
+                <h2 class="careers-positions__title">Find your next role</h2>
+                <p class="careers-positions__subtitle">
+                    Explore our current openings and find the perfect fit for your skills.
+                </p>
+            </div>
+
+            // Department Filter
+            <div class="careers-positions__filter">
+                {for dept in departments}
+                    <button
+                        class={match selectedDepartment { dept => "careers-positions__filter-btn careers-positions__filter-btn--active" _ => "careers-positions__filter-btn" }}
+                        click={() => selectedDepartment = dept}
+                    >
+                        {dept}
+                    </button>
+                {/for}
+            </div>
+
+            // Job Listings
+            <div class="careers-positions__list">
+                {for position in filterPositions()}
+                    <div class="careers-position-card">
+                        <div class="careers-position-card__main">
+                            <div class="careers-position-card__info">
+                                <h3 class="careers-position-card__title">{position.title}</h3>
+                                <div class="careers-position-card__meta">
+                                    <span class="careers-position-card__department">{position.department}</span>
+                                    <span class="careers-position-card__separator">-</span>
+                                    <span class="careers-position-card__location">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                            <circle cx="12" cy="10" r="3"/>
+                                        </svg>
+                                        {position.location}
+                                    </span>
+                                    <span class="careers-position-card__separator">-</span>
+                                    <span class="careers-position-card__type">{position.type}</span>
+                                </div>
+                            </div>
+                            <div class="careers-position-card__salary">{position.salary}</div>
+                        </div>
+                        <button
+                            class="careers-position-card__apply"
+                            click={() => handleApply(position.id)}
+                        >
+                            Apply Now
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                {/for}
+
+                {if filterPositions().length == 0}
+                    <div class="careers-positions__empty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        <h3>No positions found</h3>
+                        <p>There are no open positions in this department right now. Check back soon!</p>
+                    </div>
+                {/if}
+            </div>
+        </div>
+    </section>
+
+    // CTA Section
+    <section class="careers-cta">
+        <div class="careers-cta__container">
+            <h2 class="careers-cta__title">Don't see the right role?</h2>
+            <p class="careers-cta__subtitle">
+                We're always looking for talented people. Send us your resume and we'll keep you in mind for future opportunities.
+            </p>
+            <a href="/contact" class="careers-cta__button">
+                Get in Touch
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </section>
+</div>
+
+<style scoped>
+.careers-page {
+    font-family: var(--flin-font-sans);
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-base);
+}
+
+/* Hero Section */
+.careers-hero {
+    padding: var(--flin-space-20) var(--flin-space-6);
+    background: linear-gradient(180deg, var(--flin-bg-surface) 0%, var(--flin-bg-base) 100%);
+    text-align: center;
+}
+
+.careers-hero__container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.careers-hero__title {
+    font-size: 3rem;
+    font-weight: var(--flin-font-bold);
+    line-height: 1.1;
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.careers-hero__subtitle {
+    font-size: var(--flin-text-xl);
+    color: var(--flin-text-secondary);
+    margin: 0 0 var(--flin-space-8) 0;
+}
+
+.careers-hero__stats {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-12);
+}
+
+.careers-hero__stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.careers-hero__stat-value {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-accent-gold);
+}
+
+.careers-hero__stat-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-tertiary);
+}
+
+/* Culture Section */
+.careers-culture {
+    padding: var(--flin-space-20) var(--flin-space-6);
+}
+
+.careers-culture__container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--flin-space-12);
+    align-items: center;
+}
+
+.careers-culture__eyebrow {
+    display: inline-block;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--flin-space-4);
+}
+
+.careers-culture__title {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-6) 0;
+}
+
+.careers-culture__text {
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-secondary);
+    line-height: 1.7;
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.careers-culture__image-placeholder {
+    aspect-ratio: 4/3;
+    background: var(--flin-bg-surface);
+    border: 2px dashed var(--flin-border-default);
+    border-radius: var(--flin-radius-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-text-muted);
+}
+
+.careers-culture__image-placeholder svg {
+    width: 48px;
+    height: 48px;
+}
+
+.careers-culture__image-placeholder span {
+    font-size: var(--flin-text-sm);
+}
+
+/* Benefits Section */
+.careers-benefits {
+    padding: var(--flin-space-20) var(--flin-space-6);
+    background: var(--flin-bg-surface);
+}
+
+.careers-benefits__container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.careers-benefits__header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto var(--flin-space-12);
+}
+
+.careers-benefits__eyebrow {
+    display: inline-block;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--flin-space-4);
+}
+
+.careers-benefits__title {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.careers-benefits__subtitle {
+    font-size: var(--flin-text-lg);
+    color: var(--flin-text-secondary);
+    margin: 0;
+}
+
+.careers-benefits__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--flin-space-6);
+}
+
+.careers-benefit-card {
+    padding: var(--flin-space-6);
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    text-align: center;
+}
+
+.careers-benefit-card__icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-accent-gold-light);
+    border-radius: var(--flin-radius-full);
+    margin: 0 auto var(--flin-space-4);
+}
+
+.careers-benefit-card__icon svg {
+    width: 24px;
+    height: 24px;
+    color: var(--flin-accent-gold);
+}
+
+.careers-benefit-card__title {
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.careers-benefit-card__description {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Positions Section */
+.careers-positions {
+    padding: var(--flin-space-20) var(--flin-space-6);
+}
+
+.careers-positions__container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.careers-positions__header {
+    text-align: center;
+    margin-bottom: var(--flin-space-8);
+}
+
+.careers-positions__eyebrow {
+    display: inline-block;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--flin-space-4);
+}
+
+.careers-positions__title {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.careers-positions__subtitle {
+    font-size: var(--flin-text-lg);
+    color: var(--flin-text-secondary);
+    margin: 0;
+}
+
+.careers-positions__filter {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    margin-bottom: var(--flin-space-8);
+}
+
+.careers-positions__filter-btn {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-secondary);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.careers-positions__filter-btn:hover {
+    border-color: var(--flin-border-default);
+    color: var(--flin-text-primary);
+}
+
+.careers-positions__filter-btn--active {
+    background: var(--flin-accent-gold);
+    border-color: var(--flin-accent-gold);
+    color: white;
+}
+
+.careers-positions__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.careers-position-card {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    transition: all var(--flin-transition-fast);
+}
+
+.careers-position-card:hover {
+    border-color: var(--flin-accent-gold);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.careers-position-card__main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: var(--flin-space-4);
+}
+
+.careers-position-card__title {
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.careers-position-card__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+}
+
+.careers-position-card__separator {
+    color: var(--flin-text-muted);
+}
+
+.careers-position-card__location {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+.careers-position-card__location svg {
+    width: 14px;
+    height: 14px;
+}
+
+.careers-position-card__department {
+    color: var(--flin-accent-gold);
+    font-weight: var(--flin-font-medium);
+}
+
+.careers-position-card__salary {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    white-space: nowrap;
+}
+
+.careers-position-card__apply {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background: var(--flin-accent-gold);
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    white-space: nowrap;
+}
+
+.careers-position-card__apply:hover {
+    background: var(--flin-accent-gold-hover);
+}
+
+.careers-position-card__apply svg {
+    width: 16px;
+    height: 16px;
+}
+
+.careers-positions__empty {
+    text-align: center;
+    padding: var(--flin-space-12);
+    color: var(--flin-text-muted);
+}
+
+.careers-positions__empty svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--flin-space-4);
+}
+
+.careers-positions__empty h3 {
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.careers-positions__empty p {
+    font-size: var(--flin-text-sm);
+    margin: 0;
+}
+
+/* CTA Section */
+.careers-cta {
+    padding: var(--flin-space-20) var(--flin-space-6);
+    background: linear-gradient(135deg, var(--flin-accent-gold) 0%, #e6a817 100%);
+    text-align: center;
+}
+
+.careers-cta__container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.careers-cta__title {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: white;
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.careers-cta__subtitle {
+    font-size: var(--flin-text-lg);
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0 0 var(--flin-space-8) 0;
+}
+
+.careers-cta__button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-4) var(--flin-space-8);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-accent-gold);
+    background: white;
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    text-decoration: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.careers-cta__button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.careers-cta__button svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .careers-culture__container {
+        grid-template-columns: 1fr;
+    }
+
+    .careers-benefits__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .careers-hero__title {
+        font-size: 2.25rem;
+    }
+
+    .careers-hero__stats {
+        flex-direction: column;
+        gap: var(--flin-space-4);
+    }
+
+    .careers-benefits__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .careers-position-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .careers-position-card__main {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .careers-position-card__meta {
+        flex-wrap: wrap;
+    }
+
+    .careers-position-card__apply {
+        justify-content: center;
+    }
+}
+</style>

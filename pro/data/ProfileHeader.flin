@@ -1,0 +1,428 @@
+// ProfileHeader.flin - FlinUI PRO
+// User profile header with cover image, avatar, name, stats
+
+// Props with defaults
+name = props.name || ""
+username = props.username || ""
+bio = props.bio || ""
+avatarSrc = props.avatarSrc || ""
+avatarSize = props.avatarSize || "xl"
+coverSrc = props.coverSrc || ""
+coverHeight = props.coverHeight || "200px"
+coverGradient = props.coverGradient || "linear-gradient(135deg, var(--flin-primary) 0%, var(--flin-info) 100%)"
+verified = props.verified || false
+location = props.location || ""
+website = props.website || ""
+stats = props.stats || []
+actions = props.actions || none
+badges = props.badges || []
+variant = props.variant || "default"
+
+// Compute variant class
+variantClass = match variant {
+    "compact" -> "profile-header--compact"
+    "centered" -> "profile-header--centered"
+    _ -> "profile-header--default"
+}
+
+// Generate initials from name
+initials = {if name != "" {
+    words = name.split(" ")
+    {if words.length > 1 {
+        words[0][0] ++ words[words.length - 1][0]
+    } else {
+        name[0]
+    }}
+} else {
+    "?"
+}}
+
+<div class={"profile-header " ++ variantClass}>
+    // Cover image section
+    <div
+        class="profile-header__cover"
+        style={"height: " ++ coverHeight ++ "; " ++ {if coverSrc != "" { "background-image: url(" ++ coverSrc ++ ");" } else { "background: " ++ coverGradient ++ ";" }}}
+    >
+        {if props.coverActions != none}
+            <div class="profile-header__cover-actions">
+                {props.coverActions}
+            </div>
+        {/if}
+    </div>
+
+    // Profile info container
+    <div class="profile-header__container">
+        // Avatar section
+        <div class="profile-header__avatar-wrapper">
+            <div class={"profile-header__avatar profile-header__avatar--" ++ avatarSize}>
+                {if avatarSrc != ""}
+                    <img
+                        class="profile-header__avatar-img"
+                        src={avatarSrc}
+                        alt={name}
+                    >
+                {else}
+                    <div class="profile-header__avatar-initials">
+                        {initials}
+                    </div>
+                {/if}
+            </div>
+            {if props.avatarBadge != none}
+                <div class="profile-header__avatar-badge">
+                    {props.avatarBadge}
+                </div>
+            {/if}
+        </div>
+
+        // Profile details
+        <div class="profile-header__details">
+            <div class="profile-header__main">
+                <div class="profile-header__identity">
+                    <h1 class="profile-header__name">
+                        {name}
+                        {if verified}
+                            <span class="profile-header__verified" title="Verified">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--flin-primary)">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </span>
+                        {/if}
+                    </h1>
+                    {if username != ""}
+                        <p class="profile-header__username">@{username}</p>
+                    {/if}
+                </div>
+
+                // Actions
+                {if actions != none}
+                    <div class="profile-header__actions">
+                        {actions}
+                    </div>
+                {/if}
+            </div>
+
+            // Bio
+            {if bio != ""}
+                <p class="profile-header__bio">{bio}</p>
+            {/if}
+
+            // Badges
+            {if badges.length > 0}
+                <div class="profile-header__badges">
+                    {for badge in badges}
+                        <span class={"profile-header__badge profile-header__badge--" ++ (badge.variant || "default")}>
+                            {if badge.icon != none}
+                                <span class="profile-header__badge-icon">{badge.icon}</span>
+                            {/if}
+                            {badge.label || badge}
+                        </span>
+                    {/for}
+                </div>
+            {/if}
+
+            // Meta info (location, website, etc.)
+            <div class="profile-header__meta">
+                {if location != ""}
+                    <span class="profile-header__meta-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        {location}
+                    </span>
+                {/if}
+                {if website != ""}
+                    <a class="profile-header__meta-item profile-header__meta-link" href={website}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"></path>
+                        </svg>
+                        {website.replace("https://", "").replace("http://", "")}
+                    </a>
+                {/if}
+                {if props.joinedDate != none}
+                    <span class="profile-header__meta-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Joined {props.joinedDate}
+                    </span>
+                {/if}
+            </div>
+
+            // Stats
+            {if stats.length > 0}
+                <div class="profile-header__stats">
+                    {for stat in stats}
+                        <div class="profile-header__stat">
+                            <span class="profile-header__stat-value">{stat.value || 0}</span>
+                            <span class="profile-header__stat-label">{stat.label || ""}</span>
+                        </div>
+                    {/for}
+                </div>
+            {/if}
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.profile-header {
+    background: var(--flin-bg);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--flin-neutral-200);
+}
+
+.profile-header__cover {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+}
+
+.profile-header__cover-actions {
+    position: absolute;
+    top: var(--flin-space-3);
+    right: var(--flin-space-3);
+    display: flex;
+    gap: var(--flin-space-2);
+}
+
+.profile-header__container {
+    padding: var(--flin-space-5);
+    padding-top: 0;
+    margin-top: -60px;
+    position: relative;
+}
+
+.profile-header--centered .profile-header__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.profile-header--compact .profile-header__container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--flin-space-4);
+    margin-top: -40px;
+}
+
+.profile-header__avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.profile-header__avatar {
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    background-color: var(--flin-neutral-200);
+    border: 4px solid var(--flin-bg);
+    box-shadow: var(--flin-shadow-md);
+}
+
+.profile-header__avatar--sm { width: 64px; height: 64px; }
+.profile-header__avatar--md { width: 96px; height: 96px; }
+.profile-header__avatar--lg { width: 112px; height: 112px; }
+.profile-header__avatar--xl { width: 128px; height: 128px; }
+
+.profile-header--compact .profile-header__avatar--xl { width: 80px; height: 80px; }
+
+.profile-header__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-header__avatar-initials {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-semibold);
+    background: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.profile-header__avatar-badge {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+}
+
+.profile-header__details {
+    flex: 1;
+    min-width: 0;
+    margin-top: var(--flin-space-3);
+}
+
+.profile-header--compact .profile-header__details {
+    margin-top: var(--flin-space-5);
+}
+
+.profile-header__main {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    flex-wrap: wrap;
+}
+
+.profile-header--centered .profile-header__main {
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-header__identity {
+    min-width: 0;
+}
+
+.profile-header__name {
+    margin: 0;
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-fg);
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.profile-header__verified {
+    display: inline-flex;
+    color: var(--flin-primary);
+}
+
+.profile-header__username {
+    margin: var(--flin-space-1) 0 0 0;
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg-muted);
+}
+
+.profile-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    flex-shrink: 0;
+}
+
+.profile-header__bio {
+    margin: var(--flin-space-3) 0 0 0;
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    line-height: 1.6;
+    max-width: 600px;
+}
+
+.profile-header__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-3);
+}
+
+.profile-header--centered .profile-header__badges {
+    justify-content: center;
+}
+
+.profile-header__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-1) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    border-radius: var(--flin-radius-full);
+}
+
+.profile-header__badge--default { background-color: var(--flin-neutral-100); color: var(--flin-neutral-700); }
+.profile-header__badge--primary { background-color: var(--flin-primary-light); color: var(--flin-primary); }
+.profile-header__badge--success { background-color: var(--flin-success-light); color: var(--flin-success-dark); }
+.profile-header__badge--warning { background-color: var(--flin-warning-light); color: var(--flin-warning-dark); }
+.profile-header__badge--danger { background-color: var(--flin-danger-light); color: var(--flin-danger-dark); }
+
+.profile-header__badge-icon {
+    display: flex;
+    align-items: center;
+}
+
+.profile-header__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-space-4);
+    margin-top: var(--flin-space-3);
+}
+
+.profile-header--centered .profile-header__meta {
+    justify-content: center;
+}
+
+.profile-header__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.profile-header__meta-link {
+    color: var(--flin-primary);
+    text-decoration: none;
+}
+
+.profile-header__meta-link:hover {
+    text-decoration: underline;
+}
+
+.profile-header__stats {
+    display: flex;
+    gap: var(--flin-space-6);
+    margin-top: var(--flin-space-4);
+    padding-top: var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.profile-header--centered .profile-header__stats {
+    justify-content: center;
+}
+
+.profile-header__stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+.profile-header--default .profile-header__stat {
+    align-items: flex-start;
+}
+
+.profile-header__stat-value {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-fg);
+}
+
+.profile-header__stat-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Dark theme */
+[data-theme="dark"] .profile-header {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .profile-header__avatar {
+    border-color: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .profile-header__stats {
+    border-top-color: var(--flin-neutral-700);
+}
+</style>

@@ -1,0 +1,1160 @@
+// StorefrontPage.flin - E-commerce storefront with hero, featured products, and categories
+// FlinUI PRO - Page Template
+
+// Props with defaults
+title = props.title || "Store"
+storeName = props.storeName || "FLIN Store"
+featuredProducts = props.featuredProducts || []
+categories = props.categories || []
+onProductClick = props.onProductClick || none
+onAddToCart = props.onAddToCart || none
+
+// State
+cartCount = 3
+searchQuery = ""
+showMobileMenu = false
+
+// Default categories
+defaultCategories = [
+  { id: 1, name: "Electronics", image: "electronics.jpg", count: 156 },
+  { id: 2, name: "Clothing", image: "clothing.jpg", count: 324 },
+  { id: 3, name: "Home & Garden", image: "home.jpg", count: 89 },
+  { id: 4, name: "Sports", image: "sports.jpg", count: 67 },
+  { id: 5, name: "Books", image: "books.jpg", count: 234 },
+  { id: 6, name: "Beauty", image: "beauty.jpg", count: 112 }
+]
+
+categoryList = categories.length > 0 ? categories : defaultCategories
+
+// Default featured products
+defaultProducts = [
+  { id: 1, name: "Wireless Headphones Pro", price: 299.99, originalPrice: 399.99, rating: 4.8, reviews: 256, image: "headphones.jpg", badge: "Best Seller" },
+  { id: 2, name: "Smart Watch Series 5", price: 449.00, originalPrice: none, rating: 4.6, reviews: 189, image: "watch.jpg", badge: "New" },
+  { id: 3, name: "Premium Leather Bag", price: 189.99, originalPrice: 249.99, rating: 4.9, reviews: 324, image: "bag.jpg", badge: none },
+  { id: 4, name: "Minimalist Desk Lamp", price: 79.99, originalPrice: none, rating: 4.5, reviews: 87, image: "lamp.jpg", badge: none },
+  { id: 5, name: "Organic Cotton T-Shirt", price: 49.99, originalPrice: 69.99, rating: 4.7, reviews: 456, image: "tshirt.jpg", badge: "Sale" },
+  { id: 6, name: "Portable Bluetooth Speaker", price: 129.00, originalPrice: none, rating: 4.4, reviews: 167, image: "speaker.jpg", badge: none },
+  { id: 7, name: "Ceramic Plant Pot Set", price: 39.99, originalPrice: none, rating: 4.8, reviews: 98, image: "pots.jpg", badge: none },
+  { id: 8, name: "Fitness Resistance Bands", price: 24.99, originalPrice: 34.99, rating: 4.6, reviews: 534, image: "bands.jpg", badge: "Top Rated" }
+]
+
+productList = featuredProducts.length > 0 ? featuredProducts : defaultProducts
+
+// Trending items
+trendingItems = productList.slice(0, 4)
+
+<div class="storefront">
+  <!-- Header -->
+  <header class="store-header">
+    <div class="header-container">
+      <button class="mobile-menu-btn" click={() => showMobileMenu = !showMobileMenu}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <a href="/" class="store-logo">
+        <span class="logo-text">{storeName}</span>
+      </a>
+
+      <nav class="main-nav">
+        <a href="/shop" class="nav-link">Shop</a>
+        <a href="/new" class="nav-link">New Arrivals</a>
+        <a href="/sale" class="nav-link sale">Sale</a>
+        <a href="/collections" class="nav-link">Collections</a>
+        <a href="/about" class="nav-link">About</a>
+      </nav>
+
+      <div class="header-actions">
+        <div class="search-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" placeholder="Search products..." value={searchQuery} />
+        </div>
+        <button class="icon-btn">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </button>
+        <button class="icon-btn">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </button>
+        <button class="cart-btn">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          {if cartCount > 0}
+            <span class="cart-badge">{cartCount}</span>
+          {/if}
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <span class="hero-tag">New Collection 2026</span>
+      <h1 class="hero-title">Discover Premium Quality Products</h1>
+      <p class="hero-subtitle">Shop the latest trends with exclusive deals and free shipping on orders over $50</p>
+      <div class="hero-actions">
+        <Button variant="primary" size="lg">Shop Now</Button>
+        <Button variant="secondary" size="lg">View Collections</Button>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="hero-product-card">
+        <span class="featured-tag">Featured</span>
+        <div class="product-visual"></div>
+        <h3>Premium Wireless Earbuds</h3>
+        <p class="product-price">$199.99</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section class="categories-section">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>Shop by Category</h2>
+        <a href="/categories" class="view-all">View All Categories</a>
+      </div>
+      <div class="categories-grid">
+        {for category in categoryList}
+          <a href={"/category/" + category.id} class="category-card">
+            <div class="category-image">
+              <div class="category-overlay"></div>
+            </div>
+            <div class="category-info">
+              <h3>{category.name}</h3>
+              <span>{category.count} products</span>
+            </div>
+          </a>
+        {/for}
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products -->
+  <section class="products-section">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>Featured Products</h2>
+        <div class="section-tabs">
+          <button class="tab-btn active">All</button>
+          <button class="tab-btn">New</button>
+          <button class="tab-btn">Best Sellers</button>
+          <button class="tab-btn">Sale</button>
+        </div>
+      </div>
+      <div class="products-grid">
+        {for product in productList}
+          <div class="product-card">
+            {if product.badge}
+              <span class={"product-badge " + product.badge.toLowerCase().replace(" ", "-")}>{product.badge}</span>
+            {/if}
+            <button class="wishlist-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+            </button>
+            <div class="product-image">
+              <div class="image-placeholder"></div>
+            </div>
+            <div class="product-info">
+              <div class="product-rating">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+                <span>{product.rating}</span>
+                <span class="review-count">({product.reviews})</span>
+              </div>
+              <h3 class="product-name">{product.name}</h3>
+              <div class="product-price">
+                <span class="current-price">${product.price}</span>
+                {if product.originalPrice}
+                  <span class="original-price">${product.originalPrice}</span>
+                {/if}
+              </div>
+            </div>
+            <button class="add-to-cart-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+              Add to Cart
+            </button>
+          </div>
+        {/for}
+      </div>
+    </div>
+  </section>
+
+  <!-- Promo Banner -->
+  <section class="promo-banner">
+    <div class="promo-content">
+      <span class="promo-tag">Limited Time Offer</span>
+      <h2>Get 20% Off Your First Order</h2>
+      <p>Use code WELCOME20 at checkout</p>
+      <Button variant="primary">Shop the Sale</Button>
+    </div>
+  </section>
+
+  <!-- Trending Section -->
+  <section class="trending-section">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>Trending Now</h2>
+        <a href="/trending" class="view-all">See All</a>
+      </div>
+      <div class="trending-grid">
+        {for item in trendingItems}
+          <div class="trending-item">
+            <div class="trending-image">
+              <div class="image-placeholder"></div>
+            </div>
+            <div class="trending-info">
+              <h4>{item.name}</h4>
+              <p class="trending-price">${item.price}</p>
+            </div>
+          </div>
+        {/for}
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="section-container">
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="3" width="15" height="13"></rect>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+              <circle cx="5.5" cy="18.5" r="2.5"></circle>
+              <circle cx="18.5" cy="18.5" r="2.5"></circle>
+            </svg>
+          </div>
+          <h3>Free Shipping</h3>
+          <p>On orders over $50</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+          </div>
+          <h3>Easy Returns</h3>
+          <p>30-day return policy</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <h3>Secure Checkout</h3>
+          <p>SSL encrypted payments</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <h3>24/7 Support</h3>
+          <p>Chat with us anytime</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="store-footer">
+    <div class="footer-container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="footer-logo">{storeName}</span>
+          <p>Your destination for premium quality products at affordable prices.</p>
+          <div class="social-links">
+            <a href="#" class="social-link">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </a>
+            <a href="#" class="social-link">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+              </svg>
+            </a>
+            <a href="#" class="social-link">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4>Shop</h4>
+          <a href="/new">New Arrivals</a>
+          <a href="/women">Women</a>
+          <a href="/men">Men</a>
+          <a href="/accessories">Accessories</a>
+          <a href="/sale">Sale</a>
+        </div>
+        <div class="footer-links">
+          <h4>Help</h4>
+          <a href="/faq">FAQ</a>
+          <a href="/shipping">Shipping</a>
+          <a href="/returns">Returns</a>
+          <a href="/sizing">Size Guide</a>
+          <a href="/contact">Contact Us</a>
+        </div>
+        <div class="footer-links">
+          <h4>Company</h4>
+          <a href="/about">About Us</a>
+          <a href="/careers">Careers</a>
+          <a href="/press">Press</a>
+          <a href="/sustainability">Sustainability</a>
+        </div>
+        <div class="footer-newsletter">
+          <h4>Newsletter</h4>
+          <p>Subscribe for exclusive offers and updates</p>
+          <div class="newsletter-form">
+            <input type="email" placeholder="Your email" />
+            <Button variant="primary" size="sm">Subscribe</Button>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 {storeName}. All rights reserved.</p>
+        <div class="footer-legal">
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/terms">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<style scoped>
+.storefront {
+  background: var(--flin-bg-primary);
+  min-height: 100vh;
+}
+
+/* Header */
+.store-header {
+  position: sticky;
+  top: 0;
+  background: var(--flin-bg-primary);
+  border-bottom: 1px solid var(--flin-border-primary);
+  z-index: 100;
+}
+
+.header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--flin-space-4) var(--flin-space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-6);
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--flin-text-primary);
+  cursor: pointer;
+}
+
+.store-logo {
+  text-decoration: none;
+}
+
+.logo-text {
+  font-size: var(--flin-text-xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+}
+
+.main-nav {
+  display: flex;
+  gap: var(--flin-space-6);
+  flex: 1;
+}
+
+.nav-link {
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: var(--flin-text-primary);
+}
+
+.nav-link.sale {
+  color: #ef4444;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  padding: var(--flin-space-2) var(--flin-space-3);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-full);
+  width: 200px;
+}
+
+.search-box svg {
+  color: var(--flin-text-tertiary);
+}
+
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+  width: 100%;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  color: var(--flin-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+}
+
+.cart-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  color: var(--flin-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 18px;
+  height: 18px;
+  background: var(--flin-accent-gold);
+  color: var(--flin-bg-primary);
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hero Section */
+.hero-section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--flin-space-12) var(--flin-space-6);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--flin-space-12);
+  align-items: center;
+}
+
+.hero-tag {
+  display: inline-block;
+  padding: var(--flin-space-2) var(--flin-space-4);
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--flin-accent-gold);
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  border-radius: var(--flin-radius-full);
+  margin-bottom: var(--flin-space-4);
+}
+
+.hero-title {
+  font-size: var(--flin-text-5xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+  line-height: 1.1;
+  margin-bottom: var(--flin-space-4);
+}
+
+.hero-subtitle {
+  font-size: var(--flin-text-lg);
+  color: var(--flin-text-secondary);
+  margin-bottom: var(--flin-space-6);
+}
+
+.hero-actions {
+  display: flex;
+  gap: var(--flin-space-4);
+}
+
+.hero-image {
+  display: flex;
+  justify-content: center;
+}
+
+.hero-product-card {
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-xl);
+  padding: var(--flin-space-6);
+  width: 300px;
+  text-align: center;
+  position: relative;
+}
+
+.featured-tag {
+  position: absolute;
+  top: var(--flin-space-4);
+  left: var(--flin-space-4);
+  padding: var(--flin-space-1) var(--flin-space-3);
+  background: var(--flin-accent-gold);
+  color: var(--flin-bg-primary);
+  font-size: var(--flin-text-xs);
+  font-weight: 600;
+  border-radius: var(--flin-radius-full);
+}
+
+.product-visual {
+  width: 200px;
+  height: 200px;
+  background: var(--flin-bg-tertiary);
+  border-radius: 50%;
+  margin: 0 auto var(--flin-space-4);
+}
+
+.hero-product-card h3 {
+  font-size: var(--flin-text-lg);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.hero-product-card .product-price {
+  font-size: var(--flin-text-xl);
+  font-weight: 700;
+  color: var(--flin-accent-gold);
+}
+
+/* Section Styles */
+.section-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--flin-space-12) var(--flin-space-6);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--flin-space-8);
+}
+
+.section-header h2 {
+  font-size: var(--flin-text-2xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+}
+
+.view-all {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-accent-gold);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.section-tabs {
+  display: flex;
+  gap: var(--flin-space-2);
+}
+
+.tab-btn {
+  padding: var(--flin-space-2) var(--flin-space-4);
+  background: transparent;
+  border: none;
+  border-radius: var(--flin-radius-full);
+  color: var(--flin-text-secondary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+}
+
+/* Categories */
+.categories-section {
+  background: var(--flin-bg-secondary);
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--flin-space-4);
+}
+
+.category-card {
+  position: relative;
+  border-radius: var(--flin-radius-lg);
+  overflow: hidden;
+  text-decoration: none;
+  aspect-ratio: 1;
+}
+
+.category-image {
+  position: absolute;
+  inset: 0;
+  background: var(--flin-bg-tertiary);
+}
+
+.category-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+}
+
+.category-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--flin-space-4);
+  color: white;
+}
+
+.category-info h3 {
+  font-size: var(--flin-text-md);
+  font-weight: 600;
+  margin-bottom: var(--flin-space-1);
+}
+
+.category-info span {
+  font-size: var(--flin-text-xs);
+  opacity: 0.8;
+}
+
+/* Products Grid */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--flin-space-6);
+}
+
+.product-card {
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-lg);
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+}
+
+.product-badge {
+  position: absolute;
+  top: var(--flin-space-3);
+  left: var(--flin-space-3);
+  padding: var(--flin-space-1) var(--flin-space-3);
+  border-radius: var(--flin-radius-full);
+  font-size: var(--flin-text-xs);
+  font-weight: 600;
+  z-index: 1;
+}
+
+.product-badge.best-seller { background: var(--flin-accent-gold); color: var(--flin-bg-primary); }
+.product-badge.new { background: #22c55e; color: white; }
+.product-badge.sale { background: #ef4444; color: white; }
+.product-badge.top-rated { background: #3b82f6; color: white; }
+
+.wishlist-btn {
+  position: absolute;
+  top: var(--flin-space-3);
+  right: var(--flin-space-3);
+  width: 36px;
+  height: 36px;
+  background: var(--flin-bg-primary);
+  border: none;
+  border-radius: 50%;
+  color: var(--flin-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.product-card:hover .wishlist-btn {
+  opacity: 1;
+}
+
+.wishlist-btn:hover {
+  color: #ef4444;
+}
+
+.product-image {
+  aspect-ratio: 1;
+  padding: var(--flin-space-6);
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--flin-bg-tertiary);
+  border-radius: var(--flin-radius-md);
+}
+
+.product-info {
+  padding: var(--flin-space-4);
+}
+
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-1);
+  margin-bottom: var(--flin-space-2);
+}
+
+.product-rating svg {
+  color: #eab308;
+}
+
+.product-rating span {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-primary);
+}
+
+.review-count {
+  color: var(--flin-text-tertiary);
+}
+
+.product-name {
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.product-price {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+}
+
+.current-price {
+  font-size: var(--flin-text-lg);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+}
+
+.original-price {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-tertiary);
+  text-decoration: line-through;
+}
+
+.add-to-cart-btn {
+  width: 100%;
+  padding: var(--flin-space-3);
+  background: var(--flin-text-primary);
+  border: none;
+  color: var(--flin-bg-primary);
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--flin-space-2);
+  transition: background 0.2s;
+}
+
+.add-to-cart-btn:hover {
+  background: var(--flin-accent-gold);
+}
+
+/* Promo Banner */
+.promo-banner {
+  background: linear-gradient(135deg, var(--flin-accent-gold) 0%, #f59e0b 100%);
+  padding: var(--flin-space-12);
+  text-align: center;
+}
+
+.promo-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.promo-tag {
+  display: inline-block;
+  padding: var(--flin-space-1) var(--flin-space-3);
+  background: rgba(255,255,255,0.2);
+  color: white;
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  border-radius: var(--flin-radius-full);
+  margin-bottom: var(--flin-space-4);
+}
+
+.promo-banner h2 {
+  font-size: var(--flin-text-3xl);
+  font-weight: 700;
+  color: white;
+  margin-bottom: var(--flin-space-2);
+}
+
+.promo-banner p {
+  font-size: var(--flin-text-lg);
+  color: rgba(255,255,255,0.9);
+  margin-bottom: var(--flin-space-6);
+}
+
+/* Trending */
+.trending-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--flin-space-4);
+}
+
+.trending-item {
+  display: flex;
+  gap: var(--flin-space-4);
+  padding: var(--flin-space-4);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-lg);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.trending-item:hover {
+  background: var(--flin-bg-tertiary);
+}
+
+.trending-image {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.trending-image .image-placeholder {
+  border-radius: var(--flin-radius-md);
+}
+
+.trending-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.trending-info h4 {
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-1);
+}
+
+.trending-price {
+  font-size: var(--flin-text-md);
+  font-weight: 700;
+  color: var(--flin-accent-gold);
+}
+
+/* Features */
+.features-section {
+  background: var(--flin-bg-secondary);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--flin-space-6);
+}
+
+.feature-card {
+  text-align: center;
+  padding: var(--flin-space-6);
+}
+
+.feature-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--flin-space-4);
+  background: var(--flin-bg-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--flin-accent-gold);
+}
+
+.feature-card h3 {
+  font-size: var(--flin-text-md);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-1);
+}
+
+.feature-card p {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+/* Footer */
+.store-footer {
+  background: var(--flin-bg-tertiary);
+  padding: var(--flin-space-12) 0 var(--flin-space-6);
+}
+
+.footer-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--flin-space-6);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 2fr;
+  gap: var(--flin-space-8);
+  margin-bottom: var(--flin-space-8);
+}
+
+.footer-logo {
+  font-size: var(--flin-text-xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+  display: block;
+  margin-bottom: var(--flin-space-3);
+}
+
+.footer-brand p {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+  margin-bottom: var(--flin-space-4);
+}
+
+.social-links {
+  display: flex;
+  gap: var(--flin-space-3);
+}
+
+.social-link {
+  width: 36px;
+  height: 36px;
+  background: var(--flin-bg-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--flin-text-secondary);
+  transition: all 0.2s;
+}
+
+.social-link:hover {
+  background: var(--flin-accent-gold);
+  color: var(--flin-bg-primary);
+}
+
+.footer-links h4 {
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-4);
+}
+
+.footer-links a {
+  display: block;
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+  text-decoration: none;
+  margin-bottom: var(--flin-space-2);
+  transition: color 0.2s;
+}
+
+.footer-links a:hover {
+  color: var(--flin-text-primary);
+}
+
+.footer-newsletter h4 {
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.footer-newsletter p {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+  margin-bottom: var(--flin-space-4);
+}
+
+.newsletter-form {
+  display: flex;
+  gap: var(--flin-space-2);
+}
+
+.newsletter-form input {
+  flex: 1;
+  padding: var(--flin-space-3);
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  background: var(--flin-bg-primary);
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--flin-space-6);
+  border-top: 1px solid var(--flin-border-primary);
+}
+
+.footer-bottom p {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-tertiary);
+}
+
+.footer-legal {
+  display: flex;
+  gap: var(--flin-space-4);
+}
+
+.footer-legal a {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-tertiary);
+  text-decoration: none;
+}
+
+.footer-legal a:hover {
+  color: var(--flin-text-primary);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .categories-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .footer-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .footer-brand,
+  .footer-newsletter {
+    grid-column: span 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .main-nav {
+    display: none;
+  }
+
+  .search-box {
+    display: none;
+  }
+
+  .hero-section {
+    grid-template-columns: 1fr;
+    padding: var(--flin-space-6);
+  }
+
+  .hero-title {
+    font-size: var(--flin-text-3xl);
+  }
+
+  .hero-image {
+    display: none;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--flin-space-4);
+  }
+
+  .trending-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footer-brand,
+  .footer-newsletter {
+    grid-column: span 2;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: var(--flin-space-4);
+    text-align: center;
+  }
+}
+</style>

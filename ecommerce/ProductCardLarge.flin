@@ -1,0 +1,484 @@
+// ============================================================================
+// ProductCardLarge.flin — FlinUI PRO E-Commerce
+// Detailed product card with features list, full specs, and multiple CTAs
+// ============================================================================
+// Props:
+//   - image: Product image URL (string)
+//   - imageAlt: Alt text for image (string)
+//   - title: Product name (string)
+//   - description: Product description (string)
+//   - price: Product price (number)
+//   - originalPrice: Original price for discount display (number or none)
+//   - currency: Currency code (string, default "USD")
+//   - rating: Product rating 0-5 (number)
+//   - reviewCount: Number of reviews (number)
+//   - features: Array of feature strings (array or none)
+//   - badge: Badge text (e.g., "Sale", "New") (string or none)
+//   - badgeColor: Badge color variant (string: "gold", "emerald", "rose")
+//   - inStock: Stock status (boolean, default true)
+//   - onAddToCart: Add to cart handler (function or none)
+//   - onQuickView: Quick view handler (function or none)
+//   - onViewDetails: View details handler (function or none)
+
+image = props.image || "/placeholder-product.png"
+imageAlt = props.imageAlt || props.title || "Product image"
+title = props.title || "Product Name"
+description = props.description || ""
+price = props.price || 0
+originalPrice = props.originalPrice || none
+currency = props.currency || "USD"
+rating = props.rating || 0
+reviewCount = props.reviewCount || 0
+features = props.features || []
+badge = props.badge || none
+badgeColor = props.badgeColor || "gold"
+inStock = props.inStock != false
+onAddToCart = props.onAddToCart || none
+onQuickView = props.onQuickView || none
+onViewDetails = props.onViewDetails || none
+
+// State
+isHovered = false
+imageLoaded = false
+
+// Computed values
+hasDiscount = originalPrice != none && originalPrice > price
+discountPercent = 0
+if hasDiscount {
+    discountPercent = math_round((originalPrice - price) / originalPrice * 100)
+}
+hasFeatures = features.length > 0
+
+// Format price with currency
+formatPrice = fn(amount) {
+    if currency == "USD" {
+        return "$" + amount.toFixed(2)
+    }
+    if currency == "EUR" {
+        return "€" + amount.toFixed(2)
+    }
+    if currency == "GBP" {
+        return "£" + amount.toFixed(2)
+    }
+    return currency + " " + amount.toFixed(2)
+}
+
+// Generate star rating display
+generateStars = fn(ratingValue) {
+    stars = ""
+    fullStars = math_floor(ratingValue)
+    hasHalfStar = (ratingValue - fullStars) >= 0.5
+
+    for i in 1..5 {
+        if i <= fullStars {
+            stars = stars + "★"
+        } else if i == fullStars + 1 && hasHalfStar {
+            stars = stars + "⯨"
+        } else {
+            stars = stars + "☆"
+        }
+    }
+    return stars
+}
+
+handleAddToCart = fn() {
+    if onAddToCart != none && inStock {
+        onAddToCart()
+    }
+}
+
+handleQuickView = fn() {
+    if onQuickView != none {
+        onQuickView()
+    }
+}
+
+handleViewDetails = fn() {
+    if onViewDetails != none {
+        onViewDetails()
+    }
+}
+
+handleImageLoad = fn() {
+    imageLoaded = true
+}
+
+<div
+    class="flin-product-card-large"
+    mouseenter={() => { isHovered = true }}
+    mouseleave={() => { isHovered = false }}
+>
+    <style>
+        .flin-product-card-large {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-card);
+            overflow: hidden;
+            transition: all var(--flin-transition-normal);
+            height: 100%;
+            box-shadow: var(--flin-shadow-md);
+        }
+
+        .flin-product-card-large:hover {
+            border-color: var(--flin-border-medium);
+            box-shadow: var(--flin-shadow-lg);
+            transform: translateY(-8px);
+        }
+
+        /* Image Container */
+        .card-image-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            overflow: hidden;
+            background: var(--flin-bg-elevated);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--flin-transition-slow);
+        }
+
+        .flin-product-card-large:hover .card-image {
+            transform: scale(1.08);
+        }
+
+        .card-image.loading {
+            opacity: 0;
+        }
+
+        .card-image.loaded {
+            opacity: 1;
+            animation: fadeIn var(--flin-transition-normal);
+        }
+
+        /* Badge */
+        .card-badge {
+            position: absolute;
+            top: var(--flin-space-4);
+            left: var(--flin-space-4);
+            padding: var(--flin-space-2) var(--flin-space-4);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+            border-radius: var(--flin-radius-badge);
+            text-transform: uppercase;
+            letter-spacing: var(--flin-tracking-wide);
+            z-index: var(--flin-z-10);
+        }
+
+        .card-badge.gold {
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+        }
+
+        .card-badge.emerald {
+            background: var(--flin-accent-emerald);
+            color: var(--flin-text-inverse);
+        }
+
+        .card-badge.rose {
+            background: var(--flin-accent-rose);
+            color: var(--flin-text-inverse);
+        }
+
+        /* Content */
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            padding: var(--flin-space-6);
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-2) 0;
+            line-height: var(--flin-leading-tight);
+        }
+
+        .card-description {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            margin: 0 0 var(--flin-space-4) 0;
+            line-height: var(--flin-leading-relaxed);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Rating */
+        .card-rating {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .rating-stars {
+            color: var(--flin-accent-gold);
+            font-size: var(--flin-text-lg);
+            letter-spacing: 2px;
+        }
+
+        .rating-count {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-muted);
+        }
+
+        /* Features List */
+        .features-list {
+            margin: var(--flin-space-4) 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-2) 0;
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+
+        .feature-icon {
+            color: var(--flin-accent-emerald);
+            font-size: 1.2rem;
+        }
+
+        /* Price Section */
+        .card-price-section {
+            display: flex;
+            align-items: baseline;
+            gap: var(--flin-space-4);
+            margin: var(--flin-space-4) 0;
+            padding: var(--flin-space-4) 0;
+            border-top: 1px solid var(--flin-border-subtle);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .card-price {
+            font-size: var(--flin-text-4xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-accent-gold);
+        }
+
+        .card-original-price {
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-muted);
+            text-decoration: line-through;
+        }
+
+        .card-discount {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-accent-rose);
+            background: var(--flin-bg-error);
+            padding: var(--flin-space-2) var(--flin-space-3);
+            border-radius: var(--flin-radius-md);
+        }
+
+        /* Stock Status */
+        .stock-status {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .stock-status.in-stock {
+            color: var(--flin-accent-emerald);
+        }
+
+        .stock-status.out-of-stock {
+            color: var(--flin-accent-rose);
+        }
+
+        /* CTA Buttons */
+        .cta-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--flin-space-3);
+        }
+
+        .btn {
+            padding: var(--flin-space-4);
+            border: none;
+            border-radius: var(--flin-radius-button);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .btn.primary {
+            grid-column: 1 / -1;
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+        }
+
+        .btn.primary:hover {
+            background: var(--flin-accent-gold-bright);
+            box-shadow: var(--flin-shadow-glow-gold);
+            transform: translateY(-2px);
+        }
+
+        .btn.secondary {
+            background: var(--flin-bg-hover);
+            color: var(--flin-text-primary);
+            border: 1px solid var(--flin-border-medium);
+        }
+
+        .btn.secondary:hover {
+            background: var(--flin-bg-elevated);
+            border-color: var(--flin-border-medium);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: var(--flin-bg-hover);
+            color: var(--flin-text-muted);
+            cursor: not-allowed;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .card-content {
+                padding: var(--flin-space-5);
+            }
+
+            .card-title {
+                font-size: var(--flin-text-xl);
+            }
+
+            .card-price {
+                font-size: var(--flin-text-3xl);
+            }
+
+            .cta-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .btn.primary {
+                grid-column: auto;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .card-title {
+                font-size: var(--flin-text-lg);
+            }
+
+            .card-image-container {
+                aspect-ratio: 1 / 1;
+            }
+
+            .card-price {
+                font-size: var(--flin-text-2xl);
+            }
+        }
+    </style>
+
+    <!-- Image Container -->
+    <div class="card-image-container">
+        <img
+            src={image}
+            alt={imageAlt}
+            class="card-image {imageLoaded ? 'loaded' : 'loading'}"
+            load={handleImageLoad}
+        />
+
+        {if badge != none}
+            <div class="card-badge {badgeColor}">
+                {badge}
+            </div>
+        {/if}
+    </div>
+
+    <!-- Content -->
+    <div class="card-content">
+        <h2 class="card-title">{title}</h2>
+
+        {if description != ""}
+            <p class="card-description">{description}</p>
+        {/if}
+
+        {if rating > 0}
+            <div class="card-rating">
+                <span class="rating-stars">{generateStars(rating)}</span>
+                {if reviewCount > 0}
+                    <span class="rating-count">{reviewCount} reviews</span>
+                {/if}
+            </div>
+        {/if}
+
+        {if hasFeatures}
+            <ul class="features-list">
+                {for feature in features}
+                    <li class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>{feature}</span>
+                    </li>
+                {/for}
+            </ul>
+        {/if}
+
+        <div class="card-price-section">
+            <span class="card-price">{formatPrice(price)}</span>
+
+            {if hasDiscount}
+                <span class="card-original-price">{formatPrice(originalPrice)}</span>
+                <span class="card-discount">-{discountPercent}%</span>
+            {/if}
+        </div>
+
+        <div class="stock-status {inStock ? 'in-stock' : 'out-of-stock'}">
+            {inStock ? "✓ In Stock" : "Out of Stock"}
+        </div>
+
+        <div class="cta-buttons">
+            {if onAddToCart != none}
+                <button
+                    class="btn primary"
+                    click={handleAddToCart}
+                    disabled={!inStock}
+                >
+                    {inStock ? "Add to Cart" : "Out of Stock"}
+                </button>
+            {/if}
+
+            {if onQuickView != none}
+                <button class="btn secondary" click={handleQuickView}>
+                    Quick View
+                </button>
+            {/if}
+
+            {if onViewDetails != none}
+                <button class="btn secondary" click={handleViewDetails}>
+                    View Details
+                </button>
+            {/if}
+        </div>
+    </div>
+</div>

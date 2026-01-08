@@ -1,0 +1,295 @@
+// ============================================================================
+// AppShellResponsive.flin — FlinUI PRO Shell Component
+// Mobile adaptive layout with drawer navigation
+// ============================================================================
+// Props:
+//   - breakpoint: Mobile breakpoint in px (number, default: 768)
+//   - sidebarWidth: Sidebar width on desktop (string, default: "260px")
+//   - drawerPosition: Drawer position on mobile - left, right (string, default: "left")
+//   - showBottomNav: Show bottom navigation on mobile (boolean, default: false)
+//   - navbarHeight: Height of navbar (string, default: "64px")
+//   - bottomNavHeight: Height of bottom nav (string, default: "56px")
+// ============================================================================
+
+breakpoint = props.breakpoint || 768
+sidebarWidth = props.sidebarWidth || "260px"
+drawerPosition = props.drawerPosition || "left"
+showBottomNav = props.showBottomNav || false
+navbarHeight = props.navbarHeight || "64px"
+bottomNavHeight = props.bottomNavHeight || "56px"
+
+// Internal state
+drawerOpen = false
+
+toggleDrawer = () => {
+    drawerOpen = !drawerOpen
+}
+
+closeDrawer = () => {
+    drawerOpen = false
+}
+
+<div class="flin-app-shell-responsive {if drawerPosition == 'right'}drawer-right{/if} {if showBottomNav}has-bottom-nav{/if}"
+     style="--sidebar-width: {sidebarWidth}; --navbar-height: {navbarHeight}; --bottom-nav-height: {bottomNavHeight}">
+
+    // Mobile navbar
+    <header class="mobile-navbar">
+        <button class="menu-btn" click={toggleDrawer} aria-label="Open menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h18M3 6h18M3 18h18"/>
+            </svg>
+        </button>
+        <div class="navbar-content">
+            {props.mobileHeader || none}
+        </div>
+    </header>
+
+    // Desktop sidebar / Mobile drawer
+    <aside class="sidebar-drawer {if drawerOpen}open{/if}">
+        <div class="drawer-header">
+            <span class="drawer-title">{props.drawerTitle || "Menu"}</span>
+            <button class="close-btn" click={closeDrawer} aria-label="Close menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="sidebar-content">
+            {props.sidebar || none}
+        </div>
+    </aside>
+
+    // Overlay
+    {if drawerOpen}
+        <div class="drawer-overlay" click={closeDrawer}></div>
+    {/if}
+
+    // Main content
+    <main class="main-content">
+        <div class="content-inner">
+            {children}
+        </div>
+    </main>
+
+    // Bottom navigation (mobile only)
+    {if showBottomNav}
+        <nav class="bottom-nav">
+            {props.bottomNav || none}
+        </nav>
+    {/if}
+</div>
+
+<style scoped>
+.flin-app-shell-responsive {
+    display: flex;
+    min-height: 100vh;
+    background: var(--flin-bg-base);
+}
+
+/* Desktop sidebar */
+.sidebar-drawer {
+    width: var(--sidebar-width);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: var(--flin-bg-elevated);
+    border-right: 1px solid var(--flin-border-subtle);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+}
+
+.drawer-right .sidebar-drawer {
+    left: auto;
+    right: 0;
+    border-right: none;
+    border-left: 1px solid var(--flin-border-subtle);
+}
+
+.drawer-header {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.drawer-title {
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+}
+
+.close-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-secondary);
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-primary);
+}
+
+.sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Mobile navbar (hidden on desktop) */
+.mobile-navbar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--navbar-height);
+    background: var(--flin-bg-elevated);
+    border-bottom: 1px solid var(--flin-border-subtle);
+    z-index: 90;
+    align-items: center;
+    padding: 0 var(--flin-space-4);
+    gap: var(--flin-space-3);
+}
+
+.menu-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-primary);
+    cursor: pointer;
+}
+
+.menu-btn:hover {
+    background: var(--flin-bg-surface);
+}
+
+.navbar-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+/* Overlay */
+.drawer-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 95;
+}
+
+/* Main content */
+.main-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+}
+
+.drawer-right .main-content {
+    margin-left: 0;
+    margin-right: var(--sidebar-width);
+}
+
+.content-inner {
+    padding: var(--flin-space-6);
+}
+
+/* Bottom navigation */
+.bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--bottom-nav-height);
+    background: var(--flin-bg-elevated);
+    border-top: 1px solid var(--flin-border-subtle);
+    z-index: 90;
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+    .mobile-navbar {
+        display: flex;
+    }
+
+    .sidebar-drawer {
+        transform: translateX(-100%);
+        transition: transform var(--flin-transition-normal);
+        width: 280px;
+    }
+
+    .drawer-right .sidebar-drawer {
+        transform: translateX(100%);
+    }
+
+    .sidebar-drawer.open {
+        transform: translateX(0);
+    }
+
+    .drawer-header {
+        display: flex;
+    }
+
+    .drawer-overlay {
+        display: block;
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--flin-transition-normal);
+    }
+
+    .sidebar-drawer.open ~ .drawer-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .main-content {
+        margin-left: 0;
+        margin-right: 0;
+        padding-top: var(--navbar-height);
+    }
+
+    .has-bottom-nav .main-content {
+        padding-bottom: var(--bottom-nav-height);
+    }
+
+    .content-inner {
+        padding: var(--flin-space-4);
+    }
+
+    .bottom-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .sidebar-drawer {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .mobile-navbar {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .bottom-nav {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+</style>

@@ -1,0 +1,304 @@
+// ============================================================================
+// Breadcrumbs.flin — FlinUI PRO Navigation Component
+// Path navigation breadcrumb trail with collapsible items
+// ============================================================================
+// Props:
+//   - items: List of breadcrumb items with label, href (list)
+//   - separator: Custom separator character or element (string)
+//   - maxItems: Max items to show before collapsing (number)
+//   - showHomeIcon: Show home icon for first item (boolean)
+//   - homeHref: Link for home icon (string)
+//   - size: Size variant - sm, md, lg (string)
+
+items = props.items || [
+    ["label": "Home", "href": "/"],
+    ["label": "Products", "href": "/products"],
+    ["label": "Electronics", "href": "/products/electronics"],
+    ["label": "Smartphones", "href": "/products/electronics/smartphones"]
+]
+separator = props.separator || "/"
+maxItems = props.maxItems || 0
+showHomeIcon = props.showHomeIcon || true
+homeHref = props.homeHref || "/"
+size = props.size || "md"
+
+// State for collapsed expansion
+isExpanded = false
+
+// Size class
+sizeClass = match size {
+    "sm" => "breadcrumbs-sm"
+    "lg" => "breadcrumbs-lg"
+    _ => "breadcrumbs-md"
+}
+
+// Determine if we need to collapse
+shouldCollapse = maxItems > 0 && items.length > maxItems && !isExpanded
+
+// Get visible items
+getVisibleItems = () => {
+    if !shouldCollapse {
+        return items
+    }
+    // Show first item, ellipsis, and last (maxItems - 1) items
+    firstItem = items[0]
+    lastItems = items.slice(-(maxItems - 1))
+    return [firstItem, ["isEllipsis": true], ...lastItems]
+}
+
+visibleItems = getVisibleItems()
+
+<nav class="flin-breadcrumbs {sizeClass}" aria-label="Breadcrumb navigation">
+    <ol class="breadcrumbs-list">
+        {if showHomeIcon}
+            <li class="breadcrumbs-item">
+                <a href={homeHref} class="breadcrumbs-link breadcrumbs-home" aria-label="Home">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </a>
+                <span class="breadcrumbs-separator" aria-hidden="true">
+                    {if separator == "chevron"}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    {else if separator == "arrow"}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    {else}
+                        {separator}
+                    {/if}
+                </span>
+            </li>
+        {/if}
+
+        {for item, index in visibleItems}
+            {if item.isEllipsis}
+                <li class="breadcrumbs-item">
+                    <button
+                        class="breadcrumbs-ellipsis"
+                        click={() => isExpanded = true}
+                        aria-label="Show all breadcrumbs"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="5" cy="12" r="2"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                            <circle cx="19" cy="12" r="2"></circle>
+                        </svg>
+                    </button>
+                    <span class="breadcrumbs-separator" aria-hidden="true">
+                        {if separator == "chevron"}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        {else if separator == "arrow"}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        {else}
+                            {separator}
+                        {/if}
+                    </span>
+                </li>
+            {else}
+                <li class="breadcrumbs-item">
+                    {if index == visibleItems.length - 1 && !showHomeIcon || index == visibleItems.length - 1}
+                        <span class="breadcrumbs-current" aria-current="page">
+                            {item.label}
+                        </span>
+                    {else}
+                        <a href={item.href} class="breadcrumbs-link">
+                            {item.label}
+                        </a>
+                        <span class="breadcrumbs-separator" aria-hidden="true">
+                            {if separator == "chevron"}
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            {else if separator == "arrow"}
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            {else}
+                                {separator}
+                            {/if}
+                        </span>
+                    {/if}
+                </li>
+            {/if}
+        {/for}
+    </ol>
+</nav>
+
+<style scoped>
+.flin-breadcrumbs {
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumbs-list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--flin-space-1);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.breadcrumbs-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.breadcrumbs-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-family: var(--flin-font-sans);
+    color: var(--flin-text-tertiary);
+    text-decoration: none;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    transition: all var(--flin-transition-fast);
+}
+
+.breadcrumbs-link:hover {
+    color: var(--flin-text-primary);
+    background-color: var(--flin-bg-surface);
+}
+
+.breadcrumbs-link:focus-visible {
+    outline: 2px solid var(--flin-accent-gold);
+    outline-offset: 2px;
+}
+
+.breadcrumbs-home {
+    padding: var(--flin-space-1-5);
+}
+
+.breadcrumbs-home svg {
+    width: 18px;
+    height: 18px;
+}
+
+.breadcrumbs-separator {
+    display: flex;
+    align-items: center;
+    color: var(--flin-text-muted);
+    font-size: var(--flin-text-sm);
+    user-select: none;
+}
+
+.breadcrumbs-separator svg {
+    width: 14px;
+    height: 14px;
+}
+
+.breadcrumbs-current {
+    font-family: var(--flin-font-sans);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-primary);
+    padding: var(--flin-space-1) var(--flin-space-2);
+}
+
+.breadcrumbs-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-sm);
+    padding: var(--flin-space-1);
+    cursor: pointer;
+    color: var(--flin-text-tertiary);
+    transition: all var(--flin-transition-fast);
+}
+
+.breadcrumbs-ellipsis:hover {
+    background: var(--flin-bg-elevated);
+    border-color: var(--flin-border-default);
+    color: var(--flin-text-primary);
+}
+
+.breadcrumbs-ellipsis:focus-visible {
+    outline: 2px solid var(--flin-accent-gold);
+    outline-offset: 2px;
+}
+
+.breadcrumbs-ellipsis svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Size variants */
+.breadcrumbs-sm .breadcrumbs-link {
+    font-size: var(--flin-text-xs);
+    padding: var(--flin-space-0-5) var(--flin-space-1);
+}
+
+.breadcrumbs-sm .breadcrumbs-current {
+    font-size: var(--flin-text-xs);
+}
+
+.breadcrumbs-sm .breadcrumbs-home svg {
+    width: 14px;
+    height: 14px;
+}
+
+.breadcrumbs-sm .breadcrumbs-separator svg {
+    width: 12px;
+    height: 12px;
+}
+
+.breadcrumbs-md .breadcrumbs-link {
+    font-size: var(--flin-text-sm);
+}
+
+.breadcrumbs-md .breadcrumbs-current {
+    font-size: var(--flin-text-sm);
+}
+
+.breadcrumbs-lg .breadcrumbs-link {
+    font-size: var(--flin-text-base);
+    padding: var(--flin-space-1-5) var(--flin-space-3);
+}
+
+.breadcrumbs-lg .breadcrumbs-current {
+    font-size: var(--flin-text-base);
+}
+
+.breadcrumbs-lg .breadcrumbs-home svg {
+    width: 20px;
+    height: 20px;
+}
+
+.breadcrumbs-lg .breadcrumbs-separator svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .breadcrumbs-list {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+        padding: var(--flin-space-1) 0;
+    }
+
+    .breadcrumbs-list::-webkit-scrollbar {
+        display: none;
+    }
+
+    .breadcrumbs-item {
+        flex-shrink: 0;
+    }
+}
+</style>

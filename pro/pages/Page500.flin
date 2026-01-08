@@ -1,0 +1,409 @@
+// ============================================================================
+// Page500.flin — FlinUI PRO Page Template
+// Server error (500) page with retry and support options
+// ============================================================================
+// Props:
+//   - title: Error title (string)
+//   - message: Error message (string)
+//   - errorCode: Error code to display (string or none)
+//   - showRetry: Show retry button (boolean)
+//   - supportUrl: Support page URL (string)
+//   - homeUrl: Home page URL (string)
+//   - onRetry: Retry callback (function or none)
+
+title = props.title || "Something went wrong"
+message = props.message || "We're experiencing technical difficulties. Our team has been notified and is working to fix the issue."
+errorCode = props.errorCode || none
+showRetry = props.showRetry || true
+supportUrl = props.supportUrl || "/support"
+homeUrl = props.homeUrl || "/"
+onRetry = props.onRetry || none
+
+isRetrying = false
+
+handleRetry = () => {
+    isRetrying = true
+    if onRetry != none {
+        onRetry()
+    } else {
+        // Default: reload the page
+        window.location.reload()
+    }
+}
+
+<div class="page-500">
+    <div class="page-500__container">
+        // Error Illustration
+        <div class="page-500__illustration">
+            <div class="page-500__icon-wrapper">
+                <svg class="page-500__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+            <div class="page-500__code-badge">500</div>
+        </div>
+
+        // Error Content
+        <h1 class="page-500__title">{title}</h1>
+        <p class="page-500__message">{message}</p>
+
+        {if errorCode != none}
+            <div class="page-500__error-code">
+                <span class="page-500__error-label">Error Code:</span>
+                <code class="page-500__error-value">{errorCode}</code>
+            </div>
+        {/if}
+
+        // Actions
+        <div class="page-500__actions">
+            {if showRetry}
+                <button
+                    class="page-500__button page-500__button--primary"
+                    click={handleRetry}
+                    disabled={isRetrying}
+                >
+                    {if isRetrying}
+                        <span class="page-500__spinner"></span>
+                        Retrying...
+                    {else}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 2v6h-6"/>
+                            <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+                            <path d="M3 22v-6h6"/>
+                            <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+                        </svg>
+                        Try Again
+                    {/if}
+                </button>
+            {/if}
+            <a href={homeUrl} class="page-500__button page-500__button--secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Go Home
+            </a>
+        </div>
+
+        // Status & Support
+        <div class="page-500__footer">
+            <div class="page-500__status">
+                <div class="page-500__status-indicator"></div>
+                <span>Checking system status...</span>
+            </div>
+            <div class="page-500__support">
+                <p>If this problem persists, please</p>
+                <a href={supportUrl}>contact our support team</a>
+            </div>
+        </div>
+
+        // Tips
+        <div class="page-500__tips">
+            <h2 class="page-500__tips-title">While you wait, you can try:</h2>
+            <ul class="page-500__tips-list">
+                <li>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 2v6h-6"/>
+                        <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+                    </svg>
+                    Refreshing the page
+                </li>
+                <li>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    Waiting a few minutes and trying again
+                </li>
+                <li>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6 6 18"/>
+                        <path d="m6 6 12 12"/>
+                    </svg>
+                    Clearing your browser cache
+                </li>
+                <li>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/>
+                        <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                    Checking your internet connection
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.page-500 {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-8) var(--flin-space-6);
+    background: var(--flin-bg-base);
+    font-family: var(--flin-font-sans);
+}
+
+.page-500__container {
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Illustration */
+.page-500__illustration {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto var(--flin-space-8);
+}
+
+.page-500__icon-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-danger-light);
+    border-radius: var(--flin-radius-full);
+    animation: page-500-pulse 2s ease-in-out infinite;
+}
+
+.page-500__icon {
+    width: 56px;
+    height: 56px;
+    color: var(--flin-danger);
+}
+
+.page-500__code-badge {
+    position: absolute;
+    bottom: -8px;
+    right: -8px;
+    padding: var(--flin-space-1) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-bold);
+    color: white;
+    background: var(--flin-danger);
+    border-radius: var(--flin-radius-full);
+    box-shadow: var(--flin-shadow-md);
+}
+
+@keyframes page-500-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Content */
+.page-500__title {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-3) 0;
+}
+
+.page-500__message {
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-secondary);
+    line-height: 1.6;
+    margin: 0 0 var(--flin-space-6) 0;
+}
+
+.page-500__error-code {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    margin-bottom: var(--flin-space-6);
+}
+
+.page-500__error-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-tertiary);
+}
+
+.page-500__error-value {
+    font-size: var(--flin-text-sm);
+    font-family: var(--flin-font-mono);
+    color: var(--flin-danger);
+    background: var(--flin-danger-light);
+    padding: 2px var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+}
+
+/* Actions */
+.page-500__actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-4);
+    margin-bottom: var(--flin-space-8);
+}
+
+.page-500__button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-6);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    border-radius: var(--flin-radius-lg);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.page-500__button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.page-500__button--primary {
+    color: white;
+    background: var(--flin-accent-gold);
+    border: none;
+}
+
+.page-500__button--primary:hover:not(:disabled) {
+    background: var(--flin-accent-gold-hover);
+}
+
+.page-500__button--primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.page-500__button--secondary {
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-default);
+}
+
+.page-500__button--secondary:hover {
+    background: var(--flin-bg-elevated);
+}
+
+.page-500__spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: page-500-spin 0.6s linear infinite;
+}
+
+@keyframes page-500-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Footer */
+.page-500__footer {
+    padding: var(--flin-space-6) 0;
+    border-top: 1px solid var(--flin-border-subtle);
+    border-bottom: 1px solid var(--flin-border-subtle);
+    margin-bottom: var(--flin-space-8);
+}
+
+.page-500__status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    margin-bottom: var(--flin-space-3);
+}
+
+.page-500__status-indicator {
+    width: 8px;
+    height: 8px;
+    background: var(--flin-warning);
+    border-radius: var(--flin-radius-full);
+    animation: page-500-blink 1s ease-in-out infinite;
+}
+
+@keyframes page-500-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.page-500__support {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-tertiary);
+}
+
+.page-500__support p {
+    margin: 0;
+    display: inline;
+}
+
+.page-500__support a {
+    color: var(--flin-accent-gold);
+    text-decoration: none;
+    font-weight: var(--flin-font-medium);
+}
+
+.page-500__support a:hover {
+    text-decoration: underline;
+}
+
+/* Tips */
+.page-500__tips {
+    text-align: left;
+}
+
+.page-500__tips-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-tertiary);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.page-500__tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--flin-space-3);
+}
+
+.page-500__tips-list li {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    padding: var(--flin-space-3);
+    background: var(--flin-bg-surface);
+    border-radius: var(--flin-radius-md);
+}
+
+.page-500__tips-list svg {
+    width: 16px;
+    height: 16px;
+    color: var(--flin-text-muted);
+    flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .page-500__actions {
+        flex-direction: column;
+    }
+
+    .page-500__tips-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark Theme */
+[data-theme="dark"] .page-500__icon-wrapper {
+    background: rgba(239, 68, 68, 0.2);
+}
+</style>

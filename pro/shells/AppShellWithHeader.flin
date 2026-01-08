@@ -1,0 +1,213 @@
+// ============================================================================
+// AppShellWithHeader.flin — FlinUI PRO Shell Component
+// Fixed header layout with optional sidebar
+// ============================================================================
+// Props:
+//   - headerHeight: Height of header (string, default: "64px")
+//   - headerFixed: Fixed header position (boolean, default: true)
+//   - showSidebar: Show sidebar (boolean, default: false)
+//   - sidebarWidth: Sidebar width (string, default: "260px")
+//   - sidebarBelowHeader: Sidebar starts below header (boolean, default: true)
+//   - showSubheader: Show subheader area (boolean, default: false)
+//   - subheaderHeight: Height of subheader (string, default: "48px")
+// ============================================================================
+
+headerHeight = props.headerHeight || "64px"
+headerFixed = props.headerFixed || true
+showSidebar = props.showSidebar || false
+sidebarWidth = props.sidebarWidth || "260px"
+sidebarBelowHeader = props.sidebarBelowHeader || true
+showSubheader = props.showSubheader || false
+subheaderHeight = props.subheaderHeight || "48px"
+
+// Calculate total header height
+totalHeaderHeight = {if showSubheader { "calc(" + headerHeight + " + " + subheaderHeight + ")" } else { headerHeight }}
+
+<div class="flin-app-shell-header {if headerFixed}header-fixed{/if} {if showSidebar}has-sidebar{/if} {if sidebarBelowHeader}sidebar-below{/if}"
+     style="--header-height: {headerHeight}; --total-header-height: {totalHeaderHeight}; --sidebar-width: {sidebarWidth}; --subheader-height: {subheaderHeight}">
+
+    // Header
+    <header class="app-header">
+        <div class="header-main">
+            <div class="header-content">
+                {props.header || none}
+            </div>
+        </div>
+
+        // Subheader
+        {if showSubheader}
+            <div class="header-sub">
+                <div class="subheader-content">
+                    {props.subheader || none}
+                </div>
+            </div>
+        {/if}
+    </header>
+
+    // Body wrapper
+    <div class="app-body">
+        // Sidebar
+        {if showSidebar}
+            <aside class="app-sidebar">
+                <div class="sidebar-content">
+                    {props.sidebar || none}
+                </div>
+            </aside>
+        {/if}
+
+        // Main content
+        <main class="app-main">
+            <div class="main-content">
+                {children}
+            </div>
+        </main>
+    </div>
+</div>
+
+<style scoped>
+.flin-app-shell-header {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--flin-bg-base);
+}
+
+/* Header */
+.app-header {
+    flex-shrink: 0;
+    background: var(--flin-bg-elevated);
+    border-bottom: 1px solid var(--flin-border-subtle);
+    z-index: 100;
+}
+
+.header-fixed .app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.header-main {
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+}
+
+.header-content {
+    flex: 1;
+    padding: 0 var(--flin-space-6);
+    display: flex;
+    align-items: center;
+}
+
+.header-sub {
+    height: var(--subheader-height);
+    display: flex;
+    align-items: center;
+    border-top: 1px solid var(--flin-border-subtle);
+    background: var(--flin-bg-surface);
+}
+
+.subheader-content {
+    flex: 1;
+    padding: 0 var(--flin-space-6);
+    display: flex;
+    align-items: center;
+}
+
+/* Body wrapper */
+.app-body {
+    display: flex;
+    flex: 1;
+}
+
+.header-fixed .app-body {
+    padding-top: var(--total-header-height);
+}
+
+/* Sidebar */
+.app-sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    background: var(--flin-bg-elevated);
+    border-right: 1px solid var(--flin-border-subtle);
+}
+
+.has-sidebar.sidebar-below .app-sidebar {
+    position: fixed;
+    top: var(--total-header-height);
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+}
+
+.has-sidebar:not(.sidebar-below) .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 110;
+}
+
+.has-sidebar:not(.sidebar-below) .app-header {
+    margin-left: var(--sidebar-width);
+}
+
+.sidebar-content {
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Main content */
+.app-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.has-sidebar.sidebar-below .app-main {
+    margin-left: var(--sidebar-width);
+}
+
+.main-content {
+    padding: var(--flin-space-6);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .app-sidebar {
+        display: none;
+    }
+
+    .has-sidebar.sidebar-below .app-main,
+    .has-sidebar:not(.sidebar-below) .app-header {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-content,
+    .subheader-content {
+        padding: 0 var(--flin-space-4);
+    }
+
+    .main-content {
+        padding: var(--flin-space-4);
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .app-header {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .header-sub {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .app-sidebar {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+</style>

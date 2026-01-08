@@ -1,17 +1,19 @@
 // FlinUI - Official Component Library for FLIN
-// 178 production-ready components. No npm install. No dependencies. Just FLIN.
-// Version 1.6.0
+// 241 production-ready components. No npm install. No dependencies. Just FLIN.
+// Version 2.0.0
 
 // ============================================================================
 // FLINUI COMPONENT LIBRARY
 // ============================================================================
 //
-// 178 production-ready components for building modern web applications.
+// 241 production-ready components for building modern web applications.
 // All components use theme tokens for consistent styling and dark mode support.
+//
+// NEW in v2.0: FlinUI PRO with 25 AI & Chat components!
 //
 // Usage:
 //   Components are auto-imported when used in .flin files.
-//   Just use <Button>, <Card>, <Modal>, etc.
+//   Just use <Button>, <Card>, <Modal>, <AIChatbot>, etc.
 //
 // Theme:
 //   Include theme/tokens.flin to get CSS variables.
@@ -21,17 +23,20 @@
 
 // Component Categories:
 //
-// BASIC (19 components)
+// BASIC (45 components)
 //   Button, Input, Textarea, Select, Checkbox, Radio, Switch, Slider
 //   Text, Link, Icon (1572 Lucide icons - auto-routed to 14 category files), Image, Avatar, Badge, Tag
-//   IconButton, CloseButton, ButtonGroup, ThemeToggle
+//   IconButton, CloseButton, ButtonGroup, ThemeToggle, WhatsAppWidget, WalletCard
+//   ImageUpload, MiniCart, Header, AppTopBar, DashboardSidebar, StacksSidebar
+//   Sidebar, SidebarModern, Navbar, AdminHeader, and more...
 //
-// LAYOUT (21 components)
+// LAYOUT (24 components)
 //   Container, Stack, Grid, Flex, Box, Divider, Spacer, Center
 //   AspectRatio, Wrap, ResizablePanels, Header, Footer, Collapse
 //   Section, Hero, PageContainer, Affix, BackTop, ScrollArea, Splitter
+//   FooterBranded, and more...
 //
-// DATA DISPLAY (33 components)
+// DATA DISPLAY (34 components)
 //   Card, CardHeader, CardBody, CardFooter, Table, List, ListItem
 //   Progress, Spinner, Skeleton, Empty, Code, Kbd, Stat, Accordion
 //   Calendar, Carousel, Timeline, DataTable, AvatarGroup, BadgeGroup
@@ -73,12 +78,20 @@
 //   EcommerceDashboard, BankingDashboard, CRMDashboard, AnalyticsDashboard
 //   EmailClient, MonitoringDashboard
 //
+// PRO (25 AI & Chat components) - NEW IN V2.0! 🎉
+//   AIChatbot, ChatInput, ChatMessages, ChatBubble, ChatTypingIndicator
+//   ChatStreamingText, ChatConversationList, ChatModelSelector, ChatReasoningPanel
+//   ChatSourceCitations, AIPromptInput, AIPromptLibrary, AIResponseCard
+//   AILoadingState, AIFeedbackButtons, AIToolCall, AICodeBlock, AIMarkdownRenderer
+//   AIAgentStatus, AIImageGenerator, AIChartGenerator, AITableGenerator
+//   AIFormGenerator, AIDocumentSummary, AIVoiceInput
+//
 // FLIN-NATIVE (2 components) - UNIQUE TO FLIN!
 //   TimeTravel - Navigate through variable history (memory-native)
 //   MemoryInspector - Visual FlinDB debugger (zero-config persistence)
 //
 // THEME (8 files)
-//   tokens.flin - Design tokens and CSS variables
+//   tokens.flin - Design tokens and CSS variables (185+ tokens)
 //   variables.flin - CSS custom properties
 //   dark.flin - Dark mode support
 //   animations.flin - Animation utilities
@@ -86,10 +99,28 @@
 //   shadows.flin - Shadow system
 //   custom.flin - Theme customization
 //   index.flin - Theme provider
+//
 
-version = "1.6.0"
-componentCount = 178
-categories = ["basic", "layout", "data", "forms", "feedback", "navigation", "charts", "typography", "collections", "templates", "flin-native"]
+version = "2.0.0"
+componentCount = 241
+categories = ["basic", "layout", "data", "forms", "feedback", "navigation", "charts", "typography", "collections", "templates", "pro", "flin-native", "theme"]
+
+// Category stats
+stats = [
+    "basic": 45,
+    "layout": 24,
+    "data": 34,
+    "forms": 22,
+    "feedback": 17,
+    "navigation": 19,
+    "charts": 13,
+    "typography": 8,
+    "collections": 8,
+    "templates": 16,
+    "pro": 25,
+    "flin-native": 2,
+    "theme": 8
+]
 
 <div class="flinui-root">
     <h1>FlinUI v{version}</h1>
@@ -97,52 +128,68 @@ categories = ["basic", "layout", "data", "forms", "feedback", "navigation", "cha
 
     <h2>Getting Started</h2>
     <pre><code>
-// Just use components directly - they auto-import!
-&lt;Button label="Click me" variant="primary" /&gt;
-&lt;Input placeholder="Enter text" value={name} /&gt;
+// No installation needed!
+// Just use components directly:
 
-&lt;Card&gt;
-    &lt;CardHeader title="Welcome" /&gt;
-    &lt;CardBody&gt;Content here&lt;/CardBody&gt;
-&lt;/Card&gt;
+count = 0
 
-&lt;Modal open={showModal} title="Confirm"&gt;
-    &lt;ModalBody&gt;Are you sure?&lt;/ModalBody&gt;
-    &lt;ModalFooter&gt;
-        &lt;Button label="Cancel" variant="secondary" /&gt;
-        &lt;Button label="Confirm" variant="primary" /&gt;
-    &lt;/ModalFooter&gt;
-&lt;/Modal&gt;
+&lt;Button click={count++}&gt;
+    Clicked {count} times
+&lt;/Button&gt;
     </code></pre>
+
+    <h2>Categories</h2>
+    <ul>
+        {for category in categories}
+            <li>{category}: {stats[category]} components</li>
+        {/for}
+    </ul>
 </div>
 
 <style>
 .flinui-root {
     font-family: var(--flin-font-sans);
-    padding: var(--flin-space-8);
     max-width: 800px;
     margin: 0 auto;
+    padding: var(--flin-space-8);
 }
 
-.flinui-root h1 {
+h1 {
     color: var(--flin-primary);
+    font-size: var(--flin-text-4xl);
     margin-bottom: var(--flin-space-2);
 }
 
-.flinui-root h2 {
+h2 {
+    color: var(--flin-text-primary);
+    font-size: var(--flin-text-2xl);
     margin-top: var(--flin-space-8);
-    color: var(--flin-fg);
+    margin-bottom: var(--flin-space-4);
 }
 
-.flinui-root pre {
-    background: var(--flin-bg-muted);
+pre {
+    background: var(--flin-bg-surface);
     padding: var(--flin-space-4);
-    border-radius: var(--flin-radius-lg);
+    border-radius: var(--flin-radius-md);
     overflow-x: auto;
 }
 
-.flinui-root code {
+code {
     font-family: var(--flin-font-mono);
     font-size: var(--flin-text-sm);
+}
+
+ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--flin-space-2);
+}
+
+li {
+    padding: var(--flin-space-3);
+    background: var(--flin-bg-subtle);
+    border-radius: var(--flin-radius-sm);
+    border-left: 3px solid var(--flin-primary);
 }
 </style>

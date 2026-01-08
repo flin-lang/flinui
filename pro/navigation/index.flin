@@ -1,0 +1,168 @@
+// ============================================================================
+// FlinUI PRO Navigation Components Index
+// Complete navigation system: headers, navbars, footers, and page navigation
+// ============================================================================
+
+// ============================================================================
+// NAVBARS / HEADERS (7 components)
+// ============================================================================
+
+// NavbarSimple - Basic responsive navbar with logo, links, and CTA
+// <NavbarSimple
+//     logoText="Brand"
+//     links={[{ label: "Home", href: "/", active: true }, { label: "About", href: "/about" }]}
+//     ctaLabel="Get Started"
+//     ctaHref="/signup"
+//     variant="light"
+// />
+
+// NavbarWithSearch - Navbar with integrated search input
+// <NavbarWithSearch
+//     logoText="Brand"
+//     links={[{ label: "Docs", href: "/docs" }]}
+//     searchPlaceholder="Search..."
+//     onSearch={fn(query) { handleSearch(query) }}
+//     searchPosition="center"
+// />
+
+// NavbarWithDropdown - Navbar with dropdown menus for nav items
+// <NavbarWithDropdown
+//     logoText="Brand"
+//     links={[
+//         { label: "Products", dropdown: [
+//             { label: "Analytics", href: "/analytics", description: "Track data" }
+//         ]},
+//         { label: "Pricing", href: "/pricing" }
+//     ]}
+// />
+
+// NavbarSticky - Sticky navbar with scroll progress bar
+// <NavbarSticky
+//     logoText="Brand"
+//     links={[{ label: "Features", href: "/features" }]}
+//     stickyOffset={0}
+//     showProgress={true}
+// />
+
+// NavbarTransparent - Transparent navbar that changes on scroll
+// <NavbarTransparent
+//     logoText="Brand"
+//     logoLight="/logo-white.svg"
+//     logo="/logo-dark.svg"
+//     scrollThreshold={100}
+//     solidBackground="light"
+// />
+
+// MegaMenu - Large dropdown with columns and featured content
+// <MegaMenu
+//     logoText="Brand"
+//     items={[
+//         { label: "Products", mega: {
+//             columns: [{ title: "Platform", links: [{ label: "Analytics", href: "/analytics" }] }],
+//             featured: { image: "/featured.jpg", title: "New", href: "/new" }
+//         }}
+//     ]}
+// />
+
+// FlyoutMenu - Hover-triggered dropdown for single items
+// <FlyoutMenu
+//     trigger="Solutions"
+//     items={[{ label: "Analytics", href: "/analytics", description: "Track metrics", badge: "New" }]}
+//     placement="bottom-start"
+// />
+
+// ============================================================================
+// SIDEBARS (6 components)
+// ============================================================================
+
+// SidebarSimple - Basic sidebar with links
+// <SidebarSimple links={[{ label: "Dashboard", href: "/", icon: <HomeIcon /> }]} />
+
+// SidebarWithIcons - Sidebar with prominent icons
+// <SidebarWithIcons links={[{ label: "Home", href: "/", icon: <HomeIcon />, active: true }]} />
+
+// SidebarNested - Sidebar with nested/collapsible sections
+// <SidebarNested sections={[{ title: "Menu", links: [...], collapsible: true }]} />
+
+// SidebarMini - Collapsible mini sidebar (icons only when collapsed)
+// <SidebarMini collapsed={false} links={[...]} />
+
+// SidebarCollapsible - Full-width collapsible sidebar
+// <SidebarCollapsible collapsed={false} links={[...]} />
+
+// SidebarDrawer - Mobile-friendly drawer sidebar
+// <SidebarDrawer open={isOpen} onClose={handleClose} links={[...]} />
+
+// ============================================================================
+// FOOTERS (5 components)
+// ============================================================================
+
+// FooterSimple - Basic footer with logo, links, and copyright
+// <FooterSimple
+//     logoText="Brand"
+//     links={[{ label: "Privacy", href: "/privacy" }, { label: "Terms", href: "/terms" }]}
+//     copyright="All rights reserved."
+// />
+
+// FooterColumns - Multi-column footer with link groups
+// <FooterColumns
+//     logoText="Brand"
+//     description="Building the future."
+//     columns={[
+//         { title: "Product", links: [{ label: "Features", href: "/features" }] },
+//         { title: "Company", links: [{ label: "About", href: "/about" }] }
+//     ]}
+// />
+
+// FooterWithSocial - Footer with social media icons
+// <FooterWithSocial
+//     logoText="Brand"
+//     socialLinks={[
+//         { platform: "twitter", href: "https://twitter.com/brand" },
+//         { platform: "github", href: "https://github.com/brand" }
+//     ]}
+// />
+
+// FooterWithNewsletter - Footer with email signup form
+// <FooterWithNewsletter
+//     logoText="Brand"
+//     newsletterTitle="Stay updated"
+//     newsletterDescription="Get the latest news."
+//     onNewsletterSubmit={fn(email) { subscribe(email) }}
+// />
+
+// FooterMinimal - Minimal single-line footer
+// <FooterMinimal
+//     companyName="Company"
+//     links={[{ label: "Privacy", href: "/privacy" }]}
+//     align="center"
+// />
+
+// ============================================================================
+// PAGE NAVIGATION (7 components)
+// ============================================================================
+
+// Breadcrumbs - Path navigation breadcrumb trail
+// <Breadcrumbs items={[...]} separator="/" maxItems={4} />
+
+// Pagination - Full page number pagination with ellipsis
+// <Pagination currentPage={1} totalPages={10} onPageChange={handleChange} />
+
+// PaginationSimple - Simple prev/next pagination
+// <PaginationSimple currentPage={1} totalPages={10} onPrevious={handlePrev} onNext={handleNext} />
+
+// TabsHorizontal - Horizontal tabs with multiple variants
+// <TabsHorizontal tabs={[...]} activeTab="tab1" onChange={handleChange} variant="default" />
+
+// TabsVertical - Vertical tabs with sidebar layout
+// <TabsVertical tabs={[...]} activeTab="general" onChange={handleChange} />
+
+// TabsPills - Pill-style tabs with rounded backgrounds
+// <TabsPills tabs={[...]} activeTab="all" onChange={handleChange} variant="solid" color="gold" />
+
+// StepIndicator - Multi-step progress indicator
+// <StepIndicator steps={[...]} currentStep={2} variant="horizontal" />
+
+// ============================================================================
+// All components support light/dark variants and responsive design
+// ============================================================================

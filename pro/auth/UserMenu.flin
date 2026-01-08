@@ -1,0 +1,434 @@
+// UserMenu.flin - FlinUI PRO User Menu Component
+// Dropdown avatar menu with profile, settings, logout options
+
+// Props with defaults
+user = props.user || ["name": "Guest", "email": "", "avatar": ""]
+menuItems = props.menuItems || []
+onLogout = props.onLogout
+onItemClick = props.onItemClick
+placement = props.placement || "bottom-right"
+
+// State
+isOpen = false
+focusedIndex = -1
+
+// Toggle menu
+toggleMenu = {
+    isOpen = !isOpen
+    if isOpen {
+        focusedIndex = -1
+    }
+}
+
+// Close menu
+closeMenu = {
+    isOpen = false
+    focusedIndex = -1
+}
+
+// Handle menu item click
+handleItemClick = fn(item) {
+    if item.action {
+        item.action()
+    }
+    if onItemClick {
+        onItemClick(item)
+    }
+    closeMenu()
+}
+
+// Handle logout
+handleLogout = {
+    if onLogout {
+        onLogout()
+    }
+    closeMenu()
+}
+
+// Keyboard navigation
+handleKeyDown = fn(e) {
+    if !isOpen {
+        if e.key == "Enter" || e.key == " " || e.key == "ArrowDown" {
+            e.preventDefault()
+            isOpen = true
+            focusedIndex = 0
+        }
+    } else {
+        match e.key {
+            "Escape" -> {
+                e.preventDefault()
+                closeMenu()
+            }
+            "ArrowDown" -> {
+                e.preventDefault()
+                totalItems = menuItems.length + 2
+                focusedIndex = (focusedIndex + 1) % totalItems
+            }
+            "ArrowUp" -> {
+                e.preventDefault()
+                totalItems = menuItems.length + 2
+                focusedIndex = match focusedIndex <= 0 {
+                    true -> totalItems - 1
+                    _ -> focusedIndex - 1
+                }
+            }
+            "Enter" -> {
+                e.preventDefault()
+                if focusedIndex == menuItems.length + 1 {
+                    handleLogout()
+                } else if focusedIndex >= 0 && focusedIndex < menuItems.length {
+                    handleItemClick(menuItems[focusedIndex])
+                }
+            }
+            _ -> {}
+        }
+    }
+}
+
+// Handle click outside
+handleClickOutside = fn(e) {
+    if isOpen {
+        closeMenu()
+    }
+}
+
+// Get user initials
+userInitials = {if user.name != "" {
+    words = user.name.split(" ")
+    {if words.length > 1 {
+        words[0][0] ++ words[words.length - 1][0]
+    } else {
+        user.name[0]
+    }}
+} else {
+    "?"
+}}
+
+// Placement class
+placementClass = match placement {
+    "bottom-left" -> "user-menu-dropdown-bottom-left"
+    "top-right" -> "user-menu-dropdown-top-right"
+    "top-left" -> "user-menu-dropdown-top-left"
+    _ -> "user-menu-dropdown-bottom-right"
+}
+
+// Dropdown classes
+dropdownClass = "user-menu-dropdown " ++ placementClass ++ match isOpen {
+    true -> " user-menu-dropdown-open"
+    _ -> ""
+}
+
+<div class="user-menu" blur={handleClickOutside}>
+    <button
+        class="user-menu-trigger"
+        click={toggleMenu}
+        keydown={handleKeyDown}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+    >
+        <div class="user-menu-avatar">
+            {if user.avatar != ""}
+                <img src={user.avatar} alt={user.name} class="user-menu-avatar-img">
+            {else}
+                <span class="user-menu-avatar-initials">{userInitials}</span>
+            {/if}
+        </div>
+        <svg class="user-menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+        </svg>
+    </button>
+
+    <div class={dropdownClass} role="menu">
+        <div class="user-menu-header">
+            <div class="user-menu-header-avatar">
+                {if user.avatar != ""}
+                    <img src={user.avatar} alt={user.name} class="user-menu-avatar-img">
+                {else}
+                    <span class="user-menu-avatar-initials">{userInitials}</span>
+                {/if}
+            </div>
+            <div class="user-menu-header-info">
+                <span class="user-menu-header-name">{user.name}</span>
+                {if user.email != ""}
+                    <span class="user-menu-header-email">{user.email}</span>
+                {/if}
+            </div>
+        </div>
+
+        <div class="user-menu-divider"></div>
+
+        {if menuItems.length > 0}
+            <div class="user-menu-items">
+                {for item, index in menuItems}
+                    {if item.type == "divider"}
+                        <div class="user-menu-divider"></div>
+                    {else}
+                        <button
+                            class={"user-menu-item" ++ match index == focusedIndex { true -> " user-menu-item-focused", _ -> "" }}
+                            click={fn() { handleItemClick(item) }}
+                            role="menuitem"
+                        >
+                            {if item.icon}
+                                <span class="user-menu-item-icon">{item.icon}</span>
+                            {/if}
+                            <span class="user-menu-item-label">{item.label}</span>
+                            {if item.badge}
+                                <span class="user-menu-item-badge">{item.badge}</span>
+                            {/if}
+                        </button>
+                    {/if}
+                {/for}
+            </div>
+            <div class="user-menu-divider"></div>
+        {/if}
+
+        <button
+            class={"user-menu-item user-menu-logout" ++ match focusedIndex == menuItems.length + 1 { true -> " user-menu-item-focused", _ -> "" }}
+            click={handleLogout}
+            role="menuitem"
+        >
+            <svg class="user-menu-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            <span class="user-menu-item-label">Log out</span>
+        </button>
+    </div>
+</div>
+
+<style scoped>
+.user-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.user-menu-trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-1);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.user-menu-trigger:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.user-menu-trigger:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.user-menu-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-primary-light);
+    overflow: hidden;
+}
+
+.user-menu-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-menu-avatar-initials {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-primary);
+    text-transform: uppercase;
+}
+
+.user-menu-chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--flin-fg-muted);
+    transition: transform var(--flin-transition-fast);
+}
+
+.user-menu-trigger[aria-expanded="true"] .user-menu-chevron {
+    transform: rotate(180deg);
+}
+
+/* Dropdown */
+.user-menu-dropdown {
+    position: absolute;
+    z-index: var(--flin-z-dropdown);
+    min-width: 240px;
+    padding: var(--flin-space-2);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all var(--flin-transition-fast);
+}
+
+.user-menu-dropdown-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Placement variants */
+.user-menu-dropdown-bottom-right {
+    top: 100%;
+    right: 0;
+    margin-top: var(--flin-space-2);
+}
+
+.user-menu-dropdown-bottom-left {
+    top: 100%;
+    left: 0;
+    margin-top: var(--flin-space-2);
+}
+
+.user-menu-dropdown-top-right {
+    bottom: 100%;
+    right: 0;
+    margin-bottom: var(--flin-space-2);
+    transform: translateY(8px);
+}
+
+.user-menu-dropdown-top-right.user-menu-dropdown-open {
+    transform: translateY(0);
+}
+
+.user-menu-dropdown-top-left {
+    bottom: 100%;
+    left: 0;
+    margin-bottom: var(--flin-space-2);
+    transform: translateY(8px);
+}
+
+.user-menu-dropdown-top-left.user-menu-dropdown-open {
+    transform: translateY(0);
+}
+
+/* Header */
+.user-menu-header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-2);
+}
+
+.user-menu-header-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-primary-light);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.user-menu-header-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.user-menu-header-name {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-menu-header-email {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Divider */
+.user-menu-divider {
+    height: 1px;
+    margin: var(--flin-space-2) 0;
+    background-color: var(--flin-neutral-200);
+}
+
+/* Menu items */
+.user-menu-items {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    width: 100%;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+    text-align: left;
+}
+
+.user-menu-item:hover,
+.user-menu-item-focused {
+    background-color: var(--flin-neutral-100);
+}
+
+.user-menu-item-icon {
+    display: flex;
+    width: 18px;
+    height: 18px;
+    color: var(--flin-fg-muted);
+}
+
+.user-menu-item-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.user-menu-item-label {
+    flex: 1;
+}
+
+.user-menu-item-badge {
+    padding: var(--flin-space-0-5) var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+    border-radius: var(--flin-radius-full);
+}
+
+/* Logout */
+.user-menu-logout {
+    color: var(--flin-danger);
+}
+
+.user-menu-logout:hover,
+.user-menu-logout.user-menu-item-focused {
+    background-color: var(--flin-danger-light);
+}
+
+.user-menu-logout .user-menu-item-icon {
+    color: var(--flin-danger);
+}
+</style>

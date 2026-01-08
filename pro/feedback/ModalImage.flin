@@ -1,0 +1,530 @@
+// ModalImage.flin - FlinUI PRO Image Lightbox Modal
+// Image lightbox modal with navigation arrows and zoom capability
+
+// Props with defaults
+isOpen = props.isOpen || false
+images = props.images || []
+currentIndex = props.currentIndex || 0
+showThumbnails = props.showThumbnails || true
+showCounter = props.showCounter || true
+enableZoom = props.enableZoom || true
+closeOnBackdrop = props.closeOnBackdrop || true
+onClose = props.onClose
+onIndexChange = props.onIndexChange
+
+// Internal state
+isClosing = false
+activeIndex = currentIndex
+isZoomed = false
+
+// Calculate totals
+totalImages = images.length
+hasPrevious = activeIndex > 0
+hasNext = activeIndex < totalImages - 1
+
+// Get current image
+currentImage = match totalImages {
+    0 -> none
+    _ -> images[activeIndex]
+}
+
+// Handle close
+handleClose = {
+    isClosing = true
+    isZoomed = false
+    if onClose { onClose() }
+}
+
+// Handle backdrop click
+handleBackdropClick = {
+    if closeOnBackdrop && !isZoomed {
+        handleClose()
+    }
+}
+
+// Handle escape key
+handleKeyDown = (event) => {
+    match event.key {
+        "Escape" -> handleClose()
+        "ArrowLeft" -> handlePrevious()
+        "ArrowRight" -> handleNext()
+        _ -> none
+    }
+}
+
+// Navigate to previous image
+handlePrevious = {
+    if hasPrevious {
+        activeIndex = activeIndex - 1
+        isZoomed = false
+        if onIndexChange { onIndexChange(activeIndex) }
+    }
+}
+
+// Navigate to next image
+handleNext = {
+    if hasNext {
+        activeIndex = activeIndex + 1
+        isZoomed = false
+        if onIndexChange { onIndexChange(activeIndex) }
+    }
+}
+
+// Navigate to specific image
+handleThumbnailClick = (index) => {
+    activeIndex = index
+    isZoomed = false
+    if onIndexChange { onIndexChange(activeIndex) }
+}
+
+// Toggle zoom
+handleZoomToggle = {
+    if enableZoom {
+        isZoomed = !isZoomed
+    }
+}
+
+// Computed classes
+backdropClass = match isClosing {
+    true -> "modal-image-backdrop modal-image-backdrop--closing"
+    _ -> "modal-image-backdrop"
+}
+
+modalClass = match isClosing {
+    true -> "modal-image modal-image--closing"
+    _ -> "modal-image"
+}
+
+containerClass = match isOpen {
+    true -> "modal-image-container"
+    _ -> "modal-image-container modal-image-container--hidden"
+}
+
+imageClass = match isZoomed {
+    true -> "modal-image-main modal-image-main--zoomed"
+    _ -> "modal-image-main"
+}
+
+<div class={containerClass}>
+    <div
+        class={backdropClass}
+        click={handleBackdropClick}
+        aria-hidden="true"
+    ></div>
+
+    <div
+        class={modalClass}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Image viewer"
+        tabindex="-1"
+        keydown={handleKeyDown}
+    >
+        // Header toolbar
+        <div class="modal-image-header">
+            {if showCounter && totalImages > 0}
+                <span class="modal-image-counter">
+                    {activeIndex + 1} / {totalImages}
+                </span>
+            {/if}
+
+            <div class="modal-image-actions">
+                {if enableZoom}
+                    <button
+                        class="modal-image-action"
+                        click={handleZoomToggle}
+                        aria-label={match isZoomed { true -> "Zoom out", _ -> "Zoom in" }}
+                        type="button"
+                    >
+                        {if isZoomed}
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                            </svg>
+                        {:else}
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                            </svg>
+                        {/if}
+                    </button>
+                {/if}
+
+                <button
+                    class="modal-image-action modal-image-close"
+                    click={handleClose}
+                    aria-label="Close image viewer"
+                    type="button"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        // Main image area
+        <div class="modal-image-content">
+            // Previous button
+            {if hasPrevious}
+                <button
+                    class="modal-image-nav modal-image-nav--prev"
+                    click={handlePrevious}
+                    aria-label="Previous image"
+                    type="button"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+            {/if}
+
+            // Image display
+            <div class="modal-image-display" click={handleZoomToggle}>
+                {if currentImage != none}
+                    <img
+                        class={imageClass}
+                        src={currentImage.src || currentImage}
+                        alt={currentImage.alt || "Image " ++ (activeIndex + 1)}
+                        draggable="false"
+                    />
+                {/if}
+            </div>
+
+            // Next button
+            {if hasNext}
+                <button
+                    class="modal-image-nav modal-image-nav--next"
+                    click={handleNext}
+                    aria-label="Next image"
+                    type="button"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            {/if}
+        </div>
+
+        // Image caption
+        {if currentImage != none && currentImage.caption}
+            <div class="modal-image-caption">
+                <p>{currentImage.caption}</p>
+            </div>
+        {/if}
+
+        // Thumbnails
+        {if showThumbnails && totalImages > 1}
+            <div class="modal-image-thumbnails">
+                {for (image, index) in images}
+                    <button
+                        class={match index {
+                            _ if index == activeIndex -> "modal-image-thumb modal-image-thumb--active"
+                            _ -> "modal-image-thumb"
+                        }}
+                        click={() => handleThumbnailClick(index)}
+                        aria-label={"View image " ++ (index + 1)}
+                        type="button"
+                    >
+                        <img
+                            src={image.thumbnail || image.src || image}
+                            alt={"Thumbnail " ++ (index + 1)}
+                            draggable="false"
+                        />
+                    </button>
+                {/for}
+            </div>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.modal-image-container {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+}
+
+.modal-image-container--hidden {
+    display: none;
+}
+
+/* Backdrop */
+.modal-image-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.95);
+    animation: imageBackdropIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes imageBackdropIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-image-backdrop--closing {
+    animation: imageBackdropOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes imageBackdropOut {
+    to { opacity: 0; }
+}
+
+/* Modal */
+.modal-image {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    animation: imageModalIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes imageModalIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-image--closing {
+    animation: imageModalOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes imageModalOut {
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+.modal-image:focus {
+    outline: none;
+}
+
+/* Header */
+.modal-image-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-4) var(--flin-space-6);
+    flex-shrink: 0;
+}
+
+.modal-image-counter {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.modal-image-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.modal-image-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    color: white;
+    transition: all var(--flin-transition-fast);
+}
+
+.modal-image-action:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-image-action:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+.modal-image-action svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Content area */
+.modal-image-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0 var(--flin-space-16);
+    overflow: hidden;
+}
+
+/* Navigation buttons */
+.modal-image-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    color: white;
+    transition: all var(--flin-transition-fast);
+    z-index: 10;
+}
+
+.modal-image-nav:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.modal-image-nav:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+.modal-image-nav svg {
+    width: 24px;
+    height: 24px;
+}
+
+.modal-image-nav--prev {
+    left: var(--flin-space-4);
+}
+
+.modal-image-nav--next {
+    right: var(--flin-space-4);
+}
+
+/* Image display */
+.modal-image-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    cursor: zoom-in;
+}
+
+.modal-image-main {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: transform var(--flin-transition-normal) ease-out;
+    user-select: none;
+}
+
+.modal-image-main--zoomed {
+    transform: scale(1.5);
+    cursor: zoom-out;
+}
+
+/* Caption */
+.modal-image-caption {
+    padding: var(--flin-space-4) var(--flin-space-6);
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.modal-image-caption p {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+}
+
+/* Thumbnails */
+.modal-image-thumbnails {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-4) var(--flin-space-6);
+    overflow-x: auto;
+    flex-shrink: 0;
+}
+
+.modal-image-thumb {
+    width: 60px;
+    height: 60px;
+    padding: 0;
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    overflow: hidden;
+    flex-shrink: 0;
+    opacity: 0.5;
+    transition: all var(--flin-transition-fast);
+}
+
+.modal-image-thumb:hover {
+    opacity: 0.8;
+}
+
+.modal-image-thumb--active {
+    border-color: white;
+    opacity: 1;
+}
+
+.modal-image-thumb:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+.modal-image-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .modal-image-content {
+        padding: 0 var(--flin-space-2);
+    }
+
+    .modal-image-nav {
+        width: 40px;
+        height: 40px;
+    }
+
+    .modal-image-nav--prev {
+        left: var(--flin-space-2);
+    }
+
+    .modal-image-nav--next {
+        right: var(--flin-space-2);
+    }
+
+    .modal-image-nav svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .modal-image-thumbnails {
+        display: none;
+    }
+
+    .modal-image-main--zoomed {
+        transform: scale(2);
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+    .modal-image-nav {
+        background: rgba(255, 255, 255, 0.2);
+    }
+}
+</style>

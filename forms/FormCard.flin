@@ -1,0 +1,209 @@
+// FormCard.flin - FlinUI Form Card Component
+// Form wrapped in a card container with header, body, and footer
+
+// Props with defaults
+title = props.title || none
+description = props.description || none
+icon = props.icon || none
+variant = props.variant || "default"
+padding = props.padding || "lg"
+shadow = props.shadow || "md"
+onSubmit = props.submit
+
+// Compute variant class
+variantClass = match variant {
+    "bordered" -> " form-card-bordered"
+    "elevated" -> " form-card-elevated"
+    "flat" -> " form-card-flat"
+    _ -> ""
+}
+
+// Compute padding class
+paddingClass = match padding {
+    "none" -> " form-card-padding-none"
+    "sm" -> " form-card-padding-sm"
+    "md" -> " form-card-padding-md"
+    "xl" -> " form-card-padding-xl"
+    _ -> " form-card-padding-lg"
+}
+
+// Compute shadow class
+shadowClass = match shadow {
+    "none" -> " form-card-shadow-none"
+    "sm" -> " form-card-shadow-sm"
+    "lg" -> " form-card-shadow-lg"
+    "xl" -> " form-card-shadow-xl"
+    _ -> " form-card-shadow-md"
+}
+
+containerClass = "form-card" ++ variantClass ++ paddingClass ++ shadowClass
+
+// Handle form submission
+handleSubmit = {
+    event.preventDefault()
+    if onSubmit { onSubmit(event) }
+}
+
+<div class={containerClass}>
+    {if title != none || description != none || icon != none}
+        <header class="form-card-header">
+            {if icon != none}
+                <div class="form-card-icon">{icon}</div>
+            {/if}
+            <div class="form-card-header-content">
+                {if title != none}
+                    <h2 class="form-card-title">{title}</h2>
+                {/if}
+                {if description != none}
+                    <p class="form-card-description">{description}</p>
+                {/if}
+            </div>
+        </header>
+    {/if}
+
+    <form class="form-card-body" submit={handleSubmit} novalidate>
+        {children}
+    </form>
+</div>
+
+<style scoped>
+.form-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Default variant */
+.form-card {
+    border: 1px solid var(--flin-neutral-200);
+}
+
+/* Bordered variant */
+.form-card-bordered {
+    border: 2px solid var(--flin-neutral-300);
+}
+
+/* Elevated variant */
+.form-card-elevated {
+    border: none;
+}
+
+/* Flat variant */
+.form-card-flat {
+    border: none;
+    border-radius: 0;
+}
+
+/* Shadow variants */
+.form-card-shadow-none {
+    box-shadow: none;
+}
+
+.form-card-shadow-sm {
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.form-card-shadow-md {
+    box-shadow: var(--flin-shadow-md);
+}
+
+.form-card-shadow-lg {
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.form-card-shadow-xl {
+    box-shadow: var(--flin-shadow-xl);
+}
+
+/* Header */
+.form-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-6);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    background-color: var(--flin-neutral-50);
+}
+
+.form-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-space-12);
+    height: var(--flin-space-12);
+    border-radius: var(--flin-radius-lg);
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+    flex-shrink: 0;
+}
+
+.form-card-icon svg {
+    width: var(--flin-space-6);
+    height: var(--flin-space-6);
+}
+
+.form-card-header-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.form-card-title {
+    margin: 0;
+    font-size: var(--flin-text-xl);
+    font-weight: 600;
+    color: var(--flin-fg);
+    line-height: 1.3;
+}
+
+.form-card-description {
+    margin: var(--flin-space-1) 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.5;
+}
+
+/* Body */
+.form-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+/* Padding variants */
+.form-card-padding-none .form-card-body {
+    padding: 0;
+}
+
+.form-card-padding-sm .form-card-body {
+    padding: var(--flin-space-3);
+}
+
+.form-card-padding-md .form-card-body {
+    padding: var(--flin-space-4);
+}
+
+.form-card-padding-lg .form-card-body {
+    padding: var(--flin-space-6);
+}
+
+.form-card-padding-xl .form-card-body {
+    padding: var(--flin-space-8);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .form-card-header {
+        padding: var(--flin-space-4);
+        flex-direction: column;
+    }
+
+    .form-card-padding-lg .form-card-body,
+    .form-card-padding-xl .form-card-body {
+        padding: var(--flin-space-4);
+    }
+}
+</style>

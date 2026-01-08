@@ -1,0 +1,412 @@
+// ============================================================================
+// Banner.flin — FlinUI PRO
+// Promotional banner with CTA (Call to Action)
+// ============================================================================
+// Props:
+//   title: text - Banner title (required)
+//   description: text - Banner description (default: "")
+//   image: text - Background image URL (default: none)
+//   ctaText: text - CTA button text (default: "Learn More")
+//   ctaHref: text - CTA button link (default: "#")
+//   secondaryCtaText: text - Secondary CTA text (default: none)
+//   secondaryCtaHref: text - Secondary CTA link (default: none)
+//   variant: text - Style variant ("default", "gradient", "image", "split") (default: "default")
+//   color: text - Color scheme ("primary", "secondary", "dark", "light") (default: "primary")
+//   size: text - Banner size ("sm", "md", "lg") (default: "md")
+//   align: text - Content alignment ("left", "center", "right") (default: "left")
+//   dismissible: boolean - Show dismiss button (default: false)
+//   onDismiss: function - Dismiss callback (default: none)
+//   icon: slot - Optional icon slot (default: none)
+// ============================================================================
+
+title = props.title || "Banner Title"
+description = props.description || ""
+image = props.image || none
+ctaText = props.ctaText || "Learn More"
+ctaHref = props.ctaHref || "#"
+secondaryCtaText = props.secondaryCtaText || none
+secondaryCtaHref = props.secondaryCtaHref || none
+variant = props.variant || "default"
+color = props.color || "primary"
+size = props.size || "md"
+align = props.align || "left"
+dismissible = props.dismissible || false
+onDismiss = props.onDismiss || none
+icon = props.icon || none
+
+// State for dismissal
+dismissed = false
+
+handleDismiss = {
+    dismissed = true
+    if onDismiss != none {
+        onDismiss()
+    }
+}
+
+// Compute variant class
+variantClass = match variant {
+    "gradient" -> "banner--gradient"
+    "image" -> "banner--image"
+    "split" -> "banner--split"
+    _ -> "banner--default"
+}
+
+// Compute color class
+colorClass = match color {
+    "secondary" -> "banner--secondary"
+    "dark" -> "banner--dark"
+    "light" -> "banner--light"
+    _ -> "banner--primary"
+}
+
+// Compute size class
+sizeClass = match size {
+    "sm" -> "banner--sm"
+    "lg" -> "banner--lg"
+    _ -> "banner--md"
+}
+
+// Compute align class
+alignClass = match align {
+    "center" -> "banner--center"
+    "right" -> "banner--right"
+    _ -> "banner--left"
+}
+
+{if !dismissed}
+    <div
+        class={"banner " ++ variantClass ++ " " ++ colorClass ++ " " ++ sizeClass ++ " " ++ alignClass}
+        style={if image != none && variant == "image" { "background-image: url(" ++ image ++ ");" } else { "" }}
+        role="banner"
+    >
+        {if variant == "split" && image != none}
+            <div class="banner__image-section">
+                <img class="banner__image" src={image} alt="">
+            </div>
+        {/if}
+
+        <div class="banner__content">
+            {if icon != none}
+                <div class="banner__icon">
+                    {icon}
+                </div>
+            {/if}
+
+            <div class="banner__text">
+                <h3 class="banner__title">{title}</h3>
+                {if description != ""}
+                    <p class="banner__description">{description}</p>
+                {/if}
+            </div>
+
+            <div class="banner__actions">
+                <a href={ctaHref} class="banner__cta banner__cta--primary">
+                    {ctaText}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+                {if secondaryCtaText != none}
+                    <a href={secondaryCtaHref || "#"} class="banner__cta banner__cta--secondary">
+                        {secondaryCtaText}
+                    </a>
+                {/if}
+            </div>
+        </div>
+
+        {if dismissible}
+            <button
+                class="banner__dismiss"
+                click={handleDismiss}
+                aria-label="Dismiss banner"
+                type="button"
+            >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        {/if}
+    </div>
+{/if}
+
+<style scoped>
+.banner {
+    position: relative;
+    display: flex;
+    border-radius: var(--flin-radius-xl);
+    overflow: hidden;
+}
+
+/* Size variants */
+.banner--sm {
+    padding: var(--flin-space-4) var(--flin-space-5);
+}
+
+.banner--md {
+    padding: var(--flin-space-6) var(--flin-space-8);
+}
+
+.banner--lg {
+    padding: var(--flin-space-10) var(--flin-space-12);
+}
+
+/* Alignment */
+.banner--left .banner__content { text-align: left; justify-content: flex-start; }
+.banner--center .banner__content { text-align: center; justify-content: center; }
+.banner--right .banner__content { text-align: right; justify-content: flex-end; }
+
+.banner--center .banner__actions { justify-content: center; }
+.banner--right .banner__actions { justify-content: flex-end; }
+
+/* Variant: default (solid color) */
+.banner--default.banner--primary { background: var(--flin-primary); }
+.banner--default.banner--secondary { background: var(--flin-neutral-800); }
+.banner--default.banner--dark { background: var(--flin-neutral-900); }
+.banner--default.banner--light { background: var(--flin-neutral-100); }
+
+/* Variant: gradient */
+.banner--gradient.banner--primary {
+    background: linear-gradient(135deg, var(--flin-primary) 0%, #7C3AED 100%);
+}
+
+.banner--gradient.banner--secondary {
+    background: linear-gradient(135deg, var(--flin-neutral-800) 0%, var(--flin-neutral-600) 100%);
+}
+
+.banner--gradient.banner--dark {
+    background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+}
+
+.banner--gradient.banner--light {
+    background: linear-gradient(135deg, var(--flin-neutral-50) 0%, var(--flin-neutral-200) 100%);
+}
+
+/* Variant: image */
+.banner--image {
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.banner--image::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.banner--image .banner__content {
+    position: relative;
+    z-index: 1;
+}
+
+/* Variant: split */
+.banner--split {
+    padding: 0;
+}
+
+.banner--split .banner__image-section {
+    width: 40%;
+    flex-shrink: 0;
+}
+
+.banner--split .banner__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner--split .banner__content {
+    flex: 1;
+    padding: var(--flin-space-8);
+}
+
+/* Content */
+.banner__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--flin-space-4);
+    flex: 1;
+}
+
+.banner--center .banner__content {
+    align-items: center;
+}
+
+.banner--right .banner__content {
+    align-items: flex-end;
+}
+
+/* Icon */
+.banner__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--flin-radius-lg);
+    color: white;
+}
+
+.banner--light .banner__icon {
+    background: var(--flin-primary);
+}
+
+/* Text */
+.banner__text {
+    max-width: 600px;
+}
+
+/* Title */
+.banner__title {
+    margin: 0;
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: white;
+    line-height: 1.2;
+}
+
+.banner--sm .banner__title { font-size: var(--flin-text-lg); }
+.banner--lg .banner__title { font-size: var(--flin-text-3xl); }
+
+.banner--light .banner__title {
+    color: var(--flin-fg);
+}
+
+/* Description */
+.banner__description {
+    margin: var(--flin-space-2) 0 0 0;
+    font-size: var(--flin-text-base);
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
+}
+
+.banner--sm .banner__description { font-size: var(--flin-text-sm); }
+.banner--lg .banner__description { font-size: var(--flin-text-lg); }
+
+.banner--light .banner__description {
+    color: var(--flin-fg-muted);
+}
+
+/* Actions */
+.banner__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    flex-wrap: wrap;
+}
+
+.banner__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-5);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    text-decoration: none;
+    border-radius: var(--flin-radius-full);
+    transition: all var(--flin-transition-fast);
+}
+
+.banner--lg .banner__cta {
+    padding: var(--flin-space-3) var(--flin-space-6);
+    font-size: var(--flin-text-base);
+}
+
+.banner__cta--primary {
+    background: white;
+    color: var(--flin-neutral-900);
+}
+
+.banner__cta--primary:hover {
+    background: var(--flin-neutral-100);
+    transform: translateX(2px);
+}
+
+.banner--light .banner__cta--primary {
+    background: var(--flin-primary);
+    color: white;
+}
+
+.banner--light .banner__cta--primary:hover {
+    background: var(--flin-primary-dark);
+}
+
+.banner__cta--secondary {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.banner__cta--secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+}
+
+.banner--light .banner__cta--secondary {
+    color: var(--flin-fg);
+    border-color: var(--flin-neutral-300);
+}
+
+.banner--light .banner__cta--secondary:hover {
+    background: var(--flin-neutral-200);
+}
+
+/* Dismiss button */
+.banner__dismiss {
+    position: absolute;
+    top: var(--flin-space-3);
+    right: var(--flin-space-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: var(--flin-radius-full);
+    color: white;
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.banner__dismiss:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.banner--light .banner__dismiss {
+    background: var(--flin-neutral-200);
+    color: var(--flin-fg-muted);
+}
+
+.banner--light .banner__dismiss:hover {
+    background: var(--flin-neutral-300);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .banner--split {
+        flex-direction: column;
+    }
+
+    .banner--split .banner__image-section {
+        width: 100%;
+        height: 200px;
+    }
+
+    .banner__content {
+        align-items: flex-start !important;
+        text-align: left !important;
+    }
+
+    .banner__actions {
+        justify-content: flex-start !important;
+    }
+}
+</style>

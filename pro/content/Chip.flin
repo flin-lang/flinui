@@ -1,0 +1,372 @@
+// ============================================================================
+// Chip.flin — FlinUI PRO
+// Tag/chip component with remove option (interactive tags)
+// ============================================================================
+// Props:
+//   label: text - Chip label (default: uses children)
+//   variant: text - Style variant ("default", "outlined", "filled") (default: "default")
+//   color: text - Color scheme ("default", "primary", "success", "warning", "danger", "info") (default: "default")
+//   size: text - Size variant ("sm", "md", "lg") (default: "md")
+//   removable: boolean - Show remove/close button (default: false)
+//   onRemove: function - Remove callback (default: none)
+//   clickable: boolean - Make chip clickable (default: false)
+//   onClick: function - Click callback (default: none)
+//   selected: boolean - Selected/active state (default: false)
+//   disabled: boolean - Disabled state (default: false)
+//   avatar: text - Avatar image URL (default: none)
+//   icon: slot - Leading icon slot (default: none)
+//   href: text - Link URL (makes chip a link) (default: none)
+// ============================================================================
+
+label = props.label || none
+variant = props.variant || "default"
+color = props.color || "default"
+size = props.size || "md"
+removable = props.removable || false
+onRemove = props.onRemove || none
+clickable = props.clickable || false
+onClick = props.onClick || none
+selected = props.selected || false
+disabled = props.disabled || false
+avatar = props.avatar || none
+icon = props.icon || none
+href = props.href || none
+
+// Compute variant class
+variantClass = match variant {
+    "outlined" -> "chip--outlined"
+    "filled" -> "chip--filled"
+    _ -> "chip--default"
+}
+
+// Compute color class
+colorClass = match color {
+    "primary" -> "chip--primary"
+    "success" -> "chip--success"
+    "warning" -> "chip--warning"
+    "danger" -> "chip--danger"
+    "info" -> "chip--info"
+    _ -> "chip--color-default"
+}
+
+// Compute size class
+sizeClass = match size {
+    "sm" -> "chip--sm"
+    "lg" -> "chip--lg"
+    _ -> "chip--md"
+}
+
+// Compute clickable class
+clickableClass = match clickable || href != none {
+    true -> "chip--clickable"
+    _ -> ""
+}
+
+// Compute selected class
+selectedClass = match selected {
+    true -> "chip--selected"
+    _ -> ""
+}
+
+// Compute disabled class
+disabledClass = match disabled {
+    true -> "chip--disabled"
+    _ -> ""
+}
+
+chipClass = "chip " ++ variantClass ++ " " ++ colorClass ++ " " ++ sizeClass ++ " " ++ clickableClass ++ " " ++ selectedClass ++ " " ++ disabledClass
+
+chipContent = <>
+    {if avatar != none}
+        <img class="chip__avatar" src={avatar} alt="">
+    {/if}
+
+    {if icon != none}
+        <span class="chip__icon">{icon}</span>
+    {/if}
+
+    <span class="chip__label">{label || children}</span>
+
+    {if removable && !disabled}
+        <button
+            class="chip__remove"
+            click={(e) => {
+                e.stopPropagation()
+                if onRemove != none {
+                    onRemove()
+                }
+            }}
+            aria-label="Remove"
+            type="button"
+        >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    {/if}
+</>
+
+{if href != none && !disabled}
+    <a href={href} class={chipClass}>
+        {chipContent}
+    </a>
+{else if clickable && !disabled}
+    <button class={chipClass} click={onClick} type="button">
+        {chipContent}
+    </button>
+{else}
+    <span class={chipClass}>
+        {chipContent}
+    </span>
+{/if}
+
+<style scoped>
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-weight: var(--flin-font-medium);
+    line-height: 1;
+    border-radius: var(--flin-radius-full);
+    text-decoration: none;
+    border: none;
+    cursor: default;
+    transition: all var(--flin-transition-fast);
+}
+
+/* Size variants */
+.chip--sm {
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    gap: var(--flin-space-1);
+}
+
+.chip--md {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+}
+
+.chip--lg {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-base);
+}
+
+/* Variant: default (soft) */
+.chip--default.chip--color-default {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-700);
+}
+
+.chip--default.chip--primary {
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.chip--default.chip--success {
+    background-color: var(--flin-success-light);
+    color: var(--flin-success-dark);
+}
+
+.chip--default.chip--warning {
+    background-color: var(--flin-warning-light);
+    color: var(--flin-warning-dark);
+}
+
+.chip--default.chip--danger {
+    background-color: var(--flin-danger-light);
+    color: var(--flin-danger-dark);
+}
+
+.chip--default.chip--info {
+    background-color: var(--flin-info-light);
+    color: var(--flin-info-dark);
+}
+
+/* Variant: outlined */
+.chip--outlined {
+    background-color: transparent;
+    border: 1px solid currentColor;
+}
+
+.chip--outlined.chip--color-default {
+    color: var(--flin-neutral-600);
+    border-color: var(--flin-neutral-300);
+}
+
+.chip--outlined.chip--primary {
+    color: var(--flin-primary);
+}
+
+.chip--outlined.chip--success {
+    color: var(--flin-success);
+}
+
+.chip--outlined.chip--warning {
+    color: var(--flin-warning-dark);
+}
+
+.chip--outlined.chip--danger {
+    color: var(--flin-danger);
+}
+
+.chip--outlined.chip--info {
+    color: var(--flin-info);
+}
+
+/* Variant: filled (solid) */
+.chip--filled.chip--color-default {
+    background-color: var(--flin-neutral-600);
+    color: white;
+}
+
+.chip--filled.chip--primary {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.chip--filled.chip--success {
+    background-color: var(--flin-success);
+    color: white;
+}
+
+.chip--filled.chip--warning {
+    background-color: var(--flin-warning);
+    color: var(--flin-neutral-900);
+}
+
+.chip--filled.chip--danger {
+    background-color: var(--flin-danger);
+    color: white;
+}
+
+.chip--filled.chip--info {
+    background-color: var(--flin-info);
+    color: white;
+}
+
+/* Clickable state */
+.chip--clickable {
+    cursor: pointer;
+}
+
+.chip--clickable:hover {
+    filter: brightness(0.95);
+}
+
+.chip--clickable:active {
+    transform: scale(0.98);
+}
+
+.chip--outlined.chip--clickable:hover {
+    background-color: currentColor;
+    color: white;
+}
+
+.chip--outlined.chip--color-default.chip--clickable:hover {
+    background-color: var(--flin-neutral-600);
+    border-color: var(--flin-neutral-600);
+}
+
+/* Selected state */
+.chip--selected {
+    box-shadow: 0 0 0 2px var(--flin-primary);
+}
+
+.chip--default.chip--selected,
+.chip--outlined.chip--selected {
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+    border-color: var(--flin-primary);
+}
+
+/* Disabled state */
+.chip--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Avatar */
+.chip__avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: var(--flin-radius-full);
+    object-fit: cover;
+    margin-left: calc(-1 * var(--flin-space-1));
+}
+
+.chip--sm .chip__avatar {
+    width: 16px;
+    height: 16px;
+}
+
+.chip--lg .chip__avatar {
+    width: 24px;
+    height: 24px;
+}
+
+/* Icon */
+.chip__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chip--sm .chip__icon svg { width: 12px; height: 12px; }
+.chip--md .chip__icon svg { width: 14px; height: 14px; }
+.chip--lg .chip__icon svg { width: 16px; height: 16px; }
+
+/* Label */
+.chip__label {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Remove button */
+.chip__remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    margin-right: calc(-1 * var(--flin-space-1));
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-full);
+    color: currentColor;
+    opacity: 0.6;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.chip__remove:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.chip--filled .chip__remove:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.chip--sm .chip__remove svg { width: 12px; height: 12px; }
+.chip--md .chip__remove svg { width: 14px; height: 14px; }
+.chip--lg .chip__remove svg { width: 16px; height: 16px; }
+
+/* Dark theme */
+[data-theme="dark"] .chip--default.chip--color-default {
+    background-color: var(--flin-neutral-800);
+    color: var(--flin-neutral-300);
+}
+
+[data-theme="dark"] .chip--outlined.chip--color-default {
+    color: var(--flin-neutral-400);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .chip--outlined.chip--color-default.chip--clickable:hover {
+    background-color: var(--flin-neutral-700);
+    border-color: var(--flin-neutral-600);
+    color: var(--flin-neutral-200);
+}
+</style>

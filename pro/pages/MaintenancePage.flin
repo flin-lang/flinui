@@ -1,0 +1,561 @@
+// ============================================================================
+// MaintenancePage.flin — FlinUI PRO Page Template
+// Under maintenance page with countdown and status updates
+// ============================================================================
+// Props:
+//   - title: Page title (string)
+//   - message: Page message (string)
+//   - estimatedTime: Estimated completion time (string)
+//   - progress: Maintenance progress 0-100 (number)
+//   - showCountdown: Show countdown timer (boolean)
+//   - endTime: End time for countdown (timestamp or none)
+//   - statusUpdates: List of status update objects (list)
+//   - socialLinks: List of social links (list)
+//   - notifyEmail: Enable email notification (boolean)
+//   - onNotify: Notify callback (function or none)
+
+title = props.title || "We're improving things"
+message = props.message || "We're currently performing scheduled maintenance to bring you a better experience. We'll be back shortly!"
+estimatedTime = props.estimatedTime || "2 hours"
+progress = props.progress || 65
+showCountdown = props.showCountdown || true
+endTime = props.endTime || none
+notifyEmail = props.notifyEmail || true
+onNotify = props.onNotify || none
+
+statusUpdates = props.statusUpdates || [
+    ["time": "10:30 AM", "message": "Maintenance started", "status": "complete"],
+    ["time": "10:45 AM", "message": "Database migration in progress", "status": "complete"],
+    ["time": "11:00 AM", "message": "Updating application servers", "status": "in_progress"],
+    ["time": "11:30 AM", "message": "Final testing and verification", "status": "pending"]
+]
+
+socialLinks = props.socialLinks || [
+    ["name": "Twitter", "url": "https://twitter.com", "icon": "twitter"],
+    ["name": "Status Page", "url": "#", "icon": "status"]
+]
+
+email = ""
+emailSubmitted = false
+
+// Countdown state
+countdown = ["hours": 1, "minutes": 45, "seconds": 30]
+
+handleNotify = () => {
+    if onNotify != none && email != "" {
+        onNotify(email)
+        emailSubmitted = true
+    }
+}
+
+getStatusIcon = (status) => match status {
+    "complete" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    "in_progress" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    _ => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+}
+
+getSocialIcon = (iconName) => match iconName {
+    "twitter" => <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+    "status" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    _ => <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+}
+
+<div class="maintenance-page">
+    <div class="maintenance-page__container">
+        // Header
+        <div class="maintenance-page__header">
+            <div class="maintenance-page__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                </svg>
+            </div>
+            <h1 class="maintenance-page__title">{title}</h1>
+            <p class="maintenance-page__message">{message}</p>
+        </div>
+
+        // Progress
+        <div class="maintenance-page__progress-section">
+            <div class="maintenance-page__progress-header">
+                <span class="maintenance-page__progress-label">Progress</span>
+                <span class="maintenance-page__progress-value">{progress}%</span>
+            </div>
+            <div class="maintenance-page__progress-bar">
+                <div class="maintenance-page__progress-fill" style={"width: " ++ progress ++ "%"}></div>
+            </div>
+            <p class="maintenance-page__estimated">
+                Estimated time remaining: <strong>{estimatedTime}</strong>
+            </p>
+        </div>
+
+        // Countdown
+        {if showCountdown}
+            <div class="maintenance-page__countdown">
+                <div class="maintenance-page__countdown-item">
+                    <span class="maintenance-page__countdown-value">{countdown.hours}</span>
+                    <span class="maintenance-page__countdown-label">Hours</span>
+                </div>
+                <span class="maintenance-page__countdown-separator">:</span>
+                <div class="maintenance-page__countdown-item">
+                    <span class="maintenance-page__countdown-value">{countdown.minutes}</span>
+                    <span class="maintenance-page__countdown-label">Minutes</span>
+                </div>
+                <span class="maintenance-page__countdown-separator">:</span>
+                <div class="maintenance-page__countdown-item">
+                    <span class="maintenance-page__countdown-value">{countdown.seconds}</span>
+                    <span class="maintenance-page__countdown-label">Seconds</span>
+                </div>
+            </div>
+        {/if}
+
+        // Status Updates
+        <div class="maintenance-page__status">
+            <h2 class="maintenance-page__status-title">Status Updates</h2>
+            <div class="maintenance-page__status-list">
+                {for update in statusUpdates}
+                    <div class={"maintenance-page__status-item maintenance-page__status-item--" ++ update.status}>
+                        <div class="maintenance-page__status-icon">
+                            {getStatusIcon(update.status)}
+                        </div>
+                        <div class="maintenance-page__status-content">
+                            <span class="maintenance-page__status-message">{update.message}</span>
+                            <span class="maintenance-page__status-time">{update.time}</span>
+                        </div>
+                    </div>
+                {/for}
+            </div>
+        </div>
+
+        // Notification Signup
+        {if notifyEmail}
+            <div class="maintenance-page__notify">
+                {if emailSubmitted}
+                    <div class="maintenance-page__notify-success">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        <span>We'll notify you when we're back online!</span>
+                    </div>
+                {else}
+                    <h3 class="maintenance-page__notify-title">Get notified when we're back</h3>
+                    <form class="maintenance-page__notify-form" submit={handleNotify}>
+                        <input
+                            type="email"
+                            class="maintenance-page__notify-input"
+                            placeholder="Enter your email"
+                            value={email}
+                            change={(e) => email = e.target.value}
+                            required
+                        />
+                        <button type="submit" class="maintenance-page__notify-button">
+                            Notify Me
+                        </button>
+                    </form>
+                {/if}
+            </div>
+        {/if}
+
+        // Social Links
+        <div class="maintenance-page__social">
+            <p class="maintenance-page__social-label">Follow us for updates:</p>
+            <div class="maintenance-page__social-links">
+                {for link in socialLinks}
+                    <a href={link.url} class="maintenance-page__social-link" target="_blank" rel="noopener" aria-label={link.name}>
+                        {getSocialIcon(link.icon)}
+                        <span>{link.name}</span>
+                    </a>
+                {/for}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.maintenance-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-8) var(--flin-space-6);
+    background: linear-gradient(135deg, var(--flin-bg-base) 0%, var(--flin-bg-surface) 100%);
+    font-family: var(--flin-font-sans);
+}
+
+.maintenance-page__container {
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Header */
+.maintenance-page__header {
+    margin-bottom: var(--flin-space-8);
+}
+
+.maintenance-page__icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-accent-gold-light);
+    border-radius: var(--flin-radius-full);
+    margin: 0 auto var(--flin-space-6);
+    animation: maintenance-rotate 8s linear infinite;
+}
+
+.maintenance-page__icon svg {
+    width: 40px;
+    height: 40px;
+    color: var(--flin-accent-gold);
+}
+
+@keyframes maintenance-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.maintenance-page__title {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-3) 0;
+}
+
+.maintenance-page__message {
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Progress */
+.maintenance-page__progress-section {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-6);
+    margin-bottom: var(--flin-space-6);
+}
+
+.maintenance-page__progress-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--flin-space-3);
+}
+
+.maintenance-page__progress-label {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-secondary);
+}
+
+.maintenance-page__progress-value {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-accent-gold);
+}
+
+.maintenance-page__progress-bar {
+    height: 8px;
+    background: var(--flin-bg-elevated);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    margin-bottom: var(--flin-space-4);
+}
+
+.maintenance-page__progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--flin-accent-gold) 0%, #e6a817 100%);
+    border-radius: var(--flin-radius-full);
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+.maintenance-page__progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+    animation: maintenance-shimmer 2s infinite;
+}
+
+@keyframes maintenance-shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.maintenance-page__estimated {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-tertiary);
+    margin: 0;
+}
+
+.maintenance-page__estimated strong {
+    color: var(--flin-text-primary);
+}
+
+/* Countdown */
+.maintenance-page__countdown {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--flin-space-4);
+    margin-bottom: var(--flin-space-8);
+}
+
+.maintenance-page__countdown-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.maintenance-page__countdown-value {
+    font-size: var(--flin-text-4xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-space-4) var(--flin-space-5);
+    min-width: 80px;
+    font-variant-numeric: tabular-nums;
+}
+
+.maintenance-page__countdown-label {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-tertiary);
+    margin-top: var(--flin-space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.maintenance-page__countdown-separator {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-muted);
+    margin-top: -24px;
+}
+
+/* Status */
+.maintenance-page__status {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-6);
+    margin-bottom: var(--flin-space-6);
+    text-align: left;
+}
+
+.maintenance-page__status-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.maintenance-page__status-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+}
+
+.maintenance-page__status-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+}
+
+.maintenance-page__status-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.maintenance-page__status-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.maintenance-page__status-item--complete .maintenance-page__status-icon svg {
+    color: var(--flin-success);
+}
+
+.maintenance-page__status-item--in_progress .maintenance-page__status-icon svg {
+    color: var(--flin-accent-gold);
+    animation: maintenance-pulse 1s ease-in-out infinite;
+}
+
+.maintenance-page__status-item--pending .maintenance-page__status-icon svg {
+    color: var(--flin-text-muted);
+}
+
+@keyframes maintenance-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.maintenance-page__status-content {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.maintenance-page__status-message {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+}
+
+.maintenance-page__status-item--complete .maintenance-page__status-message {
+    color: var(--flin-text-tertiary);
+}
+
+.maintenance-page__status-item--in_progress .maintenance-page__status-message {
+    color: var(--flin-text-primary);
+    font-weight: var(--flin-font-medium);
+}
+
+.maintenance-page__status-time {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+}
+
+/* Notification */
+.maintenance-page__notify {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-6);
+    margin-bottom: var(--flin-space-6);
+}
+
+.maintenance-page__notify-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-4) 0;
+}
+
+.maintenance-page__notify-form {
+    display: flex;
+    gap: var(--flin-space-2);
+}
+
+.maintenance-page__notify-input {
+    flex: 1;
+    padding: var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-default);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.maintenance-page__notify-input:focus {
+    border-color: var(--flin-accent-gold);
+    box-shadow: 0 0 0 3px var(--flin-accent-gold-light);
+}
+
+.maintenance-page__notify-button {
+    padding: var(--flin-space-3) var(--flin-space-5);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background: var(--flin-accent-gold);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    white-space: nowrap;
+}
+
+.maintenance-page__notify-button:hover {
+    background: var(--flin-accent-gold-hover);
+}
+
+.maintenance-page__notify-success {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    color: var(--flin-success);
+}
+
+.maintenance-page__notify-success svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Social */
+.maintenance-page__social {
+    text-align: center;
+}
+
+.maintenance-page__social-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-tertiary);
+    margin: 0 0 var(--flin-space-3) 0;
+}
+
+.maintenance-page__social-links {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-4);
+}
+
+.maintenance-page__social-link {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-secondary);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-full);
+    text-decoration: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.maintenance-page__social-link:hover {
+    background: var(--flin-bg-elevated);
+    border-color: var(--flin-accent-gold);
+    color: var(--flin-accent-gold);
+}
+
+.maintenance-page__social-link svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .maintenance-page__countdown-value {
+        font-size: var(--flin-text-2xl);
+        min-width: 60px;
+        padding: var(--flin-space-3) var(--flin-space-4);
+    }
+
+    .maintenance-page__notify-form {
+        flex-direction: column;
+    }
+
+    .maintenance-page__social-links {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+</style>

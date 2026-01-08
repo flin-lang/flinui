@@ -1,0 +1,704 @@
+// ============================================================================
+// NavbarWithSearch.flin — FlinUI PRO Navigation Component
+// Navbar with integrated search input and expandable mobile search
+// ============================================================================
+// Props:
+//   - logo: Logo image URL or none for default (string)
+//   - logoText: Text to show with/instead of logo (string)
+//   - logoHref: Link for logo click (string)
+//   - links: Array of nav links [{ label, href, active }] (array)
+//   - searchPlaceholder: Placeholder text for search (string)
+//   - onSearch: Search submit handler (function)
+//   - ctaLabel: CTA button text (string)
+//   - ctaHref: CTA button link (string)
+//   - variant: Color scheme - light, dark (string)
+//   - searchPosition: Position of search - center, right (string)
+
+logo = props.logo || none
+logoText = props.logoText || "Brand"
+logoHref = props.logoHref || "/"
+links = props.links || []
+searchPlaceholder = props.searchPlaceholder || "Search..."
+onSearch = props.onSearch || none
+ctaLabel = props.ctaLabel || none
+ctaHref = props.ctaHref || none
+variant = props.variant || "light"
+searchPosition = props.searchPosition || "center"
+
+// State
+mobileOpen = false
+searchOpen = false
+searchQuery = ""
+
+toggleMobile = {
+    mobileOpen = !mobileOpen
+    searchOpen = false
+}
+
+toggleSearch = {
+    searchOpen = !searchOpen
+    if searchOpen {
+        mobileOpen = false
+    }
+}
+
+closeMobile = {
+    mobileOpen = false
+}
+
+handleSearchInput = fn(e) {
+    searchQuery = e.target.value
+}
+
+handleSearchSubmit = {
+    event.preventDefault()
+    if onSearch && searchQuery != "" {
+        onSearch(searchQuery)
+    }
+}
+
+// Variant classes
+variantClass = match variant {
+    "dark" => "navbar-search-dark"
+    _ => "navbar-search-light"
+}
+
+// Mobile menu class
+mobileClass = match mobileOpen {
+    true => " navbar-mobile-open"
+    _ => ""
+}
+
+// Search open class
+searchClass = match searchOpen {
+    true => " navbar-search-expanded"
+    _ => ""
+}
+
+// Search position class
+positionClass = match searchPosition {
+    "right" => " search-right"
+    _ => " search-center"
+}
+
+navbarClass = "flin-navbar-search " ++ variantClass ++ mobileClass ++ searchClass ++ positionClass
+
+<nav class={navbarClass} role="navigation" aria-label="Main navigation">
+    <div class="navbar-container">
+        <!-- Logo -->
+        <a href={logoHref} class="navbar-brand">
+            {if logo != none}
+                <img src={logo} alt={logoText} class="navbar-logo-img">
+            {else}
+                <div class="navbar-logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+            {/if}
+            <span class="navbar-logo-text">{logoText}</span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <div class="navbar-nav">
+            {for link in links}
+                <a
+                    href={link.href}
+                    class={"navbar-link" ++ (match link.active { true => " navbar-link-active", _ => "" })}
+                >
+                    {link.label}
+                </a>
+            {/for}
+        </div>
+
+        <!-- Search Form (Desktop) -->
+        <form class="navbar-search-form" submit={handleSearchSubmit}>
+            <div class="navbar-search-wrapper">
+                <span class="navbar-search-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </span>
+                <input
+                    type="search"
+                    class="navbar-search-input"
+                    placeholder={searchPlaceholder}
+                    value={searchQuery}
+                    input={handleSearchInput}
+                    aria-label="Search"
+                >
+                {if searchQuery != ""}
+                    <button
+                        type="button"
+                        class="navbar-search-clear"
+                        click={fn() { searchQuery = "" }}
+                        aria-label="Clear search"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                {/if}
+            </div>
+        </form>
+
+        <!-- Actions -->
+        <div class="navbar-actions">
+            <!-- Mobile search toggle -->
+            <button
+                class="navbar-search-toggle"
+                click={toggleSearch}
+                aria-label="Toggle search"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+            </button>
+
+            {if ctaLabel != none}
+                <a href={ctaHref} class="navbar-cta">{ctaLabel}</a>
+            {/if}
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button
+            class="navbar-toggle"
+            click={toggleMobile}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileOpen}
+        >
+            {if mobileOpen}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            {else}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            {/if}
+        </button>
+    </div>
+
+    <!-- Mobile Search Bar -->
+    <div class="navbar-mobile-search">
+        <form class="navbar-mobile-search-form" submit={handleSearchSubmit}>
+            <span class="navbar-search-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+            </span>
+            <input
+                type="search"
+                class="navbar-mobile-search-input"
+                placeholder={searchPlaceholder}
+                value={searchQuery}
+                input={handleSearchInput}
+                aria-label="Search"
+            >
+            <button type="button" class="navbar-mobile-search-close" click={toggleSearch}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="navbar-mobile">
+        <div class="navbar-mobile-inner">
+            {for link in links}
+                <a
+                    href={link.href}
+                    class={"navbar-mobile-link" ++ (match link.active { true => " navbar-mobile-link-active", _ => "" })}
+                    click={closeMobile}
+                >
+                    {link.label}
+                </a>
+            {/for}
+            {if ctaLabel != none}
+                <a href={ctaHref} class="navbar-mobile-cta" click={closeMobile}>{ctaLabel}</a>
+            {/if}
+        </div>
+    </div>
+</nav>
+
+<style scoped>
+.flin-navbar-search {
+    width: 100%;
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    max-width: var(--flin-container-screen-xl);
+    height: 64px;
+    margin: 0 auto;
+    padding: 0 var(--flin-space-4);
+}
+
+/* Light variant */
+.navbar-search-light {
+    background-color: var(--flin-bg);
+    color: var(--flin-fg);
+}
+
+.navbar-search-light .navbar-link {
+    color: var(--flin-fg-muted);
+}
+
+.navbar-search-light .navbar-link:hover,
+.navbar-search-light .navbar-link-active {
+    color: var(--flin-fg);
+}
+
+/* Dark variant */
+.navbar-search-dark {
+    background-color: var(--flin-neutral-900);
+    color: var(--flin-neutral-50);
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+.navbar-search-dark .navbar-link {
+    color: var(--flin-neutral-400);
+}
+
+.navbar-search-dark .navbar-link:hover,
+.navbar-search-dark .navbar-link-active {
+    color: var(--flin-neutral-50);
+}
+
+.navbar-search-dark .navbar-search-wrapper {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+.navbar-search-dark .navbar-search-input {
+    color: var(--flin-neutral-50);
+}
+
+.navbar-search-dark .navbar-search-input::placeholder {
+    color: var(--flin-neutral-500);
+}
+
+/* Brand/Logo */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    text-decoration: none;
+    color: inherit;
+    font-weight: var(--flin-font-bold);
+    flex-shrink: 0;
+}
+
+.navbar-logo-img {
+    height: 32px;
+    width: auto;
+}
+
+.navbar-logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--flin-radius-md);
+    background: var(--flin-primary);
+    color: white;
+}
+
+.navbar-logo-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.navbar-logo-text {
+    font-size: var(--flin-text-lg);
+}
+
+/* Navigation links */
+.navbar-nav {
+    display: none;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+@media (min-width: 1024px) {
+    .navbar-nav {
+        display: flex;
+    }
+}
+
+.navbar-link {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    text-decoration: none;
+    border-radius: var(--flin-radius-md);
+    white-space: nowrap;
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-link:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.navbar-search-dark .navbar-link:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+/* Search form */
+.navbar-search-form {
+    display: none;
+    flex: 1;
+    max-width: 400px;
+}
+
+@media (min-width: 768px) {
+    .navbar-search-form {
+        display: block;
+    }
+}
+
+.search-center .navbar-search-form {
+    margin: 0 auto;
+}
+
+.search-right .navbar-search-form {
+    margin-left: auto;
+    margin-right: var(--flin-space-4);
+}
+
+.navbar-search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background-color: var(--flin-neutral-100);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-search-wrapper:focus-within {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.navbar-search-icon {
+    display: flex;
+    align-items: center;
+    padding-left: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.navbar-search-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.navbar-search-input {
+    flex: 1;
+    height: 40px;
+    padding: 0 var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+.navbar-search-input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.navbar-search-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-right: var(--flin-space-1);
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-search-clear:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-200);
+}
+
+.navbar-search-clear svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Actions */
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    flex-shrink: 0;
+}
+
+.navbar-search-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.navbar-search-toggle:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.navbar-search-dark .navbar-search-toggle:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+.navbar-search-toggle svg {
+    width: 22px;
+    height: 22px;
+}
+
+@media (min-width: 768px) {
+    .navbar-search-toggle {
+        display: none;
+    }
+}
+
+.navbar-cta {
+    display: none;
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-cta:hover {
+    background-color: var(--flin-primary-hover);
+}
+
+@media (min-width: 768px) {
+    .navbar-cta {
+        display: inline-flex;
+    }
+}
+
+/* Mobile toggle */
+.navbar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.navbar-toggle:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.navbar-search-dark .navbar-toggle:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+.navbar-toggle svg {
+    width: 24px;
+    height: 24px;
+}
+
+@media (min-width: 1024px) {
+    .navbar-toggle {
+        display: none;
+    }
+}
+
+/* Mobile search */
+.navbar-mobile-search {
+    display: none;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.navbar-search-dark .navbar-mobile-search {
+    border-top-color: var(--flin-neutral-700);
+}
+
+.navbar-search-expanded .navbar-mobile-search {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .navbar-mobile-search {
+        display: none !important;
+    }
+}
+
+.navbar-mobile-search-form {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background-color: var(--flin-neutral-100);
+    border-radius: var(--flin-radius-lg);
+}
+
+.navbar-search-dark .navbar-mobile-search-form {
+    background-color: var(--flin-neutral-800);
+}
+
+.navbar-mobile-search-input {
+    flex: 1;
+    height: 36px;
+    padding: 0;
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+.navbar-search-dark .navbar-mobile-search-input {
+    color: var(--flin-neutral-50);
+}
+
+.navbar-mobile-search-input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.navbar-mobile-search-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+}
+
+.navbar-mobile-search-close svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Mobile menu */
+.navbar-mobile {
+    display: none;
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.navbar-search-dark .navbar-mobile {
+    border-top-color: var(--flin-neutral-700);
+}
+
+.navbar-mobile-open .navbar-mobile {
+    display: block;
+}
+
+@media (min-width: 1024px) {
+    .navbar-mobile {
+        display: none !important;
+    }
+}
+
+.navbar-mobile-inner {
+    display: flex;
+    flex-direction: column;
+    padding: var(--flin-space-4);
+    gap: var(--flin-space-1);
+}
+
+.navbar-mobile-link {
+    display: block;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-medium);
+    text-decoration: none;
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-search-light .navbar-mobile-link {
+    color: var(--flin-fg-muted);
+}
+
+.navbar-search-light .navbar-mobile-link:hover,
+.navbar-search-light .navbar-mobile-link-active {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.navbar-search-dark .navbar-mobile-link {
+    color: var(--flin-neutral-400);
+}
+
+.navbar-search-dark .navbar-mobile-link:hover,
+.navbar-search-dark .navbar-mobile-link-active {
+    color: var(--flin-neutral-50);
+    background-color: var(--flin-neutral-800);
+}
+
+.navbar-mobile-cta {
+    display: block;
+    width: 100%;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    margin-top: var(--flin-space-2);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    text-align: center;
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-mobile-cta:hover {
+    background-color: var(--flin-primary-hover);
+}
+</style>

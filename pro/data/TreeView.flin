@@ -1,0 +1,383 @@
+// ============================================================================
+// TreeView.flin — FlinUI PRO Data Component
+// File/folder tree structure with icons and expand/collapse
+// ============================================================================
+// Props:
+//   - items: Tree data with id, name, icon, type, children (list)
+//   - selectedId: Currently selected item ID (string or number or none)
+//   - expandedIds: List of expanded folder IDs (list)
+//   - onSelect: Callback when item is selected (function or none)
+//   - onToggle: Callback when folder is expanded/collapsed (function or none)
+//   - showIcons: Show file/folder icons (boolean)
+//   - showLines: Show connecting lines (boolean)
+//   - selectable: Allow item selection (boolean)
+
+items = props.items || [
+    [
+        "id": "src",
+        "name": "src",
+        "type": "folder",
+        "children": [
+            [
+                "id": "components",
+                "name": "components",
+                "type": "folder",
+                "children": [
+                    ["id": "button", "name": "Button.flin", "type": "file", "icon": "flin"],
+                    ["id": "input", "name": "Input.flin", "type": "file", "icon": "flin"],
+                    ["id": "card", "name": "Card.flin", "type": "file", "icon": "flin"]
+                ]
+            ],
+            [
+                "id": "utils",
+                "name": "utils",
+                "type": "folder",
+                "children": [
+                    ["id": "helpers", "name": "helpers.ts", "type": "file", "icon": "ts"],
+                    ["id": "constants", "name": "constants.ts", "type": "file", "icon": "ts"]
+                ]
+            ],
+            ["id": "main", "name": "main.flin", "type": "file", "icon": "flin"],
+            ["id": "app", "name": "App.flin", "type": "file", "icon": "flin"]
+        ]
+    ],
+    [
+        "id": "public",
+        "name": "public",
+        "type": "folder",
+        "children": [
+            ["id": "index", "name": "index.html", "type": "file", "icon": "html"],
+            ["id": "styles", "name": "styles.css", "type": "file", "icon": "css"],
+            ["id": "favicon", "name": "favicon.ico", "type": "file", "icon": "image"]
+        ]
+    ],
+    ["id": "readme", "name": "README.md", "type": "file", "icon": "md"],
+    ["id": "package", "name": "package.json", "type": "file", "icon": "json"],
+    ["id": "gitignore", "name": ".gitignore", "type": "file", "icon": "git"]
+]
+selectedId = props.selectedId || none
+expandedIds = props.expandedIds || ["src", "components"]
+onSelect = props.onSelect || none
+onToggle = props.onToggle || none
+showIcons = props.showIcons || true
+showLines = props.showLines || true
+selectable = props.selectable || true
+
+isExpanded = (id) => expandedIds.includes(id)
+
+toggleExpanded = (id) => {
+    if isExpanded(id) {
+        expandedIds = expandedIds.filter(i => i != id)
+    } else {
+        expandedIds = [...expandedIds, id]
+    }
+    if onToggle != none {
+        onToggle(id, isExpanded(id))
+    }
+}
+
+getFileIcon = (item) => {
+    if item.type == "folder" {
+        return isExpanded(item.id) ? "folder-open" : "folder"
+    }
+    return item.icon || "file"
+}
+
+<div class="flin-tree-view {if showLines}with-lines{/if}">
+    {for item in items}
+        <TreeNode
+            item={item}
+            level={0}
+            selectedId={selectedId}
+            expandedIds={expandedIds}
+            onSelect={onSelect}
+            toggleExpanded={toggleExpanded}
+            showIcons={showIcons}
+            selectable={selectable}
+            getFileIcon={getFileIcon}
+            isExpanded={isExpanded}
+        />
+    {/for}
+</div>
+
+// Recursive TreeNode component (inline)
+TreeNode = (nodeProps) => {
+    item = nodeProps.item
+    level = nodeProps.level
+    selectedId = nodeProps.selectedId
+    expandedIds = nodeProps.expandedIds
+    onSelect = nodeProps.onSelect
+    toggleExpanded = nodeProps.toggleExpanded
+    showIcons = nodeProps.showIcons
+    selectable = nodeProps.selectable
+    getFileIcon = nodeProps.getFileIcon
+    isExpanded = nodeProps.isExpanded
+
+    hasChildren = item.children != none && item.children.length > 0
+    expanded = hasChildren && isExpanded(item.id)
+    isSelected = selectedId == item.id
+
+    <div class="tree-node" data-level={level}>
+        <div
+            class="tree-item {if isSelected}selected{/if} {if selectable}selectable{/if}"
+            style="padding-left: {level * 20 + 8}px"
+            click={() => {
+                if hasChildren {
+                    toggleExpanded(item.id)
+                }
+                if selectable && onSelect != none {
+                    onSelect(item)
+                }
+            }}
+        >
+            {if hasChildren}
+                <span class="tree-toggle {if expanded}expanded{/if}">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                        <path d="M4.5 2L9 6L4.5 10V2Z"/>
+                    </svg>
+                </span>
+            {else}
+                <span class="tree-toggle-spacer"></span>
+            {/if}
+
+            {if showIcons}
+                <span class="tree-icon" data-icon={getFileIcon(item)}>
+                    {if item.type == "folder"}
+                        {if expanded}
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M1.75 2.5a.75.75 0 00-.75.75v9.5c0 .414.336.75.75.75h12.5a.75.75 0 00.75-.75v-7.5a.75.75 0 00-.75-.75H7.5L6.354 3.354A.5.5 0 006 3.207V3H1.75z"/>
+                            </svg>
+                        {else}
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M1.75 2A1.75 1.75 0 000 3.75v8.5C0 13.216.784 14 1.75 14h12.5A1.75 1.75 0 0016 12.25V5.75A1.75 1.75 0 0014.25 4h-6l-1.5-1.5H1.75z"/>
+                            </svg>
+                        {/if}
+                    {else}
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3.75 1.5a.25.25 0 00-.25.25v12.5c0 .138.112.25.25.25h8.5a.25.25 0 00.25-.25V4.664a.25.25 0 00-.073-.177l-2.914-2.914a.25.25 0 00-.177-.073H3.75zM2 1.75C2 .784 2.784 0 3.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0112.25 16h-8.5A1.75 1.75 0 012 14.25V1.75z"/>
+                        </svg>
+                    {/if}
+                </span>
+            {/if}
+
+            <span class="tree-name">{item.name}</span>
+        </div>
+
+        {if hasChildren && expanded}
+            <div class="tree-children">
+                {for child in item.children}
+                    <TreeNode
+                        item={child}
+                        level={level + 1}
+                        selectedId={selectedId}
+                        expandedIds={expandedIds}
+                        onSelect={onSelect}
+                        toggleExpanded={toggleExpanded}
+                        showIcons={showIcons}
+                        selectable={selectable}
+                        getFileIcon={getFileIcon}
+                        isExpanded={isExpanded}
+                    />
+                {/for}
+            </div>
+        {/if}
+    </div>
+}
+
+<style scoped>
+.flin-tree-view {
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-lg);
+    padding: var(--flin-space-2);
+    font-family: var(--flin-font-mono);
+}
+
+.tree-node {
+    position: relative;
+}
+
+.tree-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+}
+
+.tree-item.selectable {
+    cursor: pointer;
+}
+
+.tree-item:hover {
+    background: var(--flin-bg-surface);
+}
+
+.tree-item.selected {
+    background: rgba(234, 179, 8, 0.1);
+}
+
+.tree-item.selected::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+}
+
+.tree-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    color: var(--flin-text-muted);
+    transition: transform var(--flin-transition-fast);
+    flex-shrink: 0;
+}
+
+.tree-toggle.expanded {
+    transform: rotate(90deg);
+}
+
+.tree-toggle-spacer {
+    width: 16px;
+    flex-shrink: 0;
+}
+
+.tree-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--flin-text-tertiary);
+}
+
+/* Icon colors based on type */
+.tree-icon[data-icon="folder"],
+.tree-icon[data-icon="folder-open"] {
+    color: #f59e0b;
+}
+
+.tree-icon[data-icon="flin"] {
+    color: var(--flin-accent-gold);
+}
+
+.tree-icon[data-icon="ts"],
+.tree-icon[data-icon="tsx"] {
+    color: #3178c6;
+}
+
+.tree-icon[data-icon="js"],
+.tree-icon[data-icon="jsx"] {
+    color: #f7df1e;
+}
+
+.tree-icon[data-icon="html"] {
+    color: #e34f26;
+}
+
+.tree-icon[data-icon="css"] {
+    color: #1572b6;
+}
+
+.tree-icon[data-icon="json"] {
+    color: #6b7280;
+}
+
+.tree-icon[data-icon="md"] {
+    color: #083fa1;
+}
+
+.tree-icon[data-icon="git"] {
+    color: #f05032;
+}
+
+.tree-icon[data-icon="image"] {
+    color: #22c55e;
+}
+
+.tree-name {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tree-item.selected .tree-name {
+    color: var(--flin-accent-gold);
+    font-weight: var(--flin-font-medium);
+}
+
+.tree-children {
+    position: relative;
+}
+
+/* Connecting lines */
+.with-lines .tree-children::before {
+    content: "";
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 12px;
+    width: 1px;
+    background: var(--flin-border-subtle);
+}
+
+.with-lines .tree-node[data-level="1"]::before {
+    content: "";
+    position: absolute;
+    left: 20px;
+    top: 18px;
+    width: 12px;
+    height: 1px;
+    background: var(--flin-border-subtle);
+}
+
+.with-lines .tree-node[data-level="2"]::before {
+    left: 40px;
+}
+
+.with-lines .tree-node[data-level="3"]::before {
+    left: 60px;
+}
+
+/* Animation for expand/collapse */
+.tree-children {
+    animation: tree-expand 0.2s ease-out;
+}
+
+@keyframes tree-expand {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .flin-tree-view {
+        padding: var(--flin-space-1);
+    }
+
+    .tree-item {
+        padding: var(--flin-space-1) var(--flin-space-2);
+    }
+
+    .tree-name {
+        font-size: var(--flin-text-xs);
+    }
+}
+</style>

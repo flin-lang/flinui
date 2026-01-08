@@ -1,0 +1,284 @@
+// NotificationBell.flin - FlinUI PRO Notification Bell Component
+// Bell icon with unread notification badge and animations
+
+// Props with defaults
+count = props.count || 0
+onClick = props.onClick
+animated = props.animated || true
+size = props.size || "md"
+maxCount = props.maxCount || 99
+showZero = props.showZero || false
+color = props.color || "default"
+
+// Handle click
+handleClick = {
+    if onClick { onClick() }
+}
+
+// Handle keyboard activation
+handleKeyDown = {
+    if onClick { onClick() }
+}
+
+// Size class
+sizeClass = match size {
+    "sm" -> "notification-bell--sm"
+    "lg" -> "notification-bell--lg"
+    _ -> "notification-bell--md"
+}
+
+// Color class
+colorClass = match color {
+    "primary" -> " notification-bell--primary"
+    "danger" -> " notification-bell--danger"
+    _ -> ""
+}
+
+// Animation class
+animationClass = match animated { true -> " notification-bell--animated", _ -> "" }
+
+// Has unread class
+hasUnreadClass = match count > 0 { true -> " notification-bell--has-unread", _ -> "" }
+
+// Display count (cap at maxCount)
+displayCount = match count > maxCount { true -> maxCount ++ "+", _ -> count }
+
+// Show badge
+showBadge = match showZero { true -> true, _ -> count > 0 }
+
+<button
+    class={"flin-pro-notification-bell " ++ sizeClass ++ colorClass ++ animationClass ++ hasUnreadClass}
+    click={handleClick}
+    keydown={handleKeyDown}
+    aria-label={"Notifications" ++ match count > 0 { true -> ", " ++ count ++ " unread", _ -> "" }}
+    type="button"
+>
+    <div class="notification-bell__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+    </div>
+
+    {if showBadge}
+        <span class="notification-bell__badge" aria-hidden="true">
+            {displayCount}
+        </span>
+    {/if}
+
+    <span class="notification-bell__ring"></span>
+</button>
+
+<style scoped>
+.flin-pro-notification-bell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--flin-radius-full);
+    transition: background-color var(--flin-transition-fast), color var(--flin-transition-fast);
+    color: var(--flin-fg-muted);
+}
+
+.flin-pro-notification-bell:hover {
+    background: var(--flin-neutral-100);
+    color: var(--flin-fg);
+}
+
+.flin-pro-notification-bell:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+/* Sizes */
+.notification-bell--sm {
+    width: 32px;
+    height: 32px;
+}
+
+.notification-bell--sm .notification-bell__icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.notification-bell--md {
+    width: 40px;
+    height: 40px;
+}
+
+.notification-bell--md .notification-bell__icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.notification-bell--lg {
+    width: 48px;
+    height: 48px;
+}
+
+.notification-bell--lg .notification-bell__icon svg {
+    width: 26px;
+    height: 26px;
+}
+
+/* Icon */
+.notification-bell__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Badge */
+.notification-bell__badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+    text-align: center;
+    color: white;
+    background: var(--flin-danger);
+    border-radius: var(--flin-radius-full);
+    border: 2px solid var(--flin-bg);
+    animation: badgePop var(--flin-transition-fast) ease-out;
+}
+
+.notification-bell--sm .notification-bell__badge {
+    top: 0;
+    right: 0;
+    min-width: 16px;
+    height: 16px;
+    font-size: 10px;
+    line-height: 16px;
+    padding: 0 4px;
+}
+
+.notification-bell--lg .notification-bell__badge {
+    top: 4px;
+    right: 4px;
+    min-width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+}
+
+@keyframes badgePop {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Ring animation */
+.notification-bell__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--flin-radius-full);
+    pointer-events: none;
+}
+
+/* Animated ring effect when has unread */
+.notification-bell--animated.notification-bell--has-unread .notification-bell__icon {
+    animation: bellShake 2s ease-in-out infinite;
+    animation-delay: 1s;
+}
+
+@keyframes bellShake {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    5%, 15% {
+        transform: rotate(-15deg);
+    }
+    10%, 20% {
+        transform: rotate(15deg);
+    }
+    25% {
+        transform: rotate(0deg);
+    }
+}
+
+.notification-bell--animated.notification-bell--has-unread .notification-bell__ring {
+    animation: ringPulse 2s ease-in-out infinite;
+    animation-delay: 1s;
+}
+
+@keyframes ringPulse {
+    0%, 25%, 100% {
+        box-shadow: none;
+    }
+    12.5% {
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3);
+    }
+}
+
+/* Color variants */
+.notification-bell--primary .notification-bell__badge {
+    background: var(--flin-primary);
+}
+
+.notification-bell--primary.notification-bell--animated.notification-bell--has-unread .notification-bell__ring {
+    animation-name: ringPulsePrimary;
+}
+
+@keyframes ringPulsePrimary {
+    0%, 25%, 100% {
+        box-shadow: none;
+    }
+    12.5% {
+        box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.3);
+    }
+}
+
+.notification-bell--danger .notification-bell__badge {
+    background: var(--flin-danger);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-pro-notification-bell:hover {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .notification-bell__badge {
+    border-color: var(--flin-neutral-900);
+}
+
+/* Active state */
+.flin-pro-notification-bell:active {
+    transform: scale(0.95);
+}
+
+/* Dot-only badge variant (when no count provided) */
+.notification-bell__badge:empty {
+    min-width: 10px;
+    height: 10px;
+    padding: 0;
+    top: 6px;
+    right: 6px;
+}
+
+.notification-bell--sm .notification-bell__badge:empty {
+    min-width: 8px;
+    height: 8px;
+    top: 4px;
+    right: 4px;
+}
+
+.notification-bell--lg .notification-bell__badge:empty {
+    min-width: 12px;
+    height: 12px;
+    top: 8px;
+    right: 8px;
+}
+</style>

@@ -1,0 +1,317 @@
+// FeedList.flin - FlinUI PRO
+// Activity feed with timestamps, icons, user avatars
+
+// Props with defaults
+items = props.items || []
+showConnector = props.showConnector || true
+variant = props.variant || "default"
+
+// Compute variant class
+variantClass = match variant {
+    "compact" -> "feed-list--compact"
+    "detailed" -> "feed-list--detailed"
+    _ -> "feed-list--default"
+}
+
+<div class={"feed-list " ++ variantClass} role="feed" aria-label="Activity feed">
+    {for item, index in items}
+        <div class="feed-list__item" role="article">
+            // Timeline connector
+            {if showConnector}
+                <div class="feed-list__connector">
+                    <div class={"feed-list__dot feed-list__dot--" ++ (item.type || "default")}></div>
+                    {if index < items.length - 1}
+                        <div class="feed-list__line"></div>
+                    {/if}
+                </div>
+            {/if}
+
+            // Avatar section
+            {if item.avatarSrc != none || item.avatar != none}
+                <div class="feed-list__avatar">
+                    {if item.avatarSrc != none}
+                        <img
+                            class="feed-list__avatar-img"
+                            src={item.avatarSrc}
+                            alt={item.user || "User"}
+                        >
+                    {else}
+                        <div class="feed-list__avatar-initials">
+                            {item.avatar || "?"}
+                        </div>
+                    {/if}
+                </div>
+            {/if}
+
+            // Icon section (alternative to avatar)
+            {if item.icon != none && item.avatarSrc == none && item.avatar == none}
+                <div class={"feed-list__icon feed-list__icon--" ++ (item.type || "default")}>
+                    {item.icon}
+                </div>
+            {/if}
+
+            // Content section
+            <div class="feed-list__content">
+                <div class="feed-list__header">
+                    {if item.user != none}
+                        <span class="feed-list__user">{item.user}</span>
+                    {/if}
+                    {if item.action != none}
+                        <span class="feed-list__action">{item.action}</span>
+                    {/if}
+                    {if item.target != none}
+                        <span class="feed-list__target">{item.target}</span>
+                    {/if}
+                </div>
+
+                {if item.description != none}
+                    <p class="feed-list__description">{item.description}</p>
+                {/if}
+
+                {if item.attachment != none}
+                    <div class="feed-list__attachment">
+                        {item.attachment}
+                    </div>
+                {/if}
+
+                {if item.comment != none}
+                    <div class="feed-list__comment">
+                        <p>{item.comment}</p>
+                    </div>
+                {/if}
+
+                <div class="feed-list__footer">
+                    {if item.timestamp != none}
+                        <time class="feed-list__timestamp">{item.timestamp}</time>
+                    {/if}
+                    {if item.reactions != none}
+                        <div class="feed-list__reactions">
+                            {item.reactions}
+                        </div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    {/for}
+
+    // Empty state
+    {if items.length == 0}
+        <div class="feed-list__empty">
+            <svg class="feed-list__empty-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span class="feed-list__empty-text">No activity yet</span>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.feed-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.feed-list--default .feed-list__item { padding: var(--flin-space-4) 0; }
+.feed-list--compact .feed-list__item { padding: var(--flin-space-2) 0; }
+.feed-list--detailed .feed-list__item { padding: var(--flin-space-5) 0; }
+
+.feed-list__item {
+    display: flex;
+    gap: var(--flin-space-3);
+    position: relative;
+}
+
+.feed-list__connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 24px;
+}
+
+.feed-list__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-neutral-300);
+    border: 2px solid var(--flin-bg);
+    box-shadow: 0 0 0 2px var(--flin-neutral-200);
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+.feed-list__dot--default { background-color: var(--flin-neutral-400); }
+.feed-list__dot--success { background-color: var(--flin-success); }
+.feed-list__dot--warning { background-color: var(--flin-warning); }
+.feed-list__dot--danger { background-color: var(--flin-danger); }
+.feed-list__dot--info { background-color: var(--flin-info); }
+.feed-list__dot--primary { background-color: var(--flin-primary); }
+
+.feed-list__line {
+    width: 2px;
+    flex: 1;
+    background-color: var(--flin-neutral-200);
+    margin-top: var(--flin-space-2);
+}
+
+.feed-list__avatar {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    background-color: var(--flin-neutral-200);
+}
+
+.feed-list__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.feed-list__avatar-initials {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    background: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.feed-list__icon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-fg-muted);
+}
+
+.feed-list__icon--success { background-color: var(--flin-success-light); color: var(--flin-success); }
+.feed-list__icon--warning { background-color: var(--flin-warning-light); color: var(--flin-warning); }
+.feed-list__icon--danger { background-color: var(--flin-danger-light); color: var(--flin-danger); }
+.feed-list__icon--info { background-color: var(--flin-info-light); color: var(--flin-info); }
+.feed-list__icon--primary { background-color: var(--flin-primary-light); color: var(--flin-primary); }
+
+.feed-list__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.feed-list__header {
+    font-size: var(--flin-text-sm);
+    line-height: 1.5;
+    color: var(--flin-fg);
+}
+
+.feed-list__user {
+    font-weight: var(--flin-font-semibold);
+}
+
+.feed-list__action {
+    color: var(--flin-fg-muted);
+    margin: 0 var(--flin-space-1);
+}
+
+.feed-list__target {
+    font-weight: var(--flin-font-medium);
+}
+
+.feed-list__description {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.feed-list__attachment {
+    margin-top: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    background-color: var(--flin-neutral-50);
+    border-radius: var(--flin-radius-md);
+    border: 1px solid var(--flin-neutral-200);
+}
+
+.feed-list__comment {
+    margin-top: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    background-color: var(--flin-neutral-50);
+    border-radius: var(--flin-radius-md);
+    border-left: 3px solid var(--flin-primary);
+}
+
+.feed-list__comment p {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    line-height: 1.5;
+}
+
+.feed-list__footer {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-4);
+}
+
+.feed-list__timestamp {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-400);
+}
+
+.feed-list__reactions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.feed-list__empty {
+    padding: var(--flin-space-8);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+.feed-list__empty-icon {
+    color: var(--flin-neutral-300);
+}
+
+.feed-list__empty-text {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Dark theme */
+[data-theme="dark"] .feed-list__line {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .feed-list__dot {
+    border-color: var(--flin-neutral-900);
+    box-shadow: 0 0 0 2px var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .feed-list__icon {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .feed-list__attachment {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .feed-list__comment {
+    background-color: var(--flin-neutral-800);
+}
+</style>

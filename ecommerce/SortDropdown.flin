@@ -1,0 +1,368 @@
+// SortDropdown.flin - FlinUI PRO E-commerce Component
+// Sort options dropdown with price, newest, best selling, and top rated
+
+// Props with defaults
+currentSort = props.currentSort || "featured"
+showLabel = props.showLabel || true
+placement = props.placement || "bottom-left"
+onChange = props.onChange
+
+// Internal state
+isOpen = false
+
+// Sort options
+sortOptions = [
+    ["value": "featured", "label": "Featured", "icon": "star"],
+    ["value": "price_low_high", "label": "Price: Low to High", "icon": "arrow-up"],
+    ["value": "price_high_low", "label": "Price: High to Low", "icon": "arrow-down"],
+    ["value": "newest", "label": "Newest", "icon": "clock"],
+    ["value": "best_selling", "label": "Best Selling", "icon": "trending-up"],
+    ["value": "top_rated", "label": "Top Rated", "icon": "award"]
+]
+
+// Get current option label
+fn getCurrentLabel() {
+    for option in sortOptions {
+        if option.value == currentSort {
+            return option.label
+        }
+    }
+    return "Sort by"
+}
+
+// Handle option select
+fn handleOptionSelect(value) {
+    isOpen = false
+    if onChange && value != currentSort {
+        onChange(value)
+    }
+}
+
+// Toggle dropdown
+fn handleToggle() {
+    isOpen = !isOpen
+}
+
+// Close dropdown
+fn handleClose() {
+    isOpen = false
+}
+
+currentLabel = getCurrentLabel()
+
+<div class="sort-dropdown">
+    {if showLabel}
+        <label class="sort-dropdown-label">Sort by:</label>
+    {/if}
+
+    <div class="sort-dropdown-trigger-wrapper">
+        <button class="sort-dropdown-trigger" click={handleToggle}>
+            <span class="sort-dropdown-current">{currentLabel}</span>
+            <svg
+                class="sort-dropdown-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                style="transform: rotate({isOpen ? 180 : 0}deg)"
+            >
+                <polyline points="6 9 12 15 18 9"/>
+            </svg>
+        </button>
+
+        {if isOpen}
+            <div class="sort-dropdown-overlay" click={handleClose}></div>
+            <div class="sort-dropdown-menu" data-placement={placement}>
+                {for option in sortOptions}
+                    <button
+                        class="sort-dropdown-option"
+                        data-selected={option.value == currentSort}
+                        click={fn() { handleOptionSelect(option.value) }}
+                    >
+                        <div class="sort-dropdown-option-icon">
+                            {if option.icon == "star"}
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            {/if}
+                            {if option.icon == "arrow-up"}
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="19" x2="12" y2="5"/>
+                                    <polyline points="5 12 12 5 19 12"/>
+                                </svg>
+                            {/if}
+                            {if option.icon == "arrow-down"}
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <polyline points="19 12 12 19 5 12"/>
+                                </svg>
+                            {/if}
+                            {if option.icon == "clock"}
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                            {/if}
+                            {if option.icon == "trending-up"}
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                    <polyline points="17 6 23 6 23 12"/>
+                                </svg>
+                            {/if}
+                            {if option.icon == "award"}
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="8" r="7"/>
+                                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                                </svg>
+                            {/if}
+                        </div>
+
+                        <span class="sort-dropdown-option-label">{option.label}</span>
+
+                        {if option.value == currentSort}
+                            <svg class="sort-dropdown-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                        {/if}
+                    </button>
+                {/for}
+            </div>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.sort-dropdown {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    position: relative;
+}
+
+/* Label */
+.sort-dropdown-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-neutral-700);
+    white-space: nowrap;
+}
+
+/* Trigger Wrapper */
+.sort-dropdown-trigger-wrapper {
+    position: relative;
+}
+
+/* Trigger Button */
+.sort-dropdown-trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-neutral-900);
+    background-color: white;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    min-width: 180px;
+}
+
+.sort-dropdown-trigger:hover {
+    border-color: var(--flin-neutral-300);
+    background-color: var(--flin-neutral-50);
+}
+
+.sort-dropdown-trigger:focus {
+    outline: none;
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+/* Current Label */
+.sort-dropdown-current {
+    flex: 1;
+    text-align: left;
+}
+
+/* Icon */
+.sort-dropdown-icon {
+    flex-shrink: 0;
+    color: var(--flin-neutral-500);
+    transition: transform var(--flin-transition-fast);
+}
+
+/* Overlay */
+.sort-dropdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+}
+
+/* Menu */
+.sort-dropdown-menu {
+    position: absolute;
+    z-index: 50;
+    min-width: 240px;
+    background-color: white;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: var(--flin-space-2);
+    margin-top: var(--flin-space-2);
+}
+
+.sort-dropdown-menu[data-placement="bottom-left"] {
+    top: 100%;
+    left: 0;
+}
+
+.sort-dropdown-menu[data-placement="bottom-right"] {
+    top: 100%;
+    right: 0;
+}
+
+.sort-dropdown-menu[data-placement="top-left"] {
+    bottom: 100%;
+    left: 0;
+    margin-bottom: var(--flin-space-2);
+    margin-top: 0;
+}
+
+.sort-dropdown-menu[data-placement="top-right"] {
+    bottom: 100%;
+    right: 0;
+    margin-bottom: var(--flin-space-2);
+    margin-top: 0;
+}
+
+/* Option */
+.sort-dropdown-option {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    width: 100%;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-900);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-3);
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--flin-transition-fast);
+}
+
+.sort-dropdown-option:hover {
+    background-color: var(--flin-neutral-50);
+}
+
+.sort-dropdown-option[data-selected="true"] {
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+/* Option Icon */
+.sort-dropdown-option-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--flin-radius-sm);
+    color: var(--flin-neutral-500);
+}
+
+.sort-dropdown-option[data-selected="true"] .sort-dropdown-option-icon {
+    color: var(--flin-primary);
+}
+
+/* Option Label */
+.sort-dropdown-option-label {
+    flex: 1;
+    font-weight: var(--flin-font-medium);
+}
+
+/* Check Icon */
+.sort-dropdown-check {
+    flex-shrink: 0;
+    color: var(--flin-primary);
+}
+
+/* Animation */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sort-dropdown-menu[data-placement^="bottom"] {
+    animation: slideDown var(--flin-transition-normal);
+}
+
+.sort-dropdown-menu[data-placement^="top"] {
+    animation: slideUp var(--flin-transition-normal);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .sort-dropdown-label {
+        color: var(--flin-neutral-300);
+    }
+
+    .sort-dropdown-trigger {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+        color: var(--flin-neutral-100);
+    }
+
+    .sort-dropdown-trigger:hover {
+        background-color: var(--flin-neutral-700);
+    }
+
+    .sort-dropdown-menu {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .sort-dropdown-option {
+        color: var(--flin-neutral-100);
+    }
+
+    .sort-dropdown-option:hover {
+        background-color: var(--flin-neutral-700);
+    }
+
+    .sort-dropdown-option[data-selected="true"] {
+        background-color: rgba(59, 130, 246, 0.2);
+    }
+}
+</style>

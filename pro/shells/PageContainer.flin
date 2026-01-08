@@ -1,0 +1,87 @@
+// ============================================================================
+// PageContainer.flin — FlinUI PRO Shell Component
+// Max-width wrapper container for page content
+// ============================================================================
+// Props:
+//   - maxWidth: Maximum width of container (string, default: "1200px")
+//   - padding: Horizontal padding (string, default: "md")
+//   - centered: Center the container (boolean, default: true)
+//   - fluid: Full width (ignore maxWidth) (boolean, default: false)
+//   - gutters: Show side gutters on wide screens (boolean, default: true)
+//   - as: HTML element to render as (string, default: "div")
+// ============================================================================
+
+maxWidth = props.maxWidth || "1200px"
+padding = props.padding || "md"
+centered = props.centered || true
+fluid = props.fluid || false
+gutters = props.gutters || true
+as = props.as || "div"
+
+// Compute padding value
+paddingValue = match padding {
+    "none" -> "0"
+    "xs" -> "var(--flin-space-2)"
+    "sm" -> "var(--flin-space-4)"
+    "md" -> "var(--flin-space-6)"
+    "lg" -> "var(--flin-space-8)"
+    "xl" -> "var(--flin-space-12)"
+    _ -> "var(--flin-space-6)"
+}
+
+containerClass = "flin-page-container"
+containerClass = {if centered { containerClass + " centered" } else { containerClass }}
+containerClass = {if fluid { containerClass + " fluid" } else { containerClass }}
+containerClass = {if gutters { containerClass + " with-gutters" } else { containerClass }}
+
+<{as} class={containerClass}
+     style="--container-max-width: {maxWidth}; --container-padding: {paddingValue}">
+    <div class="container-inner">
+        {children}
+    </div>
+</{as}>
+
+<style scoped>
+.flin-page-container {
+    width: 100%;
+    padding-left: var(--container-padding);
+    padding-right: var(--container-padding);
+}
+
+.container-inner {
+    width: 100%;
+    max-width: var(--container-max-width);
+}
+
+.centered .container-inner {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.fluid .container-inner {
+    max-width: none;
+}
+
+/* Gutters - add extra padding on large screens */
+.with-gutters {
+    padding-left: max(var(--container-padding), calc((100% - var(--container-max-width)) / 2 + var(--container-padding)));
+    padding-right: max(var(--container-padding), calc((100% - var(--container-max-width)) / 2 + var(--container-padding)));
+}
+
+.with-gutters .container-inner {
+    max-width: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .flin-page-container {
+        --container-padding: var(--flin-space-4);
+    }
+}
+
+@media (max-width: 480px) {
+    .flin-page-container {
+        --container-padding: var(--flin-space-3);
+    }
+}
+</style>

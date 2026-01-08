@@ -1,0 +1,394 @@
+// Popover.flin - FlinUI PRO Popover Component
+// Click-triggered popup with rich content support
+
+// Props with defaults
+content = props.content || ""
+placement = props.placement || "bottom"
+trigger = props.trigger || "click"
+closeOnClickOutside = props.closeOnClickOutside || true
+title = props.title || ""
+arrow = props.arrow || true
+width = props.width || 280
+open = props.open || false
+onClose = props.onClose
+
+// Internal state
+isOpen = open
+isExiting = false
+
+// Handle toggle
+handleToggle = {
+    if isOpen {
+        handleClose()
+    }
+    if !isOpen {
+        isOpen = true
+        isExiting = false
+    }
+}
+
+// Handle open (for hover trigger)
+handleOpen = {
+    isOpen = true
+    isExiting = false
+}
+
+// Handle close
+handleClose = {
+    isExiting = true
+    isOpen = false
+    if onClose { onClose() }
+}
+
+// Handle click outside
+handleClickOutside = {
+    if closeOnClickOutside {
+        handleClose()
+    }
+}
+
+// Handle escape key
+handleKeyDown = {
+    handleClose()
+}
+
+// Placement class
+placementClass = match placement {
+    "top" -> "popover--top"
+    "left" -> "popover--left"
+    "right" -> "popover--right"
+    "top-start" -> "popover--top-start"
+    "top-end" -> "popover--top-end"
+    "bottom-start" -> "popover--bottom-start"
+    "bottom-end" -> "popover--bottom-end"
+    _ -> "popover--bottom"
+}
+
+// Arrow class
+arrowClass = match arrow { true -> "", _ -> " popover--no-arrow" }
+
+// Exiting class
+exitingClass = match isExiting { true -> " popover--exiting", _ -> "" }
+
+// Width style
+widthStyle = "width: " ++ width ++ "px"
+
+// Is hover trigger
+isHoverTrigger = match trigger { "hover" -> true, _ -> false }
+
+<div class="flin-pro-popover-wrapper">
+    <div
+        class="popover__trigger"
+        click={match !isHoverTrigger { true -> handleToggle, _ -> none }}
+        mouseenter={match isHoverTrigger { true -> handleOpen, _ -> none }}
+        mouseleave={match isHoverTrigger { true -> handleClose, _ -> none }}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+    >
+        {children}
+    </div>
+
+    {if isOpen}
+        <div
+            class="popover__backdrop"
+            click={handleClickOutside}
+            aria-hidden="true"
+        ></div>
+
+        <div
+            class={"flin-pro-popover " ++ placementClass ++ arrowClass ++ exitingClass}
+            style={widthStyle}
+            role="dialog"
+            aria-modal="false"
+            tabindex="-1"
+            keydown={handleKeyDown}
+        >
+            {if arrow}
+                <div class="popover__arrow"></div>
+            {/if}
+
+            {if title != ""}
+                <div class="popover__header">
+                    <h4 class="popover__title">{title}</h4>
+                    <button
+                        class="popover__close"
+                        click={handleClose}
+                        type="button"
+                        aria-label="Close popover"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            {/if}
+
+            <div class="popover__content">
+                {if content != ""}
+                    {content}
+                {/if}
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-pro-popover-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+/* Trigger */
+.popover__trigger {
+    cursor: pointer;
+    display: inline-block;
+}
+
+/* Backdrop */
+.popover__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9997;
+}
+
+/* Popover */
+.flin-pro-popover {
+    position: absolute;
+    z-index: 9998;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-xl);
+    animation: popoverFadeIn var(--flin-transition-fast) ease-out;
+}
+
+@keyframes popoverFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.popover--exiting {
+    animation: popoverFadeOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes popoverFadeOut {
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+/* Header */
+.popover__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.popover__title {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+    margin: 0;
+}
+
+.popover__close {
+    background: transparent;
+    border: none;
+    padding: var(--flin-space-1);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-fg-muted);
+    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.popover__close:hover {
+    color: var(--flin-fg);
+    background: var(--flin-neutral-100);
+}
+
+.popover__close:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.popover__close svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Content */
+.popover__content {
+    padding: var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    line-height: 1.5;
+    color: var(--flin-fg);
+}
+
+/* Arrow */
+.popover__arrow {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    transform: rotate(45deg);
+}
+
+/* Position: Bottom */
+.popover--bottom {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: var(--flin-space-2);
+}
+
+.popover--bottom .popover__arrow {
+    top: -7px;
+    left: 50%;
+    margin-left: -6px;
+    border-right: none;
+    border-bottom: none;
+}
+
+/* Position: Bottom Start */
+.popover--bottom-start {
+    top: 100%;
+    left: 0;
+    margin-top: var(--flin-space-2);
+}
+
+.popover--bottom-start .popover__arrow {
+    top: -7px;
+    left: 20px;
+    border-right: none;
+    border-bottom: none;
+}
+
+/* Position: Bottom End */
+.popover--bottom-end {
+    top: 100%;
+    right: 0;
+    margin-top: var(--flin-space-2);
+}
+
+.popover--bottom-end .popover__arrow {
+    top: -7px;
+    right: 20px;
+    border-right: none;
+    border-bottom: none;
+}
+
+/* Position: Top */
+.popover--top {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: var(--flin-space-2);
+}
+
+.popover--top .popover__arrow {
+    bottom: -7px;
+    left: 50%;
+    margin-left: -6px;
+    border-left: none;
+    border-top: none;
+}
+
+/* Position: Top Start */
+.popover--top-start {
+    bottom: 100%;
+    left: 0;
+    margin-bottom: var(--flin-space-2);
+}
+
+.popover--top-start .popover__arrow {
+    bottom: -7px;
+    left: 20px;
+    border-left: none;
+    border-top: none;
+}
+
+/* Position: Top End */
+.popover--top-end {
+    bottom: 100%;
+    right: 0;
+    margin-bottom: var(--flin-space-2);
+}
+
+.popover--top-end .popover__arrow {
+    bottom: -7px;
+    right: 20px;
+    border-left: none;
+    border-top: none;
+}
+
+/* Position: Left */
+.popover--left {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: var(--flin-space-2);
+}
+
+.popover--left .popover__arrow {
+    right: -7px;
+    top: 50%;
+    margin-top: -6px;
+    border-left: none;
+    border-bottom: none;
+}
+
+/* Position: Right */
+.popover--right {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: var(--flin-space-2);
+}
+
+.popover--right .popover__arrow {
+    left: -7px;
+    top: 50%;
+    margin-top: -6px;
+    border-right: none;
+    border-top: none;
+}
+
+/* No arrow */
+.popover--no-arrow .popover__arrow {
+    display: none;
+}
+
+/* Focus styling */
+.flin-pro-popover:focus {
+    outline: none;
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-pro-popover {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .popover__arrow {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .popover__header {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .popover__close:hover {
+    background: var(--flin-neutral-700);
+}
+</style>

@@ -1,0 +1,284 @@
+// ============================================================================
+// TableOfContents.flin — FlinUI PRO
+// Article navigation sidebar with scroll spy
+// ============================================================================
+// Props:
+//   items: array - TOC items [{id, title, level, children}] (default: [])
+//   activeId: text - Currently active section ID (default: none)
+//   title: text - TOC title (default: "Table of Contents")
+//   showTitle: boolean - Show the title (default: true)
+//   variant: text - Style variant ("default", "bordered", "minimal") (default: "default")
+//   sticky: boolean - Make TOC sticky (default: true)
+//   maxHeight: text - Max height with scroll (default: "calc(100vh - 200px)")
+//   onItemClick: function - Callback when item is clicked (default: none)
+// ============================================================================
+
+items = props.items || []
+activeId = props.activeId || none
+tocTitle = props.title || "Table of Contents"
+showTitle = props.showTitle || true
+variant = props.variant || "default"
+sticky = props.sticky || true
+maxHeight = props.maxHeight || "calc(100vh - 200px)"
+onItemClick = props.onItemClick || none
+
+// Compute variant class
+variantClass = match variant {
+    "bordered" -> "toc--bordered"
+    "minimal" -> "toc--minimal"
+    _ -> "toc--default"
+}
+
+// Compute sticky class
+stickyClass = match sticky {
+    true -> "toc--sticky"
+    _ -> ""
+}
+
+// Render item with children recursively
+renderItem = (item) => {
+    isActive = activeId == item.id
+    <li class="toc__item">
+        <a
+            href={"#" ++ item.id}
+            class={"toc__link toc__link--level-" ++ (item.level || 2) ++ {if isActive { " toc__link--active" } else { "" }}}
+            click={(e) => {
+                if onItemClick != none {
+                    onItemClick(item)
+                }
+            }}
+        >
+            {item.title}
+        </a>
+        {if item.children != none && item.children.length > 0}
+            <ul class="toc__children">
+                {for child in item.children}
+                    {renderItem(child)}
+                {/for}
+            </ul>
+        {/if}
+    </li>
+}
+
+<nav
+    class={"toc " ++ variantClass ++ " " ++ stickyClass}
+    style={"--toc-max-height: " ++ maxHeight}
+    aria-label="Table of contents"
+>
+    {if showTitle}
+        <h4 class="toc__title">{tocTitle}</h4>
+    {/if}
+
+    {if items.length > 0}
+        <ul class="toc__list">
+            {for item in items}
+                {renderItem(item)}
+            {/for}
+        </ul>
+    {else}
+        <p class="toc__empty">No sections found</p>
+    {/if}
+</nav>
+
+<style scoped>
+.toc {
+    font-family: var(--flin-font-sans);
+}
+
+/* Sticky positioning */
+.toc--sticky {
+    position: sticky;
+    top: var(--flin-space-6);
+}
+
+/* Variant: default */
+.toc--default {
+    padding: var(--flin-space-5);
+    background: var(--flin-bg);
+    border-radius: var(--flin-radius-lg);
+}
+
+/* Variant: bordered */
+.toc--bordered {
+    padding: var(--flin-space-5);
+    background: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+}
+
+/* Variant: minimal */
+.toc--minimal {
+    padding-left: var(--flin-space-4);
+    border-left: 2px solid var(--flin-neutral-200);
+}
+
+/* Title */
+.toc__title {
+    margin: 0 0 var(--flin-space-4) 0;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.toc--minimal .toc__title {
+    margin-bottom: var(--flin-space-3);
+}
+
+/* List */
+.toc__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: var(--toc-max-height);
+    overflow-y: auto;
+}
+
+.toc__children {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Item */
+.toc__item {
+    margin: 0;
+}
+
+/* Link */
+.toc__link {
+    display: block;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    text-decoration: none;
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+    line-height: 1.4;
+}
+
+.toc--minimal .toc__link {
+    padding: var(--flin-space-1) 0;
+    border-radius: 0;
+}
+
+.toc__link:hover {
+    color: var(--flin-fg);
+    background: var(--flin-neutral-100);
+}
+
+.toc--minimal .toc__link:hover {
+    background: transparent;
+    color: var(--flin-primary);
+}
+
+/* Active state */
+.toc__link--active {
+    color: var(--flin-primary);
+    background: var(--flin-primary-light);
+    font-weight: var(--flin-font-medium);
+}
+
+.toc--minimal .toc__link--active {
+    background: transparent;
+    position: relative;
+}
+
+.toc--minimal .toc__link--active::before {
+    content: "";
+    position: absolute;
+    left: calc(-1 * var(--flin-space-4) - 2px);
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--flin-primary);
+}
+
+/* Indentation levels */
+.toc__link--level-2 {
+    padding-left: var(--flin-space-3);
+}
+
+.toc__link--level-3 {
+    padding-left: var(--flin-space-6);
+    font-size: var(--flin-text-xs);
+}
+
+.toc__link--level-4 {
+    padding-left: var(--flin-space-9);
+    font-size: var(--flin-text-xs);
+}
+
+.toc--minimal .toc__link--level-2 {
+    padding-left: 0;
+}
+
+.toc--minimal .toc__link--level-3 {
+    padding-left: var(--flin-space-4);
+}
+
+.toc--minimal .toc__link--level-4 {
+    padding-left: var(--flin-space-8);
+}
+
+/* Children list */
+.toc__children .toc__link {
+    font-weight: var(--flin-font-normal);
+}
+
+/* Empty state */
+.toc__empty {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    font-style: italic;
+}
+
+/* Scrollbar styling */
+.toc__list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.toc__list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.toc__list::-webkit-scrollbar-thumb {
+    background: var(--flin-neutral-300);
+    border-radius: 2px;
+}
+
+.toc__list::-webkit-scrollbar-thumb:hover {
+    background: var(--flin-neutral-400);
+}
+
+/* Dark theme */
+[data-theme="dark"] .toc--bordered {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .toc--minimal {
+    border-left-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .toc__link:hover {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .toc--minimal .toc__link:hover {
+    background: transparent;
+}
+
+[data-theme="dark"] .toc__link--active {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+[data-theme="dark"] .toc--minimal .toc__link--active {
+    background: transparent;
+}
+
+[data-theme="dark"] .toc__list::-webkit-scrollbar-thumb {
+    background: var(--flin-neutral-600);
+}
+</style>

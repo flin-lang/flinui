@@ -1,0 +1,255 @@
+// FlinUI PRO StripedTable Component
+// Table with alternating row colors for better readability
+
+// Props with defaults
+columns = props.columns || []
+data = props.data || []
+loading = props.loading || false
+emptyText = props.emptyText || "No data available"
+hoverable = props.hoverable || true
+bordered = props.bordered || false
+compact = props.compact || false
+stripeColor = props.stripeColor || "neutral"
+
+// Computed classes
+hoverableClass = match hoverable {
+    true -> " pro-striped-table--hoverable"
+    _ -> ""
+}
+
+borderedClass = match bordered {
+    true -> " pro-striped-table--bordered"
+    _ -> ""
+}
+
+compactClass = match compact {
+    true -> " pro-striped-table--compact"
+    _ -> ""
+}
+
+stripeColorClass = match stripeColor {
+    "primary" -> " pro-striped-table--stripe-primary"
+    "success" -> " pro-striped-table--stripe-success"
+    "warning" -> " pro-striped-table--stripe-warning"
+    _ -> ""
+}
+
+tableClass = "pro-striped-table" ++ hoverableClass ++ borderedClass ++ compactClass ++ stripeColorClass
+
+<div class="pro-striped-table-wrapper">
+    <table class={tableClass}>
+        <thead class="pro-striped-table__head">
+            <tr class="pro-striped-table__row pro-striped-table__row--header">
+                {for column in columns}
+                    <th class="pro-striped-table__header" scope="col">
+                        {column.label || column.key}
+                    </th>
+                {/for}
+            </tr>
+        </thead>
+
+        <tbody class="pro-striped-table__body">
+            {if loading}
+                <tr class="pro-striped-table__row">
+                    <td class="pro-striped-table__cell pro-striped-table__loading" colspan={columns.length}>
+                        <div class="pro-striped-table__spinner"></div>
+                        <span>Loading data...</span>
+                    </td>
+                </tr>
+            {else if data.length == 0}
+                <tr class="pro-striped-table__row">
+                    <td class="pro-striped-table__cell pro-striped-table__empty" colspan={columns.length}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M3 9h18"/>
+                            <path d="M9 21V9"/>
+                        </svg>
+                        <span>{emptyText}</span>
+                    </td>
+                </tr>
+            {else}
+                {for row in data}
+                    <tr class="pro-striped-table__row">
+                        {for column in columns}
+                            <td class="pro-striped-table__cell">
+                                {row[column.key]}
+                            </td>
+                        {/for}
+                    </tr>
+                {/for}
+            {/if}
+        </tbody>
+    </table>
+</div>
+
+<style scoped>
+.pro-striped-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    font-family: var(--flin-font-sans);
+    border-radius: var(--flin-radius-lg);
+}
+
+.pro-striped-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--flin-text-sm);
+    text-align: left;
+}
+
+.pro-striped-table__head {
+    background-color: var(--flin-neutral-100);
+}
+
+.pro-striped-table__header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    white-space: nowrap;
+    border-bottom: var(--flin-space-0-5) solid var(--flin-neutral-200);
+}
+
+.pro-striped-table__row {
+    transition: background-color var(--flin-transition-fast);
+}
+
+.pro-striped-table__cell {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    color: var(--flin-fg);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-striped-table__body .pro-striped-table__row:last-child .pro-striped-table__cell {
+    border-bottom: none;
+}
+
+/* Striped rows - default neutral */
+.pro-striped-table__body .pro-striped-table__row:nth-child(odd) {
+    background-color: var(--flin-bg);
+}
+
+.pro-striped-table__body .pro-striped-table__row:nth-child(even) {
+    background-color: var(--flin-neutral-50);
+}
+
+/* Stripe color variants */
+.pro-striped-table--stripe-primary .pro-striped-table__body .pro-striped-table__row:nth-child(even) {
+    background-color: color-mix(in srgb, var(--flin-primary) 5%, var(--flin-bg));
+}
+
+.pro-striped-table--stripe-success .pro-striped-table__body .pro-striped-table__row:nth-child(even) {
+    background-color: color-mix(in srgb, var(--flin-success) 5%, var(--flin-bg));
+}
+
+.pro-striped-table--stripe-warning .pro-striped-table__body .pro-striped-table__row:nth-child(even) {
+    background-color: color-mix(in srgb, var(--flin-warning) 5%, var(--flin-bg));
+}
+
+/* Hoverable variant */
+.pro-striped-table--hoverable .pro-striped-table__body .pro-striped-table__row:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+/* Bordered variant */
+.pro-striped-table--bordered {
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+}
+
+.pro-striped-table--bordered .pro-striped-table__header,
+.pro-striped-table--bordered .pro-striped-table__cell {
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+/* Compact variant */
+.pro-striped-table--compact .pro-striped-table__header,
+.pro-striped-table--compact .pro-striped-table__cell {
+    padding: var(--flin-space-2) var(--flin-space-3);
+}
+
+/* Loading state */
+.pro-striped-table__loading {
+    text-align: center;
+    padding: var(--flin-space-8) var(--flin-space-4);
+}
+
+.pro-striped-table__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-striped-table__spinner {
+    width: var(--flin-icon-md);
+    height: var(--flin-icon-md);
+    border: var(--flin-space-0-5) solid var(--flin-neutral-200);
+    border-top-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    animation: pro-striped-spin var(--flin-duration-slow) linear infinite;
+}
+
+@keyframes pro-striped-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty state */
+.pro-striped-table__empty {
+    text-align: center;
+    padding: var(--flin-space-12) var(--flin-space-4);
+}
+
+.pro-striped-table__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-striped-table__empty svg {
+    color: var(--flin-neutral-300);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .pro-striped-table__head {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-striped-table__header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-striped-table__cell {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-striped-table__body .pro-striped-table__row:nth-child(even) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-striped-table--hoverable .pro-striped-table__body .pro-striped-table__row:hover {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-striped-table--bordered {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-striped-table--bordered .pro-striped-table__header,
+[data-theme="dark"] .pro-striped-table--bordered .pro-striped-table__cell {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-striped-table__spinner {
+    border-color: var(--flin-neutral-700);
+    border-top-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .pro-striped-table__empty svg {
+    color: var(--flin-neutral-600);
+}
+</style>

@@ -1,0 +1,367 @@
+// CodeEditor.flin - FlinUI Code Editor Component
+// Code editor with syntax highlighting and line numbers
+
+// Props with defaults
+value = props.value || ""
+language = props.language || "javascript"
+placeholder = props.placeholder || "// Enter your code here..."
+disabled = props.disabled || false
+readOnly = props.readOnly || false
+showLineNumbers = props.showLineNumbers || true
+showLanguageLabel = props.showLanguageLabel || true
+minHeight = props.minHeight || "200px"
+maxHeight = props.maxHeight || "500px"
+onChange = props.onChange
+theme = props.theme || "dark"
+
+// State
+lineCount = (value.split("\n")).len
+isFocused = false
+
+// Compute lines array for line numbers
+lines = 1..lineCount
+
+// Handle input change
+handleChange = fn(e) {
+    if onChange {
+        onChange(e.target.value)
+    }
+    lineCount = (e.target.value.split("\n")).len
+}
+
+// Handle focus
+handleFocus = { isFocused = true }
+handleBlur = { isFocused = false }
+
+// Compute classes
+themeClass = match theme {
+    "light" -> " code-editor-light"
+    _ -> " code-editor-dark"
+}
+disabledClass = match disabled { true -> " code-editor-disabled", _ -> "" }
+focusedClass = match isFocused { true -> " code-editor-focused", _ -> "" }
+containerClass = "code-editor" ++ themeClass ++ disabledClass ++ focusedClass
+
+// Language display names
+languageDisplay = match language {
+    "javascript" -> "JavaScript"
+    "typescript" -> "TypeScript"
+    "python" -> "Python"
+    "rust" -> "Rust"
+    "go" -> "Go"
+    "html" -> "HTML"
+    "css" -> "CSS"
+    "json" -> "JSON"
+    "sql" -> "SQL"
+    "flin" -> "FLIN"
+    _ -> language
+}
+
+<div class={containerClass} style={"--code-min-height: " ++ minHeight ++ "; --code-max-height: " ++ maxHeight}>
+    <header class="code-editor-header">
+        <div class="code-editor-header-left">
+            <div class="code-editor-dots">
+                <span class="code-editor-dot dot-red"></span>
+                <span class="code-editor-dot dot-yellow"></span>
+                <span class="code-editor-dot dot-green"></span>
+            </div>
+        </div>
+        {if showLanguageLabel}
+            <div class="code-editor-language">
+                <span class="code-editor-language-label">{languageDisplay}</span>
+            </div>
+        {/if}
+        <div class="code-editor-header-right">
+            <button
+                type="button"
+                class="code-editor-copy"
+                title="Copy code"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="code-editor-body">
+        {if showLineNumbers}
+            <div class="code-editor-line-numbers" aria-hidden="true">
+                {for line in lines}
+                    <span class="code-editor-line-number">{line}</span>
+                {/for}
+            </div>
+        {/if}
+        <div class="code-editor-content">
+            <textarea
+                class="code-editor-textarea"
+                value={value}
+                placeholder={placeholder}
+                disabled={disabled}
+                readonly={readOnly}
+                input={handleChange}
+                focus={handleFocus}
+                blur={handleBlur}
+                spellcheck="false"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+            ></textarea>
+        </div>
+    </div>
+
+    <footer class="code-editor-footer">
+        <span class="code-editor-status">
+            {lineCount} {match lineCount { 1 -> "line", _ -> "lines" }}
+        </span>
+        <span class="code-editor-status">
+            {value.len} characters
+        </span>
+    </footer>
+</div>
+
+<style scoped>
+.code-editor {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+    font-family: var(--flin-font-mono);
+}
+
+/* Dark theme (default) */
+.code-editor-dark {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+}
+
+.code-editor-dark .code-editor-header {
+    background-color: #2d2d2d;
+    border-bottom: 1px solid #404040;
+}
+
+.code-editor-dark .code-editor-textarea {
+    color: #d4d4d4;
+}
+
+.code-editor-dark .code-editor-textarea::placeholder {
+    color: #6a6a6a;
+}
+
+.code-editor-dark .code-editor-line-numbers {
+    color: #858585;
+    background-color: #252526;
+    border-right: 1px solid #333;
+}
+
+.code-editor-dark .code-editor-footer {
+    background-color: #007acc;
+    color: white;
+}
+
+.code-editor-dark .code-editor-language-label {
+    color: #cccccc;
+}
+
+.code-editor-dark .code-editor-copy {
+    color: #858585;
+}
+
+.code-editor-dark .code-editor-copy:hover {
+    color: #cccccc;
+    background-color: #404040;
+}
+
+/* Light theme */
+.code-editor-light {
+    background-color: #ffffff;
+    border: 1px solid var(--flin-neutral-300);
+}
+
+.code-editor-light .code-editor-header {
+    background-color: #f3f3f3;
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.code-editor-light .code-editor-textarea {
+    color: #1f1f1f;
+}
+
+.code-editor-light .code-editor-textarea::placeholder {
+    color: #a0a0a0;
+}
+
+.code-editor-light .code-editor-line-numbers {
+    color: #858585;
+    background-color: #f8f8f8;
+    border-right: 1px solid var(--flin-neutral-200);
+}
+
+.code-editor-light .code-editor-footer {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.code-editor-light .code-editor-language-label {
+    color: #616161;
+}
+
+.code-editor-light .code-editor-copy {
+    color: #616161;
+}
+
+.code-editor-light .code-editor-copy:hover {
+    color: #1f1f1f;
+    background-color: var(--flin-neutral-200);
+}
+
+/* Header */
+.code-editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    min-height: 36px;
+}
+
+.code-editor-header-left,
+.code-editor-header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.code-editor-dots {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.code-editor-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.dot-red { background-color: #ff5f56; }
+.dot-yellow { background-color: #ffbd2e; }
+.dot-green { background-color: #27c93f; }
+
+.code-editor-language {
+    display: flex;
+    align-items: center;
+}
+
+.code-editor-language-label {
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.code-editor-copy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-space-7);
+    height: var(--flin-space-7);
+    padding: 0;
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    background: transparent;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.code-editor-copy svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+/* Body */
+.code-editor-body {
+    display: flex;
+    min-height: var(--code-min-height, 200px);
+    max-height: var(--code-max-height, 500px);
+    overflow: auto;
+}
+
+.code-editor-line-numbers {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: var(--flin-space-3) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    line-height: 1.5;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.code-editor-line-number {
+    min-width: 2ch;
+    text-align: right;
+}
+
+.code-editor-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.code-editor-textarea {
+    width: 100%;
+    height: 100%;
+    min-height: var(--code-min-height, 200px);
+    padding: var(--flin-space-3);
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-sm);
+    line-height: 1.5;
+    background: transparent;
+    border: none;
+    resize: none;
+    outline: none;
+    tab-size: 4;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+}
+
+/* Footer */
+.code-editor-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-1) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+}
+
+.code-editor-status {
+    opacity: 0.8;
+}
+
+/* Focus state */
+.code-editor-focused {
+    box-shadow: 0 0 0 2px var(--flin-primary);
+}
+
+/* Disabled state */
+.code-editor-disabled {
+    opacity: 0.6;
+}
+
+.code-editor-disabled .code-editor-textarea {
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .code-editor-header {
+        padding: var(--flin-space-2);
+    }
+
+    .code-editor-dots {
+        display: none;
+    }
+}
+</style>

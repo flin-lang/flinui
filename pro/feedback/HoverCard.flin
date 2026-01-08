@@ -1,0 +1,425 @@
+// HoverCard.flin - FlinUI PRO Hover Card Component
+// Rich preview card that appears on hover with delay support
+
+// Props with defaults
+trigger = props.trigger || ""
+content = props.content || ""
+delay = props.delay || 300
+closeDelay = props.closeDelay || 150
+placement = props.placement || "bottom"
+align = props.align || "center"
+width = props.width || 320
+disabled = props.disabled || false
+arrow = props.arrow || true
+
+// Internal state
+isOpen = false
+isExiting = false
+
+// Handle trigger enter
+handleTriggerEnter = {
+    if !disabled {
+        isOpen = true
+        isExiting = false
+    }
+}
+
+// Handle trigger leave
+handleTriggerLeave = {
+    isExiting = true
+    isOpen = false
+}
+
+// Handle content enter (keep open)
+handleContentEnter = {
+    isExiting = false
+}
+
+// Handle content leave
+handleContentLeave = {
+    isExiting = true
+    isOpen = false
+}
+
+// Handle focus for keyboard accessibility
+handleFocus = {
+    if !disabled {
+        isOpen = true
+        isExiting = false
+    }
+}
+
+handleBlur = {
+    isExiting = true
+    isOpen = false
+}
+
+// Handle escape key
+handleKeyDown = {
+    if isOpen {
+        isExiting = true
+        isOpen = false
+    }
+}
+
+// Placement class
+placementClass = match placement {
+    "top" -> "hover-card--top"
+    "left" -> "hover-card--left"
+    "right" -> "hover-card--right"
+    _ -> "hover-card--bottom"
+}
+
+// Align class
+alignClass = match align {
+    "start" -> " hover-card--align-start"
+    "end" -> " hover-card--align-end"
+    _ -> " hover-card--align-center"
+}
+
+// Arrow class
+arrowClass = match arrow { true -> "", _ -> " hover-card--no-arrow" }
+
+// Exiting class
+exitingClass = match isExiting { true -> " hover-card--exiting", _ -> "" }
+
+// Disabled class
+disabledClass = match disabled { true -> " hover-card-wrapper--disabled", _ -> "" }
+
+// Width style
+widthStyle = "width: " ++ width ++ "px"
+
+// Tabindex based on disabled
+tabindexValue = match disabled { true -> "-1", _ -> "0" }
+
+<div
+    class={"flin-pro-hover-card-wrapper" ++ disabledClass}
+    keydown={handleKeyDown}
+>
+    <div
+        class="hover-card__trigger"
+        mouseenter={handleTriggerEnter}
+        mouseleave={handleTriggerLeave}
+        focus={handleFocus}
+        blur={handleBlur}
+        tabindex={tabindexValue}
+        aria-haspopup="dialog"
+    >
+        {children}
+    </div>
+
+    {if isOpen}
+        <div
+            class={"flin-pro-hover-card " ++ placementClass ++ alignClass ++ arrowClass ++ exitingClass}
+            style={widthStyle}
+            mouseenter={handleContentEnter}
+            mouseleave={handleContentLeave}
+            role="dialog"
+            aria-modal="false"
+        >
+            {if arrow}
+                <div class="hover-card__arrow"></div>
+            {/if}
+
+            <div class="hover-card__content">
+                {if content != ""}
+                    <div class="hover-card__text">{content}</div>
+                {/if}
+
+                <div class="hover-card__body">
+                    <!-- Children content renders here -->
+                </div>
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-pro-hover-card-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.hover-card-wrapper--disabled {
+    cursor: not-allowed;
+}
+
+.hover-card-wrapper--disabled .hover-card__trigger {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* Trigger */
+.hover-card__trigger {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.hover-card__trigger:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+    border-radius: var(--flin-radius-sm);
+}
+
+/* Hover Card */
+.flin-pro-hover-card {
+    position: absolute;
+    z-index: 9998;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-xl);
+    animation: hoverCardFadeIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes hoverCardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hover-card--exiting {
+    animation: hoverCardFadeOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes hoverCardFadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+}
+
+/* Content */
+.hover-card__content {
+    overflow: hidden;
+    border-radius: var(--flin-radius-xl);
+}
+
+.hover-card__text {
+    padding: var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    line-height: 1.6;
+    color: var(--flin-fg);
+}
+
+.hover-card__body {
+    /* For slot content */
+}
+
+.hover-card__body:empty {
+    display: none;
+}
+
+/* Arrow */
+.hover-card__arrow {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    transform: rotate(45deg);
+}
+
+/* Position: Bottom */
+.hover-card--bottom {
+    top: 100%;
+    margin-top: var(--flin-space-3);
+}
+
+.hover-card--bottom.hover-card--align-center {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.hover-card--bottom.hover-card--align-start {
+    left: 0;
+}
+
+.hover-card--bottom.hover-card--align-end {
+    right: 0;
+}
+
+.hover-card--bottom .hover-card__arrow {
+    top: -7px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.hover-card--bottom.hover-card--align-center .hover-card__arrow {
+    left: 50%;
+    margin-left: -6px;
+}
+
+.hover-card--bottom.hover-card--align-start .hover-card__arrow {
+    left: 24px;
+}
+
+.hover-card--bottom.hover-card--align-end .hover-card__arrow {
+    right: 24px;
+}
+
+/* Position: Top */
+.hover-card--top {
+    bottom: 100%;
+    margin-bottom: var(--flin-space-3);
+}
+
+.hover-card--top.hover-card--align-center {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.hover-card--top.hover-card--align-start {
+    left: 0;
+}
+
+.hover-card--top.hover-card--align-end {
+    right: 0;
+}
+
+.hover-card--top .hover-card__arrow {
+    bottom: -7px;
+    border-left: none;
+    border-top: none;
+}
+
+.hover-card--top.hover-card--align-center .hover-card__arrow {
+    left: 50%;
+    margin-left: -6px;
+}
+
+.hover-card--top.hover-card--align-start .hover-card__arrow {
+    left: 24px;
+}
+
+.hover-card--top.hover-card--align-end .hover-card__arrow {
+    right: 24px;
+}
+
+/* Top animation */
+.hover-card--top {
+    animation-name: hoverCardFadeInTop;
+}
+
+@keyframes hoverCardFadeInTop {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hover-card--top.hover-card--align-center {
+    animation-name: hoverCardFadeInTopCenter;
+}
+
+@keyframes hoverCardFadeInTopCenter {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Position: Left */
+.hover-card--left {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: var(--flin-space-3);
+    animation-name: hoverCardFadeInLeft;
+}
+
+@keyframes hoverCardFadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+.hover-card--left .hover-card__arrow {
+    right: -7px;
+    top: 50%;
+    margin-top: -6px;
+    border-left: none;
+    border-bottom: none;
+}
+
+/* Position: Right */
+.hover-card--right {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: var(--flin-space-3);
+    animation-name: hoverCardFadeInRight;
+}
+
+@keyframes hoverCardFadeInRight {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+.hover-card--right .hover-card__arrow {
+    left: -7px;
+    top: 50%;
+    margin-top: -6px;
+    border-right: none;
+    border-top: none;
+}
+
+/* No arrow */
+.hover-card--no-arrow .hover-card__arrow {
+    display: none;
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-pro-hover-card {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .hover-card__arrow {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .flin-pro-hover-card {
+        max-width: calc(100vw - var(--flin-space-8));
+    }
+
+    .hover-card--left,
+    .hover-card--right {
+        left: 50%;
+        right: auto;
+        top: 100%;
+        bottom: auto;
+        transform: translateX(-50%);
+        margin-left: 0;
+        margin-right: 0;
+        margin-top: var(--flin-space-3);
+    }
+}
+</style>

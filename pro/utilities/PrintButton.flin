@@ -1,0 +1,304 @@
+// ============================================================================
+// PrintButton.flin — FlinUI PRO Utility Component
+// Print page button with customization options
+// ============================================================================
+// Props:
+//   - label: Button label (string, default: "Print")
+//   - variant: Button variant - primary, secondary, outline, ghost (string, default: "secondary")
+//   - size: Button size - sm, md, lg (string, default: "md")
+//   - showIcon: Show print icon (boolean, default: true)
+//   - iconPosition: Icon position - left, right (string, default: "left")
+//   - printTarget: CSS selector for print target (string or none for full page)
+//   - pageTitle: Custom page title for print (string or none)
+//   - beforePrint: Callback before printing (function or none)
+//   - afterPrint: Callback after printing (function or none)
+// ============================================================================
+
+label = props.label || "Print"
+variant = props.variant || "secondary"
+size = props.size || "md"
+showIcon = props.showIcon || true
+iconPosition = props.iconPosition || "left"
+printTarget = props.printTarget || none
+pageTitle = props.pageTitle || none
+beforePrint = props.beforePrint || none
+afterPrint = props.afterPrint || none
+
+// State
+isPrinting = false
+
+// Handle print
+handlePrint = () => {
+    isPrinting = true
+
+    // Call before print callback
+    if beforePrint != none {
+        beforePrint()
+    }
+
+    // Store original title
+    originalTitle = document.title
+
+    // Set custom page title if provided
+    if pageTitle != none {
+        document.title = pageTitle
+    }
+
+    // If printing specific target
+    if printTarget != none {
+        targetElement = document.querySelector(printTarget)
+        if targetElement != none {
+            // Create print container
+            printContainer = document.createElement("div")
+            printContainer.className = "flin-print-container"
+            printContainer.innerHTML = targetElement.innerHTML
+
+            // Hide original content
+            document.body.style.visibility = "hidden"
+            printContainer.style.visibility = "visible"
+            printContainer.style.position = "absolute"
+            printContainer.style.top = "0"
+            printContainer.style.left = "0"
+            printContainer.style.width = "100%"
+
+            document.body.appendChild(printContainer)
+
+            // Print
+            window.print()
+
+            // Cleanup
+            document.body.removeChild(printContainer)
+            document.body.style.visibility = "visible"
+        }
+    } else {
+        // Print full page
+        window.print()
+    }
+
+    // Restore original title
+    if pageTitle != none {
+        document.title = originalTitle
+    }
+
+    isPrinting = false
+
+    // Call after print callback
+    if afterPrint != none {
+        afterPrint()
+    }
+}
+
+// Icon component
+printIcon = <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd"/>
+</svg>
+
+<button
+    class="flin-print-button variant-{variant} size-{size} {if isPrinting}printing{/if}"
+    click={handlePrint}
+    disabled={isPrinting}
+    aria-label={label}
+>
+    {if showIcon && iconPosition == "left"}
+        <span class="btn-icon">{printIcon}</span>
+    {/if}
+
+    <span class="btn-label">{label}</span>
+
+    {if showIcon && iconPosition == "right"}
+        <span class="btn-icon">{printIcon}</span>
+    {/if}
+
+    {if isPrinting}
+        <span class="btn-spinner">
+            <svg class="spinner" width="16" height="16" viewBox="0 0 16 16">
+                <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="31.4" stroke-dashoffset="10"/>
+            </svg>
+        </span>
+    {/if}
+</button>
+
+<style scoped>
+.flin-print-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    font-family: var(--flin-font-body);
+    font-weight: var(--flin-font-medium);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    position: relative;
+}
+
+/* Sizes */
+.size-sm {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+}
+
+.size-md {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+}
+
+.size-lg {
+    padding: var(--flin-space-3) var(--flin-space-5);
+    font-size: var(--flin-text-base);
+}
+
+/* Variants */
+.variant-primary {
+    background: var(--flin-accent-gold);
+    border: none;
+    color: var(--flin-neutral-900);
+}
+
+.variant-primary:hover:not(:disabled) {
+    background: #d4a20a;
+}
+
+.variant-secondary {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    color: var(--flin-text-secondary);
+}
+
+.variant-secondary:hover:not(:disabled) {
+    background: var(--flin-bg-surface-hover);
+    color: var(--flin-text-primary);
+    border-color: var(--flin-border-default);
+}
+
+.variant-outline {
+    background: transparent;
+    border: 1px solid var(--flin-border-default);
+    color: var(--flin-text-primary);
+}
+
+.variant-outline:hover:not(:disabled) {
+    background: var(--flin-bg-surface);
+}
+
+.variant-ghost {
+    background: transparent;
+    border: none;
+    color: var(--flin-text-secondary);
+}
+
+.variant-ghost:hover:not(:disabled) {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-primary);
+}
+
+/* Icon */
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.size-sm .btn-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.size-lg .btn-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* Label */
+.btn-label {
+    white-space: nowrap;
+}
+
+/* Spinner */
+.btn-spinner {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Printing state */
+.printing {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.printing .btn-icon,
+.printing .btn-label {
+    opacity: 0;
+}
+
+/* Disabled */
+.flin-print-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Print styles - hide button when printing */
+@media print {
+    .flin-print-button {
+        display: none !important;
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .variant-secondary {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .variant-secondary:hover:not(:disabled) {
+    background: var(--flin-bg-elevated);
+}
+
+[data-theme="dark"] .variant-outline {
+    border-color: var(--flin-border-subtle);
+}
+</style>
+
+// Global print styles
+<style>
+@media print {
+    .flin-print-container {
+        visibility: visible !important;
+    }
+
+    /* Improve print readability */
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Hide non-essential elements */
+    nav,
+    footer,
+    aside,
+    .no-print {
+        display: none !important;
+    }
+
+    /* Page breaks */
+    h1, h2, h3 {
+        page-break-after: avoid;
+    }
+
+    table, figure {
+        page-break-inside: avoid;
+    }
+}
+</style>

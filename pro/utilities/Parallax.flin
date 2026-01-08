@@ -1,0 +1,129 @@
+// ============================================================================
+// Parallax.flin — FlinUI PRO Utility Component
+// Scroll parallax effect for depth and visual interest
+// ============================================================================
+// Props:
+//   - speed: Parallax speed - negative values move opposite (number, default: 0.5)
+//   - direction: Movement direction - vertical, horizontal (string, default: "vertical")
+//   - disabled: Disable parallax effect (boolean, default: false)
+//   - scale: Scale effect on scroll (number or none, default: none)
+//   - opacity: Fade effect based on scroll - none, in, out, both (string, default: "none")
+//   - rootMargin: Observer root margin (string, default: "0px")
+// ============================================================================
+
+speed = props.speed || 0.5
+direction = props.direction || "vertical"
+disabled = props.disabled || false
+scale = props.scale || none
+opacity = props.opacity || "none"
+rootMargin = props.rootMargin || "0px"
+
+// State
+translateValue = 0
+scaleValue = 1
+opacityValue = 1
+isInView = false
+
+// Calculate parallax values based on scroll
+updateParallax = () => {
+    if disabled { return }
+    if !isInView { return }
+
+    rect = element.getBoundingClientRect()
+    windowHeight = window.innerHeight
+
+    // Calculate how far through the viewport the element is
+    elementCenter = rect.top + rect.height / 2
+    viewportCenter = windowHeight / 2
+    progress = (elementCenter - viewportCenter) / windowHeight
+
+    // Calculate translate
+    translateValue = progress * speed * 100
+
+    // Calculate scale if enabled
+    if scale != none {
+        scaleProgress = Math.abs(progress)
+        scaleValue = 1 + (scale - 1) * (1 - scaleProgress)
+    }
+
+    // Calculate opacity if enabled
+    match opacity {
+        "in" -> opacityValue = 1 - Math.abs(progress) * 2
+        "out" -> opacityValue = Math.abs(progress) * 2
+        "both" -> opacityValue = 1 - Math.abs(progress)
+        _ -> opacityValue = 1
+    }
+    opacityValue = Math.max(0, Math.min(1, opacityValue))
+}
+
+// Handle scroll
+handleScroll = () => {
+    requestAnimationFrame(updateParallax)
+}
+
+// Handle intersection
+handleIntersection = (entries) => {
+    for entry in entries {
+        isInView = entry.isIntersecting
+    }
+}
+
+// Lifecycle
+onMount = () => {
+    if !disabled {
+        // Set up intersection observer
+        observer = new IntersectionObserver(handleIntersection, {
+            rootMargin: rootMargin
+        })
+        observer.observe(element)
+
+        // Listen to scroll
+        window.addEventListener("scroll", handleScroll, { passive: true })
+        updateParallax()
+    }
+}
+
+onUnmount = () => {
+    window.removeEventListener("scroll", handleScroll)
+}
+
+// Compute transform
+getTransform = () => {
+    transforms = []
+
+    if direction == "vertical" {
+        transforms.push("translateY({translateValue}px)")
+    } else {
+        transforms.push("translateX({translateValue}px)")
+    }
+
+    if scale != none {
+        transforms.push("scale({scaleValue})")
+    }
+
+    transforms.join(" ")
+}
+
+<div class="flin-parallax {if disabled}disabled{/if}"
+     style="transform: {getTransform()}; opacity: {opacityValue}">
+    {children}
+</div>
+
+<style scoped>
+.flin-parallax {
+    will-change: transform, opacity;
+    transition: none;
+}
+
+.disabled {
+    will-change: auto;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .flin-parallax {
+        transform: none !important;
+        opacity: 1 !important;
+    }
+}
+</style>

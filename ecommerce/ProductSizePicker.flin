@@ -1,0 +1,503 @@
+// ProductSizePicker.flin - FlinUI PRO E-commerce Component
+// Size button group with out of stock states, size guide link, and selected indicator
+
+// Props with defaults
+sizes = props.sizes || [
+    { id: "xs", label: "XS", available: true },
+    { id: "s", label: "S", available: true },
+    { id: "m", label: "M", available: true },
+    { id: "l", label: "L", available: true },
+    { id: "xl", label: "XL", available: true },
+    { id: "2xl", label: "2XL", available: false }
+]
+selectedSize = props.selectedSize || none
+onSizeChange = props.onSizeChange
+onSizeGuideClick = props.onSizeGuideClick
+showSizeGuide = props.showSizeGuide || true
+layout = props.layout || "row"
+
+// State
+activeSizeId = if selectedSize != none then selectedSize else (if sizes.length > 0 && sizes[0].available then sizes[0].id else none)
+
+// Handlers
+fn handleSizeSelect(sizeId) {
+    // Find the size object
+    selectedSizeObj = none
+    isAvailable = false
+
+    {each sizes as size}
+        if size.id == sizeId {
+            selectedSizeObj = size
+            isAvailable = size.available != false
+        }
+    {/each}
+
+    // Only allow selecting available sizes
+    if isAvailable {
+        activeSizeId = sizeId
+        selectedSize = sizeId
+
+        if onSizeChange {
+            onSizeChange({ id: sizeId, ...selectedSizeObj })
+        }
+    }
+}
+
+fn handleSizeGuideClick() {
+    if onSizeGuideClick {
+        onSizeGuideClick()
+    }
+}
+
+// Get current size object
+fn getCurrentSize() {
+    result = none
+    {each sizes as size}
+        if size.id == activeSizeId {
+            result = size
+        }
+    {/each}
+    return result
+}
+
+currentSize = getCurrentSize()
+
+// Layout class
+layoutClass = match layout {
+    "grid" -> "size-picker-grid"
+    "column" -> "size-picker-column"
+    _ -> "size-picker-row"
+}
+
+// Check if size is unavailable
+fn isSizeUnavailable(size) {
+    return size.available == false
+}
+
+// Count available sizes
+availableCount = 0
+{each sizes as size}
+    if size.available != false {
+        availableCount = availableCount + 1
+    }
+{/each}
+
+<div class="size-picker-container {layoutClass}">
+    <!-- Header with Label and Guide -->
+    <div class="size-picker-header">
+        <label class="size-picker-label">
+            Size{if currentSize != none}:{/if}
+            {if currentSize != none}
+                <span class="size-picker-selected">{currentSize.label}</span>
+            {/if}
+        </label>
+
+        {if showSizeGuide}
+            <button
+                class="size-guide-btn"
+                click={handleSizeGuideClick}
+                aria-label="View size guide"
+            >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                Size Guide
+            </button>
+        {/if}
+    </div>
+
+    <!-- Size Buttons -->
+    <div class="size-picker-buttons">
+        {each sizes as size}
+            <button
+                class="size-btn {if size.id == activeSizeId}active{/if} {if isSizeUnavailable(size)}unavailable{/if}"
+                click={fn() { handleSizeSelect(size.id) }}
+                disabled={isSizeUnavailable(size)}
+                aria-label={"Select size " ++ size.label}
+                role="radio"
+                aria-checked={size.id == activeSizeId}
+            >
+                <span class="size-btn-label">{size.label}</span>
+
+                {if size.id == activeSizeId}
+                    <span class="size-btn-checkmark">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </span>
+                {/if}
+
+                {if isSizeUnavailable(size)}
+                    <span class="size-btn-unavailable">Out of Stock</span>
+                {/if}
+            </button>
+        {/each}
+    </div>
+
+    <!-- Selected Size Details -->
+    {if currentSize != none}
+        <div class="size-picker-details">
+            <div class="size-detail-row">
+                <span class="size-detail-label">Selected Size:</span>
+                <span class="size-detail-value">{currentSize.label}</span>
+            </div>
+
+            {if currentSize.available == false}
+                <div class="size-detail-row size-detail-unavailable">
+                    <span class="size-detail-label">Availability:</span>
+                    <span class="size-detail-value">Out of Stock</span>
+                </div>
+            {else}
+                <div class="size-detail-row size-detail-available">
+                    <span class="size-detail-label">Availability:</span>
+                    <span class="size-detail-value">In Stock</span>
+                </div>
+            {/if}
+
+            {if currentSize.measurements}
+                <div class="size-detail-row">
+                    <span class="size-detail-label">Measurements:</span>
+                    <span class="size-detail-value">{currentSize.measurements}</span>
+                </div>
+            {/if}
+        </div>
+    {/if}
+
+    <!-- Availability Summary -->
+    <p class="size-picker-hint">
+        {availableCount} of {sizes.length} sizes available
+    </p>
+</div>
+
+<style scoped>
+/* Container */
+.size-picker-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    width: 100%;
+}
+
+/* Header */
+.size-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-3);
+}
+
+.size-picker-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.size-picker-selected {
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-primary);
+}
+
+/* Size Guide Button */
+.size-guide-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    background-color: transparent;
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-primary);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.size-guide-btn:hover {
+    background-color: var(--flin-primary-light);
+    border-color: var(--flin-primary);
+}
+
+.size-guide-btn:active {
+    transform: scale(0.95);
+}
+
+/* Buttons Container */
+.size-picker-buttons {
+    display: flex;
+    gap: var(--flin-space-2);
+    flex-wrap: wrap;
+}
+
+.size-picker-row .size-picker-buttons {
+    flex-direction: row;
+}
+
+.size-picker-column .size-picker-buttons {
+    flex-direction: column;
+    width: 100%;
+}
+
+.size-picker-grid .size-picker-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: var(--flin-space-2);
+}
+
+/* Size Button */
+.size-btn {
+    position: relative;
+    min-width: 48px;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background-color: white;
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    transition: all var(--flin-transition-fast);
+    text-align: center;
+}
+
+.size-btn:hover:not(:disabled) {
+    border-color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.size-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.size-btn.active {
+    background-color: var(--flin-primary);
+    border-color: var(--flin-primary);
+    color: white;
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.size-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--flin-neutral-50);
+}
+
+/* Column Layout Button Sizing */
+.size-picker-column .size-btn {
+    width: 100%;
+}
+
+.size-picker-grid .size-btn {
+    width: 100%;
+    min-width: auto;
+}
+
+/* Button Label */
+.size-btn-label {
+    display: block;
+}
+
+/* Checkmark */
+.size-btn-checkmark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Unavailable Label */
+.size-btn-unavailable {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-danger);
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.size-btn.unavailable:hover .size-btn-unavailable {
+    opacity: 1;
+}
+
+/* Details Section */
+.size-picker-details {
+    padding: var(--flin-space-3);
+    background-color: var(--flin-neutral-50);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.size-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--flin-space-2) 0;
+}
+
+.size-detail-row:not(:last-child) {
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.size-detail-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-neutral-600);
+}
+
+.size-detail-value {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+}
+
+.size-detail-available .size-detail-value {
+    color: var(--flin-success);
+}
+
+.size-detail-unavailable .size-detail-value {
+    color: var(--flin-danger);
+}
+
+/* Hint Text */
+.size-picker-hint {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-500);
+    margin: 0;
+    text-align: center;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .size-picker-label {
+        color: var(--flin-neutral-100);
+    }
+
+    .size-guide-btn {
+        border-color: var(--flin-neutral-600);
+        color: var(--flin-primary);
+    }
+
+    .size-guide-btn:hover {
+        background-color: var(--flin-primary-light);
+    }
+
+    .size-btn {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-600);
+        color: var(--flin-neutral-100);
+    }
+
+    .size-btn:hover:not(:disabled) {
+        background-color: var(--flin-primary-light);
+        border-color: var(--flin-primary);
+    }
+
+    .size-btn:disabled {
+        background-color: var(--flin-neutral-900);
+    }
+
+    .size-picker-details {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .size-detail-row:not(:last-child) {
+        border-bottom-color: var(--flin-neutral-700);
+    }
+
+    .size-detail-label {
+        color: var(--flin-neutral-400);
+    }
+
+    .size-detail-value {
+        color: var(--flin-neutral-100);
+    }
+
+    .size-picker-hint {
+        color: var(--flin-neutral-500);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .size-picker-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .size-guide-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .size-picker-buttons {
+        width: 100%;
+    }
+
+    .size-picker-row .size-picker-buttons {
+        justify-content: space-around;
+    }
+}
+
+@media (max-width: 480px) {
+    .size-btn {
+        min-width: 44px;
+        padding: var(--flin-space-1) var(--flin-space-2);
+        font-size: var(--flin-text-xs);
+    }
+
+    .size-detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--flin-space-1);
+    }
+}
+
+/* Accessibility */
+.size-btn:focus {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.size-guide-btn:focus {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .size-btn,
+    .size-guide-btn {
+        transition: none;
+    }
+
+    .size-btn:active:not(:disabled) {
+        transform: none;
+    }
+}
+</style>

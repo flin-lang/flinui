@@ -1,0 +1,231 @@
+// ============================================================================
+// SplitPane.flin — FlinUI PRO Shell Component
+// Resizable split panel layout
+// ============================================================================
+// Props:
+//   - direction: Split direction - horizontal, vertical (string, default: "horizontal")
+//   - initialSize: Initial size of first panel in % (number, default: 50)
+//   - minSize: Minimum size of each panel in % (number, default: 20)
+//   - maxSize: Maximum size of first panel in % (number, default: 80)
+//   - gutterSize: Size of the resize gutter in px (number, default: 8)
+//   - collapsed: Which panel is collapsed - none, first, second (string, default: "none")
+//   - onResize: Callback when panels are resized (function or none)
+// ============================================================================
+
+direction = props.direction || "horizontal"
+initialSize = props.initialSize || 50
+minSize = props.minSize || 20
+maxSize = props.maxSize || 80
+gutterSize = props.gutterSize || 8
+collapsed = props.collapsed || "none"
+onResize = props.onResize || none
+
+// State
+currentSize = initialSize
+isDragging = false
+
+// Computed values
+firstPanelSize = match collapsed {
+    "first" -> 0
+    "second" -> 100
+    _ -> currentSize
+}
+
+secondPanelSize = 100 - firstPanelSize
+
+handleMouseDown = (e) => {
+    isDragging = true
+    e.preventDefault()
+}
+
+handleMouseMove = (e) => {
+    if !isDragging { return }
+
+    container = e.currentTarget.parentElement
+    rect = container.getBoundingClientRect()
+
+    newSize = {if direction == "horizontal" {
+        ((e.clientX - rect.left) / rect.width) * 100
+    } else {
+        ((e.clientY - rect.top) / rect.height) * 100
+    }}
+
+    // Clamp to min/max
+    newSize = Math.max(minSize, Math.min(maxSize, newSize))
+    currentSize = newSize
+
+    if onResize != none {
+        onResize(newSize)
+    }
+}
+
+handleMouseUp = () => {
+    isDragging = false
+}
+
+<div class="flin-split-pane direction-{direction} {if isDragging}dragging{/if} collapsed-{collapsed}"
+     style="--gutter-size: {gutterSize}px"
+     mousemove={handleMouseMove}
+     mouseup={handleMouseUp}
+     mouseleave={handleMouseUp}>
+
+    // First panel
+    <div class="split-panel panel-first"
+         style="--panel-size: {firstPanelSize}%">
+        {props.first || none}
+    </div>
+
+    // Gutter/Resize handle
+    {if collapsed == "none"}
+        <div class="split-gutter"
+             mousedown={handleMouseDown}
+             role="separator"
+             aria-orientation={direction}
+             aria-valuenow={currentSize}
+             aria-valuemin={minSize}
+             aria-valuemax={maxSize}>
+            <div class="gutter-handle"></div>
+        </div>
+    {/if}
+
+    // Second panel
+    <div class="split-panel panel-second"
+         style="--panel-size: {secondPanelSize}%">
+        {props.second || children}
+    </div>
+</div>
+
+<style scoped>
+.flin-split-pane {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.direction-vertical {
+    flex-direction: column;
+}
+
+/* Panels */
+.split-panel {
+    overflow: auto;
+}
+
+.direction-horizontal .split-panel {
+    height: 100%;
+    width: var(--panel-size);
+}
+
+.direction-vertical .split-panel {
+    width: 100%;
+    height: var(--panel-size);
+}
+
+.collapsed-first .panel-first,
+.collapsed-second .panel-second {
+    display: none;
+}
+
+/* Gutter */
+.split-gutter {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-bg-surface);
+    transition: background var(--flin-transition-fast);
+    user-select: none;
+}
+
+.direction-horizontal .split-gutter {
+    width: var(--gutter-size);
+    cursor: col-resize;
+    flex-direction: column;
+}
+
+.direction-vertical .split-gutter {
+    height: var(--gutter-size);
+    cursor: row-resize;
+    flex-direction: row;
+}
+
+.split-gutter:hover,
+.dragging .split-gutter {
+    background: var(--flin-bg-surface-hover);
+}
+
+/* Handle */
+.gutter-handle {
+    background: var(--flin-border-default);
+    border-radius: var(--flin-radius-full);
+    transition: background var(--flin-transition-fast);
+}
+
+.direction-horizontal .gutter-handle {
+    width: 4px;
+    height: 32px;
+}
+
+.direction-vertical .gutter-handle {
+    height: 4px;
+    width: 32px;
+}
+
+.split-gutter:hover .gutter-handle,
+.dragging .gutter-handle {
+    background: var(--flin-accent-gold);
+}
+
+/* Dragging state */
+.dragging {
+    cursor: col-resize;
+    user-select: none;
+}
+
+.direction-vertical.dragging {
+    cursor: row-resize;
+}
+
+.dragging .split-panel {
+    pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .direction-horizontal {
+        flex-direction: column;
+    }
+
+    .direction-horizontal .split-panel {
+        width: 100%;
+        height: 50%;
+    }
+
+    .direction-horizontal .split-gutter {
+        width: 100%;
+        height: var(--gutter-size);
+        cursor: row-resize;
+        flex-direction: row;
+    }
+
+    .direction-horizontal .gutter-handle {
+        width: 32px;
+        height: 4px;
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .split-gutter {
+    background: var(--flin-bg-surface);
+}
+
+[data-theme="dark"] .split-gutter:hover,
+[data-theme="dark"] .dragging .split-gutter {
+    background: var(--flin-bg-elevated);
+}
+
+[data-theme="dark"] .gutter-handle {
+    background: var(--flin-border-subtle);
+}
+</style>

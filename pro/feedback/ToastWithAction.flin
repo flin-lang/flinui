@@ -1,0 +1,466 @@
+// ToastWithAction.flin - FlinUI PRO Toast with Action Button
+// Toast notification with an action button (Undo, Retry, etc.)
+
+// Props with defaults
+message = props.message || ""
+action = props.action || "Undo"
+onAction = props.onAction
+duration = props.duration || 8000
+type = props.type || "default"
+position = props.position || "bottom-center"
+title = props.title || ""
+onClose = props.onClose
+
+// Internal state
+visible = true
+isExiting = false
+isPaused = false
+
+// Handle close with exit animation
+handleClose = {
+    isExiting = true
+    visible = false
+    if onClose { onClose() }
+}
+
+// Handle action click
+handleAction = {
+    if onAction { onAction() }
+    handleClose()
+}
+
+// Pause progress on hover
+handleMouseEnter = {
+    isPaused = true
+}
+
+handleMouseLeave = {
+    isPaused = false
+}
+
+// Type class
+typeClass = match type {
+    "success" -> "toast-action--success"
+    "error" -> "toast-action--error"
+    "warning" -> "toast-action--warning"
+    "info" -> "toast-action--info"
+    _ -> "toast-action--default"
+}
+
+// Position class
+positionClass = match position {
+    "top-left" -> "toast-action--top-left"
+    "top-right" -> "toast-action--top-right"
+    "top-center" -> "toast-action--top-center"
+    "bottom-left" -> "toast-action--bottom-left"
+    "bottom-right" -> "toast-action--bottom-right"
+    _ -> "toast-action--bottom-center"
+}
+
+// Exiting class
+exitingClass = match isExiting { true -> " toast-action--exiting", _ -> "" }
+
+// Visibility class
+visibilityClass = match visible { true -> "", _ -> " toast-action--hidden" }
+
+// Paused class
+pausedClass = match isPaused { true -> " toast-action--paused", _ -> "" }
+
+// Duration style
+durationStyle = "animation-duration: " ++ duration ++ "ms"
+
+// Icon path based on type
+iconPath = match type {
+    "success" -> "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+    "error" -> "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+    "warning" -> "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+    "info" -> "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    _ -> ""
+}
+
+// Show icon
+showIcon = match type { "default" -> false, _ -> true }
+
+<div
+    class={"flin-pro-toast-action " ++ typeClass ++ " " ++ positionClass ++ exitingClass ++ visibilityClass ++ pausedClass}
+    role="alert"
+    aria-live="polite"
+    aria-atomic="true"
+    mouseenter={handleMouseEnter}
+    mouseleave={handleMouseLeave}
+>
+    {if showIcon}
+        <div class="toast-action__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
+            </svg>
+        </div>
+    {/if}
+
+    <div class="toast-action__content">
+        {if title != ""}
+            <div class="toast-action__title">{title}</div>
+        {/if}
+        <div class="toast-action__message">{message}</div>
+    </div>
+
+    <div class="toast-action__actions">
+        <button
+            class="toast-action__btn"
+            click={handleAction}
+            type="button"
+        >
+            {action}
+        </button>
+
+        <button
+            class="toast-action__close"
+            click={handleClose}
+            aria-label="Dismiss notification"
+            type="button"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+    {if duration > 0}
+        <div class="toast-action__progress" style={durationStyle}></div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-pro-toast-action {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3) var(--flin-space-4);
+    background: var(--flin-neutral-900);
+    color: white;
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-xl);
+    min-width: 340px;
+    max-width: 500px;
+    position: fixed;
+    z-index: 9999;
+    overflow: hidden;
+    animation: toastActionSlideIn var(--flin-transition-normal) ease-out;
+}
+
+.toast-action--hidden {
+    display: none;
+}
+
+/* Position variants */
+.toast-action--bottom-center {
+    bottom: var(--flin-space-6);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.toast-action--bottom-left {
+    bottom: var(--flin-space-6);
+    left: var(--flin-space-4);
+    animation-name: toastActionSlideInLeft;
+}
+
+.toast-action--bottom-right {
+    bottom: var(--flin-space-6);
+    right: var(--flin-space-4);
+    animation-name: toastActionSlideInRight;
+}
+
+.toast-action--top-center {
+    top: var(--flin-space-6);
+    left: 50%;
+    transform: translateX(-50%);
+    animation-name: toastActionSlideInTop;
+}
+
+.toast-action--top-left {
+    top: var(--flin-space-6);
+    left: var(--flin-space-4);
+    animation-name: toastActionSlideInTopLeft;
+}
+
+.toast-action--top-right {
+    top: var(--flin-space-6);
+    right: var(--flin-space-4);
+    animation-name: toastActionSlideInTopRight;
+}
+
+/* Animations */
+@keyframes toastActionSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes toastActionSlideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toastActionSlideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toastActionSlideInTop {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes toastActionSlideInTopLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toastActionSlideInTopRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Exit animation */
+.toast-action--exiting {
+    animation: toastActionFadeOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes toastActionFadeOut {
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+/* Icon */
+.toast-action__icon {
+    flex-shrink: 0;
+}
+
+.toast-action__icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Content */
+.toast-action__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.toast-action__title {
+    font-weight: 600;
+    font-size: var(--flin-text-sm);
+    margin-bottom: var(--flin-space-1);
+}
+
+.toast-action__message {
+    font-size: var(--flin-text-sm);
+    opacity: 0.9;
+    line-height: 1.4;
+}
+
+/* Actions */
+.toast-action__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    flex-shrink: 0;
+}
+
+.toast-action__btn {
+    background: transparent;
+    border: none;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-primary-light);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+    white-space: nowrap;
+}
+
+.toast-action__btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.toast-action__btn:focus-visible {
+    outline: 2px solid var(--flin-primary-light);
+    outline-offset: 2px;
+}
+
+.toast-action__close {
+    background: transparent;
+    border: none;
+    padding: var(--flin-space-1);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    color: rgba(255, 255, 255, 0.6);
+    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.toast-action__close:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.toast-action__close:focus-visible {
+    outline: 2px solid var(--flin-primary-light);
+    outline-offset: 2px;
+}
+
+.toast-action__close svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Progress bar */
+.toast-action__progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: var(--flin-primary-light);
+    animation: toastActionProgress linear forwards;
+    transform-origin: left;
+}
+
+.toast-action--paused .toast-action__progress {
+    animation-play-state: paused;
+}
+
+@keyframes toastActionProgress {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
+}
+
+/* Type variants */
+.toast-action--success {
+    background: var(--flin-success-active);
+}
+
+.toast-action--success .toast-action__btn {
+    color: white;
+}
+
+.toast-action--success .toast-action__progress {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.toast-action--error {
+    background: var(--flin-danger-active);
+}
+
+.toast-action--error .toast-action__btn {
+    color: white;
+}
+
+.toast-action--error .toast-action__progress {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.toast-action--warning {
+    background: var(--flin-warning-active);
+    color: var(--flin-neutral-900);
+}
+
+.toast-action--warning .toast-action__btn {
+    color: var(--flin-neutral-900);
+}
+
+.toast-action--warning .toast-action__close {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.toast-action--warning .toast-action__close:hover {
+    color: var(--flin-neutral-900);
+}
+
+.toast-action--warning .toast-action__progress {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.toast-action--info {
+    background: var(--flin-info-active);
+}
+
+.toast-action--info .toast-action__btn {
+    color: white;
+}
+
+.toast-action--info .toast-action__progress {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Default dark style */
+.toast-action--default .toast-action__btn {
+    color: var(--flin-primary-light);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .flin-pro-toast-action {
+        min-width: auto;
+        max-width: calc(100vw - var(--flin-space-8));
+        left: var(--flin-space-4);
+        right: var(--flin-space-4);
+        flex-wrap: wrap;
+    }
+
+    .toast-action--bottom-center,
+    .toast-action--top-center {
+        transform: none;
+    }
+
+    .toast-action__actions {
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: var(--flin-space-2);
+        padding-top: var(--flin-space-2);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+}
+</style>

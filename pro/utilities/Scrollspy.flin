@@ -1,0 +1,155 @@
+// ============================================================================
+// Scrollspy.flin — FlinUI PRO Utility Component
+// Section highlight on scroll for navigation
+// ============================================================================
+// Props:
+//   - sections: Array of section IDs to track (list)
+//   - offset: Offset from top to trigger active state in px (number, default: 100)
+//   - activeClass: Class to apply to active nav item (string, default: "active")
+//   - smooth: Use smooth scrolling when clicking (boolean, default: true)
+//   - onSectionChange: Callback when active section changes (function or none)
+// ============================================================================
+
+sections = props.sections || []
+offset = props.offset || 100
+activeClass = props.activeClass || "active"
+smooth = props.smooth || true
+onSectionChange = props.onSectionChange || none
+
+// State
+activeSection = none
+
+// Update active section based on scroll position
+updateActiveSection = () => {
+    scrollY = window.scrollY + offset
+
+    for sectionId in sections {
+        sectionEl = document.getElementById(sectionId)
+        if sectionEl == none { continue }
+
+        rect = sectionEl.getBoundingClientRect()
+        top = rect.top + window.scrollY
+        bottom = top + rect.height
+
+        if scrollY >= top && scrollY < bottom {
+            if activeSection != sectionId {
+                activeSection = sectionId
+                if onSectionChange != none {
+                    onSectionChange(sectionId)
+                }
+            }
+            return
+        }
+    }
+
+    // Check if we're above all sections
+    if sections.length > 0 {
+        firstSection = document.getElementById(sections[0])
+        if firstSection != none {
+            rect = firstSection.getBoundingClientRect()
+            if scrollY < rect.top + window.scrollY {
+                if activeSection != sections[0] {
+                    activeSection = sections[0]
+                    if onSectionChange != none {
+                        onSectionChange(sections[0])
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Handle click on nav item
+handleNavClick = (sectionId, e) => {
+    e.preventDefault()
+
+    targetEl = document.getElementById(sectionId)
+    if targetEl == none { return }
+
+    targetPosition = targetEl.getBoundingClientRect().top + window.scrollY - offset + 10
+
+    if smooth {
+        window.scrollTo({
+            top: targetPosition,
+            behavior: "smooth"
+        })
+    } else {
+        window.scrollTo(0, targetPosition)
+    }
+}
+
+// Check if section is active
+isActive = (sectionId) => sectionId == activeSection
+
+// Lifecycle
+onMount = () => {
+    window.addEventListener("scroll", updateActiveSection, { passive: true })
+    updateActiveSection()
+}
+
+onUnmount = () => {
+    window.removeEventListener("scroll", updateActiveSection)
+}
+
+<nav class="flin-scrollspy" aria-label="Page sections">
+    {for sectionId, index in sections}
+        <a
+            href="#{sectionId}"
+            class="scrollspy-link {if isActive(sectionId)}{activeClass}{/if}"
+            click={(e) => handleNavClick(sectionId, e)}
+            aria-current={if isActive(sectionId)}"true"{else}none{/if}
+        >
+            {props.renderItem ? props.renderItem(sectionId, index, isActive(sectionId)) : sectionId}
+        </a>
+    {/for}
+</nav>
+
+<style scoped>
+.flin-scrollspy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.scrollspy-link {
+    position: relative;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    text-decoration: none;
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+}
+
+.scrollspy-link:hover {
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-surface);
+}
+
+.scrollspy-link.active {
+    color: var(--flin-accent-gold);
+    background: rgba(234, 179, 8, 0.1);
+}
+
+/* Active indicator */
+.scrollspy-link.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 16px;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+}
+
+/* Dark theme */
+[data-theme="dark"] .scrollspy-link:hover {
+    background: var(--flin-bg-surface);
+}
+
+[data-theme="dark"] .scrollspy-link.active {
+    background: rgba(234, 179, 8, 0.15);
+}
+</style>

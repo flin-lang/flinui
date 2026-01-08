@@ -1,0 +1,314 @@
+// DescriptionList.flin - FlinUI PRO
+// Key-value pair display (label: value format)
+
+// Props with defaults
+items = props.items || []
+layout = props.layout || "horizontal"
+striped = props.striped || false
+bordered = props.bordered || false
+size = props.size || "md"
+labelWidth = props.labelWidth || "auto"
+align = props.align || "left"
+
+// Compute layout class
+layoutClass = match layout {
+    "vertical" -> "desc-list--vertical"
+    "inline" -> "desc-list--inline"
+    _ -> "desc-list--horizontal"
+}
+
+// Compute size class
+sizeClass = match size {
+    "sm" -> "desc-list--sm"
+    "lg" -> "desc-list--lg"
+    _ -> "desc-list--md"
+}
+
+// Compute align class
+alignClass = match align {
+    "right" -> "desc-list--align-right"
+    "center" -> "desc-list--align-center"
+    _ -> "desc-list--align-left"
+}
+
+// Build class string
+listClass = "desc-list " ++ layoutClass ++ " " ++ sizeClass ++ " " ++ alignClass
+listClass = listClass ++ {if striped { " desc-list--striped" } else { "" }}
+listClass = listClass ++ {if bordered { " desc-list--bordered" } else { "" }}
+
+<dl class={listClass} style={if labelWidth != "auto" { "--label-width: " ++ labelWidth } else { "" }}>
+    {for item in items}
+        <div class={"desc-list__item" ++ {if item.fullWidth { " desc-list__item--full" } else { "" }}}>
+            <dt class="desc-list__label">
+                {if item.icon != none}
+                    <span class="desc-list__icon">{item.icon}</span>
+                {/if}
+                <span class="desc-list__label-text">{item.label || ""}</span>
+                {if item.required}
+                    <span class="desc-list__required">*</span>
+                {/if}
+                {if item.tooltip != none}
+                    <span class="desc-list__tooltip" title={item.tooltip}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </span>
+                {/if}
+            </dt>
+            <dd class="desc-list__value">
+                {if item.value != none}
+                    {if item.copyable}
+                        <span class="desc-list__copyable">
+                            <span class="desc-list__value-text">{item.value}</span>
+                            <button class="desc-list__copy-btn" aria-label="Copy value">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                                </svg>
+                            </button>
+                        </span>
+                    {else if item.link != none}
+                        <a class="desc-list__link" href={item.link}>{item.value}</a>
+                    {else if item.badge != none}
+                        <span class={"desc-list__badge desc-list__badge--" ++ (item.badgeVariant || "default")}>
+                            {item.value}
+                        </span>
+                    {else}
+                        <span class="desc-list__value-text">{item.value}</span>
+                    {/if}
+                {else}
+                    <span class="desc-list__empty">-</span>
+                {/if}
+                {if item.secondary != none}
+                    <span class="desc-list__secondary">{item.secondary}</span>
+                {/if}
+            </dd>
+        </div>
+    {/for}
+
+    // Empty state
+    {if items.length == 0}
+        <div class="desc-list__empty-state">
+            <span>No data available</span>
+        </div>
+    {/if}
+</dl>
+
+<style scoped>
+.desc-list {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    width: 100%;
+}
+
+/* Layout variants */
+.desc-list--horizontal .desc-list__item {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    width: 50%;
+}
+
+.desc-list--vertical .desc-list__item {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.desc-list--inline {
+    flex-direction: row;
+    gap: var(--flin-space-4);
+}
+
+.desc-list--inline .desc-list__item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+    gap: var(--flin-space-2);
+}
+
+/* Size variants */
+.desc-list--sm .desc-list__item { padding: var(--flin-space-2); }
+.desc-list--md .desc-list__item { padding: var(--flin-space-3); }
+.desc-list--lg .desc-list__item { padding: var(--flin-space-4); }
+
+.desc-list--sm { font-size: var(--flin-text-xs); }
+.desc-list--md { font-size: var(--flin-text-sm); }
+.desc-list--lg { font-size: var(--flin-text-base); }
+
+/* Alignment variants */
+.desc-list--align-left .desc-list__value { text-align: left; }
+.desc-list--align-right .desc-list__value { text-align: right; }
+.desc-list--align-center .desc-list__value { text-align: center; }
+
+/* Modifiers */
+.desc-list--striped .desc-list__item:nth-child(even) {
+    background-color: var(--flin-neutral-50);
+}
+
+.desc-list--bordered {
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+}
+
+.desc-list--bordered .desc-list__item:not(:last-child) {
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.desc-list__item {
+    gap: var(--flin-space-2);
+}
+
+.desc-list__item--full {
+    width: 100% !important;
+}
+
+.desc-list__label {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+    min-width: var(--label-width, 120px);
+    margin: 0;
+}
+
+.desc-list--vertical .desc-list__label {
+    min-width: auto;
+    margin-bottom: var(--flin-space-1);
+}
+
+.desc-list--inline .desc-list__label {
+    min-width: auto;
+}
+
+.desc-list__icon {
+    display: flex;
+    align-items: center;
+    color: var(--flin-neutral-400);
+}
+
+.desc-list__label-text {
+    white-space: nowrap;
+}
+
+.desc-list__required {
+    color: var(--flin-danger);
+    margin-left: 2px;
+}
+
+.desc-list__tooltip {
+    display: flex;
+    align-items: center;
+    color: var(--flin-neutral-400);
+    cursor: help;
+}
+
+.desc-list__value {
+    flex: 1;
+    color: var(--flin-fg);
+    margin: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.desc-list__value-text {
+    word-break: break-word;
+}
+
+.desc-list__copyable {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.desc-list__copy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-1);
+    border: none;
+    background: none;
+    color: var(--flin-neutral-400);
+    cursor: pointer;
+    border-radius: var(--flin-radius-sm);
+    transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.desc-list__copy-btn:hover {
+    color: var(--flin-primary);
+    background-color: var(--flin-neutral-100);
+}
+
+.desc-list__link {
+    color: var(--flin-primary);
+    text-decoration: none;
+}
+
+.desc-list__link:hover {
+    text-decoration: underline;
+}
+
+.desc-list__badge {
+    display: inline-flex;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    border-radius: var(--flin-radius-full);
+}
+
+.desc-list__badge--default { background-color: var(--flin-neutral-100); color: var(--flin-neutral-700); }
+.desc-list__badge--success { background-color: var(--flin-success-light); color: var(--flin-success-dark); }
+.desc-list__badge--warning { background-color: var(--flin-warning-light); color: var(--flin-warning-dark); }
+.desc-list__badge--danger { background-color: var(--flin-danger-light); color: var(--flin-danger-dark); }
+.desc-list__badge--info { background-color: var(--flin-info-light); color: var(--flin-info-dark); }
+.desc-list__badge--primary { background-color: var(--flin-primary-light); color: var(--flin-primary); }
+
+.desc-list__empty {
+    color: var(--flin-neutral-400);
+}
+
+.desc-list__secondary {
+    font-size: 0.9em;
+    color: var(--flin-fg-muted);
+}
+
+.desc-list__empty-state {
+    width: 100%;
+    padding: var(--flin-space-6);
+    text-align: center;
+    color: var(--flin-fg-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .desc-list--horizontal .desc-list__item {
+        width: 100%;
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .desc-list--striped .desc-list__item:nth-child(even) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .desc-list--bordered {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .desc-list--bordered .desc-list__item:not(:last-child) {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .desc-list__copy-btn:hover {
+    background-color: var(--flin-neutral-700);
+}
+</style>

@@ -1,0 +1,286 @@
+// OTPInput.flin - FlinUI PRO Authentication Component
+// 6-digit code input with separate boxes for OTP/2FA
+
+// Props with defaults
+length = props.length || 6
+value = props.value || ""
+disabled = props.disabled || false
+error = props.error || false
+size = props.size || "md"
+autoFocus = props.autoFocus || true
+separator = props.separator || true
+separatorPosition = props.separatorPosition || 3
+onChange = props.onChange
+onComplete = props.onComplete
+
+// Internal digits array
+digits = []
+{for i in range(0, length)}
+    digits.push(value.charAt(i) || "")
+{/for}
+
+// Handle digit input
+handleInput = (index, e) => {
+    inputValue = e.target.value
+
+    // Only accept single digit
+    if /^[0-9]$/.test(inputValue) {
+        newDigits = [...digits]
+        newDigits[index] = inputValue
+
+        // Update value
+        newValue = newDigits.join("")
+        if onChange {
+            onChange(newValue)
+        }
+
+        // Auto-focus next input
+        if index < length - 1 {
+            nextInput = e.target.parentElement.querySelector('[data-index="' ++ (index + 1) ++ '"]')
+            if nextInput {
+                nextInput.focus()
+            }
+        }
+
+        // Call onComplete when all digits filled
+        if newValue.length == length && onComplete {
+            onComplete(newValue)
+        }
+    } else if inputValue == "" {
+        // Allow clearing
+        newDigits = [...digits]
+        newDigits[index] = ""
+        if onChange {
+            onChange(newDigits.join(""))
+        }
+    }
+}
+
+// Handle keydown for navigation
+handleKeyDown = (index, e) => {
+    if e.key == "Backspace" && digits[index] == "" && index > 0 {
+        // Move to previous input on backspace if current is empty
+        prevInput = e.target.parentElement.querySelector('[data-index="' ++ (index - 1) ++ '"]')
+        if prevInput {
+            prevInput.focus()
+        }
+    } else if e.key == "ArrowLeft" && index > 0 {
+        prevInput = e.target.parentElement.querySelector('[data-index="' ++ (index - 1) ++ '"]')
+        if prevInput {
+            prevInput.focus()
+        }
+    } else if e.key == "ArrowRight" && index < length - 1 {
+        nextInput = e.target.parentElement.querySelector('[data-index="' ++ (index + 1) ++ '"]')
+        if nextInput {
+            nextInput.focus()
+        }
+    }
+}
+
+// Handle paste
+handlePaste = (e) => {
+    e.preventDefault()
+    pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, length)
+
+    if pastedData.length > 0 {
+        if onChange {
+            onChange(pastedData)
+        }
+        if pastedData.length == length && onComplete {
+            onComplete(pastedData)
+        }
+    }
+}
+
+// Compute size class
+sizeClass = match size {
+    "sm" -> "otp-input--sm"
+    "lg" -> "otp-input--lg"
+    _ -> "otp-input--md"
+}
+
+// Compute error class
+errorClass = match error {
+    true -> " otp-input--error"
+    _ -> ""
+}
+
+// Compute disabled class
+disabledClass = match disabled {
+    true -> " otp-input--disabled"
+    _ -> ""
+}
+
+<div class={"otp-input " ++ sizeClass ++ errorClass ++ disabledClass} role="group" aria-label="One-time password">
+    {for i in range(0, length)}
+        {if separator && i == separatorPosition}
+            <span class="otp-input__separator" aria-hidden="true">-</span>
+        {/if}
+        <input
+            type="text"
+            class="otp-input__digit"
+            maxlength="1"
+            inputmode="numeric"
+            pattern="[0-9]"
+            value={digits[i]}
+            disabled={disabled}
+            data-index={i}
+            input={(e) => handleInput(i, e)}
+            keydown={(e) => handleKeyDown(i, e)}
+            paste={handlePaste}
+            focus={(e) => e.target.select()}
+            autocomplete="one-time-code"
+            aria-label={"Digit " ++ (i + 1) ++ " of " ++ length}
+        />
+    {/for}
+</div>
+
+<style scoped>
+.otp-input {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.otp-input__digit {
+    width: 48px;
+    height: 56px;
+    padding: 0;
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-semibold);
+    text-align: center;
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    transition: all var(--flin-transition-fast);
+    caret-color: var(--flin-primary);
+}
+
+.otp-input__digit::placeholder {
+    color: var(--flin-neutral-300);
+}
+
+.otp-input__digit:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.otp-input__digit:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.otp-input__separator {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg-muted);
+    margin: 0 var(--flin-space-1);
+    user-select: none;
+}
+
+/* Size variants */
+.otp-input--sm {
+    gap: var(--flin-space-1);
+}
+
+.otp-input--sm .otp-input__digit {
+    width: 38px;
+    height: 46px;
+    font-size: var(--flin-text-lg);
+    border-radius: var(--flin-radius-sm);
+}
+
+.otp-input--sm .otp-input__separator {
+    font-size: var(--flin-text-base);
+}
+
+.otp-input--lg {
+    gap: var(--flin-space-3);
+}
+
+.otp-input--lg .otp-input__digit {
+    width: 60px;
+    height: 70px;
+    font-size: var(--flin-text-3xl);
+    border-radius: var(--flin-radius-lg);
+}
+
+.otp-input--lg .otp-input__separator {
+    font-size: var(--flin-text-2xl);
+}
+
+/* Error state */
+.otp-input--error .otp-input__digit {
+    border-color: var(--flin-danger);
+    background-color: var(--flin-danger-light);
+}
+
+.otp-input--error .otp-input__digit:focus {
+    border-color: var(--flin-danger);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+/* Disabled state */
+.otp-input--disabled .otp-input__digit {
+    background-color: var(--flin-bg-muted);
+    color: var(--flin-fg-muted);
+    cursor: not-allowed;
+    border-color: var(--flin-neutral-200);
+}
+
+/* Hide spin buttons */
+.otp-input__digit::-webkit-outer-spin-button,
+.otp-input__digit::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.otp-input__digit[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Dark theme */
+[data-theme="dark"] .otp-input__digit {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+    color: var(--flin-fg);
+}
+
+[data-theme="dark"] .otp-input__digit:hover:not(:disabled) {
+    border-color: var(--flin-neutral-500);
+}
+
+[data-theme="dark"] .otp-input--disabled .otp-input__digit {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .otp-input--error .otp-input__digit {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .otp-input {
+        gap: var(--flin-space-1);
+    }
+
+    .otp-input__digit {
+        width: 40px;
+        height: 48px;
+        font-size: var(--flin-text-xl);
+    }
+
+    .otp-input--lg .otp-input__digit {
+        width: 48px;
+        height: 56px;
+        font-size: var(--flin-text-2xl);
+    }
+
+    .otp-input__separator {
+        margin: 0;
+    }
+}
+</style>

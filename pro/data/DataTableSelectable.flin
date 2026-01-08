@@ -1,0 +1,473 @@
+// FlinUI PRO DataTableSelectable Component
+// Row selection with checkboxes and select all functionality
+
+// Props with defaults
+columns = props.columns || []
+data = props.data || []
+loading = props.loading || false
+emptyText = props.emptyText || "No data available"
+striped = props.striped || false
+hoverable = props.hoverable || true
+bordered = props.bordered || false
+rowKey = props.rowKey || "id"
+onSelectionChange = props.onSelectionChange || none
+singleSelect = props.singleSelect || false
+
+// State
+selectedRows = []
+selectAll = false
+
+// Computed classes
+stripedClass = match striped {
+    true -> " pro-datatable-selectable--striped"
+    _ -> ""
+}
+
+hoverableClass = match hoverable {
+    true -> " pro-datatable-selectable--hoverable"
+    _ -> ""
+}
+
+borderedClass = match bordered {
+    true -> " pro-datatable-selectable--bordered"
+    _ -> ""
+}
+
+tableClass = "pro-datatable-selectable" ++ stripedClass ++ hoverableClass ++ borderedClass
+
+// Selection handlers
+isRowSelected = (row) => {
+    selectedRows.includes(row[rowKey])
+}
+
+toggleRowSelection = (row) => {
+    rowId = row[rowKey]
+
+    if singleSelect {
+        if isRowSelected(row) {
+            selectedRows = []
+        } else {
+            selectedRows = [rowId]
+        }
+    } else {
+        if isRowSelected(row) {
+            selectedRows = selectedRows.filter((id) => id != rowId)
+        } else {
+            selectedRows = [...selectedRows, rowId]
+        }
+    }
+
+    selectAll = selectedRows.length == data.length && data.length > 0
+
+    if onSelectionChange != none {
+        onSelectionChange(selectedRows, getSelectedData())
+    }
+}
+
+toggleSelectAll = {
+    if selectAll {
+        selectedRows = []
+        selectAll = false
+    } else {
+        selectedRows = data.map((row) => row[rowKey])
+        selectAll = true
+    }
+
+    if onSelectionChange != none {
+        onSelectionChange(selectedRows, getSelectedData())
+    }
+}
+
+getSelectedData = () => {
+    data.filter((row) => selectedRows.includes(row[rowKey]))
+}
+
+clearSelection = {
+    selectedRows = []
+    selectAll = false
+    if onSelectionChange != none {
+        onSelectionChange([], [])
+    }
+}
+
+<div class="pro-datatable-selectable-container">
+    {if selectedRows.length > 0}
+        <div class="pro-datatable-selectable__toolbar">
+            <span class="pro-datatable-selectable__selection-count">
+                <strong>{selectedRows.length}</strong> of {data.length} selected
+            </span>
+            <button
+                class="pro-datatable-selectable__clear-btn"
+                click={clearSelection}
+            >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+                Clear selection
+            </button>
+        </div>
+    {/if}
+
+    <div class="pro-datatable-selectable__wrapper">
+        <table class={tableClass}>
+            <thead class="pro-datatable-selectable__head">
+                <tr class="pro-datatable-selectable__row pro-datatable-selectable__row--header">
+                    <th class="pro-datatable-selectable__header pro-datatable-selectable__header--checkbox" scope="col">
+                        {if !singleSelect}
+                            <label class="pro-datatable-selectable__checkbox-wrapper">
+                                <input
+                                    type="checkbox"
+                                    class="pro-datatable-selectable__checkbox"
+                                    checked={selectAll}
+                                    indeterminate={selectedRows.length > 0 && selectedRows.length < data.length}
+                                    change={toggleSelectAll}
+                                    aria-label="Select all rows"
+                                />
+                                <span class="pro-datatable-selectable__checkbox-custom"></span>
+                            </label>
+                        {/if}
+                    </th>
+                    {for column in columns}
+                        <th class="pro-datatable-selectable__header" scope="col">
+                            {column.label || column.key}
+                        </th>
+                    {/for}
+                </tr>
+            </thead>
+
+            <tbody class="pro-datatable-selectable__body">
+                {if loading}
+                    <tr class="pro-datatable-selectable__row">
+                        <td class="pro-datatable-selectable__cell pro-datatable-selectable__loading" colspan={columns.length + 1}>
+                            <div class="pro-datatable-selectable__spinner"></div>
+                            <span>Loading data...</span>
+                        </td>
+                    </tr>
+                {else if data.length == 0}
+                    <tr class="pro-datatable-selectable__row">
+                        <td class="pro-datatable-selectable__cell pro-datatable-selectable__empty" colspan={columns.length + 1}>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M3 9h18"/>
+                                <path d="M9 21V9"/>
+                            </svg>
+                            <span>{emptyText}</span>
+                        </td>
+                    </tr>
+                {else}
+                    {for row in data}
+                        <tr
+                            class={"pro-datatable-selectable__row" ++ (if isRowSelected(row) { " pro-datatable-selectable__row--selected" } else { "" })}
+                            click={toggleRowSelection(row)}
+                        >
+                            <td class="pro-datatable-selectable__cell pro-datatable-selectable__cell--checkbox">
+                                <label class="pro-datatable-selectable__checkbox-wrapper" click={(e) => e.stopPropagation()}>
+                                    <input
+                                        type={if singleSelect { "radio" } else { "checkbox" }}
+                                        class="pro-datatable-selectable__checkbox"
+                                        checked={isRowSelected(row)}
+                                        change={toggleRowSelection(row)}
+                                        name={if singleSelect { "table-select" } else { none }}
+                                        aria-label={"Select row " ++ row[rowKey]}
+                                    />
+                                    <span class="pro-datatable-selectable__checkbox-custom"></span>
+                                </label>
+                            </td>
+                            {for column in columns}
+                                <td class="pro-datatable-selectable__cell">
+                                    {row[column.key]}
+                                </td>
+                            {/for}
+                        </tr>
+                    {/for}
+                {/if}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style scoped>
+.pro-datatable-selectable-container {
+    font-family: var(--flin-font-sans);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+.pro-datatable-selectable__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    background: color-mix(in srgb, var(--flin-primary) 8%, var(--flin-bg));
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-selectable__selection-count {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+}
+
+.pro-datatable-selectable__selection-count strong {
+    color: var(--flin-primary);
+}
+
+.pro-datatable-selectable__clear-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-1-5) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.pro-datatable-selectable__clear-btn:hover {
+    color: var(--flin-fg);
+    border-color: var(--flin-neutral-300);
+}
+
+.pro-datatable-selectable__wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pro-datatable-selectable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--flin-text-sm);
+    text-align: left;
+}
+
+.pro-datatable-selectable__head {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-selectable__header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    white-space: nowrap;
+    border-bottom: var(--flin-space-0-5) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-selectable__header--checkbox {
+    width: var(--flin-size-12);
+    text-align: center;
+    padding: var(--flin-space-3) var(--flin-space-2);
+}
+
+.pro-datatable-selectable__row {
+    transition: background-color var(--flin-transition-fast);
+    cursor: pointer;
+}
+
+.pro-datatable-selectable__row--selected {
+    background-color: color-mix(in srgb, var(--flin-primary) 8%, var(--flin-bg));
+}
+
+.pro-datatable-selectable__cell {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    color: var(--flin-fg);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-selectable__cell--checkbox {
+    width: var(--flin-size-12);
+    text-align: center;
+    padding: var(--flin-space-3) var(--flin-space-2);
+}
+
+.pro-datatable-selectable__body .pro-datatable-selectable__row:last-child .pro-datatable-selectable__cell {
+    border-bottom: none;
+}
+
+/* Custom checkbox */
+.pro-datatable-selectable__checkbox-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.pro-datatable-selectable__checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.pro-datatable-selectable__checkbox-custom {
+    display: inline-block;
+    width: var(--flin-size-4-5);
+    height: var(--flin-size-4-5);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-sm);
+    transition: all var(--flin-transition-fast);
+}
+
+.pro-datatable-selectable__checkbox:checked + .pro-datatable-selectable__checkbox-custom {
+    background: var(--flin-primary);
+    border-color: var(--flin-primary);
+}
+
+.pro-datatable-selectable__checkbox:checked + .pro-datatable-selectable__checkbox-custom::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: var(--flin-space-1);
+    height: var(--flin-space-2);
+    border: solid white;
+    border-width: 0 2px 2px 0;
+}
+
+.pro-datatable-selectable__checkbox:indeterminate + .pro-datatable-selectable__checkbox-custom {
+    background: var(--flin-primary);
+    border-color: var(--flin-primary);
+}
+
+.pro-datatable-selectable__checkbox:indeterminate + .pro-datatable-selectable__checkbox-custom::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: var(--flin-space-2);
+    height: 2px;
+    background: white;
+}
+
+.pro-datatable-selectable__checkbox:focus-visible + .pro-datatable-selectable__checkbox-custom {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--flin-primary) 30%, transparent);
+}
+
+/* Variants */
+.pro-datatable-selectable--striped .pro-datatable-selectable__body .pro-datatable-selectable__row:nth-child(even):not(.pro-datatable-selectable__row--selected) {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-selectable--hoverable .pro-datatable-selectable__body .pro-datatable-selectable__row:hover:not(.pro-datatable-selectable__row--selected) {
+    background-color: var(--flin-neutral-100);
+}
+
+.pro-datatable-selectable--hoverable .pro-datatable-selectable__body .pro-datatable-selectable__row--selected:hover {
+    background-color: color-mix(in srgb, var(--flin-primary) 12%, var(--flin-bg));
+}
+
+.pro-datatable-selectable--bordered .pro-datatable-selectable__header,
+.pro-datatable-selectable--bordered .pro-datatable-selectable__cell {
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+/* Loading state */
+.pro-datatable-selectable__loading {
+    text-align: center;
+    padding: var(--flin-space-10) var(--flin-space-4);
+    cursor: default;
+}
+
+.pro-datatable-selectable__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-selectable__spinner {
+    width: var(--flin-icon-lg);
+    height: var(--flin-icon-lg);
+    border: var(--flin-space-0-5) solid var(--flin-neutral-200);
+    border-top-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    animation: pro-datatable-selectable-spin var(--flin-duration-slow) linear infinite;
+}
+
+@keyframes pro-datatable-selectable-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty state */
+.pro-datatable-selectable__empty {
+    text-align: center;
+    padding: var(--flin-space-12) var(--flin-space-4);
+    cursor: default;
+}
+
+.pro-datatable-selectable__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-selectable__empty svg {
+    color: var(--flin-neutral-300);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .pro-datatable-selectable-container {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-selectable__toolbar {
+    background: color-mix(in srgb, var(--flin-primary) 10%, var(--flin-neutral-900));
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-selectable__clear-btn {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .pro-datatable-selectable__head {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-selectable__header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-selectable__cell {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-selectable__row--selected {
+    background-color: color-mix(in srgb, var(--flin-primary) 15%, var(--flin-neutral-900));
+}
+
+[data-theme="dark"] .pro-datatable-selectable__checkbox-custom {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .pro-datatable-selectable--striped .pro-datatable-selectable__body .pro-datatable-selectable__row:nth-child(even):not(.pro-datatable-selectable__row--selected) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-selectable--hoverable .pro-datatable-selectable__body .pro-datatable-selectable__row:hover:not(.pro-datatable-selectable__row--selected) {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-selectable__spinner {
+    border-color: var(--flin-neutral-700);
+    border-top-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .pro-datatable-selectable__empty svg {
+    color: var(--flin-neutral-600);
+}
+</style>

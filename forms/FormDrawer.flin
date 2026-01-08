@@ -1,0 +1,355 @@
+// FormDrawer.flin - FlinUI Slide-out Form Panel Component
+// Form in a drawer/sheet that slides from the edge
+
+// Props with defaults
+isOpen = props.isOpen || false
+onClose = props.close
+title = props.title || none
+description = props.description || none
+position = props.position || "right"
+size = props.size || "md"
+showOverlay = props.showOverlay || true
+closeOnOverlay = props.closeOnOverlay || true
+closeOnEscape = props.closeOnEscape || true
+onSubmit = props.submit
+
+// Compute position class
+positionClass = match position {
+    "left" -> " form-drawer-left"
+    "top" -> " form-drawer-top"
+    "bottom" -> " form-drawer-bottom"
+    _ -> " form-drawer-right"
+}
+
+// Compute size class
+sizeClass = match size {
+    "sm" -> " form-drawer-sm"
+    "lg" -> " form-drawer-lg"
+    "xl" -> " form-drawer-xl"
+    "full" -> " form-drawer-full"
+    _ -> " form-drawer-md"
+}
+
+// Compute open state class
+openClass = match isOpen {
+    true -> " form-drawer-open"
+    _ -> ""
+}
+
+containerClass = "form-drawer" ++ positionClass ++ sizeClass ++ openClass
+
+// Handle overlay click
+handleOverlayClick = {
+    if closeOnOverlay && onClose {
+        onClose()
+    }
+}
+
+// Handle escape key
+handleKeydown = {
+    if closeOnEscape && event.key == "Escape" && onClose {
+        onClose()
+    }
+}
+
+// Handle form submission
+handleSubmit = {
+    event.preventDefault()
+    if onSubmit { onSubmit(event) }
+}
+
+<div class={containerClass} keydown={handleKeydown}>
+    {if showOverlay && isOpen}
+        <div class="form-drawer-overlay" click={handleOverlayClick}></div>
+    {/if}
+
+    <aside class="form-drawer-panel" role="dialog" aria-modal="true">
+        <header class="form-drawer-header">
+            <div class="form-drawer-header-content">
+                {if title != none}
+                    <h2 class="form-drawer-title">{title}</h2>
+                {/if}
+                {if description != none}
+                    <p class="form-drawer-description">{description}</p>
+                {/if}
+            </div>
+            <button
+                type="button"
+                class="form-drawer-close"
+                click={onClose}
+                aria-label="Close"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </header>
+
+        <form class="form-drawer-body" submit={handleSubmit} novalidate>
+            <div class="form-drawer-content">
+                {children}
+            </div>
+        </form>
+
+        <footer class="form-drawer-footer">
+            <button
+                type="button"
+                class="form-drawer-btn form-drawer-btn-cancel"
+                click={onClose}
+            >
+                Cancel
+            </button>
+            <button
+                type="submit"
+                class="form-drawer-btn form-drawer-btn-submit"
+                form="form-drawer-form"
+            >
+                Save
+            </button>
+        </footer>
+    </aside>
+</div>
+
+<style scoped>
+.form-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: var(--flin-z-modal);
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.form-drawer-open {
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* Overlay */
+.form-drawer-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity var(--flin-transition-normal);
+}
+
+.form-drawer-open .form-drawer-overlay {
+    opacity: 1;
+}
+
+/* Panel */
+.form-drawer-panel {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--flin-bg);
+    box-shadow: var(--flin-shadow-xl);
+    transition: transform var(--flin-transition-normal);
+}
+
+/* Position variants */
+.form-drawer-right .form-drawer-panel {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    transform: translateX(100%);
+}
+
+.form-drawer-right.form-drawer-open .form-drawer-panel {
+    transform: translateX(0);
+}
+
+.form-drawer-left .form-drawer-panel {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+}
+
+.form-drawer-left.form-drawer-open .form-drawer-panel {
+    transform: translateX(0);
+}
+
+.form-drawer-top .form-drawer-panel {
+    top: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(-100%);
+}
+
+.form-drawer-top.form-drawer-open .form-drawer-panel {
+    transform: translateY(0);
+}
+
+.form-drawer-bottom .form-drawer-panel {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(100%);
+}
+
+.form-drawer-bottom.form-drawer-open .form-drawer-panel {
+    transform: translateY(0);
+}
+
+/* Size variants (for left/right) */
+.form-drawer-sm .form-drawer-panel {
+    width: 320px;
+}
+
+.form-drawer-md .form-drawer-panel {
+    width: 400px;
+}
+
+.form-drawer-lg .form-drawer-panel {
+    width: 560px;
+}
+
+.form-drawer-xl .form-drawer-panel {
+    width: 720px;
+}
+
+.form-drawer-full .form-drawer-panel {
+    width: 100%;
+}
+
+/* Size variants (for top/bottom) */
+.form-drawer-top .form-drawer-panel,
+.form-drawer-bottom .form-drawer-panel {
+    width: 100%;
+    max-height: 80vh;
+}
+
+/* Header */
+.form-drawer-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-6);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    flex-shrink: 0;
+}
+
+.form-drawer-header-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.form-drawer-title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+    line-height: 1.4;
+}
+
+.form-drawer-description {
+    margin: var(--flin-space-1) 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.5;
+}
+
+.form-drawer-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-space-8);
+    height: var(--flin-space-8);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    background-color: transparent;
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    flex-shrink: 0;
+}
+
+.form-drawer-close:hover {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-fg);
+}
+
+.form-drawer-close svg {
+    width: var(--flin-icon-md);
+    height: var(--flin-icon-md);
+}
+
+/* Body */
+.form-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-drawer-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-6);
+}
+
+/* Footer */
+.form-drawer-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-top: 1px solid var(--flin-neutral-200);
+    background-color: var(--flin-neutral-50);
+    flex-shrink: 0;
+}
+
+.form-drawer-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.form-drawer-btn-cancel {
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    color: var(--flin-fg);
+}
+
+.form-drawer-btn-cancel:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.form-drawer-btn-submit {
+    background-color: var(--flin-primary);
+    border: 1px solid var(--flin-primary);
+    color: white;
+}
+
+.form-drawer-btn-submit:hover {
+    background-color: var(--flin-primary-dark);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .form-drawer-sm .form-drawer-panel,
+    .form-drawer-md .form-drawer-panel,
+    .form-drawer-lg .form-drawer-panel,
+    .form-drawer-xl .form-drawer-panel {
+        width: 100%;
+    }
+
+    .form-drawer-header,
+    .form-drawer-content,
+    .form-drawer-footer {
+        padding: var(--flin-space-4);
+    }
+}
+</style>

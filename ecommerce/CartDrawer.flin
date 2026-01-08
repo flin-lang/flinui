@@ -1,0 +1,629 @@
+// CartDrawer.flin - FlinUI PRO E-commerce Component
+// Slide-in cart drawer with items list, scrolling, and quick checkout
+
+// Props with defaults
+isOpen = props.isOpen || false
+items = props.items || []
+subtotal = props.subtotal || 0
+itemCount = props.itemCount || 0
+onClose = props.onClose
+onCheckout = props.onCheckout
+onContinueShopping = props.onContinueShopping
+onItemRemove = props.onItemRemove
+onQuantityChange = props.onQuantityChange
+position = props.position || "right"
+currency = props.currency || "$"
+
+// Computed values
+formattedSubtotal = currency ++ subtotal
+hasItems = items.length > 0
+
+// Position class
+drawerPositionClass = match position {
+    "left" -> "cart-drawer-left"
+    _ -> "cart-drawer-right"
+}
+
+overlayClass = match isOpen {
+    true -> "cart-drawer-overlay cart-drawer-overlay-visible"
+    _ -> "cart-drawer-overlay"
+}
+
+drawerClass = match isOpen {
+    true -> "cart-drawer " ++ drawerPositionClass ++ " cart-drawer-open"
+    _ -> "cart-drawer " ++ drawerPositionClass
+}
+
+// Handlers
+fn handleOverlayClick() {
+    if onClose {
+        onClose()
+    }
+}
+
+fn handleCloseClick() {
+    if onClose {
+        onClose()
+    }
+}
+
+fn handleCheckoutClick() {
+    if onCheckout {
+        onCheckout()
+    }
+}
+
+fn handleContinueShopping() {
+    if onContinueShopping {
+        onContinueShopping()
+    } else if onClose {
+        onClose()
+    }
+}
+
+fn handleItemRemove(itemId) {
+    if onItemRemove {
+        onItemRemove(itemId)
+    }
+}
+
+fn handleQuantityChange(itemId, newQuantity) {
+    if onQuantityChange {
+        onQuantityChange(itemId, newQuantity)
+    }
+}
+
+<div>
+    <div class={overlayClass} click={handleOverlayClick}></div>
+
+    <div class={drawerClass}>
+        <div class="cart-drawer-header">
+            <div class="cart-drawer-title-wrapper">
+                <h2 class="cart-drawer-title">Shopping Cart</h2>
+                {if hasItems}
+                    <span class="cart-drawer-count">({itemCount} items)</span>
+                {/if}
+            </div>
+            <button
+                class="cart-drawer-close"
+                click={handleCloseClick}
+                aria-label="Close cart"
+            >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="cart-drawer-body">
+            {if hasItems}
+                <div class="cart-drawer-items">
+                    {for item in items}
+                        <div class="cart-drawer-item">
+                            <div class="cart-drawer-item-image">
+                                {if item.image}
+                                    <img src={item.image} alt={item.name} loading="lazy" />
+                                {else}
+                                    <div class="cart-drawer-item-placeholder">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                                            <path d="M21 15l-5-5L5 21"/>
+                                        </svg>
+                                    </div>
+                                {/if}
+                            </div>
+
+                            <div class="cart-drawer-item-content">
+                                <div class="cart-drawer-item-header">
+                                    <h4 class="cart-drawer-item-name">{item.name}</h4>
+                                    <button
+                                        class="cart-drawer-item-remove"
+                                        click={() => handleItemRemove(item.id)}
+                                        aria-label="Remove item"
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="18" y1="6" x2="6" y2="18"/>
+                                            <line x1="6" y1="6" x2="18" y2="18"/>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                {if item.variant || item.size || item.color}
+                                    <p class="cart-drawer-item-variant">
+                                        {if item.size}{item.size}{/if}
+                                        {if item.color && item.size} • {/if}
+                                        {if item.color}{item.color}{/if}
+                                        {if item.variant && (item.size || item.color)} • {/if}
+                                        {if item.variant}{item.variant}{/if}
+                                    </p>
+                                {/if}
+
+                                <div class="cart-drawer-item-footer">
+                                    <div class="cart-drawer-item-quantity">
+                                        <button
+                                            class="cart-drawer-qty-btn"
+                                            click={() => handleQuantityChange(item.id, item.quantity - 1)}
+                                            disabled={item.quantity <= 1}
+                                            aria-label="Decrease quantity"
+                                        >
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                            </svg>
+                                        </button>
+
+                                        <span class="cart-drawer-qty-value">{item.quantity}</span>
+
+                                        <button
+                                            class="cart-drawer-qty-btn"
+                                            click={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                            aria-label="Increase quantity"
+                                        >
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <span class="cart-drawer-item-price">{currency}{item.price * item.quantity}</span>
+                                </div>
+                            </div>
+                        </div>
+                    {/for}
+                </div>
+            {else}
+                <div class="cart-drawer-empty">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="9" cy="21" r="1"/>
+                        <circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+                    <p class="cart-drawer-empty-text">Your cart is empty</p>
+                    <button class="cart-drawer-empty-cta" click={handleContinueShopping}>
+                        Start Shopping
+                    </button>
+                </div>
+            {/if}
+        </div>
+
+        {if hasItems}
+            <div class="cart-drawer-footer">
+                <div class="cart-drawer-subtotal">
+                    <span class="cart-drawer-subtotal-label">Subtotal</span>
+                    <span class="cart-drawer-subtotal-value">{formattedSubtotal}</span>
+                </div>
+
+                <p class="cart-drawer-shipping-note">Shipping and taxes calculated at checkout</p>
+
+                <button class="cart-drawer-checkout" click={handleCheckoutClick}>
+                    <span>Checkout</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </button>
+
+                <button class="cart-drawer-continue" click={handleContinueShopping}>
+                    Continue Shopping
+                </button>
+            </div>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+/* Overlay */
+.cart-drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--flin-transition-normal);
+    z-index: 999;
+}
+
+.cart-drawer-overlay-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Drawer */
+.cart-drawer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 420px;
+    background-color: white;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--flin-transition-normal);
+    z-index: 1000;
+}
+
+.cart-drawer-right {
+    right: 0;
+    transform: translateX(100%);
+}
+
+.cart-drawer-left {
+    left: 0;
+    transform: translateX(-100%);
+}
+
+.cart-drawer-open.cart-drawer-right,
+.cart-drawer-open.cart-drawer-left {
+    transform: translateX(0);
+}
+
+/* Header */
+.cart-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--flin-space-6) var(--flin-space-6) var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.cart-drawer-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.cart-drawer-title {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+    margin: 0;
+}
+
+.cart-drawer-count {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-500);
+}
+
+.cart-drawer-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-neutral-600);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.cart-drawer-close:hover {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-900);
+}
+
+/* Body */
+.cart-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--flin-space-4) var(--flin-space-6);
+}
+
+/* Items list */
+.cart-drawer-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.cart-drawer-item {
+    display: flex;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    background-color: var(--flin-neutral-50);
+    border-radius: var(--flin-radius-lg);
+}
+
+.cart-drawer-item-image {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+    background-color: white;
+}
+
+.cart-drawer-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cart-drawer-item-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-neutral-400);
+}
+
+.cart-drawer-item-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+    min-width: 0;
+}
+
+.cart-drawer-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--flin-space-2);
+}
+
+.cart-drawer-item-name {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+    line-height: 1.4;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cart-drawer-item-remove {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    color: var(--flin-neutral-500);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.cart-drawer-item-remove:hover {
+    background-color: var(--flin-danger-light);
+    color: var(--flin-danger);
+}
+
+.cart-drawer-item-variant {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-600);
+    margin: 0;
+}
+
+.cart-drawer-item-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.cart-drawer-item-quantity {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.cart-drawer-qty-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background-color: white;
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-sm);
+    color: var(--flin-neutral-700);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.cart-drawer-qty-btn:hover:not(:disabled) {
+    background-color: var(--flin-primary);
+    border-color: var(--flin-primary);
+    color: white;
+}
+
+.cart-drawer-qty-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.cart-drawer-qty-value {
+    min-width: 24px;
+    text-align: center;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+}
+
+.cart-drawer-item-price {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+}
+
+/* Empty state */
+.cart-drawer-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-12) var(--flin-space-4);
+    text-align: center;
+    color: var(--flin-neutral-400);
+}
+
+.cart-drawer-empty-text {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-neutral-600);
+    margin: var(--flin-space-4) 0 var(--flin-space-6) 0;
+}
+
+.cart-drawer-empty-cta {
+    padding: var(--flin-space-3) var(--flin-space-6);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.cart-drawer-empty-cta:hover {
+    background-color: var(--flin-primary-hover);
+}
+
+/* Footer */
+.cart-drawer-footer {
+    padding: var(--flin-space-6);
+    border-top: 1px solid var(--flin-neutral-200);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.cart-drawer-subtotal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cart-drawer-subtotal-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-700);
+}
+
+.cart-drawer-subtotal-value {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+}
+
+.cart-drawer-shipping-note {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-500);
+    text-align: center;
+    margin: 0;
+}
+
+.cart-drawer-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    padding: var(--flin-space-4) var(--flin-space-6);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.cart-drawer-checkout:hover {
+    background-color: var(--flin-primary-hover);
+}
+
+.cart-drawer-continue {
+    width: 100%;
+    padding: var(--flin-space-3) var(--flin-space-6);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-primary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color var(--flin-transition-fast);
+}
+
+.cart-drawer-continue:hover {
+    color: var(--flin-primary-hover);
+    text-decoration: underline;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .cart-drawer {
+        background-color: var(--flin-neutral-900);
+    }
+
+    .cart-drawer-header {
+        border-bottom-color: var(--flin-neutral-700);
+    }
+
+    .cart-drawer-title,
+    .cart-drawer-item-name,
+    .cart-drawer-item-price,
+    .cart-drawer-qty-value,
+    .cart-drawer-subtotal-value {
+        color: var(--flin-neutral-100);
+    }
+
+    .cart-drawer-item {
+        background-color: var(--flin-neutral-800);
+    }
+
+    .cart-drawer-item-image {
+        background-color: var(--flin-neutral-900);
+    }
+
+    .cart-drawer-qty-btn {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-600);
+        color: var(--flin-neutral-300);
+    }
+
+    .cart-drawer-footer {
+        border-top-color: var(--flin-neutral-700);
+    }
+
+    .cart-drawer-subtotal-label {
+        color: var(--flin-neutral-300);
+    }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .cart-drawer {
+        max-width: 100%;
+    }
+}
+</style>

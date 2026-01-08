@@ -1,0 +1,287 @@
+// ============================================================================
+// Resizable.flin — FlinUI PRO Utility Component
+// Resize handle panel for adjustable layouts
+// ============================================================================
+// Props:
+//   - minWidth: Minimum width in px (number, default: 100)
+//   - maxWidth: Maximum width in px (number or none, default: none)
+//   - minHeight: Minimum height in px (number, default: 100)
+//   - maxHeight: Maximum height in px (number or none, default: none)
+//   - initialWidth: Initial width in px (number or none)
+//   - initialHeight: Initial height in px (number or none)
+//   - handles: Which handles to show - all, horizontal, vertical, corners (string, default: "all")
+//   - aspectRatio: Maintain aspect ratio (boolean, default: false)
+//   - disabled: Disable resizing (boolean, default: false)
+//   - onResize: Callback during resize (function or none)
+//   - onResizeEnd: Callback when resize ends (function or none)
+// ============================================================================
+
+minWidth = props.minWidth || 100
+maxWidth = props.maxWidth || none
+minHeight = props.minHeight || 100
+maxHeight = props.maxHeight || none
+initialWidth = props.initialWidth || none
+initialHeight = props.initialHeight || none
+handles = props.handles || "all"
+aspectRatio = props.aspectRatio || false
+disabled = props.disabled || false
+onResize = props.onResize || none
+onResizeEnd = props.onResizeEnd || none
+
+// State
+width = initialWidth || none
+height = initialHeight || none
+isResizing = false
+activeHandle = none
+startX = 0
+startY = 0
+startWidth = 0
+startHeight = 0
+ratio = none
+
+// Handle resize start
+handleResizeStart = (handle, e) => {
+    if disabled { return }
+    e.preventDefault()
+
+    isResizing = true
+    activeHandle = handle
+    startX = e.clientX
+    startY = e.clientY
+
+    rect = element.getBoundingClientRect()
+    startWidth = rect.width
+    startHeight = rect.height
+
+    if aspectRatio && ratio == none {
+        ratio = startWidth / startHeight
+    }
+
+    document.addEventListener("mousemove", handleResizeMove)
+    document.addEventListener("mouseup", handleResizeEnd)
+}
+
+// Handle resize move
+handleResizeMove = (e) => {
+    if !isResizing { return }
+
+    deltaX = e.clientX - startX
+    deltaY = e.clientY - startY
+
+    newWidth = startWidth
+    newHeight = startHeight
+
+    // Calculate new dimensions based on active handle
+    if activeHandle.includes("e") {
+        newWidth = startWidth + deltaX
+    }
+    if activeHandle.includes("w") {
+        newWidth = startWidth - deltaX
+    }
+    if activeHandle.includes("s") {
+        newHeight = startHeight + deltaY
+    }
+    if activeHandle.includes("n") {
+        newHeight = startHeight - deltaY
+    }
+
+    // Apply aspect ratio constraint
+    if aspectRatio && ratio != none {
+        if activeHandle.includes("e") || activeHandle.includes("w") {
+            newHeight = newWidth / ratio
+        } else {
+            newWidth = newHeight * ratio
+        }
+    }
+
+    // Apply constraints
+    newWidth = Math.max(minWidth, newWidth)
+    newHeight = Math.max(minHeight, newHeight)
+
+    if maxWidth != none {
+        newWidth = Math.min(maxWidth, newWidth)
+    }
+    if maxHeight != none {
+        newHeight = Math.min(maxHeight, newHeight)
+    }
+
+    width = newWidth
+    height = newHeight
+
+    if onResize != none {
+        onResize({ width: newWidth, height: newHeight })
+    }
+}
+
+// Handle resize end
+handleResizeEnd = () => {
+    isResizing = false
+    activeHandle = none
+
+    document.removeEventListener("mousemove", handleResizeMove)
+    document.removeEventListener("mouseup", handleResizeEnd)
+
+    if onResizeEnd != none {
+        onResizeEnd({ width, height })
+    }
+}
+
+// Check if handle should show
+showHandle = (handle) => {
+    if disabled { return false }
+    match handles {
+        "all" -> true
+        "horizontal" -> handle == "e" || handle == "w"
+        "vertical" -> handle == "n" || handle == "s"
+        "corners" -> handle.length == 2
+        _ -> true
+    }
+}
+
+<div class="flin-resizable {if isResizing}resizing{/if} {if disabled}disabled{/if}"
+     style="{if width != none}width: {width}px;{/if} {if height != none}height: {height}px;{/if}">
+
+    <div class="resizable-content">
+        {children}
+    </div>
+
+    // Edge handles
+    {if showHandle("n")}
+        <div class="resize-handle handle-n" mousedown={(e) => handleResizeStart("n", e)}></div>
+    {/if}
+    {if showHandle("s")}
+        <div class="resize-handle handle-s" mousedown={(e) => handleResizeStart("s", e)}></div>
+    {/if}
+    {if showHandle("e")}
+        <div class="resize-handle handle-e" mousedown={(e) => handleResizeStart("e", e)}></div>
+    {/if}
+    {if showHandle("w")}
+        <div class="resize-handle handle-w" mousedown={(e) => handleResizeStart("w", e)}></div>
+    {/if}
+
+    // Corner handles
+    {if showHandle("ne")}
+        <div class="resize-handle handle-ne" mousedown={(e) => handleResizeStart("ne", e)}></div>
+    {/if}
+    {if showHandle("nw")}
+        <div class="resize-handle handle-nw" mousedown={(e) => handleResizeStart("nw", e)}></div>
+    {/if}
+    {if showHandle("se")}
+        <div class="resize-handle handle-se" mousedown={(e) => handleResizeStart("se", e)}></div>
+    {/if}
+    {if showHandle("sw")}
+        <div class="resize-handle handle-sw" mousedown={(e) => handleResizeStart("sw", e)}></div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-resizable {
+    position: relative;
+    display: inline-block;
+}
+
+.resizable-content {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+/* Resize handles */
+.resize-handle {
+    position: absolute;
+    background: transparent;
+    z-index: 10;
+}
+
+/* Edge handles */
+.handle-n,
+.handle-s {
+    left: 8px;
+    right: 8px;
+    height: 8px;
+    cursor: ns-resize;
+}
+
+.handle-n { top: -4px; }
+.handle-s { bottom: -4px; }
+
+.handle-e,
+.handle-w {
+    top: 8px;
+    bottom: 8px;
+    width: 8px;
+    cursor: ew-resize;
+}
+
+.handle-e { right: -4px; }
+.handle-w { left: -4px; }
+
+/* Corner handles */
+.handle-ne,
+.handle-nw,
+.handle-se,
+.handle-sw {
+    width: 12px;
+    height: 12px;
+}
+
+.handle-ne {
+    top: -4px;
+    right: -4px;
+    cursor: nesw-resize;
+}
+
+.handle-nw {
+    top: -4px;
+    left: -4px;
+    cursor: nwse-resize;
+}
+
+.handle-se {
+    bottom: -4px;
+    right: -4px;
+    cursor: nwse-resize;
+}
+
+.handle-sw {
+    bottom: -4px;
+    left: -4px;
+    cursor: nesw-resize;
+}
+
+/* Corner handle visual */
+.handle-se::after {
+    content: "";
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--flin-border-default);
+    border-bottom: 2px solid var(--flin-border-default);
+}
+
+/* Resizing state */
+.resizing {
+    user-select: none;
+}
+
+.resizing .resize-handle {
+    background: rgba(234, 179, 8, 0.1);
+}
+
+/* Disabled */
+.disabled .resize-handle {
+    display: none;
+}
+
+/* Hover indicator */
+.resize-handle:hover {
+    background: rgba(234, 179, 8, 0.1);
+}
+
+/* Dark theme */
+[data-theme="dark"] .handle-se::after {
+    border-color: var(--flin-border-subtle);
+}
+</style>

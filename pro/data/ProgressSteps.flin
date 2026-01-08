@@ -1,0 +1,345 @@
+// ============================================================================
+// ProgressSteps.flin — FlinUI PRO Data Component
+// Horizontal step indicator (step 1 of 4 style)
+// ============================================================================
+// Props:
+//   - steps: List of step objects with title, description, icon (list)
+//   - currentStep: Current active step (1-indexed) (number)
+//   - variant: Style variant - default, numbered, icons (string)
+//   - size: Size - sm, md, lg (string)
+//   - clickable: Allow clicking on steps to navigate (boolean)
+//   - onStepClick: Callback when step is clicked (function or none)
+
+steps = props.steps || [
+    ["title": "Account", "description": "Create your account"],
+    ["title": "Profile", "description": "Set up your profile"],
+    ["title": "Settings", "description": "Configure preferences"],
+    ["title": "Complete", "description": "Finish setup"]
+]
+currentStep = props.currentStep || 1
+variant = props.variant || "default"
+size = props.size || "md"
+clickable = props.clickable || false
+onStepClick = props.onStepClick || none
+
+// Size class
+sizeClass = match size {
+    "sm" => "steps-sm"
+    "lg" => "steps-lg"
+    _ => "steps-md"
+}
+
+// Variant class
+variantClass = match variant {
+    "numbered" => "steps-numbered"
+    "icons" => "steps-icons"
+    _ => "steps-default"
+}
+
+getStepStatus = (index) => {
+    stepNum = index + 1
+    if stepNum < currentStep {
+        return "completed"
+    } else if stepNum == currentStep {
+        return "active"
+    } else {
+        return "pending"
+    }
+}
+
+<div class="flin-progress-steps {sizeClass} {variantClass}">
+    {for step, index in steps}
+        <div
+            class="step-item step-{getStepStatus(index)} {if clickable}step-clickable{/if}"
+            click={() => {
+                if clickable && onStepClick != none {
+                    onStepClick(index + 1)
+                }
+            }}
+        >
+            <div class="step-indicator">
+                {if variant == "icons" && step.icon != none}
+                    <span class="step-icon">{step.icon}</span>
+                {else if variant == "numbered"}
+                    <span class="step-number">
+                        {if getStepStatus(index) == "completed"}
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/>
+                            </svg>
+                        {else}
+                            {index + 1}
+                        {/if}
+                    </span>
+                {else}
+                    <span class="step-dot">
+                        {if getStepStatus(index) == "completed"}
+                            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/>
+                            </svg>
+                        {/if}
+                    </span>
+                {/if}
+            </div>
+
+            {if index < steps.length - 1}
+                <div class="step-connector">
+                    <div class="connector-line"></div>
+                    <div class="connector-progress" style="width: {if getStepStatus(index) == 'completed'}100{else}0{/if}%"></div>
+                </div>
+            {/if}
+
+            <div class="step-content">
+                <span class="step-title">{step.title}</span>
+                {if step.description != none}
+                    <span class="step-description">{step.description}</span>
+                {/if}
+            </div>
+        </div>
+    {/for}
+</div>
+
+<style scoped>
+.flin-progress-steps {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 1;
+}
+
+.step-item:last-child {
+    flex: 0 0 auto;
+}
+
+.step-clickable {
+    cursor: pointer;
+}
+
+.step-indicator {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-bg-elevated);
+    border: 2px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-full);
+    transition: all var(--flin-transition-fast);
+}
+
+/* Size variants */
+.steps-sm .step-indicator {
+    width: 28px;
+    height: 28px;
+}
+
+.steps-md .step-indicator {
+    width: 36px;
+    height: 36px;
+}
+
+.steps-lg .step-indicator {
+    width: 44px;
+    height: 44px;
+}
+
+.step-number,
+.step-icon {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.steps-lg .step-number,
+.steps-lg .step-icon {
+    font-size: var(--flin-text-base);
+}
+
+.step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--flin-radius-full);
+    background: var(--flin-border-default);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--flin-transition-fast);
+}
+
+.steps-sm .step-dot {
+    width: 8px;
+    height: 8px;
+}
+
+.steps-lg .step-dot {
+    width: 12px;
+    height: 12px;
+}
+
+/* Connector */
+.step-connector {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc(100% - 36px);
+    height: 2px;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.steps-sm .step-connector {
+    width: calc(100% - 28px);
+    top: 14px;
+    transform: none;
+}
+
+.steps-md .step-connector {
+    top: 18px;
+    transform: none;
+}
+
+.steps-lg .step-connector {
+    width: calc(100% - 44px);
+    top: 22px;
+    transform: none;
+}
+
+.connector-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: var(--flin-border-subtle);
+    border-radius: var(--flin-radius-full);
+}
+
+.connector-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+    transition: width var(--flin-transition-normal);
+}
+
+/* Step content */
+.step-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: var(--flin-space-3);
+    max-width: 100px;
+}
+
+.steps-lg .step-content {
+    max-width: 140px;
+}
+
+.step-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-tertiary);
+    transition: color var(--flin-transition-fast);
+}
+
+.step-description {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+    margin-top: var(--flin-space-1);
+    display: none;
+}
+
+.steps-lg .step-description {
+    display: block;
+}
+
+/* States */
+.step-completed .step-indicator {
+    background: var(--flin-accent-gold);
+    border-color: var(--flin-accent-gold);
+}
+
+.step-completed .step-number,
+.step-completed .step-icon {
+    color: var(--flin-bg-base);
+}
+
+.step-completed .step-dot {
+    background: var(--flin-bg-base);
+}
+
+.step-completed .step-title {
+    color: var(--flin-text-primary);
+}
+
+.step-active .step-indicator {
+    background: var(--flin-bg-elevated);
+    border-color: var(--flin-accent-gold);
+    box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.15);
+}
+
+.step-active .step-number,
+.step-active .step-icon {
+    color: var(--flin-accent-gold);
+}
+
+.step-active .step-dot {
+    background: var(--flin-accent-gold);
+}
+
+.step-active .step-title {
+    color: var(--flin-accent-gold);
+    font-weight: var(--flin-font-semibold);
+}
+
+/* Clickable hover */
+.step-clickable:hover .step-indicator {
+    border-color: var(--flin-accent-gold);
+}
+
+.step-clickable.step-pending:hover .step-title {
+    color: var(--flin-text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .step-content {
+        max-width: 80px;
+    }
+
+    .step-title {
+        font-size: var(--flin-text-xs);
+    }
+
+    .step-description {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .step-content {
+        display: none;
+    }
+
+    .flin-progress-steps {
+        justify-content: center;
+        gap: var(--flin-space-2);
+    }
+
+    .step-connector {
+        display: none;
+    }
+}
+</style>

@@ -1,0 +1,315 @@
+// ============================================================================
+// DashboardLayout.flin — FlinUI PRO Shell Component
+// Full dashboard layout with sidebar, header, and content areas
+// ============================================================================
+// Props:
+//   - sidebarWidth: Width of sidebar (string, default: "260px")
+//   - headerHeight: Height of header (string, default: "64px")
+//   - sidebarCollapsed: Sidebar collapsed state (boolean, default: false)
+//   - collapsedWidth: Width when collapsed (string, default: "72px")
+//   - showBreadcrumb: Show breadcrumb area (boolean, default: true)
+//   - pageTitle: Page title text (string or none)
+//   - pageDescription: Page description text (string or none)
+// ============================================================================
+
+sidebarWidth = props.sidebarWidth || "260px"
+headerHeight = props.headerHeight || "64px"
+sidebarCollapsed = props.sidebarCollapsed || false
+collapsedWidth = props.collapsedWidth || "72px"
+showBreadcrumb = props.showBreadcrumb || true
+pageTitle = props.pageTitle || none
+pageDescription = props.pageDescription || none
+
+// State
+mobileMenuOpen = false
+
+currentSidebarWidth = {if sidebarCollapsed { collapsedWidth } else { sidebarWidth }}
+
+toggleMobileMenu = () => {
+    mobileMenuOpen = !mobileMenuOpen
+}
+
+closeMobileMenu = () => {
+    mobileMenuOpen = false
+}
+
+<div class="flin-dashboard-layout {if sidebarCollapsed}sidebar-collapsed{/if} {if mobileMenuOpen}mobile-open{/if}"
+     style="--sidebar-width: {currentSidebarWidth}; --header-height: {headerHeight}">
+
+    // Sidebar
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-header">
+            {props.logo || none}
+        </div>
+        <nav class="sidebar-nav">
+            {props.navigation || none}
+        </nav>
+        <div class="sidebar-footer">
+            {props.sidebarFooter || none}
+        </div>
+    </aside>
+
+    // Mobile overlay
+    {if mobileMenuOpen}
+        <div class="mobile-overlay" click={closeMobileMenu}></div>
+    {/if}
+
+    // Main area
+    <div class="dashboard-main">
+        // Header
+        <header class="dashboard-header">
+            <button class="mobile-menu-btn" click={toggleMobileMenu} aria-label="Toggle menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12h18M3 6h18M3 18h18"/>
+                </svg>
+            </button>
+
+            <div class="header-left">
+                {props.headerLeft || none}
+            </div>
+
+            <div class="header-right">
+                {props.headerRight || none}
+            </div>
+        </header>
+
+        // Content area
+        <main class="dashboard-content">
+            // Breadcrumb
+            {if showBreadcrumb}
+                <div class="content-breadcrumb">
+                    {props.breadcrumb || none}
+                </div>
+            {/if}
+
+            // Page header
+            {if pageTitle != none}
+                <div class="page-header">
+                    <div class="page-header-text">
+                        <h1 class="page-title">{pageTitle}</h1>
+                        {if pageDescription != none}
+                            <p class="page-description">{pageDescription}</p>
+                        {/if}
+                    </div>
+                    <div class="page-header-actions">
+                        {props.actions || none}
+                    </div>
+                </div>
+            {/if}
+
+            // Main content
+            <div class="content-body">
+                {children}
+            </div>
+        </main>
+    </div>
+</div>
+
+<style scoped>
+.flin-dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+    background: var(--flin-bg-base);
+}
+
+/* Sidebar */
+.dashboard-sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--flin-bg-elevated);
+    border-right: 1px solid var(--flin-border-subtle);
+    z-index: 100;
+    transition: width var(--flin-transition-normal);
+}
+
+.sidebar-header {
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-border-subtle);
+    flex-shrink: 0;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--flin-space-3);
+}
+
+.sidebar-footer {
+    padding: var(--flin-space-3);
+    border-top: 1px solid var(--flin-border-subtle);
+    flex-shrink: 0;
+}
+
+/* Main area */
+.dashboard-main {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    display: flex;
+    flex-direction: column;
+    transition: margin-left var(--flin-transition-normal);
+}
+
+/* Header */
+.dashboard-header {
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--flin-space-6);
+    background: var(--flin-bg-elevated);
+    border-bottom: 1px solid var(--flin-border-subtle);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    gap: var(--flin-space-4);
+}
+
+.mobile-menu-btn {
+    display: none;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-primary);
+    cursor: pointer;
+}
+
+.mobile-menu-btn:hover {
+    background: var(--flin-bg-surface);
+}
+
+.header-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+/* Content */
+.dashboard-content {
+    flex: 1;
+    padding: var(--flin-space-6);
+}
+
+.content-breadcrumb {
+    margin-bottom: var(--flin-space-4);
+}
+
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--flin-space-6);
+    gap: var(--flin-space-4);
+}
+
+.page-title {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0;
+}
+
+.page-description {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    margin: var(--flin-space-1) 0 0;
+}
+
+.page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    flex-shrink: 0;
+}
+
+.content-body {
+    width: 100%;
+}
+
+/* Mobile overlay */
+.mobile-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 90;
+}
+
+/* Collapsed state */
+.sidebar-collapsed .sidebar-nav,
+.sidebar-collapsed .sidebar-footer {
+    overflow: hidden;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .dashboard-sidebar {
+        transform: translateX(-100%);
+        width: 280px !important;
+        transition: transform var(--flin-transition-normal);
+    }
+
+    .mobile-open .dashboard-sidebar {
+        transform: translateX(0);
+    }
+
+    .mobile-open .mobile-overlay {
+        display: block;
+    }
+
+    .dashboard-main {
+        margin-left: 0;
+    }
+
+    .mobile-menu-btn {
+        display: flex;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        padding: 0 var(--flin-space-4);
+    }
+
+    .dashboard-content {
+        padding: var(--flin-space-4);
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .page-header-actions {
+        margin-top: var(--flin-space-3);
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .dashboard-sidebar,
+[data-theme="dark"] .dashboard-header {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .sidebar-header,
+[data-theme="dark"] .sidebar-footer {
+    border-color: var(--flin-border-default);
+}
+</style>

@@ -1,0 +1,596 @@
+// ============================================================================
+// CookieConsent.flin — FlinUI PRO Utility Component
+// GDPR cookie consent banner
+// ============================================================================
+// Props:
+//   - title: Banner title (string, default: "Cookie Settings")
+//   - description: Banner description (string)
+//   - position: Banner position - bottom, top, bottom-left, bottom-right (string, default: "bottom")
+//   - variant: Style variant - bar, modal, floating (string, default: "bar")
+//   - showManage: Show manage preferences button (boolean, default: true)
+//   - privacyUrl: Link to privacy policy (string or none)
+//   - cookieKey: LocalStorage key for consent (string, default: "cookie-consent")
+//   - onAccept: Callback when all cookies accepted (function or none)
+//   - onReject: Callback when cookies rejected (function or none)
+//   - onManage: Callback when preferences managed (function or none)
+// ============================================================================
+
+title = props.title || "Cookie Settings"
+description = props.description || "We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. By clicking 'Accept All', you consent to our use of cookies."
+position = props.position || "bottom"
+variant = props.variant || "bar"
+showManage = props.showManage || true
+privacyUrl = props.privacyUrl || none
+cookieKey = props.cookieKey || "cookie-consent"
+onAccept = props.onAccept || none
+onReject = props.onReject || none
+onManage = props.onManage || none
+
+// State
+isVisible = true
+showSettings = false
+preferences = {
+    necessary: true,
+    analytics: false,
+    marketing: false,
+    personalization: false
+}
+
+// Check existing consent
+checkExistingConsent = () => {
+    saved = localStorage.getItem(cookieKey)
+    if saved != none {
+        isVisible = false
+        preferences = JSON.parse(saved)
+    }
+}
+
+// Save consent
+saveConsent = (prefs) => {
+    localStorage.setItem(cookieKey, JSON.stringify(prefs))
+    isVisible = false
+}
+
+// Handle accept all
+handleAcceptAll = () => {
+    allAccepted = {
+        necessary: true,
+        analytics: true,
+        marketing: true,
+        personalization: true
+    }
+    saveConsent(allAccepted)
+    if onAccept != none {
+        onAccept(allAccepted)
+    }
+}
+
+// Handle reject all
+handleRejectAll = () => {
+    necessaryOnly = {
+        necessary: true,
+        analytics: false,
+        marketing: false,
+        personalization: false
+    }
+    saveConsent(necessaryOnly)
+    if onReject != none {
+        onReject(necessaryOnly)
+    }
+}
+
+// Handle save preferences
+handleSavePreferences = () => {
+    saveConsent(preferences)
+    showSettings = false
+    if onManage != none {
+        onManage(preferences)
+    }
+}
+
+// Toggle settings panel
+toggleSettings = () => {
+    showSettings = !showSettings
+}
+
+// Lifecycle
+onMount = () => {
+    checkExistingConsent()
+}
+
+{if !isVisible}
+    <div></div>
+{else}
+    <div class="flin-cookie-consent position-{position} variant-{variant}">
+        // Backdrop for modal
+        {if variant == "modal"}
+            <div class="consent-backdrop"></div>
+        {/if}
+
+        <div class="consent-container">
+            // Main banner
+            {if !showSettings}
+                <div class="consent-main">
+                    <div class="consent-content">
+                        <div class="consent-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <circle cx="8" cy="9" r="1" fill="currentColor"/>
+                                <circle cx="15" cy="9" r="1" fill="currentColor"/>
+                                <circle cx="9" cy="15" r="1" fill="currentColor"/>
+                                <circle cx="14" cy="14" r="1" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <div class="consent-text">
+                            <h3 class="consent-title">{title}</h3>
+                            <p class="consent-description">{description}</p>
+                            {if privacyUrl != none}
+                                <a href={privacyUrl} class="privacy-link" target="_blank">
+                                    Learn more about our privacy policy
+                                </a>
+                            {/if}
+                        </div>
+                    </div>
+
+                    <div class="consent-actions">
+                        <button class="btn btn-secondary" click={handleRejectAll}>
+                            Reject All
+                        </button>
+                        {if showManage}
+                            <button class="btn btn-outline" click={toggleSettings}>
+                                Manage
+                            </button>
+                        {/if}
+                        <button class="btn btn-primary" click={handleAcceptAll}>
+                            Accept All
+                        </button>
+                    </div>
+                </div>
+
+            // Settings panel
+            {else}
+                <div class="consent-settings">
+                    <div class="settings-header">
+                        <h3 class="settings-title">Cookie Preferences</h3>
+                        <button class="close-btn" click={toggleSettings} aria-label="Close">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="settings-body">
+                        // Necessary cookies (always on)
+                        <div class="cookie-category">
+                            <div class="category-header">
+                                <div class="category-info">
+                                    <span class="category-name">Necessary Cookies</span>
+                                    <span class="category-badge required">Always Active</span>
+                                </div>
+                            </div>
+                            <p class="category-description">
+                                These cookies are essential for the website to function properly. They cannot be disabled.
+                            </p>
+                        </div>
+
+                        // Analytics cookies
+                        <div class="cookie-category">
+                            <div class="category-header">
+                                <div class="category-info">
+                                    <span class="category-name">Analytics Cookies</span>
+                                </div>
+                                <label class="toggle">
+                                    <input type="checkbox" checked={preferences.analytics}
+                                           change={(e) => preferences.analytics = e.target.checked} />
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <p class="category-description">
+                                These cookies help us understand how visitors interact with our website.
+                            </p>
+                        </div>
+
+                        // Marketing cookies
+                        <div class="cookie-category">
+                            <div class="category-header">
+                                <div class="category-info">
+                                    <span class="category-name">Marketing Cookies</span>
+                                </div>
+                                <label class="toggle">
+                                    <input type="checkbox" checked={preferences.marketing}
+                                           change={(e) => preferences.marketing = e.target.checked} />
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <p class="category-description">
+                                These cookies are used to track visitors across websites for advertising purposes.
+                            </p>
+                        </div>
+
+                        // Personalization cookies
+                        <div class="cookie-category">
+                            <div class="category-header">
+                                <div class="category-info">
+                                    <span class="category-name">Personalization Cookies</span>
+                                </div>
+                                <label class="toggle">
+                                    <input type="checkbox" checked={preferences.personalization}
+                                           change={(e) => preferences.personalization = e.target.checked} />
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <p class="category-description">
+                                These cookies allow us to remember your preferences and personalize content.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="settings-footer">
+                        <button class="btn btn-secondary" click={toggleSettings}>
+                            Cancel
+                        </button>
+                        <button class="btn btn-primary" click={handleSavePreferences}>
+                            Save Preferences
+                        </button>
+                    </div>
+                </div>
+            {/if}
+        </div>
+    </div>
+{/if}
+
+<style scoped>
+.flin-cookie-consent {
+    position: fixed;
+    z-index: 9999;
+}
+
+/* Positions */
+.position-bottom {
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.position-top {
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.position-bottom-left {
+    bottom: var(--flin-space-4);
+    left: var(--flin-space-4);
+    max-width: 420px;
+}
+
+.position-bottom-right {
+    bottom: var(--flin-space-4);
+    right: var(--flin-space-4);
+    max-width: 420px;
+}
+
+/* Variants */
+.variant-bar .consent-container {
+    padding: var(--flin-space-4) var(--flin-space-6);
+    background: var(--flin-bg-elevated);
+    border-top: 1px solid var(--flin-border-subtle);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.variant-floating .consent-container {
+    padding: var(--flin-space-4);
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-xl);
+}
+
+.variant-modal {
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.consent-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.variant-modal .consent-container {
+    position: relative;
+    max-width: 500px;
+    width: 90%;
+    padding: var(--flin-space-6);
+    background: var(--flin-bg-elevated);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-xl);
+}
+
+/* Main content */
+.consent-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.consent-content {
+    display: flex;
+    gap: var(--flin-space-4);
+    align-items: flex-start;
+}
+
+.consent-icon {
+    flex-shrink: 0;
+    color: var(--flin-accent-gold);
+}
+
+.consent-text {
+    flex: 1;
+}
+
+.consent-title {
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-2);
+}
+
+.consent-description {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.privacy-link {
+    display: inline-block;
+    margin-top: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-accent-gold);
+    text-decoration: none;
+}
+
+.privacy-link:hover {
+    text-decoration: underline;
+}
+
+/* Actions */
+.consent-actions {
+    display: flex;
+    gap: var(--flin-space-3);
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    border-radius: var(--flin-radius-md);
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.btn-primary {
+    background: var(--flin-accent-gold);
+    border: none;
+    color: var(--flin-neutral-900);
+}
+
+.btn-primary:hover {
+    background: #d4a20a;
+}
+
+.btn-secondary {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    color: var(--flin-text-secondary);
+}
+
+.btn-secondary:hover {
+    background: var(--flin-bg-surface-hover);
+    color: var(--flin-text-primary);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--flin-border-default);
+    color: var(--flin-text-primary);
+}
+
+.btn-outline:hover {
+    background: var(--flin-bg-surface);
+}
+
+/* Settings panel */
+.consent-settings {
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.settings-title {
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0;
+}
+
+.close-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    color: var(--flin-text-secondary);
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-primary);
+}
+
+.settings-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--flin-space-4) 0;
+}
+
+.cookie-category {
+    padding: var(--flin-space-4) 0;
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.cookie-category:last-child {
+    border-bottom: none;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--flin-space-2);
+}
+
+.category-info {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.category-name {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+}
+
+.category-badge {
+    font-size: var(--flin-text-xs);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+}
+
+.category-badge.required {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.category-description {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Toggle switch */
+.toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.toggle-slider::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: 18px;
+    height: 18px;
+    background: var(--flin-bg-elevated);
+    border-radius: var(--flin-radius-full);
+    transition: transform var(--flin-transition-fast);
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.toggle input:checked + .toggle-slider {
+    background: var(--flin-accent-gold);
+    border-color: var(--flin-accent-gold);
+}
+
+.toggle input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+}
+
+.settings-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--flin-space-3);
+    padding-top: var(--flin-space-4);
+    border-top: 1px solid var(--flin-border-subtle);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .position-bottom-left,
+    .position-bottom-right {
+        left: var(--flin-space-4);
+        right: var(--flin-space-4);
+        max-width: none;
+    }
+
+    .consent-content {
+        flex-direction: column;
+    }
+
+    .consent-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .consent-container {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .settings-header,
+[data-theme="dark"] .settings-footer,
+[data-theme="dark"] .cookie-category {
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .toggle-slider {
+    background: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .toggle-slider::before {
+    background: var(--flin-bg-elevated);
+}
+</style>

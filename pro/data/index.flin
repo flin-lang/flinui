@@ -1,0 +1,39 @@
+// ============================================================================
+// FlinUI PRO — Data Components
+// Advanced data visualization and media display components
+// ============================================================================
+
+// Data Visualization (10 components)
+// ----------------------------------
+// ProgressBar      - Linear progress with label, value, colors, sizes
+// ProgressCircle   - Circular/ring progress using SVG
+// ProgressSteps    - Horizontal step indicator (step 1 of 4 style)
+// Timeline         - Vertical event timeline with dates, icons, content
+// Gantt            - Simple CSS-based Gantt chart for projects
+// Calendar         - Full month calendar view with events
+// CalendarMini     - Small compact month view widget
+// ScheduleView     - Week/day schedule with time slots
+// KanbanBoard      - Drag-drop columns (Todo, In Progress, Done)
+// TreeView         - File/folder tree structure with icons, expand/collapse
+
+// Media Display (3 components)
+// ----------------------------
+// ImageGallery     - Image grid with lightbox modal on click
+// VideoPlayer      - Video with custom controls (play, pause, volume, fullscreen)
+// DocumentViewer   - Document preview card for PDF/DOC with download
+
+// Usage Examples:
+// ---------------
+// <ProgressBar value={75} label="Upload Progress" color="success" />
+// <ProgressCircle value={60} size="lg" showValue={true} />
+// <ProgressSteps steps={mySteps} currentStep={2} />
+// <Timeline events={myEvents} variant="alternating" />
+// <Gantt tasks={projectTasks} showProgress={true} />
+// <Calendar events={myEvents} onDateSelect={handleSelect} />
+// <CalendarMini selectedDate={today} events={myEvents} />
+// <ScheduleView view="week" events={myEvents} />
+// <KanbanBoard columns={myColumns} draggable={true} />
+// <TreeView items={fileTree} showIcons={true} />
+// <ImageGallery images={myImages} columns={4} enableLightbox={true} />
+// <VideoPlayer src="video.mp4" showControls={true} />
+// <DocumentViewer documents={myDocs} viewMode="grid" />

@@ -1,0 +1,375 @@
+// Pagination.flin - FlinUI PRO E-commerce Component
+// Page number navigation with Previous/Next buttons and page size selector
+
+// Props with defaults
+currentPage = props.currentPage || 1
+totalPages = props.totalPages || 1
+pageSize = props.pageSize || 12
+pageSizeOptions = props.pageSizeOptions || [12, 24, 48]
+totalItems = props.totalItems || 0
+onPageChange = props.onPageChange
+onPageSizeChange = props.onPageSizeChange
+showPageSize = props.showPageSize || true
+showFirstLast = props.showFirstLast || true
+maxVisible = props.maxVisible || 7
+variant = props.variant || "default"
+
+// Calculate page range
+function getPageNumbers() {
+    if totalPages <= maxVisible {
+        // Show all pages
+        pages = []
+        i = 1
+        while i <= totalPages {
+            pages = [...pages, i]
+            i = i + 1
+        }
+        return pages
+    }
+
+    // Show subset with ellipsis
+    halfVisible = Math.floor(maxVisible / 2)
+    startPage = Math.max(1, currentPage - halfVisible)
+    endPage = Math.min(totalPages, currentPage + halfVisible)
+
+    // Adjust if at start or end
+    if currentPage <= halfVisible {
+        endPage = Math.min(totalPages, maxVisible)
+    }
+    if currentPage >= totalPages - halfVisible {
+        startPage = Math.max(1, totalPages - maxVisible + 1)
+    }
+
+    pages = []
+    i = startPage
+    while i <= endPage {
+        pages = [...pages, i]
+        i = i + 1
+    }
+
+    return pages
+}
+
+pageNumbers = getPageNumbers()
+
+// Calculate item range
+startItem = (currentPage - 1) * pageSize + 1
+endItem = Math.min(currentPage * pageSize, totalItems)
+
+// Page navigation handlers
+function goToPage(page) {
+    if page >= 1 && page <= totalPages && page != currentPage {
+        if onPageChange {
+            onPageChange(page)
+        }
+    }
+}
+
+function goToFirst() {
+    goToPage(1)
+}
+
+function goToLast() {
+    goToPage(totalPages)
+}
+
+function goToPrevious() {
+    goToPage(currentPage - 1)
+}
+
+function goToNext() {
+    goToPage(currentPage + 1)
+}
+
+// Page size change handler
+function handlePageSizeChange(newSize) {
+    if onPageSizeChange {
+        onPageSizeChange(newSize)
+    }
+}
+
+// Check if first/last page
+isFirstPage = currentPage == 1
+isLastPage = currentPage == totalPages
+
+// Show ellipsis
+showStartEllipsis = pageNumbers.length > 0 && pageNumbers[0] > 2
+showEndEllipsis = pageNumbers.length > 0 && pageNumbers[pageNumbers.length - 1] < totalPages - 1
+
+// Container class
+containerClass = "pagination pagination-" ++ variant
+
+<div class={containerClass}>
+    <style scoped>
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-light);
+            border-radius: var(--flin-radius-lg);
+            font-family: var(--flin-font-sans);
+        }
+
+        .pagination-info {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+
+        .pagination-range {
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .pagination-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+            padding: 0 var(--flin-space-2);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-light);
+            border-radius: var(--flin-radius-md);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-secondary);
+        }
+
+        .pagination-button:hover:not(:disabled) {
+            background: var(--flin-bg-hover);
+            border-color: var(--flin-primary);
+            color: var(--flin-primary);
+        }
+
+        .pagination-button:focus-visible {
+            outline: 2px solid var(--flin-primary);
+            outline-offset: 2px;
+        }
+
+        .pagination-button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination-button.active {
+            background: var(--flin-primary);
+            border-color: var(--flin-primary);
+            color: white;
+            font-weight: var(--flin-font-semibold);
+        }
+
+        .pagination-button.ellipsis {
+            border: none;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .pagination-button.nav {
+            padding: 0 var(--flin-space-3);
+        }
+
+        .pagination-separator {
+            width: 1px;
+            height: 24px;
+            background: var(--flin-border-light);
+            margin: 0 var(--flin-space-1);
+        }
+
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .page-size-label {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            white-space: nowrap;
+        }
+
+        .page-size-select {
+            padding: var(--flin-space-2) var(--flin-space-3);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-light);
+            border-radius: var(--flin-radius-md);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+        }
+
+        .page-size-select:hover {
+            border-color: var(--flin-primary);
+        }
+
+        .page-size-select:focus-visible {
+            outline: 2px solid var(--flin-primary);
+            outline-offset: 2px;
+        }
+
+        /* Compact variant */
+        .pagination-compact {
+            padding: var(--flin-space-3);
+        }
+
+        .pagination-compact .pagination-button {
+            min-width: 32px;
+            height: 32px;
+        }
+
+        @media (max-width: 768px) {
+            .pagination {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .pagination-info {
+                justify-content: center;
+                order: 2;
+            }
+
+            .pagination-controls {
+                justify-content: center;
+                order: 1;
+            }
+
+            .page-size-selector {
+                justify-content: center;
+                order: 3;
+            }
+
+            .pagination-button {
+                min-width: 32px;
+                height: 32px;
+                font-size: var(--flin-text-xs);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .pagination-button.nav-text {
+                display: none;
+            }
+
+            .pagination-info {
+                font-size: var(--flin-text-xs);
+            }
+        }
+    </style>
+
+    <!-- Item Range Info -->
+    <div class="pagination-info">
+        <span>Showing</span>
+        <span class="pagination-range">{startItem}-{endItem}</span>
+        <span>of</span>
+        <span class="pagination-range">{totalItems}</span>
+        <span>items</span>
+    </div>
+
+    <!-- Page Controls -->
+    <div class="pagination-controls">
+        <!-- First Page -->
+        {if showFirstLast}
+            <button
+                class="pagination-button nav"
+                click={goToFirst}
+                disabled={isFirstPage}
+                aria-label="First page"
+            >
+                ⏮
+            </button>
+        {/if}
+
+        <!-- Previous Page -->
+        <button
+            class="pagination-button nav"
+            click={goToPrevious}
+            disabled={isFirstPage}
+            aria-label="Previous page"
+        >
+            ← <span class="nav-text">Previous</span>
+        </button>
+
+        <!-- First Page Number -->
+        {if showStartEllipsis}
+            <button class="pagination-button" click={fn() { goToPage(1) }}>
+                1
+            </button>
+            <div class="pagination-button ellipsis">...</div>
+        {/if}
+
+        <!-- Page Numbers -->
+        {each pageNumbers as pageNum}
+            <button
+                class="pagination-button {if pageNum == currentPage}active{/if}"
+                click={fn() { goToPage(pageNum) }}
+                aria-label="Page {pageNum}"
+                aria-current={if pageNum == currentPage}"page"{else}none{/if}}
+            >
+                {pageNum}
+            </button>
+        {/each}
+
+        <!-- Last Page Number -->
+        {if showEndEllipsis}
+            <div class="pagination-button ellipsis">...</div>
+            <button class="pagination-button" click={fn() { goToPage(totalPages) }}>
+                {totalPages}
+            </button>
+        {/if}
+
+        <!-- Next Page -->
+        <button
+            class="pagination-button nav"
+            click={goToNext}
+            disabled={isLastPage}
+            aria-label="Next page"
+        >
+            <span class="nav-text">Next</span> →
+        </button>
+
+        <!-- Last Page -->
+        {if showFirstLast}
+            <button
+                class="pagination-button nav"
+                click={goToLast}
+                disabled={isLastPage}
+                aria-label="Last page"
+            >
+                ⏭
+            </button>
+        {/if}
+    </div>
+
+    <!-- Page Size Selector -->
+    {if showPageSize}
+        <div class="page-size-selector">
+            <span class="page-size-label">Items per page:</span>
+            <select
+                class="page-size-select"
+                value={pageSize}
+                change={fn(event) { handlePageSizeChange(Number(event.target.value)) }}
+                aria-label="Items per page"
+            >
+                {each pageSizeOptions as option}
+                    <option value={option}>{option}</option>
+                {/each}
+            </select>
+        </div>
+    {/if}
+</div>

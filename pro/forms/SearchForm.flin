@@ -1,0 +1,1192 @@
+// SearchForm.flin - FlinUI PRO Advanced Search Form Component
+// Complete search form with filters, suggestions, and advanced options
+
+// Props with defaults
+placeholder = props.placeholder || "Search..."
+showFilters = props.showFilters || true
+showAdvanced = props.showAdvanced || true
+showRecent = props.showRecent || true
+showPopular = props.showPopular || true
+disabled = props.disabled || false
+onSearch = props.onSearch
+onClear = props.onClear
+
+// Filter pills configuration
+filterPills = props.filterPills || [
+    ["id": "all", "label": "All", "active": true],
+    ["id": "products", "label": "Products", "active": false],
+    ["id": "articles", "label": "Articles", "active": false],
+    ["id": "users", "label": "Users", "active": false]
+]
+
+// Category options for multiselect
+categoryOptions = props.categoryOptions || [
+    ["id": "electronics", "label": "Electronics"],
+    ["id": "clothing", "label": "Clothing"],
+    ["id": "books", "label": "Books"],
+    ["id": "home", "label": "Home & Garden"],
+    ["id": "sports", "label": "Sports"]
+]
+
+// Status options
+statusOptions = props.statusOptions || [
+    ["id": "all", "label": "All Status"],
+    ["id": "active", "label": "Active"],
+    ["id": "pending", "label": "Pending"],
+    ["id": "archived", "label": "Archived"]
+]
+
+// Sort options
+sortOptions = props.sortOptions || [
+    ["id": "relevance", "label": "Relevance"],
+    ["id": "newest", "label": "Newest First"],
+    ["id": "oldest", "label": "Oldest First"],
+    ["id": "price_asc", "label": "Price: Low to High"],
+    ["id": "price_desc", "label": "Price: High to Low"]
+]
+
+// Recent searches
+recentSearches = props.recentSearches || [
+    "laptop computer",
+    "wireless headphones",
+    "office chair",
+    "usb hub"
+]
+
+// Popular searches
+popularSearches = props.popularSearches || [
+    "iPhone 15",
+    "MacBook Pro",
+    "AirPods",
+    "Gaming Mouse",
+    "Mechanical Keyboard"
+]
+
+// State
+query = ""
+isLoading = false
+isAdvancedOpen = false
+activeFilters = filterPills
+selectedCategories = []
+selectedStatus = "all"
+sortBy = "relevance"
+startDate = ""
+endDate = ""
+priceMin = ""
+priceMax = ""
+isFocused = false
+
+// Compute active filter count
+activeFilterCount = fn() {
+    count = 0
+    if selectedCategories.len > 0 { count = count + 1 }
+    if selectedStatus != "all" { count = count + 1 }
+    if startDate != "" || endDate != "" { count = count + 1 }
+    if priceMin != "" || priceMax != "" { count = count + 1 }
+    if sortBy != "relevance" { count = count + 1 }
+    count
+}
+
+// Handle search input change
+handleQueryChange = fn(e) {
+    query = e.target.value
+}
+
+// Clear search input
+clearQuery = {
+    query = ""
+    if onClear {
+        onClear()
+    }
+}
+
+// Toggle filter pill
+toggleFilterPill = fn(id) {
+    activeFilters = activeFilters.map(fn(filter) {
+        if filter.id == id {
+            ["id": filter.id, "label": filter.label, "active": true]
+        } else {
+            ["id": filter.id, "label": filter.label, "active": false]
+        }
+    })
+}
+
+// Toggle advanced filters
+toggleAdvanced = {
+    isAdvancedOpen = !isAdvancedOpen
+}
+
+// Handle category selection
+toggleCategory = fn(categoryId) {
+    if selectedCategories.includes(categoryId) {
+        selectedCategories = selectedCategories.filter(fn(id) { id != categoryId })
+    } else {
+        selectedCategories = selectedCategories.concat([categoryId])
+    }
+}
+
+// Remove category tag
+removeCategory = fn(categoryId) {
+    selectedCategories = selectedCategories.filter(fn(id) { id != categoryId })
+}
+
+// Handle status change
+handleStatusChange = fn(e) {
+    selectedStatus = e.target.value
+}
+
+// Handle sort change
+handleSortChange = fn(e) {
+    sortBy = e.target.value
+}
+
+// Handle date changes
+handleStartDateChange = fn(e) {
+    startDate = e.target.value
+}
+
+handleEndDateChange = fn(e) {
+    endDate = e.target.value
+}
+
+// Handle price changes
+handlePriceMinChange = fn(e) {
+    priceMin = e.target.value
+}
+
+handlePriceMaxChange = fn(e) {
+    priceMax = e.target.value
+}
+
+// Clear all filters
+clearAllFilters = {
+    selectedCategories = []
+    selectedStatus = "all"
+    sortBy = "relevance"
+    startDate = ""
+    endDate = ""
+    priceMin = ""
+    priceMax = ""
+    activeFilters = activeFilters.map(fn(filter) {
+        if filter.id == "all" {
+            ["id": filter.id, "label": filter.label, "active": true]
+        } else {
+            ["id": filter.id, "label": filter.label, "active": false]
+        }
+    })
+}
+
+// Use recent search
+useRecentSearch = fn(term) {
+    query = term
+    handleSearch()
+}
+
+// Use popular search
+usePopularSearch = fn(term) {
+    query = term
+    handleSearch()
+}
+
+// Handle search submission
+handleSearch = {
+    if query.trim() != "" || activeFilterCount() > 0 {
+        isLoading = true
+        if onSearch {
+            onSearch([
+                "query": query,
+                "filters": activeFilters.filter(fn(f) { f.active }).map(fn(f) { f.id }),
+                "categories": selectedCategories,
+                "status": selectedStatus,
+                "sortBy": sortBy,
+                "dateRange": ["start": startDate, "end": endDate],
+                "priceRange": ["min": priceMin, "max": priceMax]
+            ])
+        }
+        isLoading = false
+    }
+}
+
+// Handle keyboard navigation
+handleKeyDown = fn(e) {
+    if e.key == "Enter" {
+        e.preventDefault()
+        handleSearch()
+    }
+    if e.key == "Escape" {
+        isFocused = false
+        isAdvancedOpen = false
+    }
+}
+
+// Handle focus
+handleFocus = {
+    isFocused = true
+}
+
+handleBlur = {
+    // Delay to allow clicks on suggestions
+    setTimeout(fn() { isFocused = false }, 200)
+}
+
+// Compute classes
+disabledClass = match disabled || isLoading { true -> " search-form-disabled", _ -> "" }
+focusedClass = match isFocused { true -> " search-form-focused", _ -> "" }
+advancedOpenClass = match isAdvancedOpen { true -> " search-form-advanced-open", _ -> "" }
+hasValueClass = match query != "" { true -> " search-form-has-value", _ -> "" }
+containerClass = "search-form" ++ disabledClass ++ focusedClass ++ advancedOpenClass ++ hasValueClass
+
+<div class={containerClass}>
+    <!-- Main Search Input Section -->
+    <div class="search-form-main">
+        <div class="search-form-input-wrapper">
+            <span class="search-form-search-icon">
+                {if isLoading}
+                    <svg class="search-form-spinner" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="32" stroke-dashoffset="32">
+                            <animate attributeName="stroke-dashoffset" values="32;0;32" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                {else}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                {/if}
+            </span>
+            <input
+                type="text"
+                class="search-form-input"
+                value={query}
+                placeholder={placeholder}
+                disabled={disabled || isLoading}
+                input={handleQueryChange}
+                keydown={handleKeyDown}
+                focus={handleFocus}
+                blur={handleBlur}
+                aria-label="Search"
+                role="searchbox"
+                autocomplete="off"
+            >
+            {if query != "" && !isLoading}
+                <button
+                    type="button"
+                    class="search-form-clear-btn"
+                    click={clearQuery}
+                    disabled={disabled}
+                    aria-label="Clear search"
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M15 9l-6 6M9 9l6 6"/>
+                    </svg>
+                </button>
+            {/if}
+            <button
+                type="button"
+                class="search-form-submit-btn"
+                click={handleSearch}
+                disabled={disabled || isLoading}
+                aria-label="Search"
+            >
+                {if isLoading}
+                    Searching...
+                {else}
+                    Search
+                {/if}
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Pills -->
+    {if showFilters}
+        <div class="search-form-filters">
+            <div class="search-form-filter-pills">
+                {for filter in activeFilters}
+                    <button
+                        type="button"
+                        class={"search-form-filter-pill" ++ (match filter.active { true -> " active", _ -> "" })}
+                        click={fn() { toggleFilterPill(filter.id) }}
+                        disabled={disabled || isLoading}
+                    >
+                        {filter.label}
+                    </button>
+                {/for}
+            </div>
+            {if showAdvanced}
+                <button
+                    type="button"
+                    class={"search-form-advanced-toggle" ++ (match isAdvancedOpen { true -> " active", _ -> "" })}
+                    click={toggleAdvanced}
+                    disabled={disabled || isLoading}
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="4" y1="21" x2="4" y2="14"/>
+                        <line x1="4" y1="10" x2="4" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12" y2="3"/>
+                        <line x1="20" y1="21" x2="20" y2="16"/>
+                        <line x1="20" y1="12" x2="20" y2="3"/>
+                        <line x1="1" y1="14" x2="7" y2="14"/>
+                        <line x1="9" y1="8" x2="15" y2="8"/>
+                        <line x1="17" y1="16" x2="23" y2="16"/>
+                    </svg>
+                    Advanced
+                    {if activeFilterCount() > 0}
+                        <span class="search-form-filter-badge">{activeFilterCount()}</span>
+                    {/if}
+                    <svg class="search-form-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                </button>
+            {/if}
+        </div>
+    {/if}
+
+    <!-- Advanced Filters Section -->
+    {if isAdvancedOpen && showAdvanced}
+        <div class="search-form-advanced">
+            <div class="search-form-advanced-grid">
+                <!-- Date Range -->
+                <div class="search-form-field">
+                    <label class="search-form-label">Date Range</label>
+                    <div class="search-form-date-range">
+                        <input
+                            type="date"
+                            class="search-form-date-input"
+                            value={startDate}
+                            change={handleStartDateChange}
+                            disabled={disabled || isLoading}
+                            aria-label="Start date"
+                        >
+                        <span class="search-form-date-separator">to</span>
+                        <input
+                            type="date"
+                            class="search-form-date-input"
+                            value={endDate}
+                            change={handleEndDateChange}
+                            disabled={disabled || isLoading}
+                            aria-label="End date"
+                        >
+                    </div>
+                </div>
+
+                <!-- Categories MultiSelect -->
+                <div class="search-form-field">
+                    <label class="search-form-label">Categories</label>
+                    <div class="search-form-multiselect">
+                        <div class="search-form-selected-tags">
+                            {for catId in selectedCategories}
+                                {for cat in categoryOptions}
+                                    {if cat.id == catId}
+                                        <span class="search-form-tag">
+                                            {cat.label}
+                                            <button
+                                                type="button"
+                                                class="search-form-tag-remove"
+                                                click={fn() { removeCategory(catId) }}
+                                                aria-label="Remove category"
+                                            >
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        </span>
+                                    {/if}
+                                {/for}
+                            {/for}
+                        </div>
+                        <div class="search-form-category-options">
+                            {for category in categoryOptions}
+                                <label class="search-form-checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedCategories.includes(category.id)}
+                                        change={fn() { toggleCategory(category.id) }}
+                                        disabled={disabled || isLoading}
+                                    >
+                                    <span>{category.label}</span>
+                                </label>
+                            {/for}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Select -->
+                <div class="search-form-field">
+                    <label class="search-form-label">Status</label>
+                    <div class="search-form-select-wrapper">
+                        <select
+                            class="search-form-select"
+                            value={selectedStatus}
+                            change={handleStatusChange}
+                            disabled={disabled || isLoading}
+                        >
+                            {for status in statusOptions}
+                                <option value={status.id}>{status.label}</option>
+                            {/for}
+                        </select>
+                        <span class="search-form-select-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m6 9 6 6 6-6"/>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Price Range -->
+                <div class="search-form-field">
+                    <label class="search-form-label">Price Range</label>
+                    <div class="search-form-price-range">
+                        <div class="search-form-price-input-wrapper">
+                            <span class="search-form-price-symbol">$</span>
+                            <input
+                                type="number"
+                                class="search-form-price-input"
+                                value={priceMin}
+                                placeholder="Min"
+                                input={handlePriceMinChange}
+                                disabled={disabled || isLoading}
+                                min="0"
+                            >
+                        </div>
+                        <span class="search-form-price-separator">-</span>
+                        <div class="search-form-price-input-wrapper">
+                            <span class="search-form-price-symbol">$</span>
+                            <input
+                                type="number"
+                                class="search-form-price-input"
+                                value={priceMax}
+                                placeholder="Max"
+                                input={handlePriceMaxChange}
+                                disabled={disabled || isLoading}
+                                min="0"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sort By -->
+                <div class="search-form-field">
+                    <label class="search-form-label">Sort By</label>
+                    <div class="search-form-select-wrapper">
+                        <select
+                            class="search-form-select"
+                            value={sortBy}
+                            change={handleSortChange}
+                            disabled={disabled || isLoading}
+                        >
+                            {for sort in sortOptions}
+                                <option value={sort.id}>{sort.label}</option>
+                            {/for}
+                        </select>
+                        <span class="search-form-select-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m6 9 6 6 6-6"/>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clear All Filters Button -->
+            {if activeFilterCount() > 0}
+                <div class="search-form-advanced-actions">
+                    <button
+                        type="button"
+                        class="search-form-clear-all-btn"
+                        click={clearAllFilters}
+                        disabled={disabled || isLoading}
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                        </svg>
+                        Clear All Filters
+                    </button>
+                </div>
+            {/if}
+        </div>
+    {/if}
+
+    <!-- Suggestions Panel (Recent & Popular) -->
+    {if isFocused && query == "" && (showRecent || showPopular)}
+        <div class="search-form-suggestions">
+            {if showRecent && recentSearches.len > 0}
+                <div class="search-form-suggestion-group">
+                    <div class="search-form-suggestion-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span>Recent Searches</span>
+                    </div>
+                    <div class="search-form-suggestion-list">
+                        {for term in recentSearches}
+                            <button
+                                type="button"
+                                class="search-form-suggestion-item"
+                                click={fn() { useRecentSearch(term) }}
+                            >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="M21 21l-4.35-4.35"/>
+                                </svg>
+                                {term}
+                            </button>
+                        {/for}
+                    </div>
+                </div>
+            {/if}
+            {if showPopular && popularSearches.len > 0}
+                <div class="search-form-suggestion-group">
+                    <div class="search-form-suggestion-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+                        </svg>
+                        <span>Popular Searches</span>
+                    </div>
+                    <div class="search-form-suggestion-tags">
+                        {for term in popularSearches}
+                            <button
+                                type="button"
+                                class="search-form-popular-tag"
+                                click={fn() { usePopularSearch(term) }}
+                            >
+                                {term}
+                            </button>
+                        {/for}
+                    </div>
+                </div>
+            {/if}
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.search-form {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+    width: 100%;
+    max-width: 800px;
+}
+
+/* Main Search Input */
+.search-form-main {
+    width: 100%;
+}
+
+.search-form-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-lg);
+    transition: all var(--flin-transition-fast);
+}
+
+.search-form-focused .search-form-input-wrapper {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.search-form-input-wrapper:hover:not(.search-form-disabled *) {
+    border-color: var(--flin-neutral-400);
+}
+
+.search-form-search-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+}
+
+.search-form-search-icon svg {
+    width: var(--flin-icon-md);
+    height: var(--flin-icon-md);
+}
+
+.search-form-spinner {
+    animation: search-form-spin 1s linear infinite;
+}
+
+@keyframes search-form-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.search-form-input {
+    flex: 1;
+    min-width: 0;
+    height: var(--flin-space-10);
+    padding: 0 var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-lg);
+    color: var(--flin-fg);
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+.search-form-input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.search-form-clear-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-space-8);
+    height: var(--flin-space-8);
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-full);
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    flex-shrink: 0;
+}
+
+.search-form-clear-btn:hover:not(:disabled) {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-danger);
+}
+
+.search-form-clear-btn svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.search-form-submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-6);
+    font-size: var(--flin-text-base);
+    font-weight: 600;
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    flex-shrink: 0;
+}
+
+.search-form-submit-btn:hover:not(:disabled) {
+    background-color: var(--flin-primary-dark);
+}
+
+.search-form-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Filter Pills */
+.search-form-filters {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    flex-wrap: wrap;
+}
+
+.search-form-filter-pills {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    flex-wrap: wrap;
+}
+
+.search-form-filter-pill {
+    display: inline-flex;
+    align-items: center;
+    height: var(--flin-space-8);
+    padding: 0 var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.search-form-filter-pill:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+    color: var(--flin-fg);
+}
+
+.search-form-filter-pill.active {
+    background-color: var(--flin-primary);
+    border-color: var(--flin-primary);
+    color: white;
+}
+
+.search-form-filter-pill:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.search-form-advanced-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    height: var(--flin-space-8);
+    padding: 0 var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.search-form-advanced-toggle:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+    color: var(--flin-fg);
+}
+
+.search-form-advanced-toggle.active {
+    background-color: var(--flin-primary-light);
+    border-color: var(--flin-primary);
+    color: var(--flin-primary);
+}
+
+.search-form-advanced-toggle svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.search-form-chevron {
+    transition: transform var(--flin-transition-fast);
+}
+
+.search-form-advanced-toggle.active .search-form-chevron {
+    transform: rotate(180deg);
+}
+
+.search-form-filter-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 var(--flin-space-1);
+    font-size: var(--flin-text-xs);
+    font-weight: 600;
+    color: white;
+    background-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+}
+
+/* Advanced Filters */
+.search-form-advanced {
+    padding: var(--flin-space-6);
+    background-color: var(--flin-neutral-50);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+}
+
+.search-form-advanced-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--flin-space-6);
+}
+
+.search-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.search-form-label {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+/* Date Range */
+.search-form-date-range {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.search-form-date-input {
+    flex: 1;
+    min-width: 0;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.search-form-date-input:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.search-form-date-separator {
+    color: var(--flin-fg-muted);
+    font-size: var(--flin-text-sm);
+    flex-shrink: 0;
+}
+
+/* MultiSelect / Categories */
+.search-form-multiselect {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.search-form-selected-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-space-1);
+    min-height: 24px;
+}
+
+.search-form-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: 2px var(--flin-space-2);
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+}
+
+.search-form-tag-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: currentColor;
+    cursor: pointer;
+    border-radius: var(--flin-radius-full);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.search-form-tag-remove:hover {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.search-form-tag-remove svg {
+    width: 10px;
+    height: 10px;
+}
+
+.search-form-category-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-space-3);
+}
+
+.search-form-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    cursor: pointer;
+}
+
+.search-form-checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--flin-primary);
+}
+
+/* Select */
+.search-form-select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-form-select {
+    width: 100%;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-10) 0 var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.search-form-select:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.search-form-select-icon {
+    position: absolute;
+    right: var(--flin-space-3);
+    display: flex;
+    color: var(--flin-fg-muted);
+    pointer-events: none;
+}
+
+.search-form-select-icon svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+/* Price Range */
+.search-form-price-range {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.search-form-price-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.search-form-price-symbol {
+    position: absolute;
+    left: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+    font-size: var(--flin-text-sm);
+}
+
+.search-form-price-input {
+    width: 100%;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3) 0 var(--flin-space-6);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.search-form-price-input:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.search-form-price-input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.search-form-price-separator {
+    color: var(--flin-fg-muted);
+    font-size: var(--flin-text-sm);
+    flex-shrink: 0;
+}
+
+/* Clear All Filters */
+.search-form-advanced-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--flin-space-4);
+    padding-top: var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.search-form-clear-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-danger);
+    background-color: transparent;
+    border: 1px solid var(--flin-danger);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.search-form-clear-all-btn:hover:not(:disabled) {
+    background-color: var(--flin-danger);
+    color: white;
+}
+
+.search-form-clear-all-btn svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+/* Suggestions Panel */
+.search-form-suggestions {
+    position: absolute;
+    top: calc(100% + var(--flin-space-2));
+    left: 0;
+    right: 0;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+    z-index: 100;
+    overflow: hidden;
+}
+
+.search-form-suggestion-group {
+    padding: var(--flin-space-4);
+}
+
+.search-form-suggestion-group + .search-form-suggestion-group {
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.search-form-suggestion-header {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    margin-bottom: var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+    font-weight: 600;
+    color: var(--flin-fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.search-form-suggestion-header svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.search-form-suggestion-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.search-form-suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    width: 100%;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    text-align: left;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.search-form-suggestion-item:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.search-form-suggestion-item svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+}
+
+.search-form-suggestion-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-space-2);
+}
+
+.search-form-popular-tag {
+    display: inline-flex;
+    align-items: center;
+    height: var(--flin-space-7);
+    padding: 0 var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+    border: none;
+    border-radius: var(--flin-radius-full);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.search-form-popular-tag:hover {
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+/* Disabled State */
+.search-form-disabled {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.search-form-disabled .search-form-input-wrapper {
+    background-color: var(--flin-bg-muted);
+    border-color: var(--flin-neutral-200);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .search-form-input-wrapper {
+        flex-wrap: wrap;
+    }
+
+    .search-form-input {
+        width: 100%;
+        order: -1;
+    }
+
+    .search-form-submit-btn {
+        width: 100%;
+        margin-top: var(--flin-space-2);
+    }
+
+    .search-form-filters {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .search-form-advanced-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .search-form-date-range,
+    .search-form-price-range {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-form-date-separator,
+    .search-form-price-separator {
+        text-align: center;
+    }
+}
+</style>

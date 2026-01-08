@@ -1,0 +1,188 @@
+// ============================================================================
+// ProgressCircle.flin — FlinUI PRO Data Component
+// Circular/ring progress indicator using SVG
+// ============================================================================
+// Props:
+//   - value: Current progress value 0-100 (number)
+//   - size: Circle size in pixels - also accepts sm, md, lg (number or string)
+//   - strokeWidth: Stroke width in pixels (number)
+//   - color: Progress color - default, success, warning, danger, info (string)
+//   - showValue: Show percentage in center (boolean)
+//   - label: Label text below percentage (string or none)
+//   - animated: Animate on mount (boolean)
+
+value = props.value || 0
+size = props.size || "md"
+strokeWidth = props.strokeWidth || 8
+color = props.color || "default"
+showValue = props.showValue || true
+label = props.label || none
+animated = props.animated || true
+
+// Resolve size
+sizeValue = match size {
+    "sm" => 80
+    "md" => 120
+    "lg" => 160
+    _ => size
+}
+
+// Clamp value between 0 and 100
+progressValue = Math.min(Math.max(value, 0), 100)
+
+// Calculate SVG dimensions
+radius = (sizeValue - strokeWidth) / 2
+circumference = 2 * Math.PI * radius
+strokeDashoffset = circumference - (progressValue / 100) * circumference
+
+// Color mapping
+strokeColor = match color {
+    "success" => "#22c55e"
+    "warning" => "#eab308"
+    "danger" => "#ef4444"
+    "info" => "#3b82f6"
+    _ => "var(--flin-accent-gold)"
+}
+
+<div class="flin-progress-circle" style="width: {sizeValue}px; height: {sizeValue}px;">
+    <svg
+        class="progress-svg {if animated}progress-animated{/if}"
+        width={sizeValue}
+        height={sizeValue}
+        viewBox="0 0 {sizeValue} {sizeValue}"
+    >
+        <!-- Background circle -->
+        <circle
+            class="progress-track-circle"
+            cx={sizeValue / 2}
+            cy={sizeValue / 2}
+            r={radius}
+            fill="none"
+            stroke="var(--flin-bg-surface)"
+            stroke-width={strokeWidth}
+        />
+
+        <!-- Progress circle -->
+        <circle
+            class="progress-fill-circle"
+            cx={sizeValue / 2}
+            cy={sizeValue / 2}
+            r={radius}
+            fill="none"
+            stroke={strokeColor}
+            stroke-width={strokeWidth}
+            stroke-linecap="round"
+            stroke-dasharray={circumference}
+            stroke-dashoffset={strokeDashoffset}
+            transform="rotate(-90 {sizeValue / 2} {sizeValue / 2})"
+        />
+    </svg>
+
+    {if showValue || label != none}
+        <div class="progress-content">
+            {if showValue}
+                <span class="progress-percentage">{Math.round(progressValue)}%</span>
+            {/if}
+            {if label != none}
+                <span class="progress-label">{label}</span>
+            {/if}
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-progress-circle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-svg {
+    transform: rotate(0deg);
+}
+
+.progress-track-circle {
+    opacity: 0.3;
+}
+
+.progress-fill-circle {
+    transition: stroke-dashoffset var(--flin-transition-slow);
+}
+
+.progress-animated .progress-fill-circle {
+    animation: progress-circle-fill 1s ease-out forwards;
+}
+
+@keyframes progress-circle-fill {
+    from {
+        stroke-dashoffset: var(--circumference);
+    }
+}
+
+.progress-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.progress-percentage {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.progress-label {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-secondary);
+    margin-top: var(--flin-space-1);
+    max-width: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Size-specific adjustments */
+.flin-progress-circle[style*="80px"] .progress-percentage {
+    font-size: var(--flin-text-base);
+}
+
+.flin-progress-circle[style*="80px"] .progress-label {
+    font-size: 10px;
+}
+
+.flin-progress-circle[style*="160px"] .progress-percentage {
+    font-size: var(--flin-text-3xl);
+}
+
+.flin-progress-circle[style*="160px"] .progress-label {
+    font-size: var(--flin-text-sm);
+}
+
+/* Hover effect */
+.flin-progress-circle:hover .progress-fill-circle {
+    filter: brightness(1.1);
+}
+
+/* Pulse animation for 100% */
+.flin-progress-circle[data-complete="true"] .progress-fill-circle {
+    animation: progress-pulse 2s ease-in-out infinite;
+}
+
+@keyframes progress-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+</style>

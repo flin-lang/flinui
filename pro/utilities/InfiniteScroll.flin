@@ -1,0 +1,147 @@
+// ============================================================================
+// InfiniteScroll.flin — FlinUI PRO Utility Component
+// Load more content on scroll
+// ============================================================================
+// Props:
+//   - threshold: Distance from bottom to trigger load in px (number, default: 200)
+//   - hasMore: Whether more content is available (boolean, default: true)
+//   - loading: Currently loading state (boolean, default: false)
+//   - onLoadMore: Callback to load more content (function, required)
+//   - loader: Custom loading indicator (element or none)
+//   - endMessage: Message when no more content (element or string or none)
+//   - scrollableTarget: ID of scrollable container (string or none for window)
+// ============================================================================
+
+threshold = props.threshold || 200
+hasMore = props.hasMore || true
+loading = props.loading || false
+onLoadMore = props.onLoadMore || none
+loader = props.loader || none
+endMessage = props.endMessage || none
+scrollableTarget = props.scrollableTarget || none
+
+// State
+sentinel = none
+
+// Handle intersection
+handleIntersection = (entries) => {
+    entry = entries[0]
+
+    if entry.isIntersecting && hasMore && !loading && onLoadMore != none {
+        onLoadMore()
+    }
+}
+
+// Lifecycle
+onMount = () => {
+    options = {
+        root: scrollableTarget ? document.getElementById(scrollableTarget) : none,
+        rootMargin: "{threshold}px",
+        threshold: 0
+    }
+
+    observer = new IntersectionObserver(handleIntersection, options)
+
+    if sentinel != none {
+        observer.observe(sentinel)
+    }
+}
+
+<div class="flin-infinite-scroll">
+    // Content
+    <div class="infinite-content">
+        {children}
+    </div>
+
+    // Sentinel element for intersection observer
+    <div class="infinite-sentinel" ref={sentinel}></div>
+
+    // Loading indicator
+    {if loading}
+        <div class="infinite-loader">
+            {if loader != none}
+                {loader}
+            {else}
+                <div class="default-loader">
+                    <div class="spinner"></div>
+                    <span class="loader-text">Loading more...</span>
+                </div>
+            {/if}
+        </div>
+    {/if}
+
+    // End message
+    {if !hasMore && !loading && endMessage != none}
+        <div class="infinite-end">
+            {endMessage}
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-infinite-scroll {
+    display: flex;
+    flex-direction: column;
+}
+
+.infinite-content {
+    flex: 1;
+}
+
+.infinite-sentinel {
+    height: 1px;
+    visibility: hidden;
+}
+
+/* Loader */
+.infinite-loader {
+    display: flex;
+    justify-content: center;
+    padding: var(--flin-space-6);
+}
+
+.default-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--flin-border-subtle);
+    border-top-color: var(--flin-accent-gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loader-text {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-muted);
+}
+
+/* End message */
+.infinite-end {
+    display: flex;
+    justify-content: center;
+    padding: var(--flin-space-6);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-muted);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .spinner {
+        animation: none;
+        border-top-color: var(--flin-accent-gold);
+        border-right-color: var(--flin-accent-gold);
+    }
+}
+</style>

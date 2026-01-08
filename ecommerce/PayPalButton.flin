@@ -1,0 +1,243 @@
+// PayPalButton.flin - FlinUI PRO PayPal Button Component
+// Official PayPal button styling with loading states
+
+// Props with defaults
+amount = props.amount
+currency = props.currency || "USD"
+onClick = props.onClick
+disabled = props.disabled || false
+loading = props.loading || false
+size = props.size || "md"
+variant = props.variant || "gold"
+
+// Component state
+isHovered = false
+processingPayment = false
+paymentStatus = "idle"
+
+// Handle button click
+function handleClick() {
+    {if !disabled && !loading && onClick}
+        processingPayment = true
+        paymentStatus = "processing"
+        onClick({
+            amount: amount,
+            currency: currency
+        })
+    {/if}
+}
+
+// Size classes
+sizeClass = match size {
+    "sm" -> "paypal-btn-sm"
+    "lg" -> "paypal-btn-lg"
+    _ -> "paypal-btn-md"
+}
+
+// Variant classes
+variantClass = match variant {
+    "blue" -> "paypal-btn-blue"
+    "silver" -> "paypal-btn-silver"
+    "white" -> "paypal-btn-white"
+    _ -> "paypal-btn-gold"
+}
+
+<div class="paypal-button-wrapper">
+    <style scoped>
+        .paypal-button-wrapper {
+            width: 100%;
+        }
+
+        .paypal-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--flin-space-2);
+            font-family: var(--flin-font-sans);
+            font-weight: var(--flin-font-semibold);
+            border: none;
+            border-radius: var(--flin-radius-button);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .paypal-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Size variants */
+        .paypal-btn-sm {
+            padding: var(--flin-space-2) var(--flin-space-4);
+            font-size: var(--flin-text-sm);
+            height: 40px;
+        }
+
+        .paypal-btn-md {
+            padding: var(--flin-space-3) var(--flin-space-6);
+            font-size: var(--flin-text-base);
+            height: 48px;
+        }
+
+        .paypal-btn-lg {
+            padding: var(--flin-space-4) var(--flin-space-8);
+            font-size: var(--flin-text-lg);
+            height: 56px;
+        }
+
+        /* Color variants */
+        .paypal-btn-gold {
+            background: linear-gradient(to bottom, #ffc439 0%, #ffb800 100%);
+            color: #111111;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .paypal-btn-gold:hover:not(:disabled) {
+            background: linear-gradient(to bottom, #ffcf63 0%, #ffc300 100%);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .paypal-btn-blue {
+            background: linear-gradient(to bottom, #0070ba 0%, #005ea6 100%);
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .paypal-btn-blue:hover:not(:disabled) {
+            background: linear-gradient(to bottom, #0079c8 0%, #006bb4 100%);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .paypal-btn-silver {
+            background: linear-gradient(to bottom, #f5f5f5 0%, #e7e7e7 100%);
+            color: #111111;
+            border: 1px solid #c0c0c0;
+        }
+
+        .paypal-btn-silver:hover:not(:disabled) {
+            background: linear-gradient(to bottom, #ffffff 0%, #f0f0f0 100%);
+            transform: translateY(-1px);
+        }
+
+        .paypal-btn-white {
+            background: #ffffff;
+            color: #0070ba;
+            border: 1px solid #c0c0c0;
+        }
+
+        .paypal-btn-white:hover:not(:disabled) {
+            border-color: #0070ba;
+            transform: translateY(-1px);
+        }
+
+        .paypal-logo {
+            height: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .paypal-logo svg {
+            height: 100%;
+            width: auto;
+        }
+
+        .paypal-text {
+            font-size: inherit;
+            font-weight: inherit;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .success-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--flin-status-success);
+        }
+
+        .error-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--flin-status-error);
+        }
+
+        .amount-display {
+            margin-left: var(--flin-space-2);
+            padding-left: var(--flin-space-2);
+            border-left: 1px solid currentColor;
+            opacity: 0.8;
+        }
+
+        .secure-notice {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--flin-space-1);
+            margin-top: var(--flin-space-2);
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-muted);
+        }
+
+        .lock-icon {
+            width: 12px;
+            height: 12px;
+        }
+    </style>
+
+    <button
+        class="paypal-btn {sizeClass} {variantClass}"
+        click={handleClick}
+        disabled={disabled || loading}
+        mouseover={() => isHovered = true}
+        mouseout={() => isHovered = false}
+    >
+        {if loading || processingPayment}
+            <span class="spinner"></span>
+            <span class="paypal-text">Processing...</span>
+        {else if paymentStatus == "success"}
+            <svg class="success-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span class="paypal-text">Payment Complete</span>
+        {else if paymentStatus == "error"}
+            <svg class="error-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            <span class="paypal-text">Payment Failed</span>
+        {else}
+            <div class="paypal-logo">
+                <svg viewBox="0 0 100 32" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="currentColor" d="M12 4.917v.583c0 1.75-.958 3.5-2.792 4.375C7.375 10.75 5.083 11 3 11H1v4c0 2.208 1.792 4 4 4h4c4.417 0 8-3.583 8-8 0-3.542-2.292-6.542-5.5-7.583C12.333 3.167 12.833 2 12.833 1h1.084C17.458 1 20.833 4.375 20.833 7.917v.583h1.084c3.541 0 6.416 2.875 6.416 6.417S25.458 21.333 21.917 21.333h-4c-4.417 0-8-3.583-8-8V4.917z"/>
+                </svg>
+            </div>
+            <span class="paypal-text">Pay with PayPal</span>
+            {if amount}
+                <span class="amount-display">{currency} {amount}</span>
+            {/if}
+        {/if}
+    </button>
+
+    <div class="secure-notice">
+        <svg class="lock-icon" viewBox="0 0 16 16" fill="currentColor">
+            <path fill-rule="evenodd" d="M8 1a3 3 0 0 0-3 3v1H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V4a3 3 0 0 0-3-3zm2 4V4a2 2 0 1 0-4 0v1h4z" clip-rule="evenodd"/>
+        </svg>
+        <span>Secure checkout with PayPal</span>
+    </div>
+</div>

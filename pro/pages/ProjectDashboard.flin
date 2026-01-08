@@ -1,0 +1,798 @@
+// ProjectDashboard.flin - Project management dashboard with tasks, timeline, and team
+// FlinUI PRO - Page Template
+
+// Props with defaults
+title = props.title || "Project Alpha"
+projectId = props.projectId || "proj-001"
+status = props.status || "active"
+progress = props.progress || 68
+startDate = props.startDate || "2026-01-01"
+endDate = props.endDate || "2026-03-31"
+budget = props.budget || 150000
+spent = props.spent || 87500
+teamMembers = props.teamMembers || []
+tasks = props.tasks || []
+milestones = props.milestones || []
+onTaskCreate = props.onTaskCreate || none
+onTaskUpdate = props.onTaskUpdate || none
+
+// Computed values
+statusClass = match status {
+  "active" => "status-active"
+  "on-hold" => "status-hold"
+  "completed" => "status-completed"
+  "at-risk" => "status-risk"
+  _ => "status-active"
+}
+
+budgetPercent = (spent / budget) * 100
+budgetStatus = match true {
+  budgetPercent > 90 => "over-budget"
+  budgetPercent > 75 => "warning"
+  _ => "on-track"
+}
+
+// Sample data
+defaultTasks = [
+  { id: 1, title: "Design System Setup", assignee: "Alice", status: "completed", priority: "high", dueDate: "2026-01-15" },
+  { id: 2, title: "API Integration", assignee: "Bob", status: "in-progress", priority: "high", dueDate: "2026-01-25" },
+  { id: 3, title: "User Authentication", assignee: "Carol", status: "in-progress", priority: "medium", dueDate: "2026-02-01" },
+  { id: 4, title: "Dashboard Components", assignee: "Dave", status: "todo", priority: "medium", dueDate: "2026-02-10" },
+  { id: 5, title: "Testing & QA", assignee: "Eve", status: "todo", priority: "low", dueDate: "2026-02-20" }
+]
+
+defaultMilestones = [
+  { id: 1, title: "Phase 1 Complete", date: "2026-01-31", status: "completed" },
+  { id: 2, title: "Beta Release", date: "2026-02-15", status: "upcoming" },
+  { id: 3, title: "Launch Ready", date: "2026-03-15", status: "upcoming" },
+  { id: 4, title: "Final Delivery", date: "2026-03-31", status: "upcoming" }
+]
+
+defaultTeam = [
+  { id: 1, name: "Alice Chen", role: "Lead Designer", avatar: "AC", tasksCompleted: 12 },
+  { id: 2, name: "Bob Smith", role: "Backend Dev", avatar: "BS", tasksCompleted: 8 },
+  { id: 3, name: "Carol Davis", role: "Frontend Dev", avatar: "CD", tasksCompleted: 15 },
+  { id: 4, name: "Dave Wilson", role: "DevOps", avatar: "DW", tasksCompleted: 6 }
+]
+
+taskList = tasks.length > 0 ? tasks : defaultTasks
+milestoneList = milestones.length > 0 ? milestones : defaultMilestones
+team = teamMembers.length > 0 ? teamMembers : defaultTeam
+
+// State
+activeTab = "overview"
+showTaskModal = false
+
+<div class="project-dashboard">
+  <!-- Header -->
+  <header class="project-header">
+    <div class="header-left">
+      <nav class="breadcrumb">
+        <a href="/projects">Projects</a>
+        <span class="separator">/</span>
+        <span class="current">{title}</span>
+      </nav>
+      <h1 class="project-title">{title}</h1>
+      <div class="project-meta">
+        <span class={"status-badge " + statusClass}>{status}</span>
+        <span class="meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          {startDate} - {endDate}
+        </span>
+        <span class="meta-item">ID: {projectId}</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <Button variant="secondary" size="sm">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        Settings
+      </Button>
+      <Button variant="primary" size="sm" click={() => showTaskModal = true}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Add Task
+      </Button>
+    </div>
+  </header>
+
+  <!-- Progress Overview -->
+  <section class="progress-section">
+    <div class="progress-card main-progress">
+      <div class="progress-header">
+        <h3>Overall Progress</h3>
+        <span class="progress-value">{progress}%</span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" style={"width: " + progress + "%"}></div>
+      </div>
+      <div class="progress-stats">
+        <div class="stat">
+          <span class="stat-value">24</span>
+          <span class="stat-label">Total Tasks</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">16</span>
+          <span class="stat-label">Completed</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">5</span>
+          <span class="stat-label">In Progress</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">3</span>
+          <span class="stat-label">Remaining</span>
+        </div>
+      </div>
+    </div>
+
+    <div class={"progress-card budget-card " + budgetStatus}>
+      <div class="progress-header">
+        <h3>Budget</h3>
+        <span class="budget-badge">{budgetStatus}</span>
+      </div>
+      <div class="budget-display">
+        <span class="spent">${spent.toLocaleString()}</span>
+        <span class="divider">/</span>
+        <span class="total">${budget.toLocaleString()}</span>
+      </div>
+      <div class="progress-bar-container">
+        <div class={"progress-bar budget-bar " + budgetStatus} style={"width: " + budgetPercent + "%"}></div>
+      </div>
+      <p class="budget-remaining">${(budget - spent).toLocaleString()} remaining</p>
+    </div>
+
+    <div class="progress-card time-card">
+      <div class="progress-header">
+        <h3>Timeline</h3>
+        <span class="days-left">45 days left</span>
+      </div>
+      <div class="timeline-visual">
+        <div class="timeline-bar">
+          <div class="timeline-progress" style="width: 55%"></div>
+          <div class="timeline-marker today" style="left: 55%">
+            <span class="marker-label">Today</span>
+          </div>
+        </div>
+        <div class="timeline-dates">
+          <span>{startDate}</span>
+          <span>{endDate}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Grid -->
+  <div class="dashboard-grid">
+    <!-- Tasks Section -->
+    <section class="tasks-section">
+      <div class="section-header">
+        <h2>Tasks</h2>
+        <div class="task-filters">
+          <select class="filter-select">
+            <option value="all">All Tasks</option>
+            <option value="todo">To Do</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+      </div>
+      <div class="tasks-list">
+        {for task in taskList}
+          <div class={"task-item priority-" + task.priority}>
+            <div class="task-checkbox">
+              <input type="checkbox" checked={task.status == "completed"} />
+            </div>
+            <div class="task-content">
+              <h4 class="task-title">{task.title}</h4>
+              <div class="task-meta">
+                <span class={"task-status status-" + task.status}>{task.status}</span>
+                <span class="task-assignee">
+                  <Avatar size="xs" name={task.assignee} />
+                  {task.assignee}
+                </span>
+                <span class="task-due">Due: {task.dueDate}</span>
+              </div>
+            </div>
+            <div class="task-priority">
+              <span class={"priority-badge " + task.priority}>{task.priority}</span>
+            </div>
+          </div>
+        {/for}
+      </div>
+      <button class="load-more-btn">View All Tasks</button>
+    </section>
+
+    <!-- Milestones Section -->
+    <section class="milestones-section">
+      <div class="section-header">
+        <h2>Milestones</h2>
+      </div>
+      <div class="milestones-timeline">
+        {for milestone in milestoneList}
+          <div class={"milestone-item " + milestone.status}>
+            <div class="milestone-marker">
+              {if milestone.status == "completed"}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              {else}
+                <div class="marker-dot"></div>
+              {/if}
+            </div>
+            <div class="milestone-content">
+              <h4>{milestone.title}</h4>
+              <span class="milestone-date">{milestone.date}</span>
+            </div>
+          </div>
+        {/for}
+      </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team-section">
+      <div class="section-header">
+        <h2>Team Members</h2>
+        <Button variant="ghost" size="sm">Manage Team</Button>
+      </div>
+      <div class="team-grid">
+        {for member in team}
+          <div class="team-member">
+            <Avatar size="lg" name={member.name} />
+            <div class="member-info">
+              <h4>{member.name}</h4>
+              <p class="member-role">{member.role}</p>
+              <span class="member-tasks">{member.tasksCompleted} tasks completed</span>
+            </div>
+          </div>
+        {/for}
+      </div>
+    </section>
+
+    <!-- Activity Feed -->
+    <section class="activity-section">
+      <div class="section-header">
+        <h2>Recent Activity</h2>
+      </div>
+      <div class="activity-feed">
+        <div class="activity-item">
+          <Avatar size="sm" name="Alice Chen" />
+          <div class="activity-content">
+            <p><strong>Alice Chen</strong> completed task "Design System Setup"</p>
+            <span class="activity-time">2 hours ago</span>
+          </div>
+        </div>
+        <div class="activity-item">
+          <Avatar size="sm" name="Bob Smith" />
+          <div class="activity-content">
+            <p><strong>Bob Smith</strong> started working on "API Integration"</p>
+            <span class="activity-time">4 hours ago</span>
+          </div>
+        </div>
+        <div class="activity-item">
+          <Avatar size="sm" name="Carol Davis" />
+          <div class="activity-content">
+            <p><strong>Carol Davis</strong> commented on "User Authentication"</p>
+            <span class="activity-time">Yesterday</span>
+          </div>
+        </div>
+        <div class="activity-item">
+          <Avatar size="sm" name="Dave Wilson" />
+          <div class="activity-content">
+            <p><strong>Dave Wilson</strong> uploaded deployment config</p>
+            <span class="activity-time">2 days ago</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<style scoped>
+.project-dashboard {
+  padding: var(--flin-space-6);
+  background: var(--flin-bg-secondary);
+  min-height: 100vh;
+}
+
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--flin-space-6);
+  padding: var(--flin-space-6);
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-tertiary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.breadcrumb a {
+  color: var(--flin-accent-gold);
+  text-decoration: none;
+}
+
+.project-title {
+  font-size: var(--flin-text-3xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-3);
+}
+
+.project-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-4);
+}
+
+.status-badge {
+  padding: var(--flin-space-1) var(--flin-space-3);
+  border-radius: var(--flin-radius-full);
+  font-size: var(--flin-text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-active { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.status-hold { background: rgba(234, 179, 8, 0.1); color: #eab308; }
+.status-completed { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.status-risk { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--flin-space-3);
+}
+
+/* Progress Section */
+.progress-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: var(--flin-space-4);
+  margin-bottom: var(--flin-space-6);
+}
+
+.progress-card {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  padding: var(--flin-space-5);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--flin-space-4);
+}
+
+.progress-header h3 {
+  font-size: var(--flin-text-lg);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.progress-value {
+  font-size: var(--flin-text-2xl);
+  font-weight: 700;
+  color: var(--flin-accent-gold);
+}
+
+.progress-bar-container {
+  height: 8px;
+  background: var(--flin-bg-tertiary);
+  border-radius: var(--flin-radius-full);
+  overflow: hidden;
+  margin-bottom: var(--flin-space-4);
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--flin-accent-gold), #f59e0b);
+  border-radius: var(--flin-radius-full);
+  transition: width 0.3s ease;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: var(--flin-text-xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+}
+
+.stat-label {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+/* Budget Card */
+.budget-display {
+  display: flex;
+  align-items: baseline;
+  gap: var(--flin-space-2);
+  margin-bottom: var(--flin-space-3);
+}
+
+.budget-display .spent {
+  font-size: var(--flin-text-2xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+}
+
+.budget-display .divider {
+  color: var(--flin-text-tertiary);
+}
+
+.budget-display .total {
+  font-size: var(--flin-text-lg);
+  color: var(--flin-text-secondary);
+}
+
+.budget-bar.on-track { background: #22c55e; }
+.budget-bar.warning { background: #eab308; }
+.budget-bar.over-budget { background: #ef4444; }
+
+.budget-badge {
+  font-size: var(--flin-text-xs);
+  padding: var(--flin-space-1) var(--flin-space-2);
+  border-radius: var(--flin-radius-sm);
+  text-transform: capitalize;
+}
+
+.budget-card.on-track .budget-badge { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.budget-card.warning .budget-badge { background: rgba(234, 179, 8, 0.1); color: #eab308; }
+.budget-card.over-budget .budget-badge { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+.budget-remaining {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+/* Timeline Card */
+.days-left {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-accent-gold);
+  font-weight: 600;
+}
+
+.timeline-visual {
+  margin-top: var(--flin-space-4);
+}
+
+.timeline-bar {
+  height: 8px;
+  background: var(--flin-bg-tertiary);
+  border-radius: var(--flin-radius-full);
+  position: relative;
+  margin-bottom: var(--flin-space-6);
+}
+
+.timeline-progress {
+  height: 100%;
+  background: var(--flin-accent-gold);
+  border-radius: var(--flin-radius-full);
+}
+
+.timeline-marker {
+  position: absolute;
+  top: -8px;
+  transform: translateX(-50%);
+}
+
+.marker-label {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-secondary);
+  white-space: nowrap;
+}
+
+.timeline-dates {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--flin-space-4);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--flin-space-4);
+}
+
+.section-header h2 {
+  font-size: var(--flin-text-lg);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+/* Tasks Section */
+.tasks-section {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  padding: var(--flin-space-5);
+}
+
+.filter-select {
+  padding: var(--flin-space-2) var(--flin-space-3);
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+  font-size: var(--flin-text-sm);
+}
+
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-3);
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-3);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-md);
+  border-left: 3px solid transparent;
+}
+
+.task-item.priority-high { border-left-color: #ef4444; }
+.task-item.priority-medium { border-left-color: #eab308; }
+.task-item.priority-low { border-left-color: #22c55e; }
+
+.task-content {
+  flex: 1;
+}
+
+.task-title {
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-1);
+}
+
+.task-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.task-status {
+  padding: var(--flin-space-1) var(--flin-space-2);
+  border-radius: var(--flin-radius-sm);
+}
+
+.task-status.status-completed { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.task-status.status-in-progress { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.task-status.status-todo { background: rgba(156, 163, 175, 0.1); color: #9ca3af; }
+
+.priority-badge {
+  font-size: var(--flin-text-xs);
+  padding: var(--flin-space-1) var(--flin-space-2);
+  border-radius: var(--flin-radius-sm);
+  text-transform: capitalize;
+}
+
+.priority-badge.high { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.priority-badge.medium { background: rgba(234, 179, 8, 0.1); color: #eab308; }
+.priority-badge.low { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+
+.load-more-btn {
+  width: 100%;
+  padding: var(--flin-space-3);
+  background: transparent;
+  border: 1px dashed var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-secondary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+  margin-top: var(--flin-space-3);
+  transition: all 0.2s;
+}
+
+.load-more-btn:hover {
+  border-color: var(--flin-accent-gold);
+  color: var(--flin-accent-gold);
+}
+
+/* Milestones Section */
+.milestones-section {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  padding: var(--flin-space-5);
+}
+
+.milestones-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-4);
+}
+
+.milestone-item {
+  display: flex;
+  gap: var(--flin-space-3);
+}
+
+.milestone-marker {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.milestone-item.completed .milestone-marker {
+  background: #22c55e;
+  color: white;
+}
+
+.milestone-item.upcoming .milestone-marker {
+  background: var(--flin-bg-tertiary);
+}
+
+.marker-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--flin-text-tertiary);
+  border-radius: 50%;
+}
+
+.milestone-content h4 {
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+}
+
+.milestone-date {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+/* Team Section */
+.team-section {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  padding: var(--flin-space-5);
+}
+
+.team-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-3);
+}
+
+.team-member {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  padding: var(--flin-space-3);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-md);
+}
+
+.member-info h4 {
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+}
+
+.member-role {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-secondary);
+}
+
+.member-tasks {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-accent-gold);
+}
+
+/* Activity Section */
+.activity-section {
+  background: var(--flin-bg-primary);
+  border-radius: var(--flin-radius-lg);
+  padding: var(--flin-space-5);
+}
+
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-4);
+}
+
+.activity-item {
+  display: flex;
+  gap: var(--flin-space-3);
+}
+
+.activity-content p {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-1);
+}
+
+.activity-time {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .progress-section {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .main-progress {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .project-dashboard {
+    padding: var(--flin-space-4);
+  }
+
+  .project-header {
+    flex-direction: column;
+    gap: var(--flin-space-4);
+  }
+
+  .progress-section {
+    grid-template-columns: 1fr;
+  }
+
+  .main-progress {
+    grid-column: span 1;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

@@ -1,0 +1,518 @@
+// FlinUI PRO DataTableExpandable Component
+// Click row to expand details panel
+
+// Props with defaults
+columns = props.columns || []
+data = props.data || []
+loading = props.loading || false
+emptyText = props.emptyText || "No data available"
+striped = props.striped || false
+hoverable = props.hoverable || true
+bordered = props.bordered || false
+rowKey = props.rowKey || "id"
+expandedContent = props.expandedContent || none
+singleExpand = props.singleExpand || false
+defaultExpanded = props.defaultExpanded || []
+onExpand = props.onExpand || none
+
+// State
+expandedRows = [...defaultExpanded]
+
+// Computed classes
+stripedClass = match striped {
+    true -> " pro-datatable-expandable--striped"
+    _ -> ""
+}
+
+hoverableClass = match hoverable {
+    true -> " pro-datatable-expandable--hoverable"
+    _ -> ""
+}
+
+borderedClass = match bordered {
+    true -> " pro-datatable-expandable--bordered"
+    _ -> ""
+}
+
+tableClass = "pro-datatable-expandable" ++ stripedClass ++ hoverableClass ++ borderedClass
+
+// Expand handlers
+isRowExpanded = (row) => {
+    expandedRows.includes(row[rowKey])
+}
+
+toggleRowExpand = (row) => {
+    rowId = row[rowKey]
+
+    if singleExpand {
+        if isRowExpanded(row) {
+            expandedRows = []
+        } else {
+            expandedRows = [rowId]
+        }
+    } else {
+        if isRowExpanded(row) {
+            expandedRows = expandedRows.filter((id) => id != rowId)
+        } else {
+            expandedRows = [...expandedRows, rowId]
+        }
+    }
+
+    if onExpand != none {
+        onExpand(expandedRows, row)
+    }
+}
+
+expandAll = {
+    expandedRows = data.map((row) => row[rowKey])
+    if onExpand != none {
+        onExpand(expandedRows, none)
+    }
+}
+
+collapseAll = {
+    expandedRows = []
+    if onExpand != none {
+        onExpand([], none)
+    }
+}
+
+<div class="pro-datatable-expandable-container">
+    <div class="pro-datatable-expandable__toolbar">
+        <span class="pro-datatable-expandable__expand-info">
+            {expandedRows.length} of {data.length} rows expanded
+        </span>
+        <div class="pro-datatable-expandable__toolbar-actions">
+            <button
+                class="pro-datatable-expandable__action-btn"
+                click={expandAll}
+                disabled={expandedRows.length == data.length}
+            >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="7 13 12 18 17 13"/>
+                    <polyline points="7 6 12 11 17 6"/>
+                </svg>
+                Expand all
+            </button>
+            <button
+                class="pro-datatable-expandable__action-btn"
+                click={collapseAll}
+                disabled={expandedRows.length == 0}
+            >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="17 11 12 6 7 11"/>
+                    <polyline points="17 18 12 13 7 18"/>
+                </svg>
+                Collapse all
+            </button>
+        </div>
+    </div>
+
+    <div class="pro-datatable-expandable__wrapper">
+        <table class={tableClass}>
+            <thead class="pro-datatable-expandable__head">
+                <tr class="pro-datatable-expandable__row pro-datatable-expandable__row--header">
+                    <th class="pro-datatable-expandable__header pro-datatable-expandable__header--expand" scope="col">
+                        <span class="visually-hidden">Expand</span>
+                    </th>
+                    {for column in columns}
+                        <th class="pro-datatable-expandable__header" scope="col">
+                            {column.label || column.key}
+                        </th>
+                    {/for}
+                </tr>
+            </thead>
+
+            <tbody class="pro-datatable-expandable__body">
+                {if loading}
+                    <tr class="pro-datatable-expandable__row">
+                        <td class="pro-datatable-expandable__cell pro-datatable-expandable__loading" colspan={columns.length + 1}>
+                            <div class="pro-datatable-expandable__spinner"></div>
+                            <span>Loading data...</span>
+                        </td>
+                    </tr>
+                {else if data.length == 0}
+                    <tr class="pro-datatable-expandable__row">
+                        <td class="pro-datatable-expandable__cell pro-datatable-expandable__empty" colspan={columns.length + 1}>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M3 9h18"/>
+                                <path d="M9 21V9"/>
+                            </svg>
+                            <span>{emptyText}</span>
+                        </td>
+                    </tr>
+                {else}
+                    {for row in data}
+                        <tr
+                            class={"pro-datatable-expandable__row" ++ (if isRowExpanded(row) { " pro-datatable-expandable__row--expanded" } else { "" })}
+                            click={toggleRowExpand(row)}
+                        >
+                            <td class="pro-datatable-expandable__cell pro-datatable-expandable__cell--expand">
+                                <button
+                                    class={"pro-datatable-expandable__expand-btn" ++ (if isRowExpanded(row) { " pro-datatable-expandable__expand-btn--expanded" } else { "" })}
+                                    click={(e) => { e.stopPropagation(); toggleRowExpand(row) }}
+                                    aria-expanded={isRowExpanded(row)}
+                                    aria-label={if isRowExpanded(row) { "Collapse row" } else { "Expand row" }}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6"/>
+                                    </svg>
+                                </button>
+                            </td>
+                            {for column in columns}
+                                <td class="pro-datatable-expandable__cell">
+                                    {row[column.key]}
+                                </td>
+                            {/for}
+                        </tr>
+
+                        {if isRowExpanded(row)}
+                            <tr class="pro-datatable-expandable__row pro-datatable-expandable__row--detail">
+                                <td class="pro-datatable-expandable__detail-cell" colspan={columns.length + 1}>
+                                    <div class="pro-datatable-expandable__detail-content">
+                                        {if expandedContent != none}
+                                            {expandedContent(row)}
+                                        {else}
+                                            <div class="pro-datatable-expandable__default-detail">
+                                                <h4>Row Details</h4>
+                                                <dl class="pro-datatable-expandable__detail-list">
+                                                    {for column in columns}
+                                                        <div class="pro-datatable-expandable__detail-item">
+                                                            <dt>{column.label || column.key}</dt>
+                                                            <dd>{row[column.key]}</dd>
+                                                        </div>
+                                                    {/for}
+                                                </dl>
+                                            </div>
+                                        {/if}
+                                    </div>
+                                </td>
+                            </tr>
+                        {/if}
+                    {/for}
+                {/if}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style scoped>
+.pro-datatable-expandable-container {
+    font-family: var(--flin-font-sans);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+.pro-datatable-expandable__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background: var(--flin-neutral-50);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+    gap: var(--flin-space-3);
+    flex-wrap: wrap;
+}
+
+.pro-datatable-expandable__expand-info {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-expandable__toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.pro-datatable-expandable__action-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-1-5) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.pro-datatable-expandable__action-btn:hover:not(:disabled) {
+    color: var(--flin-fg);
+    border-color: var(--flin-neutral-300);
+}
+
+.pro-datatable-expandable__action-btn:disabled {
+    opacity: var(--flin-opacity-50);
+    cursor: not-allowed;
+}
+
+.pro-datatable-expandable__wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pro-datatable-expandable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--flin-text-sm);
+    text-align: left;
+}
+
+.pro-datatable-expandable__head {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-expandable__header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    white-space: nowrap;
+    border-bottom: var(--flin-space-0-5) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-expandable__header--expand {
+    width: var(--flin-size-12);
+    padding: var(--flin-space-3) var(--flin-space-2);
+}
+
+.pro-datatable-expandable__row {
+    transition: background-color var(--flin-transition-fast);
+    cursor: pointer;
+}
+
+.pro-datatable-expandable__row--detail {
+    cursor: default;
+}
+
+.pro-datatable-expandable__row--expanded {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-expandable__cell {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    color: var(--flin-fg);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-expandable__cell--expand {
+    width: var(--flin-size-12);
+    padding: var(--flin-space-3) var(--flin-space-2);
+    text-align: center;
+}
+
+.pro-datatable-expandable__expand-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-size-7);
+    height: var(--flin-size-7);
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+}
+
+.pro-datatable-expandable__expand-btn:hover {
+    background: var(--flin-neutral-100);
+    color: var(--flin-fg);
+}
+
+.pro-datatable-expandable__expand-btn svg {
+    transition: transform var(--flin-transition-fast);
+}
+
+.pro-datatable-expandable__expand-btn--expanded svg {
+    transform: rotate(90deg);
+}
+
+.pro-datatable-expandable__expand-btn--expanded {
+    color: var(--flin-primary);
+}
+
+/* Detail row */
+.pro-datatable-expandable__detail-cell {
+    padding: 0;
+    background: var(--flin-neutral-50);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-expandable__detail-content {
+    padding: var(--flin-space-4) var(--flin-space-6);
+    padding-left: var(--flin-size-16);
+    border-left: var(--flin-space-1) solid var(--flin-primary);
+    margin-left: var(--flin-space-4);
+}
+
+.pro-datatable-expandable__default-detail h4 {
+    margin: 0 0 var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+}
+
+.pro-datatable-expandable__detail-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--flin-space-3);
+    margin: 0;
+}
+
+.pro-datatable-expandable__detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-0-5);
+}
+
+.pro-datatable-expandable__detail-item dt {
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.pro-datatable-expandable__detail-item dd {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+}
+
+/* Variants */
+.pro-datatable-expandable--striped .pro-datatable-expandable__body .pro-datatable-expandable__row:nth-child(4n+1):not(.pro-datatable-expandable__row--expanded):not(.pro-datatable-expandable__row--detail) {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-expandable--hoverable .pro-datatable-expandable__body .pro-datatable-expandable__row:not(.pro-datatable-expandable__row--detail):hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.pro-datatable-expandable--bordered .pro-datatable-expandable__header,
+.pro-datatable-expandable--bordered .pro-datatable-expandable__cell {
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+/* Loading state */
+.pro-datatable-expandable__loading {
+    text-align: center;
+    padding: var(--flin-space-10) var(--flin-space-4);
+    cursor: default;
+}
+
+.pro-datatable-expandable__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-expandable__spinner {
+    width: var(--flin-icon-lg);
+    height: var(--flin-icon-lg);
+    border: var(--flin-space-0-5) solid var(--flin-neutral-200);
+    border-top-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    animation: pro-datatable-expandable-spin var(--flin-duration-slow) linear infinite;
+}
+
+@keyframes pro-datatable-expandable-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty state */
+.pro-datatable-expandable__empty {
+    text-align: center;
+    padding: var(--flin-space-12) var(--flin-space-4);
+    cursor: default;
+}
+
+.pro-datatable-expandable__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-expandable__empty svg {
+    color: var(--flin-neutral-300);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .pro-datatable-expandable-container {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-expandable__toolbar {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-expandable__action-btn {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .pro-datatable-expandable__head {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-expandable__header,
+[data-theme="dark"] .pro-datatable-expandable__cell {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-expandable__row--expanded {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-expandable__detail-cell {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-expandable__expand-btn:hover {
+    background: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-expandable--striped .pro-datatable-expandable__body .pro-datatable-expandable__row:nth-child(4n+1):not(.pro-datatable-expandable__row--expanded):not(.pro-datatable-expandable__row--detail) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-expandable--hoverable .pro-datatable-expandable__body .pro-datatable-expandable__row:not(.pro-datatable-expandable__row--detail):hover {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-expandable__spinner {
+    border-color: var(--flin-neutral-700);
+    border-top-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .pro-datatable-expandable__empty svg {
+    color: var(--flin-neutral-600);
+}
+</style>

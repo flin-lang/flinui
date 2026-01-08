@@ -1,0 +1,167 @@
+// ============================================================================
+// FooterMinimal.flin — FlinUI PRO Navigation Component
+// Minimal footer with just copyright and optional links in a single line
+// ============================================================================
+// Props:
+//   - companyName: Company/brand name for copyright (string)
+//   - copyright: Additional copyright text (string)
+//   - links: Array of footer links [{ label, href }] (array)
+//   - variant: Color scheme - light, dark (string)
+//   - align: Content alignment - left, center, right (string)
+
+companyName = props.companyName || "Company"
+copyright = props.copyright || "All rights reserved."
+links = props.links || []
+variant = props.variant || "light"
+align = props.align || "center"
+
+// Get current year
+currentYear = new Date().getFullYear()
+
+// Variant classes
+variantClass = match variant {
+    "dark" => "footer-minimal-dark"
+    _ => "footer-minimal-light"
+}
+
+// Alignment classes
+alignClass = match align {
+    "left" => "footer-minimal-left"
+    "right" => "footer-minimal-right"
+    _ => "footer-minimal-center"
+}
+
+footerClass = "flin-footer-minimal " ++ variantClass ++ " " ++ alignClass
+
+<footer class={footerClass}>
+    <div class="footer-container">
+        <div class="footer-content">
+            <p class="footer-copyright">
+                &copy; {currentYear} {companyName}. {copyright}
+            </p>
+            {if links.length > 0}
+                <span class="footer-separator" aria-hidden="true">|</span>
+                <nav class="footer-nav" aria-label="Footer navigation">
+                    {for link, index in links}
+                        {if index > 0}
+                            <span class="footer-link-separator" aria-hidden="true">·</span>
+                        {/if}
+                        <a href={link.href} class="footer-link">{link.label}</a>
+                    {/for}
+                </nav>
+            {/if}
+        </div>
+    </div>
+</footer>
+
+<style scoped>
+.flin-footer-minimal {
+    width: 100%;
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.footer-container {
+    max-width: var(--flin-container-screen-xl);
+    margin: 0 auto;
+    padding: var(--flin-space-4) var(--flin-space-4);
+}
+
+/* Alignment */
+.footer-minimal-center .footer-content {
+    justify-content: center;
+}
+
+.footer-minimal-left .footer-content {
+    justify-content: flex-start;
+}
+
+.footer-minimal-right .footer-content {
+    justify-content: flex-end;
+}
+
+/* Light variant */
+.footer-minimal-light {
+    background-color: var(--flin-bg);
+    color: var(--flin-fg-muted);
+}
+
+.footer-minimal-light .footer-link {
+    color: var(--flin-fg-muted);
+}
+
+.footer-minimal-light .footer-link:hover {
+    color: var(--flin-fg);
+}
+
+.footer-minimal-light .footer-separator,
+.footer-minimal-light .footer-link-separator {
+    color: var(--flin-neutral-300);
+}
+
+/* Dark variant */
+.footer-minimal-dark {
+    background-color: var(--flin-neutral-900);
+    color: var(--flin-neutral-500);
+    border-top-color: var(--flin-neutral-800);
+}
+
+.footer-minimal-dark .footer-link {
+    color: var(--flin-neutral-500);
+}
+
+.footer-minimal-dark .footer-link:hover {
+    color: var(--flin-neutral-300);
+}
+
+.footer-minimal-dark .footer-separator,
+.footer-minimal-dark .footer-link-separator {
+    color: var(--flin-neutral-700);
+}
+
+/* Content layout */
+.footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+@media (max-width: 640px) {
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-separator {
+        display: none;
+    }
+}
+
+.footer-copyright {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+}
+
+.footer-separator {
+    margin: 0 var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+}
+
+.footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+.footer-link-separator {
+    font-size: var(--flin-text-sm);
+}
+
+.footer-link {
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    text-decoration: none;
+    transition: color var(--flin-transition-fast);
+}
+</style>

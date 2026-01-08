@@ -1,0 +1,271 @@
+// ============================================================================
+// AvatarGroup.flin — FlinUI PRO
+// Stacked avatars with +N overflow indicator
+// ============================================================================
+// Props:
+//   avatars: array - Array of avatar objects [{src, name, href}] (default: [])
+//   max: number - Maximum avatars to show before overflow (default: 4)
+//   size: text - Size variant ("xs", "sm", "md", "lg", "xl") (default: "md")
+//   shape: text - Shape variant ("circle", "rounded", "square") (default: "circle")
+//   spacing: text - Overlap spacing ("tight", "default", "loose") (default: "default")
+//   direction: text - Stack direction ("left", "right") (default: "left")
+//   showTooltip: boolean - Show name tooltip on hover (default: true)
+//   borderColor: text - Border color around avatars (default: "white")
+//   onOverflowClick: function - Callback when +N is clicked (default: none)
+// ============================================================================
+
+avatars = props.avatars || []
+max = props.max || 4
+size = props.size || "md"
+shape = props.shape || "circle"
+spacing = props.spacing || "default"
+direction = props.direction || "left"
+showTooltip = props.showTooltip || true
+borderColor = props.borderColor || "white"
+onOverflowClick = props.onOverflowClick || none
+
+// Calculate visible avatars and overflow count
+visibleAvatars = avatars.slice(0, max)
+overflowCount = avatars.length - max
+hasOverflow = overflowCount > 0
+
+// Compute size class
+sizeClass = match size {
+    "xs" -> "avatar-group--xs"
+    "sm" -> "avatar-group--sm"
+    "lg" -> "avatar-group--lg"
+    "xl" -> "avatar-group--xl"
+    _ -> "avatar-group--md"
+}
+
+// Compute shape class
+shapeClass = match shape {
+    "rounded" -> "avatar-group--rounded"
+    "square" -> "avatar-group--square"
+    _ -> "avatar-group--circle"
+}
+
+// Compute spacing class
+spacingClass = match spacing {
+    "tight" -> "avatar-group--tight"
+    "loose" -> "avatar-group--loose"
+    _ -> "avatar-group--default"
+}
+
+// Compute direction class
+directionClass = match direction {
+    "right" -> "avatar-group--right"
+    _ -> "avatar-group--left"
+}
+
+// Generate initials from name
+getInitials = (name) => {
+    if name != "" && name != none {
+        words = name.split(" ")
+        if words.length > 1 {
+            words[0][0] ++ words[words.length - 1][0]
+        } else {
+            name[0]
+        }
+    } else {
+        "?"
+    }
+}
+
+// Generate background color from name
+getBgColor = (name) => {
+    if name != "" && name != none {
+        colorIndex = (name.charCodeAt(0) + name.length) % 6
+        match colorIndex {
+            0 -> "avatar-item--bg-blue"
+            1 -> "avatar-item--bg-green"
+            2 -> "avatar-item--bg-purple"
+            3 -> "avatar-item--bg-orange"
+            4 -> "avatar-item--bg-pink"
+            _ -> "avatar-item--bg-cyan"
+        }
+    } else {
+        "avatar-item--bg-blue"
+    }
+}
+
+<div
+    class={"avatar-group " ++ sizeClass ++ " " ++ shapeClass ++ " " ++ spacingClass ++ " " ++ directionClass}
+    style={"--avatar-border-color: " ++ borderColor}
+>
+    {for i, avatar in visibleAvatars}
+        <div
+            class="avatar-group__item"
+            style={"z-index: " ++ (avatars.length - i)}
+            title={if showTooltip { avatar.name || "" } else { "" }}
+        >
+            {if avatar.href != none}
+                <a href={avatar.href} class="avatar-group__link">
+                    {if avatar.src != none}
+                        <img class="avatar-group__image" src={avatar.src} alt={avatar.name || "User"}>
+                    {else}
+                        <div class={"avatar-group__initials " ++ getBgColor(avatar.name)}>
+                            {getInitials(avatar.name)}
+                        </div>
+                    {/if}
+                </a>
+            {else}
+                {if avatar.src != none}
+                    <img class="avatar-group__image" src={avatar.src} alt={avatar.name || "User"}>
+                {else}
+                    <div class={"avatar-group__initials " ++ getBgColor(avatar.name)}>
+                        {getInitials(avatar.name)}
+                    </div>
+                {/if}
+            {/if}
+        </div>
+    {/for}
+
+    {if hasOverflow}
+        <button
+            class="avatar-group__overflow"
+            click={onOverflowClick}
+            type="button"
+            aria-label={"+" ++ overflowCount ++ " more users"}
+        >
+            +{overflowCount}
+        </button>
+    {/if}
+</div>
+
+<style scoped>
+.avatar-group {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Direction */
+.avatar-group--left {
+    flex-direction: row;
+}
+
+.avatar-group--right {
+    flex-direction: row-reverse;
+}
+
+/* Item */
+.avatar-group__item {
+    position: relative;
+    flex-shrink: 0;
+    border-radius: inherit;
+}
+
+.avatar-group__link {
+    display: block;
+    border-radius: inherit;
+}
+
+.avatar-group__image,
+.avatar-group__initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    box-shadow: 0 0 0 2px var(--avatar-border-color, white);
+    transition: transform var(--flin-transition-fast);
+}
+
+.avatar-group__initials {
+    font-weight: var(--flin-font-semibold);
+    text-transform: uppercase;
+    color: white;
+}
+
+/* Hover effect */
+.avatar-group__item:hover .avatar-group__image,
+.avatar-group__item:hover .avatar-group__initials {
+    transform: translateY(-2px);
+    z-index: 100;
+}
+
+/* Size variants */
+.avatar-group--xs .avatar-group__item { width: 24px; height: 24px; font-size: 10px; }
+.avatar-group--sm .avatar-group__item { width: 32px; height: 32px; font-size: var(--flin-text-xs); }
+.avatar-group--md .avatar-group__item { width: 40px; height: 40px; font-size: var(--flin-text-sm); }
+.avatar-group--lg .avatar-group__item { width: 56px; height: 56px; font-size: var(--flin-text-lg); }
+.avatar-group--xl .avatar-group__item { width: 80px; height: 80px; font-size: var(--flin-text-2xl); }
+
+/* Shape variants */
+.avatar-group--circle .avatar-group__item { border-radius: var(--flin-radius-full); }
+.avatar-group--rounded .avatar-group__item { border-radius: var(--flin-radius-lg); }
+.avatar-group--square .avatar-group__item { border-radius: var(--flin-radius-sm); }
+
+/* Spacing variants */
+.avatar-group--tight .avatar-group__item:not(:first-child) { margin-left: -12px; }
+.avatar-group--default .avatar-group__item:not(:first-child) { margin-left: -8px; }
+.avatar-group--loose .avatar-group__item:not(:first-child) { margin-left: -4px; }
+
+.avatar-group--right.avatar-group--tight .avatar-group__item:not(:first-child) { margin-left: 0; margin-right: -12px; }
+.avatar-group--right.avatar-group--default .avatar-group__item:not(:first-child) { margin-left: 0; margin-right: -8px; }
+.avatar-group--right.avatar-group--loose .avatar-group__item:not(:first-child) { margin-left: 0; margin-right: -4px; }
+
+/* Size-specific spacing adjustments */
+.avatar-group--xs.avatar-group--tight .avatar-group__item:not(:first-child) { margin-left: -8px; }
+.avatar-group--xs.avatar-group--default .avatar-group__item:not(:first-child) { margin-left: -6px; }
+
+.avatar-group--lg.avatar-group--tight .avatar-group__item:not(:first-child) { margin-left: -16px; }
+.avatar-group--lg.avatar-group--default .avatar-group__item:not(:first-child) { margin-left: -12px; }
+
+.avatar-group--xl.avatar-group--tight .avatar-group__item:not(:first-child) { margin-left: -20px; }
+.avatar-group--xl.avatar-group--default .avatar-group__item:not(:first-child) { margin-left: -16px; }
+
+/* Overflow indicator */
+.avatar-group__overflow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-neutral-200);
+    color: var(--flin-fg-muted);
+    font-family: var(--flin-font-sans);
+    font-weight: var(--flin-font-semibold);
+    border: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    box-shadow: 0 0 0 2px var(--avatar-border-color, white);
+}
+
+.avatar-group--xs .avatar-group__overflow { width: 24px; height: 24px; font-size: 9px; border-radius: var(--flin-radius-full); margin-left: -6px; }
+.avatar-group--sm .avatar-group__overflow { width: 32px; height: 32px; font-size: var(--flin-text-xs); border-radius: var(--flin-radius-full); margin-left: -8px; }
+.avatar-group--md .avatar-group__overflow { width: 40px; height: 40px; font-size: var(--flin-text-sm); border-radius: var(--flin-radius-full); margin-left: -8px; }
+.avatar-group--lg .avatar-group__overflow { width: 56px; height: 56px; font-size: var(--flin-text-base); border-radius: var(--flin-radius-full); margin-left: -12px; }
+.avatar-group--xl .avatar-group__overflow { width: 80px; height: 80px; font-size: var(--flin-text-xl); border-radius: var(--flin-radius-full); margin-left: -16px; }
+
+.avatar-group--rounded .avatar-group__overflow { border-radius: var(--flin-radius-lg); }
+.avatar-group--square .avatar-group__overflow { border-radius: var(--flin-radius-sm); }
+
+.avatar-group__overflow:hover {
+    background: var(--flin-neutral-300);
+    transform: translateY(-2px);
+}
+
+/* Background colors for initials */
+.avatar-item--bg-blue { background-color: var(--flin-primary); }
+.avatar-item--bg-green { background-color: var(--flin-success); }
+.avatar-item--bg-purple { background-color: #7C3AED; }
+.avatar-item--bg-orange { background-color: #D97706; }
+.avatar-item--bg-pink { background-color: #DB2777; }
+.avatar-item--bg-cyan { background-color: var(--flin-info); }
+
+/* Dark theme */
+[data-theme="dark"] .avatar-group__image,
+[data-theme="dark"] .avatar-group__initials,
+[data-theme="dark"] .avatar-group__overflow {
+    box-shadow: 0 0 0 2px var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .avatar-group__overflow {
+    background: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .avatar-group__overflow:hover {
+    background: var(--flin-neutral-600);
+}
+</style>

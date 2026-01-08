@@ -1,0 +1,775 @@
+// ============================================================================
+// DashboardOverview.flin — FlinUI PRO Page Template
+// Main dashboard overview with stats, charts, and recent activity
+// ============================================================================
+// Props:
+//   - userName: User's name (string)
+//   - stats: List of stat objects (list)
+//   - recentActivity: List of activity objects (list)
+//   - tasks: List of task objects (list)
+//   - chartData: Chart data object (object or none)
+
+userName = props.userName || "User"
+greeting = getGreeting()
+
+stats = props.stats || [
+    ["label": "Total Revenue", "value": "$45,231.89", "change": "+20.1%", "trend": "up", "icon": "dollar"],
+    ["label": "Active Users", "value": "2,350", "change": "+180", "trend": "up", "icon": "users"],
+    ["label": "Pending Orders", "value": "12", "change": "-3", "trend": "down", "icon": "shopping"],
+    ["label": "Conversion Rate", "value": "3.24%", "change": "+0.5%", "trend": "up", "icon": "chart"]
+]
+
+recentActivity = props.recentActivity || [
+    ["type": "order", "message": "New order #1234 received", "time": "2 min ago", "user": "John Doe"],
+    ["type": "user", "message": "New user registered", "time": "15 min ago", "user": "Jane Smith"],
+    ["type": "payment", "message": "Payment received for #1230", "time": "1 hour ago", "user": "Bob Wilson"],
+    ["type": "comment", "message": "New comment on Project Alpha", "time": "2 hours ago", "user": "Alice Brown"],
+    ["type": "task", "message": "Task completed: Design review", "time": "3 hours ago", "user": "Charlie Davis"]
+]
+
+tasks = props.tasks || [
+    ["title": "Review pull request", "priority": "high", "due": "Today", "completed": false],
+    ["title": "Update documentation", "priority": "medium", "due": "Tomorrow", "completed": false],
+    ["title": "Fix navigation bug", "priority": "high", "due": "Today", "completed": true],
+    ["title": "Team meeting prep", "priority": "low", "due": "Wed", "completed": false]
+]
+
+topProducts = [
+    ["name": "Product A", "sales": 1234, "revenue": "$12,340", "growth": "+12%"],
+    ["name": "Product B", "sales": 987, "revenue": "$9,870", "growth": "+8%"],
+    ["name": "Product C", "sales": 756, "revenue": "$7,560", "growth": "+15%"],
+    ["name": "Product D", "sales": 543, "revenue": "$5,430", "growth": "-3%"]
+]
+
+getGreeting = () => {
+    hour = 12 // In real app, get current hour
+    match hour {
+        h if h < 12 => "Good morning"
+        h if h < 17 => "Good afternoon"
+        _ => "Good evening"
+    }
+}
+
+getStatIcon = (iconName) => match iconName {
+    "dollar" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    "users" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    "shopping" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+    "chart" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+    _ => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+}
+
+getActivityIcon = (type) => match type {
+    "order" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    "user" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    "payment" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    "comment" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    "task" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    _ => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+}
+
+<div class="dashboard-overview">
+    // Header
+    <header class="dashboard-overview__header">
+        <div class="dashboard-overview__greeting">
+            <h1 class="dashboard-overview__title">{greeting}, {userName}!</h1>
+            <p class="dashboard-overview__subtitle">Here's what's happening with your projects today.</p>
+        </div>
+        <div class="dashboard-overview__actions">
+            <button class="dashboard-overview__action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Export
+            </button>
+            <button class="dashboard-overview__action-btn dashboard-overview__action-btn--primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                New Project
+            </button>
+        </div>
+    </header>
+
+    // Stats Grid
+    <section class="dashboard-overview__stats">
+        {for stat in stats}
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-card__header">
+                    <span class="dashboard-stat-card__label">{stat.label}</span>
+                    <div class="dashboard-stat-card__icon">
+                        {getStatIcon(stat.icon)}
+                    </div>
+                </div>
+                <div class="dashboard-stat-card__value">{stat.value}</div>
+                <div class={"dashboard-stat-card__change dashboard-stat-card__change--" ++ stat.trend}>
+                    {if stat.trend == "up"}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                            <polyline points="17 6 23 6 23 12"/>
+                        </svg>
+                    {else}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+                            <polyline points="17 18 23 18 23 12"/>
+                        </svg>
+                    {/if}
+                    <span>{stat.change}</span>
+                    <span class="dashboard-stat-card__period">from last month</span>
+                </div>
+            </div>
+        {/for}
+    </section>
+
+    // Main Content Grid
+    <div class="dashboard-overview__grid">
+        // Chart Section
+        <section class="dashboard-overview__chart">
+            <div class="dashboard-overview__section-header">
+                <h2 class="dashboard-overview__section-title">Revenue Overview</h2>
+                <div class="dashboard-overview__chart-tabs">
+                    <button class="dashboard-overview__chart-tab dashboard-overview__chart-tab--active">Week</button>
+                    <button class="dashboard-overview__chart-tab">Month</button>
+                    <button class="dashboard-overview__chart-tab">Year</button>
+                </div>
+            </div>
+            <div class="dashboard-overview__chart-area">
+                // Chart placeholder
+                <div class="dashboard-overview__chart-placeholder">
+                    <svg viewBox="0 0 400 200" class="dashboard-overview__chart-svg">
+                        <defs>
+                            <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color: var(--flin-accent-gold); stop-opacity: 0.3"/>
+                                <stop offset="100%" style="stop-color: var(--flin-accent-gold); stop-opacity: 0"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M 0 150 Q 50 130 100 140 T 200 100 T 300 80 T 400 60 L 400 200 L 0 200 Z" fill="url(#chartGradient)"/>
+                        <path d="M 0 150 Q 50 130 100 140 T 200 100 T 300 80 T 400 60" fill="none" stroke="var(--flin-accent-gold)" stroke-width="3"/>
+                    </svg>
+                    <div class="dashboard-overview__chart-labels">
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+                        <span>Sun</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        // Recent Activity
+        <section class="dashboard-overview__activity">
+            <div class="dashboard-overview__section-header">
+                <h2 class="dashboard-overview__section-title">Recent Activity</h2>
+                <a href="/activity" class="dashboard-overview__view-all">View all</a>
+            </div>
+            <div class="dashboard-overview__activity-list">
+                {for activity in recentActivity}
+                    <div class="dashboard-activity-item">
+                        <div class={"dashboard-activity-item__icon dashboard-activity-item__icon--" ++ activity.type}>
+                            {getActivityIcon(activity.type)}
+                        </div>
+                        <div class="dashboard-activity-item__content">
+                            <p class="dashboard-activity-item__message">{activity.message}</p>
+                            <span class="dashboard-activity-item__meta">
+                                <span class="dashboard-activity-item__user">{activity.user}</span>
+                                <span class="dashboard-activity-item__separator">-</span>
+                                <span class="dashboard-activity-item__time">{activity.time}</span>
+                            </span>
+                        </div>
+                    </div>
+                {/for}
+            </div>
+        </section>
+
+        // Tasks
+        <section class="dashboard-overview__tasks">
+            <div class="dashboard-overview__section-header">
+                <h2 class="dashboard-overview__section-title">My Tasks</h2>
+                <button class="dashboard-overview__add-task">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Add Task
+                </button>
+            </div>
+            <div class="dashboard-overview__tasks-list">
+                {for task in tasks}
+                    <div class={"dashboard-task-item" ++ (if task.completed { " dashboard-task-item--completed" } else { "" })}>
+                        <label class="dashboard-task-item__checkbox">
+                            <input type="checkbox" checked={task.completed} />
+                            <span class="dashboard-task-item__checkmark"></span>
+                        </label>
+                        <div class="dashboard-task-item__content">
+                            <span class="dashboard-task-item__title">{task.title}</span>
+                            <span class="dashboard-task-item__due">Due: {task.due}</span>
+                        </div>
+                        <span class={"dashboard-task-item__priority dashboard-task-item__priority--" ++ task.priority}>
+                            {task.priority}
+                        </span>
+                    </div>
+                {/for}
+            </div>
+        </section>
+
+        // Top Products
+        <section class="dashboard-overview__products">
+            <div class="dashboard-overview__section-header">
+                <h2 class="dashboard-overview__section-title">Top Products</h2>
+                <a href="/products" class="dashboard-overview__view-all">View all</a>
+            </div>
+            <div class="dashboard-overview__products-table">
+                <div class="dashboard-products-header">
+                    <span>Product</span>
+                    <span>Sales</span>
+                    <span>Revenue</span>
+                    <span>Growth</span>
+                </div>
+                {for product in topProducts}
+                    <div class="dashboard-products-row">
+                        <span class="dashboard-products-row__name">{product.name}</span>
+                        <span class="dashboard-products-row__sales">{product.sales}</span>
+                        <span class="dashboard-products-row__revenue">{product.revenue}</span>
+                        <span class={"dashboard-products-row__growth" ++ (if product.growth.charAt(0) == "+" { " dashboard-products-row__growth--positive" } else { " dashboard-products-row__growth--negative" })}>
+                            {product.growth}
+                        </span>
+                    </div>
+                {/for}
+            </div>
+        </section>
+    </div>
+</div>
+
+<style scoped>
+.dashboard-overview {
+    padding: var(--flin-space-6);
+    background: var(--flin-bg-base);
+    font-family: var(--flin-font-sans);
+    min-height: 100vh;
+}
+
+/* Header */
+.dashboard-overview__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--flin-space-8);
+}
+
+.dashboard-overview__title {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-1) 0;
+}
+
+.dashboard-overview__subtitle {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    margin: 0;
+}
+
+.dashboard-overview__actions {
+    display: flex;
+    gap: var(--flin-space-3);
+}
+
+.dashboard-overview__action-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-secondary);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-default);
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.dashboard-overview__action-btn:hover {
+    background: var(--flin-bg-elevated);
+}
+
+.dashboard-overview__action-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.dashboard-overview__action-btn--primary {
+    color: white;
+    background: var(--flin-accent-gold);
+    border: none;
+}
+
+.dashboard-overview__action-btn--primary:hover {
+    background: var(--flin-accent-gold-hover);
+}
+
+/* Stats Grid */
+.dashboard-overview__stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--flin-space-6);
+    margin-bottom: var(--flin-space-8);
+}
+
+.dashboard-stat-card {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-5);
+}
+
+.dashboard-stat-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--flin-space-3);
+}
+
+.dashboard-stat-card__label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+}
+
+.dashboard-stat-card__icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-accent-gold-light);
+    border-radius: var(--flin-radius-md);
+}
+
+.dashboard-stat-card__icon svg {
+    width: 18px;
+    height: 18px;
+    color: var(--flin-accent-gold);
+}
+
+.dashboard-stat-card__value {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin-bottom: var(--flin-space-2);
+}
+
+.dashboard-stat-card__change {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-size: var(--flin-text-sm);
+}
+
+.dashboard-stat-card__change svg {
+    width: 14px;
+    height: 14px;
+}
+
+.dashboard-stat-card__change--up {
+    color: var(--flin-success);
+}
+
+.dashboard-stat-card__change--down {
+    color: var(--flin-danger);
+}
+
+.dashboard-stat-card__period {
+    color: var(--flin-text-muted);
+}
+
+/* Main Grid */
+.dashboard-overview__grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--flin-space-6);
+}
+
+.dashboard-overview__section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--flin-space-4);
+}
+
+.dashboard-overview__section-title {
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+    margin: 0;
+}
+
+.dashboard-overview__view-all {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-accent-gold);
+    text-decoration: none;
+    font-weight: var(--flin-font-medium);
+}
+
+.dashboard-overview__view-all:hover {
+    text-decoration: underline;
+}
+
+/* Chart */
+.dashboard-overview__chart {
+    grid-column: span 2;
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-6);
+}
+
+.dashboard-overview__chart-tabs {
+    display: flex;
+    gap: var(--flin-space-1);
+}
+
+.dashboard-overview__chart-tab {
+    padding: var(--flin-space-1) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    background: none;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.dashboard-overview__chart-tab:hover {
+    background: var(--flin-bg-elevated);
+}
+
+.dashboard-overview__chart-tab--active {
+    background: var(--flin-accent-gold-light);
+    color: var(--flin-accent-gold);
+    font-weight: var(--flin-font-medium);
+}
+
+.dashboard-overview__chart-area {
+    height: 250px;
+    position: relative;
+}
+
+.dashboard-overview__chart-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-overview__chart-svg {
+    flex: 1;
+    width: 100%;
+}
+
+.dashboard-overview__chart-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+}
+
+/* Activity */
+.dashboard-overview__activity {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-6);
+}
+
+.dashboard-overview__activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.dashboard-activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+}
+
+.dashboard-activity-item__icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--flin-radius-md);
+    flex-shrink: 0;
+}
+
+.dashboard-activity-item__icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.dashboard-activity-item__icon--order {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.dashboard-activity-item__icon--user {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.dashboard-activity-item__icon--payment {
+    background: var(--flin-accent-gold-light);
+    color: var(--flin-accent-gold);
+}
+
+.dashboard-activity-item__icon--comment {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+}
+
+.dashboard-activity-item__icon--task {
+    background: rgba(6, 182, 212, 0.1);
+    color: #06b6d4;
+}
+
+.dashboard-activity-item__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.dashboard-activity-item__message {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-1) 0;
+}
+
+.dashboard-activity-item__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+}
+
+.dashboard-activity-item__separator {
+    color: var(--flin-border-default);
+}
+
+/* Tasks */
+.dashboard-overview__tasks {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-6);
+}
+
+.dashboard-overview__add-task {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-accent-gold);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: var(--flin-font-medium);
+}
+
+.dashboard-overview__add-task svg {
+    width: 14px;
+    height: 14px;
+}
+
+.dashboard-overview__tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.dashboard-task-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    background: var(--flin-bg-elevated);
+    border-radius: var(--flin-radius-lg);
+    transition: all var(--flin-transition-fast);
+}
+
+.dashboard-task-item--completed {
+    opacity: 0.6;
+}
+
+.dashboard-task-item__checkbox {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.dashboard-task-item__checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.dashboard-task-item__checkmark {
+    position: absolute;
+    inset: 0;
+    background: var(--flin-bg-surface);
+    border: 2px solid var(--flin-border-default);
+    border-radius: var(--flin-radius-sm);
+    transition: all var(--flin-transition-fast);
+}
+
+.dashboard-task-item__checkbox input:checked + .dashboard-task-item__checkmark {
+    background: var(--flin-accent-gold);
+    border-color: var(--flin-accent-gold);
+}
+
+.dashboard-task-item__checkbox input:checked + .dashboard-task-item__checkmark::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.dashboard-task-item__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.dashboard-task-item__title {
+    display: block;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-primary);
+    margin-bottom: 2px;
+}
+
+.dashboard-task-item--completed .dashboard-task-item__title {
+    text-decoration: line-through;
+}
+
+.dashboard-task-item__due {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+}
+
+.dashboard-task-item__priority {
+    font-size: 10px;
+    font-weight: var(--flin-font-bold);
+    text-transform: uppercase;
+    padding: 2px var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+}
+
+.dashboard-task-item__priority--high {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.dashboard-task-item__priority--medium {
+    background: var(--flin-accent-gold-light);
+    color: var(--flin-accent-gold);
+}
+
+.dashboard-task-item__priority--low {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-muted);
+}
+
+/* Products */
+.dashboard-overview__products {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-6);
+}
+
+.dashboard-products-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: var(--flin-space-4);
+    padding-bottom: var(--flin-space-3);
+    border-bottom: 1px solid var(--flin-border-subtle);
+    margin-bottom: var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-muted);
+    text-transform: uppercase;
+}
+
+.dashboard-products-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-3) 0;
+    border-bottom: 1px solid var(--flin-border-subtle);
+    font-size: var(--flin-text-sm);
+}
+
+.dashboard-products-row:last-child {
+    border-bottom: none;
+}
+
+.dashboard-products-row__name {
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-primary);
+}
+
+.dashboard-products-row__sales,
+.dashboard-products-row__revenue {
+    color: var(--flin-text-secondary);
+}
+
+.dashboard-products-row__growth {
+    font-weight: var(--flin-font-medium);
+}
+
+.dashboard-products-row__growth--positive {
+    color: var(--flin-success);
+}
+
+.dashboard-products-row__growth--negative {
+    color: var(--flin-danger);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .dashboard-overview__stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-overview__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-overview__chart {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-overview__header {
+        flex-direction: column;
+        gap: var(--flin-space-4);
+    }
+
+    .dashboard-overview__stats {
+        grid-template-columns: 1fr;
+    }
+}
+</style>

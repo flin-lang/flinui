@@ -1,0 +1,549 @@
+// TwoFactorPage.flin - FlinUI PRO Authentication Component
+// 2FA code input page with backup code option
+
+// Props with defaults
+title = props.title || "Two-factor authentication"
+subtitle = props.subtitle || "Enter the 6-digit code from your authenticator app"
+logo = props.logo || none
+logoAlt = props.logoAlt || "Logo"
+loginUrl = props.loginUrl || "/login"
+loading = props.loading || false
+error = props.error || none
+onSubmit = props.onSubmit
+onBackupCode = props.onBackupCode
+codeLength = props.codeLength || 6
+showBackupOption = props.showBackupOption || true
+showRememberDevice = props.showRememberDevice || true
+
+// Internal state
+code = ""
+showBackupInput = false
+backupCode = ""
+rememberDevice = false
+
+// Handle OTP input change
+handleCodeChange = (index, value) => {
+    // Update code at index
+    newCode = code.substring(0, index) ++ value ++ code.substring(index + 1)
+    code = newCode
+
+    // Auto-submit when complete
+    if code.length == codeLength && onSubmit {
+        onSubmit({
+            code: code,
+            rememberDevice: rememberDevice
+        })
+    }
+}
+
+// Handle form submission
+handleSubmit = {
+    if showBackupInput {
+        if onBackupCode {
+            onBackupCode({
+                backupCode: backupCode,
+                rememberDevice: rememberDevice
+            })
+        }
+    } else {
+        if onSubmit {
+            onSubmit({
+                code: code,
+                rememberDevice: rememberDevice
+            })
+        }
+    }
+}
+
+// Toggle backup code input
+toggleBackupInput = {
+    showBackupInput = !showBackupInput
+    code = ""
+    backupCode = ""
+}
+
+// Compute loading class
+loadingClass = match loading {
+    true -> " two-factor--loading"
+    _ -> ""
+}
+
+<div class={"two-factor" ++ loadingClass}>
+    <div class="two-factor__container">
+        <div class="two-factor__header">
+            {if logo != none}
+                <img src={logo} alt={logoAlt} class="two-factor__logo" />
+            {/if}
+
+            <div class="two-factor__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    <circle cx="12" cy="16" r="1"/>
+                </svg>
+            </div>
+            <h1 class="two-factor__title">{title}</h1>
+            <p class="two-factor__subtitle">
+                {match showBackupInput {
+                    true -> "Enter one of your backup codes"
+                    _ -> subtitle
+                }}
+            </p>
+        </div>
+
+        {if error != none}
+            <div class="two-factor__error" role="alert">
+                <svg class="two-factor__error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>{error}</span>
+            </div>
+        {/if}
+
+        <form class="two-factor__form" submit={handleSubmit}>
+            {if showBackupInput}
+                <div class="two-factor__backup-field">
+                    <label class="two-factor__label" for="backupCode">Backup code</label>
+                    <input
+                        type="text"
+                        id="backupCode"
+                        class="two-factor__backup-input"
+                        placeholder="XXXX-XXXX-XXXX"
+                        value={backupCode}
+                        change={(e) => backupCode = e.target.value}
+                        disabled={loading}
+                        autocomplete="one-time-code"
+                    />
+                </div>
+            {else}
+                <div class="two-factor__otp-container">
+                    {for i in range(0, codeLength)}
+                        <input
+                            type="text"
+                            class="two-factor__otp-input"
+                            maxlength="1"
+                            inputmode="numeric"
+                            pattern="[0-9]"
+                            disabled={loading}
+                            data-index={i}
+                            change={(e) => handleCodeChange(i, e.target.value)}
+                            autocomplete="one-time-code"
+                            aria-label={"Digit " ++ (i + 1)}
+                        />
+                        {if i == 2}
+                            <span class="two-factor__otp-separator">-</span>
+                        {/if}
+                    {/for}
+                </div>
+            {/if}
+
+            {if showRememberDevice}
+                <label class="two-factor__remember">
+                    <input
+                        type="checkbox"
+                        checked={rememberDevice}
+                        change={(e) => rememberDevice = e.target.checked}
+                        disabled={loading}
+                    />
+                    <span>Remember this device for 30 days</span>
+                </label>
+            {/if}
+
+            <button
+                type="submit"
+                class="two-factor__submit"
+                disabled={loading}
+            >
+                {if loading}
+                    <span class="two-factor__spinner"></span>
+                    <span>Verifying...</span>
+                {else}
+                    <span>Verify</span>
+                {/if}
+            </button>
+        </form>
+
+        {if showBackupOption}
+            <div class="two-factor__alternate">
+                <button
+                    type="button"
+                    class="two-factor__alternate-btn"
+                    click={toggleBackupInput}
+                    disabled={loading}
+                >
+                    {match showBackupInput {
+                        true -> "Use authenticator app instead"
+                        _ -> "Use a backup code"
+                    }}
+                </button>
+            </div>
+        {/if}
+
+        <div class="two-factor__help">
+            <p class="two-factor__help-title">Having trouble?</p>
+            <p class="two-factor__help-text">
+                If you've lost access to your authenticator app and backup codes,
+                please contact support for account recovery.
+            </p>
+        </div>
+
+        <a href={loginUrl} class="two-factor__back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span>Back to sign in</span>
+        </a>
+    </div>
+</div>
+
+<style scoped>
+.two-factor {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-4);
+    background-color: var(--flin-bg-muted);
+}
+
+.two-factor__container {
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-lg);
+    padding: var(--flin-space-8);
+}
+
+.two-factor__header {
+    text-align: center;
+    margin-bottom: var(--flin-space-6);
+}
+
+.two-factor__logo {
+    height: 48px;
+    width: auto;
+    margin-bottom: var(--flin-space-4);
+}
+
+.two-factor__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    background-color: var(--flin-primary-light);
+    border-radius: var(--flin-radius-lg);
+    margin-bottom: var(--flin-space-4);
+}
+
+.two-factor__icon svg {
+    width: 28px;
+    height: 28px;
+    color: var(--flin-primary);
+}
+
+.two-factor__title {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-fg);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.two-factor__subtitle {
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg-muted);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.two-factor__error {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    background-color: var(--flin-danger-light);
+    color: var(--flin-danger);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    margin-bottom: var(--flin-space-4);
+}
+
+.two-factor__error-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.two-factor__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.two-factor__otp-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+}
+
+.two-factor__otp-input {
+    width: 48px;
+    height: 56px;
+    padding: 0;
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-semibold);
+    text-align: center;
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    transition: all var(--flin-transition-fast);
+    caret-color: var(--flin-primary);
+}
+
+.two-factor__otp-input:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.two-factor__otp-input:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.two-factor__otp-input:disabled {
+    background-color: var(--flin-bg-muted);
+    cursor: not-allowed;
+}
+
+.two-factor__otp-separator {
+    font-size: var(--flin-text-xl);
+    color: var(--flin-fg-muted);
+    margin: 0 var(--flin-space-1);
+}
+
+.two-factor__backup-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.two-factor__label {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+}
+
+.two-factor__backup-input {
+    width: 100%;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3);
+    font-family: var(--flin-font-mono);
+    font-size: var(--flin-text-lg);
+    text-align: center;
+    letter-spacing: 0.1em;
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.two-factor__backup-input:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.two-factor__backup-input:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.two-factor__backup-input::placeholder {
+    color: var(--flin-fg-muted);
+    letter-spacing: 0.2em;
+}
+
+.two-factor__remember {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    cursor: pointer;
+}
+
+.two-factor__remember input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--flin-primary);
+    cursor: pointer;
+}
+
+.two-factor__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-4);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-medium);
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.two-factor__submit:hover:not(:disabled) {
+    background-color: var(--flin-primary-hover);
+}
+
+.two-factor__submit:active:not(:disabled) {
+    background-color: var(--flin-primary-active);
+}
+
+.two-factor__submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.two-factor__spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: two-factor-spin 0.6s linear infinite;
+}
+
+@keyframes two-factor-spin {
+    to { transform: rotate(360deg); }
+}
+
+.two-factor__alternate {
+    text-align: center;
+    margin-top: var(--flin-space-4);
+}
+
+.two-factor__alternate-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-primary);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.two-factor__alternate-btn:hover:not(:disabled) {
+    text-decoration: underline;
+}
+
+.two-factor__alternate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.two-factor__help {
+    background-color: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-4);
+    margin-top: var(--flin-space-6);
+}
+
+.two-factor__help-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+    margin: 0 0 var(--flin-space-1) 0;
+}
+
+.two-factor__help-text {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.two-factor__back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-6);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg-muted);
+    text-decoration: none;
+    transition: color var(--flin-transition-fast);
+}
+
+.two-factor__back:hover {
+    color: var(--flin-fg);
+}
+
+.two-factor__back svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Loading state */
+.two-factor--loading {
+    pointer-events: none;
+}
+
+/* Dark theme */
+[data-theme="dark"] .two-factor {
+    background-color: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .two-factor__container {
+    background-color: var(--flin-neutral-800);
+    border: 1px solid var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .two-factor__otp-input {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .two-factor__backup-input {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .two-factor__help {
+    background-color: var(--flin-neutral-900);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .two-factor__container {
+        padding: var(--flin-space-6);
+        border-radius: var(--flin-radius-lg);
+    }
+
+    .two-factor__otp-input {
+        width: 40px;
+        height: 48px;
+        font-size: var(--flin-text-xl);
+    }
+
+    .two-factor__otp-container {
+        gap: var(--flin-space-1);
+    }
+}
+</style>

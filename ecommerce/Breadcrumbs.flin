@@ -1,0 +1,214 @@
+// Breadcrumbs.flin - FlinUI PRO E-commerce Component
+// Navigation breadcrumb trail for hierarchical page navigation
+
+// Props with defaults
+items = props.items || []
+separator = props.separator || "/"
+maxItems = props.maxItems || 0
+onItemClick = props.onItemClick
+showHomeIcon = props.showHomeIcon || true
+homeLabel = props.homeLabel || "Home"
+homeUrl = props.homeUrl || "/"
+
+// Process items with max items constraint
+function getDisplayItems() {
+    if maxItems > 0 && items.length > maxItems {
+        // Show first, ellipsis, and last items
+        firstItems = items.slice(0, 1)
+        lastItems = items.slice(-(maxItems - 2))
+        return [...firstItems, ["label": "...", "collapsed": true], ...lastItems]
+    }
+    return items
+}
+
+displayItems = getDisplayItems()
+
+// Handle item click
+function handleItemClick(item, index) {
+    if item.collapsed {
+        return
+    }
+    if onItemClick {
+        onItemClick(item, index)
+    }
+}
+
+// Check if item is last
+function isLast(index) {
+    return index == displayItems.length - 1
+}
+
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+    <style scoped>
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-3);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-md);
+            font-family: var(--flin-font-sans);
+            font-size: var(--flin-text-sm);
+            overflow-x: auto;
+        }
+
+        .breadcrumbs::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .breadcrumbs::-webkit-scrollbar-thumb {
+            background: var(--flin-border-medium);
+            border-radius: var(--flin-radius-full);
+        }
+
+        .breadcrumb-list {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .breadcrumb-link {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-1) var(--flin-space-2);
+            background: transparent;
+            border: none;
+            border-radius: var(--flin-radius-sm);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            color: var(--flin-text-secondary);
+            text-decoration: none;
+            font-weight: var(--flin-font-medium);
+            white-space: nowrap;
+        }
+
+        .breadcrumb-link:hover {
+            background: var(--flin-bg-hover);
+            color: var(--flin-primary);
+        }
+
+        .breadcrumb-link:focus-visible {
+            outline: 2px solid var(--flin-primary);
+            outline-offset: 2px;
+        }
+
+        .breadcrumb-link.disabled {
+            cursor: default;
+            color: var(--flin-text-muted);
+        }
+
+        .breadcrumb-link.disabled:hover {
+            background: transparent;
+            color: var(--flin-text-muted);
+        }
+
+        .breadcrumb-link.current {
+            color: var(--flin-text-primary);
+            font-weight: var(--flin-font-semibold);
+            cursor: default;
+        }
+
+        .breadcrumb-link.current:hover {
+            background: transparent;
+        }
+
+        .breadcrumb-icon {
+            font-size: var(--flin-text-base);
+        }
+
+        .breadcrumb-separator {
+            color: var(--flin-text-muted);
+            font-size: var(--flin-text-sm);
+            user-select: none;
+        }
+
+        .breadcrumb-ellipsis {
+            padding: var(--flin-space-1) var(--flin-space-2);
+            color: var(--flin-text-muted);
+            cursor: default;
+        }
+
+        @media (max-width: 640px) {
+            .breadcrumbs {
+                padding: var(--flin-space-2);
+                font-size: var(--flin-text-xs);
+            }
+
+            .breadcrumb-link {
+                padding: var(--flin-space-1);
+            }
+
+            .breadcrumb-icon {
+                font-size: var(--flin-text-sm);
+            }
+        }
+    </style>
+
+    <ol class="breadcrumb-list">
+        <!-- Home item -->
+        <li class="breadcrumb-item">
+            <button
+                class="breadcrumb-link"
+                click={fn() {
+                    if onItemClick {
+                        onItemClick(["label": homeLabel, "url": homeUrl], -1)
+                    }
+                }}
+                aria-label={homeLabel}
+            >
+                {if showHomeIcon}
+                    <span class="breadcrumb-icon">🏠</span>
+                {else}
+                    <span>{homeLabel}</span>
+                {/if}
+            </button>
+        </li>
+
+        <!-- Separator after home -->
+        {if displayItems.length > 0}
+            <li class="breadcrumb-separator" aria-hidden="true">
+                {separator}
+            </li>
+        {/if}
+
+        <!-- Breadcrumb items -->
+        {each displayItems as item, index}
+            <li class="breadcrumb-item">
+                {if item.collapsed}
+                    <span class="breadcrumb-ellipsis">...</span>
+                {else}
+                    <button
+                        class="breadcrumb-link {if isLast(index)}current{/if} {if item.disabled}disabled{/if}"
+                        click={fn() { handleItemClick(item, index) }}
+                        aria-current={if isLast(index)}"page"{else}none{/if}}
+                        disabled={item.disabled || isLast(index)}
+                    >
+                        {if item.icon}
+                            <span class="breadcrumb-icon">{item.icon}</span>
+                        {/if}
+                        <span>{item.label}</span>
+                    </button>
+                {/if}
+            </li>
+
+            <!-- Separator between items -->
+            {if !isLast(index)}
+                <li class="breadcrumb-separator" aria-hidden="true">
+                    {separator}
+                </li>
+            {/if}
+        {/each}
+    </ol>
+</nav>

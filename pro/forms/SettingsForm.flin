@@ -1,0 +1,1350 @@
+// SettingsForm.flin - FlinUI PRO Settings Form Component
+// A comprehensive settings/preferences form with multiple sections
+
+// Props with defaults
+title = props.title || "Settings"
+subtitle = props.subtitle || "Manage your account settings and preferences"
+showAccountSettings = props.showAccountSettings || true
+showNotificationSettings = props.showNotificationSettings || true
+showPrivacySettings = props.showPrivacySettings || true
+showAppearanceSettings = props.showAppearanceSettings || true
+showDangerZone = props.showDangerZone || true
+onSave = props.onSave
+onReset = props.onReset
+onDeleteAccount = props.onDeleteAccount
+disabled = props.disabled || false
+
+// State - Account Settings
+language = props.language || "en"
+timezone = props.timezone || "UTC"
+currency = props.currency || "USD"
+
+// State - Notification Settings
+emailNotifications = props.emailNotifications || true
+pushNotifications = props.pushNotifications || false
+marketingEmails = props.marketingEmails || false
+
+// State - Privacy Settings
+profileVisibility = props.profileVisibility || "public"
+searchIndexing = props.searchIndexing || true
+twoFactorAuth = props.twoFactorAuth || false
+
+// State - Appearance Settings
+theme = props.theme || "system"
+compactMode = props.compactMode || false
+reduceAnimations = props.reduceAnimations || false
+
+// UI State
+isLoading = false
+isSaving = false
+showDeleteConfirm = false
+hasChanges = false
+
+// Language options
+languages = [
+    ["value": "en", "label": "English"],
+    ["value": "es", "label": "Espanol"],
+    ["value": "fr", "label": "Francais"],
+    ["value": "de", "label": "Deutsch"],
+    ["value": "pt", "label": "Portugues"],
+    ["value": "ja", "label": "Japanese"],
+    ["value": "zh", "label": "Chinese"]
+]
+
+// Timezone options
+timezones = [
+    ["value": "UTC", "label": "UTC (Coordinated Universal Time)"],
+    ["value": "America/New_York", "label": "Eastern Time (ET)"],
+    ["value": "America/Chicago", "label": "Central Time (CT)"],
+    ["value": "America/Denver", "label": "Mountain Time (MT)"],
+    ["value": "America/Los_Angeles", "label": "Pacific Time (PT)"],
+    ["value": "Europe/London", "label": "Greenwich Mean Time (GMT)"],
+    ["value": "Europe/Paris", "label": "Central European Time (CET)"],
+    ["value": "Asia/Tokyo", "label": "Japan Standard Time (JST)"],
+    ["value": "Asia/Shanghai", "label": "China Standard Time (CST)"],
+    ["value": "Australia/Sydney", "label": "Australian Eastern Time (AET)"]
+]
+
+// Currency options
+currencies = [
+    ["value": "USD", "label": "USD ($)"],
+    ["value": "EUR", "label": "EUR"],
+    ["value": "GBP", "label": "GBP"],
+    ["value": "JPY", "label": "JPY"],
+    ["value": "CNY", "label": "CNY"],
+    ["value": "CAD", "label": "CAD ($)"],
+    ["value": "AUD", "label": "AUD ($)"],
+    ["value": "CHF", "label": "CHF"],
+    ["value": "XOF", "label": "XOF (CFA)"]
+]
+
+// Profile visibility options
+visibilityOptions = [
+    ["value": "public", "label": "Public", "description": "Anyone can see your profile"],
+    ["value": "private", "label": "Private", "description": "Only you can see your profile"],
+    ["value": "contacts", "label": "Contacts only", "description": "Only your contacts can see your profile"]
+]
+
+// Theme options
+themeOptions = [
+    ["value": "light", "label": "Light", "icon": "sun"],
+    ["value": "dark", "label": "Dark", "icon": "moon"],
+    ["value": "system", "label": "System", "icon": "monitor"]
+]
+
+// Track changes
+markChanged = {
+    hasChanges = true
+}
+
+// Handle language change
+handleLanguageChange = fn(e) {
+    language = e.target.value
+    markChanged()
+}
+
+// Handle timezone change
+handleTimezoneChange = fn(e) {
+    timezone = e.target.value
+    markChanged()
+}
+
+// Handle currency change
+handleCurrencyChange = fn(e) {
+    currency = e.target.value
+    markChanged()
+}
+
+// Handle toggle changes
+handleEmailNotifications = fn(e) {
+    emailNotifications = e.target.checked
+    markChanged()
+}
+
+handlePushNotifications = fn(e) {
+    pushNotifications = e.target.checked
+    markChanged()
+}
+
+handleMarketingEmails = fn(e) {
+    marketingEmails = e.target.checked
+    markChanged()
+}
+
+handleSearchIndexing = fn(e) {
+    searchIndexing = e.target.checked
+    markChanged()
+}
+
+handleTwoFactorAuth = fn(e) {
+    twoFactorAuth = e.target.checked
+    markChanged()
+}
+
+handleCompactMode = fn(e) {
+    compactMode = e.target.checked
+    markChanged()
+}
+
+handleReduceAnimations = fn(e) {
+    reduceAnimations = e.target.checked
+    markChanged()
+}
+
+// Handle visibility change
+handleVisibilityChange = fn(value) {
+    profileVisibility = value
+    markChanged()
+}
+
+// Handle theme change
+handleThemeChange = fn(value) {
+    theme = value
+    markChanged()
+}
+
+// Handle save
+handleSave = {
+    event.preventDefault()
+    isSaving = true
+
+    settings = [
+        "account": [
+            "language": language,
+            "timezone": timezone,
+            "currency": currency
+        ],
+        "notifications": [
+            "emailNotifications": emailNotifications,
+            "pushNotifications": pushNotifications,
+            "marketingEmails": marketingEmails
+        ],
+        "privacy": [
+            "profileVisibility": profileVisibility,
+            "searchIndexing": searchIndexing,
+            "twoFactorAuth": twoFactorAuth
+        ],
+        "appearance": [
+            "theme": theme,
+            "compactMode": compactMode,
+            "reduceAnimations": reduceAnimations
+        ]
+    ]
+
+    if onSave {
+        onSave(settings)
+    }
+
+    hasChanges = false
+    isSaving = false
+}
+
+// Handle reset
+handleReset = {
+    // Reset to defaults
+    language = "en"
+    timezone = "UTC"
+    currency = "USD"
+    emailNotifications = true
+    pushNotifications = false
+    marketingEmails = false
+    profileVisibility = "public"
+    searchIndexing = true
+    twoFactorAuth = false
+    theme = "system"
+    compactMode = false
+    reduceAnimations = false
+    hasChanges = false
+
+    if onReset {
+        onReset()
+    }
+}
+
+// Handle delete account
+handleDeleteAccount = {
+    if onDeleteAccount {
+        onDeleteAccount()
+    }
+    showDeleteConfirm = false
+}
+
+// Computed classes
+disabledClass = match disabled || isSaving { true -> " settings-form-disabled", _ -> "" }
+containerClass = "settings-form" ++ disabledClass
+
+<div class={containerClass}>
+    <div class="settings-form-header">
+        <h1 class="settings-form-title">{title}</h1>
+        <p class="settings-form-subtitle">{subtitle}</p>
+    </div>
+
+    <form class="settings-form-body" submit={handleSave}>
+        <!-- Account Settings Section -->
+        {if showAccountSettings}
+            <section class="settings-section">
+                <div class="settings-section-header">
+                    <div class="settings-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="settings-section-info">
+                        <h2 class="settings-section-title">Account Settings</h2>
+                        <p class="settings-section-description">Configure your account preferences</p>
+                    </div>
+                </div>
+
+                <div class="settings-section-content">
+                    <!-- Language -->
+                    <div class="settings-field">
+                        <label class="settings-field-label" for="settings-language">Language</label>
+                        <p class="settings-field-help">Select your preferred language for the interface</p>
+                        <select
+                            id="settings-language"
+                            class="settings-select"
+                            value={language}
+                            change={handleLanguageChange}
+                            disabled={disabled || isSaving}
+                        >
+                            {for lang in languages}
+                                <option value={lang.value} selected={language == lang.value}>
+                                    {lang.label}
+                                </option>
+                            {/for}
+                        </select>
+                    </div>
+
+                    <!-- Timezone -->
+                    <div class="settings-field">
+                        <label class="settings-field-label" for="settings-timezone">Timezone</label>
+                        <p class="settings-field-help">Your local timezone for scheduling and notifications</p>
+                        <select
+                            id="settings-timezone"
+                            class="settings-select"
+                            value={timezone}
+                            change={handleTimezoneChange}
+                            disabled={disabled || isSaving}
+                        >
+                            {for tz in timezones}
+                                <option value={tz.value} selected={timezone == tz.value}>
+                                    {tz.label}
+                                </option>
+                            {/for}
+                        </select>
+                    </div>
+
+                    <!-- Currency -->
+                    <div class="settings-field">
+                        <label class="settings-field-label" for="settings-currency">Currency</label>
+                        <p class="settings-field-help">Default currency for pricing and transactions</p>
+                        <select
+                            id="settings-currency"
+                            class="settings-select"
+                            value={currency}
+                            change={handleCurrencyChange}
+                            disabled={disabled || isSaving}
+                        >
+                            {for curr in currencies}
+                                <option value={curr.value} selected={currency == curr.value}>
+                                    {curr.label}
+                                </option>
+                            {/for}
+                        </select>
+                    </div>
+                </div>
+            </section>
+        {/if}
+
+        <!-- Notification Settings Section -->
+        {if showNotificationSettings}
+            <section class="settings-section">
+                <div class="settings-section-header">
+                    <div class="settings-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                    </div>
+                    <div class="settings-section-info">
+                        <h2 class="settings-section-title">Notification Settings</h2>
+                        <p class="settings-section-description">Control how and when you receive notifications</p>
+                    </div>
+                </div>
+
+                <div class="settings-section-content">
+                    <!-- Email Notifications -->
+                    <div class="settings-toggle-field">
+                        <div class="settings-toggle-info">
+                            <label class="settings-toggle-label">Email Notifications</label>
+                            <p class="settings-toggle-help">Receive important updates via email</p>
+                        </div>
+                        <label class="settings-switch">
+                            <input
+                                type="checkbox"
+                                class="settings-switch-input"
+                                checked={emailNotifications}
+                                change={handleEmailNotifications}
+                                disabled={disabled || isSaving}
+                            >
+                            <span class={"settings-switch-track" ++ (match emailNotifications { true -> " checked", _ -> "" })}>
+                                <span class="settings-switch-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Push Notifications -->
+                    <div class="settings-toggle-field">
+                        <div class="settings-toggle-info">
+                            <label class="settings-toggle-label">Push Notifications</label>
+                            <p class="settings-toggle-help">Get real-time notifications on your device</p>
+                        </div>
+                        <label class="settings-switch">
+                            <input
+                                type="checkbox"
+                                class="settings-switch-input"
+                                checked={pushNotifications}
+                                change={handlePushNotifications}
+                                disabled={disabled || isSaving}
+                            >
+                            <span class={"settings-switch-track" ++ (match pushNotifications { true -> " checked", _ -> "" })}>
+                                <span class="settings-switch-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Marketing Emails -->
+                    <div class="settings-toggle-field">
+                        <div class="settings-toggle-info">
+                            <label class="settings-toggle-label">Marketing Emails</label>
+                            <p class="settings-toggle-help">Receive news, updates, and special offers</p>
+                        </div>
+                        <label class="settings-switch">
+                            <input
+                                type="checkbox"
+                                class="settings-switch-input"
+                                checked={marketingEmails}
+                                change={handleMarketingEmails}
+                                disabled={disabled || isSaving}
+                            >
+                            <span class={"settings-switch-track" ++ (match marketingEmails { true -> " checked", _ -> "" })}>
+                                <span class="settings-switch-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+        {/if}
+
+        <!-- Privacy Settings Section -->
+        {if showPrivacySettings}
+            <section class="settings-section">
+                <div class="settings-section-header">
+                    <div class="settings-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </div>
+                    <div class="settings-section-info">
+                        <h2 class="settings-section-title">Privacy Settings</h2>
+                        <p class="settings-section-description">Manage your privacy and security preferences</p>
+                    </div>
+                </div>
+
+                <div class="settings-section-content">
+                    <!-- Profile Visibility -->
+                    <div class="settings-field">
+                        <label class="settings-field-label">Profile Visibility</label>
+                        <p class="settings-field-help">Control who can see your profile information</p>
+                        <div class="settings-radio-group">
+                            {for option in visibilityOptions}
+                                <label class={"settings-radio" ++ (match profileVisibility == option.value { true -> " checked", _ -> "" })}>
+                                    <input
+                                        type="radio"
+                                        name="visibility"
+                                        value={option.value}
+                                        checked={profileVisibility == option.value}
+                                        change={fn(e) { handleVisibilityChange(option.value) }}
+                                        disabled={disabled || isSaving}
+                                    >
+                                    <span class="settings-radio-control">
+                                        <span class="settings-radio-dot"></span>
+                                    </span>
+                                    <div class="settings-radio-content">
+                                        <span class="settings-radio-label">{option.label}</span>
+                                        <span class="settings-radio-description">{option.description}</span>
+                                    </div>
+                                </label>
+                            {/for}
+                        </div>
+                    </div>
+
+                    <!-- Search Indexing -->
+                    <div class="settings-toggle-field">
+                        <div class="settings-toggle-info">
+                            <label class="settings-toggle-label">Search Indexing</label>
+                            <p class="settings-toggle-help">Allow search engines to index your profile</p>
+                        </div>
+                        <label class="settings-switch">
+                            <input
+                                type="checkbox"
+                                class="settings-switch-input"
+                                checked={searchIndexing}
+                                change={handleSearchIndexing}
+                                disabled={disabled || isSaving}
+                            >
+                            <span class={"settings-switch-track" ++ (match searchIndexing { true -> " checked", _ -> "" })}>
+                                <span class="settings-switch-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Two-Factor Authentication -->
+                    <div class="settings-toggle-field">
+                        <div class="settings-toggle-info">
+                            <label class="settings-toggle-label">Two-Factor Authentication</label>
+                            <p class="settings-toggle-help">Add an extra layer of security to your account</p>
+                        </div>
+                        <label class="settings-switch">
+                            <input
+                                type="checkbox"
+                                class="settings-switch-input"
+                                checked={twoFactorAuth}
+                                change={handleTwoFactorAuth}
+                                disabled={disabled || isSaving}
+                            >
+                            <span class={"settings-switch-track" ++ (match twoFactorAuth { true -> " checked", _ -> "" })}>
+                                <span class="settings-switch-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+        {/if}
+
+        <!-- Appearance Settings Section -->
+        {if showAppearanceSettings}
+            <section class="settings-section">
+                <div class="settings-section-header">
+                    <div class="settings-section-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"/>
+                            <line x1="12" y1="1" x2="12" y2="3"/>
+                            <line x1="12" y1="21" x2="12" y2="23"/>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                            <line x1="1" y1="12" x2="3" y2="12"/>
+                            <line x1="21" y1="12" x2="23" y2="12"/>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                        </svg>
+                    </div>
+                    <div class="settings-section-info">
+                        <h2 class="settings-section-title">Appearance</h2>
+                        <p class="settings-section-description">Customize the look and feel of the application</p>
+                    </div>
+                </div>
+
+                <div class="settings-section-content">
+                    <!-- Theme Selection -->
+                    <div class="settings-field">
+                        <label class="settings-field-label">Theme</label>
+                        <p class="settings-field-help">Choose your preferred color theme</p>
+                        <div class="settings-theme-group">
+                            {for option in themeOptions}
+                                <button
+                                    type="button"
+                                    class={"settings-theme-option" ++ (match theme == option.value { true -> " selected", _ -> "" })}
+                                    click={fn() { handleThemeChange(option.value) }}
+                                    disabled={disabled || isSaving}
+                                >
+                                    <span class="settings-theme-icon">
+                                        {if option.icon == "sun"}
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="5"/>
+                                                <line x1="12" y1="1" x2="12" y2="3"/>
+                                                <line x1="12" y1="21" x2="12" y2="23"/>
+                                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                                                <line x1="1" y1="12" x2="3" y2="12"/>
+                                                <line x1="21" y1="12" x2="23" y2="12"/>
+                                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                                            </svg>
+                                        {/if}
+                                        {if option.icon == "moon"}
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                                            </svg>
+                                        {/if}
+                                        {if option.icon == "monitor"}
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                                <line x1="8" y1="21" x2="16" y2="21"/>
+                                                <line x1="12" y1="17" x2="12" y2="21"/>
+                                            </svg>
+                                        {/if}
+                                    </span>
+                                    <span class="settings-theme-label">{option.label}</span>
+                                </button>
+                            {/for}
+                        </div>
+                    </div>
+
+                    <!-- Compact Mode -->
+                    <div class="settings-toggle-field">
+                        <div class="settings-toggle-info">
+                            <label class="settings-toggle-label">Compact Mode</label>
+                            <p class="settings-toggle-help">Reduce spacing and show more content on screen</p>
+                        </div>
+                        <label class="settings-switch">
+                            <input
+                                type="checkbox"
+                                class="settings-switch-input"
+                                checked={compactMode}
+                                change={handleCompactMode}
+                                disabled={disabled || isSaving}
+                            >
+                            <span class={"settings-switch-track" ++ (match compactMode { true -> " checked", _ -> "" })}>
+                                <span class="settings-switch-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Reduce Animations -->
+                    <div class="settings-toggle-field">
+                        <div class="settings-toggle-info">
+                            <label class="settings-toggle-label">Reduce Animations</label>
+                            <p class="settings-toggle-help">Minimize motion effects for accessibility</p>
+                        </div>
+                        <label class="settings-switch">
+                            <input
+                                type="checkbox"
+                                class="settings-switch-input"
+                                checked={reduceAnimations}
+                                change={handleReduceAnimations}
+                                disabled={disabled || isSaving}
+                            >
+                            <span class={"settings-switch-track" ++ (match reduceAnimations { true -> " checked", _ -> "" })}>
+                                <span class="settings-switch-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+        {/if}
+
+        <!-- Danger Zone Section -->
+        {if showDangerZone}
+            <section class="settings-section settings-danger-zone">
+                <div class="settings-section-header">
+                    <div class="settings-section-icon danger">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </div>
+                    <div class="settings-section-info">
+                        <h2 class="settings-section-title danger">Danger Zone</h2>
+                        <p class="settings-section-description">Irreversible and destructive actions</p>
+                    </div>
+                </div>
+
+                <div class="settings-section-content">
+                    <div class="settings-danger-item">
+                        <div class="settings-danger-info">
+                            <h3 class="settings-danger-title">Delete Account</h3>
+                            <p class="settings-danger-description">Permanently delete your account and all associated data. This action cannot be undone.</p>
+                        </div>
+                        {if !showDeleteConfirm}
+                            <button
+                                type="button"
+                                class="settings-danger-btn"
+                                click={fn() { showDeleteConfirm = true }}
+                                disabled={disabled || isSaving}
+                            >
+                                Delete Account
+                            </button>
+                        {else}
+                            <div class="settings-danger-confirm">
+                                <p class="settings-danger-confirm-text">Are you sure? This cannot be undone.</p>
+                                <div class="settings-danger-confirm-actions">
+                                    <button
+                                        type="button"
+                                        class="settings-cancel-btn"
+                                        click={fn() { showDeleteConfirm = false }}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="settings-danger-confirm-btn"
+                                        click={handleDeleteAccount}
+                                    >
+                                        Yes, Delete My Account
+                                    </button>
+                                </div>
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+            </section>
+        {/if}
+
+        <!-- Form Actions -->
+        <div class="settings-form-actions">
+            <button
+                type="button"
+                class="settings-reset-btn"
+                click={handleReset}
+                disabled={disabled || isSaving}
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="1 4 1 10 7 10"/>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                </svg>
+                Reset to Defaults
+            </button>
+            <button
+                type="submit"
+                class="settings-save-btn"
+                disabled={disabled || isSaving || !hasChanges}
+            >
+                {if isSaving}
+                    <svg class="settings-spinner" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="32" stroke-dashoffset="32">
+                            <animate attributeName="stroke-dashoffset" values="32;0;32" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                    Saving...
+                {else}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                    Save Changes
+                {/if}
+            </button>
+        </div>
+    </form>
+</div>
+
+<style scoped>
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-8);
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Header */
+.settings-form-header {
+    padding-bottom: var(--flin-space-6);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.settings-form-title {
+    margin: 0;
+    font-size: var(--flin-text-3xl);
+    font-weight: 700;
+    color: var(--flin-fg);
+}
+
+.settings-form-subtitle {
+    margin: var(--flin-space-2) 0 0;
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg-muted);
+}
+
+/* Form body */
+.settings-form-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-8);
+}
+
+/* Section */
+.settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-6);
+    padding: var(--flin-space-6);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-xl);
+}
+
+.settings-section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-4);
+}
+
+.settings-section-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: var(--flin-primary-light);
+    border-radius: var(--flin-radius-lg);
+    color: var(--flin-primary);
+    flex-shrink: 0;
+}
+
+.settings-section-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.settings-section-icon.danger {
+    background-color: var(--flin-danger-light);
+    color: var(--flin-danger);
+}
+
+.settings-section-info {
+    flex: 1;
+}
+
+.settings-section-title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.settings-section-title.danger {
+    color: var(--flin-danger);
+}
+
+.settings-section-description {
+    margin: var(--flin-space-1) 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.settings-section-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-5);
+    padding-left: 56px;
+}
+
+@media (max-width: 640px) {
+    .settings-section-content {
+        padding-left: 0;
+    }
+}
+
+/* Field */
+.settings-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.settings-field-label {
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.settings-field-help {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Select */
+.settings-select {
+    width: 100%;
+    max-width: 300px;
+    height: var(--flin-height-sm);
+    padding: var(--flin-space-2) var(--flin-space-10) var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--flin-space-3) center;
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.settings-select:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.settings-select:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.settings-select:disabled {
+    background-color: var(--flin-bg-muted);
+    color: var(--flin-fg-muted);
+    cursor: not-allowed;
+}
+
+/* Toggle field */
+.settings-toggle-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-4);
+    background-color: var(--flin-neutral-50);
+    border-radius: var(--flin-radius-lg);
+}
+
+.settings-toggle-info {
+    flex: 1;
+}
+
+.settings-toggle-label {
+    display: block;
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.settings-toggle-help {
+    margin: var(--flin-space-1) 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Switch */
+.settings-switch {
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.settings-switch-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.settings-switch-track {
+    display: block;
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background-color: var(--flin-neutral-300);
+    border-radius: var(--flin-radius-full);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.settings-switch-track.checked {
+    background-color: var(--flin-primary);
+}
+
+.settings-switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: var(--flin-radius-full);
+    box-shadow: var(--flin-shadow-sm);
+    transition: transform var(--flin-transition-fast);
+}
+
+.settings-switch-track.checked .settings-switch-thumb {
+    transform: translateX(20px);
+}
+
+.settings-switch:hover .settings-switch-track:not(.checked) {
+    background-color: var(--flin-neutral-400);
+}
+
+.settings-switch:hover .settings-switch-track.checked {
+    background-color: var(--flin-primary-dark);
+}
+
+.settings-switch-input:focus-visible + .settings-switch-track {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.settings-switch-input:disabled + .settings-switch-track {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Radio group */
+.settings-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+}
+
+.settings-radio {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4);
+    background-color: var(--flin-neutral-50);
+    border: 2px solid transparent;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.settings-radio:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.settings-radio.checked {
+    background-color: var(--flin-primary-light);
+    border-color: var(--flin-primary);
+}
+
+.settings-radio input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.settings-radio-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-bg);
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all var(--flin-transition-fast);
+}
+
+.settings-radio.checked .settings-radio-control {
+    border-color: var(--flin-primary);
+}
+
+.settings-radio-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--flin-radius-full);
+    background-color: transparent;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.settings-radio.checked .settings-radio-dot {
+    background-color: var(--flin-primary);
+}
+
+.settings-radio-content {
+    flex: 1;
+}
+
+.settings-radio-label {
+    display: block;
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.settings-radio-description {
+    display: block;
+    margin-top: var(--flin-space-1);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Theme group */
+.settings-theme-group {
+    display: flex;
+    gap: var(--flin-space-3);
+    flex-wrap: wrap;
+}
+
+.settings-theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-4) var(--flin-space-6);
+    background-color: var(--flin-neutral-50);
+    border: 2px solid transparent;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    min-width: 100px;
+}
+
+.settings-theme-option:hover:not(:disabled) {
+    background-color: var(--flin-neutral-100);
+}
+
+.settings-theme-option.selected {
+    background-color: var(--flin-primary-light);
+    border-color: var(--flin-primary);
+}
+
+.settings-theme-option:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.settings-theme-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    color: var(--flin-fg-muted);
+}
+
+.settings-theme-option.selected .settings-theme-icon {
+    color: var(--flin-primary);
+}
+
+.settings-theme-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.settings-theme-label {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+}
+
+/* Danger zone */
+.settings-danger-zone {
+    border-color: var(--flin-danger-light);
+    background-color: var(--flin-danger-light);
+}
+
+.settings-danger-zone .settings-section-content {
+    background-color: var(--flin-bg);
+    padding: var(--flin-space-4);
+    border-radius: var(--flin-radius-lg);
+    margin-left: 0;
+}
+
+.settings-danger-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    flex-wrap: wrap;
+}
+
+.settings-danger-info {
+    flex: 1;
+    min-width: 200px;
+}
+
+.settings-danger-title {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: var(--flin-fg);
+}
+
+.settings-danger-description {
+    margin: var(--flin-space-1) 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.settings-danger-btn {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-danger);
+    background-color: transparent;
+    border: 1px solid var(--flin-danger);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    white-space: nowrap;
+}
+
+.settings-danger-btn:hover:not(:disabled) {
+    color: white;
+    background-color: var(--flin-danger);
+}
+
+.settings-danger-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.settings-danger-confirm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    align-items: flex-end;
+}
+
+.settings-danger-confirm-text {
+    margin: 0;
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-danger);
+}
+
+.settings-danger-confirm-actions {
+    display: flex;
+    gap: var(--flin-space-2);
+}
+
+.settings-cancel-btn {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.settings-cancel-btn:hover {
+    background-color: var(--flin-neutral-200);
+}
+
+.settings-danger-confirm-btn {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: white;
+    background-color: var(--flin-danger);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.settings-danger-confirm-btn:hover {
+    background-color: var(--flin-danger-dark);
+}
+
+/* Form actions */
+.settings-form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    padding-top: var(--flin-space-6);
+    border-top: 1px solid var(--flin-neutral-200);
+    flex-wrap: wrap;
+}
+
+.settings-reset-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-5);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+    background-color: transparent;
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.settings-reset-btn:hover:not(:disabled) {
+    background-color: var(--flin-neutral-50);
+    border-color: var(--flin-neutral-400);
+}
+
+.settings-reset-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.settings-reset-btn svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.settings-save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-6);
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.settings-save-btn:hover:not(:disabled) {
+    background-color: var(--flin-primary-dark);
+}
+
+.settings-save-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.settings-save-btn svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.settings-spinner {
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Disabled state */
+.settings-form-disabled {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .settings-section {
+        padding: var(--flin-space-4);
+    }
+
+    .settings-section-header {
+        flex-direction: column;
+        gap: var(--flin-space-3);
+    }
+
+    .settings-section-content {
+        padding-left: 0;
+    }
+
+    .settings-toggle-field {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--flin-space-3);
+    }
+
+    .settings-select {
+        max-width: 100%;
+    }
+
+    .settings-theme-group {
+        justify-content: center;
+    }
+
+    .settings-danger-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .settings-danger-confirm {
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .settings-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .settings-reset-btn,
+    .settings-save-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>

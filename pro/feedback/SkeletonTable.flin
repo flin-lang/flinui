@@ -1,0 +1,443 @@
+// SkeletonTable.flin - FlinUI PRO Table Skeleton Component
+// Table skeleton with headers and configurable rows/columns
+
+// Props with defaults
+rows = props.rows || 5
+cols = props.cols || 4
+showHeader = props.showHeader || true
+showCheckbox = props.showCheckbox || false
+showActions = props.showActions || false
+striped = props.striped || false
+animate = props.animate || true
+dense = props.dense || false
+className = props.className || ""
+
+// Animation class
+animationClass = match animate {
+    true -> "skeleton-table--animated"
+    _ -> ""
+}
+
+// Density class
+densityClass = match dense {
+    true -> "skeleton-table--dense"
+    _ -> ""
+}
+
+// Striped class
+stripedClass = match striped {
+    true -> "skeleton-table--striped"
+    _ -> ""
+}
+
+// Build row and column arrays
+rowItems = []
+i = 0
+{while i < rows}
+    rowItems = rowItems ++ [i]
+    i = i + 1
+{/while}
+
+colItems = []
+j = 0
+{while j < cols}
+    colItems = colItems ++ [j]
+    j = j + 1
+{/while}
+
+// Get cell width variation
+getCellWidth = (colIndex, isHeader) => {
+    match isHeader {
+        true -> match colIndex % 4 {
+            0 -> "60%"
+            1 -> "70%"
+            2 -> "50%"
+            _ -> "65%"
+        }
+        _ -> match colIndex % 5 {
+            0 -> "80%"
+            1 -> "60%"
+            2 -> "70%"
+            3 -> "50%"
+            _ -> "75%"
+        }
+    }
+}
+
+<div
+    class={"skeleton-table-wrapper " ++ className}
+    aria-hidden="true"
+    aria-label="Loading table"
+>
+    <table class={"skeleton-table " ++ animationClass ++ " " ++ densityClass ++ " " ++ stripedClass}>
+        // Header
+        {if showHeader}
+            <thead class="skeleton-table-head">
+                <tr>
+                    {if showCheckbox}
+                        <th class="skeleton-table-cell skeleton-table-cell--checkbox">
+                            <div class="skeleton-checkbox"></div>
+                        </th>
+                    {/if}
+                    {for (col, colIndex) in colItems}
+                        <th class="skeleton-table-cell skeleton-table-cell--header">
+                            <div
+                                class="skeleton-cell-content skeleton-cell-content--header"
+                                style={"width: " ++ getCellWidth(colIndex, true)}
+                            ></div>
+                        </th>
+                    {/for}
+                    {if showActions}
+                        <th class="skeleton-table-cell skeleton-table-cell--actions">
+                            <div class="skeleton-cell-content" style="width: 40%;"></div>
+                        </th>
+                    {/if}
+                </tr>
+            </thead>
+        {/if}
+
+        // Body
+        <tbody class="skeleton-table-body">
+            {for (row, rowIndex) in rowItems}
+                <tr class="skeleton-table-row">
+                    {if showCheckbox}
+                        <td class="skeleton-table-cell skeleton-table-cell--checkbox">
+                            <div class="skeleton-checkbox"></div>
+                        </td>
+                    {/if}
+                    {for (col, colIndex) in colItems}
+                        <td class="skeleton-table-cell">
+                            <div
+                                class="skeleton-cell-content"
+                                style={"width: " ++ getCellWidth(colIndex + rowIndex, false)}
+                            ></div>
+                        </td>
+                    {/for}
+                    {if showActions}
+                        <td class="skeleton-table-cell skeleton-table-cell--actions">
+                            <div class="skeleton-actions">
+                                <div class="skeleton-action-btn"></div>
+                                <div class="skeleton-action-btn"></div>
+                            </div>
+                        </td>
+                    {/if}
+                </tr>
+            {/for}
+        </tbody>
+    </table>
+
+    // Pagination skeleton (optional)
+    {if props.showPagination}
+        <div class="skeleton-table-pagination">
+            <div class="skeleton-pagination-info"></div>
+            <div class="skeleton-pagination-controls">
+                <div class="skeleton-pagination-btn"></div>
+                <div class="skeleton-pagination-pages">
+                    <div class="skeleton-pagination-page"></div>
+                    <div class="skeleton-pagination-page"></div>
+                    <div class="skeleton-pagination-page"></div>
+                </div>
+                <div class="skeleton-pagination-btn"></div>
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+/* Wrapper */
+.skeleton-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Table */
+.skeleton-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+/* Header */
+.skeleton-table-head {
+    background-color: var(--flin-neutral-50);
+}
+
+.skeleton-table-head .skeleton-table-cell {
+    border-bottom: 2px solid var(--flin-neutral-200);
+}
+
+/* Cells */
+.skeleton-table-cell {
+    padding: var(--flin-space-4);
+    text-align: left;
+    border-bottom: 1px solid var(--flin-neutral-100);
+}
+
+.skeleton-table--dense .skeleton-table-cell {
+    padding: var(--flin-space-2) var(--flin-space-3);
+}
+
+.skeleton-table-cell--checkbox {
+    width: 48px;
+    text-align: center;
+}
+
+.skeleton-table-cell--header {
+    font-weight: 600;
+}
+
+.skeleton-table-cell--actions {
+    width: 100px;
+    text-align: right;
+}
+
+/* Cell content */
+.skeleton-cell-content {
+    height: 1em;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-cell-content--header {
+    height: 0.875em;
+    background-color: var(--flin-neutral-300);
+}
+
+.skeleton-table--animated .skeleton-cell-content::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonTableShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonTableShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Checkbox */
+.skeleton-checkbox {
+    width: 18px;
+    height: 18px;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-sm);
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-table--animated .skeleton-checkbox::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonTableShimmer 1.5s ease-in-out infinite;
+}
+
+/* Actions */
+.skeleton-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--flin-space-2);
+}
+
+.skeleton-action-btn {
+    width: 32px;
+    height: 32px;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-table--animated .skeleton-action-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonTableShimmer 1.5s ease-in-out infinite;
+}
+
+/* Striped rows */
+.skeleton-table--striped .skeleton-table-row:nth-child(even) {
+    background-color: var(--flin-neutral-50);
+}
+
+/* Row hover effect placeholder */
+.skeleton-table-row {
+    transition: background-color var(--flin-transition-fast);
+}
+
+/* Pagination */
+.skeleton-table-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+    background-color: var(--flin-bg);
+}
+
+.skeleton-pagination-info {
+    width: 120px;
+    height: 1em;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-table--animated .skeleton-pagination-info::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonTableShimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.skeleton-pagination-btn {
+    width: 32px;
+    height: 32px;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-table--animated .skeleton-pagination-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonTableShimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-pagination-pages {
+    display: flex;
+    gap: var(--flin-space-1);
+}
+
+.skeleton-pagination-page {
+    width: 32px;
+    height: 32px;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-table--animated .skeleton-pagination-page::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+    );
+    animation: skeletonTableShimmer 1.5s ease-in-out infinite;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+    .skeleton-table-cell {
+        padding: var(--flin-space-2) var(--flin-space-3);
+    }
+
+    .skeleton-pagination-pages {
+        display: none;
+    }
+}
+
+/* Dark theme */
+[data-theme="dark"] .skeleton-table {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .skeleton-table-head {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .skeleton-table-head .skeleton-table-cell {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .skeleton-table-cell {
+    border-bottom-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .skeleton-cell-content,
+[data-theme="dark"] .skeleton-checkbox,
+[data-theme="dark"] .skeleton-action-btn,
+[data-theme="dark"] .skeleton-pagination-info,
+[data-theme="dark"] .skeleton-pagination-btn,
+[data-theme="dark"] .skeleton-pagination-page {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .skeleton-cell-content--header {
+    background-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .skeleton-table--striped .skeleton-table-row:nth-child(even) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .skeleton-table-pagination {
+    background-color: var(--flin-neutral-900);
+    border-top-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .skeleton-table--animated .skeleton-cell-content::after,
+[data-theme="dark"] .skeleton-table--animated .skeleton-checkbox::after,
+[data-theme="dark"] .skeleton-table--animated .skeleton-action-btn::after,
+[data-theme="dark"] .skeleton-table--animated .skeleton-pagination-info::after,
+[data-theme="dark"] .skeleton-table--animated .skeleton-pagination-btn::after,
+[data-theme="dark"] .skeleton-table--animated .skeleton-pagination-page::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        transparent 100%
+    );
+}
+</style>

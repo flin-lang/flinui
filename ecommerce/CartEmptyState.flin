@@ -1,0 +1,292 @@
+// CartEmptyState.flin - FlinUI PRO E-commerce Component
+// Empty cart state with illustration and call-to-action
+
+// Props with defaults
+title = props.title || "Your cart is empty"
+description = props.description || "Add items to get started"
+ctaText = props.ctaText || "Browse Products"
+onCtaClick = props.onCtaClick
+showRecentItems = props.showRecentItems || false
+recentItems = props.recentItems || []
+
+// Handlers
+fn handleCtaClick() {
+    if onCtaClick {
+        onCtaClick()
+    }
+}
+
+<div class="cart-empty-state">
+    <div class="cart-empty-illustration">
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+            <!-- Shopping cart illustration -->
+            <circle cx="60" cy="60" r="55" fill="var(--flin-neutral-100)" opacity="0.5"/>
+
+            <!-- Cart body -->
+            <path
+                d="M35 35h10l8 30h30l6-20H45"
+                stroke="var(--flin-neutral-400)"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                fill="none"
+            />
+
+            <!-- Cart wheels -->
+            <circle cx="55" cy="75" r="4" fill="var(--flin-neutral-400)"/>
+            <circle cx="75" cy="75" r="4" fill="var(--flin-neutral-400)"/>
+
+            <!-- Empty indicator (dashed circle) -->
+            <circle
+                cx="60"
+                cy="50"
+                r="15"
+                stroke="var(--flin-neutral-300)"
+                stroke-width="2"
+                stroke-dasharray="4 4"
+                fill="none"
+            />
+        </svg>
+    </div>
+
+    <div class="cart-empty-content">
+        <h3 class="cart-empty-title">{title}</h3>
+        <p class="cart-empty-description">{description}</p>
+
+        <button class="cart-empty-cta" click={handleCtaClick}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1"/>
+                <circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            <span>{ctaText}</span>
+        </button>
+    </div>
+
+    {if showRecentItems && recentItems.length > 0}
+        <div class="cart-empty-recent">
+            <h4 class="cart-empty-recent-title">Recently Viewed</h4>
+            <div class="cart-empty-recent-grid">
+                {for item in recentItems}
+                    <div class="cart-empty-recent-item">
+                        <div class="cart-empty-recent-image">
+                            {if item.image}
+                                <img src={item.image} alt={item.name} loading="lazy" />
+                            {else}
+                                <div class="cart-empty-recent-placeholder">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                                        <path d="M21 15l-5-5L5 21"/>
+                                    </svg>
+                                </div>
+                            {/if}
+                        </div>
+                        <div class="cart-empty-recent-info">
+                            <p class="cart-empty-recent-name">{item.name}</p>
+                            <p class="cart-empty-recent-price">${item.price}</p>
+                        </div>
+                    </div>
+                {/for}
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+/* Container */
+.cart-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-8) var(--flin-space-4);
+    text-align: center;
+}
+
+/* Illustration */
+.cart-empty-illustration {
+    margin-bottom: var(--flin-space-6);
+    animation: cart-empty-float 3s ease-in-out infinite;
+}
+
+@keyframes cart-empty-float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Content */
+.cart-empty-content {
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-4);
+}
+
+.cart-empty-title {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+    margin: 0;
+}
+
+.cart-empty-description {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-neutral-600);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* CTA Button */
+.cart-empty-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3) var(--flin-space-6);
+    background-color: var(--flin-primary);
+    color: white;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.cart-empty-cta:hover {
+    background-color: var(--flin-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cart-empty-cta:active {
+    transform: translateY(0);
+}
+
+.cart-empty-cta:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+/* Recent items section */
+.cart-empty-recent {
+    margin-top: var(--flin-space-8);
+    width: 100%;
+    max-width: 600px;
+}
+
+.cart-empty-recent-title {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+    margin: 0 0 var(--flin-space-4) 0;
+    text-align: left;
+}
+
+.cart-empty-recent-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--flin-space-3);
+}
+
+.cart-empty-recent-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    background-color: white;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.cart-empty-recent-item:hover {
+    border-color: var(--flin-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.cart-empty-recent-image {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+    background-color: var(--flin-neutral-100);
+}
+
+.cart-empty-recent-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cart-empty-recent-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-neutral-400);
+}
+
+.cart-empty-recent-info {
+    text-align: left;
+}
+
+.cart-empty-recent-name {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-neutral-900);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cart-empty-recent-price {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-primary);
+    margin: var(--flin-space-1) 0 0 0;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .cart-empty-title,
+    .cart-empty-recent-title,
+    .cart-empty-recent-name {
+        color: var(--flin-neutral-100);
+    }
+
+    .cart-empty-description {
+        color: var(--flin-neutral-400);
+    }
+
+    .cart-empty-recent-item {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .cart-empty-recent-item:hover {
+        border-color: var(--flin-primary);
+    }
+
+    .cart-empty-recent-image,
+    .cart-empty-recent-placeholder {
+        background-color: var(--flin-neutral-900);
+    }
+}
+</style>

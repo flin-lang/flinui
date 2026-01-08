@@ -1,0 +1,32 @@
+// ============================================================================
+// FlinUI PRO — App Shells Index
+// 20 Application Shell Components for complex layouts
+// ============================================================================
+
+// Layouts (5)
+export AppShellSidebar    // Sidebar + main content layout
+export AppShellStacked    // Navbar + main content layout
+export AppShellMultiColumn // Multiple panel layout
+export AppShellResponsive // Mobile adaptive layout
+export AppShellWithHeader // Fixed header layout
+
+// Dashboard Layouts (5)
+export DashboardLayout    // Full dashboard with sidebar
+export SettingsLayout     // Settings page with navigation
+export ProfileLayout      // Profile page layout
+export InboxLayout        // Email/message app layout
+export FileManagerLayout  // Files/folders layout
+
+// Special Layouts (5)
+export SplitPane          // Resizable panels
+export MasterDetail       // List + detail view
+export CardLayout         // Card-based pages
+export WizardLayout       // Step-by-step flow
+export EmptyState         // No data placeholder
+
+// Containers (5)
+export PageContainer      // Max-width wrapper
+export Section            // Page section container
+export Card               // Content card
+export Panel              // Panel container
+export Divider            // Section divider

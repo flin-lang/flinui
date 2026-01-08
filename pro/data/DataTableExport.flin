@@ -1,0 +1,574 @@
+// FlinUI PRO DataTableExport Component
+// Export buttons for CSV/JSON with download functionality
+
+// Props with defaults
+columns = props.columns || []
+data = props.data || []
+loading = props.loading || false
+emptyText = props.emptyText || "No data available"
+striped = props.striped || false
+hoverable = props.hoverable || true
+bordered = props.bordered || false
+filename = props.filename || "table-data"
+exportFormats = props.exportFormats || ["csv", "json"]
+onExport = props.onExport || none
+
+// State
+exportMenuOpen = false
+exporting = false
+
+// Computed classes
+stripedClass = match striped {
+    true -> " pro-datatable-export--striped"
+    _ -> ""
+}
+
+hoverableClass = match hoverable {
+    true -> " pro-datatable-export--hoverable"
+    _ -> ""
+}
+
+borderedClass = match bordered {
+    true -> " pro-datatable-export--bordered"
+    _ -> ""
+}
+
+tableClass = "pro-datatable-export" ++ stripedClass ++ hoverableClass ++ borderedClass
+
+// Export handlers
+toggleExportMenu = {
+    exportMenuOpen = !exportMenuOpen
+}
+
+closeExportMenu = {
+    exportMenuOpen = false
+}
+
+exportCSV = {
+    exporting = true
+    exportMenuOpen = false
+
+    // Build CSV content
+    headers = columns.map((col) => col.label || col.key).join(",")
+    rows = data.map((row) => {
+        columns.map((col) => {
+            value = row[col.key]
+            // Escape quotes and wrap in quotes if contains comma
+            strValue = String(value || "")
+            if strValue.includes(",") || strValue.includes("\"") {
+                "\"" ++ strValue.replace(/"/g, "\"\"") ++ "\""
+            } else {
+                strValue
+            }
+        }).join(",")
+    }).join("\n")
+
+    csvContent = headers ++ "\n" ++ rows
+
+    // Create and trigger download
+    blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    link = document.createElement("a")
+    link.href = URL.createObjectURL(blob)
+    link.download = filename ++ ".csv"
+    link.click()
+    URL.revokeObjectURL(link.href)
+
+    exporting = false
+
+    if onExport != none {
+        onExport("csv", data)
+    }
+}
+
+exportJSON = {
+    exporting = true
+    exportMenuOpen = false
+
+    // Build JSON content with column mapping
+    exportData = data.map((row) => {
+        obj = {}
+        for col in columns {
+            obj[col.key] = row[col.key]
+        }
+        obj
+    })
+
+    jsonContent = JSON.stringify(exportData, none, 2)
+
+    // Create and trigger download
+    blob = new Blob([jsonContent], { type: "application/json;charset=utf-8;" })
+    link = document.createElement("a")
+    link.href = URL.createObjectURL(blob)
+    link.download = filename ++ ".json"
+    link.click()
+    URL.revokeObjectURL(link.href)
+
+    exporting = false
+
+    if onExport != none {
+        onExport("json", data)
+    }
+}
+
+copyToClipboard = {
+    exportMenuOpen = false
+
+    // Build tab-separated content for clipboard
+    headers = columns.map((col) => col.label || col.key).join("\t")
+    rows = data.map((row) => {
+        columns.map((col) => String(row[col.key] || "")).join("\t")
+    }).join("\n")
+
+    content = headers ++ "\n" ++ rows
+
+    navigator.clipboard.writeText(content)
+
+    if onExport != none {
+        onExport("clipboard", data)
+    }
+}
+
+<div class="pro-datatable-export-container">
+    <div class="pro-datatable-export__toolbar">
+        <div class="pro-datatable-export__info">
+            <span class="pro-datatable-export__count">
+                {data.length} rows
+            </span>
+        </div>
+
+        <div class="pro-datatable-export__actions">
+            <button
+                class="pro-datatable-export__copy-btn"
+                click={copyToClipboard}
+                title="Copy to clipboard"
+            >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                Copy
+            </button>
+
+            <div class="pro-datatable-export__dropdown">
+                <button
+                    class={"pro-datatable-export__export-btn" ++ (if exportMenuOpen { " pro-datatable-export__export-btn--open" } else { "" })}
+                    click={toggleExportMenu}
+                    aria-expanded={exportMenuOpen}
+                    aria-haspopup="true"
+                >
+                    {if exporting}
+                        <div class="pro-datatable-export__btn-spinner"></div>
+                        Exporting...
+                    {else}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Export
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    {/if}
+                </button>
+
+                {if exportMenuOpen}
+                    <div class="pro-datatable-export__menu">
+                        {if exportFormats.includes("csv")}
+                            <button
+                                class="pro-datatable-export__menu-item"
+                                click={exportCSV}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="8" y1="13" x2="16" y2="13"/>
+                                    <line x1="8" y1="17" x2="16" y2="17"/>
+                                </svg>
+                                <div class="pro-datatable-export__menu-item-content">
+                                    <span class="pro-datatable-export__menu-item-title">Export as CSV</span>
+                                    <span class="pro-datatable-export__menu-item-desc">Comma-separated values</span>
+                                </div>
+                            </button>
+                        {/if}
+
+                        {if exportFormats.includes("json")}
+                            <button
+                                class="pro-datatable-export__menu-item"
+                                click={exportJSON}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <path d="M8 13h2"/>
+                                    <path d="M8 17h2"/>
+                                    <path d="M14 13h2"/>
+                                    <path d="M14 17h2"/>
+                                </svg>
+                                <div class="pro-datatable-export__menu-item-content">
+                                    <span class="pro-datatable-export__menu-item-title">Export as JSON</span>
+                                    <span class="pro-datatable-export__menu-item-desc">JavaScript Object Notation</span>
+                                </div>
+                            </button>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+        </div>
+    </div>
+
+    <div class="pro-datatable-export__wrapper">
+        <table class={tableClass}>
+            <thead class="pro-datatable-export__head">
+                <tr class="pro-datatable-export__row pro-datatable-export__row--header">
+                    {for column in columns}
+                        <th class="pro-datatable-export__header" scope="col">
+                            {column.label || column.key}
+                        </th>
+                    {/for}
+                </tr>
+            </thead>
+
+            <tbody class="pro-datatable-export__body">
+                {if loading}
+                    <tr class="pro-datatable-export__row">
+                        <td class="pro-datatable-export__cell pro-datatable-export__loading" colspan={columns.length}>
+                            <div class="pro-datatable-export__spinner"></div>
+                            <span>Loading data...</span>
+                        </td>
+                    </tr>
+                {else if data.length == 0}
+                    <tr class="pro-datatable-export__row">
+                        <td class="pro-datatable-export__cell pro-datatable-export__empty" colspan={columns.length}>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M3 9h18"/>
+                                <path d="M9 21V9"/>
+                            </svg>
+                            <span>{emptyText}</span>
+                        </td>
+                    </tr>
+                {else}
+                    {for row in data}
+                        <tr class="pro-datatable-export__row">
+                            {for column in columns}
+                                <td class="pro-datatable-export__cell">
+                                    {row[column.key]}
+                                </td>
+                            {/for}
+                        </tr>
+                    {/for}
+                {/if}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style scoped>
+.pro-datatable-export-container {
+    font-family: var(--flin-font-sans);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+.pro-datatable-export__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    background: var(--flin-neutral-50);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+    gap: var(--flin-space-3);
+    flex-wrap: wrap;
+}
+
+.pro-datatable-export__info {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.pro-datatable-export__count {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-export__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.pro-datatable-export__copy-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.pro-datatable-export__copy-btn:hover {
+    border-color: var(--flin-neutral-300);
+    background: var(--flin-neutral-50);
+}
+
+.pro-datatable-export__dropdown {
+    position: relative;
+}
+
+.pro-datatable-export__export-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: white;
+    background: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.pro-datatable-export__export-btn:hover {
+    background: var(--flin-primary-dark);
+}
+
+.pro-datatable-export__export-btn--open {
+    background: var(--flin-primary-dark);
+}
+
+.pro-datatable-export__btn-spinner {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: var(--flin-radius-full);
+    animation: pro-datatable-export-spin var(--flin-duration-slow) linear infinite;
+}
+
+.pro-datatable-export__menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: var(--flin-space-1);
+    min-width: var(--flin-size-64);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+    z-index: var(--flin-z-50);
+    overflow: hidden;
+}
+
+.pro-datatable-export__menu-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+    width: 100%;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.pro-datatable-export__menu-item:hover {
+    background: var(--flin-neutral-50);
+}
+
+.pro-datatable-export__menu-item:not(:last-child) {
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-100);
+}
+
+.pro-datatable-export__menu-item svg {
+    flex-shrink: 0;
+    margin-top: var(--flin-space-0-5);
+    color: var(--flin-primary);
+}
+
+.pro-datatable-export__menu-item-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-0-5);
+}
+
+.pro-datatable-export__menu-item-title {
+    font-weight: var(--flin-font-medium);
+}
+
+.pro-datatable-export__menu-item-desc {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-export__wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pro-datatable-export {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--flin-text-sm);
+    text-align: left;
+}
+
+.pro-datatable-export__head {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-export__header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    white-space: nowrap;
+    border-bottom: var(--flin-space-0-5) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-export__row {
+    transition: background-color var(--flin-transition-fast);
+}
+
+.pro-datatable-export__cell {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    color: var(--flin-fg);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-export__body .pro-datatable-export__row:last-child .pro-datatable-export__cell {
+    border-bottom: none;
+}
+
+/* Variants */
+.pro-datatable-export--striped .pro-datatable-export__body .pro-datatable-export__row:nth-child(even) {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-export--hoverable .pro-datatable-export__body .pro-datatable-export__row:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.pro-datatable-export--bordered .pro-datatable-export__header,
+.pro-datatable-export--bordered .pro-datatable-export__cell {
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+/* Loading state */
+.pro-datatable-export__loading {
+    text-align: center;
+    padding: var(--flin-space-10) var(--flin-space-4);
+}
+
+.pro-datatable-export__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-export__spinner {
+    width: var(--flin-icon-lg);
+    height: var(--flin-icon-lg);
+    border: var(--flin-space-0-5) solid var(--flin-neutral-200);
+    border-top-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    animation: pro-datatable-export-spin var(--flin-duration-slow) linear infinite;
+}
+
+@keyframes pro-datatable-export-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty state */
+.pro-datatable-export__empty {
+    text-align: center;
+    padding: var(--flin-space-12) var(--flin-space-4);
+}
+
+.pro-datatable-export__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-export__empty svg {
+    color: var(--flin-neutral-300);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .pro-datatable-export-container {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-export__toolbar {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-export__copy-btn {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .pro-datatable-export__copy-btn:hover {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-export__menu {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .pro-datatable-export__menu-item:hover {
+    background: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-export__menu-item:not(:last-child) {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-export__head {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-export__header,
+[data-theme="dark"] .pro-datatable-export__cell {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-export--striped .pro-datatable-export__body .pro-datatable-export__row:nth-child(even) {
+    background-color: var(--flin-neutral-850);
+}
+
+[data-theme="dark"] .pro-datatable-export--hoverable .pro-datatable-export__body .pro-datatable-export__row:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-export__spinner {
+    border-color: var(--flin-neutral-700);
+    border-top-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .pro-datatable-export__empty svg {
+    color: var(--flin-neutral-600);
+}
+</style>

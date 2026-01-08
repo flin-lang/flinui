@@ -1,0 +1,343 @@
+// ContextMenu.flin - FlinUI PRO Context Menu Component
+// Right-click triggered context menu with keyboard navigation
+
+// Props with defaults
+items = props.items || []
+position = props.position || "auto"
+onSelect = props.onSelect
+onClose = props.onClose
+
+// Internal state
+isOpen = false
+isExiting = false
+menuX = 0
+menuY = 0
+activeIndex = -1
+
+// Handle context menu (right click)
+handleContextMenu = {
+    isOpen = true
+    isExiting = false
+    activeIndex = 0
+}
+
+// Handle close
+handleClose = {
+    isExiting = true
+    isOpen = false
+    activeIndex = -1
+    if onClose { onClose() }
+}
+
+// Handle backdrop click
+handleBackdropClick = {
+    handleClose()
+}
+
+// Handle item select
+handleSelect = {
+    if onSelect { onSelect() }
+    handleClose()
+}
+
+// Handle keyboard navigation
+handleKeyDown = {
+    // Escape closes
+    handleClose()
+}
+
+// Exiting class
+exitingClass = match isExiting { true -> " context-menu--exiting", _ -> "" }
+
+// Position style (would be set dynamically based on click position)
+positionStyle = "top: " ++ menuY ++ "px; left: " ++ menuX ++ "px"
+
+<div
+    class="flin-pro-context-menu-wrapper"
+    contextmenu={handleContextMenu}
+>
+    <div class="context-menu__area">
+        {children}
+    </div>
+
+    {if isOpen}
+        <div
+            class="context-menu__backdrop"
+            click={handleBackdropClick}
+            contextmenu={handleBackdropClick}
+            aria-hidden="true"
+        ></div>
+
+        <div
+            class={"flin-pro-context-menu" ++ exitingClass}
+            style={positionStyle}
+            role="menu"
+            tabindex="-1"
+            keydown={handleKeyDown}
+        >
+            <div class="context-menu__content">
+                <div class="context-menu__list" role="group">
+                    <!-- Example items structure -->
+                    <button class="context-menu__item" role="menuitem">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        <span>Edit</span>
+                        <kbd class="context-menu__shortcut">E</kbd>
+                    </button>
+
+                    <button class="context-menu__item" role="menuitem">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <span>Copy</span>
+                        <kbd class="context-menu__shortcut">C</kbd>
+                    </button>
+
+                    <button class="context-menu__item" role="menuitem">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <span>Paste</span>
+                        <kbd class="context-menu__shortcut">V</kbd>
+                    </button>
+
+                    <div class="context-menu__separator"></div>
+
+                    <button class="context-menu__item context-menu__item--danger" role="menuitem">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span>Delete</span>
+                        <kbd class="context-menu__shortcut">Del</kbd>
+                    </button>
+                </div>
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-pro-context-menu-wrapper {
+    position: relative;
+}
+
+.context-menu__area {
+    /* Area that triggers context menu */
+}
+
+/* Backdrop */
+.context-menu__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9997;
+}
+
+/* Context Menu */
+.flin-pro-context-menu {
+    position: fixed;
+    z-index: 9998;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-xl);
+    min-width: 180px;
+    max-width: 280px;
+    overflow: hidden;
+    animation: contextMenuFadeIn var(--flin-transition-fast) ease-out;
+}
+
+@keyframes contextMenuFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.context-menu--exiting {
+    animation: contextMenuFadeOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes contextMenuFadeOut {
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+/* Content */
+.context-menu__content {
+    padding: var(--flin-space-1);
+}
+
+.context-menu__list {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Menu item */
+.context-menu__item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+    border: none;
+    background: transparent;
+    text-align: left;
+    width: 100%;
+}
+
+.context-menu__item:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.context-menu__item:focus {
+    outline: none;
+    background-color: var(--flin-neutral-100);
+}
+
+.context-menu__item:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: -2px;
+}
+
+/* Item icon */
+.context-menu__item svg {
+    width: 16px;
+    height: 16px;
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+}
+
+/* Item label */
+.context-menu__item span {
+    flex: 1;
+}
+
+/* Shortcut */
+.context-menu__shortcut {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    background: var(--flin-neutral-100);
+    padding: 2px 6px;
+    border-radius: var(--flin-radius-sm);
+    font-family: var(--flin-font-mono);
+    margin-left: var(--flin-space-2);
+}
+
+/* Separator */
+.context-menu__separator {
+    height: 1px;
+    background-color: var(--flin-neutral-200);
+    margin: var(--flin-space-1) 0;
+}
+
+/* Group label */
+.context-menu__label {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+    font-weight: 600;
+    color: var(--flin-fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Disabled items */
+.context-menu__item[disabled],
+.context-menu__item--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Danger items */
+.context-menu__item--danger {
+    color: var(--flin-danger);
+}
+
+.context-menu__item--danger:hover {
+    background-color: var(--flin-danger-light);
+}
+
+.context-menu__item--danger svg {
+    color: var(--flin-danger);
+}
+
+/* Submenu indicator */
+.context-menu__item--has-submenu::after {
+    content: "";
+    width: 0;
+    height: 0;
+    border: 4px solid transparent;
+    border-left-color: var(--flin-fg-muted);
+    margin-left: auto;
+}
+
+/* Focus styling */
+.flin-pro-context-menu:focus {
+    outline: none;
+}
+
+/* Active/selected item */
+.context-menu__item--active {
+    background-color: var(--flin-neutral-100);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-pro-context-menu {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .context-menu__item:hover,
+[data-theme="dark"] .context-menu__item:focus,
+[data-theme="dark"] .context-menu__item--active {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .context-menu__separator {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .context-menu__shortcut {
+    background: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .context-menu__item--danger:hover {
+    background-color: rgba(239, 68, 68, 0.15);
+}
+
+/* Ensure menu stays in viewport */
+.flin-pro-context-menu {
+    /* These would be calculated dynamically */
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+}
+
+/* Scrollbar styling */
+.context-menu__content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.context-menu__content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.context-menu__content::-webkit-scrollbar-thumb {
+    background: var(--flin-neutral-300);
+    border-radius: 3px;
+}
+
+[data-theme="dark"] .context-menu__content::-webkit-scrollbar-thumb {
+    background: var(--flin-neutral-600);
+}
+</style>

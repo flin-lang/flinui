@@ -1,0 +1,463 @@
+// ============================================================================
+// NavbarSticky.flin — FlinUI PRO Navigation Component
+// Navbar that sticks to top on scroll with smooth shadow animation
+// ============================================================================
+// Props:
+//   - logo: Logo image URL or none for default (string)
+//   - logoText: Text to show with/instead of logo (string)
+//   - logoHref: Link for logo click (string)
+//   - links: Array of nav links [{ label, href, active }] (array)
+//   - ctaLabel: CTA button text (string)
+//   - ctaHref: CTA button link (string)
+//   - variant: Color scheme - light, dark (string)
+//   - stickyOffset: Scroll offset before becoming sticky (number)
+//   - showProgress: Show scroll progress bar (boolean)
+
+logo = props.logo || none
+logoText = props.logoText || "Brand"
+logoHref = props.logoHref || "/"
+links = props.links || []
+ctaLabel = props.ctaLabel || none
+ctaHref = props.ctaHref || none
+variant = props.variant || "light"
+stickyOffset = props.stickyOffset || 0
+showProgress = props.showProgress || false
+
+// State
+mobileOpen = false
+isSticky = false
+scrollProgress = 0
+
+toggleMobile = {
+    mobileOpen = !mobileOpen
+}
+
+closeMobile = {
+    mobileOpen = false
+}
+
+// Handle scroll
+handleScroll = {
+    scrollY = window.scrollY
+    isSticky = scrollY > stickyOffset
+
+    if showProgress {
+        docHeight = document.documentElement.scrollHeight - window.innerHeight
+        if docHeight > 0 {
+            scrollProgress = (scrollY / docHeight) * 100
+        }
+    }
+}
+
+// Attach scroll listener on mount
+window.addEventListener("scroll", handleScroll)
+
+// Variant classes
+variantClass = match variant {
+    "dark" => "navbar-sticky-dark"
+    _ => "navbar-sticky-light"
+}
+
+// Sticky class
+stickyClass = match isSticky {
+    true => " is-sticky"
+    _ => ""
+}
+
+// Mobile menu class
+mobileClass = match mobileOpen {
+    true => " navbar-mobile-open"
+    _ => ""
+}
+
+navbarClass = "flin-navbar-sticky " ++ variantClass ++ stickyClass ++ mobileClass
+
+<nav class={navbarClass} role="navigation" aria-label="Main navigation">
+    {if showProgress}
+        <div class="navbar-progress-bar">
+            <div class="navbar-progress-fill" style="width: {scrollProgress}%"></div>
+        </div>
+    {/if}
+
+    <div class="navbar-container">
+        <!-- Logo -->
+        <a href={logoHref} class="navbar-brand">
+            {if logo != none}
+                <img src={logo} alt={logoText} class="navbar-logo-img">
+            {else}
+                <div class="navbar-logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+            {/if}
+            <span class="navbar-logo-text">{logoText}</span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <div class="navbar-nav">
+            {for link in links}
+                <a
+                    href={link.href}
+                    class={"navbar-link" ++ (match link.active { true => " navbar-link-active", _ => "" })}
+                >
+                    {link.label}
+                </a>
+            {/for}
+        </div>
+
+        <!-- Actions -->
+        <div class="navbar-actions">
+            {if ctaLabel != none}
+                <a href={ctaHref} class="navbar-cta">{ctaLabel}</a>
+            {/if}
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button
+            class="navbar-toggle"
+            click={toggleMobile}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileOpen}
+        >
+            {if mobileOpen}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            {else}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            {/if}
+        </button>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="navbar-mobile">
+        <div class="navbar-mobile-inner">
+            {for link in links}
+                <a
+                    href={link.href}
+                    class={"navbar-mobile-link" ++ (match link.active { true => " navbar-mobile-link-active", _ => "" })}
+                    click={closeMobile}
+                >
+                    {link.label}
+                </a>
+            {/for}
+            {if ctaLabel != none}
+                <a href={ctaHref} class="navbar-mobile-cta" click={closeMobile}>{ctaLabel}</a>
+            {/if}
+        </div>
+    </div>
+</nav>
+
+<style scoped>
+.flin-navbar-sticky {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: var(--flin-z-navbar);
+    transition: box-shadow var(--flin-transition-normal), background-color var(--flin-transition-normal);
+}
+
+.flin-navbar-sticky.is-sticky {
+    box-shadow: var(--flin-shadow-md);
+}
+
+/* Progress bar */
+.navbar-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--flin-neutral-200);
+    overflow: hidden;
+}
+
+.navbar-sticky-dark .navbar-progress-bar {
+    background-color: var(--flin-neutral-700);
+}
+
+.navbar-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--flin-primary), var(--flin-primary-hover));
+    transition: width 50ms linear;
+}
+
+.navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: var(--flin-container-screen-xl);
+    height: 64px;
+    margin: 0 auto;
+    padding: 0 var(--flin-space-4);
+}
+
+/* Light variant */
+.navbar-sticky-light {
+    background-color: var(--flin-bg);
+    color: var(--flin-fg);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.navbar-sticky-light.is-sticky {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom-color: transparent;
+}
+
+.navbar-sticky-light .navbar-link {
+    color: var(--flin-fg-muted);
+}
+
+.navbar-sticky-light .navbar-link:hover,
+.navbar-sticky-light .navbar-link-active {
+    color: var(--flin-fg);
+}
+
+/* Dark variant */
+.navbar-sticky-dark {
+    background-color: var(--flin-neutral-900);
+    color: var(--flin-neutral-50);
+    border-bottom: 1px solid var(--flin-neutral-700);
+}
+
+.navbar-sticky-dark.is-sticky {
+    background-color: rgba(24, 24, 27, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom-color: transparent;
+}
+
+.navbar-sticky-dark .navbar-link {
+    color: var(--flin-neutral-400);
+}
+
+.navbar-sticky-dark .navbar-link:hover,
+.navbar-sticky-dark .navbar-link-active {
+    color: var(--flin-neutral-50);
+}
+
+/* Brand/Logo */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    text-decoration: none;
+    color: inherit;
+    font-weight: var(--flin-font-bold);
+}
+
+.navbar-logo-img {
+    height: 32px;
+    width: auto;
+}
+
+.navbar-logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--flin-radius-md);
+    background: var(--flin-primary);
+    color: white;
+}
+
+.navbar-logo-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.navbar-logo-text {
+    font-size: var(--flin-text-lg);
+}
+
+/* Navigation links */
+.navbar-nav {
+    display: none;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+@media (min-width: 768px) {
+    .navbar-nav {
+        display: flex;
+    }
+}
+
+.navbar-link {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    text-decoration: none;
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-link:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.navbar-sticky-dark .navbar-link:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+.navbar-link-active {
+    font-weight: var(--flin-font-semibold);
+}
+
+/* Actions */
+.navbar-actions {
+    display: none;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+@media (min-width: 768px) {
+    .navbar-actions {
+        display: flex;
+    }
+}
+
+.navbar-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-cta:hover {
+    background-color: var(--flin-primary-hover);
+}
+
+/* Mobile toggle */
+.navbar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.navbar-toggle:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.navbar-sticky-dark .navbar-toggle:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+.navbar-toggle svg {
+    width: 24px;
+    height: 24px;
+}
+
+@media (min-width: 768px) {
+    .navbar-toggle {
+        display: none;
+    }
+}
+
+/* Mobile menu */
+.navbar-mobile {
+    display: none;
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+.navbar-sticky-dark .navbar-mobile {
+    border-top-color: var(--flin-neutral-700);
+}
+
+.navbar-mobile-open .navbar-mobile {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .navbar-mobile {
+        display: none !important;
+    }
+}
+
+.navbar-mobile-inner {
+    display: flex;
+    flex-direction: column;
+    padding: var(--flin-space-4);
+    gap: var(--flin-space-1);
+}
+
+.navbar-mobile-link {
+    display: block;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-medium);
+    text-decoration: none;
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-sticky-light .navbar-mobile-link {
+    color: var(--flin-fg-muted);
+}
+
+.navbar-sticky-light .navbar-mobile-link:hover,
+.navbar-sticky-light .navbar-mobile-link-active {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-100);
+}
+
+.navbar-sticky-dark .navbar-mobile-link {
+    color: var(--flin-neutral-400);
+}
+
+.navbar-sticky-dark .navbar-mobile-link:hover,
+.navbar-sticky-dark .navbar-mobile-link-active {
+    color: var(--flin-neutral-50);
+    background-color: var(--flin-neutral-800);
+}
+
+.navbar-mobile-cta {
+    display: block;
+    width: 100%;
+    padding: var(--flin-space-3) var(--flin-space-4);
+    margin-top: var(--flin-space-2);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    text-align: center;
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.navbar-mobile-cta:hover {
+    background-color: var(--flin-primary-hover);
+}
+</style>

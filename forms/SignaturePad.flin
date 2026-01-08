@@ -1,0 +1,359 @@
+// SignaturePad.flin - FlinUI Signature Pad Component
+// E-signature capture with drawing canvas
+
+// Props with defaults
+value = props.value || none
+width = props.width || "100%"
+height = props.height || "200px"
+penColor = props.penColor || "#000000"
+penWidth = props.penWidth || 2
+backgroundColor = props.backgroundColor || "#ffffff"
+disabled = props.disabled || false
+showGuide = props.showGuide || true
+guideText = props.guideText || "Sign here"
+onChange = props.onChange
+onClear = props.onClear
+
+// State
+isDrawing = false
+isEmpty = true
+lastX = 0
+lastY = 0
+paths = []
+currentPath = []
+
+// Canvas reference (conceptual)
+canvasId = "signature-canvas-" ++ Math.random().toString(36).substr(2, 9)
+
+// Start drawing
+startDrawing = fn(e) {
+    if !disabled {
+        isDrawing = true
+        isEmpty = false
+        rect = e.target.getBoundingClientRect()
+        lastX = e.clientX - rect.left
+        lastY = e.clientY - rect.top
+        currentPath = [["x": lastX, "y": lastY]]
+    }
+}
+
+// Continue drawing
+draw = fn(e) {
+    if !disabled && isDrawing {
+        rect = e.target.getBoundingClientRect()
+        x = e.clientX - rect.left
+        y = e.clientY - rect.top
+        currentPath.push(["x": x, "y": y])
+        lastX = x
+        lastY = y
+        // In real implementation, draw on canvas
+    }
+}
+
+// Stop drawing
+stopDrawing = {
+    if isDrawing {
+        isDrawing = false
+        if currentPath.len > 0 {
+            paths.push(currentPath)
+            currentPath = []
+            notifyChange()
+        }
+    }
+}
+
+// Handle touch events
+handleTouchStart = fn(e) {
+    e.preventDefault()
+    if e.touches.len > 0 {
+        touch = e.touches[0]
+        startDrawing(touch)
+    }
+}
+
+handleTouchMove = fn(e) {
+    e.preventDefault()
+    if e.touches.len > 0 {
+        touch = e.touches[0]
+        draw(touch)
+    }
+}
+
+handleTouchEnd = fn(e) {
+    e.preventDefault()
+    stopDrawing()
+}
+
+// Clear signature
+clearSignature = {
+    paths = []
+    currentPath = []
+    isEmpty = true
+    if onClear {
+        onClear()
+    }
+    notifyChange()
+}
+
+// Undo last stroke
+undoLastStroke = {
+    if paths.len > 0 {
+        paths.pop()
+        if paths.len == 0 {
+            isEmpty = true
+        }
+        notifyChange()
+    }
+}
+
+// Notify change
+notifyChange = {
+    if onChange {
+        // In real implementation, export canvas as data URL
+        onChange(match isEmpty { true -> none, _ -> paths })
+    }
+}
+
+// Compute classes
+disabledClass = match disabled { true -> " signature-pad-disabled", _ -> "" }
+emptyClass = match isEmpty { true -> " signature-pad-empty", _ -> "" }
+containerClass = "signature-pad" ++ disabledClass ++ emptyClass
+
+<div class={containerClass}>
+    <div class="signature-pad-wrapper" style={"width: " ++ width ++ "; height: " ++ height}>
+        <canvas
+            id={canvasId}
+            class="signature-pad-canvas"
+            mousedown={startDrawing}
+            mousemove={draw}
+            mouseup={stopDrawing}
+            mouseleave={stopDrawing}
+            touchstart={handleTouchStart}
+            touchmove={handleTouchMove}
+            touchend={handleTouchEnd}
+            style={"background-color: " ++ backgroundColor}
+        ></canvas>
+
+        {if showGuide && isEmpty}
+            <div class="signature-pad-guide">
+                <span class="signature-pad-guide-text">{guideText}</span>
+                <div class="signature-pad-guide-line"></div>
+            </div>
+        {/if}
+
+        {if !isEmpty}
+            <div class="signature-pad-indicator">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>Signed</span>
+            </div>
+        {/if}
+    </div>
+
+    <div class="signature-pad-toolbar">
+        <div class="signature-pad-tools">
+            <button
+                type="button"
+                class="signature-pad-btn signature-pad-btn-undo"
+                click={undoLastStroke}
+                disabled={disabled || isEmpty}
+                title="Undo"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="1 4 1 10 7 10"/>
+                    <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+                </svg>
+                Undo
+            </button>
+            <button
+                type="button"
+                class="signature-pad-btn signature-pad-btn-clear"
+                click={clearSignature}
+                disabled={disabled || isEmpty}
+                title="Clear"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+                Clear
+            </button>
+        </div>
+        <div class="signature-pad-status">
+            {if isEmpty}
+                <span class="signature-pad-status-empty">No signature</span>
+            {else}
+                <span class="signature-pad-status-signed">Signature captured</span>
+            {/if}
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.signature-pad {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    width: 100%;
+}
+
+/* Canvas wrapper */
+.signature-pad-wrapper {
+    position: relative;
+    border: 2px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+    background-color: white;
+}
+
+.signature-pad-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+/* Guide */
+.signature-pad-guide {
+    position: absolute;
+    bottom: 30%;
+    left: var(--flin-space-4);
+    right: var(--flin-space-4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-2);
+    pointer-events: none;
+}
+
+.signature-pad-guide-text {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    font-style: italic;
+}
+
+.signature-pad-guide-line {
+    width: 100%;
+    height: 1px;
+    background-color: var(--flin-neutral-300);
+}
+
+/* Signed indicator */
+.signature-pad-indicator {
+    position: absolute;
+    top: var(--flin-space-2);
+    right: var(--flin-space-2);
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    background-color: var(--flin-success-light);
+    border-radius: var(--flin-radius-full);
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    color: var(--flin-success);
+}
+
+.signature-pad-indicator svg {
+    width: var(--flin-icon-xs);
+    height: var(--flin-icon-xs);
+}
+
+/* Toolbar */
+.signature-pad-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+}
+
+.signature-pad-tools {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.signature-pad-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.signature-pad-btn svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.signature-pad-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.signature-pad-btn-undo {
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    color: var(--flin-fg);
+}
+
+.signature-pad-btn-undo:hover:not(:disabled) {
+    background-color: var(--flin-neutral-100);
+}
+
+.signature-pad-btn-clear {
+    background-color: var(--flin-danger-light);
+    border: 1px solid var(--flin-danger-light);
+    color: var(--flin-danger);
+}
+
+.signature-pad-btn-clear:hover:not(:disabled) {
+    background-color: var(--flin-danger);
+    border-color: var(--flin-danger);
+    color: white;
+}
+
+.signature-pad-status {
+    font-size: var(--flin-text-sm);
+}
+
+.signature-pad-status-empty {
+    color: var(--flin-fg-muted);
+}
+
+.signature-pad-status-signed {
+    color: var(--flin-success);
+    font-weight: 500;
+}
+
+/* Focus state */
+.signature-pad-wrapper:focus-within {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+/* Disabled state */
+.signature-pad-disabled .signature-pad-wrapper {
+    background-color: var(--flin-bg-muted);
+    border-color: var(--flin-neutral-200);
+}
+
+.signature-pad-disabled .signature-pad-canvas {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .signature-pad-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>

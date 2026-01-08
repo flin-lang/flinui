@@ -1,0 +1,397 @@
+// AddressAutocomplete.flin - FlinUI Address Autocomplete Component
+// Address input with autocomplete suggestions (Places API compatible)
+
+// Props with defaults
+value = props.value || ""
+placeholder = props.placeholder || "Enter your address"
+disabled = props.disabled || false
+required = props.required || false
+showIcon = props.showIcon || true
+country = props.country || none
+types = props.types || ["address"]
+onChange = props.onChange
+onSelect = props.onSelect
+
+// State
+isOpen = false
+suggestions = []
+isLoading = false
+highlightedIndex = 0
+selectedAddress = none
+
+// Mock suggestions for demo (in real app, would call Places API)
+mockSuggestions = [
+    ["id": "1", "mainText": "123 Main Street", "secondaryText": "San Francisco, CA 94102, USA", "placeId": "place_1"],
+    ["id": "2", "mainText": "456 Oak Avenue", "secondaryText": "Los Angeles, CA 90001, USA", "placeId": "place_2"],
+    ["id": "3", "mainText": "789 Pine Boulevard", "secondaryText": "New York, NY 10001, USA", "placeId": "place_3"],
+    ["id": "4", "mainText": "321 Cedar Lane", "secondaryText": "Chicago, IL 60601, USA", "placeId": "place_4"],
+    ["id": "5", "mainText": "654 Maple Drive", "secondaryText": "Houston, TX 77001, USA", "placeId": "place_5"]
+]
+
+// Fetch suggestions (mock implementation)
+fetchSuggestions = fn(query) {
+    if query.len >= 3 {
+        isLoading = true
+        // In real implementation, call Places API here
+        // For demo, filter mock data
+        suggestions = mockSuggestions.filter(fn(s) {
+            s.mainText.toLowerCase().contains(query.toLowerCase()) ||
+            s.secondaryText.toLowerCase().contains(query.toLowerCase())
+        })
+        isLoading = false
+        if suggestions.len > 0 {
+            isOpen = true
+        }
+    } else {
+        suggestions = []
+        isOpen = false
+    }
+}
+
+// Handle input change
+handleInput = fn(e) {
+    newValue = e.target.value
+    if onChange {
+        onChange(newValue)
+    }
+    fetchSuggestions(newValue)
+    highlightedIndex = 0
+}
+
+// Handle suggestion selection
+selectSuggestion = fn(suggestion) {
+    fullAddress = suggestion.mainText ++ ", " ++ suggestion.secondaryText
+    if onChange {
+        onChange(fullAddress)
+    }
+    if onSelect {
+        onSelect(suggestion)
+    }
+    selectedAddress = suggestion
+    isOpen = false
+    suggestions = []
+}
+
+// Handle keyboard navigation
+handleKeydown = fn(e) {
+    if e.key == "ArrowDown" {
+        e.preventDefault()
+        if highlightedIndex < suggestions.len - 1 {
+            highlightedIndex = highlightedIndex + 1
+        }
+    } else if e.key == "ArrowUp" {
+        e.preventDefault()
+        if highlightedIndex > 0 {
+            highlightedIndex = highlightedIndex - 1
+        }
+    } else if e.key == "Enter" {
+        e.preventDefault()
+        if isOpen && suggestions.len > 0 {
+            selectSuggestion(suggestions[highlightedIndex])
+        }
+    } else if e.key == "Escape" {
+        isOpen = false
+    }
+}
+
+// Handle blur
+handleBlur = {
+    // Delay to allow click on suggestions
+    setTimeout(fn() { isOpen = false }, 200)
+}
+
+// Clear selection
+clearSelection = {
+    if onChange {
+        onChange("")
+    }
+    selectedAddress = none
+    suggestions = []
+}
+
+// Compute classes
+disabledClass = match disabled { true -> " address-autocomplete-disabled", _ -> "" }
+openClass = match isOpen { true -> " address-autocomplete-open", _ -> "" }
+containerClass = "address-autocomplete" ++ disabledClass ++ openClass
+
+<div class={containerClass}>
+    <div class="address-autocomplete-wrapper">
+        {if showIcon}
+            <span class="address-autocomplete-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                </svg>
+            </span>
+        {/if}
+        <input
+            type="text"
+            class="address-autocomplete-input"
+            value={value}
+            placeholder={placeholder}
+            disabled={disabled}
+            required={required}
+            input={handleInput}
+            keydown={handleKeydown}
+            blur={handleBlur}
+            autocomplete="off"
+            role="combobox"
+            aria-expanded={isOpen}
+            aria-autocomplete="list"
+        >
+        {if isLoading}
+            <span class="address-autocomplete-loading">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="32">
+                        <animate attributeName="stroke-dashoffset" values="32;0" dur="1s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+            </span>
+        {/if}
+        {if value != "" && !disabled}
+            <button
+                type="button"
+                class="address-autocomplete-clear"
+                click={clearSelection}
+                aria-label="Clear"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        {/if}
+    </div>
+
+    {if isOpen && suggestions.len > 0}
+        <ul class="address-autocomplete-dropdown" role="listbox">
+            {for suggestion, index in suggestions}
+                <li
+                    class={"address-autocomplete-item" ++ (match index == highlightedIndex { true -> " highlighted", _ -> "" })}
+                    click={selectSuggestion(suggestion)}
+                    role="option"
+                    aria-selected={index == highlightedIndex}
+                >
+                    <span class="address-autocomplete-item-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                    </span>
+                    <div class="address-autocomplete-item-content">
+                        <span class="address-autocomplete-item-main">{suggestion.mainText}</span>
+                        <span class="address-autocomplete-item-secondary">{suggestion.secondaryText}</span>
+                    </div>
+                </li>
+            {/for}
+        </ul>
+    {/if}
+
+    {if selectedAddress != none}
+        <div class="address-autocomplete-selected">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Address selected</span>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.address-autocomplete {
+    position: relative;
+    width: 100%;
+}
+
+.address-autocomplete-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    background-color: var(--flin-bg);
+    overflow: hidden;
+    transition: all var(--flin-transition-fast);
+}
+
+.address-autocomplete-wrapper:hover:not(.address-autocomplete-disabled .address-autocomplete-wrapper) {
+    border-color: var(--flin-neutral-400);
+}
+
+.address-autocomplete-wrapper:focus-within {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.address-autocomplete-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.address-autocomplete-icon svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.address-autocomplete-input {
+    flex: 1;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background: transparent;
+    border: none;
+    outline: none;
+    min-width: 0;
+}
+
+.address-autocomplete-input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.address-autocomplete-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--flin-space-2);
+    color: var(--flin-primary);
+}
+
+.address-autocomplete-loading svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.address-autocomplete-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-space-8);
+    height: var(--flin-space-8);
+    margin-right: var(--flin-space-1);
+    padding: 0;
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    background: transparent;
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.address-autocomplete-clear:hover {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-fg);
+}
+
+.address-autocomplete-clear svg {
+    width: var(--flin-icon-xs);
+    height: var(--flin-icon-xs);
+}
+
+/* Dropdown */
+.address-autocomplete-dropdown {
+    position: absolute;
+    top: calc(100% + var(--flin-space-1));
+    left: 0;
+    right: 0;
+    list-style: none;
+    margin: 0;
+    padding: var(--flin-space-1);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    box-shadow: var(--flin-shadow-lg);
+    z-index: var(--flin-z-dropdown);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.address-autocomplete-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.address-autocomplete-item:hover,
+.address-autocomplete-item.highlighted {
+    background-color: var(--flin-neutral-100);
+}
+
+.address-autocomplete-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-space-8);
+    height: var(--flin-space-8);
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+}
+
+.address-autocomplete-item-icon svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.address-autocomplete-item-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.address-autocomplete-item-main {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg);
+}
+
+.address-autocomplete-item-secondary {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+/* Selected indicator */
+.address-autocomplete-selected {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background-color: var(--flin-success-light);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-success);
+}
+
+.address-autocomplete-selected svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+/* Disabled state */
+.address-autocomplete-disabled .address-autocomplete-wrapper {
+    background-color: var(--flin-bg-muted);
+    border-color: var(--flin-neutral-200);
+}
+
+.address-autocomplete-disabled .address-autocomplete-input {
+    cursor: not-allowed;
+    color: var(--flin-fg-muted);
+}
+</style>

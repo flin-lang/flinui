@@ -1,0 +1,372 @@
+// FlinUI PRO DataTableSortable Component
+// Click column headers to sort asc/desc
+
+// Props with defaults
+columns = props.columns || []
+data = props.data || []
+loading = props.loading || false
+emptyText = props.emptyText || "No data available"
+striped = props.striped || false
+hoverable = props.hoverable || true
+bordered = props.bordered || false
+defaultSortColumn = props.defaultSortColumn || none
+defaultSortDirection = props.defaultSortDirection || "asc"
+onSort = props.onSort || none
+
+// State
+sortColumn = defaultSortColumn
+sortDirection = defaultSortDirection
+
+// Computed classes
+stripedClass = match striped {
+    true -> " pro-datatable-sortable--striped"
+    _ -> ""
+}
+
+hoverableClass = match hoverable {
+    true -> " pro-datatable-sortable--hoverable"
+    _ -> ""
+}
+
+borderedClass = match bordered {
+    true -> " pro-datatable-sortable--bordered"
+    _ -> ""
+}
+
+tableClass = "pro-datatable-sortable" ++ stripedClass ++ hoverableClass ++ borderedClass
+
+// Sort handler
+handleSort = (columnKey) => {
+    if sortColumn == columnKey {
+        sortDirection = match sortDirection {
+            "asc" -> "desc"
+            _ -> "asc"
+        }
+    } else {
+        sortColumn = columnKey
+        sortDirection = "asc"
+    }
+
+    if onSort != none {
+        onSort(sortColumn, sortDirection)
+    }
+}
+
+// Sort data
+sortedData = () => {
+    if sortColumn == none {
+        data
+    } else {
+        [...data].sort((a, b) => {
+            aVal = a[sortColumn]
+            bVal = b[sortColumn]
+
+            if aVal == bVal {
+                0
+            } else if aVal < bVal {
+                match sortDirection {
+                    "asc" -> -1
+                    _ -> 1
+                }
+            } else {
+                match sortDirection {
+                    "asc" -> 1
+                    _ -> -1
+                }
+            }
+        })
+    }
+}
+
+displayData = sortedData()
+
+<div class="pro-datatable-sortable-container">
+    <div class="pro-datatable-sortable__wrapper">
+        <table class={tableClass}>
+            <thead class="pro-datatable-sortable__head">
+                <tr class="pro-datatable-sortable__row pro-datatable-sortable__row--header">
+                    {for column in columns}
+                        <th
+                            class={"pro-datatable-sortable__header" ++ (if column.sortable != false { " pro-datatable-sortable__header--sortable" } else { "" }) ++ (if sortColumn == column.key { " pro-datatable-sortable__header--active" } else { "" })}
+                            scope="col"
+                            click={if column.sortable != false { handleSort(column.key) } else { none }}
+                            role={if column.sortable != false { "button" } else { none }}
+                            tabindex={if column.sortable != false { "0" } else { none }}
+                            aria-sort={if sortColumn == column.key { match sortDirection { "asc" -> "ascending", _ -> "descending" } } else { none }}
+                        >
+                            <div class="pro-datatable-sortable__header-content">
+                                <span>{column.label || column.key}</span>
+                                {if column.sortable != false}
+                                    <span class="pro-datatable-sortable__sort-icon">
+                                        {if sortColumn == column.key}
+                                            {match sortDirection {
+                                                "asc" ->
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <polyline points="18 15 12 9 6 15"/>
+                                                    </svg>
+                                                _ ->
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <polyline points="6 9 12 15 18 9"/>
+                                                    </svg>
+                                            }}
+                                        {else}
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.4">
+                                                <polyline points="18 15 12 9 6 15"/>
+                                            </svg>
+                                        {/if}
+                                    </span>
+                                {/if}
+                            </div>
+                        </th>
+                    {/for}
+                </tr>
+            </thead>
+
+            <tbody class="pro-datatable-sortable__body">
+                {if loading}
+                    <tr class="pro-datatable-sortable__row">
+                        <td class="pro-datatable-sortable__cell pro-datatable-sortable__loading" colspan={columns.length}>
+                            <div class="pro-datatable-sortable__spinner"></div>
+                            <span>Loading data...</span>
+                        </td>
+                    </tr>
+                {else if displayData.length == 0}
+                    <tr class="pro-datatable-sortable__row">
+                        <td class="pro-datatable-sortable__cell pro-datatable-sortable__empty" colspan={columns.length}>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M3 9h18"/>
+                                <path d="M9 21V9"/>
+                            </svg>
+                            <span>{emptyText}</span>
+                        </td>
+                    </tr>
+                {else}
+                    {for row in displayData}
+                        <tr class="pro-datatable-sortable__row">
+                            {for column in columns}
+                                <td class="pro-datatable-sortable__cell">
+                                    {row[column.key]}
+                                </td>
+                            {/for}
+                        </tr>
+                    {/for}
+                {/if}
+            </tbody>
+        </table>
+    </div>
+
+    {if sortColumn != none}
+        <div class="pro-datatable-sortable__status">
+            Sorted by <strong>{sortColumn}</strong> ({match sortDirection { "asc" -> "ascending", _ -> "descending" }})
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.pro-datatable-sortable-container {
+    font-family: var(--flin-font-sans);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+.pro-datatable-sortable__wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pro-datatable-sortable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--flin-text-sm);
+    text-align: left;
+}
+
+.pro-datatable-sortable__head {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-sortable__header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    white-space: nowrap;
+    border-bottom: var(--flin-space-0-5) solid var(--flin-neutral-200);
+    user-select: none;
+}
+
+.pro-datatable-sortable__header--sortable {
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.pro-datatable-sortable__header--sortable:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.pro-datatable-sortable__header--sortable:focus-visible {
+    outline: var(--flin-space-0-5) solid var(--flin-primary);
+    outline-offset: calc(-1 * var(--flin-space-0-5));
+}
+
+.pro-datatable-sortable__header--active {
+    background-color: color-mix(in srgb, var(--flin-primary) 10%, var(--flin-neutral-50));
+    color: var(--flin-primary);
+}
+
+.pro-datatable-sortable__header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-2);
+}
+
+.pro-datatable-sortable__sort-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.pro-datatable-sortable__header--active .pro-datatable-sortable__sort-icon svg {
+    color: var(--flin-primary);
+}
+
+.pro-datatable-sortable__row {
+    transition: background-color var(--flin-transition-fast);
+}
+
+.pro-datatable-sortable__cell {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    color: var(--flin-fg);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-sortable__body .pro-datatable-sortable__row:last-child .pro-datatable-sortable__cell {
+    border-bottom: none;
+}
+
+/* Status bar */
+.pro-datatable-sortable__status {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    background-color: var(--flin-neutral-50);
+    border-top: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-sortable__status strong {
+    color: var(--flin-primary);
+    font-weight: var(--flin-font-semibold);
+}
+
+/* Variants */
+.pro-datatable-sortable--striped .pro-datatable-sortable__body .pro-datatable-sortable__row:nth-child(even) {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-sortable--hoverable .pro-datatable-sortable__body .pro-datatable-sortable__row:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.pro-datatable-sortable--bordered .pro-datatable-sortable__header,
+.pro-datatable-sortable--bordered .pro-datatable-sortable__cell {
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+/* Loading state */
+.pro-datatable-sortable__loading {
+    text-align: center;
+    padding: var(--flin-space-10) var(--flin-space-4);
+}
+
+.pro-datatable-sortable__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-sortable__spinner {
+    width: var(--flin-icon-lg);
+    height: var(--flin-icon-lg);
+    border: var(--flin-space-0-5) solid var(--flin-neutral-200);
+    border-top-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    animation: pro-datatable-sortable-spin var(--flin-duration-slow) linear infinite;
+}
+
+@keyframes pro-datatable-sortable-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty state */
+.pro-datatable-sortable__empty {
+    text-align: center;
+    padding: var(--flin-space-12) var(--flin-space-4);
+}
+
+.pro-datatable-sortable__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-sortable__empty svg {
+    color: var(--flin-neutral-300);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .pro-datatable-sortable-container {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-sortable__head {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-sortable__header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-sortable__header--sortable:hover {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-sortable__header--active {
+    background-color: color-mix(in srgb, var(--flin-primary) 15%, var(--flin-neutral-800));
+}
+
+[data-theme="dark"] .pro-datatable-sortable__cell {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-sortable__status {
+    background-color: var(--flin-neutral-800);
+    border-top-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-sortable--striped .pro-datatable-sortable__body .pro-datatable-sortable__row:nth-child(even) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-sortable--hoverable .pro-datatable-sortable__body .pro-datatable-sortable__row:hover {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-sortable__spinner {
+    border-color: var(--flin-neutral-700);
+    border-top-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .pro-datatable-sortable__empty svg {
+    color: var(--flin-neutral-600);
+}
+</style>

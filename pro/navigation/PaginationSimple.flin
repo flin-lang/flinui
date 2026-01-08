@@ -1,0 +1,252 @@
+// ============================================================================
+// PaginationSimple.flin — FlinUI PRO Navigation Component
+// Simple prev/next pagination with page indicator
+// ============================================================================
+// Props:
+//   - currentPage: Current active page (number)
+//   - totalPages: Total number of pages (number)
+//   - onPrevious: Callback for previous button (function)
+//   - onNext: Callback for next button (function)
+//   - showPageInfo: Show "Page X of Y" text (boolean)
+//   - size: Size variant - sm, md, lg (string)
+//   - variant: Style variant - default, outline, minimal (string)
+//   - labels: Custom labels object with prev, next keys (object)
+
+currentPage = props.currentPage || 1
+totalPages = props.totalPages || 10
+onPrevious = props.onPrevious || none
+onNext = props.onNext || none
+showPageInfo = props.showPageInfo || true
+size = props.size || "md"
+variant = props.variant || "default"
+labels = props.labels || ["prev": "Previous", "next": "Next"]
+
+// Size class
+sizeClass = match size {
+    "sm" => "pagination-simple-sm"
+    "lg" => "pagination-simple-lg"
+    _ => "pagination-simple-md"
+}
+
+// Variant class
+variantClass = match variant {
+    "outline" => "pagination-simple-outline"
+    "minimal" => "pagination-simple-minimal"
+    _ => "pagination-simple-default"
+}
+
+// Navigation handlers
+handlePrevious = () => {
+    if currentPage > 1 && onPrevious != none {
+        onPrevious(currentPage - 1)
+    }
+}
+
+handleNext = () => {
+    if currentPage < totalPages && onNext != none {
+        onNext(currentPage + 1)
+    }
+}
+
+// Disabled states
+prevDisabled = currentPage == 1
+nextDisabled = currentPage == totalPages
+
+<nav
+    class="flin-pagination-simple {sizeClass} {variantClass}"
+    aria-label="Simple page navigation"
+    role="navigation"
+>
+    <button
+        class="pagination-simple-btn pagination-simple-prev"
+        click={handlePrevious}
+        disabled={prevDisabled}
+        aria-label="Go to previous page"
+    >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        <span class="pagination-simple-label">{labels.prev}</span>
+    </button>
+
+    {if showPageInfo}
+        <div class="pagination-simple-info">
+            <span class="pagination-simple-current">{currentPage}</span>
+            <span class="pagination-simple-separator">of</span>
+            <span class="pagination-simple-total">{totalPages}</span>
+        </div>
+    {/if}
+
+    <button
+        class="pagination-simple-btn pagination-simple-next"
+        click={handleNext}
+        disabled={nextDisabled}
+        aria-label="Go to next page"
+    >
+        <span class="pagination-simple-label">{labels.next}</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+    </button>
+</nav>
+
+<style scoped>
+.flin-pagination-simple {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    user-select: none;
+}
+
+.pagination-simple-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-weight: var(--flin-font-medium);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.pagination-simple-btn:focus-visible {
+    outline: 2px solid var(--flin-accent-gold);
+    outline-offset: 2px;
+}
+
+.pagination-simple-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pagination-simple-btn svg {
+    flex-shrink: 0;
+}
+
+.pagination-simple-label {
+    display: inline-block;
+}
+
+.pagination-simple-info {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1-5);
+    font-family: var(--flin-font-sans);
+}
+
+.pagination-simple-current {
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+}
+
+.pagination-simple-separator {
+    color: var(--flin-text-muted);
+}
+
+.pagination-simple-total {
+    color: var(--flin-text-secondary);
+}
+
+/* Size variants */
+.pagination-simple-sm .pagination-simple-btn {
+    padding: var(--flin-space-1-5) var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+}
+
+.pagination-simple-sm .pagination-simple-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.pagination-simple-sm .pagination-simple-info {
+    font-size: var(--flin-text-xs);
+}
+
+.pagination-simple-md .pagination-simple-btn {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+}
+
+.pagination-simple-md .pagination-simple-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.pagination-simple-md .pagination-simple-info {
+    font-size: var(--flin-text-sm);
+}
+
+.pagination-simple-lg .pagination-simple-btn {
+    padding: var(--flin-space-3) var(--flin-space-5);
+    font-size: var(--flin-text-base);
+}
+
+.pagination-simple-lg .pagination-simple-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.pagination-simple-lg .pagination-simple-info {
+    font-size: var(--flin-text-base);
+}
+
+/* Default variant */
+.pagination-simple-default .pagination-simple-btn {
+    background-color: var(--flin-bg-elevated);
+    color: var(--flin-text-secondary);
+    border: 1px solid var(--flin-border-subtle);
+}
+
+.pagination-simple-default .pagination-simple-btn:hover:not(:disabled) {
+    background-color: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+    color: var(--flin-text-primary);
+}
+
+/* Outline variant */
+.pagination-simple-outline .pagination-simple-btn {
+    background-color: transparent;
+    color: var(--flin-text-secondary);
+    border: 1px solid var(--flin-border-subtle);
+}
+
+.pagination-simple-outline .pagination-simple-btn:hover:not(:disabled) {
+    border-color: var(--flin-accent-gold);
+    color: var(--flin-accent-gold);
+}
+
+/* Minimal variant */
+.pagination-simple-minimal .pagination-simple-btn {
+    background-color: transparent;
+    color: var(--flin-text-secondary);
+    border: none;
+    padding-left: var(--flin-space-2);
+    padding-right: var(--flin-space-2);
+}
+
+.pagination-simple-minimal .pagination-simple-btn:hover:not(:disabled) {
+    color: var(--flin-accent-gold);
+}
+
+.pagination-simple-minimal .pagination-simple-label {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .flin-pagination-simple {
+        gap: var(--flin-space-2);
+    }
+
+    .pagination-simple-label {
+        display: none;
+    }
+
+    .pagination-simple-btn {
+        padding: var(--flin-space-2);
+    }
+}
+</style>

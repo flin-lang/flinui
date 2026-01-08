@@ -1,0 +1,367 @@
+// PhoneInput.flin - FlinUI International Phone Input Component
+// Phone number input with country code selector
+
+// Props with defaults
+value = props.value || ""
+defaultCountry = props.defaultCountry || "US"
+placeholder = props.placeholder || "Phone number"
+disabled = props.disabled || false
+required = props.required || false
+onChange = props.onChange
+onCountryChange = props.onCountryChange
+
+// State
+isOpen = false
+searchQuery = ""
+selectedCountry = defaultCountry
+
+// Country data with codes and flags
+countries = [
+    ["code": "US", "name": "United States", "dial": "+1", "flag": "🇺🇸"],
+    ["code": "GB", "name": "United Kingdom", "dial": "+44", "flag": "🇬🇧"],
+    ["code": "FR", "name": "France", "dial": "+33", "flag": "🇫🇷"],
+    ["code": "DE", "name": "Germany", "dial": "+49", "flag": "🇩🇪"],
+    ["code": "ES", "name": "Spain", "dial": "+34", "flag": "🇪🇸"],
+    ["code": "IT", "name": "Italy", "dial": "+39", "flag": "🇮🇹"],
+    ["code": "CA", "name": "Canada", "dial": "+1", "flag": "🇨🇦"],
+    ["code": "AU", "name": "Australia", "dial": "+61", "flag": "🇦🇺"],
+    ["code": "JP", "name": "Japan", "dial": "+81", "flag": "🇯🇵"],
+    ["code": "CN", "name": "China", "dial": "+86", "flag": "🇨🇳"],
+    ["code": "IN", "name": "India", "dial": "+91", "flag": "🇮🇳"],
+    ["code": "BR", "name": "Brazil", "dial": "+55", "flag": "🇧🇷"],
+    ["code": "MX", "name": "Mexico", "dial": "+52", "flag": "🇲🇽"],
+    ["code": "NG", "name": "Nigeria", "dial": "+234", "flag": "🇳🇬"],
+    ["code": "ZA", "name": "South Africa", "dial": "+27", "flag": "🇿🇦"],
+    ["code": "KE", "name": "Kenya", "dial": "+254", "flag": "🇰🇪"],
+    ["code": "GH", "name": "Ghana", "dial": "+233", "flag": "🇬🇭"],
+    ["code": "SN", "name": "Senegal", "dial": "+221", "flag": "🇸🇳"],
+    ["code": "CI", "name": "Ivory Coast", "dial": "+225", "flag": "🇨🇮"],
+    ["code": "BJ", "name": "Benin", "dial": "+229", "flag": "🇧🇯"],
+    ["code": "MA", "name": "Morocco", "dial": "+212", "flag": "🇲🇦"],
+    ["code": "EG", "name": "Egypt", "dial": "+20", "flag": "🇪🇬"],
+    ["code": "AE", "name": "UAE", "dial": "+971", "flag": "🇦🇪"],
+    ["code": "SA", "name": "Saudi Arabia", "dial": "+966", "flag": "🇸🇦"],
+    ["code": "RU", "name": "Russia", "dial": "+7", "flag": "🇷🇺"],
+    ["code": "KR", "name": "South Korea", "dial": "+82", "flag": "🇰🇷"],
+    ["code": "SG", "name": "Singapore", "dial": "+65", "flag": "🇸🇬"],
+    ["code": "MY", "name": "Malaysia", "dial": "+60", "flag": "🇲🇾"],
+    ["code": "TH", "name": "Thailand", "dial": "+66", "flag": "🇹🇭"],
+    ["code": "ID", "name": "Indonesia", "dial": "+62", "flag": "🇮🇩"]
+]
+
+// Get current country data
+getCountry = fn(code) {
+    countries.find(fn(c) { c.code == code }) || countries[0]
+}
+
+currentCountry = getCountry(selectedCountry)
+
+// Filter countries by search
+filteredCountries = match searchQuery {
+    "" -> countries
+    _ -> countries.filter(fn(c) {
+        c.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
+        c.dial.contains(searchQuery) ||
+        c.code.toLowerCase().contains(searchQuery.toLowerCase())
+    })
+}
+
+// Toggle dropdown
+toggleDropdown = {
+    if !disabled {
+        isOpen = !isOpen
+        if isOpen {
+            searchQuery = ""
+        }
+    }
+}
+
+// Close dropdown
+closeDropdown = {
+    isOpen = false
+    searchQuery = ""
+}
+
+// Select country
+selectCountry = fn(country) {
+    selectedCountry = country.code
+    currentCountry = country
+    closeDropdown()
+    if onCountryChange {
+        onCountryChange(country)
+    }
+}
+
+// Handle phone number change
+handleChange = fn(e) {
+    if onChange {
+        onChange(e.target.value, currentCountry)
+    }
+}
+
+// Format phone for display
+formatPhone = fn(number) {
+    // Basic formatting - remove non-digits
+    digits = number.replace(/\D/g, "")
+    digits
+}
+
+// Compute classes
+disabledClass = match disabled { true -> " phone-input-disabled", _ -> "" }
+openClass = match isOpen { true -> " phone-input-open", _ -> "" }
+containerClass = "phone-input" ++ disabledClass ++ openClass
+
+<div class={containerClass}>
+    <div class="phone-input-wrapper">
+        <button
+            type="button"
+            class="phone-input-country-btn"
+            click={toggleDropdown}
+            disabled={disabled}
+            aria-label="Select country"
+        >
+            <span class="phone-input-flag">{currentCountry.flag}</span>
+            <span class="phone-input-dial">{currentCountry.dial}</span>
+            <span class="phone-input-chevron">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </span>
+        </button>
+        <input
+            type="tel"
+            class="phone-input-field"
+            value={value}
+            placeholder={placeholder}
+            disabled={disabled}
+            required={required}
+            input={handleChange}
+            autocomplete="tel-national"
+        >
+    </div>
+
+    {if isOpen}
+        <div class="phone-input-dropdown">
+            <div class="phone-input-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                    type="text"
+                    class="phone-input-search-field"
+                    placeholder="Search country..."
+                    value={searchQuery}
+                    input={fn(e) { searchQuery = e.target.value }}
+                    autofocus
+                >
+            </div>
+            <ul class="phone-input-list">
+                {if filteredCountries.len == 0}
+                    <li class="phone-input-empty">No countries found</li>
+                {else}
+                    {for country in filteredCountries}
+                        <li
+                            class={"phone-input-item" ++ (match country.code == selectedCountry { true -> " selected", _ -> "" })}
+                            click={selectCountry(country)}
+                        >
+                            <span class="phone-input-item-flag">{country.flag}</span>
+                            <span class="phone-input-item-name">{country.name}</span>
+                            <span class="phone-input-item-dial">{country.dial}</span>
+                        </li>
+                    {/for}
+                {/if}
+            </ul>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.phone-input {
+    position: relative;
+    width: 100%;
+}
+
+.phone-input-wrapper {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    background-color: var(--flin-bg);
+    overflow: hidden;
+    transition: all var(--flin-transition-fast);
+}
+
+.phone-input-wrapper:hover:not(.phone-input-disabled .phone-input-wrapper) {
+    border-color: var(--flin-neutral-400);
+}
+
+.phone-input-wrapper:focus-within {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+/* Country button */
+.phone-input-country-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: 0 var(--flin-space-2) 0 var(--flin-space-3);
+    background-color: var(--flin-neutral-50);
+    border: none;
+    border-right: 1px solid var(--flin-neutral-200);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.phone-input-country-btn:hover:not(:disabled) {
+    background-color: var(--flin-neutral-100);
+}
+
+.phone-input-flag {
+    font-size: var(--flin-text-lg);
+}
+
+.phone-input-dial {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    font-weight: 500;
+}
+
+.phone-input-chevron {
+    display: flex;
+    align-items: center;
+    color: var(--flin-fg-muted);
+    transition: transform var(--flin-transition-fast);
+}
+
+.phone-input-chevron svg {
+    width: var(--flin-icon-xs);
+    height: var(--flin-icon-xs);
+}
+
+.phone-input-open .phone-input-chevron {
+    transform: rotate(180deg);
+}
+
+/* Phone input field */
+.phone-input-field {
+    flex: 1;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background: transparent;
+    border: none;
+    outline: none;
+    min-width: 0;
+}
+
+.phone-input-field::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+/* Dropdown */
+.phone-input-dropdown {
+    position: absolute;
+    top: calc(100% + var(--flin-space-1));
+    left: 0;
+    right: 0;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-md);
+    box-shadow: var(--flin-shadow-lg);
+    z-index: var(--flin-z-dropdown);
+    overflow: hidden;
+}
+
+.phone-input-search {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.phone-input-search svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+}
+
+.phone-input-search-field {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    outline: none;
+}
+
+.phone-input-search-field::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.phone-input-list {
+    list-style: none;
+    margin: 0;
+    padding: var(--flin-space-1);
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.phone-input-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.phone-input-item:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.phone-input-item.selected {
+    background-color: var(--flin-primary-light);
+}
+
+.phone-input-item-flag {
+    font-size: var(--flin-text-lg);
+}
+
+.phone-input-item-name {
+    flex: 1;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+}
+
+.phone-input-item-dial {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    font-weight: 500;
+}
+
+.phone-input-empty {
+    padding: var(--flin-space-4);
+    text-align: center;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Disabled state */
+.phone-input-disabled .phone-input-wrapper {
+    background-color: var(--flin-bg-muted);
+    border-color: var(--flin-neutral-200);
+}
+
+.phone-input-disabled .phone-input-country-btn,
+.phone-input-disabled .phone-input-field {
+    cursor: not-allowed;
+    color: var(--flin-fg-muted);
+}
+</style>

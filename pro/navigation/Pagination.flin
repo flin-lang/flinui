@@ -1,0 +1,334 @@
+// ============================================================================
+// Pagination.flin — FlinUI PRO Navigation Component
+// Full page number pagination with ellipsis support
+// ============================================================================
+// Props:
+//   - currentPage: Current active page (number)
+//   - totalPages: Total number of pages (number)
+//   - onPageChange: Callback when page changes (function)
+//   - siblingCount: Number of siblings on each side (number)
+//   - showFirstLast: Show first/last buttons (boolean)
+//   - showPrevNext: Show prev/next buttons (boolean)
+//   - size: Size variant - sm, md, lg (string)
+//   - variant: Style variant - default, outline, ghost (string)
+
+currentPage = props.currentPage || 1
+totalPages = props.totalPages || 10
+onPageChange = props.onPageChange || none
+siblingCount = props.siblingCount || 1
+showFirstLast = props.showFirstLast || true
+showPrevNext = props.showPrevNext || true
+size = props.size || "md"
+variant = props.variant || "default"
+
+// Size class
+sizeClass = match size {
+    "sm" => "pagination-sm"
+    "lg" => "pagination-lg"
+    _ => "pagination-md"
+}
+
+// Variant class
+variantClass = match variant {
+    "outline" => "pagination-outline"
+    "ghost" => "pagination-ghost"
+    _ => "pagination-default"
+}
+
+// Navigation handlers
+goToPage = (page) => {
+    if page >= 1 && page <= totalPages && onPageChange != none {
+        onPageChange(page)
+    }
+}
+
+goToPrevious = () => {
+    if currentPage > 1 {
+        goToPage(currentPage - 1)
+    }
+}
+
+goToNext = () => {
+    if currentPage < totalPages {
+        goToPage(currentPage + 1)
+    }
+}
+
+// Generate page numbers with ellipsis
+generatePageNumbers = () => {
+    pages = []
+
+    // Always show first page
+    pages.push(1)
+
+    // Calculate range around current page
+    leftSibling = Math.max(2, currentPage - siblingCount)
+    rightSibling = Math.min(totalPages - 1, currentPage + siblingCount)
+
+    // Show left ellipsis?
+    if leftSibling > 2 {
+        pages.push("...")
+    }
+
+    // Pages around current
+    for i in range(leftSibling, rightSibling + 1) {
+        if i != 1 && i != totalPages {
+            pages.push(i)
+        }
+    }
+
+    // Show right ellipsis?
+    if rightSibling < totalPages - 1 {
+        pages.push("...")
+    }
+
+    // Always show last page (if more than 1 page)
+    if totalPages > 1 {
+        pages.push(totalPages)
+    }
+
+    return pages
+}
+
+pageNumbers = generatePageNumbers()
+
+// Disabled states
+prevDisabled = currentPage == 1
+nextDisabled = currentPage == totalPages
+
+<nav
+    class="flin-pagination {sizeClass} {variantClass}"
+    aria-label="Page navigation"
+    role="navigation"
+>
+    {if showFirstLast}
+        <button
+            class="pagination-btn pagination-btn-nav"
+            click={() => goToPage(1)}
+            disabled={prevDisabled}
+            aria-label="Go to first page"
+        >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="11 17 6 12 11 7"></polyline>
+                <polyline points="18 17 13 12 18 7"></polyline>
+            </svg>
+        </button>
+    {/if}
+
+    {if showPrevNext}
+        <button
+            class="pagination-btn pagination-btn-nav"
+            click={goToPrevious}
+            disabled={prevDisabled}
+            aria-label="Go to previous page"
+        >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+    {/if}
+
+    <div class="pagination-pages">
+        {for page in pageNumbers}
+            {if page == "..."}
+                <span class="pagination-ellipsis" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="5" cy="12" r="1.5"></circle>
+                        <circle cx="12" cy="12" r="1.5"></circle>
+                        <circle cx="19" cy="12" r="1.5"></circle>
+                    </svg>
+                </span>
+            {else}
+                <button
+                    class="pagination-btn pagination-btn-page {if page == currentPage}pagination-btn-active{/if}"
+                    click={() => goToPage(page)}
+                    aria-label="Go to page {page}"
+                    aria-current={if page == currentPage}"page"{else}none{/if}
+                >
+                    {page}
+                </button>
+            {/if}
+        {/for}
+    </div>
+
+    {if showPrevNext}
+        <button
+            class="pagination-btn pagination-btn-nav"
+            click={goToNext}
+            disabled={nextDisabled}
+            aria-label="Go to next page"
+        >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+    {/if}
+
+    {if showFirstLast}
+        <button
+            class="pagination-btn pagination-btn-nav"
+            click={() => goToPage(totalPages)}
+            disabled={nextDisabled}
+            aria-label="Go to last page"
+        >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="13 17 18 12 13 7"></polyline>
+                <polyline points="6 17 11 12 6 7"></polyline>
+            </svg>
+        </button>
+    {/if}
+</nav>
+
+<style scoped>
+.flin-pagination {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    user-select: none;
+}
+
+.pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+.pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--flin-font-sans);
+    font-weight: var(--flin-font-medium);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.pagination-btn:focus-visible {
+    outline: 2px solid var(--flin-accent-gold);
+    outline-offset: 2px;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pagination-btn svg {
+    flex-shrink: 0;
+}
+
+.pagination-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-text-muted);
+    padding: 0 var(--flin-space-1);
+}
+
+/* Size variants */
+.pagination-sm .pagination-btn {
+    min-width: 28px;
+    height: 28px;
+    font-size: var(--flin-text-xs);
+}
+
+.pagination-sm .pagination-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.pagination-md .pagination-btn {
+    min-width: 36px;
+    height: 36px;
+    font-size: var(--flin-text-sm);
+}
+
+.pagination-md .pagination-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.pagination-lg .pagination-btn {
+    min-width: 44px;
+    height: 44px;
+    font-size: var(--flin-text-base);
+}
+
+.pagination-lg .pagination-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Default variant */
+.pagination-default .pagination-btn {
+    background-color: var(--flin-bg-elevated);
+    color: var(--flin-text-secondary);
+    border: 1px solid var(--flin-border-subtle);
+}
+
+.pagination-default .pagination-btn:hover:not(:disabled) {
+    background-color: var(--flin-bg-surface);
+    border-color: var(--flin-border-default);
+    color: var(--flin-text-primary);
+}
+
+.pagination-default .pagination-btn-active {
+    background-color: var(--flin-accent-gold);
+    border-color: var(--flin-accent-gold);
+    color: var(--flin-bg-base);
+}
+
+.pagination-default .pagination-btn-active:hover:not(:disabled) {
+    background-color: var(--flin-accent-gold-hover);
+    border-color: var(--flin-accent-gold-hover);
+    color: var(--flin-bg-base);
+}
+
+/* Outline variant */
+.pagination-outline .pagination-btn {
+    background-color: transparent;
+    color: var(--flin-text-secondary);
+    border: 1px solid var(--flin-border-subtle);
+}
+
+.pagination-outline .pagination-btn:hover:not(:disabled) {
+    border-color: var(--flin-accent-gold);
+    color: var(--flin-accent-gold);
+}
+
+.pagination-outline .pagination-btn-active {
+    border-color: var(--flin-accent-gold);
+    color: var(--flin-accent-gold);
+    background-color: rgba(234, 179, 8, 0.1);
+}
+
+/* Ghost variant */
+.pagination-ghost .pagination-btn {
+    background-color: transparent;
+    color: var(--flin-text-secondary);
+    border: none;
+}
+
+.pagination-ghost .pagination-btn:hover:not(:disabled) {
+    background-color: var(--flin-bg-surface);
+    color: var(--flin-text-primary);
+}
+
+.pagination-ghost .pagination-btn-active {
+    background-color: var(--flin-accent-gold);
+    color: var(--flin-bg-base);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .pagination-pages {
+        gap: var(--flin-space-0-5);
+    }
+
+    .flin-pagination {
+        gap: var(--flin-space-0-5);
+    }
+}
+</style>

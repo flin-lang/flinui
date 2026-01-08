@@ -1,0 +1,137 @@
+// ============================================================================
+// VirtualList.flin — FlinUI PRO Utility Component
+// Efficiently render large lists with virtualization
+// ============================================================================
+// Props:
+//   - items: Array of items to render (list)
+//   - itemHeight: Height of each item in px (number, default: 48)
+//   - overscan: Number of extra items to render above/below (number, default: 3)
+//   - containerHeight: Height of the container in px (number, default: 400)
+//   - renderItem: Function to render each item (function, required)
+//   - keyExtractor: Function to extract unique key from item (function or none)
+//   - onScroll: Callback on scroll (function or none)
+// ============================================================================
+
+items = props.items || []
+itemHeight = props.itemHeight || 48
+overscan = props.overscan || 3
+containerHeight = props.containerHeight || 400
+renderItem = props.renderItem || none
+keyExtractor = props.keyExtractor || none
+onScroll = props.onScroll || none
+
+// State
+scrollTop = 0
+containerRef = none
+
+// Calculated values
+totalHeight = items.length * itemHeight
+visibleCount = Math.ceil(containerHeight / itemHeight) + overscan * 2
+
+// Get visible range
+getVisibleRange = () => {
+    startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan)
+    endIndex = Math.min(items.length, startIndex + visibleCount)
+
+    [startIndex, endIndex]
+}
+
+// Handle scroll
+handleScroll = (e) => {
+    scrollTop = e.target.scrollTop
+
+    if onScroll != none {
+        onScroll(scrollTop)
+    }
+}
+
+// Get key for item
+getKey = (item, index) => {
+    if keyExtractor != none {
+        keyExtractor(item, index)
+    } else {
+        index
+    }
+}
+
+// Get visible items
+[startIndex, endIndex] = getVisibleRange()
+visibleItems = items.slice(startIndex, endIndex)
+offsetY = startIndex * itemHeight
+
+<div class="flin-virtual-list"
+     style="height: {containerHeight}px"
+     scroll={handleScroll}
+     ref={containerRef}>
+
+    <div class="virtual-content" style="height: {totalHeight}px">
+        <div class="virtual-viewport" style="transform: translateY({offsetY}px)">
+            {for item, localIndex in visibleItems}
+                <div class="virtual-item"
+                     style="height: {itemHeight}px"
+                     key={getKey(item, startIndex + localIndex)}>
+                    {if renderItem != none}
+                        {renderItem(item, startIndex + localIndex)}
+                    {else}
+                        {item}
+                    {/if}
+                </div>
+            {/for}
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.flin-virtual-list {
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.virtual-content {
+    position: relative;
+    width: 100%;
+}
+
+.virtual-viewport {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    will-change: transform;
+}
+
+.virtual-item {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+/* Scrollbar styling */
+.flin-virtual-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.flin-virtual-list::-webkit-scrollbar-track {
+    background: var(--flin-bg-surface);
+    border-radius: var(--flin-radius-full);
+}
+
+.flin-virtual-list::-webkit-scrollbar-thumb {
+    background: var(--flin-border-default);
+    border-radius: var(--flin-radius-full);
+}
+
+.flin-virtual-list::-webkit-scrollbar-thumb:hover {
+    background: var(--flin-border-strong);
+}
+
+/* Dark theme */
+[data-theme="dark"] .flin-virtual-list::-webkit-scrollbar-track {
+    background: var(--flin-bg-base);
+}
+
+[data-theme="dark"] .flin-virtual-list::-webkit-scrollbar-thumb {
+    background: var(--flin-border-subtle);
+}
+</style>

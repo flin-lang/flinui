@@ -1,0 +1,423 @@
+// ============================================================================
+// Gantt.flin — FlinUI PRO Data Component
+// Simple CSS-based Gantt chart for project management
+// ============================================================================
+// Props:
+//   - tasks: List of task objects with id, name, start, end, progress, color, dependencies (list)
+//   - startDate: Chart start date (string)
+//   - endDate: Chart end date (string)
+//   - showProgress: Show progress bars (boolean)
+//   - showToday: Show today marker (boolean)
+//   - dayWidth: Width per day in pixels (number)
+
+tasks = props.tasks || [
+    ["id": 1, "name": "Project Planning", "start": "2024-01-01", "end": "2024-01-07", "progress": 100, "color": "blue"],
+    ["id": 2, "name": "Design Phase", "start": "2024-01-05", "end": "2024-01-15", "progress": 80, "color": "purple"],
+    ["id": 3, "name": "Development", "start": "2024-01-12", "end": "2024-01-28", "progress": 45, "color": "green"],
+    ["id": 4, "name": "Testing", "start": "2024-01-25", "end": "2024-02-05", "progress": 10, "color": "orange"],
+    ["id": 5, "name": "Deployment", "start": "2024-02-03", "end": "2024-02-10", "progress": 0, "color": "gold"]
+]
+startDate = props.startDate || "2024-01-01"
+endDate = props.endDate || "2024-02-15"
+showProgress = props.showProgress || true
+showToday = props.showToday || true
+dayWidth = props.dayWidth || 30
+
+// Parse dates
+parseDate = (dateStr) => new Date(dateStr)
+chartStart = parseDate(startDate)
+chartEnd = parseDate(endDate)
+today = new Date()
+
+// Calculate total days
+totalDays = Math.ceil((chartEnd - chartStart) / (1000 * 60 * 60 * 24)) + 1
+
+// Generate weeks/days for header
+generateDays = () => {
+    days = []
+    currentDate = new Date(chartStart)
+    {for i in range(0, totalDays)}
+        days.push({
+            "date": new Date(currentDate),
+            "day": currentDate.getDate(),
+            "month": currentDate.getMonth(),
+            "year": currentDate.getFullYear(),
+            "isWeekend": currentDate.getDay() == 0 || currentDate.getDay() == 6
+        })
+        currentDate.setDate(currentDate.getDate() + 1)
+    {/for}
+    return days
+}
+
+days = generateDays()
+months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+// Calculate task position and width
+getTaskStyle = (task) => {
+    taskStart = parseDate(task.start)
+    taskEnd = parseDate(task.end)
+    startOffset = Math.ceil((taskStart - chartStart) / (1000 * 60 * 60 * 24))
+    duration = Math.ceil((taskEnd - taskStart) / (1000 * 60 * 60 * 24)) + 1
+    return {
+        "left": startOffset * dayWidth,
+        "width": duration * dayWidth
+    }
+}
+
+// Today marker position
+todayOffset = Math.ceil((today - chartStart) / (1000 * 60 * 60 * 24))
+showTodayMarker = showToday && todayOffset >= 0 && todayOffset <= totalDays
+
+<div class="flin-gantt">
+    <div class="gantt-container">
+        <!-- Task list sidebar -->
+        <div class="gantt-sidebar">
+            <div class="sidebar-header">
+                <span class="header-title">Tasks</span>
+            </div>
+            <div class="sidebar-tasks">
+                {for task in tasks}
+                    <div class="sidebar-task">
+                        <div class="task-color" data-color={task.color || "gold"}></div>
+                        <span class="task-name">{task.name}</span>
+                        {if showProgress}
+                            <span class="task-progress-label">{task.progress}%</span>
+                        {/if}
+                    </div>
+                {/for}
+            </div>
+        </div>
+
+        <!-- Chart area -->
+        <div class="gantt-chart">
+            <!-- Timeline header -->
+            <div class="chart-header" style="width: {totalDays * dayWidth}px">
+                <div class="month-row">
+                    {for day, index in days}
+                        {if index == 0 || day.day == 1}
+                            <div class="month-cell">
+                                {months[day.month]} {day.year}
+                            </div>
+                        {/if}
+                    {/for}
+                </div>
+                <div class="days-row">
+                    {for day in days}
+                        <div
+                            class="day-cell {if day.isWeekend}weekend{/if}"
+                            style="width: {dayWidth}px"
+                        >
+                            {day.day}
+                        </div>
+                    {/for}
+                </div>
+            </div>
+
+            <!-- Task bars -->
+            <div class="chart-body" style="width: {totalDays * dayWidth}px">
+                <!-- Grid background -->
+                <div class="chart-grid">
+                    {for day in days}
+                        <div
+                            class="grid-column {if day.isWeekend}weekend{/if}"
+                            style="width: {dayWidth}px"
+                        ></div>
+                    {/for}
+                </div>
+
+                <!-- Today marker -->
+                {if showTodayMarker}
+                    <div
+                        class="today-marker"
+                        style="left: {todayOffset * dayWidth + dayWidth / 2}px"
+                    >
+                        <div class="today-line"></div>
+                        <span class="today-label">Today</span>
+                    </div>
+                {/if}
+
+                <!-- Task rows -->
+                {for task in tasks}
+                    <div class="task-row">
+                        <div
+                            class="task-bar"
+                            data-color={task.color || "gold"}
+                            style="left: {getTaskStyle(task).left}px; width: {getTaskStyle(task).width}px"
+                        >
+                            {if showProgress}
+                                <div
+                                    class="task-progress-fill"
+                                    style="width: {task.progress}%"
+                                ></div>
+                            {/if}
+                            <span class="task-bar-label">{task.name}</span>
+                        </div>
+                    </div>
+                {/for}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.flin-gantt {
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    overflow: hidden;
+}
+
+.gantt-container {
+    display: flex;
+    overflow: hidden;
+}
+
+/* Sidebar */
+.gantt-sidebar {
+    flex-shrink: 0;
+    width: 220px;
+    background: var(--flin-bg-surface);
+    border-right: 1px solid var(--flin-border-subtle);
+}
+
+.sidebar-header {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.header-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-primary);
+}
+
+.sidebar-tasks {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-task {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    height: 48px;
+    padding: 0 var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.task-color {
+    width: 4px;
+    height: 24px;
+    border-radius: var(--flin-radius-sm);
+    flex-shrink: 0;
+}
+
+.task-color[data-color="gold"] { background: var(--flin-accent-gold); }
+.task-color[data-color="blue"] { background: #3b82f6; }
+.task-color[data-color="green"] { background: #22c55e; }
+.task-color[data-color="purple"] { background: #a855f7; }
+.task-color[data-color="orange"] { background: #f97316; }
+.task-color[data-color="red"] { background: #ef4444; }
+
+.task-name {
+    flex: 1;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.task-progress-label {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Chart area */
+.gantt-chart {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.chart-header {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--flin-border-subtle);
+    position: sticky;
+    top: 0;
+    background: var(--flin-bg-elevated);
+    z-index: 10;
+}
+
+.month-row {
+    height: 32px;
+    display: flex;
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.month-cell {
+    padding: 0 var(--flin-space-3);
+    display: flex;
+    align-items: center;
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-text-secondary);
+    border-right: 1px solid var(--flin-border-subtle);
+}
+
+.days-row {
+    height: 32px;
+    display: flex;
+}
+
+.day-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-tertiary);
+    border-right: 1px solid var(--flin-border-subtle);
+}
+
+.day-cell.weekend {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-muted);
+}
+
+/* Chart body */
+.chart-body {
+    position: relative;
+    min-height: 100%;
+}
+
+.chart-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    pointer-events: none;
+}
+
+.grid-column {
+    height: 100%;
+    border-right: 1px solid var(--flin-border-subtle);
+}
+
+.grid-column.weekend {
+    background: var(--flin-bg-surface);
+    opacity: 0.5;
+}
+
+/* Today marker */
+.today-marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.today-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 2px;
+    background: #ef4444;
+}
+
+.today-label {
+    position: absolute;
+    top: var(--flin-space-2);
+    left: var(--flin-space-2);
+    font-size: 10px;
+    font-weight: var(--flin-font-semibold);
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 2px var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    white-space: nowrap;
+}
+
+/* Task rows */
+.task-row {
+    height: 48px;
+    position: relative;
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.task-bar {
+    position: absolute;
+    top: 8px;
+    height: 32px;
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.task-bar:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: var(--flin-shadow-card);
+}
+
+.task-bar[data-color="gold"] { background: var(--flin-accent-gold); }
+.task-bar[data-color="blue"] { background: #3b82f6; }
+.task-bar[data-color="green"] { background: #22c55e; }
+.task-bar[data-color="purple"] { background: #a855f7; }
+.task-bar[data-color="orange"] { background: #f97316; }
+.task-bar[data-color="red"] { background: #ef4444; }
+
+.task-progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+}
+
+.task-bar-label {
+    position: relative;
+    z-index: 1;
+    padding: 0 var(--flin-space-3);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .gantt-sidebar {
+        width: 160px;
+    }
+
+    .task-name {
+        font-size: var(--flin-text-xs);
+    }
+}
+
+@media (max-width: 480px) {
+    .gantt-sidebar {
+        width: 120px;
+    }
+
+    .task-progress-label {
+        display: none;
+    }
+}
+</style>

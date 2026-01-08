@@ -1,0 +1,354 @@
+// ============================================================================
+// LanguageSelector.flin — FlinUI PRO Utility Component
+// i18n language dropdown selector
+// ============================================================================
+// Props:
+//   - languages: Available languages (list)
+//     Each item: { code, name, flag (optional), native (optional) }
+//   - value: Currently selected language code (string)
+//   - variant: Display variant - dropdown, buttons, minimal (string, default: "dropdown")
+//   - showFlag: Show flag emoji/icon (boolean, default: true)
+//   - showNative: Show native language name (boolean, default: false)
+//   - placeholder: Placeholder text (string, default: "Select language")
+//   - onChange: Callback when language changes (function or none)
+// ============================================================================
+
+languages = props.languages || [
+    ["code": "en", "name": "English", "flag": "🇺🇸", "native": "English"],
+    ["code": "fr", "name": "French", "flag": "🇫🇷", "native": "Français"],
+    ["code": "es", "name": "Spanish", "flag": "🇪🇸", "native": "Español"],
+    ["code": "de", "name": "German", "flag": "🇩🇪", "native": "Deutsch"],
+    ["code": "zh", "name": "Chinese", "flag": "🇨🇳", "native": "中文"],
+    ["code": "ja", "name": "Japanese", "flag": "🇯🇵", "native": "日本語"]
+]
+value = props.value || "en"
+variant = props.variant || "dropdown"
+showFlag = props.showFlag || true
+showNative = props.showNative || false
+placeholder = props.placeholder || "Select language"
+onChange = props.onChange || none
+
+// State
+isOpen = false
+
+// Get current language
+currentLanguage = languages.find((lang) => lang.code == value) || none
+
+// Handle selection
+handleSelect = (lang) => {
+    isOpen = false
+    if onChange != none {
+        onChange(lang.code, lang)
+    }
+}
+
+// Toggle dropdown
+toggleDropdown = () => {
+    isOpen = !isOpen
+}
+
+// Close dropdown
+closeDropdown = () => {
+    isOpen = false
+}
+
+<div class="flin-language-selector variant-{variant} {if isOpen}open{/if}">
+    {if variant == "dropdown"}
+        <button class="selector-trigger" click={toggleDropdown} aria-expanded={isOpen} aria-haspopup="listbox">
+            {if currentLanguage != none}
+                {if showFlag && currentLanguage.flag != none}
+                    <span class="lang-flag">{currentLanguage.flag}</span>
+                {/if}
+                <span class="lang-name">
+                    {showNative && currentLanguage.native != none ? currentLanguage.native : currentLanguage.name}
+                </span>
+            {else}
+                <span class="placeholder">{placeholder}</span>
+            {/if}
+            <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+        </button>
+
+        {if isOpen}
+            <div class="selector-dropdown" role="listbox">
+                {for lang in languages}
+                    <button
+                        class="lang-option {if lang.code == value}selected{/if}"
+                        click={() => handleSelect(lang)}
+                        role="option"
+                        aria-selected={lang.code == value}
+                    >
+                        {if showFlag && lang.flag != none}
+                            <span class="lang-flag">{lang.flag}</span>
+                        {/if}
+                        <span class="lang-details">
+                            <span class="lang-name">{lang.name}</span>
+                            {if showNative && lang.native != none && lang.native != lang.name}
+                                <span class="lang-native">{lang.native}</span>
+                            {/if}
+                        </span>
+                        {if lang.code == value}
+                            <svg class="check-icon" width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                        {/if}
+                    </button>
+                {/for}
+            </div>
+            <div class="backdrop" click={closeDropdown}></div>
+        {/if}
+
+    {else if variant == "buttons"}
+        <div class="button-group" role="radiogroup">
+            {for lang in languages}
+                <button
+                    class="lang-button {if lang.code == value}selected{/if}"
+                    click={() => handleSelect(lang)}
+                    role="radio"
+                    aria-checked={lang.code == value}
+                >
+                    {if showFlag && lang.flag != none}
+                        <span class="lang-flag">{lang.flag}</span>
+                    {/if}
+                    <span class="lang-code">{lang.code.toUpperCase()}</span>
+                </button>
+            {/for}
+        </div>
+
+    {else}
+        // Minimal - just code
+        <button class="minimal-trigger" click={toggleDropdown}>
+            <svg class="globe-icon" width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.083 9h1.946c.089-1.546.383-2.97.837-4.118A6.004 6.004 0 004.083 9zM10 2a8 8 0 100 16 8 8 0 000-16zm0 2c-.076 0-.232.032-.465.262-.238.234-.497.623-.737 1.182-.389.907-.673 2.142-.766 3.556h3.936c-.093-1.414-.377-2.649-.766-3.556-.24-.56-.5-.948-.737-1.182C10.232 4.032 10.076 4 10 4zm3.971 5c-.089-1.546-.383-2.97-.837-4.118A6.004 6.004 0 0115.917 9h-1.946zm-2.003 2H8.032c.093 1.414.377 2.649.766 3.556.24.56.5.948.737 1.182.233.23.389.262.465.262.076 0 .232-.032.465-.262.238-.234.498-.623.737-1.182.389-.907.673-2.142.766-3.556zm1.166 4.118c.454-1.147.748-2.572.837-4.118h1.946a6.004 6.004 0 01-2.783 4.118zm-6.268 0C6.412 13.97 6.118 12.546 6.03 11H4.083a6.004 6.004 0 002.783 4.118z" clip-rule="evenodd"/>
+            </svg>
+            <span class="current-code">{value.toUpperCase()}</span>
+            <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+        </button>
+
+        {if isOpen}
+            <div class="selector-dropdown minimal-dropdown" role="listbox">
+                {for lang in languages}
+                    <button
+                        class="lang-option {if lang.code == value}selected{/if}"
+                        click={() => handleSelect(lang)}
+                    >
+                        {if showFlag && lang.flag != none}
+                            <span class="lang-flag">{lang.flag}</span>
+                        {/if}
+                        <span class="lang-name">{lang.name}</span>
+                    </button>
+                {/for}
+            </div>
+            <div class="backdrop" click={closeDropdown}></div>
+        {/if}
+    {/if}
+</div>
+
+<style scoped>
+.flin-language-selector {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown trigger */
+.selector-trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-primary);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    min-width: 150px;
+}
+
+.selector-trigger:hover {
+    border-color: var(--flin-border-default);
+}
+
+.open .selector-trigger {
+    border-color: var(--flin-accent-gold);
+}
+
+.lang-flag {
+    font-size: 1.125rem;
+    line-height: 1;
+}
+
+.lang-name {
+    flex: 1;
+    text-align: left;
+}
+
+.placeholder {
+    color: var(--flin-text-muted);
+}
+
+.dropdown-arrow {
+    color: var(--flin-text-muted);
+    transition: transform var(--flin-transition-fast);
+}
+
+.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+/* Dropdown */
+.selector-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: var(--flin-space-1);
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    box-shadow: var(--flin-shadow-lg);
+    z-index: 100;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.lang-option {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    width: 100%;
+    padding: var(--flin-space-3);
+    background: transparent;
+    border: none;
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-primary);
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--flin-transition-fast);
+}
+
+.lang-option:hover {
+    background: var(--flin-bg-surface);
+}
+
+.lang-option.selected {
+    background: rgba(234, 179, 8, 0.1);
+}
+
+.lang-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.lang-native {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-text-muted);
+}
+
+.check-icon {
+    color: var(--flin-accent-gold);
+}
+
+/* Button group variant */
+.button-group {
+    display: flex;
+    gap: var(--flin-space-1);
+    background: var(--flin-bg-surface);
+    padding: 2px;
+    border-radius: var(--flin-radius-md);
+}
+
+.lang-button {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background: transparent;
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-secondary);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.lang-button:hover {
+    color: var(--flin-text-primary);
+}
+
+.lang-button.selected {
+    background: var(--flin-bg-elevated);
+    color: var(--flin-text-primary);
+    box-shadow: var(--flin-shadow-sm);
+}
+
+.lang-code {
+    letter-spacing: 0.05em;
+}
+
+/* Minimal variant */
+.minimal-trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    background: transparent;
+    border: none;
+    font-family: var(--flin-font-body);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-secondary);
+    cursor: pointer;
+    border-radius: var(--flin-radius-sm);
+    transition: all var(--flin-transition-fast);
+}
+
+.minimal-trigger:hover {
+    background: var(--flin-bg-surface);
+    color: var(--flin-text-primary);
+}
+
+.globe-icon {
+    color: var(--flin-text-muted);
+}
+
+.current-code {
+    letter-spacing: 0.05em;
+}
+
+.minimal-dropdown {
+    min-width: 180px;
+}
+
+/* Backdrop */
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+}
+
+/* Dark theme */
+[data-theme="dark"] .selector-trigger,
+[data-theme="dark"] .selector-dropdown {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .button-group {
+    background: var(--flin-bg-surface);
+}
+
+[data-theme="dark"] .lang-button.selected {
+    background: var(--flin-bg-elevated);
+}
+</style>

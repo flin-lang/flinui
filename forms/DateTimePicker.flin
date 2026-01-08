@@ -1,0 +1,483 @@
+// DateTimePicker.flin - FlinUI Date & Time Picker Component
+// Combined date and time selection input
+
+// Props with defaults
+value = props.value || ""
+placeholder = props.placeholder || "Select date and time"
+disabled = props.disabled || false
+minDateTime = props.min || none
+maxDateTime = props.max || none
+showSeconds = props.showSeconds || false
+use24Hour = props.use24Hour || false
+onChange = props.onChange
+
+// State
+isOpen = false
+activeTab = "date"
+
+// Parse current value
+currentDate = match value {
+    "" -> ""
+    _ -> value.split("T")[0]
+}
+
+currentTime = match value {
+    "" -> ""
+    _ -> match value.split("T").len > 1 {
+        true -> value.split("T")[1]
+        _ -> ""
+    }
+}
+
+// Compute classes
+disabledClass = match disabled { true -> " datetime-picker-disabled", _ -> "" }
+openClass = match isOpen { true -> " datetime-picker-open", _ -> "" }
+containerClass = "datetime-picker" ++ disabledClass ++ openClass
+
+// Toggle dropdown
+toggleOpen = {
+    if !disabled {
+        isOpen = !isOpen
+        if isOpen {
+            activeTab = "date"
+        }
+    }
+}
+
+// Close dropdown
+closeDropdown = {
+    isOpen = false
+}
+
+// Handle date change
+handleDateChange = fn(e) {
+    currentDate = e.target.value
+    updateValue()
+}
+
+// Handle time change
+handleTimeChange = fn(e) {
+    currentTime = e.target.value
+    updateValue()
+}
+
+// Update combined value
+updateValue = {
+    if onChange {
+        newValue = match currentDate {
+            "" -> ""
+            _ -> match currentTime {
+                "" -> currentDate
+                _ -> currentDate ++ "T" ++ currentTime
+            }
+        }
+        onChange(newValue)
+    }
+}
+
+// Format display value
+formatDisplayValue = fn(val) {
+    if val == "" { "" }
+    else {
+        parts = val.split("T")
+        datePart = parts[0]
+        timePart = match parts.len > 1 {
+            true -> parts[1]
+            _ -> ""
+        }
+        match timePart {
+            "" -> datePart
+            _ -> datePart ++ " " ++ timePart
+        }
+    }
+}
+
+displayValue = formatDisplayValue(value)
+
+// Clear value
+clearValue = {
+    currentDate = ""
+    currentTime = ""
+    if onChange {
+        onChange("")
+    }
+}
+
+<div class={containerClass}>
+    <div class="datetime-picker-trigger" click={toggleOpen}>
+        <span class="datetime-picker-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+                <circle cx="12" cy="15" r="1"/>
+            </svg>
+        </span>
+        <span class="datetime-picker-value">
+            {if displayValue != ""}
+                {displayValue}
+            {else}
+                <span class="datetime-picker-placeholder">{placeholder}</span>
+            {/if}
+        </span>
+        {if value != "" && !disabled}
+            <button
+                type="button"
+                class="datetime-picker-clear"
+                click={clearValue}
+                aria-label="Clear"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        {/if}
+        <span class="datetime-picker-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+            </svg>
+        </span>
+    </div>
+
+    {if isOpen}
+        <div class="datetime-picker-dropdown">
+            <div class="datetime-picker-tabs">
+                <button
+                    type="button"
+                    class={"datetime-picker-tab" ++ (match activeTab == "date" { true -> " active", _ -> "" })}
+                    click={activeTab = "date"}
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    Date
+                </button>
+                <button
+                    type="button"
+                    class={"datetime-picker-tab" ++ (match activeTab == "time" { true -> " active", _ -> "" })}
+                    click={activeTab = "time"}
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    Time
+                </button>
+            </div>
+
+            <div class="datetime-picker-content">
+                {if activeTab == "date"}
+                    <div class="datetime-picker-date-panel">
+                        <input
+                            type="date"
+                            class="datetime-picker-input"
+                            value={currentDate}
+                            min={minDateTime}
+                            max={maxDateTime}
+                            change={handleDateChange}
+                        >
+                    </div>
+                {else}
+                    <div class="datetime-picker-time-panel">
+                        <input
+                            type="time"
+                            class="datetime-picker-input"
+                            value={currentTime}
+                            step={match showSeconds { true -> "1", _ -> "60" }}
+                            change={handleTimeChange}
+                        >
+                        <div class="datetime-picker-time-presets">
+                            <span class="datetime-picker-presets-label">Quick select:</span>
+                            <div class="datetime-picker-preset-buttons">
+                                <button type="button" class="datetime-picker-preset" click={currentTime = "09:00"; updateValue()}>9:00 AM</button>
+                                <button type="button" class="datetime-picker-preset" click={currentTime = "12:00"; updateValue()}>12:00 PM</button>
+                                <button type="button" class="datetime-picker-preset" click={currentTime = "14:00"; updateValue()}>2:00 PM</button>
+                                <button type="button" class="datetime-picker-preset" click={currentTime = "17:00"; updateValue()}>5:00 PM</button>
+                            </div>
+                        </div>
+                    </div>
+                {/if}
+            </div>
+
+            <div class="datetime-picker-footer">
+                <button
+                    type="button"
+                    class="datetime-picker-btn datetime-picker-btn-cancel"
+                    click={closeDropdown}
+                >
+                    Cancel
+                </button>
+                <button
+                    type="button"
+                    class="datetime-picker-btn datetime-picker-btn-apply"
+                    click={closeDropdown}
+                >
+                    Apply
+                </button>
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.datetime-picker {
+    position: relative;
+    width: 100%;
+}
+
+.datetime-picker-trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.datetime-picker-trigger:hover:not(.datetime-picker-disabled .datetime-picker-trigger) {
+    border-color: var(--flin-neutral-400);
+}
+
+.datetime-picker-open .datetime-picker-trigger {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.datetime-picker-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-fg-muted);
+}
+
+.datetime-picker-icon svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.datetime-picker-value {
+    flex: 1;
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.datetime-picker-placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.datetime-picker-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-space-5);
+    height: var(--flin-space-5);
+    padding: 0;
+    border: none;
+    border-radius: var(--flin-radius-sm);
+    background: transparent;
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.datetime-picker-clear:hover {
+    background-color: var(--flin-neutral-200);
+    color: var(--flin-fg);
+}
+
+.datetime-picker-clear svg {
+    width: var(--flin-icon-xs);
+    height: var(--flin-icon-xs);
+}
+
+.datetime-picker-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--flin-fg-muted);
+    transition: transform var(--flin-transition-fast);
+}
+
+.datetime-picker-chevron svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+.datetime-picker-open .datetime-picker-chevron {
+    transform: rotate(180deg);
+}
+
+/* Dropdown */
+.datetime-picker-dropdown {
+    position: absolute;
+    top: calc(100% + var(--flin-space-1));
+    left: 0;
+    min-width: 280px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: var(--flin-shadow-lg);
+    z-index: var(--flin-z-dropdown);
+    overflow: hidden;
+}
+
+/* Tabs */
+.datetime-picker-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.datetime-picker-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.datetime-picker-tab:hover {
+    color: var(--flin-fg);
+    background-color: var(--flin-neutral-50);
+}
+
+.datetime-picker-tab.active {
+    color: var(--flin-primary);
+    border-bottom-color: var(--flin-primary);
+}
+
+.datetime-picker-tab svg {
+    width: var(--flin-icon-sm);
+    height: var(--flin-icon-sm);
+}
+
+/* Content */
+.datetime-picker-content {
+    padding: var(--flin-space-4);
+}
+
+.datetime-picker-input {
+    width: 100%;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.datetime-picker-input:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+/* Time presets */
+.datetime-picker-time-presets {
+    margin-top: var(--flin-space-4);
+}
+
+.datetime-picker-presets-label {
+    display: block;
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    margin-bottom: var(--flin-space-2);
+}
+
+.datetime-picker-preset-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--flin-space-2);
+}
+
+.datetime-picker-preset {
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    background-color: var(--flin-neutral-100);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-sm);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.datetime-picker-preset:hover {
+    background-color: var(--flin-primary-light);
+    border-color: var(--flin-primary);
+    color: var(--flin-primary);
+}
+
+/* Footer */
+.datetime-picker-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    border-top: 1px solid var(--flin-neutral-200);
+    background-color: var(--flin-neutral-50);
+}
+
+.datetime-picker-btn {
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.datetime-picker-btn-cancel {
+    background-color: transparent;
+    border: 1px solid var(--flin-neutral-300);
+    color: var(--flin-fg);
+}
+
+.datetime-picker-btn-cancel:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.datetime-picker-btn-apply {
+    background-color: var(--flin-primary);
+    border: 1px solid var(--flin-primary);
+    color: white;
+}
+
+.datetime-picker-btn-apply:hover {
+    background-color: var(--flin-primary-dark);
+}
+
+/* Disabled state */
+.datetime-picker-disabled .datetime-picker-trigger {
+    background-color: var(--flin-bg-muted);
+    border-color: var(--flin-neutral-200);
+    cursor: not-allowed;
+}
+
+.datetime-picker-disabled .datetime-picker-value {
+    color: var(--flin-fg-muted);
+}
+</style>

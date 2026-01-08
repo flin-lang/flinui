@@ -1,0 +1,442 @@
+// UserCard.flin - FlinUI PRO
+// User info card with avatar, name, role, contact buttons
+
+// Props with defaults
+name = props.name || ""
+role = props.role || ""
+email = props.email || ""
+phone = props.phone || ""
+avatarSrc = props.avatarSrc || ""
+coverSrc = props.coverSrc || ""
+coverGradient = props.coverGradient || "linear-gradient(135deg, var(--flin-primary) 0%, var(--flin-info) 100%)"
+bio = props.bio || ""
+status = props.status || none
+location = props.location || ""
+department = props.department || ""
+socials = props.socials || []
+actions = props.actions || none
+variant = props.variant || "default"
+hoverable = props.hoverable || false
+onClick = props.onClick || none
+
+// Compute variant class
+variantClass = match variant {
+    "horizontal" -> "user-card--horizontal"
+    "compact" -> "user-card--compact"
+    "minimal" -> "user-card--minimal"
+    _ -> "user-card--default"
+}
+
+// Generate initials from name
+initials = {if name != "" {
+    words = name.split(" ")
+    {if words.length > 1 {
+        words[0][0] ++ words[words.length - 1][0]
+    } else {
+        name[0]
+    }}
+} else {
+    "?"
+}}
+
+// Compute status class
+statusClass = match status {
+    "online" -> "user-card__status--online"
+    "offline" -> "user-card__status--offline"
+    "busy" -> "user-card__status--busy"
+    "away" -> "user-card__status--away"
+    _ -> ""
+}
+
+<div
+    class={
+        "user-card " ++ variantClass ++
+        {if hoverable { " user-card--hoverable" } else { "" }}
+    }
+    click={if onClick != none { onClick() }}
+>
+    // Cover image (for default variant)
+    {if variant == "default" && (coverSrc != "" || coverGradient != "")}
+        <div
+            class="user-card__cover"
+            style={if coverSrc != "" { "background-image: url(" ++ coverSrc ++ ");" } else { "background: " ++ coverGradient ++ ";" }}
+        ></div>
+    {/if}
+
+    // Card body
+    <div class="user-card__body">
+        // Avatar section
+        <div class="user-card__avatar-container">
+            <div class="user-card__avatar">
+                {if avatarSrc != ""}
+                    <img
+                        class="user-card__avatar-img"
+                        src={avatarSrc}
+                        alt={name}
+                    >
+                {else}
+                    <div class="user-card__avatar-initials">
+                        {initials}
+                    </div>
+                {/if}
+            </div>
+            {if status != none}
+                <span class={"user-card__status " ++ statusClass}></span>
+            {/if}
+        </div>
+
+        // Info section
+        <div class="user-card__info">
+            <h3 class="user-card__name">{name}</h3>
+            {if role != ""}
+                <p class="user-card__role">{role}</p>
+            {/if}
+            {if department != ""}
+                <p class="user-card__department">{department}</p>
+            {/if}
+            {if bio != "" && variant != "compact" && variant != "minimal"}
+                <p class="user-card__bio">{bio}</p>
+            {/if}
+        </div>
+
+        // Meta info
+        {if (location != "" || email != "" || phone != "") && variant != "minimal"}
+            <div class="user-card__meta">
+                {if location != ""}
+                    <div class="user-card__meta-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <span>{location}</span>
+                    </div>
+                {/if}
+                {if email != ""}
+                    <div class="user-card__meta-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        <a href={"mailto:" ++ email} class="user-card__link">{email}</a>
+                    </div>
+                {/if}
+                {if phone != ""}
+                    <div class="user-card__meta-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"></path>
+                        </svg>
+                        <a href={"tel:" ++ phone} class="user-card__link">{phone}</a>
+                    </div>
+                {/if}
+            </div>
+        {/if}
+
+        // Social links
+        {if socials.length > 0 && variant != "minimal"}
+            <div class="user-card__socials">
+                {for social in socials}
+                    <a
+                        href={social.url || "#"}
+                        class="user-card__social"
+                        title={social.name || ""}
+                        aria-label={social.name || "Social link"}
+                    >
+                        {social.icon}
+                    </a>
+                {/for}
+            </div>
+        {/if}
+
+        // Action buttons
+        {if actions != none}
+            <div class="user-card__actions">
+                {actions}
+            </div>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+.user-card {
+    background: var(--flin-bg);
+    border-radius: var(--flin-radius-lg);
+    border: 1px solid var(--flin-neutral-200);
+    overflow: hidden;
+    transition: box-shadow var(--flin-transition-normal),
+                transform var(--flin-transition-normal);
+}
+
+.user-card--hoverable {
+    cursor: pointer;
+}
+
+.user-card--hoverable:hover {
+    box-shadow: var(--flin-shadow-lg);
+    transform: translateY(-2px);
+}
+
+/* Default variant */
+.user-card--default .user-card__cover {
+    height: 80px;
+    background-size: cover;
+    background-position: center;
+}
+
+.user-card--default .user-card__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--flin-space-4);
+    margin-top: -40px;
+}
+
+.user-card--default .user-card__avatar {
+    width: 80px;
+    height: 80px;
+    border: 4px solid var(--flin-bg);
+}
+
+/* Horizontal variant */
+.user-card--horizontal .user-card__body {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-4);
+}
+
+.user-card--horizontal .user-card__avatar {
+    width: 64px;
+    height: 64px;
+}
+
+.user-card--horizontal .user-card__info {
+    flex: 1;
+    text-align: left;
+}
+
+.user-card--horizontal .user-card__actions {
+    align-self: center;
+}
+
+/* Compact variant */
+.user-card--compact .user-card__body {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+}
+
+.user-card--compact .user-card__avatar {
+    width: 48px;
+    height: 48px;
+}
+
+.user-card--compact .user-card__info {
+    flex: 1;
+    text-align: left;
+}
+
+.user-card--compact .user-card__name {
+    font-size: var(--flin-text-base);
+}
+
+.user-card--compact .user-card__role {
+    font-size: var(--flin-text-xs);
+}
+
+/* Minimal variant */
+.user-card--minimal {
+    border: none;
+    background: transparent;
+}
+
+.user-card--minimal .user-card__body {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-2);
+}
+
+.user-card--minimal .user-card__avatar {
+    width: 40px;
+    height: 40px;
+}
+
+.user-card--minimal .user-card__name {
+    font-size: var(--flin-text-sm);
+    margin: 0;
+}
+
+.user-card--minimal .user-card__role {
+    font-size: var(--flin-text-xs);
+}
+
+/* Avatar styles */
+.user-card__avatar-container {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.user-card__avatar {
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+    background-color: var(--flin-neutral-200);
+}
+
+.user-card__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-card__avatar-initials {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-semibold);
+    background: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.user-card__status {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: var(--flin-radius-full);
+    border: 2px solid var(--flin-bg);
+}
+
+.user-card__status--online { background-color: var(--flin-success); }
+.user-card__status--offline { background-color: var(--flin-neutral-400); }
+.user-card__status--busy { background-color: var(--flin-danger); }
+.user-card__status--away { background-color: var(--flin-warning); }
+
+/* Info styles */
+.user-card__info {
+    min-width: 0;
+}
+
+.user-card__name {
+    margin: var(--flin-space-2) 0 0 0;
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+}
+
+.user-card__role {
+    margin: var(--flin-space-1) 0 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.user-card__department {
+    margin: var(--flin-space-1) 0 0 0;
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-400);
+}
+
+.user-card__bio {
+    margin: var(--flin-space-3) 0 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    line-height: 1.5;
+}
+
+/* Meta styles */
+.user-card__meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-3);
+    width: 100%;
+}
+
+.user-card__meta-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.user-card__link {
+    color: var(--flin-primary);
+    text-decoration: none;
+}
+
+.user-card__link:hover {
+    text-decoration: underline;
+}
+
+/* Social links */
+.user-card__socials {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-3);
+}
+
+.user-card--horizontal .user-card__socials {
+    justify-content: flex-start;
+}
+
+.user-card__social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-fg-muted);
+    transition: background-color var(--flin-transition-fast),
+                color var(--flin-transition-fast);
+}
+
+.user-card__social:hover {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+/* Actions */
+.user-card__actions {
+    display: flex;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-4);
+    width: 100%;
+}
+
+.user-card--default .user-card__actions {
+    justify-content: center;
+}
+
+/* Dark theme */
+[data-theme="dark"] .user-card {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .user-card--minimal {
+    border-color: transparent;
+}
+
+[data-theme="dark"] .user-card__avatar {
+    border-color: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .user-card__status {
+    border-color: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .user-card__social {
+    background-color: var(--flin-neutral-700);
+}
+</style>

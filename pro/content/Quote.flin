@@ -1,0 +1,225 @@
+// ============================================================================
+// Quote.flin — FlinUI PRO
+// Blockquote styles (simple, featured, pull-quote)
+// ============================================================================
+// Props:
+//   variant: text - Style variant ("simple", "featured", "pull", "bordered") (default: "simple")
+//   cite: text - Citation/source text (default: none)
+//   author: text - Author name (default: none)
+//   authorTitle: text - Author title/role (default: none)
+//   authorImage: text - Author avatar URL (default: none)
+//   size: text - Text size ("sm", "base", "lg", "xl") (default: "base")
+//   align: text - Text alignment ("left", "center") (default: "left")
+// ============================================================================
+
+variant = props.variant || "simple"
+cite = props.cite || none
+author = props.author || none
+authorTitle = props.authorTitle || none
+authorImage = props.authorImage || none
+size = props.size || "base"
+align = props.align || "left"
+
+// Compute variant class
+variantClass = match variant {
+    "featured" -> "quote--featured"
+    "pull" -> "quote--pull"
+    "bordered" -> "quote--bordered"
+    _ -> "quote--simple"
+}
+
+// Compute size class
+sizeClass = match size {
+    "sm" -> "quote--sm"
+    "lg" -> "quote--lg"
+    "xl" -> "quote--xl"
+    _ -> "quote--base"
+}
+
+// Compute align class
+alignClass = match align {
+    "center" -> "quote--center"
+    _ -> "quote--left"
+}
+
+<figure class={"quote " ++ variantClass ++ " " ++ sizeClass ++ " " ++ alignClass}>
+    {if variant == "featured" || variant == "pull"}
+        <svg class="quote__mark" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+        </svg>
+    {/if}
+
+    <blockquote class="quote__content">
+        {children}
+    </blockquote>
+
+    {if author != none || cite != none}
+        <figcaption class="quote__footer">
+            {if authorImage != none}
+                <img class="quote__avatar" src={authorImage} alt={author || "Author"}>
+            {/if}
+            <div class="quote__attribution">
+                {if author != none}
+                    <cite class="quote__author">{author}</cite>
+                {/if}
+                {if authorTitle != none}
+                    <span class="quote__author-title">{authorTitle}</span>
+                {/if}
+                {if cite != none && author == none}
+                    <cite class="quote__cite">{cite}</cite>
+                {/if}
+                {if cite != none && author != none}
+                    <span class="quote__cite">{cite}</span>
+                {/if}
+            </div>
+        </figcaption>
+    {/if}
+</figure>
+
+<style scoped>
+.quote {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+}
+
+.quote__content {
+    margin: 0;
+    font-style: italic;
+    color: var(--flin-fg);
+    line-height: 1.7;
+}
+
+/* Size variants */
+.quote--sm .quote__content { font-size: var(--flin-text-sm); }
+.quote--base .quote__content { font-size: var(--flin-text-base); }
+.quote--lg .quote__content { font-size: var(--flin-text-lg); }
+.quote--xl .quote__content { font-size: var(--flin-text-xl); line-height: 1.6; }
+
+/* Alignment */
+.quote--left { text-align: left; }
+.quote--center { text-align: center; }
+
+/* Simple variant */
+.quote--simple {
+    padding-left: var(--flin-space-4);
+    border-left: 4px solid var(--flin-primary);
+}
+
+.quote--simple .quote__content {
+    color: var(--flin-fg-muted);
+}
+
+/* Bordered variant */
+.quote--bordered {
+    padding: var(--flin-space-6);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    background: var(--flin-neutral-50);
+}
+
+/* Featured variant */
+.quote--featured {
+    padding: var(--flin-space-8);
+    background: linear-gradient(135deg, var(--flin-primary-light) 0%, var(--flin-info-light) 100%);
+    border-radius: var(--flin-radius-xl);
+    position: relative;
+}
+
+.quote--featured .quote__mark {
+    color: var(--flin-primary);
+    opacity: 0.3;
+    margin-bottom: var(--flin-space-4);
+}
+
+.quote--featured .quote__content {
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-medium);
+    font-style: normal;
+    line-height: 1.5;
+}
+
+/* Pull quote variant */
+.quote--pull {
+    padding: var(--flin-space-6) 0;
+    border-top: 2px solid var(--flin-neutral-200);
+    border-bottom: 2px solid var(--flin-neutral-200);
+}
+
+.quote--pull .quote__mark {
+    color: var(--flin-primary);
+    opacity: 0.5;
+    margin-bottom: var(--flin-space-2);
+}
+
+.quote--pull .quote__content {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-medium);
+    font-style: normal;
+    line-height: 1.4;
+    color: var(--flin-fg);
+}
+
+.quote--center .quote__mark {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+/* Footer/Attribution */
+.quote__footer {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    margin-top: var(--flin-space-4);
+}
+
+.quote--center .quote__footer {
+    justify-content: center;
+}
+
+.quote__avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--flin-radius-full);
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.quote__attribution {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-1);
+}
+
+.quote__author {
+    font-style: normal;
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    font-size: var(--flin-text-sm);
+}
+
+.quote__author-title {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.quote__cite {
+    font-style: normal;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+/* Dark theme */
+[data-theme="dark"] .quote--bordered {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .quote--featured {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+}
+
+[data-theme="dark"] .quote--pull {
+    border-color: var(--flin-neutral-700);
+}
+</style>

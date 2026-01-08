@@ -1,0 +1,351 @@
+// ProductFilters.flin - FlinUI PRO E-commerce Component
+// Complete filter sidebar with price, brand, color, size, and custom filters
+
+// Props with defaults
+filters = props.filters || []
+selectedFilters = props.selectedFilters || []
+onFilterChange = props.onFilterChange
+onClearAll = props.onClearAll
+showClearAll = props.showClearAll || true
+collapsible = props.collapsible || true
+priceRange = props.priceRange || ["min": 0, "max": 1000]
+currency = props.currency || "$"
+
+// State for collapsed filter groups
+collapsedGroups = []
+
+// Toggle filter group
+function toggleGroup(groupId) {
+    if collapsedGroups.includes(groupId) {
+        collapsedGroups = collapsedGroups.filter(fn (id) { id != groupId })
+    } else {
+        collapsedGroups = [...collapsedGroups, groupId]
+    }
+}
+
+// Check if group is collapsed
+function isCollapsed(groupId) {
+    return collapsedGroups.includes(groupId)
+}
+
+// Check if filter is selected
+function isSelected(filterId) {
+    return selectedFilters.includes(filterId)
+}
+
+// Handle filter toggle
+function handleFilterToggle(filterId) {
+    if onFilterChange {
+        onFilterChange(filterId)
+    }
+}
+
+// Handle clear all
+function handleClearAll() {
+    if onClearAll {
+        onClearAll()
+    }
+}
+
+// Count active filters
+activeFilterCount = selectedFilters.length
+
+<div class="product-filters">
+    <style scoped>
+        .product-filters {
+            display: flex;
+            flex-direction: column;
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-light);
+            border-radius: var(--flin-radius-lg);
+            font-family: var(--flin-font-sans);
+        }
+
+        .filters-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--flin-space-4);
+            border-bottom: 1px solid var(--flin-border-light);
+        }
+
+        .filters-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+        }
+
+        .clear-all-button {
+            padding: var(--flin-space-2) var(--flin-space-3);
+            background: transparent;
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-md);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-secondary);
+        }
+
+        .clear-all-button:hover {
+            background: var(--flin-bg-hover);
+            border-color: var(--flin-primary);
+            color: var(--flin-primary);
+        }
+
+        .clear-all-button:focus-visible {
+            outline: 2px solid var(--flin-primary);
+            outline-offset: 2px;
+        }
+
+        .clear-all-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .active-filters-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            margin-left: var(--flin-space-2);
+            padding: 0 var(--flin-space-1);
+            background: var(--flin-primary);
+            color: white;
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+            border-radius: var(--flin-radius-full);
+        }
+
+        .filters-body {
+            display: flex;
+            flex-direction: column;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: var(--flin-space-2);
+        }
+
+        .filters-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .filters-body::-webkit-scrollbar-thumb {
+            background: var(--flin-border-medium);
+            border-radius: var(--flin-radius-full);
+        }
+
+        .filter-group {
+            border-bottom: 1px solid var(--flin-border-light);
+        }
+
+        .filter-group:last-child {
+            border-bottom: none;
+        }
+
+        .filter-group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: var(--flin-space-3);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background var(--flin-transition-fast);
+        }
+
+        .filter-group-header:hover {
+            background: var(--flin-bg-hover);
+        }
+
+        .filter-group-title {
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            text-align: left;
+        }
+
+        .filter-group-toggle {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-muted);
+            transition: transform var(--flin-transition-fast);
+        }
+
+        .filter-group-toggle.expanded {
+            transform: rotate(90deg);
+        }
+
+        .filter-group-body {
+            display: none;
+            flex-direction: column;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-2) var(--flin-space-3) var(--flin-space-3);
+        }
+
+        .filter-group-body.expanded {
+            display: flex;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-2);
+            border-radius: var(--flin-radius-sm);
+            cursor: pointer;
+            transition: background var(--flin-transition-fast);
+        }
+
+        .filter-option:hover {
+            background: var(--flin-bg-hover);
+        }
+
+        .filter-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-sm);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            flex-shrink: 0;
+        }
+
+        .filter-checkbox.checked {
+            background: var(--flin-primary);
+            border-color: var(--flin-primary);
+        }
+
+        .filter-checkbox.checked::after {
+            content: "✓";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+        }
+
+        .filter-label {
+            flex: 1;
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+
+        .filter-option.selected .filter-label {
+            color: var(--flin-text-primary);
+            font-weight: var(--flin-font-medium);
+        }
+
+        .filter-count {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-muted);
+            padding: var(--flin-space-1) var(--flin-space-2);
+            background: var(--flin-bg-deep);
+            border-radius: var(--flin-radius-full);
+        }
+
+        .color-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: var(--flin-radius-sm);
+            border: 2px solid var(--flin-border-light);
+            flex-shrink: 0;
+        }
+
+        .color-swatch.selected {
+            border-color: var(--flin-primary);
+            box-shadow: 0 0 0 2px var(--flin-primary-light);
+        }
+
+        @media (max-width: 768px) {
+            .product-filters {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+
+            .filters-body {
+                max-height: 400px;
+            }
+        }
+    </style>
+
+    <!-- Header -->
+    <div class="filters-header">
+        <h2 class="filters-title">
+            Filters
+            {if activeFilterCount > 0}
+                <span class="active-filters-count">{activeFilterCount}</span>
+            {/if}
+        </h2>
+        {if showClearAll}
+            <button
+                class="clear-all-button"
+                click={handleClearAll}
+                disabled={activeFilterCount == 0}
+            >
+                Clear All
+            </button>
+        {/if}
+    </div>
+
+    <!-- Filter Groups -->
+    <div class="filters-body">
+        {each filters as filterGroup}
+            <div class="filter-group">
+                {if collapsible}
+                    <button
+                        class="filter-group-header"
+                        click={fn() { toggleGroup(filterGroup.id) }}
+                        aria-expanded={!isCollapsed(filterGroup.id)}
+                    >
+                        <span class="filter-group-title">{filterGroup.label}</span>
+                        <span class="filter-group-toggle {if !isCollapsed(filterGroup.id)}expanded{/if}">
+                            ▶
+                        </span>
+                    </button>
+                {else}
+                    <div class="filter-group-header">
+                        <span class="filter-group-title">{filterGroup.label}</span>
+                    </div>
+                {/if}
+
+                <div class="filter-group-body {if !isCollapsed(filterGroup.id)}expanded{/if}">
+                    {if filterGroup.type == "color"}
+                        <!-- Color swatches -->
+                        {each filterGroup.options as option}
+                            <div
+                                class="filter-option {if isSelected(option.id)}selected{/if}"
+                                click={fn() { handleFilterToggle(option.id) }}
+                            >
+                                <div
+                                    class="color-swatch {if isSelected(option.id)}selected{/if}"
+                                    style="background-color: {option.color};"
+                                ></div>
+                                <span class="filter-label">{option.label}</span>
+                                {if option.count}
+                                    <span class="filter-count">{option.count}</span>
+                                {/if}
+                            </div>
+                        {/each}
+                    {else}
+                        <!-- Regular checkbox options -->
+                        {each filterGroup.options as option}
+                            <div
+                                class="filter-option {if isSelected(option.id)}selected{/if}"
+                                click={fn() { handleFilterToggle(option.id) }}
+                            >
+                                <div class="filter-checkbox {if isSelected(option.id)}checked{/if}"></div>
+                                <span class="filter-label">{option.label}</span>
+                                {if option.count}
+                                    <span class="filter-count">{option.count}</span>
+                                {/if}
+                            </div>
+                        {/each}
+                    {/if}
+                </div>
+            </div>
+        {/each}
+    </div>
+</div>

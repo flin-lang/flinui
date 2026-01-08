@@ -1,0 +1,276 @@
+// UserButton.flin - FlinUI PRO User Button Component
+// Avatar + name button that can trigger a menu
+
+// Props with defaults
+user = props.user || ["name": "Guest", "email": "", "avatar": ""]
+size = props.size || "md"
+variant = props.variant || "default"
+showChevron = props.showChevron || false
+onClick = props.onClick
+disabled = props.disabled || false
+
+// Get user initials
+userInitials = {if user.name != "" {
+    words = user.name.split(" ")
+    {if words.length > 1 {
+        words[0][0] ++ words[words.length - 1][0]
+    } else {
+        user.name[0]
+    }}
+} else {
+    "?"
+}}
+
+// Size classes
+sizeClass = match size {
+    "sm" -> "user-button-sm"
+    "lg" -> "user-button-lg"
+    _ -> "user-button-md"
+}
+
+// Variant classes
+variantClass = match variant {
+    "avatar-only" -> "user-button-avatar-only"
+    "with-name" -> "user-button-with-name"
+    "with-email" -> "user-button-with-email"
+    "minimal" -> "user-button-minimal"
+    _ -> "user-button-default"
+}
+
+// Avatar size based on button size
+avatarSizeClass = match size {
+    "sm" -> "user-button-avatar-sm"
+    "lg" -> "user-button-avatar-lg"
+    _ -> "user-button-avatar-md"
+}
+
+// Disabled class
+disabledClass = match disabled {
+    true -> " user-button-disabled"
+    _ -> ""
+}
+
+// Full button class
+buttonClass = "user-button " ++ sizeClass ++ " " ++ variantClass ++ disabledClass
+
+// Handle click
+handleClick = {
+    if !disabled && onClick {
+        onClick()
+    }
+}
+
+<button
+    class={buttonClass}
+    click={handleClick}
+    disabled={disabled}
+    aria-label={"User menu for " ++ user.name}
+>
+    <div class={"user-button-avatar " ++ avatarSizeClass}>
+        {if user.avatar != ""}
+            <img src={user.avatar} alt={user.name} class="user-button-avatar-img">
+        {else}
+            <span class="user-button-avatar-initials">{userInitials}</span>
+        {/if}
+    </div>
+
+    {if variant == "with-name" || variant == "with-email" || variant == "default"}
+        <div class="user-button-info">
+            <span class="user-button-name">{user.name}</span>
+            {if (variant == "with-email" || variant == "default") && user.email != ""}
+                <span class="user-button-email">{user.email}</span>
+            {/if}
+        </div>
+    {/if}
+
+    {if showChevron}
+        <svg class="user-button-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+        </svg>
+    {/if}
+</button>
+
+<style scoped>
+.user-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-2);
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.user-button:hover:not(:disabled) {
+    background-color: var(--flin-neutral-100);
+}
+
+.user-button:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+.user-button-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Size variants */
+.user-button-sm {
+    padding: var(--flin-space-1);
+    gap: var(--flin-space-2);
+}
+
+.user-button-md {
+    padding: var(--flin-space-2);
+    gap: var(--flin-space-3);
+}
+
+.user-button-lg {
+    padding: var(--flin-space-3);
+    gap: var(--flin-space-4);
+}
+
+/* Variant: default with border */
+.user-button-default {
+    border-color: var(--flin-neutral-200);
+    background-color: var(--flin-bg);
+}
+
+.user-button-default:hover:not(:disabled) {
+    border-color: var(--flin-neutral-300);
+    background-color: var(--flin-neutral-50);
+}
+
+/* Variant: avatar-only */
+.user-button-avatar-only {
+    padding: var(--flin-space-1);
+    border-radius: var(--flin-radius-full);
+}
+
+/* Variant: minimal */
+.user-button-minimal {
+    padding: 0;
+    background: none;
+}
+
+.user-button-minimal:hover:not(:disabled) {
+    background: none;
+}
+
+/* Avatar */
+.user-button-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--flin-radius-full);
+    background-color: var(--flin-primary-light);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.user-button-avatar-sm {
+    width: 28px;
+    height: 28px;
+}
+
+.user-button-avatar-md {
+    width: 36px;
+    height: 36px;
+}
+
+.user-button-avatar-lg {
+    width: 44px;
+    height: 44px;
+}
+
+.user-button-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-button-avatar-initials {
+    font-weight: 600;
+    color: var(--flin-primary);
+    text-transform: uppercase;
+}
+
+.user-button-sm .user-button-avatar-initials {
+    font-size: var(--flin-text-xs);
+}
+
+.user-button-md .user-button-avatar-initials {
+    font-size: var(--flin-text-sm);
+}
+
+.user-button-lg .user-button-avatar-initials {
+    font-size: var(--flin-text-base);
+}
+
+/* Info section */
+.user-button-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+}
+
+.user-button-name {
+    font-weight: 600;
+    color: var(--flin-fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+.user-button-sm .user-button-name {
+    font-size: var(--flin-text-xs);
+}
+
+.user-button-md .user-button-name {
+    font-size: var(--flin-text-sm);
+}
+
+.user-button-lg .user-button-name {
+    font-size: var(--flin-text-base);
+}
+
+.user-button-email {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+.user-button-sm .user-button-email {
+    font-size: 10px;
+}
+
+.user-button-lg .user-button-email {
+    font-size: var(--flin-text-sm);
+}
+
+/* Chevron */
+.user-button-chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+}
+
+.user-button-sm .user-button-chevron {
+    width: 14px;
+    height: 14px;
+}
+
+.user-button-lg .user-button-chevron {
+    width: 18px;
+    height: 18px;
+}
+</style>

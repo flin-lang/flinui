@@ -1,0 +1,401 @@
+// ============================================================================
+// ImageGallery.flin — FlinUI PRO Data Component
+// Image grid with lightbox modal on click
+// ============================================================================
+// Props:
+//   - images: List of image objects with src, alt, thumbnail, caption (list)
+//   - columns: Number of columns - 2, 3, 4, 5, 6 (number)
+//   - gap: Gap between images - sm, md, lg (string)
+//   - aspectRatio: Image aspect ratio - square, video, portrait, auto (string)
+//   - showCaptions: Show image captions (boolean)
+//   - enableLightbox: Enable lightbox on click (boolean)
+
+images = props.images || [
+    ["src": "https://picsum.photos/800/600?random=1", "thumbnail": "https://picsum.photos/400/300?random=1", "alt": "Mountain landscape", "caption": "Beautiful mountain vista"],
+    ["src": "https://picsum.photos/800/600?random=2", "thumbnail": "https://picsum.photos/400/300?random=2", "alt": "Ocean sunset", "caption": "Sunset over the ocean"],
+    ["src": "https://picsum.photos/800/600?random=3", "thumbnail": "https://picsum.photos/400/300?random=3", "alt": "City skyline", "caption": "Urban cityscape"],
+    ["src": "https://picsum.photos/800/600?random=4", "thumbnail": "https://picsum.photos/400/300?random=4", "alt": "Forest path", "caption": "Path through the forest"],
+    ["src": "https://picsum.photos/800/600?random=5", "thumbnail": "https://picsum.photos/400/300?random=5", "alt": "Desert dunes", "caption": "Sand dunes at dawn"],
+    ["src": "https://picsum.photos/800/600?random=6", "thumbnail": "https://picsum.photos/400/300?random=6", "alt": "Waterfall", "caption": "Cascading waterfall"]
+]
+columns = props.columns || 3
+gap = props.gap || "md"
+aspectRatio = props.aspectRatio || "video"
+showCaptions = props.showCaptions || true
+enableLightbox = props.enableLightbox || true
+
+lightboxOpen = false
+lightboxIndex = 0
+
+openLightbox = (index) => {
+    if enableLightbox {
+        lightboxIndex = index
+        lightboxOpen = true
+    }
+}
+
+closeLightbox = () => {
+    lightboxOpen = false
+}
+
+prevImage = () => {
+    lightboxIndex = lightboxIndex > 0 ? lightboxIndex - 1 : images.length - 1
+}
+
+nextImage = () => {
+    lightboxIndex = lightboxIndex < images.length - 1 ? lightboxIndex + 1 : 0
+}
+
+// Gap class
+gapClass = match gap {
+    "sm" => "gap-sm"
+    "lg" => "gap-lg"
+    _ => "gap-md"
+}
+
+// Aspect ratio class
+ratioClass = match aspectRatio {
+    "square" => "ratio-square"
+    "portrait" => "ratio-portrait"
+    "auto" => "ratio-auto"
+    _ => "ratio-video"
+}
+
+<div class="flin-image-gallery">
+    <div class="gallery-grid columns-{columns} {gapClass}">
+        {for image, index in images}
+            <div
+                class="gallery-item {ratioClass}"
+                click={() => openLightbox(index)}
+            >
+                <img
+                    src={image.thumbnail || image.src}
+                    alt={image.alt || "Gallery image"}
+                    class="gallery-image"
+                    loading="lazy"
+                />
+                <div class="image-overlay">
+                    <svg class="zoom-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                        <path d="M11 8v6M8 11h6"/>
+                    </svg>
+                </div>
+                {if showCaptions && image.caption != none}
+                    <div class="image-caption">
+                        <span>{image.caption}</span>
+                    </div>
+                {/if}
+            </div>
+        {/for}
+    </div>
+
+    <!-- Lightbox Modal -->
+    {if lightboxOpen}
+        <div class="lightbox-overlay" click={closeLightbox}>
+            <div class="lightbox-content" click={(e) => e.stopPropagation()}>
+                <button class="lightbox-close" click={closeLightbox}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+
+                <button class="lightbox-nav lightbox-prev" click={prevImage}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </button>
+
+                <div class="lightbox-image-wrapper">
+                    <img
+                        src={images[lightboxIndex].src}
+                        alt={images[lightboxIndex].alt || "Gallery image"}
+                        class="lightbox-image"
+                    />
+                </div>
+
+                <button class="lightbox-nav lightbox-next" click={nextImage}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                </button>
+
+                <div class="lightbox-footer">
+                    {if images[lightboxIndex].caption != none}
+                        <p class="lightbox-caption">{images[lightboxIndex].caption}</p>
+                    {/if}
+                    <span class="lightbox-counter">{lightboxIndex + 1} / {images.length}</span>
+                </div>
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-image-gallery {
+    width: 100%;
+}
+
+.gallery-grid {
+    display: grid;
+}
+
+.columns-2 { grid-template-columns: repeat(2, 1fr); }
+.columns-3 { grid-template-columns: repeat(3, 1fr); }
+.columns-4 { grid-template-columns: repeat(4, 1fr); }
+.columns-5 { grid-template-columns: repeat(5, 1fr); }
+.columns-6 { grid-template-columns: repeat(6, 1fr); }
+
+.gap-sm { gap: var(--flin-space-2); }
+.gap-md { gap: var(--flin-space-4); }
+.gap-lg { gap: var(--flin-space-6); }
+
+.gallery-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    background: var(--flin-bg-surface);
+}
+
+.ratio-square { aspect-ratio: 1; }
+.ratio-video { aspect-ratio: 16 / 9; }
+.ratio-portrait { aspect-ratio: 3 / 4; }
+.ratio-auto { aspect-ratio: auto; }
+
+.gallery-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--flin-transition-normal);
+}
+
+.gallery-item:hover .gallery-image {
+    transform: scale(1.05);
+}
+
+.image-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity var(--flin-transition-fast);
+}
+
+.gallery-item:hover .image-overlay {
+    opacity: 1;
+}
+
+.zoom-icon {
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.image-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--flin-space-3);
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    transform: translateY(100%);
+    transition: transform var(--flin-transition-fast);
+}
+
+.gallery-item:hover .image-caption {
+    transform: translateY(0);
+}
+
+.image-caption span {
+    font-size: var(--flin-text-sm);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Lightbox */
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: lightbox-fade-in 0.2s ease-out;
+}
+
+@keyframes lightbox-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.lightbox-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: var(--flin-space-4);
+    right: var(--flin-space-4);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: var(--flin-radius-full);
+    color: white;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    z-index: 10;
+}
+
+.lightbox-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: var(--flin-radius-full);
+    color: white;
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    z-index: 10;
+}
+
+.lightbox-nav:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.lightbox-prev {
+    left: var(--flin-space-4);
+}
+
+.lightbox-next {
+    right: var(--flin-space-4);
+}
+
+.lightbox-image-wrapper {
+    max-width: calc(100% - 120px);
+    max-height: calc(100% - 120px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: var(--flin-radius-lg);
+    animation: lightbox-zoom-in 0.3s ease-out;
+}
+
+@keyframes lightbox-zoom-in {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.lightbox-footer {
+    position: absolute;
+    bottom: var(--flin-space-6);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-2);
+    text-align: center;
+}
+
+.lightbox-caption {
+    font-size: var(--flin-text-base);
+    color: white;
+    margin: 0;
+    max-width: 500px;
+}
+
+.lightbox-counter {
+    font-size: var(--flin-text-sm);
+    color: rgba(255, 255, 255, 0.6);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .columns-5,
+    .columns-6 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .columns-3,
+    .columns-4,
+    .columns-5,
+    .columns-6 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .lightbox-nav {
+        width: 40px;
+        height: 40px;
+    }
+
+    .lightbox-image-wrapper {
+        max-width: calc(100% - 80px);
+        max-height: calc(100% - 100px);
+    }
+}
+
+@media (max-width: 480px) {
+    .columns-2,
+    .columns-3,
+    .columns-4,
+    .columns-5,
+    .columns-6 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .gap-md,
+    .gap-lg {
+        gap: var(--flin-space-2);
+    }
+
+    .lightbox-prev {
+        left: var(--flin-space-2);
+    }
+
+    .lightbox-next {
+        right: var(--flin-space-2);
+    }
+}
+</style>

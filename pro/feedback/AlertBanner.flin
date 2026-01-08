@@ -1,0 +1,322 @@
+// AlertBanner.flin - FlinUI PRO Alert Banner Component
+// Full-width banner alert that appears at the top of a page
+
+// Props with defaults
+message = props.message || ""
+type = props.type || "info"
+dismissible = props.dismissible || false
+icon = props.icon || true
+action = props.action || ""
+onAction = props.onAction
+onDismiss = props.onDismiss
+sticky = props.sticky || false
+
+// Internal state
+visible = true
+isExiting = false
+
+// Handle dismiss
+handleDismiss = {
+    isExiting = true
+    visible = false
+    if onDismiss { onDismiss() }
+}
+
+// Handle action click
+handleAction = {
+    if onAction { onAction() }
+}
+
+// Type class
+typeClass = match type {
+    "success" -> "alert-banner--success"
+    "error" -> "alert-banner--error"
+    "warning" -> "alert-banner--warning"
+    _ -> "alert-banner--info"
+}
+
+// Sticky class
+stickyClass = match sticky { true -> " alert-banner--sticky", _ -> "" }
+
+// Exiting class
+exitingClass = match isExiting { true -> " alert-banner--exiting", _ -> "" }
+
+// Visibility class
+visibilityClass = match visible { true -> "", _ -> " alert-banner--hidden" }
+
+// Icon paths based on type
+iconPath = match type {
+    "success" -> "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+    "error" -> "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    "warning" -> "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+    _ -> "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+}
+
+<div
+    class={"flin-pro-alert-banner " ++ typeClass ++ stickyClass ++ exitingClass ++ visibilityClass}
+    role="alert"
+    aria-live="polite"
+>
+    <div class="alert-banner__container">
+        {if icon}
+            <div class="alert-banner__icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
+                </svg>
+            </div>
+        {/if}
+
+        <div class="alert-banner__content">
+            <p class="alert-banner__message">{message}</p>
+            {children}
+        </div>
+
+        {if action != ""}
+            <button
+                class="alert-banner__action"
+                click={handleAction}
+                type="button"
+            >
+                {action}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+            </button>
+        {/if}
+
+        {if dismissible}
+            <button
+                class="alert-banner__dismiss"
+                click={handleDismiss}
+                aria-label="Dismiss banner"
+                type="button"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+.flin-pro-alert-banner {
+    width: 100%;
+    padding: var(--flin-space-3) 0;
+    animation: alertBannerSlideIn var(--flin-transition-normal) ease-out;
+}
+
+.alert-banner--hidden {
+    display: none;
+}
+
+.alert-banner--sticky {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Container */
+.alert-banner__container {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 var(--flin-space-4);
+}
+
+/* Icon */
+.alert-banner__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.alert-banner__icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Content */
+.alert-banner__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    flex-wrap: wrap;
+}
+
+.alert-banner__message {
+    font-size: var(--flin-text-sm);
+    font-weight: 500;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Action button */
+.alert-banner__action {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    background: transparent;
+    border: none;
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    transition: opacity var(--flin-transition-fast);
+    white-space: nowrap;
+}
+
+.alert-banner__action:hover {
+    opacity: 0.8;
+}
+
+.alert-banner__action:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+.alert-banner__action svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Dismiss button */
+.alert-banner__dismiss {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    padding: var(--flin-space-1);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    opacity: 0.7;
+    transition: opacity var(--flin-transition-fast), background-color var(--flin-transition-fast);
+}
+
+.alert-banner__dismiss:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.alert-banner__dismiss:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+    opacity: 1;
+}
+
+.alert-banner__dismiss svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Animations */
+@keyframes alertBannerSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-banner--exiting {
+    animation: alertBannerSlideOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes alertBannerSlideOut {
+    to {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+}
+
+/* Type variants */
+.alert-banner--info {
+    background: var(--flin-info);
+    color: white;
+}
+
+.alert-banner--info .alert-banner__action {
+    color: white;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.alert-banner--success {
+    background: var(--flin-success);
+    color: white;
+}
+
+.alert-banner--success .alert-banner__action {
+    color: white;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.alert-banner--warning {
+    background: var(--flin-warning);
+    color: var(--flin-neutral-900);
+}
+
+.alert-banner--warning .alert-banner__action {
+    color: var(--flin-neutral-900);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.alert-banner--warning .alert-banner__dismiss:hover {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.alert-banner--error {
+    background: var(--flin-danger);
+    color: white;
+}
+
+.alert-banner--error .alert-banner__action {
+    color: white;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* Gradient variants for special emphasis */
+.alert-banner--info.alert-banner--gradient {
+    background: linear-gradient(90deg, var(--flin-info), var(--flin-info-active));
+}
+
+.alert-banner--success.alert-banner--gradient {
+    background: linear-gradient(90deg, var(--flin-success), var(--flin-success-active));
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .alert-banner__container {
+        flex-wrap: wrap;
+    }
+
+    .alert-banner__content {
+        width: 100%;
+        order: 2;
+    }
+
+    .alert-banner__icon {
+        order: 1;
+    }
+
+    .alert-banner__dismiss {
+        order: 1;
+        margin-left: auto;
+    }
+
+    .alert-banner__action {
+        margin-top: var(--flin-space-2);
+    }
+}
+</style>

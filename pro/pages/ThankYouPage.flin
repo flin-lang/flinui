@@ -1,0 +1,451 @@
+// ============================================================================
+// ThankYouPage.flin — FlinUI PRO Page Template
+// Post-submit thank you page with next steps
+// ============================================================================
+// Props:
+//   - title: Thank you title (string)
+//   - message: Thank you message (string)
+//   - type: Page type "contact" | "purchase" | "subscribe" | "download" (string)
+//   - userName: User's name (string or none)
+//   - nextSteps: List of next steps (list or none)
+//   - shareMessage: Social share message (string or none)
+//   - showShare: Show social share options (boolean)
+//   - redirectUrl: Auto-redirect URL (string or none)
+//   - redirectDelay: Redirect delay in seconds (number)
+
+title = props.title || "Thank You!"
+message = props.message || "We've received your submission and will get back to you soon."
+type = props.type || "contact"
+userName = props.userName || none
+showShare = props.showShare || true
+shareMessage = props.shareMessage || "Just joined an amazing platform!"
+redirectUrl = props.redirectUrl || none
+redirectDelay = props.redirectDelay || 10
+
+// Type-specific configurations
+getTypeConfig = () => match type {
+    "contact" => [
+        "icon": "mail",
+        "subtitle": "Message Received",
+        "defaultSteps": [
+            ["icon": "clock", "text": "We typically respond within 24 hours"],
+            ["icon": "mail", "text": "Check your inbox for a confirmation email"],
+            ["icon": "bookmark", "text": "Save our contact page for future reference"]
+        ]
+    ]
+    "purchase" => [
+        "icon": "shopping-bag",
+        "subtitle": "Order Confirmed",
+        "defaultSteps": [
+            ["icon": "mail", "text": "Receipt sent to your email"],
+            ["icon": "package", "text": "Your order is being prepared"],
+            ["icon": "truck", "text": "Track your shipment in your account"]
+        ]
+    ]
+    "subscribe" => [
+        "icon": "bell",
+        "subtitle": "Subscription Active",
+        "defaultSteps": [
+            ["icon": "check", "text": "You're now on the list!"],
+            ["icon": "mail", "text": "Expect our first email soon"],
+            ["icon": "star", "text": "Add us to your contacts to avoid spam"]
+        ]
+    ]
+    "download" => [
+        "icon": "download",
+        "subtitle": "Download Ready",
+        "defaultSteps": [
+            ["icon": "folder", "text": "Your download should start automatically"],
+            ["icon": "mail", "text": "Download link also sent to your email"],
+            ["icon": "help", "text": "Having trouble? Contact our support"]
+        ]
+    ]
+    _ => [
+        "icon": "heart",
+        "subtitle": "Submission Received",
+        "defaultSteps": []
+    ]
+}
+
+config = getTypeConfig()
+nextSteps = props.nextSteps || config.defaultSteps
+
+// Countdown for redirect
+countdownValue = redirectDelay
+
+getIcon = (iconName) => match iconName {
+    "mail" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+    "shopping-bag" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    "bell" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    "download" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    "heart" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    "clock" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    "check" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+    "package" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16.5 9.4-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+    "truck" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    "star" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    "folder" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    "help" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    "bookmark" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+    _ => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+}
+
+<div class="thank-you-page">
+    <div class="thank-you-page__container">
+        // Animated Icon
+        <div class="thank-you-page__icon-wrapper">
+            <div class="thank-you-page__icon-bg"></div>
+            <div class="thank-you-page__icon">
+                {getIcon(config.icon)}
+            </div>
+        </div>
+
+        // Content
+        <div class="thank-you-page__content">
+            <span class="thank-you-page__subtitle">{config.subtitle}</span>
+            <h1 class="thank-you-page__title">
+                {if userName != none}
+                    Thank You, {userName}!
+                {else}
+                    {title}
+                {/if}
+            </h1>
+            <p class="thank-you-page__message">{message}</p>
+        </div>
+
+        // Next Steps
+        {if nextSteps.length > 0}
+            <div class="thank-you-page__steps">
+                <h2 class="thank-you-page__steps-title">What happens next?</h2>
+                <div class="thank-you-page__steps-list">
+                    {for step, index in nextSteps}
+                        <div class="thank-you-page__step">
+                            <div class="thank-you-page__step-number">{index + 1}</div>
+                            <div class="thank-you-page__step-icon">
+                                {getIcon(step.icon)}
+                            </div>
+                            <span class="thank-you-page__step-text">{step.text}</span>
+                        </div>
+                    {/for}
+                </div>
+            </div>
+        {/if}
+
+        // Social Share
+        {if showShare}
+            <div class="thank-you-page__share">
+                <p class="thank-you-page__share-label">Spread the word</p>
+                <div class="thank-you-page__share-buttons">
+                    <a href={"https://twitter.com/intent/tweet?text=" ++ shareMessage} class="thank-you-page__share-btn thank-you-page__share-btn--twitter" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                    </a>
+                    <a href={"https://www.linkedin.com/sharing/share-offsite/?url=" ++ window.location.href} class="thank-you-page__share-btn thank-you-page__share-btn--linkedin" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    </a>
+                    <a href={"https://www.facebook.com/sharer/sharer.php?u=" ++ window.location.href} class="thank-you-page__share-btn thank-you-page__share-btn--facebook" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    </a>
+                </div>
+            </div>
+        {/if}
+
+        // Actions
+        <div class="thank-you-page__actions">
+            <a href="/" class="thank-you-page__button thank-you-page__button--primary">
+                Go to Homepage
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+
+        // Redirect Notice
+        {if redirectUrl != none}
+            <div class="thank-you-page__redirect">
+                <p>Redirecting in {countdownValue} seconds...</p>
+                <a href={redirectUrl}>Click here if not redirected</a>
+            </div>
+        {/if}
+    </div>
+</div>
+
+<style scoped>
+.thank-you-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-8) var(--flin-space-6);
+    background: linear-gradient(180deg, var(--flin-bg-surface) 0%, var(--flin-bg-base) 100%);
+    font-family: var(--flin-font-sans);
+}
+
+.thank-you-page__container {
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Icon */
+.thank-you-page__icon-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto var(--flin-space-8);
+}
+
+.thank-you-page__icon-bg {
+    position: absolute;
+    inset: 0;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+    animation: thank-you-pulse 2s ease-in-out infinite;
+}
+
+@keyframes thank-you-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.thank-you-page__icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+    animation: thank-you-bounce 0.5s ease-out;
+}
+
+@keyframes thank-you-bounce {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.thank-you-page__icon svg {
+    width: 48px;
+    height: 48px;
+    color: white;
+}
+
+/* Content */
+.thank-you-page__content {
+    margin-bottom: var(--flin-space-8);
+}
+
+.thank-you-page__subtitle {
+    display: inline-block;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--flin-space-3);
+}
+
+.thank-you-page__title {
+    font-size: var(--flin-text-3xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-3) 0;
+}
+
+.thank-you-page__message {
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Steps */
+.thank-you-page__steps {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-6);
+    margin-bottom: var(--flin-space-6);
+    text-align: left;
+}
+
+.thank-you-page__steps-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 var(--flin-space-4) 0;
+    text-align: center;
+}
+
+.thank-you-page__steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+}
+
+.thank-you-page__step {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    background: var(--flin-bg-elevated);
+    border-radius: var(--flin-radius-lg);
+}
+
+.thank-you-page__step-number {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-accent-gold);
+    color: white;
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-bold);
+    border-radius: var(--flin-radius-full);
+    flex-shrink: 0;
+}
+
+.thank-you-page__step-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.thank-you-page__step-icon svg {
+    width: 16px;
+    height: 16px;
+    color: var(--flin-text-muted);
+}
+
+.thank-you-page__step-text {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-secondary);
+    flex: 1;
+}
+
+/* Share */
+.thank-you-page__share {
+    margin-bottom: var(--flin-space-6);
+}
+
+.thank-you-page__share-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-tertiary);
+    margin: 0 0 var(--flin-space-3) 0;
+}
+
+.thank-you-page__share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: var(--flin-space-3);
+}
+
+.thank-you-page__share-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--flin-radius-full);
+    color: white;
+    transition: all var(--flin-transition-fast);
+}
+
+.thank-you-page__share-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.thank-you-page__share-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.thank-you-page__share-btn--twitter {
+    background: #1DA1F2;
+}
+
+.thank-you-page__share-btn--linkedin {
+    background: #0077B5;
+}
+
+.thank-you-page__share-btn--facebook {
+    background: #1877F2;
+}
+
+/* Actions */
+.thank-you-page__actions {
+    margin-bottom: var(--flin-space-6);
+}
+
+.thank-you-page__button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-4) var(--flin-space-8);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    border-radius: var(--flin-radius-lg);
+    text-decoration: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.thank-you-page__button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.thank-you-page__button--primary {
+    color: white;
+    background: var(--flin-accent-gold);
+}
+
+.thank-you-page__button--primary:hover {
+    background: var(--flin-accent-gold-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+/* Redirect */
+.thank-you-page__redirect {
+    padding-top: var(--flin-space-4);
+    border-top: 1px solid var(--flin-border-subtle);
+}
+
+.thank-you-page__redirect p {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-muted);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.thank-you-page__redirect a {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-accent-gold);
+    text-decoration: none;
+}
+
+.thank-you-page__redirect a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .thank-you-page__title {
+        font-size: var(--flin-text-2xl);
+    }
+
+    .thank-you-page__step {
+        flex-wrap: wrap;
+    }
+
+    .thank-you-page__step-number {
+        order: -1;
+    }
+}
+</style>

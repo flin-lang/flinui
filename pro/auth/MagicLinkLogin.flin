@@ -1,0 +1,636 @@
+// MagicLinkLogin.flin - FlinUI PRO Authentication Component
+// Passwordless login with email link
+
+// Props with defaults
+title = props.title || "Sign in with email"
+subtitle = props.subtitle || "Enter your email and we'll send you a magic link to sign in."
+logo = props.logo || none
+logoAlt = props.logoAlt || "Logo"
+loginUrl = props.loginUrl || "/login"
+loading = props.loading || false
+error = props.error || none
+success = props.success || false
+successMessage = props.successMessage || "Check your inbox for a magic link to sign in."
+onSubmit = props.onSubmit
+onResend = props.onResend
+showPasswordOption = props.showPasswordOption || true
+resendCooldown = props.resendCooldown || 60
+
+// Internal state
+email = ""
+sentEmail = ""
+cooldownRemaining = 0
+canResend = true
+
+// Handle form submission
+handleSubmit = {
+    if onSubmit {
+        sentEmail = email
+        onSubmit({ email: email })
+    }
+}
+
+// Handle resend
+handleResend = {
+    if canResend && onResend {
+        onResend({ email: sentEmail })
+        canResend = false
+        cooldownRemaining = resendCooldown
+    }
+}
+
+// Reset to try different email
+handleTryDifferent = {
+    email = ""
+    sentEmail = ""
+}
+
+// Compute loading class
+loadingClass = match loading {
+    true -> " magic-link--loading"
+    _ -> ""
+}
+
+<div class={"magic-link" ++ loadingClass}>
+    <div class="magic-link__container">
+        <div class="magic-link__header">
+            {if logo != none}
+                <img src={logo} alt={logoAlt} class="magic-link__logo" />
+            {/if}
+
+            {if success}
+                <div class="magic-link__success-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                </div>
+                <h1 class="magic-link__title">Check your email</h1>
+                <p class="magic-link__subtitle">{successMessage}</p>
+            {else}
+                <div class="magic-link__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/>
+                        <line x1="8" y1="12" x2="16" y2="12"/>
+                    </svg>
+                </div>
+                <h1 class="magic-link__title">{title}</h1>
+                <p class="magic-link__subtitle">{subtitle}</p>
+            {/if}
+        </div>
+
+        {if !success}
+            {if error != none}
+                <div class="magic-link__error" role="alert">
+                    <svg class="magic-link__error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span>{error}</span>
+                </div>
+            {/if}
+
+            <form class="magic-link__form" submit={handleSubmit}>
+                <div class="magic-link__field">
+                    <label class="magic-link__label" for="email">Email address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        class="magic-link__input"
+                        placeholder="you@example.com"
+                        value={email}
+                        change={(e) => email = e.target.value}
+                        disabled={loading}
+                        required
+                        autocomplete="email"
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    class="magic-link__submit"
+                    disabled={loading}
+                >
+                    {if loading}
+                        <span class="magic-link__spinner"></span>
+                        <span>Sending magic link...</span>
+                    {else}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"/>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                        <span>Send magic link</span>
+                    {/if}
+                </button>
+            </form>
+
+            {if showPasswordOption}
+                <div class="magic-link__divider">
+                    <span>Or</span>
+                </div>
+
+                <a href={loginUrl} class="magic-link__password-option">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <span>Sign in with password instead</span>
+                </a>
+            {/if}
+        {else}
+            <div class="magic-link__sent-info">
+                <p class="magic-link__sent-label">Sent to:</p>
+                <p class="magic-link__sent-email">{sentEmail}</p>
+            </div>
+
+            <div class="magic-link__actions">
+                <button
+                    type="button"
+                    class="magic-link__resend-btn"
+                    click={handleResend}
+                    disabled={loading || !canResend}
+                >
+                    {if loading}
+                        <span class="magic-link__spinner-small"></span>
+                        <span>Sending...</span>
+                    {else if !canResend}
+                        <span>Resend in {cooldownRemaining}s</span>
+                    {else}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+                        </svg>
+                        <span>Resend link</span>
+                    {/if}
+                </button>
+
+                <button
+                    type="button"
+                    class="magic-link__different-btn"
+                    click={handleTryDifferent}
+                    disabled={loading}
+                >
+                    Try different email
+                </button>
+            </div>
+
+            <div class="magic-link__tips">
+                <p class="magic-link__tips-title">Can't find the email?</p>
+                <ul class="magic-link__tips-list">
+                    <li>Check your spam or junk folder</li>
+                    <li>Make sure you entered the correct email</li>
+                    <li>The link expires in 15 minutes</li>
+                </ul>
+            </div>
+        {/if}
+
+        <a href={loginUrl} class="magic-link__back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span>Back to sign in</span>
+        </a>
+    </div>
+</div>
+
+<style scoped>
+.magic-link {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-4);
+    background-color: var(--flin-bg-muted);
+}
+
+.magic-link__container {
+    width: 100%;
+    max-width: 400px;
+    background-color: var(--flin-bg);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-lg);
+    padding: var(--flin-space-8);
+}
+
+.magic-link__header {
+    text-align: center;
+    margin-bottom: var(--flin-space-6);
+}
+
+.magic-link__logo {
+    height: 48px;
+    width: auto;
+    margin-bottom: var(--flin-space-4);
+}
+
+.magic-link__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    background-color: var(--flin-primary-light);
+    border-radius: var(--flin-radius-lg);
+    margin-bottom: var(--flin-space-4);
+}
+
+.magic-link__icon svg {
+    width: 28px;
+    height: 28px;
+    color: var(--flin-primary);
+}
+
+.magic-link__success-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background-color: var(--flin-success-light);
+    border-radius: var(--flin-radius-full);
+    margin-bottom: var(--flin-space-4);
+}
+
+.magic-link__success-icon svg {
+    width: 32px;
+    height: 32px;
+    color: var(--flin-success);
+}
+
+.magic-link__title {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-fg);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.magic-link__subtitle {
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg-muted);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.magic-link__error {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-3);
+    background-color: var(--flin-danger-light);
+    color: var(--flin-danger);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-sm);
+    margin-bottom: var(--flin-space-4);
+}
+
+.magic-link__error-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.magic-link__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+}
+
+.magic-link__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.magic-link__label {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+}
+
+.magic-link__input {
+    width: 100%;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    outline: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.magic-link__input:hover:not(:disabled) {
+    border-color: var(--flin-neutral-400);
+}
+
+.magic-link__input:focus {
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 3px var(--flin-primary-light);
+}
+
+.magic-link__input:disabled {
+    background-color: var(--flin-bg-muted);
+    cursor: not-allowed;
+}
+
+.magic-link__input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.magic-link__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-4);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-medium);
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.magic-link__submit:hover:not(:disabled) {
+    background-color: var(--flin-primary-hover);
+}
+
+.magic-link__submit:active:not(:disabled) {
+    background-color: var(--flin-primary-active);
+}
+
+.magic-link__submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.magic-link__submit svg {
+    width: 18px;
+    height: 18px;
+}
+
+.magic-link__spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: magic-spin 0.6s linear infinite;
+}
+
+.magic-link__spinner-small {
+    width: 14px;
+    height: 14px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: magic-spin 0.6s linear infinite;
+}
+
+@keyframes magic-spin {
+    to { transform: rotate(360deg); }
+}
+
+.magic-link__divider {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    margin: var(--flin-space-4) 0;
+    color: var(--flin-fg-muted);
+    font-size: var(--flin-text-sm);
+}
+
+.magic-link__divider::before,
+.magic-link__divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: var(--flin-neutral-200);
+}
+
+.magic-link__password-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-4);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    text-decoration: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.magic-link__password-option:hover {
+    background-color: var(--flin-bg-muted);
+    border-color: var(--flin-neutral-400);
+}
+
+.magic-link__password-option svg {
+    width: 18px;
+    height: 18px;
+}
+
+.magic-link__sent-info {
+    text-align: center;
+    padding: var(--flin-space-4);
+    background-color: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-md);
+    margin-bottom: var(--flin-space-4);
+}
+
+.magic-link__sent-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    margin: 0 0 var(--flin-space-1) 0;
+}
+
+.magic-link__sent-email {
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    margin: 0;
+    word-break: break-all;
+}
+
+.magic-link__actions {
+    display: flex;
+    gap: var(--flin-space-3);
+    margin-bottom: var(--flin-space-4);
+}
+
+.magic-link__resend-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-primary);
+    background-color: var(--flin-primary-light);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.magic-link__resend-btn:hover:not(:disabled) {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.magic-link__resend-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.magic-link__resend-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.magic-link__different-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--flin-height-sm);
+    padding: 0 var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.magic-link__different-btn:hover:not(:disabled) {
+    background-color: var(--flin-bg-muted);
+    border-color: var(--flin-neutral-400);
+}
+
+.magic-link__different-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.magic-link__tips {
+    background-color: var(--flin-bg-muted);
+    border-radius: var(--flin-radius-md);
+    padding: var(--flin-space-4);
+    margin-bottom: var(--flin-space-4);
+}
+
+.magic-link__tips-title {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+    margin: 0 0 var(--flin-space-2) 0;
+}
+
+.magic-link__tips-list {
+    margin: 0;
+    padding-left: var(--flin-space-4);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    line-height: 1.6;
+}
+
+.magic-link__tips-list li {
+    margin-bottom: var(--flin-space-1);
+}
+
+.magic-link__back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-4);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg-muted);
+    text-decoration: none;
+    transition: color var(--flin-transition-fast);
+}
+
+.magic-link__back:hover {
+    color: var(--flin-fg);
+}
+
+.magic-link__back svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Loading state */
+.magic-link--loading {
+    pointer-events: none;
+}
+
+/* Dark theme */
+[data-theme="dark"] .magic-link {
+    background-color: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .magic-link__container {
+    background-color: var(--flin-neutral-800);
+    border: 1px solid var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .magic-link__input {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .magic-link__password-option {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .magic-link__sent-info {
+    background-color: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .magic-link__different-btn {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .magic-link__tips {
+    background-color: var(--flin-neutral-900);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .magic-link__container {
+        padding: var(--flin-space-6);
+        border-radius: var(--flin-radius-lg);
+    }
+
+    .magic-link__actions {
+        flex-direction: column;
+    }
+}
+</style>

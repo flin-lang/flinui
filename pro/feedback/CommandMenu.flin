@@ -1,0 +1,528 @@
+// CommandMenu.flin - FlinUI PRO Command Menu Component
+// Command palette (Cmd+K) for quick actions and navigation
+
+// Props with defaults
+commands = props.commands || []
+placeholder = props.placeholder || "Type a command or search..."
+open = props.open || false
+onSelect = props.onSelect
+onClose = props.onClose
+categories = props.categories || []
+emptyMessage = props.emptyMessage || "No results found"
+recentLabel = props.recentLabel || "Recent"
+maxHeight = props.maxHeight || 400
+
+// Internal state
+isOpen = open
+query = ""
+activeIndex = 0
+filteredCommands = []
+isExiting = false
+
+// Handle input change
+handleInput = {
+    activeIndex = 0
+}
+
+// Handle close
+handleClose = {
+    isExiting = true
+    query = ""
+    activeIndex = 0
+    isOpen = false
+    if onClose { onClose() }
+}
+
+// Handle backdrop click
+handleBackdropClick = {
+    handleClose()
+}
+
+// Handle command select
+handleSelect = {
+    if onSelect { onSelect() }
+    handleClose()
+}
+
+// Handle keyboard navigation
+handleKeyDown = {
+    // Escape closes
+    handleClose()
+}
+
+// Display class
+displayClass = match isOpen { true -> "command-menu--open", _ -> "command-menu--closed" }
+
+// Exiting class
+exitingClass = match isExiting { true -> " command-menu--exiting", _ -> "" }
+
+// Max height style
+maxHeightStyle = "max-height: " ++ maxHeight ++ "px"
+
+// Has results
+hasResults = true
+
+<div class={"flin-pro-command-menu " ++ displayClass ++ exitingClass}>
+    {if isOpen}
+        <div class="command-menu__backdrop" click={handleBackdropClick}></div>
+    {/if}
+
+    <div class="command-menu__dialog" role="dialog" aria-modal="true" aria-label="Command menu">
+        <div class="command-menu__header">
+            <div class="command-menu__input-wrapper">
+                <svg class="command-menu__search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                    type="text"
+                    class="command-menu__input"
+                    value={query}
+                    placeholder={placeholder}
+                    input={handleInput}
+                    keydown={handleKeyDown}
+                    aria-label="Search commands"
+                />
+                <kbd class="command-menu__esc">ESC</kbd>
+            </div>
+        </div>
+
+        <div class="command-menu__content" style={maxHeightStyle}>
+            {if hasResults}
+                <div class="command-menu__list" role="listbox" id="command-list">
+                    <!-- Category: Recent -->
+                    <div class="command-menu__group">
+                        <div class="command-menu__group-label">{recentLabel}</div>
+                        <div class="command-menu__items">
+                            <!-- Example items -->
+                            <button class="command-menu__item command-menu__item--active" role="option" aria-selected="true">
+                                <span class="command-menu__item-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </span>
+                                <span class="command-menu__item-label">Create new file</span>
+                                <span class="command-menu__item-shortcut">
+                                    <kbd>Cmd</kbd>
+                                    <kbd>N</kbd>
+                                </span>
+                            </button>
+
+                            <button class="command-menu__item" role="option">
+                                <span class="command-menu__item-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </span>
+                                <span class="command-menu__item-label">Search files</span>
+                                <span class="command-menu__item-shortcut">
+                                    <kbd>Cmd</kbd>
+                                    <kbd>P</kbd>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Category: Actions -->
+                    <div class="command-menu__group">
+                        <div class="command-menu__group-label">Actions</div>
+                        <div class="command-menu__items">
+                            <button class="command-menu__item" role="option">
+                                <span class="command-menu__item-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </span>
+                                <span class="command-menu__item-label">Open settings</span>
+                                <span class="command-menu__item-shortcut">
+                                    <kbd>Cmd</kbd>
+                                    <kbd>,</kbd>
+                                </span>
+                            </button>
+
+                            <button class="command-menu__item" role="option">
+                                <span class="command-menu__item-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                    </svg>
+                                </span>
+                                <span class="command-menu__item-label">Toggle dark mode</span>
+                                <span class="command-menu__item-shortcut">
+                                    <kbd>Cmd</kbd>
+                                    <kbd>D</kbd>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {children}
+                </div>
+            {/if}
+
+            {if !hasResults}
+                <div class="command-menu__empty">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <p>{emptyMessage}</p>
+                </div>
+            {/if}
+        </div>
+
+        <div class="command-menu__footer">
+            <div class="command-menu__hints">
+                <div class="command-menu__hint">
+                    <kbd class="command-menu__kbd">arrow</kbd>
+                    <span>Navigate</span>
+                </div>
+                <div class="command-menu__hint">
+                    <kbd class="command-menu__kbd">enter</kbd>
+                    <span>Select</span>
+                </div>
+                <div class="command-menu__hint">
+                    <kbd class="command-menu__kbd">esc</kbd>
+                    <span>Close</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.flin-pro-command-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 15vh;
+}
+
+.command-menu--closed {
+    display: none;
+}
+
+/* Backdrop */
+.command-menu__backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: commandMenuBackdropFade var(--flin-transition-fast) ease-out;
+}
+
+@keyframes commandMenuBackdropFade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Dialog */
+.command-menu__dialog {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-xl);
+    box-shadow: var(--flin-shadow-2xl);
+    overflow: hidden;
+    animation: commandMenuSlideIn var(--flin-transition-normal) ease-out;
+}
+
+@keyframes commandMenuSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.command-menu--exiting .command-menu__backdrop {
+    animation: commandMenuBackdropFadeOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes commandMenuBackdropFadeOut {
+    to {
+        opacity: 0;
+    }
+}
+
+.command-menu--exiting .command-menu__dialog {
+    animation: commandMenuSlideOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes commandMenuSlideOut {
+    to {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+}
+
+/* Header */
+.command-menu__header {
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.command-menu__input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+}
+
+.command-menu__search-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+}
+
+.command-menu__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: var(--flin-text-base);
+    color: var(--flin-fg);
+    outline: none;
+}
+
+.command-menu__input::placeholder {
+    color: var(--flin-fg-muted);
+}
+
+.command-menu__esc {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    background-color: var(--flin-neutral-100);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    border-radius: var(--flin-radius-sm);
+    font-family: var(--flin-font-mono);
+    flex-shrink: 0;
+}
+
+/* Content */
+.command-menu__content {
+    overflow-y: auto;
+}
+
+.command-menu__list {
+    padding: var(--flin-space-2);
+}
+
+/* Group */
+.command-menu__group {
+    margin-bottom: var(--flin-space-2);
+}
+
+.command-menu__group:last-child {
+    margin-bottom: 0;
+}
+
+.command-menu__group-label {
+    font-size: var(--flin-text-xs);
+    font-weight: 600;
+    color: var(--flin-fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: var(--flin-space-2) var(--flin-space-3);
+}
+
+.command-menu__items {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Item */
+.command-menu__item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    cursor: pointer;
+    border-radius: var(--flin-radius-md);
+    transition: background-color var(--flin-transition-fast);
+    border: none;
+    background: transparent;
+    text-align: left;
+    width: 100%;
+}
+
+.command-menu__item:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.command-menu__item:focus {
+    outline: none;
+    background-color: var(--flin-neutral-100);
+}
+
+.command-menu__item--active {
+    background-color: var(--flin-primary-light);
+    color: var(--flin-primary);
+}
+
+.command-menu__item--active .command-menu__item-icon {
+    color: var(--flin-primary);
+}
+
+.command-menu__item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--flin-fg-muted);
+    flex-shrink: 0;
+}
+
+.command-menu__item-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.command-menu__item-label {
+    flex: 1;
+    font-weight: 500;
+}
+
+.command-menu__item-desc {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+.command-menu__item-shortcut {
+    display: flex;
+    gap: var(--flin-space-1);
+    flex-shrink: 0;
+}
+
+.command-menu__item-shortcut kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 var(--flin-space-1);
+    font-size: 11px;
+    font-family: var(--flin-font-mono);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+    background-color: var(--flin-neutral-100);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-sm);
+}
+
+/* Empty state */
+.command-menu__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-8);
+    color: var(--flin-fg-muted);
+}
+
+.command-menu__empty svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--flin-space-3);
+    opacity: 0.5;
+}
+
+.command-menu__empty p {
+    font-size: var(--flin-text-sm);
+    margin: 0;
+}
+
+/* Footer */
+.command-menu__footer {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+    background-color: var(--flin-neutral-50);
+}
+
+.command-menu__hints {
+    display: flex;
+    gap: var(--flin-space-4);
+}
+
+.command-menu__hint {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+.command-menu__kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 4px;
+    font-size: 10px;
+    font-family: var(--flin-font-mono);
+    font-weight: 500;
+    color: var(--flin-fg-muted);
+    background-color: var(--flin-neutral-100);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-sm);
+}
+
+/* Dark theme */
+[data-theme="dark"] .command-menu__dialog {
+    background-color: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .command-menu__header,
+[data-theme="dark"] .command-menu__footer {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .command-menu__footer {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .command-menu__item:hover,
+[data-theme="dark"] .command-menu__item:focus {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .command-menu__item--active {
+    background-color: rgba(124, 58, 237, 0.15);
+}
+
+[data-theme="dark"] .command-menu__esc,
+[data-theme="dark"] .command-menu__kbd,
+[data-theme="dark"] .command-menu__item-shortcut kbd {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .flin-pro-command-menu {
+        padding: var(--flin-space-4);
+        padding-top: var(--flin-space-4);
+    }
+
+    .command-menu__dialog {
+        max-width: 100%;
+    }
+
+    .command-menu__hints {
+        flex-wrap: wrap;
+    }
+}
+</style>

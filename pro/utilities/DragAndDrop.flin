@@ -1,0 +1,223 @@
+// ============================================================================
+// DragAndDrop.flin — FlinUI PRO Utility Component
+// Sortable list container with drag and drop functionality
+// ============================================================================
+// Props:
+//   - items: List of items to render (list)
+//   - direction: Layout direction - vertical, horizontal (string, default: "vertical")
+//   - handle: Use drag handle instead of entire item (boolean, default: false)
+//   - disabled: Disable drag and drop (boolean, default: false)
+//   - animation: Animation duration in ms (number, default: 200)
+//   - ghostClass: Class for dragged ghost element (string, default: "dragging")
+//   - onReorder: Callback when items are reordered (function or none)
+//   - onDragStart: Callback when drag starts (function or none)
+//   - onDragEnd: Callback when drag ends (function or none)
+// ============================================================================
+
+items = props.items || []
+direction = props.direction || "vertical"
+handle = props.handle || false
+disabled = props.disabled || false
+animation = props.animation || 200
+ghostClass = props.ghostClass || "dragging"
+onReorder = props.onReorder || none
+onDragStart = props.onDragStart || none
+onDragEnd = props.onDragEnd || none
+
+// State
+draggingIndex = none
+dragOverIndex = none
+orderedItems = items
+
+// Handle drag start
+handleDragStart = (index, e) => {
+    if disabled { return }
+
+    draggingIndex = index
+    e.dataTransfer.effectAllowed = "move"
+    e.dataTransfer.setData("text/plain", index)
+
+    if onDragStart != none {
+        onDragStart(index, items[index])
+    }
+}
+
+// Handle drag over
+handleDragOver = (index, e) => {
+    e.preventDefault()
+    if disabled { return }
+    if draggingIndex == none { return }
+
+    dragOverIndex = index
+}
+
+// Handle drag leave
+handleDragLeave = (e) => {
+    dragOverIndex = none
+}
+
+// Handle drop
+handleDrop = (targetIndex, e) => {
+    e.preventDefault()
+    if disabled { return }
+    if draggingIndex == none { return }
+
+    sourceIndex = draggingIndex
+
+    if sourceIndex != targetIndex {
+        // Reorder items
+        newItems = [...orderedItems]
+        item = newItems.splice(sourceIndex, 1)[0]
+        newItems.splice(targetIndex, 0, item)
+        orderedItems = newItems
+
+        if onReorder != none {
+            onReorder(newItems, sourceIndex, targetIndex)
+        }
+    }
+
+    draggingIndex = none
+    dragOverIndex = none
+
+    if onDragEnd != none {
+        onDragEnd()
+    }
+}
+
+// Handle drag end (cleanup)
+handleDragEnd = () => {
+    draggingIndex = none
+    dragOverIndex = none
+
+    if onDragEnd != none {
+        onDragEnd()
+    }
+}
+
+<div class="flin-drag-drop direction-{direction} {if disabled}disabled{/if}"
+     style="--animation-duration: {animation}ms">
+    {for item, index in orderedItems}
+        <div class="drag-item {if draggingIndex == index}{ghostClass}{/if} {if dragOverIndex == index}drag-over{/if}"
+             draggable={!disabled && !handle}
+             dragstart={(e) => handleDragStart(index, e)}
+             dragover={(e) => handleDragOver(index, e)}
+             dragleave={handleDragLeave}
+             drop={(e) => handleDrop(index, e)}
+             dragend={handleDragEnd}>
+
+            {if handle}
+                <div class="drag-handle"
+                     draggable={!disabled}
+                     dragstart={(e) => handleDragStart(index, e)}>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M4 4h2v2H4V4zm0 3h2v2H4V7zm0 3h2v2H4v-2zm3-6h2v2H7V4zm0 3h2v2H7V7zm0 3h2v2H7v-2zm3-6h2v2h-2V4zm0 3h2v2h-2V7zm0 3h2v2h-2v-2z"/>
+                    </svg>
+                </div>
+            {/if}
+
+            <div class="item-content">
+                {item}
+            </div>
+        </div>
+    {/for}
+</div>
+
+<style scoped>
+.flin-drag-drop {
+    display: flex;
+    gap: var(--flin-space-2);
+}
+
+.direction-vertical {
+    flex-direction: column;
+}
+
+.direction-horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+/* Drag item */
+.drag-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    background: var(--flin-bg-elevated);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-md);
+    cursor: grab;
+    transition: transform var(--animation-duration) ease,
+                box-shadow var(--animation-duration) ease,
+                border-color var(--animation-duration) ease;
+    user-select: none;
+}
+
+.drag-item:hover:not(.disabled .drag-item) {
+    border-color: var(--flin-border-default);
+}
+
+.drag-item:active:not(.disabled .drag-item) {
+    cursor: grabbing;
+}
+
+/* Dragging state */
+.dragging {
+    opacity: 0.5;
+    transform: scale(1.02);
+    box-shadow: var(--flin-shadow-lg);
+    z-index: 100;
+}
+
+/* Drag over state */
+.drag-over {
+    border-color: var(--flin-accent-gold);
+    background: rgba(234, 179, 8, 0.05);
+}
+
+/* Drag handle */
+.drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--flin-text-muted);
+    cursor: grab;
+    flex-shrink: 0;
+}
+
+.drag-handle:hover {
+    color: var(--flin-text-secondary);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Item content */
+.item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Disabled state */
+.disabled .drag-item {
+    cursor: default;
+}
+
+.disabled .drag-handle {
+    display: none;
+}
+
+/* Dark theme */
+[data-theme="dark"] .drag-item {
+    background: var(--flin-bg-base);
+    border-color: var(--flin-border-default);
+}
+
+[data-theme="dark"] .drag-over {
+    border-color: var(--flin-accent-gold);
+    background: rgba(234, 179, 8, 0.1);
+}
+</style>

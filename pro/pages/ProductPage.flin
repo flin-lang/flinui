@@ -1,0 +1,1100 @@
+// ProductPage.flin - Single product page with gallery, details, and reviews
+// FlinUI PRO - Page Template
+
+// Props with defaults
+product = props.product || none
+onAddToCart = props.onAddToCart || none
+onBuyNow = props.onBuyNow || none
+
+// Default product
+defaultProduct = {
+  id: "prod-001",
+  name: "Premium Wireless Headphones",
+  brand: "AudioTech",
+  price: 299.99,
+  originalPrice: 399.99,
+  rating: 4.8,
+  reviews: 256,
+  description: "Experience crystal-clear audio with our premium wireless headphones. Featuring advanced noise cancellation, 40-hour battery life, and premium comfort for all-day wear.",
+  features: [
+    "Active Noise Cancellation",
+    "40-hour battery life",
+    "Bluetooth 5.3",
+    "Premium memory foam cushions",
+    "Foldable design",
+    "USB-C fast charging"
+  ],
+  colors: [
+    { name: "Midnight Black", value: "#1a1a1a" },
+    { name: "Pearl White", value: "#f5f5f5" },
+    { name: "Navy Blue", value: "#1e3a5f" }
+  ],
+  images: ["main.jpg", "side.jpg", "detail.jpg", "lifestyle.jpg"],
+  inStock: true,
+  stockCount: 23,
+  sku: "AUD-WH-001",
+  category: "Electronics"
+}
+
+productData = product || defaultProduct
+
+// State
+selectedColor = productData.colors[0]
+selectedImage = 0
+quantity = 1
+activeTab = "description"
+showSizeGuide = false
+
+// Reviews data
+reviews = [
+  { id: 1, author: "Sarah M.", rating: 5, date: "Jan 5, 2026", title: "Best headphones I've owned", content: "The sound quality is incredible and the noise cancellation is top-notch. Very comfortable for long listening sessions.", helpful: 24 },
+  { id: 2, author: "John D.", rating: 4, date: "Jan 3, 2026", title: "Great quality, minor issues", content: "Sound is amazing and battery life is impressive. Only complaint is the touch controls can be a bit sensitive.", helpful: 18 },
+  { id: 3, author: "Emily R.", rating: 5, date: "Dec 28, 2025", title: "Worth every penny", content: "Premium build quality and the sound is phenomenal. The case is also really nice. Highly recommend!", helpful: 32 }
+]
+
+// Related products
+relatedProducts = [
+  { id: 2, name: "Wireless Earbuds Pro", price: 199.99, rating: 4.6, image: "earbuds.jpg" },
+  { id: 3, name: "Headphone Stand", price: 49.99, rating: 4.9, image: "stand.jpg" },
+  { id: 4, name: "Audio Cable 3.5mm", price: 19.99, rating: 4.5, image: "cable.jpg" },
+  { id: 5, name: "Carrying Case", price: 29.99, rating: 4.7, image: "case.jpg" }
+]
+
+<div class="product-page">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a href="/">Home</a>
+    <span class="separator">/</span>
+    <a href="/category/electronics">{productData.category}</a>
+    <span class="separator">/</span>
+    <span class="current">{productData.name}</span>
+  </nav>
+
+  <!-- Product Section -->
+  <section class="product-section">
+    <!-- Gallery -->
+    <div class="product-gallery">
+      <div class="thumbnail-list">
+        {for i, img in productData.images}
+          <button
+            class={"thumbnail " + (selectedImage == i ? "active" : "")}
+            click={() => selectedImage = i}
+          >
+            <div class="thumbnail-image"></div>
+          </button>
+        {/for}
+      </div>
+      <div class="main-image">
+        <div class="image-placeholder">
+          <span class="placeholder-text">Product Image {selectedImage + 1}</span>
+        </div>
+        <button class="zoom-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <line x1="11" y1="8" x2="11" y2="14"></line>
+            <line x1="8" y1="11" x2="14" y2="11"></line>
+          </svg>
+        </button>
+        {if productData.originalPrice}
+          <span class="sale-badge">Sale</span>
+        {/if}
+      </div>
+    </div>
+
+    <!-- Product Info -->
+    <div class="product-info">
+      <div class="product-header">
+        <span class="product-brand">{productData.brand}</span>
+        <h1 class="product-title">{productData.name}</h1>
+        <div class="product-meta">
+          <div class="rating">
+            <div class="stars">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </div>
+            <span class="rating-value">{productData.rating}</span>
+            <a href="#reviews" class="review-count">({productData.reviews} reviews)</a>
+          </div>
+          <span class="sku">SKU: {productData.sku}</span>
+        </div>
+      </div>
+
+      <div class="product-price">
+        <span class="current-price">${productData.price}</span>
+        {if productData.originalPrice}
+          <span class="original-price">${productData.originalPrice}</span>
+          <span class="discount">Save ${(productData.originalPrice - productData.price).toFixed(2)}</span>
+        {/if}
+      </div>
+
+      <p class="product-description">{productData.description}</p>
+
+      <!-- Color Selection -->
+      <div class="option-group">
+        <label>Color: <strong>{selectedColor.name}</strong></label>
+        <div class="color-options">
+          {for color in productData.colors}
+            <button
+              class={"color-swatch " + (selectedColor.name == color.name ? "selected" : "")}
+              style={"background-color: " + color.value}
+              click={() => selectedColor = color}
+              title={color.name}
+            ></button>
+          {/for}
+        </div>
+      </div>
+
+      <!-- Quantity -->
+      <div class="option-group">
+        <label>Quantity</label>
+        <div class="quantity-selector">
+          <button class="qty-btn" click={() => quantity = Math.max(1, quantity - 1)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+          <input type="number" value={quantity} min="1" max={productData.stockCount} />
+          <button class="qty-btn" click={() => quantity = Math.min(productData.stockCount, quantity + 1)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+        {if productData.inStock}
+          <span class="stock-status in-stock">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            In Stock ({productData.stockCount} available)
+          </span>
+        {else}
+          <span class="stock-status out-of-stock">Out of Stock</span>
+        {/if}
+      </div>
+
+      <!-- Actions -->
+      <div class="product-actions">
+        <Button variant="primary" size="lg" disabled={!productData.inStock}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          Add to Cart
+        </Button>
+        <Button variant="secondary" size="lg">Buy Now</Button>
+        <button class="wishlist-btn">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Features -->
+      <div class="features-list">
+        {for feature in productData.features}
+          <div class="feature-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>{feature}</span>
+          </div>
+        {/for}
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="trust-badges">
+        <div class="badge">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="1" y="3" width="15" height="13"></rect>
+            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+            <circle cx="5.5" cy="18.5" r="2.5"></circle>
+            <circle cx="18.5" cy="18.5" r="2.5"></circle>
+          </svg>
+          <span>Free Shipping</span>
+        </div>
+        <div class="badge">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span>30-Day Returns</span>
+        </div>
+        <div class="badge">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>2-Year Warranty</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabs Section -->
+  <section class="tabs-section">
+    <div class="tabs-header">
+      <button
+        class={"tab-btn " + (activeTab == "description" ? "active" : "")}
+        click={() => activeTab = "description"}
+      >Description</button>
+      <button
+        class={"tab-btn " + (activeTab == "specifications" ? "active" : "")}
+        click={() => activeTab = "specifications"}
+      >Specifications</button>
+      <button
+        class={"tab-btn " + (activeTab == "reviews" ? "active" : "")}
+        click={() => activeTab = "reviews"}
+      >Reviews ({productData.reviews})</button>
+    </div>
+
+    <div class="tabs-content">
+      {if activeTab == "description"}
+        <div class="tab-panel">
+          <h3>Product Description</h3>
+          <p>{productData.description}</p>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+          <h4>Key Features</h4>
+          <ul>
+            {for feature in productData.features}
+              <li>{feature}</li>
+            {/for}
+          </ul>
+        </div>
+      {/if}
+
+      {if activeTab == "specifications"}
+        <div class="tab-panel">
+          <h3>Technical Specifications</h3>
+          <table class="specs-table">
+            <tr>
+              <th>Driver Size</th>
+              <td>40mm</td>
+            </tr>
+            <tr>
+              <th>Frequency Response</th>
+              <td>20Hz - 20kHz</td>
+            </tr>
+            <tr>
+              <th>Impedance</th>
+              <td>32 ohms</td>
+            </tr>
+            <tr>
+              <th>Connectivity</th>
+              <td>Bluetooth 5.3, 3.5mm jack</td>
+            </tr>
+            <tr>
+              <th>Battery Life</th>
+              <td>40 hours (ANC on)</td>
+            </tr>
+            <tr>
+              <th>Charging Time</th>
+              <td>2 hours (USB-C)</td>
+            </tr>
+            <tr>
+              <th>Weight</th>
+              <td>250g</td>
+            </tr>
+            <tr>
+              <th>Warranty</th>
+              <td>2 years</td>
+            </tr>
+          </table>
+        </div>
+      {/if}
+
+      {if activeTab == "reviews"}
+        <div class="tab-panel" id="reviews">
+          <div class="reviews-header">
+            <div class="reviews-summary">
+              <div class="average-rating">
+                <span class="rating-number">{productData.rating}</span>
+                <div class="rating-info">
+                  <div class="stars">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </div>
+                  <span>Based on {productData.reviews} reviews</span>
+                </div>
+              </div>
+              <Button variant="primary">Write a Review</Button>
+            </div>
+          </div>
+
+          <div class="reviews-list">
+            {for review in reviews}
+              <div class="review-card">
+                <div class="review-header">
+                  <div class="reviewer">
+                    <Avatar size="sm" name={review.author} />
+                    <div class="reviewer-info">
+                      <span class="reviewer-name">{review.author}</span>
+                      <span class="review-date">{review.date}</span>
+                    </div>
+                  </div>
+                  <div class="review-rating">
+                    {for i in [1,2,3,4,5]}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill={i <= review.rating ? "currentColor" : "none"} stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                    {/for}
+                  </div>
+                </div>
+                <h4 class="review-title">{review.title}</h4>
+                <p class="review-content">{review.content}</p>
+                <div class="review-footer">
+                  <button class="helpful-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                    </svg>
+                    Helpful ({review.helpful})
+                  </button>
+                </div>
+              </div>
+            {/for}
+          </div>
+          <div class="load-more">
+            <Button variant="secondary">Load More Reviews</Button>
+          </div>
+        </div>
+      {/if}
+    </div>
+  </section>
+
+  <!-- Related Products -->
+  <section class="related-section">
+    <h2>You May Also Like</h2>
+    <div class="related-grid">
+      {for item in relatedProducts}
+        <div class="related-card">
+          <div class="related-image">
+            <div class="image-placeholder"></div>
+          </div>
+          <div class="related-info">
+            <div class="related-rating">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <span>{item.rating}</span>
+            </div>
+            <h4>{item.name}</h4>
+            <p class="related-price">${item.price}</p>
+          </div>
+        </div>
+      {/for}
+    </div>
+  </section>
+</div>
+
+<style scoped>
+.product-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--flin-space-6);
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  margin-bottom: var(--flin-space-6);
+  font-size: var(--flin-text-sm);
+}
+
+.breadcrumb a {
+  color: var(--flin-text-secondary);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  color: var(--flin-accent-gold);
+}
+
+.breadcrumb .separator {
+  color: var(--flin-text-tertiary);
+}
+
+.breadcrumb .current {
+  color: var(--flin-text-primary);
+}
+
+/* Product Section */
+.product-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--flin-space-12);
+  margin-bottom: var(--flin-space-12);
+}
+
+/* Gallery */
+.product-gallery {
+  display: flex;
+  gap: var(--flin-space-4);
+}
+
+.thumbnail-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-2);
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  border: 2px solid transparent;
+  border-radius: var(--flin-radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--flin-bg-secondary);
+  padding: 0;
+}
+
+.thumbnail.active {
+  border-color: var(--flin-accent-gold);
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  background: var(--flin-bg-tertiary);
+}
+
+.main-image {
+  flex: 1;
+  position: relative;
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-lg);
+  overflow: hidden;
+}
+
+.image-placeholder {
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--flin-bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-text {
+  color: var(--flin-text-tertiary);
+  font-size: var(--flin-text-sm);
+}
+
+.zoom-btn {
+  position: absolute;
+  top: var(--flin-space-4);
+  right: var(--flin-space-4);
+  width: 40px;
+  height: 40px;
+  background: var(--flin-bg-primary);
+  border: none;
+  border-radius: 50%;
+  color: var(--flin-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sale-badge {
+  position: absolute;
+  top: var(--flin-space-4);
+  left: var(--flin-space-4);
+  padding: var(--flin-space-1) var(--flin-space-3);
+  background: #ef4444;
+  color: white;
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  border-radius: var(--flin-radius-full);
+}
+
+/* Product Info */
+.product-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-brand {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--flin-space-2);
+}
+
+.product-title {
+  font-size: var(--flin-text-3xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-3);
+}
+
+.product-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-4);
+  margin-bottom: var(--flin-space-4);
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+}
+
+.stars {
+  display: flex;
+  color: #eab308;
+}
+
+.rating-value {
+  font-weight: 600;
+  color: var(--flin-text-primary);
+}
+
+.review-count {
+  color: var(--flin-text-secondary);
+  text-decoration: none;
+}
+
+.review-count:hover {
+  color: var(--flin-accent-gold);
+}
+
+.sku {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-tertiary);
+}
+
+.product-price {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+  margin-bottom: var(--flin-space-4);
+}
+
+.current-price {
+  font-size: var(--flin-text-3xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+}
+
+.original-price {
+  font-size: var(--flin-text-xl);
+  color: var(--flin-text-tertiary);
+  text-decoration: line-through;
+}
+
+.discount {
+  padding: var(--flin-space-1) var(--flin-space-2);
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  font-size: var(--flin-text-sm);
+  font-weight: 600;
+  border-radius: var(--flin-radius-sm);
+}
+
+.product-description {
+  font-size: var(--flin-text-md);
+  color: var(--flin-text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--flin-space-6);
+}
+
+/* Options */
+.option-group {
+  margin-bottom: var(--flin-space-4);
+}
+
+.option-group label {
+  display: block;
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.color-options {
+  display: flex;
+  gap: var(--flin-space-2);
+}
+
+.color-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.color-swatch.selected {
+  border-color: var(--flin-accent-gold);
+  box-shadow: 0 0 0 2px var(--flin-bg-primary), 0 0 0 4px var(--flin-accent-gold);
+}
+
+.quantity-selector {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--flin-border-primary);
+  border-radius: var(--flin-radius-md);
+  overflow: hidden;
+  margin-right: var(--flin-space-4);
+}
+
+.qty-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: var(--flin-bg-secondary);
+  color: var(--flin-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qty-btn:hover {
+  background: var(--flin-bg-tertiary);
+}
+
+.quantity-selector input {
+  width: 60px;
+  height: 40px;
+  border: none;
+  background: var(--flin-bg-primary);
+  text-align: center;
+  font-size: var(--flin-text-md);
+  color: var(--flin-text-primary);
+}
+
+.stock-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--flin-space-1);
+  font-size: var(--flin-text-sm);
+}
+
+.stock-status.in-stock {
+  color: #22c55e;
+}
+
+.stock-status.out-of-stock {
+  color: #ef4444;
+}
+
+/* Actions */
+.product-actions {
+  display: flex;
+  gap: var(--flin-space-3);
+  margin-bottom: var(--flin-space-6);
+}
+
+.product-actions :global(.btn) {
+  flex: 1;
+}
+
+.wishlist-btn {
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--flin-border-primary);
+  background: transparent;
+  border-radius: var(--flin-radius-md);
+  color: var(--flin-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wishlist-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* Features */
+.features-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--flin-space-2);
+  margin-bottom: var(--flin-space-6);
+  padding: var(--flin-space-4);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-lg);
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+.feature-item svg {
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+/* Trust Badges */
+.trust-badges {
+  display: flex;
+  gap: var(--flin-space-6);
+  padding-top: var(--flin-space-4);
+  border-top: 1px solid var(--flin-border-primary);
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+.badge svg {
+  color: var(--flin-accent-gold);
+}
+
+/* Tabs */
+.tabs-section {
+  margin-bottom: var(--flin-space-12);
+}
+
+.tabs-header {
+  display: flex;
+  gap: var(--flin-space-1);
+  border-bottom: 1px solid var(--flin-border-primary);
+  margin-bottom: var(--flin-space-6);
+}
+
+.tab-btn {
+  padding: var(--flin-space-4) var(--flin-space-6);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--flin-text-secondary);
+  font-size: var(--flin-text-md);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  color: var(--flin-text-primary);
+  border-bottom-color: var(--flin-accent-gold);
+}
+
+.tabs-content {
+  padding: var(--flin-space-4) 0;
+}
+
+.tab-panel h3 {
+  font-size: var(--flin-text-xl);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-4);
+}
+
+.tab-panel h4 {
+  font-size: var(--flin-text-lg);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin: var(--flin-space-6) 0 var(--flin-space-3);
+}
+
+.tab-panel p {
+  font-size: var(--flin-text-md);
+  color: var(--flin-text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--flin-space-4);
+}
+
+.tab-panel ul {
+  list-style: disc;
+  padding-left: var(--flin-space-6);
+}
+
+.tab-panel li {
+  font-size: var(--flin-text-md);
+  color: var(--flin-text-secondary);
+  margin-bottom: var(--flin-space-2);
+}
+
+/* Specs Table */
+.specs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.specs-table tr {
+  border-bottom: 1px solid var(--flin-border-primary);
+}
+
+.specs-table th,
+.specs-table td {
+  padding: var(--flin-space-4);
+  text-align: left;
+  font-size: var(--flin-text-sm);
+}
+
+.specs-table th {
+  width: 200px;
+  color: var(--flin-text-secondary);
+  font-weight: 500;
+}
+
+.specs-table td {
+  color: var(--flin-text-primary);
+}
+
+/* Reviews */
+.reviews-header {
+  margin-bottom: var(--flin-space-6);
+}
+
+.reviews-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--flin-space-6);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-lg);
+}
+
+.average-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-4);
+}
+
+.rating-number {
+  font-size: var(--flin-text-4xl);
+  font-weight: 700;
+  color: var(--flin-text-primary);
+}
+
+.rating-info .stars {
+  margin-bottom: var(--flin-space-1);
+}
+
+.rating-info span {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flin-space-4);
+}
+
+.review-card {
+  padding: var(--flin-space-5);
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-lg);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--flin-space-3);
+}
+
+.reviewer {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-3);
+}
+
+.reviewer-name {
+  display: block;
+  font-weight: 500;
+  color: var(--flin-text-primary);
+}
+
+.review-date {
+  font-size: var(--flin-text-xs);
+  color: var(--flin-text-tertiary);
+}
+
+.review-rating {
+  display: flex;
+  color: #eab308;
+}
+
+.review-title {
+  font-size: var(--flin-text-md);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-2);
+}
+
+.review-content {
+  font-size: var(--flin-text-sm);
+  color: var(--flin-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--flin-space-3);
+}
+
+.review-footer {
+  display: flex;
+}
+
+.helpful-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-2);
+  background: transparent;
+  border: none;
+  color: var(--flin-text-tertiary);
+  font-size: var(--flin-text-sm);
+  cursor: pointer;
+}
+
+.helpful-btn:hover {
+  color: var(--flin-text-primary);
+}
+
+.load-more {
+  text-align: center;
+  margin-top: var(--flin-space-6);
+}
+
+/* Related Products */
+.related-section {
+  margin-bottom: var(--flin-space-12);
+}
+
+.related-section h2 {
+  font-size: var(--flin-text-xl);
+  font-weight: 600;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-6);
+}
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--flin-space-4);
+}
+
+.related-card {
+  background: var(--flin-bg-secondary);
+  border-radius: var(--flin-radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.related-card:hover {
+  transform: translateY(-4px);
+}
+
+.related-image {
+  padding: var(--flin-space-4);
+}
+
+.related-image .image-placeholder {
+  aspect-ratio: 1;
+  border-radius: var(--flin-radius-md);
+}
+
+.related-info {
+  padding: var(--flin-space-4);
+  padding-top: 0;
+}
+
+.related-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--flin-space-1);
+  margin-bottom: var(--flin-space-1);
+  color: #eab308;
+  font-size: var(--flin-text-sm);
+}
+
+.related-info h4 {
+  font-size: var(--flin-text-sm);
+  font-weight: 500;
+  color: var(--flin-text-primary);
+  margin-bottom: var(--flin-space-1);
+}
+
+.related-price {
+  font-size: var(--flin-text-md);
+  font-weight: 700;
+  color: var(--flin-accent-gold);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .product-section {
+    grid-template-columns: 1fr;
+    gap: var(--flin-space-8);
+  }
+
+  .product-gallery {
+    flex-direction: column-reverse;
+  }
+
+  .thumbnail-list {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .related-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .product-page {
+    padding: var(--flin-space-4);
+  }
+
+  .product-title {
+    font-size: var(--flin-text-2xl);
+  }
+
+  .product-actions {
+    flex-direction: column;
+  }
+
+  .product-actions :global(.btn) {
+    width: 100%;
+  }
+
+  .wishlist-btn {
+    width: 100%;
+  }
+
+  .trust-badges {
+    flex-direction: column;
+    gap: var(--flin-space-3);
+  }
+
+  .tabs-header {
+    overflow-x: auto;
+  }
+
+  .reviews-summary {
+    flex-direction: column;
+    gap: var(--flin-space-4);
+    text-align: center;
+  }
+
+  .average-rating {
+    flex-direction: column;
+  }
+}
+</style>

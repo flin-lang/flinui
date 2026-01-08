@@ -1,0 +1,528 @@
+// FlinUI PRO DataTableEditable Component
+// Inline editing on cell click
+
+// Props with defaults
+columns = props.columns || []
+data = props.data || []
+loading = props.loading || false
+emptyText = props.emptyText || "No data available"
+striped = props.striped || false
+hoverable = props.hoverable || true
+bordered = props.bordered || false
+rowKey = props.rowKey || "id"
+onCellEdit = props.onCellEdit || none
+onRowSave = props.onRowSave || none
+editableColumns = props.editableColumns || "all"
+
+// State
+editingCell = none
+editValue = ""
+pendingChanges = {}
+
+// Computed classes
+stripedClass = match striped {
+    true -> " pro-datatable-editable--striped"
+    _ -> ""
+}
+
+hoverableClass = match hoverable {
+    true -> " pro-datatable-editable--hoverable"
+    _ -> ""
+}
+
+borderedClass = match bordered {
+    true -> " pro-datatable-editable--bordered"
+    _ -> ""
+}
+
+tableClass = "pro-datatable-editable" ++ stripedClass ++ hoverableClass ++ borderedClass
+
+// Check if column is editable
+isColumnEditable = (columnKey) => {
+    if editableColumns == "all" {
+        true
+    } else if editableColumns == "none" {
+        false
+    } else {
+        editableColumns.includes(columnKey)
+    }
+}
+
+// Cell editing handlers
+startEditing = (rowId, columnKey, currentValue) => {
+    if isColumnEditable(columnKey) {
+        editingCell = { rowId: rowId, columnKey: columnKey }
+        editValue = currentValue || ""
+    }
+}
+
+handleEditChange = (e) => {
+    editValue = e.target.value
+}
+
+saveEdit = {
+    if editingCell != none {
+        rowId = editingCell.rowId
+        columnKey = editingCell.columnKey
+
+        // Track pending changes
+        if pendingChanges[rowId] == none {
+            pendingChanges[rowId] = {}
+        }
+        pendingChanges[rowId][columnKey] = editValue
+
+        // Notify parent
+        if onCellEdit != none {
+            onCellEdit(rowId, columnKey, editValue)
+        }
+
+        editingCell = none
+        editValue = ""
+    }
+}
+
+cancelEdit = {
+    editingCell = none
+    editValue = ""
+}
+
+handleKeyDown = (e) => {
+    match e.key {
+        "Enter" -> saveEdit
+        "Escape" -> cancelEdit
+        _ -> none
+    }
+}
+
+isEditing = (rowId, columnKey) => {
+    editingCell != none && editingCell.rowId == rowId && editingCell.columnKey == columnKey
+}
+
+getCellValue = (row, columnKey) => {
+    rowId = row[rowKey]
+    if pendingChanges[rowId] != none && pendingChanges[rowId][columnKey] != none {
+        pendingChanges[rowId][columnKey]
+    } else {
+        row[columnKey]
+    }
+}
+
+hasPendingChanges = (row) => {
+    rowId = row[rowKey]
+    pendingChanges[rowId] != none && Object.keys(pendingChanges[rowId]).length > 0
+}
+
+saveRow = (row) => {
+    rowId = row[rowKey]
+    if onRowSave != none && pendingChanges[rowId] != none {
+        onRowSave(rowId, pendingChanges[rowId])
+        delete pendingChanges[rowId]
+    }
+}
+
+discardRowChanges = (row) => {
+    rowId = row[rowKey]
+    delete pendingChanges[rowId]
+}
+
+<div class="pro-datatable-editable-container">
+    <div class="pro-datatable-editable__toolbar">
+        <span class="pro-datatable-editable__hint">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            Click any cell to edit
+        </span>
+    </div>
+
+    <div class="pro-datatable-editable__wrapper">
+        <table class={tableClass}>
+            <thead class="pro-datatable-editable__head">
+                <tr class="pro-datatable-editable__row pro-datatable-editable__row--header">
+                    {for column in columns}
+                        <th class="pro-datatable-editable__header" scope="col">
+                            <div class="pro-datatable-editable__header-content">
+                                {column.label || column.key}
+                                {if isColumnEditable(column.key)}
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                {/if}
+                            </div>
+                        </th>
+                    {/for}
+                    <th class="pro-datatable-editable__header pro-datatable-editable__header--actions">
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody class="pro-datatable-editable__body">
+                {if loading}
+                    <tr class="pro-datatable-editable__row">
+                        <td class="pro-datatable-editable__cell pro-datatable-editable__loading" colspan={columns.length + 1}>
+                            <div class="pro-datatable-editable__spinner"></div>
+                            <span>Loading data...</span>
+                        </td>
+                    </tr>
+                {else if data.length == 0}
+                    <tr class="pro-datatable-editable__row">
+                        <td class="pro-datatable-editable__cell pro-datatable-editable__empty" colspan={columns.length + 1}>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M3 9h18"/>
+                                <path d="M9 21V9"/>
+                            </svg>
+                            <span>{emptyText}</span>
+                        </td>
+                    </tr>
+                {else}
+                    {for row in data}
+                        <tr class={"pro-datatable-editable__row" ++ (if hasPendingChanges(row) { " pro-datatable-editable__row--modified" } else { "" })}>
+                            {for column in columns}
+                                <td
+                                    class={"pro-datatable-editable__cell" ++ (if isColumnEditable(column.key) { " pro-datatable-editable__cell--editable" } else { "" }) ++ (if isEditing(row[rowKey], column.key) { " pro-datatable-editable__cell--editing" } else { "" })}
+                                    click={if !isEditing(row[rowKey], column.key) { startEditing(row[rowKey], column.key, getCellValue(row, column.key)) } else { none }}
+                                >
+                                    {if isEditing(row[rowKey], column.key)}
+                                        <input
+                                            type={column.inputType || "text"}
+                                            class="pro-datatable-editable__input"
+                                            value={editValue}
+                                            input={handleEditChange}
+                                            keydown={handleKeyDown}
+                                            blur={saveEdit}
+                                            autofocus
+                                        />
+                                    {else}
+                                        <span class="pro-datatable-editable__value">
+                                            {getCellValue(row, column.key)}
+                                        </span>
+                                        {if isColumnEditable(column.key)}
+                                            <svg class="pro-datatable-editable__edit-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                            </svg>
+                                        {/if}
+                                    {/if}
+                                </td>
+                            {/for}
+                            <td class="pro-datatable-editable__cell pro-datatable-editable__cell--actions">
+                                {if hasPendingChanges(row)}
+                                    <div class="pro-datatable-editable__row-actions">
+                                        <button
+                                            class="pro-datatable-editable__save-btn"
+                                            click={saveRow(row)}
+                                            title="Save changes"
+                                        >
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="20 6 9 17 4 12"/>
+                                            </svg>
+                                        </button>
+                                        <button
+                                            class="pro-datatable-editable__discard-btn"
+                                            click={discardRowChanges(row)}
+                                            title="Discard changes"
+                                        >
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M18 6L6 18M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                {else}
+                                    <span class="pro-datatable-editable__no-changes">-</span>
+                                {/if}
+                            </td>
+                        </tr>
+                    {/for}
+                {/if}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style scoped>
+.pro-datatable-editable-container {
+    font-family: var(--flin-font-sans);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+.pro-datatable-editable__toolbar {
+    display: flex;
+    align-items: center;
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background: var(--flin-neutral-50);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-editable__hint {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-editable__wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pro-datatable-editable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--flin-text-sm);
+    text-align: left;
+}
+
+.pro-datatable-editable__head {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-editable__header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    white-space: nowrap;
+    border-bottom: var(--flin-space-0-5) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-editable__header-content {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+.pro-datatable-editable__header--actions {
+    width: var(--flin-size-24);
+    text-align: center;
+}
+
+.pro-datatable-editable__row {
+    transition: background-color var(--flin-transition-fast);
+}
+
+.pro-datatable-editable__row--modified {
+    background-color: color-mix(in srgb, var(--flin-warning) 8%, var(--flin-bg));
+}
+
+.pro-datatable-editable__cell {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    color: var(--flin-fg);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+    position: relative;
+}
+
+.pro-datatable-editable__cell--editable {
+    cursor: pointer;
+}
+
+.pro-datatable-editable__cell--editable:hover {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-editable__cell--editable:hover .pro-datatable-editable__edit-icon {
+    opacity: 1;
+}
+
+.pro-datatable-editable__cell--editing {
+    padding: var(--flin-space-1);
+    background-color: var(--flin-bg);
+}
+
+.pro-datatable-editable__cell--actions {
+    text-align: center;
+}
+
+.pro-datatable-editable__value {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.pro-datatable-editable__edit-icon {
+    opacity: 0;
+    color: var(--flin-fg-muted);
+    transition: opacity var(--flin-transition-fast);
+    flex-shrink: 0;
+}
+
+.pro-datatable-editable__input {
+    width: 100%;
+    padding: var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    background: var(--flin-bg);
+    border: var(--flin-space-0-5) solid var(--flin-primary);
+    border-radius: var(--flin-radius-sm);
+    outline: none;
+}
+
+.pro-datatable-editable__row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-1);
+}
+
+.pro-datatable-editable__save-btn,
+.pro-datatable-editable__discard-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--flin-size-7);
+    height: var(--flin-size-7);
+    padding: 0;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.pro-datatable-editable__save-btn {
+    background: var(--flin-success);
+    color: white;
+}
+
+.pro-datatable-editable__save-btn:hover {
+    background: color-mix(in srgb, var(--flin-success) 80%, black);
+}
+
+.pro-datatable-editable__discard-btn {
+    background: var(--flin-neutral-200);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-editable__discard-btn:hover {
+    background: var(--flin-neutral-300);
+    color: var(--flin-fg);
+}
+
+.pro-datatable-editable__no-changes {
+    color: var(--flin-fg-muted);
+}
+
+/* Variants */
+.pro-datatable-editable--striped .pro-datatable-editable__body .pro-datatable-editable__row:nth-child(even):not(.pro-datatable-editable__row--modified) {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-editable--hoverable .pro-datatable-editable__body .pro-datatable-editable__row:hover:not(.pro-datatable-editable__row--modified) {
+    background-color: var(--flin-neutral-100);
+}
+
+.pro-datatable-editable--bordered .pro-datatable-editable__header,
+.pro-datatable-editable--bordered .pro-datatable-editable__cell {
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+/* Loading state */
+.pro-datatable-editable__loading {
+    text-align: center;
+    padding: var(--flin-space-10) var(--flin-space-4);
+}
+
+.pro-datatable-editable__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-editable__spinner {
+    width: var(--flin-icon-lg);
+    height: var(--flin-icon-lg);
+    border: var(--flin-space-0-5) solid var(--flin-neutral-200);
+    border-top-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    animation: pro-datatable-editable-spin var(--flin-duration-slow) linear infinite;
+}
+
+@keyframes pro-datatable-editable-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty state */
+.pro-datatable-editable__empty {
+    text-align: center;
+    padding: var(--flin-space-12) var(--flin-space-4);
+}
+
+.pro-datatable-editable__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--flin-space-3);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-editable__empty svg {
+    color: var(--flin-neutral-300);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .pro-datatable-editable-container {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-editable__toolbar {
+    background: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-editable__head {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-editable__header,
+[data-theme="dark"] .pro-datatable-editable__cell {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-editable__cell--editable:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-editable__input {
+    background: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .pro-datatable-editable__row--modified {
+    background-color: color-mix(in srgb, var(--flin-warning) 12%, var(--flin-neutral-900));
+}
+
+[data-theme="dark"] .pro-datatable-editable--striped .pro-datatable-editable__body .pro-datatable-editable__row:nth-child(even):not(.pro-datatable-editable__row--modified) {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-editable--hoverable .pro-datatable-editable__body .pro-datatable-editable__row:hover:not(.pro-datatable-editable__row--modified) {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-editable__discard-btn {
+    background: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-editable__discard-btn:hover {
+    background: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .pro-datatable-editable__spinner {
+    border-color: var(--flin-neutral-700);
+    border-top-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .pro-datatable-editable__empty svg {
+    color: var(--flin-neutral-600);
+}
+</style>

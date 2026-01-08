@@ -1,0 +1,363 @@
+// Tooltip.flin - FlinUI PRO Tooltip Component
+// Hover/click triggered informational tooltip with rich content support
+
+// Props with defaults
+content = props.content || ""
+placement = props.placement || "top"
+trigger = props.trigger || "hover"
+delay = props.delay || 200
+maxWidth = props.maxWidth || 250
+arrow = props.arrow || true
+disabled = props.disabled || false
+
+// Internal state
+isVisible = false
+isExiting = false
+
+// Handle show tooltip
+handleShow = {
+    if !disabled {
+        isVisible = true
+        isExiting = false
+    }
+}
+
+// Handle hide tooltip
+handleHide = {
+    isExiting = true
+    isVisible = false
+}
+
+// Handle toggle for click trigger
+handleToggle = {
+    if !disabled {
+        if isVisible {
+            handleHide()
+        }
+        if !isVisible {
+            handleShow()
+        }
+    }
+}
+
+// Handle focus for keyboard accessibility
+handleFocus = {
+    handleShow()
+}
+
+handleBlur = {
+    handleHide()
+}
+
+// Placement class
+placementClass = match placement {
+    "bottom" -> "tooltip--bottom"
+    "left" -> "tooltip--left"
+    "right" -> "tooltip--right"
+    "top-start" -> "tooltip--top-start"
+    "top-end" -> "tooltip--top-end"
+    "bottom-start" -> "tooltip--bottom-start"
+    "bottom-end" -> "tooltip--bottom-end"
+    _ -> "tooltip--top"
+}
+
+// Arrow class
+arrowClass = match arrow { true -> "", _ -> " tooltip--no-arrow" }
+
+// Exiting class
+exitingClass = match isExiting { true -> " tooltip--exiting", _ -> "" }
+
+// Disabled class
+disabledClass = match disabled { true -> " tooltip-wrapper--disabled", _ -> "" }
+
+// Max width style
+maxWidthStyle = "max-width: " ++ maxWidth ++ "px"
+
+// Trigger is hover
+isHoverTrigger = match trigger { "hover" -> true, _ -> false }
+
+// Trigger is click
+isClickTrigger = match trigger { "click" -> true, _ -> false }
+
+<div class={"flin-pro-tooltip-wrapper" ++ disabledClass}>
+    <div
+        class="tooltip__trigger"
+        mouseenter={match isHoverTrigger { true -> handleShow, _ -> none }}
+        mouseleave={match isHoverTrigger { true -> handleHide, _ -> none }}
+        click={match isClickTrigger { true -> handleToggle, _ -> none }}
+        focus={handleFocus}
+        blur={handleBlur}
+        aria-describedby="tooltip-content"
+        tabindex="0"
+    >
+        {children}
+    </div>
+
+    {if isVisible && content != ""}
+        <div
+            id="tooltip-content"
+            class={"flin-pro-tooltip " ++ placementClass ++ arrowClass ++ exitingClass}
+            style={maxWidthStyle}
+            role="tooltip"
+            aria-hidden={!isVisible}
+        >
+            {if arrow}
+                <div class="tooltip__arrow"></div>
+            {/if}
+            <div class="tooltip__content">
+                {content}
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.flin-pro-tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-wrapper--disabled {
+    cursor: not-allowed;
+}
+
+.tooltip-wrapper--disabled .tooltip__trigger {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* Trigger */
+.tooltip__trigger {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.tooltip__trigger:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+    border-radius: var(--flin-radius-sm);
+}
+
+/* Tooltip */
+.flin-pro-tooltip {
+    position: absolute;
+    z-index: 9999;
+    pointer-events: none;
+    animation: tooltipFadeIn var(--flin-transition-fast) ease-out;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.tooltip--exiting {
+    animation: tooltipFadeOut var(--flin-transition-fast) ease-in forwards;
+}
+
+@keyframes tooltipFadeOut {
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+/* Content */
+.tooltip__content {
+    background-color: var(--flin-neutral-900);
+    color: white;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    border-radius: var(--flin-radius-md);
+    font-size: var(--flin-text-xs);
+    font-weight: 500;
+    line-height: 1.5;
+    text-align: center;
+    word-wrap: break-word;
+    box-shadow: var(--flin-shadow-md);
+}
+
+/* Arrow */
+.tooltip__arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+}
+
+/* Position: Top */
+.tooltip--top {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 8px;
+}
+
+.tooltip--top .tooltip__arrow {
+    bottom: -12px;
+    left: 50%;
+    margin-left: -6px;
+    border-top-color: var(--flin-neutral-900);
+    border-bottom: none;
+}
+
+/* Position: Top Start */
+.tooltip--top-start {
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 8px;
+}
+
+.tooltip--top-start .tooltip__arrow {
+    bottom: -12px;
+    left: 16px;
+    border-top-color: var(--flin-neutral-900);
+    border-bottom: none;
+}
+
+/* Position: Top End */
+.tooltip--top-end {
+    bottom: 100%;
+    right: 0;
+    margin-bottom: 8px;
+}
+
+.tooltip--top-end .tooltip__arrow {
+    bottom: -12px;
+    right: 16px;
+    border-top-color: var(--flin-neutral-900);
+    border-bottom: none;
+}
+
+/* Position: Bottom */
+.tooltip--bottom {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 8px;
+}
+
+.tooltip--bottom .tooltip__arrow {
+    top: -12px;
+    left: 50%;
+    margin-left: -6px;
+    border-bottom-color: var(--flin-neutral-900);
+    border-top: none;
+}
+
+/* Position: Bottom Start */
+.tooltip--bottom-start {
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+}
+
+.tooltip--bottom-start .tooltip__arrow {
+    top: -12px;
+    left: 16px;
+    border-bottom-color: var(--flin-neutral-900);
+    border-top: none;
+}
+
+/* Position: Bottom End */
+.tooltip--bottom-end {
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+}
+
+.tooltip--bottom-end .tooltip__arrow {
+    top: -12px;
+    right: 16px;
+    border-bottom-color: var(--flin-neutral-900);
+    border-top: none;
+}
+
+/* Position: Left */
+.tooltip--left {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 8px;
+}
+
+.tooltip--left .tooltip__arrow {
+    right: -12px;
+    top: 50%;
+    margin-top: -6px;
+    border-left-color: var(--flin-neutral-900);
+    border-right: none;
+}
+
+/* Position: Right */
+.tooltip--right {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 8px;
+}
+
+.tooltip--right .tooltip__arrow {
+    left: -12px;
+    top: 50%;
+    margin-top: -6px;
+    border-right-color: var(--flin-neutral-900);
+    border-left: none;
+}
+
+/* No arrow variant */
+.tooltip--no-arrow .tooltip__arrow {
+    display: none;
+}
+
+.tooltip--no-arrow.tooltip--top,
+.tooltip--no-arrow.tooltip--top-start,
+.tooltip--no-arrow.tooltip--top-end {
+    margin-bottom: 4px;
+}
+
+.tooltip--no-arrow.tooltip--bottom,
+.tooltip--no-arrow.tooltip--bottom-start,
+.tooltip--no-arrow.tooltip--bottom-end {
+    margin-top: 4px;
+}
+
+.tooltip--no-arrow.tooltip--left {
+    margin-right: 4px;
+}
+
+.tooltip--no-arrow.tooltip--right {
+    margin-left: 4px;
+}
+
+/* Dark theme - invert for contrast */
+[data-theme="dark"] .tooltip__content {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-neutral-900);
+}
+
+[data-theme="dark"] .tooltip--top .tooltip__arrow,
+[data-theme="dark"] .tooltip--top-start .tooltip__arrow,
+[data-theme="dark"] .tooltip--top-end .tooltip__arrow {
+    border-top-color: var(--flin-neutral-100);
+}
+
+[data-theme="dark"] .tooltip--bottom .tooltip__arrow,
+[data-theme="dark"] .tooltip--bottom-start .tooltip__arrow,
+[data-theme="dark"] .tooltip--bottom-end .tooltip__arrow {
+    border-bottom-color: var(--flin-neutral-100);
+}
+
+[data-theme="dark"] .tooltip--left .tooltip__arrow {
+    border-left-color: var(--flin-neutral-100);
+}
+
+[data-theme="dark"] .tooltip--right .tooltip__arrow {
+    border-right-color: var(--flin-neutral-100);
+}
+</style>

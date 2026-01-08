@@ -1,0 +1,496 @@
+// CartSummary.flin - FlinUI PRO E-commerce Component
+// Complete cart summary with line items, totals, promo codes, and checkout
+
+// Props with defaults
+items = props.items || []
+subtotal = props.subtotal || 0
+tax = props.tax || 0
+shipping = props.shipping || 0
+discount = props.discount || 0
+promoCode = props.promoCode || ""
+onPromoApply = props.onPromoApply
+onCheckout = props.onCheckout
+showLineItems = props.showLineItems || true
+shippingThreshold = props.shippingThreshold || 50
+currency = props.currency || "$"
+
+// Computed values
+total = subtotal + tax + shipping - discount
+formattedSubtotal = currency ++ subtotal
+formattedTax = currency ++ tax
+formattedShipping = shipping > 0 ? currency ++ shipping : "FREE"
+formattedDiscount = currency ++ discount
+formattedTotal = currency ++ total
+
+// Free shipping progress
+shippingProgress = subtotal / shippingThreshold * 100
+needsForFreeShipping = shippingThreshold - subtotal
+showShippingProgress = needsForFreeShipping > 0 && shipping > 0
+
+// Local state
+promoInput = ""
+promoApplied = promoCode != ""
+promoError = ""
+
+// Handlers
+fn handlePromoSubmit() {
+    if promoInput != "" {
+        if onPromoApply {
+            result = onPromoApply(promoInput)
+            if result.error {
+                promoError = result.error
+            } else {
+                promoError = ""
+            }
+        }
+    }
+}
+
+fn handleCheckoutClick() {
+    if onCheckout {
+        onCheckout()
+    }
+}
+
+<div class="cart-summary">
+    <div class="cart-summary-header">
+        <h3 class="cart-summary-title">Order Summary</h3>
+        <span class="cart-summary-count">{items.length} items</span>
+    </div>
+
+    {if showLineItems && items.length > 0}
+        <div class="cart-summary-items">
+            {for item in items}
+                <div class="cart-summary-item">
+                    <div class="cart-summary-item-info">
+                        <span class="cart-summary-item-name">{item.name}</span>
+                        <span class="cart-summary-item-qty">x{item.quantity}</span>
+                    </div>
+                    <span class="cart-summary-item-price">{currency}{item.price * item.quantity}</span>
+                </div>
+            {/for}
+        </div>
+        <div class="cart-summary-divider"></div>
+    {/if}
+
+    {if showShippingProgress}
+        <div class="cart-summary-shipping-progress">
+            <div class="cart-summary-shipping-text">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="3" width="15" height="13"/>
+                    <path d="M16 8h5l3 3v5h-2"/>
+                    <circle cx="5.5" cy="18.5" r="2.5"/>
+                    <circle cx="18.5" cy="18.5" r="2.5"/>
+                </svg>
+                <span>Add {currency}{needsForFreeShipping} more for FREE shipping!</span>
+            </div>
+            <div class="cart-summary-progress-bar">
+                <div class="cart-summary-progress-fill" style="width: {shippingProgress}%"></div>
+            </div>
+        </div>
+        <div class="cart-summary-divider"></div>
+    {/if}
+
+    <div class="cart-summary-promo">
+        <label class="cart-summary-promo-label">Promo Code</label>
+        <div class="cart-summary-promo-input-wrapper">
+            <input
+                type="text"
+                class="cart-summary-promo-input"
+                placeholder="Enter code"
+                value={promoInput}
+                disabled={promoApplied}
+            />
+            <button
+                class="cart-summary-promo-btn"
+                click={handlePromoSubmit}
+                disabled={promoInput == "" || promoApplied}
+            >
+                {if promoApplied}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                {else}
+                    Apply
+                {/if}
+            </button>
+        </div>
+        {if promoError != ""}
+            <p class="cart-summary-promo-error">{promoError}</p>
+        {/if}
+        {if promoApplied}
+            <p class="cart-summary-promo-success">Code "{promoCode}" applied!</p>
+        {/if}
+    </div>
+
+    <div class="cart-summary-divider"></div>
+
+    <div class="cart-summary-totals">
+        <div class="cart-summary-row">
+            <span class="cart-summary-label">Subtotal</span>
+            <span class="cart-summary-value">{formattedSubtotal}</span>
+        </div>
+
+        {if discount > 0}
+            <div class="cart-summary-row cart-summary-discount">
+                <span class="cart-summary-label">Discount</span>
+                <span class="cart-summary-value">-{formattedDiscount}</span>
+            </div>
+        {/if}
+
+        <div class="cart-summary-row">
+            <span class="cart-summary-label">Shipping</span>
+            <span class="cart-summary-value">{formattedShipping}</span>
+        </div>
+
+        <div class="cart-summary-row">
+            <span class="cart-summary-label">Tax</span>
+            <span class="cart-summary-value">{formattedTax}</span>
+        </div>
+    </div>
+
+    <div class="cart-summary-divider cart-summary-divider-bold"></div>
+
+    <div class="cart-summary-total">
+        <span class="cart-summary-total-label">Total</span>
+        <span class="cart-summary-total-value">{formattedTotal}</span>
+    </div>
+
+    <button class="cart-summary-checkout" click={handleCheckoutClick}>
+        <span>Proceed to Checkout</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+        </svg>
+    </button>
+
+    <div class="cart-summary-security">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <span>Secure checkout with SSL encryption</span>
+    </div>
+</div>
+
+<style scoped>
+/* Container */
+.cart-summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-6);
+    background-color: white;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-xl);
+}
+
+/* Header */
+.cart-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cart-summary-title {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+    margin: 0;
+}
+
+.cart-summary-count {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-600);
+}
+
+/* Line items */
+.cart-summary-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.cart-summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--flin-space-2);
+}
+
+.cart-summary-item-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.cart-summary-item-name {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-700);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cart-summary-item-qty {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-500);
+}
+
+.cart-summary-item-price {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+}
+
+/* Shipping progress */
+.cart-summary-shipping-progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.cart-summary-shipping-text {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-success);
+    font-weight: var(--flin-font-medium);
+}
+
+.cart-summary-progress-bar {
+    height: 6px;
+    background-color: var(--flin-neutral-200);
+    border-radius: var(--flin-radius-full);
+    overflow: hidden;
+}
+
+.cart-summary-progress-fill {
+    height: 100%;
+    background-color: var(--flin-success);
+    transition: width var(--flin-transition-normal);
+}
+
+/* Promo code */
+.cart-summary-promo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+}
+
+.cart-summary-promo-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-neutral-700);
+}
+
+.cart-summary-promo-input-wrapper {
+    display: flex;
+    gap: var(--flin-space-2);
+}
+
+.cart-summary-promo-input {
+    flex: 1;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-900);
+    background-color: var(--flin-neutral-50);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    transition: border-color var(--flin-transition-fast);
+}
+
+.cart-summary-promo-input:focus {
+    outline: none;
+    border-color: var(--flin-primary);
+}
+
+.cart-summary-promo-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cart-summary-promo-btn {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-md);
+    cursor: pointer;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.cart-summary-promo-btn:hover:not(:disabled) {
+    background-color: var(--flin-primary-hover);
+}
+
+.cart-summary-promo-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cart-summary-promo-error {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-danger);
+    margin: 0;
+}
+
+.cart-summary-promo-success {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-success);
+    margin: 0;
+}
+
+/* Dividers */
+.cart-summary-divider {
+    height: 1px;
+    background-color: var(--flin-neutral-200);
+}
+
+.cart-summary-divider-bold {
+    height: 2px;
+    background-color: var(--flin-neutral-300);
+}
+
+/* Totals */
+.cart-summary-totals {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+}
+
+.cart-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cart-summary-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-700);
+}
+
+.cart-summary-value {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+}
+
+.cart-summary-discount .cart-summary-value {
+    color: var(--flin-success);
+}
+
+/* Total */
+.cart-summary-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cart-summary-total-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+}
+
+.cart-summary-total-value {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-primary);
+}
+
+/* Checkout button */
+.cart-summary-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    width: 100%;
+    padding: var(--flin-space-4) var(--flin-space-6);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: white;
+    background-color: var(--flin-primary);
+    border: none;
+    border-radius: var(--flin-radius-lg);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.cart-summary-checkout:hover {
+    background-color: var(--flin-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cart-summary-checkout:active {
+    transform: translateY(0);
+}
+
+.cart-summary-checkout:focus-visible {
+    outline: 2px solid var(--flin-primary);
+    outline-offset: 2px;
+}
+
+/* Security badge */
+.cart-summary-security {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-500);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .cart-summary {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .cart-summary-title,
+    .cart-summary-item-price,
+    .cart-summary-value,
+    .cart-summary-total-label {
+        color: var(--flin-neutral-100);
+    }
+
+    .cart-summary-promo-input {
+        background-color: var(--flin-neutral-900);
+        border-color: var(--flin-neutral-600);
+        color: var(--flin-neutral-100);
+    }
+
+    .cart-summary-divider {
+        background-color: var(--flin-neutral-700);
+    }
+
+    .cart-summary-divider-bold {
+        background-color: var(--flin-neutral-600);
+    }
+}
+</style>

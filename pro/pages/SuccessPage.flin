@@ -1,0 +1,463 @@
+// ============================================================================
+// SuccessPage.flin — FlinUI PRO Page Template
+// Action complete/success page with confirmation and next steps
+// ============================================================================
+// Props:
+//   - title: Success title (string)
+//   - message: Success message (string)
+//   - type: Success type "default" | "payment" | "signup" | "order" (string)
+//   - details: Additional details object (object or none)
+//   - primaryAction: Primary action object (object or none)
+//   - secondaryAction: Secondary action object (object or none)
+//   - showConfetti: Show confetti animation (boolean)
+
+title = props.title || "Success!"
+message = props.message || "Your action has been completed successfully."
+type = props.type || "default"
+details = props.details || none
+showConfetti = props.showConfetti || true
+
+primaryAction = props.primaryAction || ["label": "Continue", "url": "/"]
+secondaryAction = props.secondaryAction || ["label": "Go to Dashboard", "url": "/dashboard"]
+
+// Type-specific defaults
+getTypeConfig = () => match type {
+    "payment" => [
+        "icon": "credit-card",
+        "title": title || "Payment Successful",
+        "message": message || "Your payment has been processed successfully.",
+        "color": "green"
+    ]
+    "signup" => [
+        "icon": "user-check",
+        "title": title || "Welcome Aboard!",
+        "message": message || "Your account has been created successfully.",
+        "color": "gold"
+    ]
+    "order" => [
+        "icon": "package",
+        "title": title || "Order Confirmed",
+        "message": message || "Your order has been placed successfully.",
+        "color": "blue"
+    ]
+    _ => [
+        "icon": "check",
+        "title": title,
+        "message": message,
+        "color": "gold"
+    ]
+}
+
+config = getTypeConfig()
+
+getSuccessIcon = (iconName) => match iconName {
+    "check" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+    "credit-card" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    "user-check" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+    "package" => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16.5 9.4-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+    _ => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+}
+
+<div class="success-page">
+    {if showConfetti}
+        <div class="success-page__confetti">
+            {for i in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
+                <div class="success-page__confetti-piece"></div>
+            {/for}
+        </div>
+    {/if}
+
+    <div class="success-page__container">
+        // Success Icon
+        <div class={"success-page__icon-wrapper success-page__icon-wrapper--" ++ config.color}>
+            <div class="success-page__icon-circle">
+                <div class="success-page__icon">
+                    {getSuccessIcon(config.icon)}
+                </div>
+            </div>
+            <div class="success-page__icon-ring success-page__icon-ring--1"></div>
+            <div class="success-page__icon-ring success-page__icon-ring--2"></div>
+        </div>
+
+        // Content
+        <h1 class="success-page__title">{config.title}</h1>
+        <p class="success-page__message">{config.message}</p>
+
+        // Details (if provided)
+        {if details != none}
+            <div class="success-page__details">
+                {if details.orderId != none}
+                    <div class="success-page__detail-row">
+                        <span class="success-page__detail-label">Order ID</span>
+                        <span class="success-page__detail-value">{details.orderId}</span>
+                    </div>
+                {/if}
+                {if details.transactionId != none}
+                    <div class="success-page__detail-row">
+                        <span class="success-page__detail-label">Transaction ID</span>
+                        <span class="success-page__detail-value">{details.transactionId}</span>
+                    </div>
+                {/if}
+                {if details.amount != none}
+                    <div class="success-page__detail-row">
+                        <span class="success-page__detail-label">Amount</span>
+                        <span class="success-page__detail-value success-page__detail-value--highlight">{details.amount}</span>
+                    </div>
+                {/if}
+                {if details.email != none}
+                    <div class="success-page__detail-row">
+                        <span class="success-page__detail-label">Confirmation sent to</span>
+                        <span class="success-page__detail-value">{details.email}</span>
+                    </div>
+                {/if}
+                {if details.date != none}
+                    <div class="success-page__detail-row">
+                        <span class="success-page__detail-label">Date</span>
+                        <span class="success-page__detail-value">{details.date}</span>
+                    </div>
+                {/if}
+            </div>
+        {/if}
+
+        // Actions
+        <div class="success-page__actions">
+            <a href={primaryAction.url} class="success-page__button success-page__button--primary">
+                {primaryAction.label}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+            {if secondaryAction != none}
+                <a href={secondaryAction.url} class="success-page__button success-page__button--secondary">
+                    {secondaryAction.label}
+                </a>
+            {/if}
+        </div>
+
+        // Additional Info
+        <div class="success-page__info">
+            <div class="success-page__info-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="4" width="20" height="16" rx="2"/>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                </svg>
+                <span>A confirmation email has been sent</span>
+            </div>
+            <div class="success-page__info-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span>Need help? <a href="/support">Contact support</a></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style scoped>
+.success-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--flin-space-8) var(--flin-space-6);
+    background: var(--flin-bg-base);
+    font-family: var(--flin-font-sans);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Confetti */
+.success-page__confetti {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.success-page__confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--flin-accent-gold);
+    animation: success-confetti 3s ease-out forwards;
+}
+
+.success-page__confetti-piece:nth-child(1) { left: 10%; animation-delay: 0s; background: var(--flin-accent-gold); }
+.success-page__confetti-piece:nth-child(2) { left: 20%; animation-delay: 0.1s; background: #a855f7; border-radius: 50%; }
+.success-page__confetti-piece:nth-child(3) { left: 30%; animation-delay: 0.2s; background: #3b82f6; }
+.success-page__confetti-piece:nth-child(4) { left: 40%; animation-delay: 0.1s; background: #22c55e; border-radius: 50%; }
+.success-page__confetti-piece:nth-child(5) { left: 50%; animation-delay: 0.3s; background: var(--flin-accent-gold); }
+.success-page__confetti-piece:nth-child(6) { left: 60%; animation-delay: 0.15s; background: #ef4444; border-radius: 50%; }
+.success-page__confetti-piece:nth-child(7) { left: 70%; animation-delay: 0.25s; background: #3b82f6; }
+.success-page__confetti-piece:nth-child(8) { left: 80%; animation-delay: 0.05s; background: #a855f7; border-radius: 50%; }
+.success-page__confetti-piece:nth-child(9) { left: 90%; animation-delay: 0.2s; background: var(--flin-accent-gold); }
+.success-page__confetti-piece:nth-child(10) { left: 15%; animation-delay: 0.35s; background: #22c55e; }
+.success-page__confetti-piece:nth-child(11) { left: 55%; animation-delay: 0.4s; background: #ef4444; border-radius: 50%; }
+.success-page__confetti-piece:nth-child(12) { left: 85%; animation-delay: 0.3s; background: #3b82f6; }
+
+@keyframes success-confetti {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+.success-page__container {
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* Icon */
+.success-page__icon-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto var(--flin-space-8);
+}
+
+.success-page__icon-circle {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+    animation: success-pop 0.5s ease-out;
+}
+
+.success-page__icon-wrapper--green .success-page__icon-circle {
+    background: #22c55e;
+}
+
+.success-page__icon-wrapper--blue .success-page__icon-circle {
+    background: #3b82f6;
+}
+
+@keyframes success-pop {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.success-page__icon {
+    animation: success-check 0.5s ease-out 0.3s both;
+}
+
+@keyframes success-check {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.success-page__icon svg {
+    width: 56px;
+    height: 56px;
+    color: white;
+}
+
+.success-page__icon-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid var(--flin-accent-gold);
+    border-radius: var(--flin-radius-full);
+    animation: success-ring 1s ease-out forwards;
+}
+
+.success-page__icon-wrapper--green .success-page__icon-ring {
+    border-color: #22c55e;
+}
+
+.success-page__icon-wrapper--blue .success-page__icon-ring {
+    border-color: #3b82f6;
+}
+
+.success-page__icon-ring--1 {
+    width: 140px;
+    height: 140px;
+    animation-delay: 0.2s;
+}
+
+.success-page__icon-ring--2 {
+    width: 160px;
+    height: 160px;
+    animation-delay: 0.4s;
+}
+
+@keyframes success-ring {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+    }
+}
+
+/* Content */
+.success-page__title {
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-text-primary);
+    margin: 0 0 var(--flin-space-3) 0;
+}
+
+.success-page__message {
+    font-size: var(--flin-text-base);
+    color: var(--flin-text-secondary);
+    line-height: 1.6;
+    margin: 0 0 var(--flin-space-6) 0;
+}
+
+/* Details */
+.success-page__details {
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-subtle);
+    border-radius: var(--flin-radius-xl);
+    padding: var(--flin-space-5);
+    margin-bottom: var(--flin-space-6);
+    text-align: left;
+}
+
+.success-page__detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--flin-space-3) 0;
+    border-bottom: 1px solid var(--flin-border-subtle);
+}
+
+.success-page__detail-row:last-child {
+    border-bottom: none;
+}
+
+.success-page__detail-label {
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-tertiary);
+}
+
+.success-page__detail-value {
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-text-primary);
+    font-family: var(--flin-font-mono);
+}
+
+.success-page__detail-value--highlight {
+    color: var(--flin-accent-gold);
+    font-weight: var(--flin-font-bold);
+}
+
+/* Actions */
+.success-page__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    margin-bottom: var(--flin-space-8);
+}
+
+.success-page__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    padding: var(--flin-space-4) var(--flin-space-6);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    border-radius: var(--flin-radius-lg);
+    text-decoration: none;
+    transition: all var(--flin-transition-fast);
+}
+
+.success-page__button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.success-page__button--primary {
+    color: white;
+    background: var(--flin-accent-gold);
+}
+
+.success-page__button--primary:hover {
+    background: var(--flin-accent-gold-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--flin-shadow-lg);
+}
+
+.success-page__button--secondary {
+    color: var(--flin-text-primary);
+    background: var(--flin-bg-surface);
+    border: 1px solid var(--flin-border-default);
+}
+
+.success-page__button--secondary:hover {
+    background: var(--flin-bg-elevated);
+}
+
+/* Info */
+.success-page__info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    padding-top: var(--flin-space-6);
+    border-top: 1px solid var(--flin-border-subtle);
+}
+
+.success-page__info-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-text-tertiary);
+}
+
+.success-page__info-item svg {
+    width: 16px;
+    height: 16px;
+}
+
+.success-page__info-item a {
+    color: var(--flin-accent-gold);
+    text-decoration: none;
+    font-weight: var(--flin-font-medium);
+}
+
+.success-page__info-item a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .success-page__icon-wrapper {
+        width: 100px;
+        height: 100px;
+    }
+
+    .success-page__icon svg {
+        width: 44px;
+        height: 44px;
+    }
+
+    .success-page__icon-ring--1 {
+        width: 120px;
+        height: 120px;
+    }
+
+    .success-page__icon-ring--2 {
+        width: 140px;
+        height: 140px;
+    }
+}
+</style>

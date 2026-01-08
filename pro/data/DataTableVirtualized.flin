@@ -1,0 +1,364 @@
+// FlinUI PRO DataTableVirtualized Component
+// For large datasets, shows only visible rows for performance
+
+// Props with defaults
+columns = props.columns || []
+data = props.data || []
+loading = props.loading || false
+emptyText = props.emptyText || "No data available"
+striped = props.striped || false
+hoverable = props.hoverable || true
+bordered = props.bordered || false
+rowHeight = props.rowHeight || 48
+overscan = props.overscan || 5
+containerHeight = props.containerHeight || 400
+
+// State
+scrollTop = 0
+containerRef = none
+
+// Computed classes
+stripedClass = match striped {
+    true -> " pro-datatable-virtualized--striped"
+    _ -> ""
+}
+
+hoverableClass = match hoverable {
+    true -> " pro-datatable-virtualized--hoverable"
+    _ -> ""
+}
+
+borderedClass = match bordered {
+    true -> " pro-datatable-virtualized--bordered"
+    _ -> ""
+}
+
+tableClass = "pro-datatable-virtualized" ++ stripedClass ++ hoverableClass ++ borderedClass
+
+// Virtual scrolling calculations
+totalHeight = data.length * rowHeight
+visibleRowCount = Math.ceil(containerHeight / rowHeight) + overscan * 2
+startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan)
+endIndex = Math.min(data.length, startIndex + visibleRowCount)
+offsetY = startIndex * rowHeight
+visibleData = data.slice(startIndex, endIndex)
+
+// Scroll handler
+handleScroll = (e) => {
+    scrollTop = e.target.scrollTop
+}
+
+// Get row index for striping
+getRowIndex = (index) => {
+    startIndex + index
+}
+
+<div class="pro-datatable-virtualized-container">
+    <div class="pro-datatable-virtualized__info">
+        <span class="pro-datatable-virtualized__count">
+            {data.length} rows total
+        </span>
+        <span class="pro-datatable-virtualized__visible">
+            Showing rows {startIndex + 1} - {endIndex}
+        </span>
+    </div>
+
+    <div class="pro-datatable-virtualized__header-wrapper">
+        <table class={tableClass ++ " pro-datatable-virtualized__header-table"}>
+            <thead class="pro-datatable-virtualized__head">
+                <tr class="pro-datatable-virtualized__row pro-datatable-virtualized__row--header">
+                    {for column in columns}
+                        <th
+                            class="pro-datatable-virtualized__header"
+                            scope="col"
+                            style={"width: " ++ (column.width || "auto") ++ "; min-width: " ++ (column.minWidth || "100px")}
+                        >
+                            {column.label || column.key}
+                        </th>
+                    {/for}
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <div
+        class="pro-datatable-virtualized__scroll-container"
+        style={"height: " ++ containerHeight ++ "px"}
+        scroll={handleScroll}
+        ref={containerRef}
+    >
+        {if loading}
+            <div class="pro-datatable-virtualized__loading">
+                <div class="pro-datatable-virtualized__spinner"></div>
+                <span>Loading data...</span>
+            </div>
+        {else if data.length == 0}
+            <div class="pro-datatable-virtualized__empty">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M3 9h18"/>
+                    <path d="M9 21V9"/>
+                </svg>
+                <span>{emptyText}</span>
+            </div>
+        {else}
+            <div
+                class="pro-datatable-virtualized__spacer"
+                style={"height: " ++ totalHeight ++ "px; position: relative;"}
+            >
+                <div
+                    class="pro-datatable-virtualized__rows"
+                    style={"transform: translateY(" ++ offsetY ++ "px);"}
+                >
+                    <table class={tableClass}>
+                        <tbody class="pro-datatable-virtualized__body">
+                            {for row, index in visibleData}
+                                <tr
+                                    class={"pro-datatable-virtualized__row" ++ (if striped && getRowIndex(index) % 2 == 1 { " pro-datatable-virtualized__row--striped" } else { "" })}
+                                    style={"height: " ++ rowHeight ++ "px"}
+                                >
+                                    {for column in columns}
+                                        <td
+                                            class="pro-datatable-virtualized__cell"
+                                            style={"width: " ++ (column.width || "auto") ++ "; min-width: " ++ (column.minWidth || "100px")}
+                                        >
+                                            {row[column.key]}
+                                        </td>
+                                    {/for}
+                                </tr>
+                            {/for}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {/if}
+    </div>
+
+    <div class="pro-datatable-virtualized__footer">
+        <span class="pro-datatable-virtualized__performance">
+            Virtualized: rendering {visibleData.length} of {data.length} rows
+        </span>
+    </div>
+</div>
+
+<style scoped>
+.pro-datatable-virtualized-container {
+    font-family: var(--flin-font-sans);
+    background: var(--flin-bg);
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+.pro-datatable-virtualized__info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background: var(--flin-neutral-50);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-virtualized__count {
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+}
+
+.pro-datatable-virtualized__header-wrapper {
+    overflow: hidden;
+    background: var(--flin-neutral-50);
+}
+
+.pro-datatable-virtualized__header-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.pro-datatable-virtualized {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--flin-text-sm);
+    text-align: left;
+    table-layout: fixed;
+}
+
+.pro-datatable-virtualized__head {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-virtualized__header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: var(--flin-space-0-5) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-virtualized__scroll-container {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.pro-datatable-virtualized__spacer {
+    width: 100%;
+}
+
+.pro-datatable-virtualized__rows {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.pro-datatable-virtualized__row {
+    display: table-row;
+    transition: background-color var(--flin-transition-fast);
+}
+
+.pro-datatable-virtualized__row--striped {
+    background-color: var(--flin-neutral-50);
+}
+
+.pro-datatable-virtualized__cell {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    color: var(--flin-fg);
+    border-bottom: var(--flin-size-px) solid var(--flin-neutral-200);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+/* Variants */
+.pro-datatable-virtualized--hoverable .pro-datatable-virtualized__row:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.pro-datatable-virtualized--bordered .pro-datatable-virtualized__header,
+.pro-datatable-virtualized--bordered .pro-datatable-virtualized__cell {
+    border: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+/* Footer */
+.pro-datatable-virtualized__footer {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    background: var(--flin-neutral-50);
+    border-top: var(--flin-size-px) solid var(--flin-neutral-200);
+}
+
+.pro-datatable-virtualized__performance {
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+}
+
+/* Loading state */
+.pro-datatable-virtualized__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-3);
+    height: 100%;
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-virtualized__spinner {
+    width: var(--flin-icon-lg);
+    height: var(--flin-icon-lg);
+    border: var(--flin-space-0-5) solid var(--flin-neutral-200);
+    border-top-color: var(--flin-primary);
+    border-radius: var(--flin-radius-full);
+    animation: pro-datatable-virtualized-spin var(--flin-duration-slow) linear infinite;
+}
+
+@keyframes pro-datatable-virtualized-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty state */
+.pro-datatable-virtualized__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-3);
+    height: 100%;
+    color: var(--flin-fg-muted);
+}
+
+.pro-datatable-virtualized__empty svg {
+    color: var(--flin-neutral-300);
+}
+
+/* Scrollbar styling */
+.pro-datatable-virtualized__scroll-container::-webkit-scrollbar {
+    width: var(--flin-space-2);
+}
+
+.pro-datatable-virtualized__scroll-container::-webkit-scrollbar-track {
+    background: var(--flin-neutral-100);
+}
+
+.pro-datatable-virtualized__scroll-container::-webkit-scrollbar-thumb {
+    background-color: var(--flin-neutral-300);
+    border-radius: var(--flin-radius-full);
+}
+
+.pro-datatable-virtualized__scroll-container::-webkit-scrollbar-thumb:hover {
+    background-color: var(--flin-neutral-400);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .pro-datatable-virtualized-container {
+    background: var(--flin-neutral-900);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-virtualized__info,
+[data-theme="dark"] .pro-datatable-virtualized__header-wrapper,
+[data-theme="dark"] .pro-datatable-virtualized__head,
+[data-theme="dark"] .pro-datatable-virtualized__footer {
+    background-color: var(--flin-neutral-800);
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-virtualized__header,
+[data-theme="dark"] .pro-datatable-virtualized__cell {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .pro-datatable-virtualized__row--striped {
+    background-color: var(--flin-neutral-850);
+}
+
+[data-theme="dark"] .pro-datatable-virtualized--hoverable .pro-datatable-virtualized__row:hover {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-virtualized__scroll-container::-webkit-scrollbar-track {
+    background: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .pro-datatable-virtualized__scroll-container::-webkit-scrollbar-thumb {
+    background-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .pro-datatable-virtualized__scroll-container::-webkit-scrollbar-thumb:hover {
+    background-color: var(--flin-neutral-500);
+}
+
+[data-theme="dark"] .pro-datatable-virtualized__spinner {
+    border-color: var(--flin-neutral-700);
+    border-top-color: var(--flin-primary);
+}
+
+[data-theme="dark"] .pro-datatable-virtualized__empty svg {
+    color: var(--flin-neutral-600);
+}
+</style>

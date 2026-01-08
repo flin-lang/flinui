@@ -1,0 +1,235 @@
+// CheckoutSteps.flin - FlinUI PRO E-commerce Component
+// Step indicator for checkout process with active/completed/inactive states
+
+// Props with defaults
+currentStep = props.currentStep || 1
+steps = props.steps || ["Cart", "Shipping", "Payment", "Review"]
+onStepClick = props.onStepClick
+clickable = props.clickable || false
+
+// Determine step status
+function getStepStatus(index) {
+    stepNumber = index + 1
+    if stepNumber < currentStep {
+        return "completed"
+    }
+    if stepNumber == currentStep {
+        return "active"
+    }
+    return "inactive"
+}
+
+// Handle step click
+function handleStepClick(index) {
+    if clickable && onStepClick {
+        onStepClick(index + 1)
+    }
+}
+
+<div class="checkout-steps">
+    <style scoped>
+        .checkout-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--flin-space-8) var(--flin-space-4);
+            background: var(--flin-bg-surface);
+            border-bottom: 1px solid var(--flin-border-light);
+        }
+
+        .steps-container {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .step-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-3);
+            background: transparent;
+            border: none;
+            cursor: default;
+            transition: all var(--flin-transition-fast);
+            flex: 1;
+            min-width: 0;
+        }
+
+        .step-button.clickable {
+            cursor: pointer;
+        }
+
+        .step-button.clickable:hover .step-circle {
+            transform: scale(1.05);
+        }
+
+        .step-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--flin-font-semibold);
+            font-size: var(--flin-text-lg);
+            transition: all var(--flin-transition-fast);
+            position: relative;
+        }
+
+        .step-circle.inactive {
+            background: var(--flin-bg-deep);
+            border: 2px solid var(--flin-border-medium);
+            color: var(--flin-text-muted);
+        }
+
+        .step-circle.active {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-deep);
+            box-shadow: 0 0 0 4px var(--flin-accent-gold-alpha-20);
+        }
+
+        .step-circle.completed {
+            background: var(--flin-accent-green);
+            color: white;
+        }
+
+        .step-checkmark {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .step-label {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            text-align: center;
+            transition: color var(--flin-transition-fast);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .step-label.inactive {
+            color: var(--flin-text-muted);
+        }
+
+        .step-label.active {
+            color: var(--flin-text-primary);
+        }
+
+        .step-label.completed {
+            color: var(--flin-text-secondary);
+        }
+
+        .step-connector {
+            flex: 1;
+            height: 2px;
+            background: var(--flin-border-medium);
+            margin: 0 var(--flin-space-2);
+            position: relative;
+            min-width: 20px;
+        }
+
+        .step-connector.completed {
+            background: var(--flin-accent-green);
+        }
+
+        .step-connector.active {
+            background: linear-gradient(
+                to right,
+                var(--flin-accent-green) 0%,
+                var(--flin-accent-green) 50%,
+                var(--flin-border-medium) 50%,
+                var(--flin-border-medium) 100%
+            );
+        }
+
+        @media (max-width: 640px) {
+            .checkout-steps {
+                padding: var(--flin-space-4) var(--flin-space-2);
+            }
+
+            .steps-container {
+                gap: 0;
+            }
+
+            .step-button {
+                padding: var(--flin-space-2);
+            }
+
+            .step-circle {
+                width: 36px;
+                height: 36px;
+                font-size: var(--flin-text-base);
+            }
+
+            .step-label {
+                font-size: var(--flin-text-xs);
+                display: none;
+            }
+
+            .step-label.active {
+                display: block;
+            }
+
+            .step-connector {
+                min-width: 10px;
+                margin: 0 var(--flin-space-1);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .step-circle {
+                width: 32px;
+                height: 32px;
+                font-size: var(--flin-text-sm);
+            }
+
+            .step-checkmark {
+                font-size: 18px;
+            }
+        }
+    </style>
+
+    <div class="steps-container">
+        {each steps as step, index}
+            {stepStatus = getStepStatus(index)}
+            {isLast = index == steps.length - 1}
+
+            <div class="step-item">
+                <button
+                    class="step-button {if clickable}clickable{/if}"
+                    click={() => handleStepClick(index)}
+                    type="button"
+                    aria-current={if stepStatus == "active"}"step"{/if}
+                >
+                    <div class="step-circle {stepStatus}">
+                        {if stepStatus == "completed"}
+                            <span class="step-checkmark">✓</span>
+                        {else}
+                            {index + 1}
+                        {/if}
+                    </div>
+                    <div class="step-label {stepStatus}">
+                        {step}
+                    </div>
+                </button>
+
+                {if !isLast}
+                    <div class="step-connector {stepStatus}"></div>
+                {/if}
+            </div>
+        {/each}
+    </div>
+</div>

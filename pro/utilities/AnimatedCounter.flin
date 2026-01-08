@@ -1,0 +1,138 @@
+// ============================================================================
+// AnimatedCounter.flin — FlinUI PRO Utility Component
+// Animated number counter with smooth transitions
+// ============================================================================
+// Props:
+//   - value: Target value to animate to (number, default: 0)
+//   - duration: Animation duration in ms (number, default: 1000)
+//   - delay: Delay before animation starts in ms (number, default: 0)
+//   - easing: Easing function - linear, ease-out, ease-in-out (string, default: "ease-out")
+//   - decimals: Number of decimal places (number, default: 0)
+//   - prefix: Prefix text (string, default: "")
+//   - suffix: Suffix text (string, default: "")
+//   - separator: Thousands separator (string, default: ",")
+//   - startOnView: Start animation when element is in view (boolean, default: true)
+// ============================================================================
+
+value = props.value || 0
+duration = props.duration || 1000
+delay = props.delay || 0
+easing = props.easing || "ease-out"
+decimals = props.decimals || 0
+prefix = props.prefix || ""
+suffix = props.suffix || ""
+separator = props.separator || ","
+startOnView = props.startOnView || true
+
+// State
+displayValue = 0
+hasStarted = false
+startTime = none
+
+// Format number with separator and decimals
+formatNumber = (num) => {
+    fixed = num.toFixed(decimals)
+    parts = fixed.split(".")
+    intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, separator)
+    {if decimals > 0 && parts.length > 1 {
+        intPart + "." + parts[1]
+    } else {
+        intPart
+    }}
+}
+
+// Easing functions
+getEasedProgress = (progress) => {
+    match easing {
+        "linear" -> progress
+        "ease-in" -> progress * progress
+        "ease-out" -> 1 - Math.pow(1 - progress, 2)
+        "ease-in-out" -> {
+            if progress < 0.5 {
+                2 * progress * progress
+            } else {
+                1 - Math.pow(-2 * progress + 2, 2) / 2
+            }
+        }
+        _ -> 1 - Math.pow(1 - progress, 2)
+    }
+}
+
+// Animation frame
+animate = (timestamp) => {
+    if startTime == none {
+        startTime = timestamp + delay
+    }
+
+    elapsed = timestamp - startTime
+
+    if elapsed < 0 {
+        requestAnimationFrame(animate)
+        return
+    }
+
+    progress = Math.min(elapsed / duration, 1)
+    easedProgress = getEasedProgress(progress)
+    displayValue = easedProgress * value
+
+    if progress < 1 {
+        requestAnimationFrame(animate)
+    }
+}
+
+// Start animation
+startAnimation = () => {
+    if !hasStarted {
+        hasStarted = true
+        requestAnimationFrame(animate)
+    }
+}
+
+// Intersection observer callback
+handleIntersection = (entries) => {
+    for entry in entries {
+        if entry.isIntersecting {
+            startAnimation()
+        }
+    }
+}
+
+// Lifecycle
+onMount = () => {
+    if startOnView {
+        // Set up intersection observer
+        observer = new IntersectionObserver(handleIntersection, {
+            threshold: 0.1
+        })
+        observer.observe(element)
+    } else {
+        // Start immediately after delay
+        setTimeout(startAnimation, delay)
+    }
+}
+
+<span class="flin-animated-counter" data-value={value}>
+    <span class="counter-prefix">{prefix}</span>
+    <span class="counter-value">{formatNumber(displayValue)}</span>
+    <span class="counter-suffix">{suffix}</span>
+</span>
+
+<style scoped>
+.flin-animated-counter {
+    display: inline-flex;
+    align-items: baseline;
+    font-variant-numeric: tabular-nums;
+}
+
+.counter-prefix,
+.counter-suffix {
+    font-size: inherit;
+    color: inherit;
+}
+
+.counter-value {
+    font-weight: inherit;
+    font-size: inherit;
+    color: inherit;
+}
+</style>

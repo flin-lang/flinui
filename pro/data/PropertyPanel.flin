@@ -1,0 +1,445 @@
+// PropertyPanel.flin - FlinUI PRO
+// Object properties panel with sections
+
+// Props with defaults
+title = props.title || ""
+subtitle = props.subtitle || ""
+sections = props.sections || []
+collapsible = props.collapsible || false
+defaultCollapsed = props.defaultCollapsed || []
+bordered = props.bordered || true
+shadow = props.shadow || "sm"
+headerActions = props.headerActions || none
+onSectionToggle = props.onSectionToggle || none
+
+// State for collapsed sections
+collapsedSections = defaultCollapsed
+
+// Toggle section collapse
+handleToggle = {sectionId} => {
+    if collapsedSections.includes(sectionId) {
+        collapsedSections = collapsedSections.filter({id} => id != sectionId)
+    } else {
+        collapsedSections = [...collapsedSections, sectionId]
+    }
+    if onSectionToggle != none {
+        onSectionToggle(sectionId, collapsedSections)
+    }
+}
+
+// Compute shadow class
+shadowClass = match shadow {
+    "none" -> ""
+    "md" -> "property-panel--shadow-md"
+    "lg" -> "property-panel--shadow-lg"
+    _ -> "property-panel--shadow-sm"
+}
+
+// Build class string
+panelClass = "property-panel " ++ shadowClass
+panelClass = panelClass ++ {if bordered { " property-panel--bordered" } else { "" }}
+
+<div class={panelClass}>
+    // Panel header
+    {if title != "" || headerActions != none}
+        <div class="property-panel__header">
+            <div class="property-panel__header-content">
+                {if title != ""}
+                    <h3 class="property-panel__title">{title}</h3>
+                {/if}
+                {if subtitle != ""}
+                    <p class="property-panel__subtitle">{subtitle}</p>
+                {/if}
+            </div>
+            {if headerActions != none}
+                <div class="property-panel__header-actions">
+                    {headerActions}
+                </div>
+            {/if}
+        </div>
+    {/if}
+
+    // Sections
+    <div class="property-panel__body">
+        {for section in sections}
+            <div
+                class={
+                    "property-panel__section" ++
+                    {if collapsible && collapsedSections.includes(section.id || section.title) { " property-panel__section--collapsed" } else { "" }}
+                }
+            >
+                // Section header
+                {if section.title != none}
+                    <div
+                        class={"property-panel__section-header" ++ {if collapsible { " property-panel__section-header--clickable" } else { "" }}}
+                        click={if collapsible { handleToggle(section.id || section.title) }}
+                    >
+                        <div class="property-panel__section-title">
+                            {if section.icon != none}
+                                <span class="property-panel__section-icon">{section.icon}</span>
+                            {/if}
+                            <span>{section.title}</span>
+                            {if section.badge != none}
+                                <span class={"property-panel__section-badge property-panel__section-badge--" ++ (section.badgeVariant || "default")}>
+                                    {section.badge}
+                                </span>
+                            {/if}
+                        </div>
+                        {if collapsible}
+                            <span class={"property-panel__section-toggle" ++ {if !collapsedSections.includes(section.id || section.title) { " property-panel__section-toggle--expanded" } else { "" }}}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </span>
+                        {/if}
+                    </div>
+                {/if}
+
+                // Section content
+                {if !collapsible || !collapsedSections.includes(section.id || section.title)}
+                    <div class="property-panel__section-content">
+                        {if section.description != none}
+                            <p class="property-panel__section-desc">{section.description}</p>
+                        {/if}
+
+                        // Properties
+                        {if section.properties != none}
+                            <dl class="property-panel__properties">
+                                {for prop in section.properties}
+                                    <div class={"property-panel__property" ++ {if prop.highlight { " property-panel__property--highlight" } else { "" }}}>
+                                        <dt class="property-panel__property-label">
+                                            {prop.label || ""}
+                                            {if prop.required}
+                                                <span class="property-panel__required">*</span>
+                                            {/if}
+                                        </dt>
+                                        <dd class="property-panel__property-value">
+                                            {if prop.editable}
+                                                <input
+                                                    type="text"
+                                                    class="property-panel__input"
+                                                    value={prop.value || ""}
+                                                    placeholder={prop.placeholder || ""}
+                                                >
+                                            {else if prop.badge != none}
+                                                <span class={"property-panel__badge property-panel__badge--" ++ (prop.badgeVariant || "default")}>
+                                                    {prop.value || ""}
+                                                </span>
+                                            {else if prop.link != none}
+                                                <a class="property-panel__link" href={prop.link}>{prop.value || ""}</a>
+                                            {else if prop.value != none}
+                                                <span class="property-panel__value-text">{prop.value}</span>
+                                            {else}
+                                                <span class="property-panel__empty">-</span>
+                                            {/if}
+                                            {if prop.action != none}
+                                                <span class="property-panel__property-action">{prop.action}</span>
+                                            {/if}
+                                        </dd>
+                                    </div>
+                                {/for}
+                            </dl>
+                        {/if}
+
+                        // Custom content slot
+                        {if section.content != none}
+                            <div class="property-panel__custom-content">
+                                {section.content}
+                            </div>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+        {/for}
+    </div>
+
+    // Panel footer
+    {if props.footer != none}
+        <div class="property-panel__footer">
+            {props.footer}
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.property-panel {
+    background: var(--flin-bg);
+    border-radius: var(--flin-radius-lg);
+    overflow: hidden;
+}
+
+.property-panel--bordered {
+    border: 1px solid var(--flin-neutral-200);
+}
+
+.property-panel--shadow-sm { box-shadow: var(--flin-shadow-sm); }
+.property-panel--shadow-md { box-shadow: var(--flin-shadow-md); }
+.property-panel--shadow-lg { box-shadow: var(--flin-shadow-lg); }
+
+.property-panel__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-4) var(--flin-space-5);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    background-color: var(--flin-neutral-50);
+}
+
+.property-panel__header-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.property-panel__title {
+    margin: 0;
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+}
+
+.property-panel__subtitle {
+    margin: var(--flin-space-1) 0 0 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.property-panel__header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.property-panel__body {
+    display: flex;
+    flex-direction: column;
+}
+
+.property-panel__section {
+    border-bottom: 1px solid var(--flin-neutral-100);
+}
+
+.property-panel__section:last-child {
+    border-bottom: none;
+}
+
+.property-panel__section--collapsed .property-panel__section-content {
+    display: none;
+}
+
+.property-panel__section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-3) var(--flin-space-5);
+    background-color: var(--flin-neutral-50);
+}
+
+.property-panel__section-header--clickable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.property-panel__section-header--clickable:hover {
+    background-color: var(--flin-neutral-100);
+}
+
+.property-panel__section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.property-panel__section-icon {
+    display: flex;
+    align-items: center;
+    color: var(--flin-neutral-500);
+}
+
+.property-panel__section-badge {
+    padding: 2px var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    border-radius: var(--flin-radius-full);
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.property-panel__section-badge--default { background-color: var(--flin-neutral-200); color: var(--flin-neutral-700); }
+.property-panel__section-badge--success { background-color: var(--flin-success-light); color: var(--flin-success-dark); }
+.property-panel__section-badge--warning { background-color: var(--flin-warning-light); color: var(--flin-warning-dark); }
+.property-panel__section-badge--danger { background-color: var(--flin-danger-light); color: var(--flin-danger-dark); }
+
+.property-panel__section-toggle {
+    display: flex;
+    align-items: center;
+    color: var(--flin-neutral-400);
+    transition: transform var(--flin-transition-fast);
+}
+
+.property-panel__section-toggle--expanded {
+    transform: rotate(90deg);
+}
+
+.property-panel__section-content {
+    padding: var(--flin-space-4) var(--flin-space-5);
+}
+
+.property-panel__section-desc {
+    margin: 0 0 var(--flin-space-4) 0;
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.property-panel__properties {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    margin: 0;
+}
+
+.property-panel__property {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--flin-space-4);
+    padding: var(--flin-space-2) 0;
+}
+
+.property-panel__property--highlight {
+    background-color: var(--flin-warning-light);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    margin: 0 calc(var(--flin-space-3) * -1);
+    border-radius: var(--flin-radius-md);
+}
+
+.property-panel__property-label {
+    flex-shrink: 0;
+    min-width: 140px;
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg-muted);
+    margin: 0;
+}
+
+.property-panel__required {
+    color: var(--flin-danger);
+    margin-left: 2px;
+}
+
+.property-panel__property-value {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg);
+    margin: 0;
+    min-width: 0;
+    word-break: break-word;
+}
+
+.property-panel__value-text {
+    flex: 1;
+}
+
+.property-panel__input {
+    flex: 1;
+    padding: var(--flin-space-2) var(--flin-space-3);
+    font-size: var(--flin-text-sm);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-md);
+    background: var(--flin-bg);
+    color: var(--flin-fg);
+}
+
+.property-panel__input:focus {
+    outline: none;
+    border-color: var(--flin-primary);
+    box-shadow: 0 0 0 2px var(--flin-primary-light);
+}
+
+.property-panel__badge {
+    padding: var(--flin-space-1) var(--flin-space-2);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-medium);
+    border-radius: var(--flin-radius-full);
+}
+
+.property-panel__badge--default { background-color: var(--flin-neutral-100); color: var(--flin-neutral-700); }
+.property-panel__badge--success { background-color: var(--flin-success-light); color: var(--flin-success-dark); }
+.property-panel__badge--warning { background-color: var(--flin-warning-light); color: var(--flin-warning-dark); }
+.property-panel__badge--danger { background-color: var(--flin-danger-light); color: var(--flin-danger-dark); }
+.property-panel__badge--info { background-color: var(--flin-info-light); color: var(--flin-info-dark); }
+
+.property-panel__link {
+    color: var(--flin-primary);
+    text-decoration: none;
+}
+
+.property-panel__link:hover {
+    text-decoration: underline;
+}
+
+.property-panel__empty {
+    color: var(--flin-neutral-400);
+}
+
+.property-panel__property-action {
+    flex-shrink: 0;
+}
+
+.property-panel__custom-content {
+    margin-top: var(--flin-space-3);
+}
+
+.property-panel__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-4) var(--flin-space-5);
+    border-top: 1px solid var(--flin-neutral-200);
+    background-color: var(--flin-neutral-50);
+}
+
+/* Dark theme */
+[data-theme="dark"] .property-panel--bordered {
+    border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .property-panel__header {
+    border-bottom-color: var(--flin-neutral-700);
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .property-panel__section {
+    border-bottom-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .property-panel__section-header {
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .property-panel__section-header--clickable:hover {
+    background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .property-panel__input {
+    border-color: var(--flin-neutral-600);
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .property-panel__footer {
+    border-top-color: var(--flin-neutral-700);
+    background-color: var(--flin-neutral-800);
+}
+
+[data-theme="dark"] .property-panel__property--highlight {
+    background-color: rgba(var(--flin-warning-rgb), 0.2);
+}
+</style>

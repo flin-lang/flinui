@@ -1,0 +1,194 @@
+// FlinUI PRO - Authentication Components
+// Complete auth UI kit for login, registration, password reset, 2FA, and more
+
+// This index file documents the available auth components.
+// Remember: FLIN has NO imports! Just use components directly.
+
+// ============================================================================
+// AUTH PAGES (8 components)
+// Full-page authentication layouts
+// ============================================================================
+
+// LoginPage - Full login page with form, social login, forgot password link
+// RegisterPage - Full signup page with form, terms acceptance, password strength
+// ForgotPasswordPage - Password reset request page with email input
+// ResetPasswordPage - New password entry page with strength indicator
+// VerifyEmailPage - Email verification page with success/pending states
+// TwoFactorPage - 2FA code input page with backup code option
+// SocialLogin - OAuth buttons component with multiple providers
+// MagicLinkLogin - Passwordless login with email link
+
+// ============================================================================
+// AUTH COMPONENTS (7 components)
+// Reusable authentication building blocks
+// ============================================================================
+
+// LoginCard - Centered login form card component
+// RegisterCard - Centered signup form card component
+// AuthTabs - Tabbed login/register interface
+// SocialAuthButtons - Grid of social auth buttons with layout options
+// PasswordStrength - Password strength indicator bar with requirements
+// OTPInput - 6-digit code input with separate boxes
+// RememberMe - Remember me checkbox + forgot password link row
+
+// ============================================================================
+// USER SESSION COMPONENTS (5 components)
+// User menu and session management
+// ============================================================================
+
+// UserMenu - Dropdown avatar menu with profile, settings, logout
+// UserButton - Avatar + name button that triggers menu
+// AccountSwitcher - Multi-account dropdown with add account option
+// SessionTimeout - Session timeout warning modal with countdown
+// LogoutConfirm - Logout confirmation modal
+
+// ============================================================================
+// EXAMPLE USAGE
+// ============================================================================
+
+// --- Login Page ---
+// <LoginPage
+//     title="Welcome back"
+//     onSubmit={fn(data) { login(data.email, data.password) }}
+//     onSocialLogin={fn(provider) { oauthLogin(provider) }}
+//     socialProviders={["google", "github"]}
+//     error={loginError}
+//     loading={isLoading}
+// />
+
+// --- Register Page ---
+// <RegisterPage
+//     title="Create an account"
+//     onSubmit={fn(data) { register(data) }}
+//     showTerms={true}
+//     termsUrl="/terms"
+//     privacyUrl="/privacy"
+// />
+
+// --- Forgot Password ---
+// <ForgotPasswordPage
+//     onSubmit={fn(data) { sendResetEmail(data.email) }}
+//     success={emailSent}
+// />
+
+// --- Reset Password ---
+// <ResetPasswordPage
+//     token={resetToken}
+//     onSubmit={fn(data) { resetPassword(data) }}
+//     minLength={8}
+// />
+
+// --- Email Verification ---
+// <VerifyEmailPage
+//     email="user@example.com"
+//     verified={false}
+//     onResend={fn() { resendVerification() }}
+// />
+
+// --- Two-Factor Auth ---
+// <TwoFactorPage
+//     onSubmit={fn(data) { verify2FA(data.code) }}
+//     onBackupCode={fn(data) { verifyBackupCode(data.backupCode) }}
+//     showBackupOption={true}
+// />
+
+// --- Magic Link Login ---
+// <MagicLinkLogin
+//     onSubmit={fn(data) { sendMagicLink(data.email) }}
+//     success={linkSent}
+// />
+
+// --- Login Card (embedded) ---
+// <LoginCard
+//     onSubmit={handleLogin}
+//     showSocialLogin={true}
+//     size="md"
+// />
+
+// --- Register Card (embedded) ---
+// <RegisterCard
+//     onSubmit={handleRegister}
+//     showPasswordStrength={true}
+// />
+
+// --- Auth Tabs (login/register toggle) ---
+// <AuthTabs
+//     defaultTab="login"
+//     onLogin={handleLogin}
+//     onRegister={handleRegister}
+//     showSocialLogin={true}
+// />
+
+// --- Social Auth Buttons ---
+// <SocialAuthButtons
+//     providers={["google", "github", "apple"]}
+//     layout="grid"
+//     columns={2}
+//     onAuth={fn(provider) { oauthLogin(provider) }}
+// />
+
+// --- Password Strength Indicator ---
+// <PasswordStrength
+//     password={passwordValue}
+//     showRequirements={true}
+//     variant="bar"
+// />
+
+// --- OTP Input ---
+// <OTPInput
+//     length={6}
+//     value={otpCode}
+//     onChange={fn(val) { otpCode = val }}
+//     onComplete={fn(val) { verifyOTP(val) }}
+// />
+
+// --- Remember Me Row ---
+// <RememberMe
+//     checked={rememberMe}
+//     onChange={fn(val) { rememberMe = val }}
+//     forgotPasswordUrl="/forgot-password"
+// />
+
+// --- User Menu ---
+// <UserMenu
+//     user={user}
+//     menuItems={[
+//         ["label": "Profile", "icon": "user"],
+//         ["label": "Settings", "icon": "settings"],
+//         ["type": "divider"],
+//         ["label": "Help", "icon": "help"]
+//     ]}
+//     onLogout={fn() { navigate("/login") }}
+// />
+
+// --- User Button ---
+// <UserButton
+//     user={user}
+//     size="md"
+//     variant="with-email"
+//     showChevron={true}
+// />
+
+// --- Account Switcher ---
+// <AccountSwitcher
+//     accounts={accounts}
+//     activeAccount={currentAccount}
+//     onSwitch={fn(account) { switchAccount(account) }}
+//     onAddAccount={fn() { navigate("/add-account") }}
+// />
+
+// --- Session Timeout ---
+// <SessionTimeout
+//     timeRemaining={300}
+//     warningThreshold={60}
+//     onExtend={fn() { extendSession() }}
+//     onLogout={fn() { logout() }}
+// />
+
+// --- Logout Confirm ---
+// <LogoutConfirm
+//     isOpen={showLogoutModal}
+//     userName={user.name}
+//     onConfirm={fn() { logout() }}
+//     onCancel={fn() { showLogoutModal = false }}
+// />

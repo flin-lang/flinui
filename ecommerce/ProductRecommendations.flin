@@ -1,0 +1,479 @@
+// ProductRecommendations.flin - FlinUI PRO E-commerce Component
+// "Recommended for You" section with AI-powered suggestions and horizontal scroll
+
+// Props with defaults
+recommendations = props.recommendations || []
+title = props.title || "Recommended for You"
+subtitle = props.subtitle || "Based on your browsing history"
+showSubtitle = props.showSubtitle || true
+onProductClick = props.onProductClick
+onAddToCart = props.onAddToCart
+currency = props.currency || "$"
+maxVisible = props.maxVisible || 6
+
+// State
+scrollPosition = 0
+canScrollLeft = false
+canScrollRight = recommendations.length > maxVisible
+containerRef = none
+
+// Computed values
+visibleRecommendations = recommendations.slice(0, maxVisible)
+hasRecommendations = recommendations.length > 0
+
+// Handlers
+fn handleScrollLeft() {
+    {if containerRef != none}
+        containerRef.scrollLeft -= 320
+        updateScrollState()
+    {/if}
+}
+
+fn handleScrollRight() {
+    {if containerRef != none}
+        containerRef.scrollLeft += 320
+        updateScrollState()
+    {/if}
+}
+
+fn updateScrollState() {
+    {if containerRef != none}
+        canScrollLeft = containerRef.scrollLeft > 0
+        canScrollRight = containerRef.scrollLeft < (containerRef.scrollWidth - containerRef.clientWidth - 10)
+    {/if}
+}
+
+fn handleProductClick(product) {
+    {if onProductClick != none}
+        onProductClick(product)
+    {/if}
+}
+
+fn handleAddToCart(product) {
+    {if onAddToCart != none}
+        onAddToCart(product)
+    {/if}
+}
+
+// Initialize scroll state
+onMount {
+    updateScrollState()
+    {if containerRef != none}
+        containerRef.addEventListener("scroll", updateScrollState)
+    {/if}
+}
+
+onUnmount {
+    {if containerRef != none}
+        containerRef.removeEventListener("scroll", updateScrollState)
+    {/if}
+}
+
+<div class="product-recommendations">
+    <div class="product-recommendations-header">
+        <div>
+            <h2 class="product-recommendations-title">{title}</h2>
+            {if showSubtitle}
+                <p class="product-recommendations-subtitle">{subtitle}</p>
+            {/if}
+        </div>
+        {if recommendations.length > maxVisible}
+            <div class="product-recommendations-controls">
+                <button
+                    class="product-recommendations-nav-btn product-recommendations-nav-left"
+                    click={handleScrollLeft}
+                    disabled={!canScrollLeft}
+                    aria-label="Scroll left"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                </button>
+                <button
+                    class="product-recommendations-nav-btn product-recommendations-nav-right"
+                    click={handleScrollRight}
+                    disabled={!canScrollRight}
+                    aria-label="Scroll right"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                </button>
+            </div>
+        {/if}
+    </div>
+
+    {if hasRecommendations}
+        <div class="product-recommendations-container" ref={containerRef}>
+            {for product in recommendations}
+                <div class="product-recommendations-card" key={product.id}>
+                    <div class="product-recommendations-image-wrapper">
+                        <img
+                            src={product.image || ""}
+                            alt={product.name || "Product"}
+                            class="product-recommendations-image"
+                            click={() => handleProductClick(product)}
+                        />
+                        {if product.badge != ""}
+                            <div class="product-recommendations-badge">{product.badge}</div>
+                        {/if}
+                    </div>
+
+                    <div class="product-recommendations-content">
+                        <h3 class="product-recommendations-name">{product.name || "Product Name"}</h3>
+
+                        {if product.rating != none}
+                            <div class="product-recommendations-rating">
+                                <div class="product-recommendations-stars">
+                                    {for i in [1, 2, 3, 4, 5]}
+                                        {if i <= product.rating}
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="star-filled">
+                                                <polygon points="12 2 15.09 10.26 24 10.26 17.55 15.91 19.64 24 12 19.35 4.36 24 6.45 15.91 0 10.26 8.91 10.26"/>
+                                            </svg>
+                                        {else}
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="star-empty">
+                                                <polygon points="12 2 15.09 10.26 24 10.26 17.55 15.91 19.64 24 12 19.35 4.36 24 6.45 15.91 0 10.26 8.91 10.26"/>
+                                            </svg>
+                                        {/if}
+                                    {/for}
+                                </div>
+                                <span class="product-recommendations-rating-count">({product.reviews || 0})</span>
+                            </div>
+                        {/if}
+
+                        <div class="product-recommendations-price">
+                            {if product.salePrice != none && product.salePrice < product.price}
+                                <span class="product-recommendations-sale-price">{currency}{product.salePrice}</span>
+                                <span class="product-recommendations-original-price">{currency}{product.price}</span>
+                            {else}
+                                <span class="product-recommendations-sale-price">{currency}{product.price}</span>
+                            {/if}
+                        </div>
+
+                        <button
+                            class="product-recommendations-add-btn"
+                            click={() => handleAddToCart(product)}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="9" cy="21" r="1"/>
+                                <circle cx="20" cy="21" r="1"/>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                            </svg>
+                            <span>Add</span>
+                        </button>
+                    </div>
+                </div>
+            {/for}
+        </div>
+    {else}
+        <div class="product-recommendations-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            <p>No recommendations available</p>
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+/* Container */
+.product-recommendations {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-5);
+    padding: var(--flin-space-6);
+    background-color: white;
+    border-radius: var(--flin-radius-xl);
+}
+
+/* Header */
+.product-recommendations-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--flin-space-4);
+}
+
+.product-recommendations-title {
+    margin: 0 0 var(--flin-space-1) 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-2xl);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+}
+
+.product-recommendations-subtitle {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-600);
+}
+
+/* Controls */
+.product-recommendations-controls {
+    display: flex;
+    gap: var(--flin-space-2);
+    flex-shrink: 0;
+}
+
+.product-recommendations-nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background-color: var(--flin-neutral-100);
+    border: 1px solid var(--flin-neutral-300);
+    border-radius: var(--flin-radius-lg);
+    color: var(--flin-neutral-700);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+}
+
+.product-recommendations-nav-btn:hover:not(:disabled) {
+    background-color: var(--flin-primary);
+    border-color: var(--flin-primary);
+    color: white;
+    transform: scale(1.05);
+}
+
+.product-recommendations-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Scroll container */
+.product-recommendations-container {
+    display: flex;
+    gap: var(--flin-space-4);
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding-bottom: var(--flin-space-2);
+    margin-bottom: calc(var(--flin-space-2) * -1);
+}
+
+.product-recommendations-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.product-recommendations-container::-webkit-scrollbar-track {
+    background: var(--flin-neutral-100);
+    border-radius: var(--flin-radius-full);
+}
+
+.product-recommendations-container::-webkit-scrollbar-thumb {
+    background: var(--flin-neutral-400);
+    border-radius: var(--flin-radius-full);
+}
+
+.product-recommendations-container::-webkit-scrollbar-thumb:hover {
+    background: var(--flin-neutral-500);
+}
+
+/* Card */
+.product-recommendations-card {
+    flex: 0 0 280px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    background-color: white;
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    transition: all var(--flin-transition-base);
+}
+
+.product-recommendations-card:hover {
+    border-color: var(--flin-neutral-300);
+    box-shadow: var(--flin-shadow-md);
+    transform: translateY(-2px);
+}
+
+/* Image wrapper */
+.product-recommendations-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+    background-color: var(--flin-neutral-100);
+}
+
+.product-recommendations-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform var(--flin-transition-base);
+}
+
+.product-recommendations-card:hover .product-recommendations-image {
+    transform: scale(1.08);
+}
+
+/* Badge */
+.product-recommendations-badge {
+    position: absolute;
+    top: var(--flin-space-2);
+    right: var(--flin-space-2);
+    padding: var(--flin-space-1) var(--flin-space-2);
+    background-color: var(--flin-danger);
+    color: white;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    font-weight: var(--flin-font-bold);
+    border-radius: var(--flin-radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Content */
+.product-recommendations-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-2);
+    flex: 1;
+}
+
+.product-recommendations-name {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-neutral-900);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Rating */
+.product-recommendations-rating {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-1);
+}
+
+.product-recommendations-stars {
+    display: flex;
+    gap: 2px;
+}
+
+.star-filled {
+    color: #fbbf24;
+}
+
+.star-empty {
+    color: var(--flin-neutral-300);
+}
+
+.product-recommendations-rating-count {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-neutral-600);
+}
+
+/* Price */
+.product-recommendations-price {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+}
+
+.product-recommendations-sale-price {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-neutral-900);
+}
+
+.product-recommendations-original-price {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-neutral-500);
+    text-decoration: line-through;
+}
+
+/* Add button */
+.product-recommendations-add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-1);
+    padding: var(--flin-space-2) var(--flin-space-3);
+    background-color: var(--flin-primary);
+    color: white;
+    border: none;
+    border-radius: var(--flin-radius-md);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-semibold);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    margin-top: auto;
+}
+
+.product-recommendations-add-btn:hover {
+    background-color: var(--flin-primary-hover);
+    transform: scale(1.02);
+}
+
+.product-recommendations-add-btn:active {
+    transform: scale(0.98);
+}
+
+/* Empty state */
+.product-recommendations-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-8);
+    color: var(--flin-neutral-500);
+}
+
+.product-recommendations-empty svg {
+    color: var(--flin-neutral-400);
+}
+
+.product-recommendations-empty p {
+    margin: 0;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .product-recommendations {
+        background-color: var(--flin-neutral-800);
+    }
+
+    .product-recommendations-title {
+        color: var(--flin-neutral-100);
+    }
+
+    .product-recommendations-card {
+        background-color: var(--flin-neutral-800);
+        border-color: var(--flin-neutral-700);
+    }
+
+    .product-recommendations-name {
+        color: var(--flin-neutral-100);
+    }
+
+    .product-recommendations-nav-btn {
+        background-color: var(--flin-neutral-700);
+        border-color: var(--flin-neutral-600);
+        color: var(--flin-neutral-300);
+    }
+
+    .product-recommendations-sale-price {
+        color: var(--flin-neutral-100);
+    }
+}
+</style>
