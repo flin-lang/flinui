@@ -1,0 +1,62 @@
+// ============================================================================
+// AIChatbot — FlinUI PRO
+// Full chat interface
+// ============================================================================
+// Props:
+//   variant: "default" | "compact" (default: "default")
+// ============================================================================
+
+variant = props.variant || "default"
+
+<div class="ai-chatbot" data-variant={variant}>
+    <style>
+        .ai-chatbot {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            background: var(--flin-bg-base);
+            border-radius: var(--flin-radius-xl);
+            border: 1px solid var(--flin-border-medium);
+            overflow: hidden;
+        }
+
+        .chatbot-header {
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-surface);
+            border-bottom: 1px solid var(--flin-border-medium);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            padding: var(--flin-space-4);
+            overflow-y: auto;
+        }
+
+        .chatbot-input {
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-surface);
+            border-top: 1px solid var(--flin-border-medium);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: var(--flin-space-3);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-lg);
+        }
+    </style>
+
+    <div class="chatbot-header">AI Assistant</div>
+    <div class="chatbot-messages">Messages will appear here...</div>
+    <div class="chatbot-input">
+        <input class="input-field" placeholder="Type your message..." />
+    </div>
+</div>

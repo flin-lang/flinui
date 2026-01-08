@@ -1,0 +1,71 @@
+// ============================================================================
+// AIFormGenerator — FlinUI PRO
+// Dynamic forms from natural language
+// ============================================================================
+// Props:
+//   formTitle: text (default: "Generated Form")
+// ============================================================================
+
+formTitle = props.formTitle || "Generated Form"
+
+<div class="ai-form-generator">
+    <style>
+        .ai-form-generator {
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-xl);
+            border: 1px solid var(--flin-border-medium);
+        }
+
+        .form-title {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .form-field {
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .form-label {
+            display: block;
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: var(--flin-space-3);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-md);
+        }
+
+        .form-submit {
+            padding: var(--flin-space-3) var(--flin-space-6);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-inverse);
+            background: var(--flin-accent-gold);
+            border: none;
+            border-radius: var(--flin-radius-lg);
+            cursor: pointer;
+        }
+    </style>
+
+    <div class="form-title">{formTitle}</div>
+    <div class="form-field">
+        <label class="form-label">Field Name</label>
+        <input class="form-input" placeholder="Enter value..." />
+    </div>
+    <button class="form-submit">Submit</button>
+</div>

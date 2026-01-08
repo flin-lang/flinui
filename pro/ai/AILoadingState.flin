@@ -1,0 +1,204 @@
+// ============================================================================
+// AILoadingState — FlinUI PRO
+// Animated processing indicator for AI operations
+// ============================================================================
+// Props:
+//   variant: "dots" | "pulse" | "thinking" | "typing" (default: "thinking")
+//   message: string (default: "AI is thinking...")
+//   showProgress: boolean (default: false)
+//   progress: number (0-100)
+// ============================================================================
+
+variant = props.variant || "thinking"
+message = props.message || "AI is thinking..."
+showProgress = props.showProgress || false
+progress = props.progress || 0
+
+<div class="ai-loading-state" data-variant={variant}>
+    <style>
+        .ai-loading-state {
+            font-family: var(--flin-font-body);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--flin-space-12);
+            gap: var(--flin-space-6);
+        }
+
+        .ai-loading-state__animation {
+            width: var(--flin-size-16);
+            height: var(--flin-size-16);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--flin-space-2);
+        }
+
+        /* Dots variant */
+        .ai-loading-state[data-variant="dots"] .ai-loading-state__dot {
+            width: var(--flin-size-3);
+            height: var(--flin-size-3);
+            background: var(--flin-accent-gold);
+            border-radius: var(--flin-radius-full);
+            animation: dotPulse 1.4s infinite ease-in-out;
+        }
+
+        .ai-loading-state[data-variant="dots"] .ai-loading-state__dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .ai-loading-state[data-variant="dots"] .ai-loading-state__dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .ai-loading-state[data-variant="dots"] .ai-loading-state__dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dotPulse {
+            0%, 80%, 100% {
+                opacity: var(--flin-opacity-30);
+                transform: scale(0.8);
+            }
+            40% {
+                opacity: var(--flin-opacity-100);
+                transform: scale(1.2);
+            }
+        }
+
+        /* Pulse variant */
+        .ai-loading-state[data-variant="pulse"] .ai-loading-state__pulse {
+            width: var(--flin-size-16);
+            height: var(--flin-size-16);
+            border: 3px solid var(--flin-accent-gold-muted);
+            border-radius: var(--flin-radius-full);
+            position: relative;
+        }
+
+        .ai-loading-state[data-variant="pulse"] .ai-loading-state__pulse::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border: 3px solid var(--flin-accent-gold);
+            border-radius: var(--flin-radius-full);
+            animation: pulseRing 2s infinite ease-out;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                transform: scale(0.8);
+                opacity: var(--flin-opacity-100);
+            }
+            100% {
+                transform: scale(1.4);
+                opacity: var(--flin-opacity-0);
+            }
+        }
+
+        /* Thinking variant */
+        .ai-loading-state[data-variant="thinking"] .ai-loading-state__brain {
+            width: var(--flin-size-16);
+            height: var(--flin-size-16);
+            border: 3px solid var(--flin-accent-gold);
+            border-radius: var(--flin-radius-full);
+            border-top-color: transparent;
+            border-right-color: transparent;
+            animation: rotate 1s linear infinite;
+        }
+
+        @keyframes rotate {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Typing variant */
+        .ai-loading-state[data-variant="typing"] .ai-loading-state__cursor {
+            width: 3px;
+            height: var(--flin-size-6);
+            background: var(--flin-accent-gold);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% {
+                opacity: var(--flin-opacity-100);
+            }
+            51%, 100% {
+                opacity: var(--flin-opacity-0);
+            }
+        }
+
+        .ai-loading-state__message {
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-medium);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-secondary);
+            text-align: center;
+        }
+
+        .ai-loading-state__progress-container {
+            width: var(--flin-size-full);
+            max-width: 300px;
+        }
+
+        .ai-loading-state__progress-bar {
+            width: var(--flin-size-full);
+            height: 6px;
+            background: var(--flin-bg-elevated);
+            border-radius: var(--flin-radius-full);
+            overflow: hidden;
+        }
+
+        .ai-loading-state__progress-fill {
+            height: 100%;
+            background: var(--flin-gradient-gold);
+            border-radius: var(--flin-radius-full);
+            transition: width var(--flin-transition-normal) var(--flin-ease-out);
+        }
+
+        .ai-loading-state__progress-text {
+            font-family: var(--flin-font-mono);
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-muted);
+            text-align: center;
+            margin-top: var(--flin-space-2);
+        }
+    </style>
+
+    <div class="ai-loading-state__animation">
+        {if variant == "dots"}
+            <div class="ai-loading-state__dot"></div>
+            <div class="ai-loading-state__dot"></div>
+            <div class="ai-loading-state__dot"></div>
+        {/if}
+        {if variant == "pulse"}
+            <div class="ai-loading-state__pulse"></div>
+        {/if}
+        {if variant == "thinking"}
+            <div class="ai-loading-state__brain"></div>
+        {/if}
+        {if variant == "typing"}
+            <div class="ai-loading-state__cursor"></div>
+        {/if}
+    </div>
+
+    <div class="ai-loading-state__message">
+        {message}
+    </div>
+
+    {if showProgress}
+        <div class="ai-loading-state__progress-container">
+            <div class="ai-loading-state__progress-bar">
+                <div
+                    class="ai-loading-state__progress-fill"
+                    style="width: {progress}%"
+                ></div>
+            </div>
+            <div class="ai-loading-state__progress-text">
+                {progress}%
+            </div>
+        </div>
+    {/if}
+</div>

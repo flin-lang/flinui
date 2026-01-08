@@ -1,0 +1,31 @@
+// ============================================================================
+// AIResponseCard — FlinUI PRO
+// Formatted AI response card
+// ============================================================================
+// Props:
+//   content: text (default: "")
+//   variant: "default" | "compact" (default: "default")
+// ============================================================================
+
+content = props.content || ""
+variant = props.variant || "default"
+
+<div class="ai-response-card" data-variant={variant}>
+    <style>
+        .ai-response-card {
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-xl);
+            border: 1px solid var(--flin-border-subtle);
+        }
+
+        .response-content {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-primary);
+        }
+    </style>
+
+    <div class="response-content">{content}</div>
+</div>

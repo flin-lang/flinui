@@ -1,0 +1,52 @@
+// ============================================================================
+// ChatStreamingText — FlinUI PRO
+// Character-by-character text display with cursor animation
+// ============================================================================
+// Props:
+//   text: text (required)
+//   showCursor: boolean (default: true)
+// ============================================================================
+
+text = props.text || ""
+showCursor = props.showCursor || true
+
+<div class="chat-streaming-text">
+    <style>
+        .chat-streaming-text {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-primary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .chat-streaming-text__content {
+            display: inline;
+        }
+
+        .chat-streaming-text__cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background: var(--flin-accent-gold);
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 50% {
+                opacity: var(--flin-opacity-100);
+            }
+            51%, 100% {
+                opacity: var(--flin-opacity-0);
+            }
+        }
+    </style>
+
+    <span class="chat-streaming-text__content">{text}</span>
+    {if showCursor}
+        <span class="chat-streaming-text__cursor"></span>
+    {/if}
+</div>

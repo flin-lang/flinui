@@ -1,0 +1,77 @@
+// ============================================================================
+// ChatTypingIndicator — FlinUI PRO
+// Animated typing indicator with pulsing dots
+// ============================================================================
+// Props:
+//   size: "sm" | "md" | "lg" (default: "md")
+//   color: text (default: uses theme color)
+// ============================================================================
+
+size = props.size || "md"
+
+<div class="chat-typing-indicator" data-size={size}>
+    <style>
+        .chat-typing-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-1-5);
+            padding: var(--flin-space-3) var(--flin-space-4);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-lg);
+            width: fit-content;
+        }
+
+        .typing-dot {
+            width: var(--flin-size-2);
+            height: var(--flin-size-2);
+            border-radius: var(--flin-radius-full);
+            background: var(--flin-text-secondary);
+            animation: typingPulse 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingPulse {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: var(--flin-opacity-40);
+            }
+            30% {
+                transform: translateY(calc(-1 * var(--flin-space-1)));
+                opacity: var(--flin-opacity-100);
+            }
+        }
+
+        .chat-typing-indicator[data-size="sm"] .typing-dot {
+            width: var(--flin-size-1-5);
+            height: var(--flin-size-1-5);
+        }
+
+        .chat-typing-indicator[data-size="lg"] .typing-dot {
+            width: var(--flin-size-3);
+            height: var(--flin-size-3);
+        }
+
+        .typing-label {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-muted);
+            margin-left: var(--flin-space-2);
+        }
+    </style>
+
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <span class="typing-label">Thinking...</span>
+</div>

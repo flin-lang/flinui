@@ -1,0 +1,53 @@
+// ============================================================================
+// ChatConversationList — FlinUI PRO
+// Sidebar displaying conversation history
+// ============================================================================
+// Props:
+//   variant: "default" | "compact" (default: "default")
+// ============================================================================
+
+variant = props.variant || "default"
+
+<div class="chat-conversation-list" data-variant={variant}>
+    <style>
+        .chat-conversation-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-base);
+            height: 100%;
+        }
+
+        .conversation-item {
+            padding: var(--flin-space-3);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-lg);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .conversation-item:hover {
+            background: var(--flin-bg-hover);
+        }
+
+        .conversation-title {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-1);
+        }
+
+        .conversation-preview {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-muted);
+        }
+    </style>
+
+    <div class="conversation-item">
+        <div class="conversation-title">Example Conversation</div>
+        <div class="conversation-preview">Last message preview...</div>
+    </div>
+</div>

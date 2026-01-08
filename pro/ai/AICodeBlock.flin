@@ -1,0 +1,58 @@
+// ============================================================================
+// AICodeBlock — FlinUI PRO
+// Syntax highlighted code block
+// ============================================================================
+// Props:
+//   code: text (default: "")
+//   language: text (default: "javascript")
+// ============================================================================
+
+code = props.code || ""
+language = props.language || "javascript"
+
+<div class="ai-code-block">
+    <style>
+        .ai-code-block {
+            background: var(--flin-bg-deep);
+            border-radius: var(--flin-radius-lg);
+            border: 1px solid var(--flin-border-subtle);
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--flin-space-3) var(--flin-space-4);
+            background: var(--flin-bg-elevated);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .code-language {
+            font-family: var(--flin-font-mono);
+            font-size: var(--flin-text-xs);
+            color: var(--flin-accent-violet);
+            font-weight: var(--flin-font-semibold);
+        }
+
+        .code-content {
+            padding: var(--flin-space-4);
+            overflow-x: auto;
+        }
+
+        .code-content pre {
+            margin: 0;
+            font-family: var(--flin-font-mono);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-primary);
+            white-space: pre;
+        }
+    </style>
+
+    <div class="code-header">
+        <span class="code-language">{language}</span>
+    </div>
+    <div class="code-content">
+        <pre>{code}</pre>
+    </div>
+</div>

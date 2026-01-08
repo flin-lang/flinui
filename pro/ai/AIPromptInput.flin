@@ -1,0 +1,80 @@
+// ============================================================================
+// AIPromptInput — FlinUI PRO
+// Input field with AI prompt suggestions
+// ============================================================================
+// Props:
+//   placeholder: text (default: "Enter your prompt...")
+//   variant: "default" | "minimal" (default: "default")
+// ============================================================================
+
+placeholder = props.placeholder || "Enter your prompt..."
+variant = props.variant || "default"
+
+<div class="ai-prompt-input" data-variant={variant}>
+    <style>
+        .ai-prompt-input {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-3);
+            width: 100%;
+        }
+
+        .ai-prompt-input__textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: var(--flin-space-4);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-surface);
+            border: 2px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-lg);
+            resize: vertical;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .ai-prompt-input__textarea:focus {
+            outline: none;
+            border-color: var(--flin-accent-gold);
+            box-shadow: 0 0 0 3px var(--flin-accent-gold-muted);
+        }
+
+        .ai-prompt-input__textarea::placeholder {
+            color: var(--flin-text-muted);
+        }
+
+        .ai-prompt-input__footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-prompt-input__submit-btn {
+            padding: var(--flin-space-3) var(--flin-space-6);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-inverse);
+            background: var(--flin-accent-gold);
+            border: none;
+            border-radius: var(--flin-radius-lg);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .ai-prompt-input__submit-btn:hover {
+            background: var(--flin-accent-gold-bright);
+        }
+    </style>
+
+    <textarea
+        class="ai-prompt-input__textarea"
+        placeholder={placeholder}
+    ></textarea>
+
+    <div class="ai-prompt-input__footer">
+        <span></span>
+        <button class="ai-prompt-input__submit-btn">Send</button>
+    </div>
+</div>

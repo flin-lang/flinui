@@ -1,0 +1,73 @@
+// ============================================================================
+// AIVoiceInput — FlinUI PRO
+// Speech-to-text input with recording visualization
+// ============================================================================
+// Props:
+//   variant: "default" | "compact" (default: "default")
+//   showTranscript: boolean (default: true)
+// ============================================================================
+
+variant = props.variant || "default"
+showTranscript = props.showTranscript || true
+
+<div class="ai-voice-input" data-variant={variant}>
+    <style>
+        .ai-voice-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-xl);
+        }
+
+        .voice-button {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-accent-rose);
+            border: none;
+            border-radius: var(--flin-radius-full);
+            color: white;
+            cursor: pointer;
+            transition: all var(--flin-transition-normal) var(--flin-ease-out);
+        }
+
+        .voice-button:hover {
+            background: var(--flin-accent-rose-bright);
+            transform: scale(1.05);
+        }
+
+        .voice-button svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .voice-transcript {
+            width: 100%;
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-base);
+            border-radius: var(--flin-radius-md);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-primary);
+            min-height: 80px;
+        }
+    </style>
+
+    <button class="voice-button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        </svg>
+    </button>
+
+    {if showTranscript}
+        <div class="voice-transcript">
+            Transcript will appear here...
+        </div>
+    {/if}
+</div>

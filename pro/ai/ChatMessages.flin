@@ -1,0 +1,93 @@
+// ============================================================================
+// ChatMessages — FlinUI PRO
+// Message list container with avatar support
+// ============================================================================
+// Props:
+//   messages: list (required)
+//   showAvatars: boolean (default: true)
+//   variant: "default" | "compact" (default: "default")
+// ============================================================================
+
+messages = props.messages || []
+showAvatars = props.showAvatars || true
+variant = props.variant || "default"
+
+<div class="chat-messages" data-variant={variant}>
+    <style>
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-4);
+        }
+
+        .chat-messages[data-variant="compact"] {
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-2);
+        }
+
+        .message-group {
+            display: flex;
+            gap: var(--flin-space-3);
+            align-items: flex-start;
+        }
+
+        .message-group[data-role="user"] {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--flin-radius-full);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-bold);
+            background: var(--flin-accent-gold-muted);
+            color: var(--flin-accent-gold);
+        }
+
+        .message-avatar[data-role="user"] {
+            background: var(--flin-accent-violet-muted);
+            color: var(--flin-accent-violet);
+        }
+
+        .message-content {
+            flex: 1;
+            max-width: 80%;
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-lg);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-primary);
+        }
+
+        .message-group[data-role="user"] .message-content {
+            background: var(--flin-accent-violet-muted);
+        }
+    </style>
+
+    <div class="message-group" data-role="assistant">
+        {if showAvatars}
+            <div class="message-avatar" data-role="assistant">A</div>
+        {/if}
+        <div class="message-content">
+            Example assistant message
+        </div>
+    </div>
+
+    <div class="message-group" data-role="user">
+        {if showAvatars}
+            <div class="message-avatar" data-role="user">U</div>
+        {/if}
+        <div class="message-content">
+            Example user message
+        </div>
+    </div>
+</div>

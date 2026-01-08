@@ -1,0 +1,293 @@
+// ============================================================================
+// FlinUI PRO — AI Components Index
+// Complete suite of AI-powered UI components with glassmorphism design
+// ============================================================================
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHAT INTERFACE COMPONENTS (ChatGPT-style)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Main chatbot interface
+export AIChatbot from "./AIChatbot.flin"
+
+// Message display components
+export ChatMessages from "./ChatMessages.flin"
+export ChatBubble from "./ChatBubble.flin"
+export ChatTypingIndicator from "./ChatTypingIndicator.flin"
+export ChatStreamingText from "./ChatStreamingText.flin"
+
+// Input and controls
+export ChatInput from "./ChatInput.flin"
+export ChatModelSelector from "./ChatModelSelector.flin"
+
+// Advanced features
+export ChatReasoningPanel from "./ChatReasoningPanel.flin"
+export ChatSourceCitations from "./ChatSourceCitations.flin"
+export ChatConversationList from "./ChatConversationList.flin"
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AI INTERACTION COMPONENTS (Prompt & Response)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export AIPromptInput from "./AIPromptInput.flin"
+export AIPromptLibrary from "./AIPromptLibrary.flin"
+export AIResponseCard from "./AIResponseCard.flin"
+export AILoadingState from "./AILoadingState.flin"
+export AIFeedbackButtons from "./AIFeedbackButtons.flin"
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AI TOOL & CODE COMPONENTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+export AIToolCall from "./AIToolCall.flin"
+export AICodeBlock from "./AICodeBlock.flin"
+export AIMarkdownRenderer from "./AIMarkdownRenderer.flin"
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GENERATIVE UI COMPONENTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Media generation
+export AIImageGenerator from "./AIImageGenerator.flin"
+export AIVoiceInput from "./AIVoiceInput.flin"
+
+// Form generation
+export AIFormGenerator from "./AIFormGenerator.flin"
+
+// Table generation
+export AITableGenerator from "./AITableGenerator.flin"
+
+// Chart generation
+export AIChartGenerator from "./AIChartGenerator.flin"
+
+// Document analysis
+export AIDocumentSummary from "./AIDocumentSummary.flin"
+
+// Agent monitoring
+export AIAgentStatus from "./AIAgentStatus.flin"
+
+// ============================================================================
+// USAGE EXAMPLES
+// ============================================================================
+
+/*
+// ═══════════════════════════════════════════════════════════════════════════
+// CHAT INTERFACE — Simple chatbot
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AIChatbot
+    title="My AI Assistant"
+    model="claude-sonnet-4-5"
+    showReasoningPanel={true}
+    showSidebar={true}
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PROMPT INPUT — AI prompt with suggestions
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AIPromptInput
+    variant="primary"
+    placeholder="Ask anything..."
+    showSuggestions={true}
+    suggestions={["Explain this code", "Write a function that..."]}
+    onSubmit={(prompt) => handlePrompt(prompt)}
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PROMPT LIBRARY — Saved prompts grid
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AIPromptLibrary
+    prompts={myPrompts}
+    onSelect={(prompt) => usePrompt(prompt)}
+    columns={3}
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RESPONSE CARD — Formatted AI response
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AIResponseCard
+    content={aiResponse}
+    timestamp="10:30 AM"
+    model="Claude Sonnet 4.5"
+    onCopy={(text) => copyToClipboard(text)}
+    onRegenerate={() => regenerateResponse()}
+    onShare={() => shareResponse()}
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOADING STATE — Animated AI processing
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AILoadingState
+    variant="thinking"
+    message="AI is thinking..."
+    showProgress={true}
+    progress={45}
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FEEDBACK BUTTONS — Response feedback actions
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AIFeedbackButtons
+    onThumbsUp={() => rateLike()}
+    onThumbsDown={() => rateDislike()}
+    onCopy={() => copyResponse()}
+    onRegenerate={() => regenerate()}
+    variant="horizontal"
+    size="md"
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TOOL CALL — AI tool execution display
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AIToolCall
+    toolName="search_database"
+    status="success"
+    input={{ query: "users", limit: 10 }}
+    output={{ count: 42, results: [...] }}
+    duration={1250}
+    expanded={false}
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CODE BLOCK — Syntax highlighted code
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AICodeBlock
+    code={codeString}
+    language="javascript"
+    showLineNumbers={true}
+    fileName="example.js"
+    onCopy={(code) => copyCode(code)}
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MARKDOWN RENDERER — Rich text from AI
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AIMarkdownRenderer
+    content={markdownText}
+    variant="editorial"
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// IMAGE GENERATOR — AI image generation
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AIImageGenerator
+    onGenerate={(params) => generateImage(params)}
+    images={generatedImages}
+    isGenerating={false}
+    columns={2}
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VOICE INPUT — Speech-to-text
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AIVoiceInput
+    onTranscript={(text) => handleTranscript(text)}
+    placeholder="Click to start recording"
+    language="en-US"
+    showTranscript={true}
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FORM GENERATION — Dynamic forms from prompts
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AIFormGenerator
+    prompt="Create a contact form with name, email, phone, and message fields"
+    variant="glassmorphic"
+    model="claude"
+    onSubmit={(data) => handleFormSubmit(data)}
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TABLE GENERATION — Tables from natural language
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AITableGenerator
+    prompt="Show me a table of top 10 tech companies with their market cap, CEO, and founding year"
+    variant="primary"
+    pageSize={10}
+    sortable={true}
+    searchable={true}
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHART GENERATION — Charts from data descriptions
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AIChartGenerator
+    prompt="Create a bar chart showing monthly sales from January to June: 10k, 15k, 12k, 18k, 22k, 25k"
+    variant="glassmorphic"
+    chartType="auto"
+    width="100%"
+    height="400px"
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DOCUMENT SUMMARY — Document analysis and insights
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AIDocumentSummary
+    document={documentContent}
+    variant="primary"
+    showKeyPoints={true}
+    showSentiment={true}
+    showEntities={true}
+    maxLength={500}
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AGENT STATUS — Real-time agent monitoring
+// ═══════════════════════════════════════════════════════════════════════════
+
+<AIAgentStatus
+    agentId="agent-123"
+    variant="glassmorphic"
+    showLogs={true}
+    showMetrics={true}
+    autoRefresh={true}
+    refreshInterval={2000}
+/>
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ADVANCED — Compose your own chat UI
+// ═══════════════════════════════════════════════════════════════════════════
+
+<div class="custom-chat">
+    <ChatConversationList
+        currentConversationId={currentId}
+        onSelect={(conv) => loadConversation(conv)}
+        onNew={() => createNewChat()}
+    />
+
+    <div class="chat-main">
+        <ChatModelSelector
+            model={selectedModel}
+            onChange={(model) => setModel(model)}
+        />
+
+        <ChatMessages
+            messages={messages}
+            showAvatars={true}
+            showTimestamps={true}
+        />
+
+        <ChatTypingIndicator />
+
+        <ChatInput
+            onSend={(text) => sendMessage(text)}
+            showFileUpload={true}
+            showVoice={true}
+        />
+    </div>
+</div>
+*/

@@ -1,0 +1,58 @@
+// ============================================================================
+// AIPromptLibrary — FlinUI PRO
+// Grid display of saved prompts
+// ============================================================================
+// Props:
+//   variant: "grid" | "list" (default: "grid")
+// ============================================================================
+
+variant = props.variant || "grid"
+
+<div class="ai-prompt-library" data-variant={variant}>
+    <style>
+        .ai-prompt-library {
+            padding: var(--flin-space-4);
+        }
+
+        .prompt-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--flin-space-4);
+        }
+
+        .prompt-card {
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-lg);
+            border: 1px solid var(--flin-border-medium);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .prompt-card:hover {
+            background: var(--flin-bg-hover);
+            border-color: var(--flin-accent-gold);
+        }
+
+        .prompt-title {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .prompt-preview {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+    </style>
+
+    <div class="prompt-grid">
+        <div class="prompt-card">
+            <div class="prompt-title">Example Prompt</div>
+            <div class="prompt-preview">Prompt description goes here...</div>
+        </div>
+    </div>
+</div>

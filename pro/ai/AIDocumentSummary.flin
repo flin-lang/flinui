@@ -1,0 +1,60 @@
+// ============================================================================
+// AIDocumentSummary — FlinUI PRO
+// Document analysis and summary display
+// ============================================================================
+// Props:
+//   title: text (default: "")
+//   summary: text (default: "")
+// ============================================================================
+
+title = props.title || ""
+summary = props.summary || ""
+
+<div class="ai-document-summary">
+    <style>
+        .ai-document-summary {
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-xl);
+            border: 1px solid var(--flin-border-medium);
+        }
+
+        .summary-header {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            margin-bottom: var(--flin-space-4);
+            padding-bottom: var(--flin-space-4);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .summary-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--flin-accent-cyan);
+        }
+
+        .summary-title {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+        }
+
+        .summary-content {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-secondary);
+        }
+    </style>
+
+    <div class="summary-header">
+        <svg class="summary-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <div class="summary-title">{title}</div>
+    </div>
+    <div class="summary-content">{summary}</div>
+</div>

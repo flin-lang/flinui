@@ -1,0 +1,64 @@
+// ============================================================================
+// ChatModelSelector — FlinUI PRO
+// Dropdown selector for AI models
+// ============================================================================
+// Props:
+//   selectedModel: text (default: "claude-3-sonnet")
+//   variant: "default" | "compact" (default: "default")
+// ============================================================================
+
+selectedModel = props.selectedModel || "claude-3-sonnet"
+variant = props.variant || "default"
+
+<div class="chat-model-selector" data-variant={variant}>
+    <style>
+        .chat-model-selector {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-3) var(--flin-space-4);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-lg);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-primary);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .chat-model-selector:hover {
+            background: var(--flin-bg-hover);
+            border-color: var(--flin-border-strong);
+        }
+
+        .chat-model-selector[data-variant="compact"] {
+            padding: var(--flin-space-2) var(--flin-space-3);
+            font-size: var(--flin-text-xs);
+        }
+
+        .model-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--flin-accent-violet);
+        }
+
+        .model-name {
+            font-weight: var(--flin-font-medium);
+        }
+
+        .model-chevron {
+            width: 14px;
+            height: 14px;
+            color: var(--flin-text-muted);
+        }
+    </style>
+
+    <svg class="model-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+    </svg>
+    <span class="model-name">{selectedModel}</span>
+    <svg class="model-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"/>
+    </svg>
+</div>

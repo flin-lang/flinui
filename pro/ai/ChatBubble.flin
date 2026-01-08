@@ -1,0 +1,105 @@
+// ============================================================================
+// ChatBubble — FlinUI PRO
+// Individual message bubble with role-based styling
+// ============================================================================
+// Props:
+//   content: text (required)
+//   role: "user" | "assistant" (default: "user")
+//   isStreaming: boolean (default: false)
+// ============================================================================
+
+content = props.content || ""
+role = props.role || "user"
+isStreaming = props.isStreaming || false
+
+<div class="chat-bubble" data-role={role} data-streaming={isStreaming}>
+    <style>
+        .chat-bubble {
+            padding: var(--flin-space-3) var(--flin-space-4);
+            border-radius: var(--flin-radius-lg);
+            font-size: var(--flin-text-sm);
+            line-height: var(--flin-leading-relaxed);
+            max-width: 100%;
+            word-wrap: break-word;
+            transition: all var(--flin-transition-normal) var(--flin-ease-out);
+        }
+
+        .chat-bubble[data-role="user"] {
+            background: var(--flin-accent-gold-muted);
+            color: var(--flin-text-primary);
+            border: 1px solid var(--flin-accent-gold-dim);
+        }
+
+        .chat-bubble[data-role="assistant"] {
+            background: var(--flin-bg-elevated);
+            color: var(--flin-text-primary);
+            border: 1px solid var(--flin-border-subtle);
+        }
+
+        .chat-bubble[data-streaming="true"] {
+            border-color: var(--flin-accent-cyan);
+            box-shadow: 0 0 0 2px var(--flin-accent-cyan-muted);
+        }
+
+        .chat-bubble pre {
+            background: var(--flin-bg-deep);
+            padding: var(--flin-space-3);
+            border-radius: var(--flin-radius-md);
+            overflow-x: auto;
+            font-family: var(--flin-font-mono);
+            font-size: var(--flin-text-xs);
+            margin: var(--flin-space-2) 0;
+        }
+
+        .chat-bubble code {
+            font-family: var(--flin-font-mono);
+            font-size: var(--flin-text-xs);
+            background: var(--flin-bg-deep);
+            padding: var(--flin-space-0-5) var(--flin-space-1);
+            border-radius: var(--flin-radius-sm);
+        }
+
+        .chat-bubble pre code {
+            background: transparent;
+            padding: 0;
+        }
+
+        .chat-bubble p {
+            margin: var(--flin-space-2) 0;
+        }
+
+        .chat-bubble p:first-child {
+            margin-top: 0;
+        }
+
+        .chat-bubble p:last-child {
+            margin-bottom: 0;
+        }
+
+        .chat-bubble a {
+            color: var(--flin-accent-cyan);
+            text-decoration: underline;
+        }
+
+        .chat-bubble a:hover {
+            color: var(--flin-accent-cyan-bright);
+        }
+
+        .chat-bubble ul, .chat-bubble ol {
+            margin: var(--flin-space-2) 0;
+            padding-left: var(--flin-space-6);
+        }
+
+        .chat-bubble li {
+            margin: var(--flin-space-1) 0;
+        }
+    </style>
+
+    <div class="bubble-content">
+        {if isStreaming}
+            <ChatStreamingText text={content} />
+        {else}
+            {content}
+        {/if}
+    </div>
+</div>

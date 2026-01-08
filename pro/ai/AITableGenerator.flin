@@ -1,0 +1,61 @@
+// ============================================================================
+// AITableGenerator — FlinUI PRO
+// Generate tables from natural language
+// ============================================================================
+// Props:
+//   variant: "default" | "compact" (default: "default")
+// ============================================================================
+
+variant = props.variant || "default"
+
+<div class="ai-table-generator" data-variant={variant}>
+    <style>
+        .ai-table-generator {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .generator-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-lg);
+        }
+
+        .generator-table th {
+            padding: var(--flin-space-3) var(--flin-space-4);
+            text-align: left;
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-accent-gold);
+            background: var(--flin-bg-elevated);
+            border-bottom: 2px solid var(--flin-border-medium);
+        }
+
+        .generator-table td {
+            padding: var(--flin-space-3) var(--flin-space-4);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-primary);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+    </style>
+
+    <table class="generator-table">
+        <thead>
+            <tr>
+                <th>Column 1</th>
+                <th>Column 2</th>
+                <th>Column 3</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Data 1</td>
+                <td>Data 2</td>
+                <td>Data 3</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

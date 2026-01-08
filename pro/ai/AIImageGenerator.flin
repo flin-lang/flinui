@@ -1,0 +1,60 @@
+// ============================================================================
+// AIImageGenerator — FlinUI PRO
+// Image generation interface
+// ============================================================================
+// Props:
+//   prompt: text (default: "")
+// ============================================================================
+
+prompt = props.prompt || ""
+
+<div class="ai-image-generator">
+    <style>
+        .ai-image-generator {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-xl);
+        }
+
+        .generator-input {
+            width: 100%;
+            padding: var(--flin-space-4);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-lg);
+        }
+
+        .generator-button {
+            padding: var(--flin-space-3) var(--flin-space-6);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-inverse);
+            background: var(--flin-accent-violet);
+            border: none;
+            border-radius: var(--flin-radius-lg);
+            cursor: pointer;
+        }
+
+        .generator-preview {
+            width: 100%;
+            aspect-ratio: 1;
+            background: var(--flin-bg-deep);
+            border-radius: var(--flin-radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--flin-text-muted);
+        }
+    </style>
+
+    <input class="generator-input" placeholder="Describe the image you want to generate..." value={prompt} />
+    <button class="generator-button">Generate Image</button>
+    <div class="generator-preview">Generated image will appear here</div>
+</div>

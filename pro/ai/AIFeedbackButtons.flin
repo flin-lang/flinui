@@ -1,0 +1,173 @@
+// ============================================================================
+// AIFeedbackButtons — FlinUI PRO
+// Feedback actions: thumbs up/down, copy, regenerate
+// ============================================================================
+// Props:
+//   onThumbsUp: function
+//   onThumbsDown: function
+//   onCopy: function
+//   onRegenerate: function
+//   variant: "horizontal" | "vertical" (default: "horizontal")
+//   size: "sm" | "md" | "lg" (default: "md")
+// ============================================================================
+
+variant = props.variant || "horizontal"
+size = props.size || "md"
+onThumbsUp = props.onThumbsUp || false
+onThumbsDown = props.onThumbsDown || false
+onCopy = props.onCopy || false
+onRegenerate = props.onRegenerate || false
+
+entity FeedbackState {
+    rating: text
+    copied: bool
+}
+
+state = FeedbackState {
+    rating: "",
+    copied: false
+}
+
+<div class="ai-feedback-buttons" data-variant={variant} data-size={size}>
+    <style>
+        .ai-feedback-buttons {
+            font-family: var(--flin-font-body);
+            display: flex;
+            gap: var(--flin-space-2);
+        }
+
+        .ai-feedback-buttons[data-variant="horizontal"] {
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .ai-feedback-buttons[data-variant="vertical"] {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .ai-feedback-buttons__btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-3);
+            font-family: var(--flin-font-body);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-secondary);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-md);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .ai-feedback-buttons[data-size="sm"] .ai-feedback-buttons__btn {
+            padding: var(--flin-space-2);
+            font-size: var(--flin-text-xs);
+        }
+
+        .ai-feedback-buttons[data-size="md"] .ai-feedback-buttons__btn {
+            padding: var(--flin-space-3);
+            font-size: var(--flin-text-sm);
+        }
+
+        .ai-feedback-buttons[data-size="lg"] .ai-feedback-buttons__btn {
+            padding: var(--flin-space-4);
+            font-size: var(--flin-text-base);
+        }
+
+        .ai-feedback-buttons__btn:hover {
+            background: var(--flin-bg-hover);
+            border-color: var(--flin-border-medium);
+        }
+
+        .ai-feedback-buttons__btn--active {
+            color: var(--flin-accent-gold);
+            background: var(--flin-accent-gold-muted);
+            border-color: var(--flin-accent-gold);
+        }
+
+        .ai-feedback-buttons__btn--positive {
+            color: var(--flin-accent-emerald);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--flin-accent-emerald);
+        }
+
+        .ai-feedback-buttons__btn--negative {
+            color: var(--flin-accent-rose);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--flin-accent-rose);
+        }
+
+        .ai-feedback-buttons__icon {
+            width: var(--flin-icon-sm);
+            height: var(--flin-icon-sm);
+        }
+
+        .ai-feedback-buttons[data-size="sm"] .ai-feedback-buttons__icon {
+            width: var(--flin-icon-xs);
+            height: var(--flin-icon-xs);
+        }
+
+        .ai-feedback-buttons[data-size="lg"] .ai-feedback-buttons__icon {
+            width: var(--flin-icon-md);
+            height: var(--flin-icon-md);
+        }
+
+        .ai-feedback-buttons__separator {
+            width: 1px;
+            background: var(--flin-border-subtle);
+            align-self: stretch;
+        }
+
+        .ai-feedback-buttons[data-variant="vertical"] .ai-feedback-buttons__separator {
+            width: 100%;
+            height: 1px;
+        }
+    </style>
+
+    {if onThumbsUp || onThumbsDown}
+        <button
+            class="ai-feedback-buttons__btn"
+            title="Helpful"
+        >
+            <span class="ai-feedback-buttons__icon">👍</span>
+        </button>
+
+        <button
+            class="ai-feedback-buttons__btn"
+            title="Not helpful"
+        >
+            <span class="ai-feedback-buttons__icon">👎</span>
+        </button>
+    {/if}
+
+    {if (onThumbsUp || onThumbsDown) && (onCopy || onRegenerate)}
+        <div class="ai-feedback-buttons__separator"></div>
+    {/if}
+
+    {if onCopy}
+        <button
+            class="ai-feedback-buttons__btn"
+            title="Copy response"
+        >
+            <span class="ai-feedback-buttons__icon">📋</span>
+            {if variant == "vertical"}
+                Copy
+            {/if}
+        </button>
+    {/if}
+
+    {if onRegenerate}
+        <button
+            class="ai-feedback-buttons__btn"
+            title="Regenerate response"
+        >
+            <span class="ai-feedback-buttons__icon">🔄</span>
+            {if variant == "vertical"}
+                Regenerate
+            {/if}
+        </button>
+    {/if}
+</div>

@@ -1,0 +1,143 @@
+// ============================================================================
+// ChatReasoningPanel — FlinUI PRO
+// Collapsible panel displaying AI reasoning/thinking process
+// ============================================================================
+// Props:
+//   reasoning: text (required)
+//   isExpanded: boolean (default: false)
+//   title: text (default: "Reasoning")
+// ============================================================================
+
+reasoning = props.reasoning || ""
+isExpanded = props.isExpanded || false
+title = props.title || "Reasoning"
+
+<div class="chat-reasoning-panel" data-expanded={isExpanded}>
+    <style>
+        .chat-reasoning-panel {
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-lg);
+            overflow: hidden;
+            margin-top: var(--flin-space-2);
+        }
+
+        .reasoning-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--flin-space-3);
+            cursor: pointer;
+            background: var(--flin-bg-surface);
+            transition: background var(--flin-transition-fast);
+        }
+
+        .reasoning-header:hover {
+            background: var(--flin-bg-hover);
+        }
+
+        .reasoning-title {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-secondary);
+        }
+
+        .reasoning-icon {
+            width: var(--flin-icon-md);
+            height: var(--flin-icon-md);
+            color: var(--flin-accent-violet);
+        }
+
+        .reasoning-badge {
+            background: var(--flin-accent-violet-muted);
+            color: var(--flin-accent-violet-bright);
+            padding: var(--flin-space-0-5) var(--flin-space-2);
+            border-radius: var(--flin-radius-badge);
+            font-size: var(--flin-text-2xs);
+            font-weight: var(--flin-font-semibold);
+        }
+
+        .reasoning-chevron {
+            width: var(--flin-icon-md);
+            height: var(--flin-icon-md);
+            color: var(--flin-text-muted);
+            transition: transform var(--flin-transition-normal) var(--flin-ease-out);
+        }
+
+        .chat-reasoning-panel[data-expanded="true"] .reasoning-chevron {
+            transform: rotate(180deg);
+        }
+
+        .reasoning-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--flin-transition-normal) var(--flin-ease-out);
+        }
+
+        .chat-reasoning-panel[data-expanded="true"] .reasoning-content {
+            max-height: var(--flin-size-96);
+        }
+
+        .reasoning-text {
+            padding: var(--flin-space-4);
+            font-size: var(--flin-text-sm);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-secondary);
+            font-family: var(--flin-font-mono);
+            background: var(--flin-bg-deep);
+            overflow-y: auto;
+            max-height: var(--flin-size-80);
+        }
+
+        .reasoning-step {
+            margin: var(--flin-space-2) 0;
+            padding-left: var(--flin-space-4);
+            border-left: 2px solid var(--flin-accent-violet-muted);
+        }
+
+        .reasoning-step-number {
+            color: var(--flin-accent-violet);
+            font-weight: var(--flin-font-semibold);
+            margin-right: var(--flin-space-2);
+        }
+    </style>
+
+    <div class="reasoning-header">
+        <div class="reasoning-title">
+            <svg class="reasoning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span>{title}</span>
+            <span class="reasoning-badge">Extended Thinking</span>
+        </div>
+        <svg class="reasoning-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+        </svg>
+    </div>
+
+    <div class="reasoning-content">
+        <div class="reasoning-text">
+            {if reasoning}
+                {reasoning}
+            {else}
+                <div class="reasoning-step">
+                    <span class="reasoning-step-number">1.</span>
+                    Analyzing the user's query...
+                </div>
+                <div class="reasoning-step">
+                    <span class="reasoning-step-number">2.</span>
+                    Considering multiple approaches...
+                </div>
+                <div class="reasoning-step">
+                    <span class="reasoning-step-number">3.</span>
+                    Formulating response...
+                </div>
+            {/if}
+        </div>
+    </div>
+</div>

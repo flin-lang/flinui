@@ -1,0 +1,187 @@
+// ============================================================================
+// AIMarkdownRenderer — FlinUI PRO
+// Rich text renderer for AI markdown responses with editorial styling
+// ============================================================================
+// Props:
+//   content: string (required)
+//   variant: "default" | "compact" | "editorial" (default: "default")
+// ============================================================================
+
+content = props.content || "# Markdown content\n\nYour AI response here."
+variant = props.variant || "default"
+
+<div class="ai-markdown-renderer" data-variant={variant}>
+    <style>
+        .ai-markdown-renderer {
+            font-family: var(--flin-font-body);
+            color: var(--flin-text-primary);
+            width: var(--flin-size-full);
+        }
+
+        .ai-markdown-renderer h1 {
+            font-size: var(--flin-text-3xl);
+            font-weight: var(--flin-font-bold);
+            line-height: var(--flin-leading-tight);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-6) 0;
+        }
+
+        .ai-markdown-renderer h2 {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-bold);
+            line-height: var(--flin-leading-tight);
+            color: var(--flin-text-primary);
+            margin: var(--flin-space-8) 0 var(--flin-space-4) 0;
+            padding-bottom: var(--flin-space-3);
+            border-bottom: 2px solid var(--flin-border-subtle);
+        }
+
+        .ai-markdown-renderer h3 {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-bold);
+            line-height: var(--flin-leading-tight);
+            color: var(--flin-text-primary);
+            margin: var(--flin-space-6) 0 var(--flin-space-3) 0;
+        }
+
+        .ai-markdown-renderer h4 {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-semibold);
+            line-height: var(--flin-leading-tight);
+            color: var(--flin-text-secondary);
+            margin: var(--flin-space-5) 0 var(--flin-space-2) 0;
+        }
+
+        .ai-markdown-renderer p {
+            font-size: var(--flin-text-base);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-6) 0;
+        }
+
+        .ai-markdown-renderer[data-variant="editorial"] p {
+            font-size: var(--flin-text-lg);
+            line-height: 1.8;
+        }
+
+        .ai-markdown-renderer[data-variant="compact"] p {
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .ai-markdown-renderer a {
+            color: var(--flin-accent-gold);
+            text-decoration: none;
+            border-bottom: 1px solid var(--flin-accent-gold-dim);
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .ai-markdown-renderer a:hover {
+            color: var(--flin-accent-gold-bright);
+            border-bottom-color: var(--flin-accent-gold-bright);
+        }
+
+        .ai-markdown-renderer ul,
+        .ai-markdown-renderer ol {
+            margin: 0 0 var(--flin-space-6) 0;
+            padding-left: var(--flin-space-8);
+        }
+
+        .ai-markdown-renderer li {
+            font-size: var(--flin-text-base);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-3);
+        }
+
+        .ai-markdown-renderer li::marker {
+            color: var(--flin-accent-gold);
+        }
+
+        .ai-markdown-renderer blockquote {
+            margin: var(--flin-space-6) 0;
+            padding-left: var(--flin-space-6);
+            border-left: 4px solid var(--flin-accent-gold);
+            color: var(--flin-text-secondary);
+            font-style: italic;
+        }
+
+        .ai-markdown-renderer[data-variant="editorial"] blockquote {
+            font-size: var(--flin-text-lg);
+            padding: var(--flin-space-6) var(--flin-space-8);
+            background: var(--flin-accent-gold-muted);
+            border-radius: var(--flin-radius-md);
+        }
+
+        .ai-markdown-renderer code {
+            font-family: var(--flin-font-mono);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-accent-violet);
+            background: var(--flin-accent-violet-muted);
+            padding: var(--flin-space-1) var(--flin-space-2);
+            border-radius: var(--flin-radius-sm);
+        }
+
+        .ai-markdown-renderer pre {
+            margin: var(--flin-space-6) 0;
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-deep);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-lg);
+            overflow-x: auto;
+        }
+
+        .ai-markdown-renderer pre code {
+            background: transparent;
+            padding: 0;
+            color: var(--flin-text-primary);
+        }
+
+        .ai-markdown-renderer table {
+            width: var(--flin-size-full);
+            border-collapse: collapse;
+            margin: var(--flin-space-6) 0;
+        }
+
+        .ai-markdown-renderer th,
+        .ai-markdown-renderer td {
+            padding: var(--flin-space-3) var(--flin-space-4);
+            border: 1px solid var(--flin-border-subtle);
+            text-align: left;
+        }
+
+        .ai-markdown-renderer th {
+            font-weight: var(--flin-font-bold);
+            background: var(--flin-bg-surface);
+            color: var(--flin-accent-gold);
+        }
+
+        .ai-markdown-renderer tr:nth-child(even) {
+            background: var(--flin-bg-surface);
+        }
+
+        .ai-markdown-renderer hr {
+            margin: var(--flin-space-8) 0;
+            border: none;
+            border-top: 2px solid var(--flin-border-subtle);
+        }
+
+        .ai-markdown-renderer strong {
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+        }
+
+        .ai-markdown-renderer em {
+            font-style: italic;
+            color: var(--flin-text-secondary);
+        }
+
+        .ai-markdown-renderer img {
+            max-width: var(--flin-size-full);
+            height: auto;
+            border-radius: var(--flin-radius-lg);
+            margin: var(--flin-space-6) 0;
+        }
+    </style>
+
+    <div innerHTML={content}></div>
+</div>

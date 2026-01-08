@@ -1,0 +1,58 @@
+// ============================================================================
+// AIToolCall — FlinUI PRO
+// Display AI tool execution
+// ============================================================================
+// Props:
+//   toolName: text (default: "")
+//   status: text (default: "pending")
+// ============================================================================
+
+toolName = props.toolName || ""
+status = props.status || "pending"
+
+<div class="ai-tool-call" data-status={status}>
+    <style>
+        .ai-tool-call {
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-lg);
+            border: 1px solid var(--flin-border-medium);
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .tool-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--flin-accent-emerald);
+        }
+
+        .tool-name {
+            font-family: var(--flin-font-mono);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        .tool-status {
+            margin-left: auto;
+            padding: var(--flin-space-1) var(--flin-space-2);
+            background: var(--flin-accent-emerald-muted);
+            color: var(--flin-accent-emerald);
+            border-radius: var(--flin-radius-sm);
+            font-size: var(--flin-text-xs);
+        }
+    </style>
+
+    <div class="tool-header">
+        <svg class="tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+        <span class="tool-name">{toolName}</span>
+        <span class="tool-status">{status}</span>
+    </div>
+</div>

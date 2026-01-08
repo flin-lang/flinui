@@ -1,0 +1,59 @@
+// ============================================================================
+// AIAgentStatus — FlinUI PRO
+// Agent execution status panel
+// ============================================================================
+// Props:
+//   status: text (default: "idle")
+//   variant: "default" | "compact" (default: "default")
+// ============================================================================
+
+status = props.status || "idle"
+variant = props.variant || "default"
+
+<div class="ai-agent-status" data-status={status} data-variant={variant}>
+    <style>
+        .ai-agent-status {
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-lg);
+            border: 1px solid var(--flin-border-medium);
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            margin-bottom: var(--flin-space-3);
+        }
+
+        .status-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--flin-accent-cyan);
+        }
+
+        .status-title {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        .status-badge {
+            padding: var(--flin-space-1) var(--flin-space-3);
+            background: var(--flin-accent-cyan-muted);
+            color: var(--flin-accent-cyan);
+            border-radius: var(--flin-radius-full);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-semibold);
+        }
+    </style>
+
+    <div class="status-header">
+        <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+        </svg>
+        <span class="status-title">Agent Status</span>
+        <span class="status-badge">{status}</span>
+    </div>
+</div>

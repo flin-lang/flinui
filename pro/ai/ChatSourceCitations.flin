@@ -1,0 +1,161 @@
+// ============================================================================
+// ChatSourceCitations — FlinUI PRO
+// Expandable list of sources and citations with links
+// ============================================================================
+// Props:
+//   sources: list (required)
+//   isExpanded: boolean (default: false)
+// ============================================================================
+
+sources = props.sources || []
+isExpanded = props.isExpanded || false
+
+<div class="chat-source-citations" data-expanded={isExpanded}>
+    <style>
+        .chat-source-citations {
+            margin-top: var(--flin-space-3);
+        }
+
+        .sources-header {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-3);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-md) var(--flin-radius-md) 0 0;
+        }
+
+        .sources-icon {
+            width: var(--flin-icon-sm);
+            height: var(--flin-icon-sm);
+            color: var(--flin-accent-cyan);
+        }
+
+        .sources-title {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        .sources-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            height: 24px;
+            padding: 0 var(--flin-space-2);
+            background: var(--flin-accent-cyan-muted);
+            color: var(--flin-accent-cyan);
+            border-radius: var(--flin-radius-full);
+            font-family: var(--flin-font-mono);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+        }
+
+        .sources-list {
+            padding: var(--flin-space-3);
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-3);
+        }
+
+        .source-item {
+            display: flex;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-3);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-md);
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .source-item:hover {
+            background: var(--flin-bg-hover);
+        }
+
+        .source-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            background: var(--flin-accent-cyan-muted);
+            color: var(--flin-accent-cyan);
+            border-radius: var(--flin-radius-full);
+            font-family: var(--flin-font-mono);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+        }
+
+        .source-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-2);
+        }
+
+        .source-title {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        .source-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+            font-family: var(--flin-font-mono);
+            font-size: var(--flin-text-xs);
+            color: var(--flin-accent-cyan);
+            text-decoration: none;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .source-link:hover {
+            color: var(--flin-accent-cyan-bright);
+        }
+
+        .source-link svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .source-description {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-xs);
+            line-height: var(--flin-leading-relaxed);
+            color: var(--flin-text-secondary);
+        }
+    </style>
+
+    {if sources.length > 0}
+        <div class="sources-header">
+            <svg class="sources-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            <span class="sources-title">Sources</span>
+            <span class="sources-count">{sources.length}</span>
+        </div>
+
+        <div class="sources-list">
+            <div class="source-item">
+                <div class="source-number">1</div>
+                <div class="source-content">
+                    <div class="source-title">Example Source</div>
+                    <a class="source-link" href="#" target="_blank">
+                        https://example.com
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                            <polyline points="15 3 21 3 21 9"/>
+                            <line x1="10" y1="14" x2="21" y2="3"/>
+                        </svg>
+                    </a>
+                    <div class="source-description">Example description of the source</div>
+                </div>
+            </div>
+        </div>
+    {/if}
+</div>

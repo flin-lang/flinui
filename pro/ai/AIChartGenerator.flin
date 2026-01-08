@@ -1,0 +1,43 @@
+// ============================================================================
+// AIChartGenerator — FlinUI PRO
+// Generate charts from data
+// ============================================================================
+// Props:
+//   chartType: text (default: "bar")
+// ============================================================================
+
+chartType = props.chartType || "bar"
+
+<div class="ai-chart-generator">
+    <style>
+        .ai-chart-generator {
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-lg);
+            border: 1px solid var(--flin-border-subtle);
+        }
+
+        .chart-title {
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 300px;
+            background: var(--flin-bg-elevated);
+            border-radius: var(--flin-radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--flin-font-body);
+            color: var(--flin-text-muted);
+        }
+    </style>
+
+    <div class="chart-title">{chartType} Chart</div>
+    <div class="chart-placeholder">Chart visualization here</div>
+</div>
