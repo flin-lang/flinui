@@ -1,0 +1,385 @@
+// ============================================================================
+// CommandPalette.flin — FlinUI PRO Dashboard Component
+// Command-K style search interface for quick navigation and actions
+// ============================================================================
+// Props:
+//   - placeholder: Search input placeholder text (string)
+//   - commands: List of command objects with icon, label, shortcut, action, category (list)
+//   - open: Control palette visibility externally (boolean)
+//   - onClose: Callback when palette closes (function or none)
+
+placeholder = props.placeholder || "Type a command or search..."
+commands = props.commands || [
+    ["icon": "🏠", "label": "Go to Dashboard", "shortcut": "G D", "category": "Navigation", "action": none],
+    ["icon": "📊", "label": "View Analytics", "shortcut": "G A", "category": "Navigation", "action": none],
+    ["icon": "👥", "label": "Manage Users", "shortcut": "G U", "category": "Navigation", "action": none],
+    ["icon": "⚙️", "label": "Open Settings", "shortcut": "G S", "category": "Navigation", "action": none],
+    ["icon": "✏️", "label": "Create New Task", "shortcut": "C T", "category": "Actions", "action": none],
+    ["icon": "📁", "label": "Upload File", "shortcut": "C F", "category": "Actions", "action": none],
+    ["icon": "🔔", "label": "Toggle Notifications", "shortcut": "T N", "category": "Settings", "action": none],
+    ["icon": "🌙", "label": "Toggle Dark Mode", "shortcut": "T D", "category": "Settings", "action": none]
+]
+open = props.open || false
+onClose = props.onClose || none
+
+searchQuery = ""
+selectedIndex = 0
+
+filteredCommands = commands.filter(cmd =>
+    cmd.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    cmd.category.toLowerCase().includes(searchQuery.toLowerCase())
+)
+
+groupedCommands = {}
+{for cmd in filteredCommands}
+    {if groupedCommands[cmd.category] == none}
+        {groupedCommands[cmd.category] = []}
+    {/if}
+    {groupedCommands[cmd.category].push(cmd)}
+{/for}
+
+<div class="flin-command-palette {if open}open{/if}">
+    <style>
+        .flin-command-palette {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 15vh;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .flin-command-palette.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .palette-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .palette-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 var(--flin-space-4);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-2xl);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            transform: scale(0.95) translateY(-20px);
+            transition: transform var(--flin-transition-fast);
+        }
+
+        .flin-command-palette.open .palette-container {
+            transform: scale(1) translateY(0);
+        }
+
+        .palette-header {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-4) var(--flin-space-5);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .search-icon {
+            color: var(--flin-text-muted);
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .palette-input {
+            flex: 1;
+            padding: 0;
+            background: transparent;
+            border: none;
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-primary);
+            outline: none;
+        }
+
+        .palette-input::placeholder {
+            color: var(--flin-text-muted);
+        }
+
+        .close-shortcut {
+            padding: var(--flin-space-1) var(--flin-space-2);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-md);
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-muted);
+            font-family: monospace;
+        }
+
+        .palette-body {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .command-group {
+            padding: var(--flin-space-3) 0;
+        }
+
+        .command-group:not(:last-child) {
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .group-label {
+            padding: var(--flin-space-2) var(--flin-space-5);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .command-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-3) var(--flin-space-5);
+            cursor: pointer;
+            transition: background var(--flin-transition-fast);
+        }
+
+        .command-item:hover,
+        .command-item.selected {
+            background: var(--flin-bg-surface);
+        }
+
+        .command-item.selected {
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .command-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-lg);
+            font-size: 1.125rem;
+            flex-shrink: 0;
+        }
+
+        .command-item.selected .command-icon {
+            background: var(--flin-accent-gold);
+        }
+
+        .command-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .command-label {
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .command-shortcut {
+            display: flex;
+            gap: var(--flin-space-1);
+            flex-shrink: 0;
+        }
+
+        .shortcut-key {
+            padding: var(--flin-space-1) var(--flin-space-2);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-sm);
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-tertiary);
+            font-family: monospace;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .palette-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-3) var(--flin-space-5);
+            border-top: 1px solid var(--flin-border-subtle);
+            background: var(--flin-bg-surface);
+        }
+
+        .footer-hint {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-4);
+        }
+
+        .hint-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-muted);
+        }
+
+        .hint-key {
+            padding: var(--flin-space-1);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-sm);
+            font-family: monospace;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* Empty state */
+        .palette-empty {
+            padding: var(--flin-space-12) var(--flin-space-6);
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--flin-space-4);
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-tertiary);
+            margin: 0;
+        }
+
+        .empty-hint {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-muted);
+            margin: var(--flin-space-2) 0 0 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-command-palette {
+                padding-top: var(--flin-space-4);
+                align-items: flex-start;
+            }
+
+            .palette-container {
+                max-width: 100%;
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .palette-body {
+                max-height: calc(100vh - 140px);
+            }
+
+            .footer-hint {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .command-shortcut {
+                display: none;
+            }
+
+            .palette-header {
+                padding: var(--flin-space-3) var(--flin-space-4);
+            }
+
+            .command-item {
+                padding: var(--flin-space-3) var(--flin-space-4);
+            }
+        }
+    </style>
+
+    <div class="palette-backdrop" click={onClose}></div>
+
+    <div class="palette-container">
+        <div class="palette-header">
+            <span class="search-icon">🔍</span>
+            <input
+                type="text"
+                class="palette-input"
+                placeholder={placeholder}
+                value={searchQuery}
+                input={(e) => {
+                    searchQuery = e.target.value
+                    selectedIndex = 0
+                }}
+                autofocus
+            />
+            <span class="close-shortcut">ESC</span>
+        </div>
+
+        <div class="palette-body">
+            {if filteredCommands.length > 0}
+                {for category, categoryCommands in groupedCommands}
+                    <div class="command-group">
+                        <div class="group-label">{category}</div>
+                        {for cmd, index in categoryCommands}
+                            <div
+                                class="command-item {if index == selectedIndex}selected{/if}"
+                                click={() => {
+                                    if cmd.action != none {
+                                        cmd.action()
+                                    }
+                                    if onClose != none {
+                                        onClose()
+                                    }
+                                }}
+                            >
+                                <div class="command-icon">{cmd.icon}</div>
+                                <div class="command-content">
+                                    <p class="command-label">{cmd.label}</p>
+                                </div>
+                                {if cmd.shortcut != none}
+                                    <div class="command-shortcut">
+                                        {for key in cmd.shortcut.split(" ")}
+                                            <span class="shortcut-key">{key}</span>
+                                        {/for}
+                                    </div>
+                                {/if}
+                            </div>
+                        {/for}
+                    </div>
+                {/for}
+            {/if}
+
+            {if filteredCommands.length == 0}
+                <div class="palette-empty">
+                    <div class="empty-icon">🔍</div>
+                    <p class="empty-text">No commands found</p>
+                    <p class="empty-hint">Try a different search term</p>
+                </div>
+            {/if}
+        </div>
+
+        <div class="palette-footer">
+            <div class="footer-hint">
+                <span class="hint-item">
+                    <span class="hint-key">↑↓</span>
+                    Navigate
+                </span>
+                <span class="hint-item">
+                    <span class="hint-key">↵</span>
+                    Select
+                </span>
+                <span class="hint-item">
+                    <span class="hint-key">esc</span>
+                    Close
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

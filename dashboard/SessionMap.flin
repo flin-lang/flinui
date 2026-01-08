@@ -1,0 +1,239 @@
+// ============================================================================
+// SessionMap.flin — FlinUI PRO Dashboard Component
+// Geographic visitor distribution with country list and percentage bars
+// ============================================================================
+// Props:
+//   - title: Section title (string)
+//   - locations: List of location objects with country, count, percent, code (list)
+//   - showTotal: Show total visitors count (boolean)
+//   - total: Total visitor count (number or none)
+//   - maxItems: Maximum items to display (number)
+
+title = props.title || "Visitors by Country"
+locations = props.locations || [
+    ["country": "United States", "count": 12847, "percent": 42.5, "code": "US"],
+    ["country": "United Kingdom", "count": 4291, "percent": 14.2, "code": "GB"],
+    ["country": "Germany", "count": 3156, "percent": 10.4, "code": "DE"],
+    ["country": "France", "count": 2847, "percent": 9.4, "code": "FR"],
+    ["country": "Canada", "count": 2103, "percent": 7.0, "code": "CA"],
+    ["country": "Australia", "count": 1842, "percent": 6.1, "code": "AU"],
+    ["country": "Japan", "count": 1521, "percent": 5.0, "code": "JP"],
+    ["country": "Others", "count": 1621, "percent": 5.4, "code": "XX"]
+]
+showTotal = props.showTotal || true
+total = props.total || none
+maxItems = props.maxItems || 8
+
+// Calculate total if not provided
+calculatedTotal = total || locations.reduce((sum, loc) => sum + loc.count, 0)
+
+<div class="flin-session-map">
+    <style>
+        .flin-session-map {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .flin-session-map:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+        }
+
+        .map-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--flin-space-4);
+        }
+
+        .map-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .map-total {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .total-value {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-accent-gold);
+        }
+
+        .total-label {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .location-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-3);
+        }
+
+        .location-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-2);
+        }
+
+        .location-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--flin-space-3);
+        }
+
+        .location-name {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .country-flag {
+            font-size: 1.25rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .country-name {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+        }
+
+        .location-stats {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-4);
+        }
+
+        .location-count {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-secondary);
+            font-variant-numeric: tabular-nums;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .location-percent {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            min-width: 48px;
+            text-align: right;
+        }
+
+        .location-bar-container {
+            width: 100%;
+            height: 6px;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-full);
+            overflow: hidden;
+        }
+
+        .location-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--flin-accent-gold), #f59e0b);
+            border-radius: var(--flin-radius-full);
+            transition: width var(--flin-transition-normal);
+        }
+
+        .location-item:nth-child(1) .location-bar { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .location-item:nth-child(2) .location-bar { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .location-item:nth-child(3) .location-bar { background: linear-gradient(90deg, #10b981, #34d399); }
+        .location-item:nth-child(4) .location-bar { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .location-item:nth-child(5) .location-bar { background: linear-gradient(90deg, #ec4899, #f472b6); }
+        .location-item:nth-child(6) .location-bar { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+        .location-item:nth-child(7) .location-bar { background: linear-gradient(90deg, #f97316, #fb923c); }
+        .location-item:nth-child(8) .location-bar { background: linear-gradient(90deg, #6b7280, #9ca3af); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-session-map {
+                padding: var(--flin-space-4);
+            }
+
+            .map-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--flin-space-2);
+            }
+
+            .map-total {
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .location-stats {
+                gap: var(--flin-space-2);
+            }
+
+            .location-count {
+                min-width: 50px;
+                font-size: var(--flin-text-xs);
+            }
+
+            .location-percent {
+                min-width: 40px;
+                font-size: var(--flin-text-xs);
+            }
+        }
+    </style>
+
+    <div class="map-header">
+        <h3 class="map-title">{title}</h3>
+        {if showTotal}
+            <div class="map-total">
+                <span class="total-value">{calculatedTotal.toLocaleString()}</span>
+                <span class="total-label">Total Visitors</span>
+            </div>
+        {/if}
+    </div>
+
+    <div class="location-list">
+        {for i, location in locations}
+            {if i < maxItems}
+                <div class="location-item">
+                    <div class="location-info">
+                        <div class="location-name">
+                            <span class="country-flag">
+                                {if location.code == "US"}🇺🇸{/if}
+                                {if location.code == "GB"}🇬🇧{/if}
+                                {if location.code == "DE"}🇩🇪{/if}
+                                {if location.code == "FR"}🇫🇷{/if}
+                                {if location.code == "CA"}🇨🇦{/if}
+                                {if location.code == "AU"}🇦🇺{/if}
+                                {if location.code == "JP"}🇯🇵{/if}
+                                {if location.code == "XX"}🌍{/if}
+                            </span>
+                            <span class="country-name">{location.country}</span>
+                        </div>
+                        <div class="location-stats">
+                            <span class="location-count">{location.count.toLocaleString()}</span>
+                            <span class="location-percent">{location.percent}%</span>
+                        </div>
+                    </div>
+                    <div class="location-bar-container">
+                        <div class="location-bar" style="width: {location.percent}%"></div>
+                    </div>
+                </div>
+            {/if}
+        {/for}
+    </div>
+</div>

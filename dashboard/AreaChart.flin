@@ -1,0 +1,230 @@
+// ============================================================================
+// AreaChart.flin — FlinUI PRO Dashboard Component
+// CSS-only filled area chart with gradient visualization
+// ============================================================================
+// Props:
+//   - title: Chart title (string or none)
+//   - data: List of data points with label and value (list)
+//   - color: Primary color for the area (string)
+//   - height: Chart height in pixels (number)
+//   - showGrid: Display background grid lines (boolean)
+//   - showLabels: Display x-axis labels (boolean)
+
+title = props.title || none
+data = props.data || [
+    ["label": "Mon", "value": 30],
+    ["label": "Tue", "value": 45],
+    ["label": "Wed", "value": 28],
+    ["label": "Thu", "value": 65],
+    ["label": "Fri", "value": 52],
+    ["label": "Sat", "value": 78],
+    ["label": "Sun", "value": 60]
+]
+color = props.color || "var(--flin-accent-gold)"
+height = props.height || 200
+showGrid = props.showGrid || true
+showLabels = props.showLabels || true
+
+// Calculate max value for scaling
+maxValue = 100
+
+<div class="flin-area-chart" style="--chart-height: {height}px; --area-color: {color}">
+    <style>
+        .flin-area-chart {
+            width: 100%;
+            font-family: var(--flin-font-sans, system-ui, sans-serif);
+        }
+
+        .area-header {
+            margin-bottom: var(--flin-space-4, 1rem);
+        }
+
+        .area-title {
+            font-size: var(--flin-text-lg, 1.125rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+            margin: 0;
+        }
+
+        .area-container {
+            position: relative;
+            height: var(--chart-height);
+            background: var(--flin-bg-elevated, #ffffff);
+            border: 1px solid var(--flin-border-subtle, #e5e5e5);
+            border-radius: var(--flin-radius-lg, 0.75rem);
+            padding: var(--flin-space-4, 1rem);
+            overflow: hidden;
+        }
+
+        .area-grid {
+            position: absolute;
+            inset: var(--flin-space-4, 1rem);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .grid-line {
+            height: 1px;
+            background: var(--flin-border-subtle, #e5e5e5);
+            opacity: 0.5;
+        }
+
+        .area-visual {
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
+        .area-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            position: relative;
+        }
+
+        .area-bar-wrapper {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            position: relative;
+        }
+
+        .area-bar {
+            width: 100%;
+            background: linear-gradient(180deg, var(--area-color), transparent);
+            border-radius: var(--flin-radius-sm, 0.25rem) var(--flin-radius-sm, 0.25rem) 0 0;
+            position: relative;
+            transition: all var(--flin-transition-normal, 0.2s) ease;
+            opacity: 0.7;
+        }
+
+        .area-bar::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            background: var(--area-color);
+            border-radius: 50%;
+            border: 2px solid var(--flin-bg-elevated, #ffffff);
+            box-shadow: var(--flin-shadow-sm, 0 1px 2px rgba(0,0,0,0.1));
+            opacity: 0;
+            transition: opacity var(--flin-transition-fast, 0.15s);
+        }
+
+        .area-column:hover .area-bar {
+            opacity: 1;
+        }
+
+        .area-column:hover .area-bar::before {
+            opacity: 1;
+        }
+
+        .area-tooltip {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--flin-bg-base, #0a0a0f);
+            color: var(--flin-text-inverse, #ffffff);
+            padding: var(--flin-space-1, 0.25rem) var(--flin-space-2, 0.5rem);
+            border-radius: var(--flin-radius-sm, 0.25rem);
+            font-size: var(--flin-text-xs, 0.75rem);
+            font-weight: var(--flin-font-semibold, 600);
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--flin-transition-fast, 0.15s);
+            z-index: 10;
+        }
+
+        .area-column:hover .area-tooltip {
+            opacity: 1;
+        }
+
+        .area-label {
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: var(--flin-text-tertiary, #6b7280);
+            margin-top: var(--flin-space-2, 0.5rem);
+            text-align: center;
+        }
+
+        .area-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg,
+                color-mix(in srgb, var(--area-color) 20%, transparent),
+                color-mix(in srgb, var(--area-color) 5%, transparent)
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .area-container {
+                padding: var(--flin-space-3, 0.75rem);
+            }
+
+            .area-label {
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .area-container {
+                height: calc(var(--chart-height) * 0.75);
+            }
+
+            .area-label {
+                writing-mode: vertical-rl;
+                text-orientation: mixed;
+            }
+        }
+    </style>
+
+    {if title != none}
+        <div class="area-header">
+            <h3 class="area-title">{title}</h3>
+        </div>
+    {/if}
+
+    <div class="area-container">
+        {if showGrid}
+            <div class="area-grid">
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+            </div>
+        {/if}
+
+        <div class="area-visual">
+            {for point in data}
+                <div class="area-column">
+                    <div class="area-bar-wrapper">
+                        <div class="area-bar" style="height: {point.value}%">
+                            <span class="area-tooltip">{point.value}</span>
+                        </div>
+                    </div>
+                    {if showLabels}
+                        <span class="area-label">{point.label}</span>
+                    {/if}
+                </div>
+            {/for}
+        </div>
+    </div>
+</div>

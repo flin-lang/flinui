@@ -1,0 +1,233 @@
+// ============================================================================
+// TrafficSources.flin — FlinUI PRO Dashboard Component
+// Referral channels breakdown with icons, visits, and trend indicators
+// ============================================================================
+// Props:
+//   - title: Section title (string)
+//   - sources: List of source objects with name, icon, visits, percent, trend (list)
+//   - showTrend: Show trend indicators (boolean)
+//   - period: Time period label (string or none)
+
+title = props.title || "Traffic Sources"
+sources = props.sources || [
+    ["name": "Organic Search", "icon": "search", "visits": 45230, "percent": 38.2, "trend": "up", "trendValue": "+5.3%"],
+    ["name": "Direct", "icon": "direct", "visits": 32150, "percent": 27.1, "trend": "up", "trendValue": "+2.1%"],
+    ["name": "Social Media", "icon": "social", "visits": 18420, "percent": 15.5, "trend": "down", "trendValue": "-1.8%"],
+    ["name": "Referral", "icon": "referral", "visits": 12890, "percent": 10.9, "trend": "up", "trendValue": "+8.4%"],
+    ["name": "Email", "icon": "email", "visits": 6540, "percent": 5.5, "trend": "neutral", "trendValue": "0%"],
+    ["name": "Paid Ads", "icon": "ads", "visits": 3320, "percent": 2.8, "trend": "down", "trendValue": "-3.2%"]
+]
+showTrend = props.showTrend || true
+period = props.period || "Last 30 days"
+
+<div class="flin-traffic-sources">
+    <style>
+        .flin-traffic-sources {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .flin-traffic-sources:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+        }
+
+        .traffic-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--flin-space-3);
+        }
+
+        .traffic-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .traffic-period {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-tertiary);
+        }
+
+        .source-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-1);
+        }
+
+        .source-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-3);
+            border-radius: var(--flin-radius-lg);
+            transition: background var(--flin-transition-fast);
+        }
+
+        .source-item:hover {
+            background: var(--flin-bg-surface);
+        }
+
+        .source-info {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            flex: 1;
+        }
+
+        .source-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--flin-radius-lg);
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .source-icon.search { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .source-icon.direct { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+        .source-icon.social { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+        .source-icon.referral { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+        .source-icon.email { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+        .source-icon.ads { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+
+        .source-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .source-name {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+        }
+
+        .source-visits {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-tertiary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .source-stats {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-4);
+        }
+
+        .source-percent {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            min-width: 45px;
+            text-align: right;
+        }
+
+        .source-trend {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-semibold);
+            min-width: 55px;
+        }
+
+        .source-trend.trend-up {
+            color: var(--flin-success);
+        }
+
+        .source-trend.trend-down {
+            color: var(--flin-error);
+        }
+
+        .source-trend.trend-neutral {
+            color: var(--flin-text-tertiary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-traffic-sources {
+                padding: var(--flin-space-4);
+            }
+
+            .traffic-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--flin-space-1);
+            }
+
+            .source-item {
+                padding: var(--flin-space-2);
+            }
+
+            .source-icon {
+                width: 32px;
+                height: 32px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .source-stats {
+                gap: var(--flin-space-2);
+            }
+
+            .source-visits {
+                display: none;
+            }
+
+            .source-trend {
+                min-width: 50px;
+            }
+        }
+    </style>
+
+    <div class="traffic-header">
+        <h3 class="traffic-title">{title}</h3>
+        {if period != none}
+            <span class="traffic-period">{period}</span>
+        {/if}
+    </div>
+
+    <div class="source-list">
+        {for source in sources}
+            <div class="source-item">
+                <div class="source-info">
+                    <div class="source-icon {source.icon}">
+                        {if source.icon == "search"}🔍{/if}
+                        {if source.icon == "direct"}🔗{/if}
+                        {if source.icon == "social"}📱{/if}
+                        {if source.icon == "referral"}🌐{/if}
+                        {if source.icon == "email"}📧{/if}
+                        {if source.icon == "ads"}📢{/if}
+                    </div>
+                    <div class="source-details">
+                        <span class="source-name">{source.name}</span>
+                        <span class="source-visits">{source.visits.toLocaleString()} visits</span>
+                    </div>
+                </div>
+                <div class="source-stats">
+                    <span class="source-percent">{source.percent}%</span>
+                    {if showTrend}
+                        <span class="source-trend trend-{source.trend}">
+                            {if source.trend == "up"}↑{/if}
+                            {if source.trend == "down"}↓{/if}
+                            {if source.trend == "neutral"}→{/if}
+                            {source.trendValue}
+                        </span>
+                    {/if}
+                </div>
+            </div>
+        {/for}
+    </div>
+</div>

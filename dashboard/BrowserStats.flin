@@ -1,0 +1,216 @@
+// ============================================================================
+// BrowserStats.flin — FlinUI PRO Dashboard Component
+// Browser and device breakdown with horizontal bars and icons
+// ============================================================================
+// Props:
+//   - title: Section title (string)
+//   - browsers: List of browser objects with name, icon, percent, count (list)
+//   - showCount: Show visit counts (boolean)
+//   - animated: Enable bar animation (boolean)
+
+title = props.title || "Browser Statistics"
+browsers = props.browsers || [
+    ["name": "Chrome", "icon": "chrome", "percent": 64.5, "count": 19523],
+    ["name": "Safari", "icon": "safari", "percent": 18.2, "count": 5512],
+    ["name": "Firefox", "icon": "firefox", "percent": 8.7, "count": 2634],
+    ["name": "Edge", "icon": "edge", "percent": 5.4, "count": 1635],
+    ["name": "Opera", "icon": "opera", "percent": 2.1, "count": 636],
+    ["name": "Other", "icon": "other", "percent": 1.1, "count": 333]
+]
+showCount = props.showCount || true
+animated = props.animated || true
+
+<div class="flin-browser-stats {if animated}animated{/if}">
+    <style>
+        .flin-browser-stats {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .flin-browser-stats:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+        }
+
+        .browser-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .browser-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .browser-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+        }
+
+        .browser-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-2);
+        }
+
+        .browser-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--flin-space-3);
+        }
+
+        .browser-name-group {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+        }
+
+        .browser-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-lg);
+            font-size: 1.25rem;
+        }
+
+        /* Browser icon colors */
+        .browser-icon.chrome { background: linear-gradient(135deg, #4285f4, #34a853, #fbbc05, #ea4335); -webkit-background-clip: padding-box; }
+        .browser-icon.safari { background: linear-gradient(135deg, #0fb5ee, #1d6df3); color: white; }
+        .browser-icon.firefox { background: linear-gradient(135deg, #ff7139, #e66000); color: white; }
+        .browser-icon.edge { background: linear-gradient(135deg, #0078d4, #00a2ed); color: white; }
+        .browser-icon.opera { background: linear-gradient(135deg, #ff1b2d, #9c0000); color: white; }
+        .browser-icon.other { background: var(--flin-bg-surface); }
+
+        .browser-name {
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+        }
+
+        .browser-stats {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-4);
+        }
+
+        .browser-count {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-tertiary);
+            font-variant-numeric: tabular-nums;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .browser-percent {
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            min-width: 55px;
+            text-align: right;
+        }
+
+        .browser-bar-container {
+            width: 100%;
+            height: 8px;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-full);
+            overflow: hidden;
+        }
+
+        .browser-bar {
+            height: 100%;
+            border-radius: var(--flin-radius-full);
+            transition: width var(--flin-transition-slow);
+        }
+
+        .animated .browser-bar {
+            animation: barGrow 1s ease-out forwards;
+        }
+
+        @keyframes barGrow {
+            from { width: 0 !important; }
+        }
+
+        .browser-item:nth-child(1) .browser-bar { background: linear-gradient(90deg, #4285f4, #34a853); animation-delay: 0.1s; }
+        .browser-item:nth-child(2) .browser-bar { background: linear-gradient(90deg, #0fb5ee, #1d6df3); animation-delay: 0.2s; }
+        .browser-item:nth-child(3) .browser-bar { background: linear-gradient(90deg, #ff7139, #e66000); animation-delay: 0.3s; }
+        .browser-item:nth-child(4) .browser-bar { background: linear-gradient(90deg, #0078d4, #00a2ed); animation-delay: 0.4s; }
+        .browser-item:nth-child(5) .browser-bar { background: linear-gradient(90deg, #ff1b2d, #9c0000); animation-delay: 0.5s; }
+        .browser-item:nth-child(6) .browser-bar { background: linear-gradient(90deg, #6b7280, #9ca3af); animation-delay: 0.6s; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-browser-stats {
+                padding: var(--flin-space-4);
+            }
+
+            .browser-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .browser-stats {
+                gap: var(--flin-space-2);
+            }
+
+            .browser-count {
+                display: none;
+            }
+
+            .browser-percent {
+                min-width: 45px;
+                font-size: var(--flin-text-sm);
+            }
+        }
+    </style>
+
+    <div class="browser-header">
+        <h3 class="browser-title">{title}</h3>
+    </div>
+
+    <div class="browser-list">
+        {for browser in browsers}
+            <div class="browser-item">
+                <div class="browser-info">
+                    <div class="browser-name-group">
+                        <div class="browser-icon {browser.icon}">
+                            {if browser.icon == "chrome"}🌐{/if}
+                            {if browser.icon == "safari"}🧭{/if}
+                            {if browser.icon == "firefox"}🦊{/if}
+                            {if browser.icon == "edge"}🔷{/if}
+                            {if browser.icon == "opera"}🔴{/if}
+                            {if browser.icon == "other"}🌍{/if}
+                        </div>
+                        <span class="browser-name">{browser.name}</span>
+                    </div>
+                    <div class="browser-stats">
+                        {if showCount}
+                            <span class="browser-count">{browser.count.toLocaleString()}</span>
+                        {/if}
+                        <span class="browser-percent">{browser.percent}%</span>
+                    </div>
+                </div>
+                <div class="browser-bar-container">
+                    <div class="browser-bar" style="width: {browser.percent}%"></div>
+                </div>
+            </div>
+        {/for}
+    </div>
+</div>

@@ -1,0 +1,268 @@
+// ============================================================================
+// DonutChart.flin — FlinUI PRO Dashboard Component
+// CSS-only ring/donut chart with center stat display
+// ============================================================================
+// Props:
+//   - title: Chart title (string or none)
+//   - data: List of segments with label, value, and color (list)
+//   - centerValue: Main value displayed in center (string or none)
+//   - centerLabel: Label below center value (string or none)
+//   - thickness: Ring thickness percentage 10-40 (number)
+
+title = props.title || none
+data = props.data || [
+    ["label": "Completed", "value": 45, "color": "#22c55e"],
+    ["label": "In Progress", "value": 30, "color": "#D4AF37"],
+    ["label": "Pending", "value": 15, "color": "#3b82f6"],
+    ["label": "Cancelled", "value": 10, "color": "#ef4444"]
+]
+centerValue = props.centerValue || "78%"
+centerLabel = props.centerLabel || "Total Progress"
+thickness = props.thickness || 25
+size = props.size || 220
+
+// Calculate inner radius based on thickness
+innerSizePercent = 100 - (thickness * 2)
+
+<div class="flin-donut-chart" style="--donut-size: {size}px; --inner-size: {innerSizePercent}%">
+    <style>
+        .flin-donut-chart {
+            width: 100%;
+            font-family: var(--flin-font-sans, system-ui, sans-serif);
+        }
+
+        .donut-header {
+            margin-bottom: var(--flin-space-4, 1rem);
+        }
+
+        .donut-title {
+            font-size: var(--flin-text-lg, 1.125rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+            margin: 0;
+        }
+
+        .donut-container {
+            background: var(--flin-bg-elevated, #ffffff);
+            border: 1px solid var(--flin-border-subtle, #e5e5e5);
+            border-radius: var(--flin-radius-lg, 0.75rem);
+            padding: var(--flin-space-6, 1.5rem);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--flin-space-6, 1.5rem);
+        }
+
+        .donut-visual {
+            width: var(--donut-size);
+            height: var(--donut-size);
+            border-radius: 50%;
+            background: var(--donut-gradient);
+            position: relative;
+            box-shadow: var(--flin-shadow-md, 0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        .donut-hole {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: var(--inner-size);
+            height: var(--inner-size);
+            border-radius: 50%;
+            background: var(--flin-bg-elevated, #ffffff);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .donut-center-value {
+            font-size: clamp(1.5rem, 3vw, 2.25rem);
+            font-weight: var(--flin-font-black, 900);
+            color: var(--flin-text-primary, #1a1a2e);
+            line-height: 1;
+            margin: 0;
+        }
+
+        .donut-center-label {
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: var(--flin-text-tertiary, #6b7280);
+            margin-top: var(--flin-space-1, 0.25rem);
+            text-align: center;
+            padding: 0 var(--flin-space-2, 0.5rem);
+        }
+
+        .donut-legend {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--flin-space-3, 0.75rem);
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2, 0.5rem);
+            padding: var(--flin-space-2, 0.5rem) var(--flin-space-3, 0.75rem);
+            background: var(--flin-bg-surface, #f5f5f5);
+            border-radius: var(--flin-radius-md, 0.5rem);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast, 0.15s) ease;
+        }
+
+        .legend-item:hover {
+            background: var(--flin-bg-base, #e5e5e5);
+            transform: scale(1.02);
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .legend-label {
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: var(--flin-text-secondary, #4b5563);
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .legend-value {
+            font-size: var(--flin-text-sm, 0.875rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+        }
+
+        /* Animation */
+        .donut-visual {
+            animation: donutSpin 0.8s ease-out;
+        }
+
+        @keyframes donutSpin {
+            from {
+                transform: rotate(-90deg);
+                opacity: 0;
+            }
+            to {
+                transform: rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .donut-hole {
+            animation: holeFade 0.5s ease-out 0.3s backwards;
+        }
+
+        @keyframes holeFade {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .legend-item {
+            animation: legendSlide 0.4s ease-out backwards;
+        }
+
+        @keyframes legendSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .legend-item:nth-child(1) { animation-delay: 0.4s; }
+        .legend-item:nth-child(2) { animation-delay: 0.45s; }
+        .legend-item:nth-child(3) { animation-delay: 0.5s; }
+        .legend-item:nth-child(4) { animation-delay: 0.55s; }
+        .legend-item:nth-child(5) { animation-delay: 0.6s; }
+        .legend-item:nth-child(6) { animation-delay: 0.65s; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .donut-container {
+                padding: var(--flin-space-4, 1rem);
+            }
+
+            .donut-visual {
+                width: calc(var(--donut-size) * 0.85);
+                height: calc(var(--donut-size) * 0.85);
+            }
+
+            .donut-legend {
+                gap: var(--flin-space-2, 0.5rem);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .donut-visual {
+                width: calc(var(--donut-size) * 0.7);
+                height: calc(var(--donut-size) * 0.7);
+            }
+
+            .donut-legend {
+                grid-template-columns: 1fr;
+            }
+
+            .legend-item {
+                padding: var(--flin-space-2, 0.5rem);
+            }
+        }
+    </style>
+
+    {if title != none}
+        <div class="donut-header">
+            <h3 class="donut-title">{title}</h3>
+        </div>
+    {/if}
+
+    <div class="donut-container">
+        <div class="donut-visual" style="--donut-gradient: conic-gradient(
+            {data[0].color} 0deg {data[0].value * 3.6}deg,
+            {data[1].color} {data[0].value * 3.6}deg {(data[0].value + data[1].value) * 3.6}deg,
+            {data[2].color} {(data[0].value + data[1].value) * 3.6}deg {(data[0].value + data[1].value + data[2].value) * 3.6}deg,
+            {data[3].color} {(data[0].value + data[1].value + data[2].value) * 3.6}deg 360deg
+        )">
+            <div class="donut-hole">
+                {if centerValue != none}
+                    <span class="donut-center-value">{centerValue}</span>
+                {/if}
+                {if centerLabel != none}
+                    <span class="donut-center-label">{centerLabel}</span>
+                {/if}
+            </div>
+        </div>
+
+        <div class="donut-legend">
+            {for segment in data}
+                <div class="legend-item">
+                    <span class="legend-color" style="background: {segment.color}"></span>
+                    <div class="legend-text">
+                        <span class="legend-label">{segment.label}</span>
+                        <span class="legend-value">{segment.value}%</span>
+                    </div>
+                </div>
+            {/for}
+        </div>
+    </div>
+</div>

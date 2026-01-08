@@ -1,0 +1,355 @@
+// ============================================================================
+// CandlestickChart.flin — FlinUI PRO Dashboard Component
+// CSS-only financial OHLC candlestick chart
+// ============================================================================
+// Props:
+//   - title: Chart title (string or none)
+//   - data: List of candle data with date, open, high, low, close (list)
+//   - bullColor: Color for bullish candles (string)
+//   - bearColor: Color for bearish candles (string)
+
+title = props.title || none
+data = props.data || [
+    ["date": "Mon", "open": 45, "high": 58, "low": 42, "close": 55],
+    ["date": "Tue", "open": 55, "high": 62, "low": 50, "close": 48],
+    ["date": "Wed", "open": 48, "high": 55, "low": 40, "close": 52],
+    ["date": "Thu", "open": 52, "high": 68, "low": 50, "close": 65],
+    ["date": "Fri", "open": 65, "high": 72, "low": 58, "close": 60],
+    ["date": "Sat", "open": 60, "high": 65, "low": 52, "close": 58],
+    ["date": "Sun", "open": 58, "high": 75, "low": 55, "close": 72]
+]
+bullColor = props.bullColor || "#22c55e"
+bearColor = props.bearColor || "#ef4444"
+
+<div class="flin-candlestick-chart" style="--bull-color: {bullColor}; --bear-color: {bearColor}">
+    <style>
+        .flin-candlestick-chart {
+            width: 100%;
+            font-family: var(--flin-font-sans, system-ui, sans-serif);
+        }
+
+        .candle-header {
+            margin-bottom: var(--flin-space-4, 1rem);
+        }
+
+        .candle-title {
+            font-size: var(--flin-text-lg, 1.125rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+            margin: 0;
+        }
+
+        .candle-container {
+            background: var(--flin-bg-elevated, #ffffff);
+            border: 1px solid var(--flin-border-subtle, #e5e5e5);
+            border-radius: var(--flin-radius-lg, 0.75rem);
+            padding: var(--flin-space-6, 1.5rem);
+        }
+
+        .candle-chart {
+            position: relative;
+            height: 250px;
+            display: flex;
+            align-items: flex-end;
+            gap: var(--flin-space-3, 0.75rem);
+            padding: var(--flin-space-4, 1rem) 0;
+        }
+
+        .candle-grid {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .grid-line {
+            height: 1px;
+            background: var(--flin-border-subtle, #e5e5e5);
+            opacity: 0.5;
+        }
+
+        .candle-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            position: relative;
+        }
+
+        .candle-stick {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+        }
+
+        .candle-wick {
+            position: absolute;
+            width: 2px;
+            background: var(--candle-color);
+        }
+
+        .candle-body {
+            position: absolute;
+            width: 70%;
+            max-width: 24px;
+            min-width: 12px;
+            background: var(--candle-color);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all var(--flin-transition-fast, 0.15s) ease;
+        }
+
+        .candle-body:hover {
+            filter: brightness(1.15);
+            transform: scaleX(1.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .candle-body.bullish {
+            --candle-color: var(--bull-color);
+        }
+
+        .candle-body.bearish {
+            --candle-color: var(--bear-color);
+        }
+
+        .candle-wick.bullish {
+            --candle-color: var(--bull-color);
+        }
+
+        .candle-wick.bearish {
+            --candle-color: var(--bear-color);
+        }
+
+        .candle-tooltip {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--flin-bg-base, #0a0a0f);
+            color: var(--flin-text-inverse, #ffffff);
+            padding: var(--flin-space-2, 0.5rem) var(--flin-space-3, 0.75rem);
+            border-radius: var(--flin-radius-md, 0.5rem);
+            font-size: var(--flin-text-xs, 0.75rem);
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--flin-transition-fast, 0.15s);
+            z-index: 10;
+        }
+
+        .candle-tooltip::after {
+            content: "";
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: var(--flin-bg-base, #0a0a0f);
+        }
+
+        .candle-item:hover .candle-tooltip {
+            opacity: 1;
+        }
+
+        .candle-tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--flin-space-3, 0.75rem);
+        }
+
+        .candle-tooltip-label {
+            color: var(--flin-text-tertiary, #9ca3af);
+        }
+
+        .candle-label {
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: var(--flin-text-tertiary, #6b7280);
+            margin-top: var(--flin-space-2, 0.5rem);
+        }
+
+        .candle-y-axis {
+            position: absolute;
+            left: -30px;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .y-tick {
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: var(--flin-text-tertiary, #6b7280);
+        }
+
+        .candle-legend {
+            display: flex;
+            justify-content: center;
+            gap: var(--flin-space-6, 1.5rem);
+            margin-top: var(--flin-space-4, 1rem);
+            padding-top: var(--flin-space-4, 1rem);
+            border-top: 1px solid var(--flin-border-subtle, #e5e5e5);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2, 0.5rem);
+        }
+
+        .legend-candle {
+            width: 12px;
+            height: 20px;
+            border-radius: 2px;
+        }
+
+        .legend-candle.bullish {
+            background: var(--bull-color);
+        }
+
+        .legend-candle.bearish {
+            background: var(--bear-color);
+        }
+
+        .legend-text {
+            font-size: var(--flin-text-sm, 0.875rem);
+            color: var(--flin-text-secondary, #4b5563);
+        }
+
+        /* Animation */
+        .candle-body,
+        .candle-wick {
+            animation: candleGrow 0.5s ease-out backwards;
+        }
+
+        @keyframes candleGrow {
+            from {
+                transform: scaleY(0);
+                opacity: 0;
+            }
+            to {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+        }
+
+        .candle-item:nth-child(1) .candle-body,
+        .candle-item:nth-child(1) .candle-wick { animation-delay: 0.1s; }
+        .candle-item:nth-child(2) .candle-body,
+        .candle-item:nth-child(2) .candle-wick { animation-delay: 0.15s; }
+        .candle-item:nth-child(3) .candle-body,
+        .candle-item:nth-child(3) .candle-wick { animation-delay: 0.2s; }
+        .candle-item:nth-child(4) .candle-body,
+        .candle-item:nth-child(4) .candle-wick { animation-delay: 0.25s; }
+        .candle-item:nth-child(5) .candle-body,
+        .candle-item:nth-child(5) .candle-wick { animation-delay: 0.3s; }
+        .candle-item:nth-child(6) .candle-body,
+        .candle-item:nth-child(6) .candle-wick { animation-delay: 0.35s; }
+        .candle-item:nth-child(7) .candle-body,
+        .candle-item:nth-child(7) .candle-wick { animation-delay: 0.4s; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .candle-container {
+                padding: var(--flin-space-4, 1rem);
+            }
+
+            .candle-chart {
+                height: 200px;
+                gap: var(--flin-space-2, 0.5rem);
+            }
+
+            .candle-body {
+                max-width: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .candle-chart {
+                height: 160px;
+                gap: 4px;
+            }
+
+            .candle-body {
+                max-width: 14px;
+                min-width: 8px;
+            }
+
+            .candle-label {
+                font-size: 9px;
+            }
+
+            .candle-y-axis {
+                display: none;
+            }
+        }
+    </style>
+
+    {if title != none}
+        <div class="candle-header">
+            <h3 class="candle-title">{title}</h3>
+        </div>
+    {/if}
+
+    <div class="candle-container">
+        <div class="candle-chart">
+            <div class="candle-grid">
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+            </div>
+
+            {for candle in data}
+                <div class="candle-item">
+                    <div class="candle-stick">
+                        <div class="candle-wick {if candle.close >= candle.open}bullish{/if}{if candle.close < candle.open}bearish{/if}"
+                             style="bottom: {candle.low}%; height: {candle.high - candle.low}%"></div>
+                        <div class="candle-body {if candle.close >= candle.open}bullish{/if}{if candle.close < candle.open}bearish{/if}"
+                             style="bottom: {if candle.close >= candle.open}{candle.open}{/if}{if candle.close < candle.open}{candle.close}{/if}%; height: {if candle.close >= candle.open}{candle.close - candle.open}{/if}{if candle.close < candle.open}{candle.open - candle.close}{/if}%">
+                        </div>
+                        <div class="candle-tooltip">
+                            <div class="candle-tooltip-row">
+                                <span class="candle-tooltip-label">O:</span>
+                                <span>{candle.open}</span>
+                            </div>
+                            <div class="candle-tooltip-row">
+                                <span class="candle-tooltip-label">H:</span>
+                                <span>{candle.high}</span>
+                            </div>
+                            <div class="candle-tooltip-row">
+                                <span class="candle-tooltip-label">L:</span>
+                                <span>{candle.low}</span>
+                            </div>
+                            <div class="candle-tooltip-row">
+                                <span class="candle-tooltip-label">C:</span>
+                                <span>{candle.close}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="candle-label">{candle.date}</span>
+                </div>
+            {/for}
+        </div>
+
+        <div class="candle-legend">
+            <div class="legend-item">
+                <div class="legend-candle bullish"></div>
+                <span class="legend-text">Bullish (Up)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-candle bearish"></div>
+                <span class="legend-text">Bearish (Down)</span>
+            </div>
+        </div>
+    </div>
+</div>

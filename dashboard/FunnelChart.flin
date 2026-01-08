@@ -1,0 +1,288 @@
+// ============================================================================
+// FunnelChart.flin — FlinUI PRO Dashboard Component
+// CSS-only conversion funnel with trapezoid shapes
+// ============================================================================
+// Props:
+//   - title: Chart title (string or none)
+//   - stages: List of stage objects with name, value, and color (list)
+//   - showPercent: Display percentage conversion rates (boolean)
+
+title = props.title || none
+stages = props.stages || [
+    ["name": "Visitors", "value": 10000, "color": "#D4AF37"],
+    ["name": "Leads", "value": 6500, "color": "#F4D03F"],
+    ["name": "Prospects", "value": 3200, "color": "#82E0AA"],
+    ["name": "Qualified", "value": 1800, "color": "#85C1E9"],
+    ["name": "Customers", "value": 950, "color": "#BB8FCE"]
+]
+showPercent = props.showPercent || true
+
+// Calculate max value for width scaling
+maxValue = stages[0].value
+
+<div class="flin-funnel-chart">
+    <style>
+        .flin-funnel-chart {
+            width: 100%;
+            font-family: var(--flin-font-sans, system-ui, sans-serif);
+        }
+
+        .funnel-header {
+            margin-bottom: var(--flin-space-4, 1rem);
+        }
+
+        .funnel-title {
+            font-size: var(--flin-text-lg, 1.125rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+            margin: 0;
+        }
+
+        .funnel-container {
+            background: var(--flin-bg-elevated, #ffffff);
+            border: 1px solid var(--flin-border-subtle, #e5e5e5);
+            border-radius: var(--flin-radius-lg, 0.75rem);
+            padding: var(--flin-space-6, 1.5rem);
+        }
+
+        .funnel-stages {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .funnel-stage {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: var(--flin-space-4, 1rem);
+        }
+
+        .funnel-bar-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .funnel-bar {
+            height: 48px;
+            border-radius: var(--flin-radius-md, 0.5rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all var(--flin-transition-normal, 0.2s) ease;
+            cursor: pointer;
+            clip-path: polygon(
+                0% 0%,
+                100% 0%,
+                calc(100% - 8px) 100%,
+                8px 100%
+            );
+        }
+
+        .funnel-bar:hover {
+            filter: brightness(1.1);
+            transform: scaleY(1.05);
+        }
+
+        .funnel-bar-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--flin-space-3, 0.75rem);
+            padding: 0 var(--flin-space-4, 1rem);
+        }
+
+        .funnel-stage-name {
+            font-size: var(--flin-text-sm, 0.875rem);
+            font-weight: var(--flin-font-semibold, 600);
+            color: var(--flin-text-inverse, #ffffff);
+            white-space: nowrap;
+        }
+
+        .funnel-stage-value {
+            font-size: var(--flin-text-sm, 0.875rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-inverse, #ffffff);
+            opacity: 0.9;
+        }
+
+        .funnel-info {
+            width: 120px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .funnel-percent {
+            font-size: var(--flin-text-lg, 1.125rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+        }
+
+        .funnel-conversion {
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: var(--flin-text-tertiary, #6b7280);
+        }
+
+        .funnel-connector {
+            width: 2px;
+            height: 20px;
+            background: var(--flin-border-subtle, #e5e5e5);
+            margin: 0 auto;
+        }
+
+        .funnel-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--flin-space-6, 1.5rem);
+            padding-top: var(--flin-space-4, 1rem);
+            border-top: 1px solid var(--flin-border-subtle, #e5e5e5);
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: var(--flin-text-tertiary, #6b7280);
+            display: block;
+            margin-bottom: var(--flin-space-1, 0.25rem);
+        }
+
+        .summary-value {
+            font-size: var(--flin-text-xl, 1.25rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+        }
+
+        .summary-value.highlight {
+            color: var(--flin-accent-gold, #D4AF37);
+        }
+
+        /* Animation */
+        .funnel-bar {
+            animation: funnelSlide 0.5s ease-out backwards;
+        }
+
+        @keyframes funnelSlide {
+            from {
+                transform: scaleX(0);
+                opacity: 0;
+            }
+            to {
+                transform: scaleX(1);
+                opacity: 1;
+            }
+        }
+
+        .funnel-stage:nth-child(1) .funnel-bar { animation-delay: 0.1s; }
+        .funnel-stage:nth-child(2) .funnel-bar { animation-delay: 0.2s; }
+        .funnel-stage:nth-child(3) .funnel-bar { animation-delay: 0.3s; }
+        .funnel-stage:nth-child(4) .funnel-bar { animation-delay: 0.4s; }
+        .funnel-stage:nth-child(5) .funnel-bar { animation-delay: 0.5s; }
+        .funnel-stage:nth-child(6) .funnel-bar { animation-delay: 0.6s; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .funnel-container {
+                padding: var(--flin-space-4, 1rem);
+            }
+
+            .funnel-bar {
+                height: 40px;
+            }
+
+            .funnel-info {
+                width: 80px;
+            }
+
+            .funnel-stage-name,
+            .funnel-stage-value {
+                font-size: var(--flin-text-xs, 0.75rem);
+            }
+
+            .funnel-percent {
+                font-size: var(--flin-text-base, 1rem);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .funnel-stage {
+                flex-direction: column;
+                gap: var(--flin-space-2, 0.5rem);
+            }
+
+            .funnel-info {
+                width: 100%;
+                text-align: center;
+                display: flex;
+                justify-content: center;
+                gap: var(--flin-space-2, 0.5rem);
+            }
+
+            .funnel-bar {
+                height: 36px;
+            }
+
+            .funnel-summary {
+                flex-wrap: wrap;
+                gap: var(--flin-space-4, 1rem);
+            }
+
+            .summary-item {
+                flex: 1;
+                min-width: 80px;
+            }
+        }
+    </style>
+
+    {if title != none}
+        <div class="funnel-header">
+            <h3 class="funnel-title">{title}</h3>
+        </div>
+    {/if}
+
+    <div class="funnel-container">
+        <div class="funnel-stages">
+            {for stage, idx in stages}
+                <div class="funnel-stage">
+                    <div class="funnel-bar-container">
+                        <div class="funnel-bar" style="width: {(stage.value / maxValue) * 100}%; background: {stage.color}; min-width: 150px;">
+                            <div class="funnel-bar-content">
+                                <span class="funnel-stage-name">{stage.name}</span>
+                                <span class="funnel-stage-value">{stage.value}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {if showPercent}
+                        <div class="funnel-info">
+                            <span class="funnel-percent">{((stage.value / maxValue) * 100).toFixed(1)}%</span>
+                            {if idx > 0}
+                                <span class="funnel-conversion">of total</span>
+                            {/if}
+                        </div>
+                    {/if}
+                </div>
+            {/for}
+        </div>
+
+        <div class="funnel-summary">
+            <div class="summary-item">
+                <span class="summary-label">Total Visitors</span>
+                <span class="summary-value">{stages[0].value}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Conversions</span>
+                <span class="summary-value highlight">{stages[stages.length - 1].value}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Conversion Rate</span>
+                <span class="summary-value highlight">{((stages[stages.length - 1].value / stages[0].value) * 100).toFixed(1)}%</span>
+            </div>
+        </div>
+    </div>
+</div>

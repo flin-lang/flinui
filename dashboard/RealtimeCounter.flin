@@ -1,0 +1,225 @@
+// ============================================================================
+// RealtimeCounter.flin — FlinUI PRO Dashboard Component
+// Live updating number display with pulse animation effect
+// ============================================================================
+// Props:
+//   - title: Counter title/label (string)
+//   - value: Current counter value (number or string)
+//   - label: Subtitle label (string or none)
+//   - pulseOnChange: Enable pulse animation (boolean)
+//   - format: Number format "number" | "currency" | "compact" (string)
+//   - prefix: Value prefix (string or none)
+//   - suffix: Value suffix (string or none)
+//   - live: Show live indicator dot (boolean)
+
+title = props.title || "Active Now"
+value = props.value || 0
+label = props.label || none
+pulseOnChange = props.pulseOnChange || true
+format = props.format || "number"
+prefix = props.prefix || none
+suffix = props.suffix || none
+live = props.live || true
+
+<div class="flin-realtime-counter {if pulseOnChange}pulse-enabled{/if}">
+    <style>
+        .flin-realtime-counter {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-8);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            text-align: center;
+            transition: all var(--flin-transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flin-realtime-counter:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+        }
+
+        .counter-header {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .counter-title {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-secondary);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--flin-success);
+            border-radius: 50%;
+            animation: livePulse 2s infinite;
+        }
+
+        .live-text {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-success);
+            font-weight: var(--flin-font-semibold);
+            text-transform: uppercase;
+        }
+
+        @keyframes livePulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        .counter-value-container {
+            display: flex;
+            align-items: baseline;
+            gap: var(--flin-space-1);
+            position: relative;
+        }
+
+        .counter-prefix,
+        .counter-suffix {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            color: var(--flin-text-secondary);
+            font-weight: var(--flin-font-semibold);
+        }
+
+        .counter-value {
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            background: linear-gradient(135deg, var(--flin-text-primary), var(--flin-accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .pulse-enabled .counter-value {
+            animation: valuePulse 0.3s ease-out;
+        }
+
+        @keyframes valuePulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .counter-label {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-tertiary);
+            margin: 0;
+        }
+
+        /* Pulse ring effect */
+        .pulse-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border: 2px solid var(--flin-accent-gold);
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .pulse-enabled .pulse-ring {
+            animation: ringPulse 2s infinite;
+        }
+
+        @keyframes ringPulse {
+            0% {
+                width: 80px;
+                height: 80px;
+                opacity: 0.6;
+            }
+            100% {
+                width: 200px;
+                height: 200px;
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-realtime-counter {
+                padding: var(--flin-space-6);
+            }
+
+            .counter-value {
+                font-size: clamp(2.5rem, 5vw, 4rem);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flin-realtime-counter {
+                padding: var(--flin-space-4);
+            }
+
+            .counter-value {
+                font-size: clamp(2rem, 4vw, 3rem);
+            }
+
+            .counter-header {
+                flex-direction: column;
+                gap: var(--flin-space-1);
+            }
+        }
+    </style>
+
+    <div class="pulse-ring"></div>
+
+    <div class="counter-header">
+        <span class="counter-title">{title}</span>
+        {if live}
+            <div class="live-indicator">
+                <span class="live-dot"></span>
+                <span class="live-text">Live</span>
+            </div>
+        {/if}
+    </div>
+
+    <div class="counter-value-container">
+        {if prefix != none}
+            <span class="counter-prefix">{prefix}</span>
+        {/if}
+        <span class="counter-value">{value}</span>
+        {if suffix != none}
+            <span class="counter-suffix">{suffix}</span>
+        {/if}
+    </div>
+
+    {if label != none}
+        <p class="counter-label">{label}</p>
+    {/if}
+</div>

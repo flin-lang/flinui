@@ -1,0 +1,305 @@
+// ============================================================================
+// AdminSidebar.flin — FlinUI PRO Dashboard Component
+// Collapsible navigation sidebar with icons, badges, and nested items
+// ============================================================================
+// Props:
+//   - logo: Logo image URL or text (string or none)
+//   - items: Navigation items list with icon, label, href, badge, children (list)
+//   - collapsed: Sidebar collapsed state (boolean)
+//   - onToggle: Callback when collapse toggle clicked (function or none)
+//   - activeItem: Currently active item identifier (string or none)
+
+logo = props.logo || none
+items = props.items || [
+    ["icon": "🏠", "label": "Dashboard", "href": "/dashboard", "id": "dashboard"],
+    ["icon": "📊", "label": "Analytics", "href": "/analytics", "id": "analytics", "badge": "New"],
+    ["icon": "👥", "label": "Users", "href": "/users", "id": "users", "children": [
+        ["label": "All Users", "href": "/users/all"],
+        ["label": "Roles", "href": "/users/roles"],
+        ["label": "Permissions", "href": "/users/permissions"]
+    ]],
+    ["icon": "📁", "label": "Projects", "href": "/projects", "id": "projects"],
+    ["icon": "⚙️", "label": "Settings", "href": "/settings", "id": "settings"]
+]
+collapsed = props.collapsed || false
+onToggle = props.onToggle || none
+activeItem = props.activeItem || none
+
+expandedMenus = []
+
+<div class="flin-admin-sidebar {if collapsed}collapsed{/if}">
+    <style>
+        .flin-admin-sidebar {
+            width: 280px;
+            min-height: 100vh;
+            background: var(--flin-bg-elevated);
+            border-right: 1px solid var(--flin-border-subtle);
+            display: flex;
+            flex-direction: column;
+            transition: width var(--flin-transition-normal);
+            position: relative;
+            z-index: 100;
+        }
+
+        .flin-admin-sidebar.collapsed {
+            width: 72px;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--flin-space-6);
+            border-bottom: 1px solid var(--flin-border-subtle);
+            min-height: 72px;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            text-decoration: none;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .sidebar-logo img {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--flin-radius-md);
+            flex-shrink: 0;
+        }
+
+        .collapsed .sidebar-logo span {
+            display: none;
+        }
+
+        .sidebar-toggle {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--flin-radius-md);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            flex-shrink: 0;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--flin-accent-gold);
+            border-color: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+        }
+
+        .collapsed .sidebar-toggle {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: var(--flin-space-4);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .nav-item {
+            margin-bottom: var(--flin-space-1);
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-3) var(--flin-space-4);
+            border-radius: var(--flin-radius-lg);
+            color: var(--flin-text-secondary);
+            text-decoration: none;
+            transition: all var(--flin-transition-fast);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            font-size: var(--flin-text-base);
+        }
+
+        .nav-link:hover {
+            background: var(--flin-bg-surface);
+            color: var(--flin-text-primary);
+        }
+
+        .nav-link.active {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+        }
+
+        .nav-link.active:hover {
+            background: var(--flin-accent-gold-light);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .nav-label {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .collapsed .nav-label {
+            display: none;
+        }
+
+        .nav-badge {
+            padding: var(--flin-space-1) var(--flin-space-2);
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+            border-radius: var(--flin-radius-full);
+            line-height: 1;
+        }
+
+        .collapsed .nav-badge {
+            display: none;
+        }
+
+        .nav-arrow {
+            transition: transform var(--flin-transition-fast);
+        }
+
+        .nav-arrow.expanded {
+            transform: rotate(90deg);
+        }
+
+        .collapsed .nav-arrow {
+            display: none;
+        }
+
+        .nav-submenu {
+            padding-left: var(--flin-space-10);
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height var(--flin-transition-normal);
+        }
+
+        .nav-submenu.open {
+            max-height: 500px;
+        }
+
+        .collapsed .nav-submenu {
+            display: none;
+        }
+
+        .submenu-link {
+            display: block;
+            padding: var(--flin-space-2) var(--flin-space-4);
+            color: var(--flin-text-tertiary);
+            text-decoration: none;
+            font-size: var(--flin-text-sm);
+            border-radius: var(--flin-radius-md);
+            transition: all var(--flin-transition-fast);
+        }
+
+        .submenu-link:hover {
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-surface);
+        }
+
+        .sidebar-footer {
+            padding: var(--flin-space-4);
+            border-top: 1px solid var(--flin-border-subtle);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .flin-admin-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                transform: translateX(-100%);
+            }
+
+            .flin-admin-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .flin-admin-sidebar.collapsed {
+                width: 280px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flin-admin-sidebar {
+                width: 100%;
+            }
+        }
+    </style>
+
+    <div class="sidebar-header">
+        <a href="/" class="sidebar-logo">
+            {if logo != none}
+                <img src={logo} alt="Logo" />
+            {/if}
+            <span>Dashboard</span>
+        </a>
+        <button class="sidebar-toggle" click={onToggle}>
+            {if collapsed}→{/if}
+            {if !collapsed}←{/if}
+        </button>
+    </div>
+
+    <nav class="sidebar-nav">
+        {for item in items}
+            <div class="nav-item">
+                <button
+                    class="nav-link {if activeItem == item.id}active{/if}"
+                    click={() => {
+                        if item.children != none {
+                            expandedMenus = expandedMenus.includes(item.id)
+                                ? expandedMenus.filter(id => id != item.id)
+                                : [...expandedMenus, item.id]
+                        } else if item.href != none {
+                            window.location.href = item.href
+                        }
+                    }}
+                >
+                    <span class="nav-icon">{item.icon}</span>
+                    <span class="nav-label">{item.label}</span>
+                    {if item.badge != none}
+                        <span class="nav-badge">{item.badge}</span>
+                    {/if}
+                    {if item.children != none}
+                        <span class="nav-arrow {if expandedMenus.includes(item.id)}expanded{/if}">›</span>
+                    {/if}
+                </button>
+
+                {if item.children != none}
+                    <div class="nav-submenu {if expandedMenus.includes(item.id)}open{/if}">
+                        {for child in item.children}
+                            <a href={child.href} class="submenu-link">{child.label}</a>
+                        {/for}
+                    </div>
+                {/if}
+            </div>
+        {/for}
+    </nav>
+
+    <div class="sidebar-footer">
+        <slot name="footer" />
+    </div>
+</div>

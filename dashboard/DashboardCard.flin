@@ -1,0 +1,297 @@
+// ============================================================================
+// DashboardCard.flin — FlinUI PRO Dashboard Component
+// Container card with header, actions menu, and content area
+// ============================================================================
+// Props:
+//   - title: Card title (string or none)
+//   - subtitle: Card subtitle (string or none)
+//   - actions: List of action objects with icon, label, onClick (list or none)
+//   - loading: Show loading state (boolean)
+//   - children: Card content (slot)
+
+title = props.title || none
+subtitle = props.subtitle || none
+actions = props.actions || none
+loading = props.loading || false
+
+showActionsMenu = false
+
+<div class="flin-dashboard-card {if loading}loading{/if}">
+    <style>
+        .flin-dashboard-card {
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            display: flex;
+            flex-direction: column;
+            transition: all var(--flin-transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flin-dashboard-card:hover {
+            border-color: var(--flin-border-default);
+            box-shadow: var(--flin-shadow-card-hover);
+        }
+
+        .flin-dashboard-card.loading::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                var(--flin-accent-gold),
+                transparent
+            );
+            animation: loading-bar 1.5s ease-in-out infinite;
+        }
+
+        @keyframes loading-bar {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-6);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .card-header:empty {
+            display: none;
+        }
+
+        .card-header-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .card-subtitle {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-tertiary);
+            margin: var(--flin-space-1) 0 0 0;
+        }
+
+        .card-actions {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .actions-trigger {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--flin-radius-md);
+            background: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--flin-text-tertiary);
+            transition: all var(--flin-transition-fast);
+            font-size: 1.25rem;
+        }
+
+        .actions-trigger:hover {
+            background: var(--flin-bg-surface);
+            color: var(--flin-text-primary);
+        }
+
+        .actions-menu {
+            position: absolute;
+            top: calc(100% + var(--flin-space-2));
+            right: 0;
+            min-width: 160px;
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-lg);
+            box-shadow: var(--flin-shadow-dropdown);
+            padding: var(--flin-space-2);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px) scale(0.95);
+            transition: all var(--flin-transition-fast);
+            z-index: 10;
+        }
+
+        .actions-menu.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-2) var(--flin-space-3);
+            border-radius: var(--flin-radius-md);
+            background: transparent;
+            border: none;
+            color: var(--flin-text-secondary);
+            font-size: var(--flin-text-sm);
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .action-item:hover {
+            background: var(--flin-bg-surface);
+            color: var(--flin-text-primary);
+        }
+
+        .action-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .card-body {
+            flex: 1;
+            padding: var(--flin-space-6);
+        }
+
+        .card-body:first-child {
+            padding-top: var(--flin-space-6);
+        }
+
+        /* Loading skeleton */
+        .flin-dashboard-card.loading .card-body {
+            position: relative;
+            min-height: 120px;
+        }
+
+        .flin-dashboard-card.loading .card-body::before {
+            content: "";
+            position: absolute;
+            inset: var(--flin-space-6);
+            background: linear-gradient(
+                90deg,
+                var(--flin-bg-surface) 25%,
+                var(--flin-bg-elevated) 50%,
+                var(--flin-bg-surface) 75%
+            );
+            background-size: 200% 100%;
+            border-radius: var(--flin-radius-md);
+            animation: skeleton-shimmer 1.5s ease-in-out infinite;
+        }
+
+        @keyframes skeleton-shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .flin-dashboard-card.loading .card-body > * {
+            opacity: 0;
+        }
+
+        /* Footer slot */
+        .card-footer {
+            padding: var(--flin-space-4) var(--flin-space-6);
+            border-top: 1px solid var(--flin-border-subtle);
+            background: var(--flin-bg-surface);
+        }
+
+        .card-footer:empty {
+            display: none;
+        }
+
+        /* Size variants via global classes */
+        :global(.card-compact) .card-header,
+        :global(.card-compact) .card-body {
+            padding: var(--flin-space-4);
+        }
+
+        :global(.card-large) .card-header,
+        :global(.card-large) .card-body {
+            padding: var(--flin-space-8);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .card-header,
+            .card-body {
+                padding: var(--flin-space-4);
+            }
+
+            .card-footer {
+                padding: var(--flin-space-3) var(--flin-space-4);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-header,
+            .card-body {
+                padding: var(--flin-space-3);
+            }
+
+            .card-title {
+                font-size: var(--flin-text-base);
+            }
+        }
+    </style>
+
+    {if title != none || subtitle != none || actions != none}
+        <div class="card-header">
+            <div class="card-header-content">
+                {if title != none}
+                    <h3 class="card-title">{title}</h3>
+                {/if}
+                {if subtitle != none}
+                    <p class="card-subtitle">{subtitle}</p>
+                {/if}
+            </div>
+
+            {if actions != none}
+                <div class="card-actions">
+                    <button
+                        class="actions-trigger"
+                        click={() => showActionsMenu = !showActionsMenu}
+                    >
+                        ⋮
+                    </button>
+
+                    <div class="actions-menu {if showActionsMenu}open{/if}">
+                        {for action in actions}
+                            <button
+                                class="action-item"
+                                click={() => {
+                                    showActionsMenu = false
+                                    action.onClick()
+                                }}
+                            >
+                                {if action.icon != none}
+                                    <span class="action-icon">{action.icon}</span>
+                                {/if}
+                                {action.label}
+                            </button>
+                        {/for}
+                    </div>
+                </div>
+            {/if}
+        </div>
+    {/if}
+
+    <div class="card-body">
+        <slot />
+    </div>
+
+    <div class="card-footer">
+        <slot name="footer" />
+    </div>
+</div>

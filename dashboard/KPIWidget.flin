@@ -1,0 +1,225 @@
+// ============================================================================
+// KPIWidget.flin — FlinUI PRO Dashboard Component
+// Key Performance Indicator with progress toward target and status
+// ============================================================================
+// Props:
+//   - title: KPI title/name (string)
+//   - value: Current value (number)
+//   - target: Target value (number)
+//   - unit: Unit suffix like "users", "sales", "$" (string or none)
+//   - status: Status indicator "on-track" | "at-risk" | "behind" (string)
+//   - showPercentage: Show percentage of target (boolean)
+
+title = props.title || "KPI"
+value = props.value || 0
+target = props.target || 100
+unit = props.unit || none
+status = props.status || "on-track"
+showPercentage = props.showPercentage || true
+
+// Calculate progress
+progress = target > 0 ? (value / target * 100) : 0
+progressCapped = Math.min(progress, 100)
+remaining = target - value
+
+<div class="flin-kpi-widget status-{status}">
+    <style>
+        .flin-kpi-widget {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .flin-kpi-widget:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--flin-space-3);
+        }
+
+        .kpi-title {
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .kpi-status {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-1) var(--flin-space-3);
+            border-radius: var(--flin-radius-full);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-semibold);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-on-track .kpi-status {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--flin-success);
+        }
+
+        .status-at-risk .kpi-status {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--flin-warning);
+        }
+
+        .status-behind .kpi-status {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--flin-error);
+        }
+
+        .kpi-status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-on-track .kpi-status-dot {
+            background: var(--flin-success);
+        }
+
+        .status-at-risk .kpi-status-dot {
+            background: var(--flin-warning);
+        }
+
+        .status-behind .kpi-status-dot {
+            background: var(--flin-error);
+        }
+
+        .kpi-values {
+            display: flex;
+            align-items: baseline;
+            gap: var(--flin-space-2);
+        }
+
+        .kpi-current {
+            font-size: clamp(2rem, 3vw, 2.5rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            line-height: 1;
+        }
+
+        .kpi-target {
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-tertiary);
+        }
+
+        .kpi-unit {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            margin-left: var(--flin-space-1);
+        }
+
+        .kpi-progress-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-2);
+        }
+
+        .kpi-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-full);
+            overflow: hidden;
+        }
+
+        .kpi-progress-fill {
+            height: 100%;
+            border-radius: var(--flin-radius-full);
+            transition: width var(--flin-transition-normal);
+        }
+
+        .status-on-track .kpi-progress-fill {
+            background: linear-gradient(90deg, var(--flin-success), #4ade80);
+        }
+
+        .status-at-risk .kpi-progress-fill {
+            background: linear-gradient(90deg, var(--flin-warning), #fcd34d);
+        }
+
+        .status-behind .kpi-progress-fill {
+            background: linear-gradient(90deg, var(--flin-error), #f87171);
+        }
+
+        .kpi-progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+
+        .kpi-remaining {
+            color: var(--flin-text-tertiary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-kpi-widget {
+                padding: var(--flin-space-4);
+            }
+
+            .kpi-current {
+                font-size: clamp(1.75rem, 2.5vw, 2rem);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .kpi-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--flin-space-2);
+            }
+        }
+    </style>
+
+    <div class="kpi-header">
+        <h3 class="kpi-title">{title}</h3>
+        <div class="kpi-status">
+            <span class="kpi-status-dot"></span>
+            <span>
+                {if status == "on-track"}On Track{/if}
+                {if status == "at-risk"}At Risk{/if}
+                {if status == "behind"}Behind{/if}
+            </span>
+        </div>
+    </div>
+
+    <div class="kpi-values">
+        <span class="kpi-current">{value}</span>
+        <span class="kpi-target">/ {target}</span>
+        {if unit != none}
+            <span class="kpi-unit">{unit}</span>
+        {/if}
+    </div>
+
+    <div class="kpi-progress-container">
+        <div class="kpi-progress-bar">
+            <div class="kpi-progress-fill" style="width: {progressCapped}%"></div>
+        </div>
+        <div class="kpi-progress-info">
+            {if showPercentage}
+                <span>{progress.toFixed(1)}% of target</span>
+            {/if}
+            {if remaining > 0}
+                <span class="kpi-remaining">{remaining} {unit || ''} remaining</span>
+            {else}
+                <span class="kpi-remaining">Target exceeded!</span>
+            {/if}
+        </div>
+    </div>
+</div>

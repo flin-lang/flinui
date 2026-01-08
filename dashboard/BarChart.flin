@@ -1,0 +1,264 @@
+// ============================================================================
+// BarChart.flin — FlinUI PRO Dashboard Component
+// CSS-only bar chart with horizontal/vertical orientation
+// ============================================================================
+// Props:
+//   - title: Chart title (string or none)
+//   - data: List of data points with label, value, and optional color (list)
+//   - orientation: Bar direction "horizontal" or "vertical" (string)
+//   - showValues: Display value labels on bars (boolean)
+//   - maxValue: Maximum value for scaling (number or none for auto)
+
+title = props.title || none
+data = props.data || [
+    ["label": "Product A", "value": 85, "color": "var(--flin-accent-gold)"],
+    ["label": "Product B", "value": 62, "color": "var(--flin-accent-gold-light)"],
+    ["label": "Product C", "value": 94, "color": "var(--flin-accent-gold)"],
+    ["label": "Product D", "value": 45, "color": "var(--flin-accent-gold-light)"],
+    ["label": "Product E", "value": 78, "color": "var(--flin-accent-gold)"]
+]
+orientation = props.orientation || "vertical"
+showValues = props.showValues || true
+maxValue = props.maxValue || 100
+
+isHorizontal = orientation == "horizontal"
+
+<div class="flin-bar-chart {if isHorizontal}horizontal{/if}">
+    <style>
+        .flin-bar-chart {
+            width: 100%;
+            font-family: var(--flin-font-sans, system-ui, sans-serif);
+        }
+
+        .bar-header {
+            margin-bottom: var(--flin-space-4, 1rem);
+        }
+
+        .bar-title {
+            font-size: var(--flin-text-lg, 1.125rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+            margin: 0;
+        }
+
+        .bar-container {
+            background: var(--flin-bg-elevated, #ffffff);
+            border: 1px solid var(--flin-border-subtle, #e5e5e5);
+            border-radius: var(--flin-radius-lg, 0.75rem);
+            padding: var(--flin-space-6, 1.5rem);
+        }
+
+        /* Vertical orientation (default) */
+        .bar-visual {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 200px;
+            gap: var(--flin-space-3, 0.75rem);
+        }
+
+        .bar-item {
+            flex: 1;
+            max-width: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+        }
+
+        .bar-track {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .bar-fill {
+            width: 100%;
+            background: var(--bar-color, var(--flin-accent-gold));
+            border-radius: var(--flin-radius-md, 0.5rem) var(--flin-radius-md, 0.5rem) 0 0;
+            position: relative;
+            transition: all var(--flin-transition-normal, 0.2s) ease;
+            min-height: 4px;
+        }
+
+        .bar-fill:hover {
+            filter: brightness(1.1);
+            transform: scaleX(1.05);
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: var(--flin-text-xs, 0.75rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+            white-space: nowrap;
+        }
+
+        .bar-label {
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: var(--flin-text-tertiary, #6b7280);
+            margin-top: var(--flin-space-2, 0.5rem);
+            text-align: center;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Horizontal orientation */
+        .flin-bar-chart.horizontal .bar-visual {
+            flex-direction: column;
+            align-items: stretch;
+            height: auto;
+            gap: var(--flin-space-4, 1rem);
+        }
+
+        .flin-bar-chart.horizontal .bar-item {
+            flex-direction: row;
+            max-width: none;
+            height: auto;
+            gap: var(--flin-space-3, 0.75rem);
+        }
+
+        .flin-bar-chart.horizontal .bar-label {
+            min-width: 80px;
+            text-align: right;
+            margin: 0;
+        }
+
+        .flin-bar-chart.horizontal .bar-track {
+            flex: 1;
+            height: 28px;
+            align-items: center;
+            justify-content: flex-start;
+            background: var(--flin-bg-surface, #f5f5f5);
+            border-radius: var(--flin-radius-md, 0.5rem);
+            overflow: hidden;
+        }
+
+        .flin-bar-chart.horizontal .bar-fill {
+            height: 100%;
+            width: auto;
+            border-radius: var(--flin-radius-md, 0.5rem);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: var(--flin-space-2, 0.5rem);
+        }
+
+        .flin-bar-chart.horizontal .bar-fill:hover {
+            transform: scaleY(1.05);
+        }
+
+        .flin-bar-chart.horizontal .bar-value {
+            position: static;
+            transform: none;
+            color: var(--flin-text-inverse, #ffffff);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* Animation */
+        .bar-fill {
+            animation: barGrow 0.6s ease-out backwards;
+        }
+
+        @keyframes barGrow {
+            from {
+                transform: scaleY(0);
+                transform-origin: bottom;
+            }
+            to {
+                transform: scaleY(1);
+            }
+        }
+
+        .flin-bar-chart.horizontal .bar-fill {
+            animation: barGrowH 0.6s ease-out backwards;
+        }
+
+        @keyframes barGrowH {
+            from {
+                transform: scaleX(0);
+                transform-origin: left;
+            }
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+        .bar-item:nth-child(1) .bar-fill { animation-delay: 0.05s; }
+        .bar-item:nth-child(2) .bar-fill { animation-delay: 0.1s; }
+        .bar-item:nth-child(3) .bar-fill { animation-delay: 0.15s; }
+        .bar-item:nth-child(4) .bar-fill { animation-delay: 0.2s; }
+        .bar-item:nth-child(5) .bar-fill { animation-delay: 0.25s; }
+        .bar-item:nth-child(6) .bar-fill { animation-delay: 0.3s; }
+        .bar-item:nth-child(7) .bar-fill { animation-delay: 0.35s; }
+        .bar-item:nth-child(8) .bar-fill { animation-delay: 0.4s; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .bar-container {
+                padding: var(--flin-space-4, 1rem);
+            }
+
+            .bar-visual {
+                height: 160px;
+            }
+
+            .bar-label {
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flin-bar-chart:not(.horizontal) .bar-visual {
+                flex-wrap: wrap;
+                height: auto;
+                gap: var(--flin-space-2, 0.5rem);
+            }
+
+            .flin-bar-chart:not(.horizontal) .bar-item {
+                min-width: calc(33% - var(--flin-space-2, 0.5rem));
+                height: 120px;
+            }
+
+            .flin-bar-chart.horizontal .bar-label {
+                min-width: 60px;
+                font-size: 10px;
+            }
+        }
+    </style>
+
+    {if title != none}
+        <div class="bar-header">
+            <h3 class="bar-title">{title}</h3>
+        </div>
+    {/if}
+
+    <div class="bar-container">
+        <div class="bar-visual">
+            {for item in data}
+                <div class="bar-item">
+                    {if isHorizontal}
+                        <span class="bar-label">{item.label}</span>
+                    {/if}
+                    <div class="bar-track">
+                        <div class="bar-fill" style="--bar-color: {item.color}; {if isHorizontal}width: {item.value}%{/if}{if !isHorizontal}height: {item.value}%{/if}">
+                            {if showValues}
+                                <span class="bar-value">{item.value}</span>
+                            {/if}
+                        </div>
+                    </div>
+                    {if !isHorizontal}
+                        <span class="bar-label">{item.label}</span>
+                    {/if}
+                </div>
+            {/for}
+        </div>
+    </div>
+</div>

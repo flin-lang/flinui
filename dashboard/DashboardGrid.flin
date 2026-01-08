@@ -1,0 +1,150 @@
+// ============================================================================
+// DashboardGrid.flin — FlinUI PRO Dashboard Component
+// CSS Grid container for responsive dashboard widget layout
+// ============================================================================
+// Props:
+//   - columns: Number of columns (1-6 or auto) (number or string)
+//   - gap: Gap size between widgets (sm, md, lg, xl) (string)
+//   - children: Widget components to render (slot)
+
+columns = props.columns || 3
+gap = props.gap || "md"
+
+<div class="flin-dashboard-grid" style="--grid-columns: {columns}; --gap-size: {gap}">
+    <style>
+        .flin-dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(var(--grid-columns), 1fr);
+            width: 100%;
+            padding: var(--flin-space-6);
+        }
+
+        /* Gap sizes */
+        .flin-dashboard-grid[style*="--gap-size: sm"] {
+            gap: var(--flin-space-4);
+        }
+
+        .flin-dashboard-grid[style*="--gap-size: md"] {
+            gap: var(--flin-space-6);
+        }
+
+        .flin-dashboard-grid[style*="--gap-size: lg"] {
+            gap: var(--flin-space-8);
+        }
+
+        .flin-dashboard-grid[style*="--gap-size: xl"] {
+            gap: var(--flin-space-10);
+        }
+
+        /* Auto columns */
+        .flin-dashboard-grid[style*="--grid-columns: auto"] {
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        }
+
+        /* Support for grid spanning in children */
+        .flin-dashboard-grid > :global(.span-2) {
+            grid-column: span 2;
+        }
+
+        .flin-dashboard-grid > :global(.span-3) {
+            grid-column: span 3;
+        }
+
+        .flin-dashboard-grid > :global(.span-full) {
+            grid-column: 1 / -1;
+        }
+
+        .flin-dashboard-grid > :global(.row-span-2) {
+            grid-row: span 2;
+        }
+
+        .flin-dashboard-grid > :global(.row-span-3) {
+            grid-row: span 3;
+        }
+
+        /* Responsive breakpoints */
+        @media (max-width: 1440px) {
+            .flin-dashboard-grid[style*="--grid-columns: 6"] {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .flin-dashboard-grid[style*="--grid-columns: 5"] {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .flin-dashboard-grid[style*="--grid-columns: 6"],
+            .flin-dashboard-grid[style*="--grid-columns: 5"],
+            .flin-dashboard-grid[style*="--grid-columns: 4"] {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .flin-dashboard-grid > :global(.span-3) {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .flin-dashboard-grid {
+                padding: var(--flin-space-4);
+            }
+
+            .flin-dashboard-grid[style*="--grid-columns: 6"],
+            .flin-dashboard-grid[style*="--grid-columns: 5"],
+            .flin-dashboard-grid[style*="--grid-columns: 4"],
+            .flin-dashboard-grid[style*="--grid-columns: 3"] {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .flin-dashboard-grid > :global(.span-3),
+            .flin-dashboard-grid > :global(.span-2) {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flin-dashboard-grid {
+                grid-template-columns: 1fr !important;
+                gap: var(--flin-space-4);
+                padding: var(--flin-space-3);
+            }
+
+            .flin-dashboard-grid > :global(.span-2),
+            .flin-dashboard-grid > :global(.span-3),
+            .flin-dashboard-grid > :global(.span-full) {
+                grid-column: span 1;
+            }
+
+            .flin-dashboard-grid > :global(.row-span-2),
+            .flin-dashboard-grid > :global(.row-span-3) {
+                grid-row: span 1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flin-dashboard-grid {
+                padding: var(--flin-space-2);
+            }
+        }
+
+        /* Masonry-like layout option */
+        .flin-dashboard-grid.masonry {
+            display: block;
+            columns: var(--grid-columns);
+            column-gap: var(--flin-space-6);
+        }
+
+        .flin-dashboard-grid.masonry > * {
+            break-inside: avoid;
+            margin-bottom: var(--flin-space-6);
+        }
+
+        /* Dense packing option */
+        .flin-dashboard-grid.dense {
+            grid-auto-flow: dense;
+        }
+    </style>
+
+    <slot />
+</div>

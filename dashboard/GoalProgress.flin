@@ -1,0 +1,270 @@
+// ============================================================================
+// GoalProgress.flin — FlinUI PRO Dashboard Component
+// Progress toward target with milestones and deadline tracking
+// ============================================================================
+// Props:
+//   - title: Goal title (string)
+//   - current: Current progress value (number)
+//   - target: Target value (number)
+//   - unit: Unit label (string or none)
+//   - deadline: Deadline date string (string or none)
+//   - milestones: List of milestone objects with value and label (list or none)
+//   - showMilestones: Show milestone markers (boolean)
+
+title = props.title || "Goal Progress"
+current = props.current || 0
+target = props.target || 100
+unit = props.unit || none
+deadline = props.deadline || none
+milestones = props.milestones || [
+    ["value": 25, "label": "Q1"],
+    ["value": 50, "label": "Q2"],
+    ["value": 75, "label": "Q3"]
+]
+showMilestones = props.showMilestones || true
+
+// Calculate progress
+progress = target > 0 ? (current / target * 100) : 0
+progressCapped = Math.min(progress, 100)
+
+<div class="flin-goal-progress">
+    <style>
+        .flin-goal-progress {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .flin-goal-progress:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+        }
+
+        .goal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--flin-space-4);
+        }
+
+        .goal-info {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-1);
+        }
+
+        .goal-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .goal-values {
+            display: flex;
+            align-items: baseline;
+            gap: var(--flin-space-2);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+
+        .goal-current {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-accent-gold);
+        }
+
+        .goal-deadline {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: var(--flin-space-1);
+        }
+
+        .deadline-label {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .deadline-date {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-secondary);
+        }
+
+        .goal-progress-container {
+            position: relative;
+            margin-top: var(--flin-space-2);
+        }
+
+        .goal-progress-track {
+            width: 100%;
+            height: 12px;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-full);
+            overflow: visible;
+            position: relative;
+        }
+
+        .goal-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--flin-accent-gold), #f59e0b);
+            border-radius: var(--flin-radius-full);
+            transition: width var(--flin-transition-slow);
+            position: relative;
+        }
+
+        .goal-progress-fill::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--flin-accent-gold);
+            border: 3px solid var(--flin-bg-elevated);
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .goal-milestones {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .milestone-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--flin-space-1);
+        }
+
+        .milestone-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--flin-border-default);
+            border: 2px solid var(--flin-bg-elevated);
+            z-index: 1;
+        }
+
+        .milestone-reached .milestone-dot {
+            background: var(--flin-success);
+        }
+
+        .milestone-label {
+            position: absolute;
+            top: 20px;
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-tertiary);
+            white-space: nowrap;
+        }
+
+        .goal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--flin-space-2);
+        }
+
+        .goal-percent {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+        }
+
+        .goal-remaining {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-goal-progress {
+                padding: var(--flin-space-4);
+            }
+
+            .goal-header {
+                flex-direction: column;
+                gap: var(--flin-space-3);
+            }
+
+            .goal-deadline {
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .milestone-label {
+                display: none;
+            }
+
+            .goal-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--flin-space-2);
+            }
+        }
+    </style>
+
+    <div class="goal-header">
+        <div class="goal-info">
+            <h3 class="goal-title">{title}</h3>
+            <div class="goal-values">
+                <span class="goal-current">{current}</span>
+                <span>/ {target} {unit || ''}</span>
+            </div>
+        </div>
+
+        {if deadline != none}
+            <div class="goal-deadline">
+                <span class="deadline-label">Deadline</span>
+                <span class="deadline-date">{deadline}</span>
+            </div>
+        {/if}
+    </div>
+
+    <div class="goal-progress-container">
+        <div class="goal-progress-track">
+            <div class="goal-progress-fill" style="width: {progressCapped}%"></div>
+
+            {if showMilestones && milestones != none}
+                <div class="goal-milestones">
+                    {for milestone in milestones}
+                        <div class="milestone-marker {if progress >= milestone.value}milestone-reached{/if}"
+                             style="left: {milestone.value}%">
+                            <span class="milestone-dot"></span>
+                            <span class="milestone-label">{milestone.label}</span>
+                        </div>
+                    {/for}
+                </div>
+            {/if}
+        </div>
+    </div>
+
+    <div class="goal-footer">
+        <span class="goal-percent">{progress.toFixed(1)}% complete</span>
+        <span class="goal-remaining">
+            {if target - current > 0}
+                {target - current} {unit || ''} to go
+            {else}
+                Goal achieved!
+            {/if}
+        </span>
+    </div>
+</div>

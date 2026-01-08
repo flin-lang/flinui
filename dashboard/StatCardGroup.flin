@@ -1,0 +1,190 @@
+// ============================================================================
+// StatCardGroup.flin — FlinUI PRO Dashboard Component
+// Responsive row/grid of stat cards for dashboard metrics overview
+// ============================================================================
+// Props:
+//   - stats: List of stat objects with title, value, icon, trend, trendValue (list)
+//   - columns: Number of columns 2-6 (number)
+//   - suffix: Default suffix for all stats (string or none)
+//   - prefix: Default prefix for all stats (string or none)
+
+stats = props.stats || [
+    ["title": "Total Users", "value": "12,847", "icon": "👥", "trend": "up", "trendValue": "+12.5%"],
+    ["title": "Revenue", "value": "48,295", "icon": "💰", "trend": "up", "trendValue": "+8.2%", "prefix": "$"],
+    ["title": "Orders", "value": "1,429", "icon": "📦", "trend": "down", "trendValue": "-3.1%"],
+    ["title": "Conversion", "value": "3.24", "icon": "📈", "trend": "neutral", "trendValue": "0%", "suffix": "%"]
+]
+columns = props.columns || 4
+
+<div class="flin-stat-card-group" style="--columns: {columns}">
+    <style>
+        .flin-stat-card-group {
+            display: grid;
+            grid-template-columns: repeat(var(--columns), 1fr);
+            gap: var(--flin-space-6);
+            width: 100%;
+        }
+
+        .stat-card-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .stat-card-item:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--flin-space-3);
+        }
+
+        .stat-card-title {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-secondary);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-card-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-lg);
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .stat-card-value-row {
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
+        }
+
+        .stat-card-prefix,
+        .stat-card-suffix {
+            font-size: clamp(1.25rem, 2vw, 1.5rem);
+            color: var(--flin-text-secondary);
+            font-weight: var(--flin-font-semibold);
+        }
+
+        .stat-card-value {
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            line-height: 1;
+        }
+
+        .stat-card-trend {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            margin-top: var(--flin-space-1);
+        }
+
+        .stat-card-trend.trend-up {
+            color: var(--flin-success);
+        }
+
+        .stat-card-trend.trend-down {
+            color: var(--flin-error);
+        }
+
+        .stat-card-trend.trend-neutral {
+            color: var(--flin-text-tertiary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .flin-stat-card-group {
+                grid-template-columns: repeat(min(var(--columns), 3), 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .flin-stat-card-group {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--flin-space-4);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .flin-stat-card-group {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card-item {
+                padding: var(--flin-space-4);
+            }
+
+            .stat-card-value {
+                font-size: clamp(1.5rem, 2.5vw, 2rem);
+            }
+        }
+
+        @media (max-width: 380px) {
+            .stat-card-item {
+                padding: var(--flin-space-3);
+            }
+
+            .stat-card-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+
+    {for stat in stats}
+        <div class="stat-card-item">
+            <div class="stat-card-header">
+                <span class="stat-card-title">{stat.title}</span>
+                {if stat.icon != none}
+                    <div class="stat-card-icon">{stat.icon}</div>
+                {/if}
+            </div>
+
+            <div class="stat-card-value-row">
+                {if stat.prefix != none}
+                    <span class="stat-card-prefix">{stat.prefix}</span>
+                {/if}
+                <span class="stat-card-value">{stat.value}</span>
+                {if stat.suffix != none}
+                    <span class="stat-card-suffix">{stat.suffix}</span>
+                {/if}
+            </div>
+
+            {if stat.trendValue != none}
+                <div class="stat-card-trend trend-{stat.trend || 'neutral'}">
+                    <span>
+                        {if stat.trend == "up"}
+                            ↑
+                        {elif stat.trend == "down"}
+                            ↓
+                        {else}
+                            →
+                        {/if}
+                    </span>
+                    <span>{stat.trendValue}</span>
+                </div>
+            {/if}
+        </div>
+    {/for}
+</div>

@@ -1,0 +1,232 @@
+// ============================================================================
+// PieChart.flin — FlinUI PRO Dashboard Component
+// CSS-only pie chart using conic-gradient with legend
+// ============================================================================
+// Props:
+//   - title: Chart title (string or none)
+//   - data: List of segments with label, value, and color (list)
+//   - showLegend: Display legend below chart (boolean)
+//   - showPercent: Display percentage in legend (boolean)
+//   - size: Chart diameter in pixels (number)
+
+title = props.title || none
+data = props.data || [
+    ["label": "Direct", "value": 35, "color": "#D4AF37"],
+    ["label": "Social", "value": 25, "color": "#F4D03F"],
+    ["label": "Organic", "value": 20, "color": "#82E0AA"],
+    ["label": "Referral", "value": 15, "color": "#85C1E9"],
+    ["label": "Other", "value": 5, "color": "#BB8FCE"]
+]
+showLegend = props.showLegend || true
+showPercent = props.showPercent || true
+size = props.size || 200
+
+// Calculate total for percentages
+totalValue = 100
+
+<div class="flin-pie-chart" style="--pie-size: {size}px">
+    <style>
+        .flin-pie-chart {
+            width: 100%;
+            font-family: var(--flin-font-sans, system-ui, sans-serif);
+        }
+
+        .pie-header {
+            margin-bottom: var(--flin-space-4, 1rem);
+        }
+
+        .pie-title {
+            font-size: var(--flin-text-lg, 1.125rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+            margin: 0;
+        }
+
+        .pie-container {
+            background: var(--flin-bg-elevated, #ffffff);
+            border: 1px solid var(--flin-border-subtle, #e5e5e5);
+            border-radius: var(--flin-radius-lg, 0.75rem);
+            padding: var(--flin-space-6, 1.5rem);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--flin-space-6, 1.5rem);
+        }
+
+        .pie-visual {
+            width: var(--pie-size);
+            height: var(--pie-size);
+            border-radius: 50%;
+            background: var(--pie-gradient);
+            position: relative;
+            box-shadow: var(--flin-shadow-md, 0 4px 6px rgba(0,0,0,0.1));
+            transition: transform var(--flin-transition-normal, 0.2s) ease;
+        }
+
+        .pie-visual:hover {
+            transform: scale(1.02);
+        }
+
+        .pie-visual::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+        }
+
+        .pie-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: var(--flin-space-4, 1rem);
+            width: 100%;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2, 0.5rem);
+            padding: var(--flin-space-2, 0.5rem) var(--flin-space-3, 0.75rem);
+            background: var(--flin-bg-surface, #f5f5f5);
+            border-radius: var(--flin-radius-md, 0.5rem);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast, 0.15s) ease;
+        }
+
+        .legend-item:hover {
+            background: var(--flin-bg-base, #e5e5e5);
+            transform: translateY(-2px);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: var(--flin-radius-sm, 0.25rem);
+            flex-shrink: 0;
+        }
+
+        .legend-label {
+            font-size: var(--flin-text-sm, 0.875rem);
+            color: var(--flin-text-secondary, #4b5563);
+            font-weight: var(--flin-font-medium, 500);
+        }
+
+        .legend-value {
+            font-size: var(--flin-text-sm, 0.875rem);
+            color: var(--flin-text-tertiary, #6b7280);
+            margin-left: var(--flin-space-1, 0.25rem);
+        }
+
+        /* Animation */
+        .pie-visual {
+            animation: pieRotate 0.8s ease-out;
+        }
+
+        @keyframes pieRotate {
+            from {
+                transform: rotate(-90deg) scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: rotate(0deg) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .legend-item {
+            animation: legendFade 0.4s ease-out backwards;
+        }
+
+        @keyframes legendFade {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .legend-item:nth-child(1) { animation-delay: 0.3s; }
+        .legend-item:nth-child(2) { animation-delay: 0.35s; }
+        .legend-item:nth-child(3) { animation-delay: 0.4s; }
+        .legend-item:nth-child(4) { animation-delay: 0.45s; }
+        .legend-item:nth-child(5) { animation-delay: 0.5s; }
+        .legend-item:nth-child(6) { animation-delay: 0.55s; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .pie-container {
+                padding: var(--flin-space-4, 1rem);
+            }
+
+            .pie-visual {
+                width: calc(var(--pie-size) * 0.8);
+                height: calc(var(--pie-size) * 0.8);
+            }
+
+            .pie-legend {
+                gap: var(--flin-space-2, 0.5rem);
+            }
+
+            .legend-item {
+                padding: var(--flin-space-1, 0.25rem) var(--flin-space-2, 0.5rem);
+            }
+
+            .legend-label,
+            .legend-value {
+                font-size: var(--flin-text-xs, 0.75rem);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .pie-visual {
+                width: calc(var(--pie-size) * 0.65);
+                height: calc(var(--pie-size) * 0.65);
+            }
+
+            .pie-legend {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .legend-item {
+                justify-content: space-between;
+            }
+        }
+    </style>
+
+    {if title != none}
+        <div class="pie-header">
+            <h3 class="pie-title">{title}</h3>
+        </div>
+    {/if}
+
+    <div class="pie-container">
+        <div class="pie-visual" style="--pie-gradient: conic-gradient(
+            {data[0].color} 0deg {data[0].value * 3.6}deg,
+            {data[1].color} {data[0].value * 3.6}deg {(data[0].value + data[1].value) * 3.6}deg,
+            {data[2].color} {(data[0].value + data[1].value) * 3.6}deg {(data[0].value + data[1].value + data[2].value) * 3.6}deg,
+            {data[3].color} {(data[0].value + data[1].value + data[2].value) * 3.6}deg {(data[0].value + data[1].value + data[2].value + data[3].value) * 3.6}deg,
+            {data[4].color} {(data[0].value + data[1].value + data[2].value + data[3].value) * 3.6}deg 360deg
+        )">
+        </div>
+
+        {if showLegend}
+            <div class="pie-legend">
+                {for segment in data}
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: {segment.color}"></span>
+                        <span class="legend-label">{segment.label}</span>
+                        {if showPercent}
+                            <span class="legend-value">{segment.value}%</span>
+                        {/if}
+                    </div>
+                {/for}
+            </div>
+        {/if}
+    </div>
+</div>

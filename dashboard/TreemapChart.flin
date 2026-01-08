@@ -1,0 +1,323 @@
+// ============================================================================
+// TreemapChart.flin — FlinUI PRO Dashboard Component
+// CSS-only hierarchical rectangle visualization
+// ============================================================================
+// Props:
+//   - title: Chart title (string or none)
+//   - data: List of items with name, value, color, and optional children (list)
+//   - showLabels: Display labels on rectangles (boolean)
+
+title = props.title || none
+data = props.data || [
+    ["name": "Technology", "value": 35, "color": "#D4AF37", "children": none],
+    ["name": "Healthcare", "value": 25, "color": "#22c55e", "children": none],
+    ["name": "Finance", "value": 20, "color": "#3b82f6", "children": none],
+    ["name": "Energy", "value": 12, "color": "#f59e0b", "children": none],
+    ["name": "Consumer", "value": 8, "color": "#8b5cf6", "children": none]
+]
+showLabels = props.showLabels || true
+
+// Sort data by value for better layout
+totalValue = 100
+
+<div class="flin-treemap-chart">
+    <style>
+        .flin-treemap-chart {
+            width: 100%;
+            font-family: var(--flin-font-sans, system-ui, sans-serif);
+        }
+
+        .treemap-header {
+            margin-bottom: var(--flin-space-4, 1rem);
+        }
+
+        .treemap-title {
+            font-size: var(--flin-text-lg, 1.125rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+            margin: 0;
+        }
+
+        .treemap-container {
+            background: var(--flin-bg-elevated, #ffffff);
+            border: 1px solid var(--flin-border-subtle, #e5e5e5);
+            border-radius: var(--flin-radius-lg, 0.75rem);
+            padding: var(--flin-space-6, 1.5rem);
+        }
+
+        .treemap-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(6, 50px);
+            gap: 4px;
+            min-height: 300px;
+        }
+
+        .treemap-item {
+            border-radius: var(--flin-radius-md, 0.5rem);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--flin-space-2, 0.5rem);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast, 0.15s) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .treemap-item::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .treemap-item:hover {
+            transform: scale(1.02);
+            z-index: 1;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Layout based on value sizes - Largest items get more grid cells */
+        .treemap-item:nth-child(1) {
+            grid-column: span 7;
+            grid-row: span 4;
+        }
+
+        .treemap-item:nth-child(2) {
+            grid-column: span 5;
+            grid-row: span 3;
+        }
+
+        .treemap-item:nth-child(3) {
+            grid-column: span 5;
+            grid-row: span 3;
+        }
+
+        .treemap-item:nth-child(4) {
+            grid-column: span 4;
+            grid-row: span 2;
+        }
+
+        .treemap-item:nth-child(5) {
+            grid-column: span 3;
+            grid-row: span 2;
+        }
+
+        .treemap-name {
+            font-size: var(--flin-text-sm, 0.875rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-inverse, #ffffff);
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            margin-bottom: var(--flin-space-1, 0.25rem);
+        }
+
+        .treemap-value {
+            font-size: var(--flin-text-2xl, 1.5rem);
+            font-weight: var(--flin-font-black, 900);
+            color: var(--flin-text-inverse, #ffffff);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .treemap-percent {
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .treemap-tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--flin-bg-base, #0a0a0f);
+            color: var(--flin-text-inverse, #ffffff);
+            padding: var(--flin-space-2, 0.5rem) var(--flin-space-3, 0.75rem);
+            border-radius: var(--flin-radius-md, 0.5rem);
+            font-size: var(--flin-text-sm, 0.875rem);
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--flin-transition-fast, 0.15s);
+            z-index: 10;
+        }
+
+        .treemap-item:hover .treemap-tooltip {
+            opacity: 1;
+        }
+
+        .treemap-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: var(--flin-space-4, 1rem);
+            margin-top: var(--flin-space-6, 1.5rem);
+            padding-top: var(--flin-space-4, 1rem);
+            border-top: 1px solid var(--flin-border-subtle, #e5e5e5);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2, 0.5rem);
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: var(--flin-radius-sm, 0.25rem);
+        }
+
+        .legend-label {
+            font-size: var(--flin-text-sm, 0.875rem);
+            color: var(--flin-text-secondary, #4b5563);
+        }
+
+        .legend-value {
+            font-size: var(--flin-text-sm, 0.875rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+        }
+
+        /* Animation */
+        .treemap-item {
+            animation: treemapFade 0.5s ease-out backwards;
+        }
+
+        @keyframes treemapFade {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .treemap-item:nth-child(1) { animation-delay: 0.1s; }
+        .treemap-item:nth-child(2) { animation-delay: 0.15s; }
+        .treemap-item:nth-child(3) { animation-delay: 0.2s; }
+        .treemap-item:nth-child(4) { animation-delay: 0.25s; }
+        .treemap-item:nth-child(5) { animation-delay: 0.3s; }
+        .treemap-item:nth-child(6) { animation-delay: 0.35s; }
+
+        /* Responsive sizing for items based on index */
+        @media (max-width: 768px) {
+            .treemap-container {
+                padding: var(--flin-space-4, 1rem);
+            }
+
+            .treemap-grid {
+                grid-template-columns: repeat(6, 1fr);
+                grid-template-rows: repeat(8, 40px);
+            }
+
+            .treemap-item:nth-child(1) {
+                grid-column: span 6;
+                grid-row: span 3;
+            }
+
+            .treemap-item:nth-child(2) {
+                grid-column: span 3;
+                grid-row: span 2;
+            }
+
+            .treemap-item:nth-child(3) {
+                grid-column: span 3;
+                grid-row: span 2;
+            }
+
+            .treemap-item:nth-child(4) {
+                grid-column: span 3;
+                grid-row: span 2;
+            }
+
+            .treemap-item:nth-child(5) {
+                grid-column: span 3;
+                grid-row: span 2;
+            }
+
+            .treemap-name {
+                font-size: var(--flin-text-xs, 0.75rem);
+            }
+
+            .treemap-value {
+                font-size: var(--flin-text-lg, 1.125rem);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .treemap-grid {
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: repeat(10, 35px);
+            }
+
+            .treemap-item:nth-child(1) {
+                grid-column: span 4;
+                grid-row: span 3;
+            }
+
+            .treemap-item:nth-child(2) {
+                grid-column: span 4;
+                grid-row: span 2;
+            }
+
+            .treemap-item:nth-child(3) {
+                grid-column: span 2;
+                grid-row: span 2;
+            }
+
+            .treemap-item:nth-child(4) {
+                grid-column: span 2;
+                grid-row: span 2;
+            }
+
+            .treemap-item:nth-child(5) {
+                grid-column: span 4;
+                grid-row: span 1;
+            }
+
+            .treemap-legend {
+                gap: var(--flin-space-2, 0.5rem);
+            }
+
+            .legend-item {
+                flex: 1;
+                min-width: 45%;
+            }
+        }
+    </style>
+
+    {if title != none}
+        <div class="treemap-header">
+            <h3 class="treemap-title">{title}</h3>
+        </div>
+    {/if}
+
+    <div class="treemap-container">
+        <div class="treemap-grid">
+            {for item in data}
+                <div class="treemap-item" style="background: {item.color}">
+                    {if showLabels}
+                        <span class="treemap-name">{item.name}</span>
+                        <span class="treemap-value">{item.value}%</span>
+                    {/if}
+                    <span class="treemap-tooltip">{item.name}: {item.value}%</span>
+                </div>
+            {/for}
+        </div>
+
+        <div class="treemap-legend">
+            {for item in data}
+                <div class="legend-item">
+                    <span class="legend-color" style="background: {item.color}"></span>
+                    <span class="legend-label">{item.name}</span>
+                    <span class="legend-value">{item.value}%</span>
+                </div>
+            {/for}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,47 @@
+// ============================================================================
+// FlinUI PRO — Dashboard Components
+// Analytics, metrics, layouts, and data visualization for admin dashboards
+// ============================================================================
+
+// Dashboard Layout (10 components)
+export AdminSidebar from "./AdminSidebar.flin"
+export DashboardHeader from "./DashboardHeader.flin"
+export DashboardGrid from "./DashboardGrid.flin"
+export DashboardCard from "./DashboardCard.flin"
+export ActivityFeed from "./ActivityFeed.flin"
+export NotificationCenter from "./NotificationCenter.flin"
+export QuickActions from "./QuickActions.flin"
+export CommandPalette from "./CommandPalette.flin"
+export DashboardTabs from "./DashboardTabs.flin"
+export MiniCalendar from "./MiniCalendar.flin"
+
+// Stats & Metrics (7 components)
+export StatCard from "./StatCard.flin"
+export StatCardGroup from "./StatCardGroup.flin"
+export StatWithSparkline from "./StatWithSparkline.flin"
+export StatComparison from "./StatComparison.flin"
+export KPIWidget from "./KPIWidget.flin"
+export MetricTrend from "./MetricTrend.flin"
+export GoalProgress from "./GoalProgress.flin"
+
+// Analytics (5 components)
+export RealtimeCounter from "./RealtimeCounter.flin"
+export SessionMap from "./SessionMap.flin"
+export BrowserStats from "./BrowserStats.flin"
+export TrafficSources from "./TrafficSources.flin"
+export UserFlowDiagram from "./UserFlowDiagram.flin"
+
+// Charts (13 components)
+export AreaChart from "./AreaChart.flin"
+export BarChart from "./BarChart.flin"
+export LineChart from "./LineChart.flin"
+export PieChart from "./PieChart.flin"
+export DonutChart from "./DonutChart.flin"
+export RadarChart from "./RadarChart.flin"
+export HeatmapChart from "./HeatmapChart.flin"
+export GaugeChart from "./GaugeChart.flin"
+export FunnelChart from "./FunnelChart.flin"
+export ScatterPlot from "./ScatterPlot.flin"
+export CandlestickChart from "./CandlestickChart.flin"
+export TreemapChart from "./TreemapChart.flin"
+export SankeyDiagram from "./SankeyDiagram.flin"

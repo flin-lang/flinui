@@ -1,0 +1,172 @@
+// ============================================================================
+// StatCard.flin — FlinUI PRO Dashboard Component
+// Single metric display with icon, value, and trend indicator
+// ============================================================================
+// Props:
+//   - title: Metric title/label (string)
+//   - value: Main metric value (string or number)
+//   - icon: Icon to display (string or none)
+//   - trend: Trend direction "up" | "down" | "neutral" (string)
+//   - trendValue: Trend percentage or value (string or none)
+//   - suffix: Value suffix like "%" or "k" (string or none)
+//   - prefix: Value prefix like "$" or "#" (string or none)
+
+title = props.title || "Metric"
+value = props.value || "0"
+icon = props.icon || none
+trend = props.trend || "neutral"
+trendValue = props.trendValue || none
+suffix = props.suffix || none
+prefix = props.prefix || none
+
+<div class="flin-stat-card trend-{trend}">
+    <style>
+        .flin-stat-card {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            transition: all var(--flin-transition-normal);
+            min-width: 200px;
+        }
+
+        .flin-stat-card:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--flin-space-3);
+        }
+
+        .stat-title {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-secondary);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-lg);
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .stat-value-container {
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
+        }
+
+        .stat-prefix,
+        .stat-suffix {
+            font-size: clamp(1.25rem, 2vw, 1.5rem);
+            color: var(--flin-text-secondary);
+            font-weight: var(--flin-font-semibold);
+        }
+
+        .stat-value {
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            line-height: 1;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            margin-top: var(--flin-space-1);
+        }
+
+        .trend-arrow {
+            font-size: 0.875rem;
+        }
+
+        .trend-up .stat-trend {
+            color: var(--flin-success);
+        }
+
+        .trend-down .stat-trend {
+            color: var(--flin-error);
+        }
+
+        .trend-neutral .stat-trend {
+            color: var(--flin-text-tertiary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-stat-card {
+                padding: var(--flin-space-4);
+                min-width: 160px;
+            }
+
+            .stat-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+
+            .stat-value {
+                font-size: clamp(1.5rem, 2.5vw, 2rem);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flin-stat-card {
+                padding: var(--flin-space-4);
+                min-width: 140px;
+            }
+        }
+    </style>
+
+    <div class="stat-header">
+        <span class="stat-title">{title}</span>
+        {if icon != none}
+            <div class="stat-icon">{icon}</div>
+        {/if}
+    </div>
+
+    <div class="stat-value-container">
+        {if prefix != none}
+            <span class="stat-prefix">{prefix}</span>
+        {/if}
+        <span class="stat-value">{value}</span>
+        {if suffix != none}
+            <span class="stat-suffix">{suffix}</span>
+        {/if}
+    </div>
+
+    {if trendValue != none}
+        <div class="stat-trend">
+            <span class="trend-arrow">
+                {if trend == "up"}
+                    ↑
+                {elif trend == "down"}
+                    ↓
+                {else}
+                    →
+                {/if}
+            </span>
+            <span>{trendValue}</span>
+        </div>
+    {/if}
+</div>

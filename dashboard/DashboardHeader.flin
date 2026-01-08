@@ -1,0 +1,391 @@
+// ============================================================================
+// DashboardHeader.flin — FlinUI PRO Dashboard Component
+// Top navigation bar with user menu, notifications, search, and actions
+// ============================================================================
+// Props:
+//   - title: Page title or breadcrumb text (string or none)
+//   - user: User object with name, avatar, role (object or none)
+//   - notifications: List of notification objects (list or none)
+//   - search: Enable search input (boolean)
+//   - actions: List of action buttons with icon, label, onClick (list or none)
+
+title = props.title || "Dashboard"
+user = props.user || ["name": "John Doe", "avatar": none, "role": "Administrator"]
+notifications = props.notifications || []
+search = props.search || true
+actions = props.actions || []
+
+searchQuery = ""
+showUserMenu = false
+showNotifications = false
+
+<header class="flin-dashboard-header">
+    <style>
+        .flin-dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--flin-space-6);
+            padding: var(--flin-space-4) var(--flin-space-8);
+            background: var(--flin-bg-elevated);
+            border-bottom: 1px solid var(--flin-border-subtle);
+            min-height: 72px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-4);
+            flex: 1;
+        }
+
+        .header-title {
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .header-search {
+            position: relative;
+            max-width: 400px;
+            flex: 1;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: var(--flin-space-3) var(--flin-space-4) var(--flin-space-3) var(--flin-space-10);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-lg);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+            transition: all var(--flin-transition-fast);
+        }
+
+        .search-input::placeholder {
+            color: var(--flin-text-muted);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--flin-accent-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: var(--flin-space-3);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--flin-text-muted);
+            pointer-events: none;
+        }
+
+        .search-shortcut {
+            position: absolute;
+            right: var(--flin-space-3);
+            top: 50%;
+            transform: translateY(-50%);
+            padding: var(--flin-space-1) var(--flin-space-2);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-sm);
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-muted);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .header-action {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-2) var(--flin-space-4);
+            background: transparent;
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-lg);
+            color: var(--flin-text-secondary);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .header-action:hover {
+            background: var(--flin-bg-surface);
+            border-color: var(--flin-border-default);
+            color: var(--flin-text-primary);
+        }
+
+        .header-action.primary {
+            background: var(--flin-accent-gold);
+            border-color: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+        }
+
+        .header-action.primary:hover {
+            background: var(--flin-accent-gold-light);
+            border-color: var(--flin-accent-gold-light);
+        }
+
+        .notifications-trigger {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--flin-radius-lg);
+            background: transparent;
+            border: 1px solid var(--flin-border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            font-size: 1.25rem;
+        }
+
+        .notifications-trigger:hover {
+            background: var(--flin-bg-surface);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 var(--flin-space-1);
+            background: #ef4444;
+            color: white;
+            font-size: 11px;
+            font-weight: var(--flin-font-bold);
+            border-radius: var(--flin-radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-trigger {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-2);
+            background: transparent;
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-lg);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .user-trigger:hover {
+            background: var(--flin-bg-surface);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--flin-radius-full);
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--flin-font-bold);
+            font-size: var(--flin-text-sm);
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: var(--flin-radius-full);
+            object-fit: cover;
+        }
+
+        .user-info {
+            text-align: left;
+        }
+
+        .user-name {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .user-role {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-tertiary);
+            margin: 0;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + var(--flin-space-2));
+            right: 0;
+            min-width: 200px;
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            box-shadow: var(--flin-shadow-dropdown);
+            padding: var(--flin-space-2);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all var(--flin-transition-fast);
+        }
+
+        .user-dropdown.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-3) var(--flin-space-4);
+            border-radius: var(--flin-radius-md);
+            color: var(--flin-text-secondary);
+            text-decoration: none;
+            font-size: var(--flin-text-sm);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .dropdown-item:hover {
+            background: var(--flin-bg-surface);
+            color: var(--flin-text-primary);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--flin-border-subtle);
+            margin: var(--flin-space-2) 0;
+        }
+
+        .dropdown-item.danger {
+            color: #ef4444;
+        }
+
+        .dropdown-item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .user-info {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .flin-dashboard-header {
+                padding: var(--flin-space-3) var(--flin-space-4);
+            }
+
+            .header-search {
+                display: none;
+            }
+
+            .search-shortcut {
+                display: none;
+            }
+
+            .header-action span {
+                display: none;
+            }
+
+            .header-action {
+                padding: var(--flin-space-2);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title {
+                font-size: var(--flin-text-lg);
+            }
+        }
+    </style>
+
+    <div class="header-left">
+        <h1 class="header-title">{title}</h1>
+
+        {if search}
+            <div class="header-search">
+                <span class="search-icon">🔍</span>
+                <input
+                    type="text"
+                    class="search-input"
+                    placeholder="Search..."
+                    value={searchQuery}
+                    input={(e) => searchQuery = e.target.value}
+                />
+                <span class="search-shortcut">⌘K</span>
+            </div>
+        {/if}
+    </div>
+
+    <div class="header-right">
+        {for action in actions}
+            <button
+                class="header-action {if action.primary}primary{/if}"
+                click={action.onClick}
+            >
+                {if action.icon != none}<span>{action.icon}</span>{/if}
+                <span>{action.label}</span>
+            </button>
+        {/for}
+
+        <button
+            class="notifications-trigger"
+            click={() => showNotifications = !showNotifications}
+        >
+            🔔
+            {if notifications.length > 0}
+                <span class="notification-badge">{notifications.length}</span>
+            {/if}
+        </button>
+
+        <div class="user-menu">
+            <button class="user-trigger" click={() => showUserMenu = !showUserMenu}>
+                <div class="user-avatar">
+                    {if user.avatar != none}
+                        <img src={user.avatar} alt={user.name} />
+                    {/if}
+                    {if user.avatar == none}
+                        {user.name.charAt(0)}
+                    {/if}
+                </div>
+                <div class="user-info">
+                    <p class="user-name">{user.name}</p>
+                    <p class="user-role">{user.role}</p>
+                </div>
+            </button>
+
+            <div class="user-dropdown {if showUserMenu}open{/if}">
+                <button class="dropdown-item">👤 Profile</button>
+                <button class="dropdown-item">⚙️ Settings</button>
+                <button class="dropdown-item">❓ Help</button>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item danger">🚪 Sign Out</button>
+            </div>
+        </div>
+    </div>
+</header>

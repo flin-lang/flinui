@@ -1,0 +1,338 @@
+// ============================================================================
+// GaugeChart.flin — FlinUI PRO Dashboard Component
+// CSS-only speedometer-style gauge with needle indicator
+// ============================================================================
+// Props:
+//   - title: Chart title (string or none)
+//   - value: Current value (number)
+//   - min: Minimum value (number)
+//   - max: Maximum value (number)
+//   - thresholds: List of threshold objects with value, color, label (list)
+
+title = props.title || none
+value = props.value || 72
+min = props.min || 0
+max = props.max || 100
+thresholds = props.thresholds || [
+    ["value": 30, "color": "#ef4444", "label": "Low"],
+    ["value": 60, "color": "#f59e0b", "label": "Medium"],
+    ["value": 80, "color": "#22c55e", "label": "Good"],
+    ["value": 100, "color": "#10b981", "label": "Excellent"]
+]
+
+// Calculate needle rotation (180 degrees = full range)
+range = max - min
+normalizedValue = value - min
+rotation = (normalizedValue / range) * 180 - 90
+
+<div class="flin-gauge-chart">
+    <style>
+        .flin-gauge-chart {
+            width: 100%;
+            font-family: var(--flin-font-sans, system-ui, sans-serif);
+        }
+
+        .gauge-header {
+            margin-bottom: var(--flin-space-4, 1rem);
+        }
+
+        .gauge-title {
+            font-size: var(--flin-text-lg, 1.125rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+            margin: 0;
+        }
+
+        .gauge-container {
+            background: var(--flin-bg-elevated, #ffffff);
+            border: 1px solid var(--flin-border-subtle, #e5e5e5);
+            border-radius: var(--flin-radius-lg, 0.75rem);
+            padding: var(--flin-space-6, 1.5rem);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gauge-visual {
+            position: relative;
+            width: 220px;
+            height: 120px;
+            margin-bottom: var(--flin-space-4, 1rem);
+        }
+
+        .gauge-arc {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 220px;
+            height: 110px;
+            border-radius: 110px 110px 0 0;
+            background: conic-gradient(
+                from 180deg at 50% 100%,
+                {thresholds[0].color} 0deg,
+                {thresholds[0].color} {thresholds[0].value * 1.8}deg,
+                {thresholds[1].color} {thresholds[0].value * 1.8}deg,
+                {thresholds[1].color} {thresholds[1].value * 1.8}deg,
+                {thresholds[2].color} {thresholds[1].value * 1.8}deg,
+                {thresholds[2].color} {thresholds[2].value * 1.8}deg,
+                {thresholds[3].color} {thresholds[2].value * 1.8}deg,
+                {thresholds[3].color} 180deg
+            );
+            overflow: hidden;
+        }
+
+        .gauge-arc::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 80px;
+            background: var(--flin-bg-elevated, #ffffff);
+            border-radius: 80px 80px 0 0;
+        }
+
+        .gauge-needle-container {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            height: 90px;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(var(--needle-rotation, -90deg));
+            transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 2;
+        }
+
+        .gauge-needle {
+            width: 4px;
+            height: 70px;
+            background: linear-gradient(to top, var(--flin-text-primary, #1a1a2e), var(--flin-text-secondary, #4b5563));
+            border-radius: 2px 2px 0 0;
+        }
+
+        .gauge-needle-cap {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--flin-text-primary, #1a1a2e);
+            border-radius: 50%;
+            border: 3px solid var(--flin-bg-elevated, #ffffff);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .gauge-ticks {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .gauge-tick {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            height: 10px;
+            background: var(--flin-text-tertiary, #6b7280);
+            transform-origin: bottom center;
+        }
+
+        .gauge-tick:nth-child(1) { transform: translateX(-50%) rotate(-90deg) translateY(-100px); }
+        .gauge-tick:nth-child(2) { transform: translateX(-50%) rotate(-60deg) translateY(-100px); }
+        .gauge-tick:nth-child(3) { transform: translateX(-50%) rotate(-30deg) translateY(-100px); }
+        .gauge-tick:nth-child(4) { transform: translateX(-50%) rotate(0deg) translateY(-100px); }
+        .gauge-tick:nth-child(5) { transform: translateX(-50%) rotate(30deg) translateY(-100px); }
+        .gauge-tick:nth-child(6) { transform: translateX(-50%) rotate(60deg) translateY(-100px); }
+        .gauge-tick:nth-child(7) { transform: translateX(-50%) rotate(90deg) translateY(-100px); }
+
+        .gauge-labels {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        .gauge-min {
+            position: absolute;
+            bottom: 5px;
+            left: 10px;
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: var(--flin-text-tertiary, #6b7280);
+        }
+
+        .gauge-max {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: var(--flin-text-tertiary, #6b7280);
+        }
+
+        .gauge-value-display {
+            text-align: center;
+        }
+
+        .gauge-value {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: var(--flin-font-black, 900);
+            color: var(--flin-text-primary, #1a1a2e);
+            line-height: 1;
+        }
+
+        .gauge-unit {
+            font-size: var(--flin-text-lg, 1.125rem);
+            color: var(--flin-text-tertiary, #6b7280);
+            margin-left: var(--flin-space-1, 0.25rem);
+        }
+
+        .gauge-status {
+            font-size: var(--flin-text-sm, 0.875rem);
+            color: var(--flin-text-secondary, #4b5563);
+            margin-top: var(--flin-space-1, 0.25rem);
+        }
+
+        .gauge-thresholds {
+            display: flex;
+            justify-content: center;
+            gap: var(--flin-space-4, 1rem);
+            margin-top: var(--flin-space-4, 1rem);
+            padding-top: var(--flin-space-4, 1rem);
+            border-top: 1px solid var(--flin-border-subtle, #e5e5e5);
+            flex-wrap: wrap;
+        }
+
+        .threshold-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2, 0.5rem);
+        }
+
+        .threshold-color {
+            width: 12px;
+            height: 12px;
+            border-radius: var(--flin-radius-sm, 0.25rem);
+        }
+
+        .threshold-label {
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: var(--flin-text-tertiary, #6b7280);
+        }
+
+        /* Animation */
+        .gauge-needle-container {
+            animation: needleSwing 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes needleSwing {
+            0% { transform: translateX(-50%) rotate(-90deg); }
+            100% { transform: translateX(-50%) rotate(var(--needle-rotation, 0deg)); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .gauge-container {
+                padding: var(--flin-space-4, 1rem);
+            }
+
+            .gauge-visual {
+                width: 180px;
+                height: 100px;
+            }
+
+            .gauge-arc {
+                width: 180px;
+                height: 90px;
+                border-radius: 90px 90px 0 0;
+            }
+
+            .gauge-arc::after {
+                width: 130px;
+                height: 65px;
+                border-radius: 65px 65px 0 0;
+            }
+
+            .gauge-needle-container {
+                height: 75px;
+            }
+
+            .gauge-needle {
+                height: 55px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gauge-visual {
+                width: 160px;
+                height: 90px;
+            }
+
+            .gauge-arc {
+                width: 160px;
+                height: 80px;
+                border-radius: 80px 80px 0 0;
+            }
+
+            .gauge-thresholds {
+                gap: var(--flin-space-2, 0.5rem);
+            }
+        }
+    </style>
+
+    {if title != none}
+        <div class="gauge-header">
+            <h3 class="gauge-title">{title}</h3>
+        </div>
+    {/if}
+
+    <div class="gauge-container">
+        <div class="gauge-visual">
+            <div class="gauge-arc"></div>
+
+            <div class="gauge-ticks">
+                <div class="gauge-tick"></div>
+                <div class="gauge-tick"></div>
+                <div class="gauge-tick"></div>
+                <div class="gauge-tick"></div>
+                <div class="gauge-tick"></div>
+                <div class="gauge-tick"></div>
+                <div class="gauge-tick"></div>
+            </div>
+
+            <div class="gauge-needle-container" style="--needle-rotation: {rotation}deg">
+                <div class="gauge-needle"></div>
+                <div class="gauge-needle-cap"></div>
+            </div>
+
+            <div class="gauge-labels">
+                <span class="gauge-min">{min}</span>
+                <span class="gauge-max">{max}</span>
+            </div>
+        </div>
+
+        <div class="gauge-value-display">
+            <span class="gauge-value">{value}</span>
+            <span class="gauge-unit">%</span>
+            <div class="gauge-status">
+                {if value < thresholds[0].value}{thresholds[0].label}{/if}
+                {if value >= thresholds[0].value && value < thresholds[1].value}{thresholds[1].label}{/if}
+                {if value >= thresholds[1].value && value < thresholds[2].value}{thresholds[2].label}{/if}
+                {if value >= thresholds[2].value}{thresholds[3].label}{/if}
+            </div>
+        </div>
+
+        <div class="gauge-thresholds">
+            {for threshold in thresholds}
+                <div class="threshold-item">
+                    <span class="threshold-color" style="background: {threshold.color}"></span>
+                    <span class="threshold-label">{threshold.label}</span>
+                </div>
+            {/for}
+        </div>
+    </div>
+</div>

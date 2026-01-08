@@ -1,0 +1,194 @@
+// ============================================================================
+// StatComparison.flin — FlinUI PRO Dashboard Component
+// Before/after comparison display with change indicator
+// ============================================================================
+// Props:
+//   - title: Comparison title (string)
+//   - current: Current value (number or string)
+//   - previous: Previous value (number or string)
+//   - label: Period label like "vs last month" (string or none)
+//   - format: Display format "number" | "currency" | "percent" (string)
+//   - currencySymbol: Currency symbol for currency format (string)
+
+title = props.title || "Comparison"
+current = props.current || 0
+previous = props.previous || 0
+label = props.label || "vs previous period"
+format = props.format || "number"
+currencySymbol = props.currencySymbol || "$"
+
+// Calculate change
+changeValue = current - previous
+changePercent = previous != 0 ? ((current - previous) / previous * 100) : 0
+isPositive = changeValue >= 0
+
+<div class="flin-stat-comparison {if isPositive}change-positive{else}change-negative{/if}">
+    <style>
+        .flin-stat-comparison {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            transition: all var(--flin-transition-normal);
+        }
+
+        .flin-stat-comparison:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .comparison-title {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-secondary);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .comparison-values {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-6);
+        }
+
+        .comparison-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-1);
+        }
+
+        .comparison-label {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .comparison-value {
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
+            font-weight: var(--flin-font-black);
+            line-height: 1;
+        }
+
+        .comparison-current .comparison-value {
+            color: var(--flin-text-primary);
+        }
+
+        .comparison-previous .comparison-value {
+            color: var(--flin-text-tertiary);
+        }
+
+        .comparison-arrow {
+            font-size: 1.5rem;
+            color: var(--flin-text-tertiary);
+        }
+
+        .comparison-change {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--flin-space-3);
+            border-radius: var(--flin-radius-lg);
+            margin-top: var(--flin-space-2);
+        }
+
+        .change-positive .comparison-change {
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .change-negative .comparison-change {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .change-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            font-weight: var(--flin-font-semibold);
+        }
+
+        .change-positive .change-indicator {
+            color: var(--flin-success);
+        }
+
+        .change-negative .change-indicator {
+            color: var(--flin-error);
+        }
+
+        .change-percent {
+            font-size: var(--flin-text-lg);
+        }
+
+        .change-label {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flin-stat-comparison {
+                padding: var(--flin-space-4);
+            }
+
+            .comparison-values {
+                gap: var(--flin-space-4);
+            }
+
+            .comparison-value {
+                font-size: clamp(1.25rem, 2vw, 1.5rem);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .comparison-values {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--flin-space-3);
+            }
+
+            .comparison-arrow {
+                transform: rotate(90deg);
+                align-self: center;
+            }
+        }
+    </style>
+
+    <span class="comparison-title">{title}</span>
+
+    <div class="comparison-values">
+        <div class="comparison-item comparison-previous">
+            <span class="comparison-label">Previous</span>
+            <span class="comparison-value">
+                {if format == "currency"}{currencySymbol}{/if}
+                {previous}
+                {if format == "percent"}%{/if}
+            </span>
+        </div>
+
+        <span class="comparison-arrow">→</span>
+
+        <div class="comparison-item comparison-current">
+            <span class="comparison-label">Current</span>
+            <span class="comparison-value">
+                {if format == "currency"}{currencySymbol}{/if}
+                {current}
+                {if format == "percent"}%{/if}
+            </span>
+        </div>
+    </div>
+
+    <div class="comparison-change">
+        <div class="change-indicator">
+            <span>{if isPositive}↑{else}↓{/if}</span>
+            <span class="change-percent">
+                {if isPositive}+{/if}{changePercent.toFixed(1)}%
+            </span>
+        </div>
+        <span class="change-label">{label}</span>
+    </div>
+</div>

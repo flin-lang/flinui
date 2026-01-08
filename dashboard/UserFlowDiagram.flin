@@ -1,0 +1,278 @@
+// ============================================================================
+// UserFlowDiagram.flin — FlinUI PRO Dashboard Component
+// Horizontal funnel visualization showing user journey with dropoff rates
+// ============================================================================
+// Props:
+//   - title: Diagram title (string)
+//   - steps: List of step objects with name, count, dropoff (list)
+//   - showDropoff: Show dropoff percentages (boolean)
+//   - showCount: Show absolute counts (boolean)
+//   - animated: Enable animation (boolean)
+
+title = props.title || "User Journey"
+steps = props.steps || [
+    ["name": "Visit", "count": 10000, "dropoff": 0],
+    ["name": "Sign Up", "count": 4500, "dropoff": 55],
+    ["name": "Onboarding", "count": 3200, "dropoff": 29],
+    ["name": "First Action", "count": 2400, "dropoff": 25],
+    ["name": "Conversion", "count": 1800, "dropoff": 25]
+]
+showDropoff = props.showDropoff || true
+showCount = props.showCount || true
+animated = props.animated || true
+
+// Calculate max for scaling
+maxCount = steps.length > 0 ? steps[0].count : 1
+
+<div class="flin-user-flow {if animated}animated{/if}">
+    <style>
+        .flin-user-flow {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-6);
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            transition: all var(--flin-transition-normal);
+            overflow-x: auto;
+        }
+
+        .flin-user-flow:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+        }
+
+        .flow-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .flow-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .flow-summary {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+
+        .flow-summary strong {
+            color: var(--flin-accent-gold);
+        }
+
+        .flow-container {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            min-width: fit-content;
+        }
+
+        .flow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            min-width: 120px;
+            position: relative;
+        }
+
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-4);
+            background: var(--flin-bg-surface);
+            border: 2px solid var(--flin-border-default);
+            border-radius: var(--flin-radius-lg);
+            width: 100%;
+            transition: all var(--flin-transition-normal);
+            position: relative;
+            z-index: 1;
+        }
+
+        .flow-step:hover .step-content {
+            border-color: var(--flin-accent-gold);
+            transform: translateY(-2px);
+            box-shadow: var(--flin-shadow-card);
+        }
+
+        .step-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--flin-bg-base);
+            border-radius: var(--flin-radius-full);
+            overflow: hidden;
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .step-bar-fill {
+            height: 100%;
+            border-radius: var(--flin-radius-full);
+            transition: width var(--flin-transition-slow);
+        }
+
+        .flow-step:nth-child(1) .step-bar-fill { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .flow-step:nth-child(2) .step-bar-fill { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .flow-step:nth-child(3) .step-bar-fill { background: linear-gradient(90deg, #10b981, #34d399); }
+        .flow-step:nth-child(4) .step-bar-fill { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .flow-step:nth-child(5) .step-bar-fill { background: linear-gradient(90deg, #ec4899, #f472b6); }
+
+        .animated .step-bar-fill {
+            animation: barExpand 0.8s ease-out forwards;
+        }
+
+        .flow-step:nth-child(1) .step-bar-fill { animation-delay: 0.1s; }
+        .flow-step:nth-child(2) .step-bar-fill { animation-delay: 0.3s; }
+        .flow-step:nth-child(3) .step-bar-fill { animation-delay: 0.5s; }
+        .flow-step:nth-child(4) .step-bar-fill { animation-delay: 0.7s; }
+        .flow-step:nth-child(5) .step-bar-fill { animation-delay: 0.9s; }
+
+        @keyframes barExpand {
+            from { width: 0 !important; }
+        }
+
+        .step-name {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            text-align: center;
+        }
+
+        .step-count {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-black);
+            color: var(--flin-text-primary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .step-arrow {
+            position: absolute;
+            right: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--flin-space-1);
+        }
+
+        .arrow-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: 50%;
+            color: var(--flin-text-tertiary);
+            font-size: 0.875rem;
+        }
+
+        .dropoff-badge {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            padding: 2px var(--flin-space-2);
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--flin-error);
+            border-radius: var(--flin-radius-full);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-semibold);
+            white-space: nowrap;
+        }
+
+        .flow-step:first-child .dropoff-badge {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .flow-container {
+                flex-direction: column;
+                gap: var(--flin-space-2);
+            }
+
+            .flow-step {
+                min-width: 100%;
+            }
+
+            .step-arrow {
+                display: none;
+            }
+
+            .step-content {
+                flex-direction: row;
+                justify-content: space-between;
+                text-align: left;
+            }
+
+            .step-bar {
+                display: none;
+            }
+
+            .dropoff-badge {
+                position: static;
+                margin-left: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flin-user-flow {
+                padding: var(--flin-space-4);
+            }
+
+            .flow-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--flin-space-2);
+            }
+
+            .step-content {
+                padding: var(--flin-space-3);
+            }
+        }
+    </style>
+
+    <div class="flow-header">
+        <h3 class="flow-title">{title}</h3>
+        {if steps.length > 1}
+            <span class="flow-summary">
+                Overall conversion: <strong>{((steps[steps.length - 1].count / steps[0].count) * 100).toFixed(1)}%</strong>
+            </span>
+        {/if}
+    </div>
+
+    <div class="flow-container">
+        {for i, step in steps}
+            <div class="flow-step">
+                <div class="step-content">
+                    <div class="step-bar">
+                        <div class="step-bar-fill" style="width: {(step.count / maxCount) * 100}%"></div>
+                    </div>
+                    <span class="step-name">{step.name}</span>
+                    {if showCount}
+                        <span class="step-count">{step.count.toLocaleString()}</span>
+                    {/if}
+
+                    {if showDropoff && step.dropoff > 0}
+                        <span class="dropoff-badge">-{step.dropoff}%</span>
+                    {/if}
+                </div>
+
+                {if i < steps.length - 1}
+                    <div class="step-arrow">
+                        <span class="arrow-icon">→</span>
+                    </div>
+                {/if}
+            </div>
+        {/for}
+    </div>
+</div>

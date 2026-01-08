@@ -1,0 +1,131 @@
+// ============================================================================
+// MetricTrend.flin — FlinUI PRO Dashboard Component
+// Compact percentage change indicator badge with arrow
+// ============================================================================
+// Props:
+//   - value: Percentage change value (number or string)
+//   - period: Time period label like "7d", "30d", "YoY" (string or none)
+//   - direction: Trend direction "up" | "down" (string)
+//   - positive: Whether this trend is good (boolean) - determines color
+//   - size: Badge size "sm" | "md" | "lg" (string)
+//   - showIcon: Show arrow icon (boolean)
+
+value = props.value || 0
+period = props.period || none
+direction = props.direction || "up"
+positive = props.positive || (direction == "up")
+size = props.size || "md"
+showIcon = props.showIcon || true
+
+<div class="flin-metric-trend size-{size} {if positive}trend-positive{else}trend-negative{/if}">
+    <style>
+        .flin-metric-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+            padding: var(--flin-space-1) var(--flin-space-2);
+            border-radius: var(--flin-radius-full);
+            font-weight: var(--flin-font-semibold);
+            transition: all var(--flin-transition-fast);
+        }
+
+        .flin-metric-trend:hover {
+            transform: scale(1.05);
+        }
+
+        /* Colors */
+        .trend-positive {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--flin-success);
+        }
+
+        .trend-negative {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--flin-error);
+        }
+
+        /* Sizes */
+        .size-sm {
+            font-size: var(--flin-text-xs);
+            padding: 2px var(--flin-space-2);
+        }
+
+        .size-sm .trend-icon {
+            font-size: 0.625rem;
+        }
+
+        .size-md {
+            font-size: var(--flin-text-sm);
+            padding: var(--flin-space-1) var(--flin-space-2);
+        }
+
+        .size-md .trend-icon {
+            font-size: 0.75rem;
+        }
+
+        .size-lg {
+            font-size: var(--flin-text-base);
+            padding: var(--flin-space-2) var(--flin-space-3);
+        }
+
+        .size-lg .trend-icon {
+            font-size: 0.875rem;
+        }
+
+        .trend-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trend-value {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+        }
+
+        .trend-period {
+            opacity: 0.7;
+            font-weight: var(--flin-font-medium);
+        }
+
+        .trend-period::before {
+            content: "·";
+            margin-right: var(--flin-space-1);
+        }
+
+        /* Animation for arrow */
+        .trend-icon svg {
+            transition: transform var(--flin-transition-fast);
+        }
+
+        .flin-metric-trend:hover .trend-icon svg {
+            transform: translateY(-2px);
+        }
+
+        .trend-negative .flin-metric-trend:hover .trend-icon svg {
+            transform: translateY(2px);
+        }
+    </style>
+
+    {if showIcon}
+        <span class="trend-icon">
+            {if direction == "up"}
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 2L10 6L8.5 6L8.5 10L3.5 10L3.5 6L2 6L6 2Z" fill="currentColor"/>
+                </svg>
+            {else}
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 10L2 6L3.5 6L3.5 2L8.5 2L8.5 6L10 6L6 10Z" fill="currentColor"/>
+                </svg>
+            {/if}
+        </span>
+    {/if}
+
+    <span class="trend-value">
+        <span>{if direction == "up"}+{else}-{/if}{value}%</span>
+        {if period != none}
+            <span class="trend-period">{period}</span>
+        {/if}
+    </span>
+</div>

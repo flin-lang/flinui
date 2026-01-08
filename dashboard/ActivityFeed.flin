@@ -1,0 +1,320 @@
+// ============================================================================
+// ActivityFeed.flin — FlinUI PRO Dashboard Component
+// Vertical timeline displaying recent activities and events
+// ============================================================================
+// Props:
+//   - title: Feed section title (string or none)
+//   - activities: List of activity objects with icon, title, description, time, user (list)
+//   - maxItems: Maximum number of items to display (number or none)
+//   - showMore: Show "View More" button (boolean)
+
+title = props.title || "Recent Activity"
+activities = props.activities || [
+    ["icon": "📝", "title": "Document updated", "description": "Project proposal was edited", "time": "2 min ago", "user": ["name": "Alice", "avatar": none]],
+    ["icon": "✅", "title": "Task completed", "description": "Implement user authentication", "time": "15 min ago", "user": ["name": "Bob", "avatar": none]],
+    ["icon": "💬", "title": "New comment", "description": "Added feedback on design mockups", "time": "1 hour ago", "user": ["name": "Carol", "avatar": none]],
+    ["icon": "🚀", "title": "Deployment success", "description": "v2.1.0 deployed to production", "time": "3 hours ago", "user": ["name": "System", "avatar": none]],
+    ["icon": "👥", "title": "New member", "description": "David joined the team", "time": "1 day ago", "user": ["name": "Admin", "avatar": none]]
+]
+maxItems = props.maxItems || none
+showMore = props.showMore || true
+
+displayActivities = maxItems != none ? activities.slice(0, maxItems) : activities
+
+<div class="flin-activity-feed">
+    <style>
+        .flin-activity-feed {
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            overflow: hidden;
+        }
+
+        .feed-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--flin-space-6);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .feed-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .feed-count {
+            padding: var(--flin-space-1) var(--flin-space-3);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-full);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+
+        .feed-list {
+            padding: var(--flin-space-4) var(--flin-space-6);
+        }
+
+        .activity-item {
+            display: flex;
+            gap: var(--flin-space-4);
+            position: relative;
+            padding: var(--flin-space-4) 0;
+        }
+
+        .activity-item:not(:last-child)::before {
+            content: "";
+            position: absolute;
+            left: 18px;
+            top: 48px;
+            bottom: 0;
+            width: 2px;
+            background: var(--flin-border-subtle);
+        }
+
+        .activity-icon-wrapper {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border: 2px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-full);
+            font-size: 1.125rem;
+            z-index: 1;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .activity-item:hover .activity-icon-wrapper {
+            border-color: var(--flin-accent-gold);
+            background: var(--flin-bg-elevated);
+        }
+
+        .activity-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .activity-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--flin-space-3);
+            margin-bottom: var(--flin-space-1);
+        }
+
+        .activity-title {
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .activity-time {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-muted);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .activity-description {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            margin: 0 0 var(--flin-space-2) 0;
+            line-height: 1.5;
+        }
+
+        .activity-user {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .user-avatar-small {
+            width: 20px;
+            height: 20px;
+            border-radius: var(--flin-radius-full);
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: var(--flin-font-bold);
+        }
+
+        .user-avatar-small img {
+            width: 100%;
+            height: 100%;
+            border-radius: var(--flin-radius-full);
+            object-fit: cover;
+        }
+
+        .user-name-small {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-tertiary);
+        }
+
+        .feed-footer {
+            padding: var(--flin-space-4) var(--flin-space-6);
+            border-top: 1px solid var(--flin-border-subtle);
+            text-align: center;
+        }
+
+        .view-more-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-2) var(--flin-space-4);
+            background: transparent;
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-lg);
+            color: var(--flin-text-secondary);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .view-more-btn:hover {
+            background: var(--flin-bg-surface);
+            border-color: var(--flin-accent-gold);
+            color: var(--flin-text-primary);
+        }
+
+        /* Empty state */
+        .feed-empty {
+            padding: var(--flin-space-12) var(--flin-space-6);
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: var(--flin-space-4);
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-tertiary);
+            margin: 0;
+        }
+
+        /* Activity types (color coded) */
+        .activity-item[data-type="success"] .activity-icon-wrapper {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .activity-item[data-type="warning"] .activity-icon-wrapper {
+            background: rgba(234, 179, 8, 0.1);
+            border-color: rgba(234, 179, 8, 0.3);
+        }
+
+        .activity-item[data-type="error"] .activity-icon-wrapper {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .feed-header {
+                padding: var(--flin-space-4);
+            }
+
+            .feed-list {
+                padding: var(--flin-space-3) var(--flin-space-4);
+            }
+
+            .activity-header {
+                flex-direction: column;
+                gap: var(--flin-space-1);
+            }
+
+            .activity-time {
+                order: -1;
+            }
+
+            .feed-footer {
+                padding: var(--flin-space-3) var(--flin-space-4);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .activity-icon-wrapper {
+                width: 32px;
+                height: 32px;
+                font-size: 0.875rem;
+            }
+
+            .activity-item:not(:last-child)::before {
+                left: 14px;
+                top: 40px;
+            }
+
+            .feed-title {
+                font-size: var(--flin-text-base);
+            }
+        }
+    </style>
+
+    <div class="feed-header">
+        <h3 class="feed-title">{title}</h3>
+        <span class="feed-count">{activities.length} events</span>
+    </div>
+
+    {if displayActivities.length > 0}
+        <div class="feed-list">
+            {for activity in displayActivities}
+                <div class="activity-item" data-type={activity.type || "default"}>
+                    <div class="activity-icon-wrapper">
+                        {activity.icon}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-header">
+                            <h4 class="activity-title">{activity.title}</h4>
+                            <span class="activity-time">{activity.time}</span>
+                        </div>
+                        {if activity.description != none}
+                            <p class="activity-description">{activity.description}</p>
+                        {/if}
+                        {if activity.user != none}
+                            <div class="activity-user">
+                                <div class="user-avatar-small">
+                                    {if activity.user.avatar != none}
+                                        <img src={activity.user.avatar} alt={activity.user.name} />
+                                    {/if}
+                                    {if activity.user.avatar == none}
+                                        {activity.user.name.charAt(0)}
+                                    {/if}
+                                </div>
+                                <span class="user-name-small">{activity.user.name}</span>
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+            {/for}
+        </div>
+    {/if}
+
+    {if displayActivities.length == 0}
+        <div class="feed-empty">
+            <div class="empty-icon">📭</div>
+            <p class="empty-text">No recent activity</p>
+        </div>
+    {/if}
+
+    {if showMore && maxItems != none && activities.length > maxItems}
+        <div class="feed-footer">
+            <button class="view-more-btn">
+                View all activity
+                <span>→</span>
+            </button>
+        </div>
+    {/if}
+</div>

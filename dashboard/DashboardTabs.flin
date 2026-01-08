@@ -1,0 +1,295 @@
+// ============================================================================
+// DashboardTabs.flin — FlinUI PRO Dashboard Component
+// Tabbed content navigation with multiple style variants
+// ============================================================================
+// Props:
+//   - tabs: List of tab objects with id, label, icon, badge (list)
+//   - activeTab: Currently active tab id (string)
+//   - onTabChange: Callback when tab changes (function or none)
+//   - variant: Tab style variant (default, pills, underline) (string)
+
+tabs = props.tabs || [
+    ["id": "overview", "label": "Overview", "icon": "📊"],
+    ["id": "analytics", "label": "Analytics", "icon": "📈", "badge": "New"],
+    ["id": "reports", "label": "Reports", "icon": "📋"],
+    ["id": "settings", "label": "Settings", "icon": "⚙️"]
+]
+activeTab = props.activeTab || tabs[0].id
+onTabChange = props.onTabChange || none
+variant = props.variant || "default"
+
+<div class="flin-dashboard-tabs" data-variant={variant}>
+    <style>
+        .flin-dashboard-tabs {
+            width: 100%;
+        }
+
+        .tabs-header {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+            padding: var(--flin-space-2);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-xl);
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .tabs-header::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-button {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-3) var(--flin-space-5);
+            background: transparent;
+            border: none;
+            border-radius: var(--flin-radius-lg);
+            color: var(--flin-text-secondary);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all var(--flin-transition-fast);
+            position: relative;
+        }
+
+        .tab-button:hover {
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-elevated);
+        }
+
+        .tab-button.active {
+            color: var(--flin-bg-base);
+            background: var(--flin-accent-gold);
+        }
+
+        .tab-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .tab-badge {
+            padding: var(--flin-space-1) var(--flin-space-2);
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            font-size: 10px;
+            font-weight: var(--flin-font-bold);
+            border-radius: var(--flin-radius-full);
+            line-height: 1;
+        }
+
+        .tab-button.active .tab-badge {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--flin-bg-base);
+        }
+
+        /* Pills variant */
+        .flin-dashboard-tabs[data-variant="pills"] .tabs-header {
+            background: transparent;
+            padding: 0;
+            gap: var(--flin-space-2);
+        }
+
+        .flin-dashboard-tabs[data-variant="pills"] .tab-button {
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-full);
+            padding: var(--flin-space-2) var(--flin-space-5);
+        }
+
+        .flin-dashboard-tabs[data-variant="pills"] .tab-button:hover {
+            border-color: var(--flin-border-default);
+            background: var(--flin-bg-elevated);
+        }
+
+        .flin-dashboard-tabs[data-variant="pills"] .tab-button.active {
+            background: var(--flin-accent-gold);
+            border-color: var(--flin-accent-gold);
+        }
+
+        /* Underline variant */
+        .flin-dashboard-tabs[data-variant="underline"] .tabs-header {
+            background: transparent;
+            padding: 0;
+            gap: 0;
+            border-bottom: 1px solid var(--flin-border-subtle);
+            border-radius: 0;
+        }
+
+        .flin-dashboard-tabs[data-variant="underline"] .tab-button {
+            border-radius: 0;
+            padding: var(--flin-space-4) var(--flin-space-6);
+            position: relative;
+        }
+
+        .flin-dashboard-tabs[data-variant="underline"] .tab-button::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: transparent;
+            transition: background var(--flin-transition-fast);
+        }
+
+        .flin-dashboard-tabs[data-variant="underline"] .tab-button:hover {
+            background: transparent;
+        }
+
+        .flin-dashboard-tabs[data-variant="underline"] .tab-button:hover::after {
+            background: var(--flin-border-default);
+        }
+
+        .flin-dashboard-tabs[data-variant="underline"] .tab-button.active {
+            background: transparent;
+            color: var(--flin-accent-gold);
+        }
+
+        .flin-dashboard-tabs[data-variant="underline"] .tab-button.active::after {
+            background: var(--flin-accent-gold);
+            height: 3px;
+        }
+
+        .flin-dashboard-tabs[data-variant="underline"] .tab-button.active .tab-badge {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--flin-accent-gold);
+        }
+
+        /* Tabs content area */
+        .tabs-content {
+            margin-top: var(--flin-space-6);
+        }
+
+        .tab-panel {
+            display: none;
+            animation: fadeIn var(--flin-transition-fast) ease-out;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scrollable indicator */
+        .tabs-header.scrollable::before,
+        .tabs-header.scrollable::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 32px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .tabs-header.scrollable::before {
+            left: 0;
+            background: linear-gradient(90deg, var(--flin-bg-surface), transparent);
+        }
+
+        .tabs-header.scrollable::after {
+            right: 0;
+            background: linear-gradient(-90deg, var(--flin-bg-surface), transparent);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tab-button {
+                padding: var(--flin-space-2) var(--flin-space-4);
+            }
+
+            .tab-label {
+                display: none;
+            }
+
+            .tab-icon {
+                font-size: 1.25rem;
+            }
+
+            .flin-dashboard-tabs[data-variant="underline"] .tab-button {
+                padding: var(--flin-space-3) var(--flin-space-4);
+            }
+
+            .flin-dashboard-tabs[data-variant="pills"] .tab-button {
+                padding: var(--flin-space-2) var(--flin-space-3);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tabs-header {
+                padding: var(--flin-space-1);
+            }
+
+            .tab-button {
+                padding: var(--flin-space-2) var(--flin-space-3);
+            }
+
+            .tab-badge {
+                display: none;
+            }
+        }
+
+        /* Tab with count indicator */
+        .tab-count {
+            padding: var(--flin-space-1) var(--flin-space-2);
+            background: var(--flin-bg-elevated);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-semibold);
+            border-radius: var(--flin-radius-full);
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .tab-button.active .tab-count {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--flin-bg-base);
+        }
+    </style>
+
+    <div class="tabs-header">
+        {for tab in tabs}
+            <button
+                class="tab-button {if activeTab == tab.id}active{/if}"
+                click={() => {
+                    activeTab = tab.id
+                    if onTabChange != none {
+                        onTabChange(tab.id)
+                    }
+                }}
+            >
+                {if tab.icon != none}
+                    <span class="tab-icon">{tab.icon}</span>
+                {/if}
+                <span class="tab-label">{tab.label}</span>
+                {if tab.badge != none}
+                    <span class="tab-badge">{tab.badge}</span>
+                {/if}
+                {if tab.count != none}
+                    <span class="tab-count">{tab.count}</span>
+                {/if}
+            </button>
+        {/for}
+    </div>
+
+    <div class="tabs-content">
+        {for tab in tabs}
+            <div class="tab-panel {if activeTab == tab.id}active{/if}" data-tab={tab.id}>
+                <slot name={tab.id} />
+            </div>
+        {/for}
+    </div>
+</div>

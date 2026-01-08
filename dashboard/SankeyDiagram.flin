@@ -1,0 +1,364 @@
+// ============================================================================
+// SankeyDiagram.flin — FlinUI PRO Dashboard Component
+// CSS-only flow visualization with columns and connecting bands
+// ============================================================================
+// Props:
+//   - title: Chart title (string or none)
+//   - nodes: List of node objects with id, name, column, color (list)
+//   - links: List of link objects with source, target, value (list)
+
+title = props.title || none
+nodes = props.nodes || [
+    ["id": "source1", "name": "Organic", "column": 0, "color": "#22c55e", "value": 40],
+    ["id": "source2", "name": "Paid", "column": 0, "color": "#3b82f6", "value": 35],
+    ["id": "source3", "name": "Social", "column": 0, "color": "#8b5cf6", "value": 25],
+    ["id": "mid1", "name": "Landing Page", "column": 1, "color": "#D4AF37", "value": 60],
+    ["id": "mid2", "name": "Product Page", "column": 1, "color": "#f59e0b", "value": 40],
+    ["id": "target1", "name": "Purchase", "column": 2, "color": "#22c55e", "value": 45],
+    ["id": "target2", "name": "Signup", "column": 2, "color": "#3b82f6", "value": 35],
+    ["id": "target3", "name": "Bounce", "column": 2, "color": "#ef4444", "value": 20]
+]
+links = props.links || [
+    ["source": "source1", "target": "mid1", "value": 30],
+    ["source": "source1", "target": "mid2", "value": 10],
+    ["source": "source2", "target": "mid1", "value": 20],
+    ["source": "source2", "target": "mid2", "value": 15],
+    ["source": "source3", "target": "mid1", "value": 10],
+    ["source": "source3", "target": "mid2", "value": 15],
+    ["source": "mid1", "target": "target1", "value": 35],
+    ["source": "mid1", "target": "target2", "value": 20],
+    ["source": "mid1", "target": "target3", "value": 5],
+    ["source": "mid2", "target": "target1", "value": 10],
+    ["source": "mid2", "target": "target2", "value": 15],
+    ["source": "mid2", "target": "target3", "value": 15]
+]
+
+<div class="flin-sankey-diagram">
+    <style>
+        .flin-sankey-diagram {
+            width: 100%;
+            font-family: var(--flin-font-sans, system-ui, sans-serif);
+        }
+
+        .sankey-header {
+            margin-bottom: var(--flin-space-4, 1rem);
+        }
+
+        .sankey-title {
+            font-size: var(--flin-text-lg, 1.125rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-primary, #1a1a2e);
+            margin: 0;
+        }
+
+        .sankey-container {
+            background: var(--flin-bg-elevated, #ffffff);
+            border: 1px solid var(--flin-border-subtle, #e5e5e5);
+            border-radius: var(--flin-radius-lg, 0.75rem);
+            padding: var(--flin-space-6, 1.5rem);
+        }
+
+        .sankey-visual {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            min-height: 320px;
+            position: relative;
+            gap: var(--flin-space-4, 1rem);
+        }
+
+        .sankey-column {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-3, 0.75rem);
+            flex: 0 0 auto;
+            width: 120px;
+            z-index: 2;
+        }
+
+        .sankey-column:nth-child(2) {
+            margin-top: var(--flin-space-8, 2rem);
+        }
+
+        .sankey-node {
+            background: var(--node-color, var(--flin-accent-gold));
+            border-radius: var(--flin-radius-md, 0.5rem);
+            padding: var(--flin-space-3, 0.75rem) var(--flin-space-4, 1rem);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast, 0.15s) ease;
+            position: relative;
+        }
+
+        .sankey-node::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+            border-radius: inherit;
+            pointer-events: none;
+        }
+
+        .sankey-node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .node-name {
+            font-size: var(--flin-text-sm, 0.875rem);
+            font-weight: var(--flin-font-semibold, 600);
+            color: var(--flin-text-inverse, #ffffff);
+            display: block;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .node-value {
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: rgba(255, 255, 255, 0.85);
+            display: block;
+            margin-top: 2px;
+        }
+
+        .sankey-flows {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .sankey-flow-group {
+            position: absolute;
+            top: 0;
+            left: 120px;
+            right: 120px;
+            height: 100%;
+        }
+
+        /* Flow connections represented as gradient bands */
+        .sankey-flow {
+            position: absolute;
+            background: linear-gradient(90deg, var(--flow-from), var(--flow-to));
+            opacity: 0.4;
+            border-radius: 20px;
+            transition: opacity var(--flin-transition-fast, 0.15s);
+        }
+
+        .sankey-flow:hover {
+            opacity: 0.7;
+        }
+
+        /* Column labels */
+        .sankey-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: var(--flin-space-4, 1rem);
+            padding-top: var(--flin-space-4, 1rem);
+            border-top: 1px solid var(--flin-border-subtle, #e5e5e5);
+        }
+
+        .column-label {
+            font-size: var(--flin-text-sm, 0.875rem);
+            font-weight: var(--flin-font-medium, 500);
+            color: var(--flin-text-tertiary, #6b7280);
+            text-align: center;
+            flex: 1;
+        }
+
+        /* Alternative simplified flow visualization */
+        .sankey-simplified {
+            margin-top: var(--flin-space-6, 1.5rem);
+        }
+
+        .flow-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--flin-space-3, 0.75rem);
+            padding: var(--flin-space-2, 0.5rem);
+            background: var(--flin-bg-surface, #f5f5f5);
+            border-radius: var(--flin-radius-md, 0.5rem);
+        }
+
+        .flow-source {
+            width: 80px;
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: var(--flin-text-secondary, #4b5563);
+        }
+
+        .flow-bar-container {
+            flex: 1;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .flow-bar {
+            height: 100%;
+            border-radius: var(--flin-radius-full, 9999px);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: var(--flin-space-2, 0.5rem);
+            transition: width 0.6s ease-out;
+        }
+
+        .flow-bar span {
+            font-size: var(--flin-text-xs, 0.75rem);
+            font-weight: var(--flin-font-bold, 700);
+            color: var(--flin-text-inverse, #ffffff);
+        }
+
+        .flow-target {
+            width: 80px;
+            font-size: var(--flin-text-xs, 0.75rem);
+            color: var(--flin-text-secondary, #4b5563);
+            text-align: right;
+        }
+
+        /* Animation */
+        .sankey-node {
+            animation: nodeSlide 0.4s ease-out backwards;
+        }
+
+        @keyframes nodeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .sankey-column:nth-child(1) .sankey-node { animation-delay: 0.1s; }
+        .sankey-column:nth-child(2) .sankey-node { animation-delay: 0.2s; }
+        .sankey-column:nth-child(3) .sankey-node { animation-delay: 0.3s; }
+
+        .flow-bar {
+            animation: flowExpand 0.6s ease-out backwards;
+        }
+
+        @keyframes flowExpand {
+            from { width: 0 !important; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sankey-container {
+                padding: var(--flin-space-4, 1rem);
+            }
+
+            .sankey-column {
+                width: 100px;
+            }
+
+            .node-name {
+                font-size: var(--flin-text-xs, 0.75rem);
+            }
+
+            .sankey-visual {
+                min-height: 280px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sankey-visual {
+                flex-direction: column;
+                gap: var(--flin-space-6, 1.5rem);
+                min-height: auto;
+            }
+
+            .sankey-column {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: var(--flin-space-2, 0.5rem);
+            }
+
+            .sankey-column:nth-child(2) {
+                margin-top: 0;
+            }
+
+            .sankey-node {
+                flex: 1;
+                min-width: calc(50% - var(--flin-space-1, 0.25rem));
+            }
+
+            .sankey-flows {
+                display: none;
+            }
+
+            .flow-source,
+            .flow-target {
+                width: 60px;
+            }
+        }
+    </style>
+
+    {if title != none}
+        <div class="sankey-header">
+            <h3 class="sankey-title">{title}</h3>
+        </div>
+    {/if}
+
+    <div class="sankey-container">
+        <div class="sankey-visual">
+            <!-- Source Column -->
+            <div class="sankey-column">
+                {for node in nodes}
+                    {if node.column == 0}
+                        <div class="sankey-node" style="--node-color: {node.color}; height: {node.value * 2}px">
+                            <span class="node-name">{node.name}</span>
+                            <span class="node-value">{node.value}%</span>
+                        </div>
+                    {/if}
+                {/for}
+            </div>
+
+            <!-- Middle Column -->
+            <div class="sankey-column">
+                {for node in nodes}
+                    {if node.column == 1}
+                        <div class="sankey-node" style="--node-color: {node.color}; height: {node.value * 2}px">
+                            <span class="node-name">{node.name}</span>
+                            <span class="node-value">{node.value}%</span>
+                        </div>
+                    {/if}
+                {/for}
+            </div>
+
+            <!-- Target Column -->
+            <div class="sankey-column">
+                {for node in nodes}
+                    {if node.column == 2}
+                        <div class="sankey-node" style="--node-color: {node.color}; height: {node.value * 2}px">
+                            <span class="node-name">{node.name}</span>
+                            <span class="node-value">{node.value}%</span>
+                        </div>
+                    {/if}
+                {/for}
+            </div>
+        </div>
+
+        <div class="sankey-labels">
+            <span class="column-label">Sources</span>
+            <span class="column-label">Channels</span>
+            <span class="column-label">Outcomes</span>
+        </div>
+
+        <!-- Simplified flow visualization -->
+        <div class="sankey-simplified">
+            {for link in links}
+                <div class="flow-row">
+                    <span class="flow-source">{link.source}</span>
+                    <div class="flow-bar-container">
+                        <div class="flow-bar" style="width: {link.value * 2}%; background: linear-gradient(90deg, #D4AF37, #22c55e)">
+                            <span>{link.value}</span>
+                        </div>
+                    </div>
+                    <span class="flow-target">{link.target}</span>
+                </div>
+            {/for}
+        </div>
+    </div>
+</div>

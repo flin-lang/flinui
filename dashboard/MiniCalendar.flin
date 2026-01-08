@@ -1,0 +1,389 @@
+// ============================================================================
+// MiniCalendar.flin — FlinUI PRO Dashboard Component
+// Compact month view calendar widget with event indicators
+// ============================================================================
+// Props:
+//   - selectedDate: Currently selected date (Date or none)
+//   - events: List of event objects with date, title, color (list or none)
+//   - onDateSelect: Callback when date is selected (function or none)
+//   - showEvents: Show event list below calendar (boolean)
+
+selectedDate = props.selectedDate || new Date()
+events = props.events || [
+    ["date": "2024-01-15", "title": "Team Meeting", "color": "blue"],
+    ["date": "2024-01-15", "title": "Project Review", "color": "green"],
+    ["date": "2024-01-18", "title": "Client Call", "color": "purple"],
+    ["date": "2024-01-22", "title": "Deadline", "color": "red"],
+    ["date": "2024-01-25", "title": "Workshop", "color": "orange"]
+]
+onDateSelect = props.onDateSelect || none
+showEvents = props.showEvents || true
+
+currentMonth = selectedDate.getMonth()
+currentYear = selectedDate.getFullYear()
+
+months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+
+getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate()
+getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay()
+
+daysInMonth = getDaysInMonth(currentYear, currentMonth)
+firstDay = getFirstDayOfMonth(currentYear, currentMonth)
+
+calendarDays = []
+{for i in range(0, firstDay)}
+    {calendarDays.push(none)}
+{/for}
+{for day in range(1, daysInMonth + 1)}
+    {calendarDays.push(day)}
+{/for}
+
+getEventsForDay = (day) => {
+    dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    return events.filter(e => e.date == dateStr)
+}
+
+isToday = (day) => {
+    today = new Date()
+    return day == today.getDate() && currentMonth == today.getMonth() && currentYear == today.getFullYear()
+}
+
+isSelected = (day) => {
+    return day == selectedDate.getDate() && currentMonth == selectedDate.getMonth() && currentYear == selectedDate.getFullYear()
+}
+
+<div class="flin-mini-calendar">
+    <style>
+        .flin-mini-calendar {
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-xl);
+            overflow: hidden;
+        }
+
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--flin-space-4) var(--flin-space-5);
+            border-bottom: 1px solid var(--flin-border-subtle);
+        }
+
+        .calendar-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin: 0;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: var(--flin-space-2);
+        }
+
+        .nav-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--flin-radius-md);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--flin-text-secondary);
+            transition: all var(--flin-transition-fast);
+            font-size: 0.875rem;
+        }
+
+        .nav-btn:hover {
+            background: var(--flin-bg-elevated);
+            border-color: var(--flin-border-default);
+            color: var(--flin-text-primary);
+        }
+
+        .calendar-grid {
+            padding: var(--flin-space-4);
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: var(--flin-space-1);
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .weekday {
+            text-align: center;
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-muted);
+            padding: var(--flin-space-2) 0;
+            text-transform: uppercase;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: var(--flin-space-1);
+        }
+
+        .day-cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--flin-radius-md);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            position: relative;
+        }
+
+        .day-cell:hover {
+            background: var(--flin-bg-surface);
+        }
+
+        .day-cell.empty {
+            cursor: default;
+        }
+
+        .day-cell.empty:hover {
+            background: transparent;
+        }
+
+        .day-number {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-secondary);
+        }
+
+        .day-cell:hover .day-number {
+            color: var(--flin-text-primary);
+        }
+
+        .day-cell.today {
+            background: var(--flin-bg-surface);
+        }
+
+        .day-cell.today .day-number {
+            color: var(--flin-accent-gold);
+            font-weight: var(--flin-font-bold);
+        }
+
+        .day-cell.selected {
+            background: var(--flin-accent-gold);
+        }
+
+        .day-cell.selected .day-number {
+            color: var(--flin-bg-base);
+        }
+
+        .day-cell.selected:hover {
+            background: var(--flin-accent-gold-light);
+        }
+
+        .event-dots {
+            display: flex;
+            gap: 2px;
+            margin-top: 2px;
+            position: absolute;
+            bottom: 4px;
+        }
+
+        .event-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: var(--flin-radius-full);
+        }
+
+        .event-dot.blue { background: #3b82f6; }
+        .event-dot.green { background: #22c55e; }
+        .event-dot.purple { background: #a855f7; }
+        .event-dot.red { background: #ef4444; }
+        .event-dot.orange { background: #f97316; }
+        .event-dot.gold { background: var(--flin-accent-gold); }
+
+        .day-cell.selected .event-dot {
+            background: var(--flin-bg-base);
+            opacity: 0.7;
+        }
+
+        /* Events list */
+        .events-section {
+            border-top: 1px solid var(--flin-border-subtle);
+            padding: var(--flin-space-4) var(--flin-space-5);
+        }
+
+        .events-title {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-3) 0;
+        }
+
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-2);
+        }
+
+        .event-item {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            padding: var(--flin-space-2) var(--flin-space-3);
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-md);
+            transition: all var(--flin-transition-fast);
+        }
+
+        .event-item:hover {
+            background: var(--flin-bg-elevated);
+        }
+
+        .event-color {
+            width: 4px;
+            height: 24px;
+            border-radius: var(--flin-radius-sm);
+            flex-shrink: 0;
+        }
+
+        .event-color.blue { background: #3b82f6; }
+        .event-color.green { background: #22c55e; }
+        .event-color.purple { background: #a855f7; }
+        .event-color.red { background: #ef4444; }
+        .event-color.orange { background: #f97316; }
+        .event-color.gold { background: var(--flin-accent-gold); }
+
+        .event-title {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            flex: 1;
+        }
+
+        .events-empty {
+            text-align: center;
+            padding: var(--flin-space-4);
+            color: var(--flin-text-muted);
+            font-size: var(--flin-text-sm);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .calendar-header {
+                padding: var(--flin-space-3) var(--flin-space-4);
+            }
+
+            .calendar-title {
+                font-size: var(--flin-text-base);
+            }
+
+            .calendar-grid {
+                padding: var(--flin-space-3);
+            }
+
+            .day-number {
+                font-size: var(--flin-text-xs);
+            }
+
+            .nav-btn {
+                width: 28px;
+                height: 28px;
+            }
+
+            .events-section {
+                padding: var(--flin-space-3) var(--flin-space-4);
+            }
+        }
+    </style>
+
+    <div class="calendar-header">
+        <h3 class="calendar-title">{months[currentMonth]} {currentYear}</h3>
+        <div class="calendar-nav">
+            <button
+                class="nav-btn"
+                click={() => {
+                    if currentMonth == 0 {
+                        currentMonth = 11
+                        currentYear = currentYear - 1
+                    } else {
+                        currentMonth = currentMonth - 1
+                    }
+                }}
+            >
+                ←
+            </button>
+            <button
+                class="nav-btn"
+                click={() => {
+                    if currentMonth == 11 {
+                        currentMonth = 0
+                        currentYear = currentYear + 1
+                    } else {
+                        currentMonth = currentMonth + 1
+                    }
+                }}
+            >
+                →
+            </button>
+        </div>
+    </div>
+
+    <div class="calendar-grid">
+        <div class="weekdays">
+            {for day in weekdays}
+                <div class="weekday">{day}</div>
+            {/for}
+        </div>
+
+        <div class="days">
+            {for day in calendarDays}
+                <div
+                    class="day-cell {if day == none}empty{/if} {if day != none && isToday(day)}today{/if} {if day != none && isSelected(day)}selected{/if}"
+                    click={() => {
+                        if day != none {
+                            selectedDate = new Date(currentYear, currentMonth, day)
+                            if onDateSelect != none {
+                                onDateSelect(selectedDate)
+                            }
+                        }
+                    }}
+                >
+                    {if day != none}
+                        <span class="day-number">{day}</span>
+                        {if getEventsForDay(day).length > 0}
+                            <div class="event-dots">
+                                {for event in getEventsForDay(day).slice(0, 3)}
+                                    <span class="event-dot {event.color || 'gold'}"></span>
+                                {/for}
+                            </div>
+                        {/if}
+                    {/if}
+                </div>
+            {/for}
+        </div>
+    </div>
+
+    {if showEvents}
+        <div class="events-section">
+            <h4 class="events-title">
+                Events on {months[selectedDate.getMonth()]} {selectedDate.getDate()}
+            </h4>
+            {if getEventsForDay(selectedDate.getDate()).length > 0}
+                <div class="events-list">
+                    {for event in getEventsForDay(selectedDate.getDate())}
+                        <div class="event-item">
+                            <div class="event-color {event.color || 'gold'}"></div>
+                            <span class="event-title">{event.title}</span>
+                        </div>
+                    {/for}
+                </div>
+            {/if}
+            {if getEventsForDay(selectedDate.getDate()).length == 0}
+                <div class="events-empty">No events scheduled</div>
+            {/if}
+        </div>
+    {/if}
+</div>
