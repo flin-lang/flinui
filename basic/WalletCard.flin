@@ -1,0 +1,367 @@
+// WalletCard.flin — Wallet balance display with top-up options
+
+// Props
+balance = props.balance || 0
+currency = props.currency || "USD"
+showTopUp = props.showTopUp || false
+autoTopUpEnabled = props.autoTopUpEnabled || false
+
+// State
+showTopUpPanel = false
+customAmount = ""
+
+// Usage data (could come from props)
+aiTokensUsed = props.aiTokensUsed || 2.45
+computeHours = props.computeHours || 1.20
+storage = props.storage || 0.35
+thisMonth = aiTokensUsed + computeHours + storage
+
+// Top-up options
+topUpOptions = [5, 10, 25, 50, 100]
+
+<div class="wallet-card">
+    <style>
+        .wallet-card {
+            background: var(--flin-bg-card);
+            border: 1px solid var(--flin-border);
+            border-radius: var(--flin-radius-xl);
+            padding: var(--flin-spacing-6);
+        }
+
+        .balance-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: var(--flin-spacing-6);
+        }
+
+        .balance-label {
+            color: var(--flin-text-secondary);
+            font-size: var(--flin-text-sm);
+            margin-bottom: var(--flin-spacing-1);
+        }
+
+        .balance-amount {
+            font-size: var(--flin-text-4xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+        }
+
+        .balance-currency {
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-tertiary);
+            margin-left: var(--flin-spacing-1);
+        }
+
+        .balance-icon-wrapper {
+            padding: var(--flin-spacing-3);
+            background: linear-gradient(135deg, var(--flin-accent-violet-muted), var(--flin-accent-gold-muted));
+            border-radius: var(--flin-radius-xl);
+        }
+
+        .balance-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--flin-accent-violet);
+        }
+
+        .usage-breakdown {
+            margin-bottom: var(--flin-spacing-6);
+        }
+
+        .usage-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: var(--flin-text-sm);
+            margin-bottom: var(--flin-spacing-3);
+        }
+
+        .usage-label {
+            color: var(--flin-text-secondary);
+        }
+
+        .usage-value {
+            color: var(--flin-text-primary);
+        }
+
+        .usage-divider {
+            width: 100%;
+            height: 1px;
+            background: var(--flin-border);
+            margin: var(--flin-spacing-3) 0;
+        }
+
+        .usage-total {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+        }
+
+        .usage-total-label {
+            color: var(--flin-text-secondary);
+        }
+
+        .usage-total-value {
+            color: var(--flin-accent-violet);
+        }
+
+        .topup-button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--flin-spacing-2);
+            padding: var(--flin-spacing-3) var(--flin-spacing-4);
+            background: var(--flin-primary);
+            color: white;
+            border: none;
+            border-radius: var(--flin-radius-lg);
+            font-weight: var(--flin-font-medium);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .topup-button:hover {
+            background: var(--flin-primary-hover);
+        }
+
+        .topup-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .topup-panel {
+            margin-top: var(--flin-spacing-4);
+            padding: var(--flin-spacing-4);
+            background: var(--flin-bg-elevated);
+            border-radius: var(--flin-radius-xl);
+        }
+
+        .topup-panel-label {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            margin-bottom: var(--flin-spacing-3);
+        }
+
+        .topup-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--flin-spacing-2);
+            margin-bottom: var(--flin-spacing-4);
+        }
+
+        .topup-option {
+            padding: var(--flin-spacing-2) var(--flin-spacing-3);
+            background: var(--flin-bg-card);
+            color: var(--flin-text-primary);
+            border: 1px solid var(--flin-border);
+            border-radius: var(--flin-radius-lg);
+            font-weight: var(--flin-font-medium);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .topup-option:hover {
+            background: var(--flin-bg-hover);
+        }
+
+        .topup-custom {
+            grid-column: span 3;
+            display: flex;
+            gap: var(--flin-spacing-2);
+        }
+
+        .topup-input {
+            flex: 1;
+            padding: var(--flin-spacing-2) var(--flin-spacing-3);
+            background: var(--flin-bg);
+            color: var(--flin-text-primary);
+            border: 1px solid var(--flin-border);
+            border-radius: var(--flin-radius-lg);
+            font-size: var(--flin-text-sm);
+        }
+
+        .topup-add-button {
+            padding: var(--flin-spacing-2) var(--flin-spacing-4);
+            background: var(--flin-bg-card);
+            color: var(--flin-text-primary);
+            border: 1px solid var(--flin-border);
+            border-radius: var(--flin-radius-lg);
+            font-weight: var(--flin-font-medium);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .topup-add-button:hover {
+            background: var(--flin-bg-hover);
+        }
+
+        .topup-add-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .topup-note {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-tertiary);
+            text-align: center;
+        }
+
+        .auto-topup {
+            margin-top: var(--flin-spacing-4);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--flin-spacing-3);
+            background: var(--flin-bg-elevated);
+            border-radius: var(--flin-radius-xl);
+        }
+
+        .auto-topup-info {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-spacing-3);
+        }
+
+        .auto-topup-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--flin-text-secondary);
+        }
+
+        .auto-topup-text h4 {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-spacing-1) 0;
+        }
+
+        .auto-topup-text p {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-tertiary);
+            margin: 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: var(--flin-bg-card);
+            border-radius: var(--flin-radius-full);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--flin-accent-violet);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(20px);
+        }
+    </style>
+
+    <!-- Balance Display -->
+    <div class="balance-header">
+        <div>
+            <p class="balance-label">Available Balance</p>
+            <p class="balance-amount">
+                ${balance}
+                <span class="balance-currency">{currency}</span>
+            </p>
+        </div>
+        <div class="balance-icon-wrapper">
+            <svg class="balance-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- Usage Breakdown -->
+    <div class="usage-breakdown">
+        <div class="usage-item">
+            <span class="usage-label">AI Tokens Used</span>
+            <span class="usage-value">${aiTokensUsed}</span>
+        </div>
+        <div class="usage-item">
+            <span class="usage-label">Compute Hours</span>
+            <span class="usage-value">${computeHours}</span>
+        </div>
+        <div class="usage-item">
+            <span class="usage-label">Storage</span>
+            <span class="usage-value">${storage}</span>
+        </div>
+        <div class="usage-divider"></div>
+        <div class="usage-total">
+            <span class="usage-total-label">This Month</span>
+            <span class="usage-total-value">${thisMonth}</span>
+        </div>
+    </div>
+
+    <!-- Top Up Button -->
+    <button class="topup-button" click={() => showTopUpPanel = !showTopUpPanel}>
+        <svg class="topup-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Top Up Balance
+    </button>
+
+    <!-- Top Up Options -->
+    {if showTopUpPanel}
+        <div class="topup-panel">
+            <p class="topup-panel-label">Select amount to add:</p>
+            <div class="topup-grid">
+                {for amount in topUpOptions}
+                    <button class="topup-option" click={() => showTopUpPanel = false}>
+                        ${amount}
+                    </button>
+                {/for}
+                <div class="topup-custom">
+                    <input
+                        type="number"
+                        class="topup-input"
+                        placeholder="Custom"
+                        value={customAmount}
+                        min="1"
+                    />
+                    <button
+                        class="topup-add-button"
+                        click={() => showTopUpPanel = false}
+                    >
+                        Add
+                    </button>
+                </div>
+            </div>
+            <p class="topup-note">Pay as you go - no monthly commitments</p>
+        </div>
+    {/if}
+
+    <!-- Auto Top-Up Option -->
+    <div class="auto-topup">
+        <div class="auto-topup-info">
+            <svg class="auto-topup-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <div class="auto-topup-text">
+                <h4>Auto Top-Up</h4>
+                <p>Add $10 when below $2</p>
+            </div>
+        </div>
+        <div class="toggle-switch {autoTopUpEnabled ? 'active' : ''}" click={() => autoTopUpEnabled = !autoTopUpEnabled}></div>
+    </div>
+</div>

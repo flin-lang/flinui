@@ -1,0 +1,237 @@
+// DashboardSidebar.flin - VS Code Activity Bar Style
+// Icon-based navigation for dashboard, stacks, wallet, domains, secrets, settings
+
+// Props with defaults
+currentPath = props.currentPath || "/dashboard"
+
+// Menu items data structures
+debugItems = [
+    ["path": "/debug", "label": "Debug", "icon": "debug"]
+]
+
+hostingItems = [
+    ["path": "/deploy", "label": "Deploy", "icon": "deploy"],
+    ["path": "/stacks", "label": "Stacks", "icon": "stacks"],
+    ["path": "/domains", "label": "Domains", "icon": "domains"],
+    ["path": "/secrets", "label": "Secrets", "icon": "secrets"],
+    ["path": "/storage", "label": "Storage", "icon": "storage"]
+]
+
+commonItems = [
+    ["path": "/wallet", "label": "Wallet", "icon": "wallet"],
+    ["path": "/activities", "label": "Activity", "icon": "activity"]
+]
+
+// Function to check if path is active
+isActive = (path) => {
+    {if path == "/dashboard" {
+        currentPath == "/dashboard"
+    } else {
+        // Simple path matching - just check equality for now
+        currentPath == path
+    }}
+}
+
+// Function to get active class
+getItemClass = (path) => {
+    {if isActive(path) {
+        "sidebar-item sidebar-item-active"
+    } else {
+        "sidebar-item"
+    }}
+}
+
+<aside class="sidebar">
+    <nav class="sidebar-nav">
+        <a href="/dashboard" class={getItemClass("/dashboard")}>
+            <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/>
+            </svg>
+            <span class="sidebar-label">Dashboard</span>
+        </a>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">DEBUG</div>
+        </div>
+
+        {for item in debugItems}
+            <a href={item.path} class={getItemClass(item.path)}>
+                <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/>
+                </svg>
+                <span class="sidebar-label">{item.label}</span>
+            </a>
+        {/for}
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">HOSTING</div>
+        </div>
+
+        {for item, idx in hostingItems}
+            <a href={item.path} class={getItemClass(item.path)}>
+                {if item.icon == "deploy"}
+                    <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                    </svg>
+                {else if item.icon == "stacks"}
+                    <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0l-5.571 3-5.571-3"/>
+                    </svg>
+                {else if item.icon == "domains"}
+                    <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/>
+                    </svg>
+                {else if item.icon == "secrets"}
+                    <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/>
+                    </svg>
+                {else if item.icon == "storage"}
+                    <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/>
+                    </svg>
+                {/if}
+                <span class="sidebar-label">{item.label}</span>
+            </a>
+            {if idx < hostingItems.length - 1}
+                <div class="sidebar-mini-divider"></div>
+            {/if}
+        {/for}
+
+        <div class="sidebar-divider"></div>
+
+        {for item, idx in commonItems}
+            <a href={item.path} class={getItemClass(item.path)}>
+                {if item.icon == "wallet"}
+                    <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"/>
+                    </svg>
+                {else if item.icon == "activity"}
+                    <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
+                    </svg>
+                {/if}
+                <span class="sidebar-label">{item.label}</span>
+            </a>
+            {if idx < commonItems.length - 1}
+                <div class="sidebar-mini-divider"></div>
+            {/if}
+        {/for}
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="/settings" class={getItemClass("/settings")}>
+            <svg class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <span class="sidebar-label">Settings</span>
+        </a>
+    </div>
+</aside>
+
+<style scoped>
+.sidebar {
+    margin: var(--flin-space-2);
+    margin-left: var(--flin-space-2);
+    width: 56px;
+    background-color: var(--flin-bg-primary);
+    border-radius: var(--flin-radius-xl);
+    border: 1px solid var(--flin-border-color);
+    box-shadow: var(--flin-shadow-sm);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: sticky;
+    top: var(--flin-space-4);
+    height: fit-content;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--flin-space-2) 0;
+}
+
+.sidebar-item {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--flin-radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--flin-transition-fast);
+    color: var(--flin-text-tertiary);
+    text-decoration: none;
+}
+
+.sidebar-item:hover {
+    background-color: var(--flin-bg-hover);
+    color: var(--flin-text-secondary);
+}
+
+.sidebar-item-active {
+    background-color: var(--flin-neutral-900);
+    color: white;
+}
+
+@media (prefers-color-scheme: dark) {
+    .sidebar-item-active {
+        background-color: white;
+        color: var(--flin-neutral-900);
+    }
+}
+
+.sidebar-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.sidebar-label {
+    font-size: 8px;
+    font-weight: 500;
+    margin-top: 2px;
+    line-height: 1;
+}
+
+.sidebar-section {
+    width: 100%;
+    padding: 0 var(--flin-space-1-5);
+    margin-top: var(--flin-space-2);
+}
+
+.sidebar-section-title {
+    font-size: 7px;
+    font-weight: 700;
+    color: var(--flin-text-tertiary);
+    text-align: center;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--flin-space-1);
+}
+
+.sidebar-divider {
+    width: 32px;
+    height: 1px;
+    background-color: var(--flin-border-color);
+    margin: var(--flin-space-2) 0;
+}
+
+.sidebar-mini-divider {
+    width: 32px;
+    height: 1px;
+    background-color: var(--flin-bg-hover);
+    margin: var(--flin-space-1) auto;
+}
+
+.sidebar-footer {
+    border-top: 1px solid var(--flin-border-color);
+    padding: var(--flin-space-2) 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+</style>

@@ -1,0 +1,463 @@
+// MiniCart.flin - FlinUI Mini Cart Component
+// Floating cart dropdown with items list, total calculation, and remove buttons
+
+// Props with defaults
+items = props.items || []
+currency = props.currency || "USD"
+exchangeRate = props.exchangeRate || 1.0
+onRemoveItem = props.onRemoveItem
+onCheckout = props.onCheckout
+
+// Internal state
+isOpen = false
+mounted = true
+
+// Handlers
+toggleOpen = {
+    isOpen = !isOpen
+}
+
+openCart = {
+    isOpen = true
+}
+
+closeCart = {
+    isOpen = false
+}
+
+// Get currency symbol
+currencySymbol = match currency {
+    "EUR" -> "€"
+    "GBP" -> "£"
+    "JPY" -> "¥"
+    _ -> "$"
+}
+
+// Calculate item count
+itemCount = items.length
+
+// Calculate total (simplified - would be computed reactively)
+totalAmount = "0.00"
+
+// Get first 3 items to display
+displayLimit = 3
+displayedItems = items
+remainingCount = 0
+
+// Computed badge text - must be string
+badgeText = "0"
+
+// Computed article text
+articleText = match itemCount == 1 {
+    true -> "article"
+    _ -> "articles"
+}
+
+// Computed "autre" text for remaining
+autreText = match remainingCount > 1 {
+    true -> "autres"
+    _ -> "autre"
+}
+
+// Computed "article" text for remaining
+articleRemainText = match remainingCount > 1 {
+    true -> "articles"
+    _ -> "article"
+}
+
+<div class="minicart-container">
+    
+    <button
+        type="button"
+        class="minicart-button"
+        click={toggleOpen}
+        mouseenter={openCart}
+        title="Panier"
+    >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+        {if itemCount > 0}
+            <span class="minicart-badge">
+                {badgeText}
+            </span>
+        {/if}
+    </button>
+
+    
+    {if isOpen}
+        <div
+            class="minicart-dropdown"
+            mouseleave={closeCart}
+        >
+            
+            <div class="minicart-header">
+                <h3 class="minicart-title">
+                    Panier ({itemCount} {articleText})
+                </h3>
+                <button
+                    type="button"
+                    class="minicart-close"
+                    click={closeCart}
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            
+            {if !mounted || itemCount == 0}
+                <div class="minicart-empty">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <p class="minicart-empty-text">Votre panier est vide</p>
+                    <a
+                        href="/vins"
+                        class="minicart-empty-link"
+                        click={closeCart}
+                    >
+                        Découvrir nos vins
+                    </a>
+                </div>
+            {else}
+                <div class="minicart-items">
+                    {for item in displayedItems}
+                        <div class="minicart-item">
+
+                            <div class="minicart-item-image">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                </svg>
+                            </div>
+
+
+                            <div class="minicart-item-info">
+                                <h4 class="minicart-item-name">Product</h4>
+                                <p class="minicart-item-price">
+                                    1 x {currencySymbol}0.00
+                                </p>
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="minicart-item-remove"
+                                click={onRemoveItem}
+                                title="Supprimer"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    {/for}
+                </div>
+
+
+                <div class="minicart-footer">
+                    
+                    <div class="minicart-total">
+                        <span class="minicart-total-label">Sous-total</span>
+                        <span class="minicart-total-value">{currencySymbol}{totalAmount}</span>
+                    </div>
+
+                    
+                    <div class="minicart-actions">
+                        <a
+                            href="/cart"
+                            class="minicart-action-btn minicart-action-view"
+                            click={closeCart}
+                        >
+                            Voir le panier
+                        </a>
+                        <a
+                            href="/checkout"
+                            class="minicart-action-btn minicart-action-checkout"
+                            click={onCheckout}
+                        >
+                            Commander
+                        </a>
+                    </div>
+                </div>
+            {/if}
+        </div>
+    {/if}
+</div>
+
+<style scoped>
+.minicart-container {
+    position: relative;
+}
+
+/* Button styles */
+.minicart-button {
+    position: relative;
+    padding: var(--flin-space-2);
+    background: none;
+    border: none;
+    color: var(--flin-neutral-700);
+    cursor: pointer;
+    transition: color var(--flin-transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.minicart-button:hover {
+    color: var(--flin-primary);
+}
+
+.minicart-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background-color: var(--flin-primary);
+    color: white;
+    font-family: var(--flin-font-sans);
+    font-size: 10px;
+    font-weight: var(--flin-font-medium);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Dropdown styles */
+.minicart-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    width: 320px;
+    background-color: var(--flin-bg);
+    border: 1px solid var(--flin-neutral-200);
+    border-radius: var(--flin-radius-lg);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+}
+
+/* Header styles */
+.minicart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+}
+
+.minicart-title {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-base);
+    font-weight: var(--flin-font-semibold);
+    color: var(--flin-fg);
+    margin: 0;
+}
+
+.minicart-close {
+    padding: var(--flin-space-1);
+    background: none;
+    border: none;
+    color: var(--flin-fg-muted);
+    cursor: pointer;
+    transition: color var(--flin-transition-fast);
+}
+
+.minicart-close:hover {
+    color: var(--flin-fg);
+}
+
+/* Empty state */
+.minicart-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--flin-space-6);
+    text-align: center;
+}
+
+.minicart-empty svg {
+    color: var(--flin-neutral-400);
+    margin-bottom: var(--flin-space-3);
+}
+
+.minicart-empty-text {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    margin-bottom: var(--flin-space-4);
+}
+
+.minicart-empty-link {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-primary);
+    text-decoration: none;
+}
+
+.minicart-empty-link:hover {
+    color: var(--flin-primary-hover);
+}
+
+/* Items list */
+.minicart-items {
+    max-height: 256px;
+    overflow-y: auto;
+}
+
+.minicart-item {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-3);
+    padding: var(--flin-space-3);
+    transition: background-color var(--flin-transition-fast);
+}
+
+.minicart-item:hover {
+    background-color: var(--flin-neutral-50);
+}
+
+.minicart-item-image {
+    width: 56px;
+    height: 56px;
+    background-color: var(--flin-neutral-100);
+    border-radius: var(--flin-radius-md);
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.minicart-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.minicart-item-image svg {
+    color: var(--flin-neutral-400);
+}
+
+.minicart-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.minicart-item-name {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    color: var(--flin-fg);
+    margin: 0 0 var(--flin-space-1) 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.minicart-item-price {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-xs);
+    color: var(--flin-fg-muted);
+    margin: 0;
+}
+
+.minicart-item-remove {
+    padding: var(--flin-space-1-5);
+    background: none;
+    border: none;
+    color: var(--flin-neutral-400);
+    cursor: pointer;
+    transition: all var(--flin-transition-fast);
+    border-radius: var(--flin-radius-sm);
+}
+
+.minicart-item-remove:hover {
+    color: var(--flin-danger);
+    background-color: var(--flin-danger-light);
+}
+
+/* Remaining items */
+.minicart-remaining {
+    padding: var(--flin-space-2) var(--flin-space-4);
+    text-align: center;
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+    border-top: 1px solid var(--flin-neutral-200);
+}
+
+/* Footer */
+.minicart-footer {
+    padding: var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+    display: flex;
+    flex-direction: column;
+    gap: var(--flin-space-3);
+}
+
+.minicart-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.minicart-total-label {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    color: var(--flin-fg-muted);
+}
+
+.minicart-total-value {
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-lg);
+    font-weight: var(--flin-font-bold);
+    color: var(--flin-fg);
+}
+
+/* Actions */
+.minicart-actions {
+    display: flex;
+    gap: var(--flin-space-2);
+}
+
+.minicart-action-btn {
+    flex: 1;
+    padding: var(--flin-space-2-5) var(--flin-space-4);
+    font-family: var(--flin-font-sans);
+    font-size: var(--flin-text-sm);
+    font-weight: var(--flin-font-medium);
+    text-align: center;
+    text-decoration: none;
+    border-radius: var(--flin-radius-md);
+    transition: all var(--flin-transition-fast);
+    cursor: pointer;
+}
+
+.minicart-action-view {
+    background-color: var(--flin-neutral-100);
+    color: var(--flin-fg);
+}
+
+.minicart-action-view:hover {
+    background-color: var(--flin-neutral-200);
+}
+
+.minicart-action-checkout {
+    background-color: var(--flin-primary);
+    color: white;
+}
+
+.minicart-action-checkout:hover {
+    background-color: var(--flin-primary-hover);
+}
+</style>
