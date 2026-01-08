@@ -12,10 +12,29 @@ FlinUI is the official component library for the [FLIN programming language](htt
 
 **Live Demo:** [flinui.flin.dev](https://flinui.flin.dev)
 
+## 🚨 CRITICAL: Zero-Import Philosophy
+
+**FLIN HAS NO IMPORTS!** Components work like HTML tags - just use them!
+
+```flin
+// ❌ WRONG (JavaScript/React thinking)
+import { Button, Card, Modal } from "flinui"
+
+// ✅ CORRECT (FLIN way)
+<Button label="Click me" />
+<Card title="Welcome" />
+<Modal open={true} />
+```
+
+**Why?** FLIN auto-discovers components from the `flinui/` directory. No configuration needed!
+
+**📖 Full Guide:** Read [`FLIN-COMPONENT-GUIDE.md`](./FLIN-COMPONENT-GUIDE.md) for complete instructions and common mistakes to avoid.
+
 ## Features
 
 - **94 Components** - From basic inputs to advanced data tables
 - **Zero Dependencies** - No npm, no node_modules, no bundlers
+- **Zero Imports** - Components auto-discovered (like HTML tags!)
 - **Native Charts** - SVG-based charts without Chart.js
 - **Dark Mode** - Built-in theme system with light/dark support
 - **Accessible** - ARIA attributes and keyboard navigation
@@ -23,10 +42,10 @@ FlinUI is the official component library for the [FLIN programming language](htt
 
 ## Quick Start
 
-Components are auto-imported when used in FLIN files:
+Components are auto-discovered when you use them:
 
 ```flin
-// No imports needed - just use components!
+// No imports! Just use components directly:
 <Button label="Click me" variant="primary" />
 
 <Card>
@@ -42,6 +61,8 @@ Components are auto-imported when used in FLIN files:
     </ModalFooter>
 </Modal>
 ```
+
+**That's it!** No `import`, no `export`, no configuration. FLIN finds the components automatically.
 
 ## Component Categories
 
