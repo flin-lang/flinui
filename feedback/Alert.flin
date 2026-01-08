@@ -1,5 +1,5 @@
 // Alert.flin - FlinUI Alert Component
-// Displays important messages with variant-based styling and optional dismiss
+// Displays important messages with variant-based styling and slots for customization
 
 // Props with defaults
 variant = props.variant || "info"
@@ -41,18 +41,29 @@ displayClass = match visible { true -> "flin-alert " ++ variantClass, _ -> "flin
     role="alert"
     aria-live="polite"
 >
-    {if showIcon}
-        <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
-        </svg>
-    {/if}
+    <div class="alert-icon-wrapper">
+        <slot name="icon">
+            {if showIcon}
+                <svg class="alert-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
+                </svg>
+            {/if}
+        </slot>
+    </div>
 
     <div class="alert-content">
-        {if title != ""}
-            <h4 class="alert-title">{title}</h4>
-        {/if}
+        <div class="alert-title-wrapper">
+            <slot name="title">
+                {if title != ""}
+                    <h4 class="alert-title">{title}</h4>
+                {/if}
+            </slot>
+        </div>
         <div class="alert-message">
-            {children}
+            <slot />
+        </div>
+        <div class="alert-actions">
+            <slot name="actions" />
         </div>
     </div>
 
@@ -81,6 +92,10 @@ displayClass = match visible { true -> "flin-alert " ++ variantClass, _ -> "flin
     animation: alertSlideIn var(--flin-transition-normal) ease-out;
 }
 
+.flin-alert--hidden {
+    display: none;
+}
+
 @keyframes alertSlideIn {
     from {
         opacity: 0;
@@ -92,16 +107,27 @@ displayClass = match visible { true -> "flin-alert " ++ variantClass, _ -> "flin
     }
 }
 
+.alert-icon-wrapper {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.alert-icon-wrapper:empty {
+    display: none;
+}
+
 .alert-icon {
     width: 20px;
     height: 20px;
-    flex-shrink: 0;
-    margin-top: 1px;
 }
 
 .alert-content {
     flex: 1;
     min-width: 0;
+}
+
+.alert-title-wrapper:empty {
+    display: none;
 }
 
 .alert-title {
@@ -113,6 +139,20 @@ displayClass = match visible { true -> "flin-alert " ++ variantClass, _ -> "flin
 .alert-message {
     font-size: var(--flin-text-sm);
     line-height: 1.5;
+}
+
+.alert-message:empty {
+    display: none;
+}
+
+.alert-actions {
+    display: flex;
+    gap: var(--flin-space-2);
+    margin-top: var(--flin-space-3);
+}
+
+.alert-actions:empty {
+    display: none;
 }
 
 .alert-dismiss {

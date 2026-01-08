@@ -1,11 +1,13 @@
 // FlinUI Card Component
 // A versatile container for grouping related content
+// Now with slot support for header, body, and footer sections
 
 // Props with defaults
 padding = props.padding || "md"
 shadow = props.shadow || "md"
 radius = props.radius || "lg"
 hoverable = props.hoverable || false
+variant = props.variant || "default"
 
 // Compute padding value based on size
 computedPadding = match padding {
@@ -23,6 +25,7 @@ computedShadow = match shadow {
     "sm" -> "var(--flin-shadow-sm)"
     "md" -> "var(--flin-shadow-md)"
     "lg" -> "var(--flin-shadow-lg)"
+    "xl" -> "var(--flin-shadow-xl)"
     _ -> "var(--flin-shadow-md)"
 }
 
@@ -37,9 +40,29 @@ computedRadius = match radius {
     _ -> "var(--flin-radius-lg)"
 }
 
-<div class="flin-card {if hoverable { 'flin-card--hoverable' }}"
+// Build class list
+hoverClass = match hoverable { true -> " flin-card--hoverable", _ -> "" }
+variantClass = match variant {
+    "outlined" -> " flin-card--outlined"
+    "elevated" -> " flin-card--elevated"
+    "filled" -> " flin-card--filled"
+    _ -> ""
+}
+
+<div class={"flin-card" ++ hoverClass ++ variantClass}
      style="--card-padding: {computedPadding}; --card-shadow: {computedShadow}; --card-radius: {computedRadius};">
-    {children}
+    <div class="flin-card__header">
+        <slot name="header" />
+    </div>
+    <div class="flin-card__media">
+        <slot name="media" />
+    </div>
+    <div class="flin-card__body">
+        <slot />
+    </div>
+    <div class="flin-card__footer">
+        <slot name="footer" />
+    </div>
 </div>
 
 <style scoped>
@@ -48,13 +71,83 @@ computedRadius = match radius {
     border: 1px solid var(--flin-neutral-200);
     border-radius: var(--card-radius);
     box-shadow: var(--card-shadow);
-    padding: var(--card-padding);
     transition: box-shadow var(--flin-transition-normal),
                 transform var(--flin-transition-normal),
                 border-color var(--flin-transition-normal);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
+/* Header slot container */
+.flin-card__header {
+    padding: var(--card-padding);
+    padding-bottom: 0;
+}
+
+.flin-card__header:empty {
+    display: none;
+}
+
+/* Media slot container (for images/videos) */
+.flin-card__media {
+    width: 100%;
+}
+
+.flin-card__media:empty {
+    display: none;
+}
+
+.flin-card__media img,
+.flin-card__media video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Body slot container */
+.flin-card__body {
+    padding: var(--card-padding);
+    flex: 1;
+}
+
+.flin-card__body:empty {
+    display: none;
+}
+
+/* Footer slot container */
+.flin-card__footer {
+    padding: var(--card-padding);
+    padding-top: 0;
+    border-top: 1px solid var(--flin-neutral-200);
+    margin-top: auto;
+}
+
+.flin-card__footer:empty {
+    display: none;
+    border-top: none;
+}
+
+/* Variant: Outlined */
+.flin-card--outlined {
+    box-shadow: none;
+    border: 2px solid var(--flin-neutral-200);
+}
+
+/* Variant: Elevated */
+.flin-card--elevated {
+    border: none;
+    box-shadow: var(--flin-shadow-lg);
+}
+
+/* Variant: Filled */
+.flin-card--filled {
+    border: none;
+    box-shadow: none;
+    background-color: var(--flin-neutral-50);
+}
+
+/* Hoverable state */
 .flin-card--hoverable {
     cursor: pointer;
 }
@@ -72,10 +165,19 @@ computedRadius = match radius {
 
 /* Dark theme support */
 [data-theme="dark"] .flin-card {
+    background-color: var(--flin-neutral-800);
     border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .flin-card__footer {
+    border-top-color: var(--flin-neutral-700);
 }
 
 [data-theme="dark"] .flin-card--hoverable:hover {
     border-color: var(--flin-neutral-600);
+}
+
+[data-theme="dark"] .flin-card--filled {
+    background-color: var(--flin-neutral-900);
 }
 </style>

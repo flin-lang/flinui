@@ -1,5 +1,5 @@
 // Toast.flin - FlinUI Toast Component
-// Temporary notifications that appear and auto-dismiss
+// Temporary notifications that appear and auto-dismiss with slot support
 
 // Props with defaults
 variant = props.variant || "info"
@@ -7,6 +7,7 @@ title = props.title || ""
 message = props.message || ""
 duration = props.duration || 5000
 position = props.position || "top-right"
+showIcon = props.icon || true
 onClose = props.onClose
 
 // Internal state
@@ -61,18 +62,30 @@ displayClass = match visible { true -> "flin-toast " ++ variantClass ++ " " ++ p
     aria-live="polite"
 >
     <div class="toast-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
-        </svg>
+        <slot name="icon">
+            {if showIcon}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPath} />
+                </svg>
+            {/if}
+        </slot>
     </div>
 
     <div class="toast-content">
-        {if title != ""}
-            <div class="toast-title">{title}</div>
-        {/if}
-        {if message != ""}
-            <div class="toast-message">{message}</div>
-        {/if}
+        <div class="toast-title">
+            <slot name="title">
+                {if title != ""}{title}{/if}
+            </slot>
+        </div>
+        <div class="toast-message">
+            <slot>
+                {if message != ""}{message}{/if}
+            </slot>
+        </div>
+    </div>
+
+    <div class="toast-actions">
+        <slot name="actions" />
     </div>
 
     <button
@@ -207,6 +220,10 @@ displayClass = match visible { true -> "flin-toast " ++ variantClass ++ " " ++ p
     height: 20px;
 }
 
+.toast-icon:empty {
+    display: none;
+}
+
 .toast-content {
     flex: 1;
     min-width: 0;
@@ -219,10 +236,29 @@ displayClass = match visible { true -> "flin-toast " ++ variantClass ++ " " ++ p
     margin-bottom: var(--flin-space-1);
 }
 
+.toast-title:empty {
+    display: none;
+}
+
 .toast-message {
     font-size: var(--flin-text-sm);
     color: var(--flin-fg-muted);
     line-height: 1.5;
+}
+
+.toast-message:empty {
+    display: none;
+}
+
+.toast-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--flin-space-2);
+    flex-shrink: 0;
+}
+
+.toast-actions:empty {
+    display: none;
 }
 
 .toast-close {

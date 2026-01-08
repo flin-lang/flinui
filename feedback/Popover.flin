@@ -1,10 +1,11 @@
 // Popover.flin - FlinUI Popover Component
-// A floating panel that appears on click or hover near a trigger element
+// A floating panel that appears on click or hover near a trigger element with slot support
 
 // Props with defaults
 open = props.open || false
 position = props.position || "bottom"
 trigger = props.trigger || "click"
+showArrow = props.arrow || true
 onClose = props.onClose
 
 // Internal state
@@ -67,7 +68,7 @@ exitingClass = match isExiting { true -> " popover-exiting", _ -> "" }
         class="popover-trigger"
         click={handleToggle}
     >
-        {children}
+        <slot name="trigger" />
     </div>
 
     {if isVisible}
@@ -78,9 +79,17 @@ exitingClass = match isExiting { true -> " popover-exiting", _ -> "" }
             tabindex="-1"
             keydown={handleKeyDown}
         >
-            <div class="popover-arrow"></div>
+            {if showArrow}
+                <div class="popover-arrow"></div>
+            {/if}
+            <div class="popover-header">
+                <slot name="header" />
+            </div>
             <div class="popover-content">
-                Popover content
+                <slot />
+            </div>
+            <div class="popover-footer">
+                <slot name="footer" />
             </div>
         </div>
 
@@ -215,12 +224,43 @@ exitingClass = match isExiting { true -> " popover-exiting", _ -> "" }
     border-top: none;
 }
 
+/* Header */
+.popover-header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    font-weight: 600;
+    font-size: var(--flin-text-sm);
+}
+
+.popover-header:empty {
+    display: none;
+    border-bottom: none;
+}
+
 /* Content */
 .popover-content {
     padding: var(--flin-space-4);
     font-size: var(--flin-text-sm);
     line-height: 1.5;
     color: var(--flin-fg);
+}
+
+.popover-content:empty {
+    display: none;
+}
+
+/* Footer */
+.popover-footer {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--flin-space-2);
+}
+
+.popover-footer:empty {
+    display: none;
+    border-top: none;
 }
 
 /* Focus styling */
@@ -237,5 +277,13 @@ exitingClass = match isExiting { true -> " popover-exiting", _ -> "" }
 [data-theme="dark"] .popover-arrow {
     background-color: var(--flin-neutral-800);
     border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .popover-header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .popover-footer {
+    border-top-color: var(--flin-neutral-700);
 }
 </style>

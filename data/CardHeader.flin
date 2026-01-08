@@ -1,27 +1,38 @@
 // FlinUI CardHeader Component
-// Header section for Card component with title, subtitle, and action slot
+// Header section for Card component with title, subtitle, avatar and action slots
 
 // Props with defaults
 title = props.title || ""
 subtitle = props.subtitle || ""
+size = props.size || "md"
 
-<div class="flin-card-header">
-    <div class="flin-card-header__content">
-        {if title != ""}
-            <h3 class="flin-card-header__title">{title}</h3>
-        {/if}
-        {if subtitle != ""}
-            <p class="flin-card-header__subtitle">{subtitle}</p>
-        {/if}
-        {if title == "" && subtitle == ""}
-            {children}
-        {/if}
+// Size-based styling
+titleClass = match size {
+    "sm" -> "flin-card-header--sm"
+    "lg" -> "flin-card-header--lg"
+    _ -> ""
+}
+
+<div class={"flin-card-header " ++ titleClass}>
+    <div class="flin-card-header__avatar">
+        <slot name="avatar" />
     </div>
-    {if props.action}
-        <div class="flin-card-header__action">
-            {props.action}
-        </div>
-    {/if}
+    <div class="flin-card-header__content">
+        <h3 class="flin-card-header__title">
+            <slot name="title">
+                {if title != ""}{title}{/if}
+            </slot>
+        </h3>
+        <p class="flin-card-header__subtitle">
+            <slot name="subtitle">
+                {if subtitle != ""}{subtitle}{/if}
+            </slot>
+        </p>
+        <slot />
+    </div>
+    <div class="flin-card-header__actions">
+        <slot name="actions" />
+    </div>
 </div>
 
 <style scoped>
@@ -29,10 +40,18 @@ subtitle = props.subtitle || ""
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--flin-space-4);
+    gap: var(--flin-space-3);
     padding-bottom: var(--flin-space-4);
     border-bottom: 1px solid var(--flin-neutral-200);
     margin-bottom: var(--flin-space-4);
+}
+
+.flin-card-header__avatar {
+    flex-shrink: 0;
+}
+
+.flin-card-header__avatar:empty {
+    display: none;
 }
 
 .flin-card-header__content {
@@ -48,6 +67,10 @@ subtitle = props.subtitle || ""
     line-height: var(--flin-leading-snug);
 }
 
+.flin-card-header__title:empty {
+    display: none;
+}
+
 .flin-card-header__subtitle {
     font-size: var(--flin-text-sm);
     color: var(--flin-fg-muted);
@@ -55,11 +78,36 @@ subtitle = props.subtitle || ""
     line-height: var(--flin-leading-normal);
 }
 
-.flin-card-header__action {
+.flin-card-header__subtitle:empty {
+    display: none;
+}
+
+.flin-card-header__actions {
     flex-shrink: 0;
     display: flex;
     align-items: center;
     gap: var(--flin-space-2);
+}
+
+.flin-card-header__actions:empty {
+    display: none;
+}
+
+/* Size variants */
+.flin-card-header--sm .flin-card-header__title {
+    font-size: var(--flin-text-base);
+}
+
+.flin-card-header--sm .flin-card-header__subtitle {
+    font-size: var(--flin-text-xs);
+}
+
+.flin-card-header--lg .flin-card-header__title {
+    font-size: var(--flin-text-xl);
+}
+
+.flin-card-header--lg .flin-card-header__subtitle {
+    font-size: var(--flin-text-base);
 }
 
 /* Dark theme support */

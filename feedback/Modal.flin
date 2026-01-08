@@ -1,5 +1,5 @@
 // Modal.flin - FlinUI Modal Component
-// A dialog overlay for important content or user interactions
+// A dialog overlay with slots for header, body, and footer
 
 // Props with defaults
 open = props.open || false
@@ -66,33 +66,50 @@ displayClass = match open { true -> "flin-modal-container", _ -> "flin-modal-con
         tabindex="-1"
         keydown={handleKeyDown}
     >
-        {if title != "" || closable}
-            <div class="modal-header">
-                {if title != ""}
-                    <h2 id="modal-title" class="modal-title">{title}</h2>
-                {/if}
-                {if closable}
-                    <button
-                        class="modal-close"
-                        click={handleClose}
-                        aria-label="Close modal"
-                        type="button"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                {/if}
+        <div class="modal-header">
+            <div class="modal-header__content">
+                <slot name="header">
+                    {if title != ""}
+                        <h2 id="modal-title" class="modal-title">{title}</h2>
+                    {/if}
+                </slot>
             </div>
-        {/if}
+            {if closable}
+                <button
+                    class="modal-close"
+                    click={handleClose}
+                    aria-label="Close modal"
+                    type="button"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            {/if}
+        </div>
 
-        <div class="modal-content">
-            {children}
+        <div class="modal-body">
+            <slot />
+        </div>
+
+        <div class="modal-footer">
+            <slot name="footer" />
         </div>
     </div>
 </div>
 
 <style scoped>
+/* Container */
+.flin-modal-container {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+}
+
+.flin-modal-container--hidden {
+    display: none;
+}
+
 /* Backdrop */
 .flin-modal-backdrop {
     position: fixed;
@@ -104,12 +121,8 @@ displayClass = match open { true -> "flin-modal-container", _ -> "flin-modal-con
 }
 
 @keyframes backdropFadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .modal-backdrop-closing {
@@ -117,9 +130,7 @@ displayClass = match open { true -> "flin-modal-container", _ -> "flin-modal-con
 }
 
 @keyframes backdropFadeOut {
-    to {
-        opacity: 0;
-    }
+    to { opacity: 0; }
 }
 
 /* Modal */
@@ -161,26 +172,10 @@ displayClass = match open { true -> "flin-modal-container", _ -> "flin-modal-con
 }
 
 /* Size variants */
-.modal-sm {
-    width: 100%;
-    max-width: 400px;
-}
-
-.modal-md {
-    width: 100%;
-    max-width: 560px;
-}
-
-.modal-lg {
-    width: 100%;
-    max-width: 720px;
-}
-
-.modal-xl {
-    width: 100%;
-    max-width: 960px;
-}
-
+.modal-sm { width: 100%; max-width: 400px; }
+.modal-md { width: 100%; max-width: 560px; }
+.modal-lg { width: 100%; max-width: 720px; }
+.modal-xl { width: 100%; max-width: 960px; }
 .modal-full {
     width: calc(100vw - var(--flin-space-8));
     max-width: none;
@@ -188,7 +183,7 @@ displayClass = match open { true -> "flin-modal-container", _ -> "flin-modal-con
     max-height: none;
 }
 
-/* Header */
+/* Header with slot support */
 .modal-header {
     display: flex;
     align-items: center;
@@ -196,6 +191,15 @@ displayClass = match open { true -> "flin-modal-container", _ -> "flin-modal-con
     padding: var(--flin-space-4) var(--flin-space-6);
     border-bottom: 1px solid var(--flin-neutral-200);
     flex-shrink: 0;
+}
+
+.modal-header__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.modal-header__content:empty {
+    display: none;
 }
 
 .modal-title {
@@ -217,6 +221,7 @@ displayClass = match open { true -> "flin-modal-container", _ -> "flin-modal-con
     cursor: pointer;
     color: var(--flin-fg-muted);
     transition: color var(--flin-transition-fast), background-color var(--flin-transition-fast);
+    margin-left: var(--flin-space-2);
 }
 
 .modal-close:hover {
@@ -229,10 +234,30 @@ displayClass = match open { true -> "flin-modal-container", _ -> "flin-modal-con
     height: 20px;
 }
 
-/* Content */
-.modal-content {
+/* Body with slot support */
+.modal-body {
     overflow-y: auto;
     flex: 1;
+    padding: var(--flin-space-6);
+}
+
+.modal-body:empty {
+    display: none;
+}
+
+/* Footer with slot support */
+.modal-footer {
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-top: 1px solid var(--flin-neutral-200);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--flin-space-3);
+    flex-shrink: 0;
+}
+
+.modal-footer:empty {
+    display: none;
+    border-top: none;
 }
 
 /* Focus trap visual indicator */
@@ -250,6 +275,14 @@ displayClass = match open { true -> "flin-modal-container", _ -> "flin-modal-con
     .modal-header {
         padding: var(--flin-space-3) var(--flin-space-4);
     }
+
+    .modal-body {
+        padding: var(--flin-space-4);
+    }
+
+    .modal-footer {
+        padding: var(--flin-space-3) var(--flin-space-4);
+    }
 }
 
 /* Dark theme */
@@ -260,6 +293,10 @@ displayClass = match open { true -> "flin-modal-container", _ -> "flin-modal-con
 
 [data-theme="dark"] .modal-header {
     border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .modal-footer {
+    border-top-color: var(--flin-neutral-700);
 }
 
 [data-theme="dark"] .modal-close:hover {

@@ -1,5 +1,5 @@
 // HoverCard.flin - FlinUI Rich Preview Card Component
-// A floating card that shows additional content when hovering over a trigger
+// A floating card that shows additional content when hovering over a trigger with slot support
 
 // Props with defaults
 openDelay = props.openDelay || 200
@@ -8,6 +8,7 @@ position = props.position || "bottom"
 align = props.align || "center"
 disabled = props.disabled || false
 closeOnContentClick = props.closeOnContentClick || false
+showArrow = props.arrow || true
 width = props.width || 320
 
 // State
@@ -116,7 +117,7 @@ widthStyle = "width: " ++ width ++ "px"
         tabindex={tabindexValue}
         aria-haspopup="dialog"
     >
-        {children}
+        <slot name="trigger" />
     </div>
 
     {if isOpen}
@@ -129,12 +130,24 @@ widthStyle = "width: " ++ width ++ "px"
             role="dialog"
             aria-modal="false"
         >
-            <div class="hover-card-arrow"></div>
+            {if showArrow}
+                <div class="hover-card-arrow"></div>
+            {/if}
+
+            <div class="hover-card-header">
+                <slot name="header" />
+            </div>
 
             <div class="hover-card-content">
-                <div class="hover-card-default">
-                    Hover card content
-                </div>
+                <slot>
+                    <div class="hover-card-default">
+                        Hover card content
+                    </div>
+                </slot>
+            </div>
+
+            <div class="hover-card-footer">
+                <slot name="footer" />
             </div>
         </div>
     {/if}
@@ -364,6 +377,19 @@ widthStyle = "width: " ++ width ++ "px"
     border-top: none;
 }
 
+/* Header */
+.hover-card-header {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-bottom: 1px solid var(--flin-neutral-200);
+    font-weight: 600;
+    font-size: var(--flin-text-sm);
+}
+
+.hover-card-header:empty {
+    display: none;
+    border-bottom: none;
+}
+
 /* Content */
 .hover-card-content {
     position: relative;
@@ -371,11 +397,29 @@ widthStyle = "width: " ++ width ++ "px"
     border-radius: var(--flin-radius-lg);
 }
 
+.hover-card-content:empty {
+    display: none;
+}
+
 .hover-card-default {
     padding: var(--flin-space-4);
     text-align: center;
     color: var(--flin-fg-muted);
     font-size: var(--flin-text-sm);
+}
+
+/* Footer */
+.hover-card-footer {
+    padding: var(--flin-space-3) var(--flin-space-4);
+    border-top: 1px solid var(--flin-neutral-200);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--flin-space-2);
+}
+
+.hover-card-footer:empty {
+    display: none;
+    border-top: none;
 }
 
 /* Dark theme */
@@ -387,6 +431,14 @@ widthStyle = "width: " ++ width ++ "px"
 [data-theme="dark"] .hover-card-arrow {
     background-color: var(--flin-neutral-800);
     border-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .hover-card-header {
+    border-bottom-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .hover-card-footer {
+    border-top-color: var(--flin-neutral-700);
 }
 
 /* Responsive */

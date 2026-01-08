@@ -1,10 +1,11 @@
 // Tooltip.flin - FlinUI Tooltip Component
-// A small informational popup that appears on hover
+// A small informational popup that appears on hover with slot support
 
 // Props with defaults
 content = props.content || ""
 position = props.position || "top"
 delay = props.delay || 200
+showArrow = props.arrow || true
 
 // Internal state
 isVisible = false
@@ -45,19 +46,23 @@ positionClass = match position {
     blur={handleBlur}
 >
     <div class="tooltip-trigger" aria-describedby="tooltip-content">
-        {children}
+        <slot />
     </div>
 
-    {if isVisible && content != ""}
+    {if isVisible}
         <div
             id="tooltip-content"
             class={"flin-tooltip " ++ positionClass}
             role="tooltip"
             aria-hidden={!isVisible}
         >
-            <div class="tooltip-arrow"></div>
+            {if showArrow}
+                <div class="tooltip-arrow"></div>
+            {/if}
             <div class="tooltip-content">
-                {content}
+                <slot name="content">
+                    {if content != ""}{content}{/if}
+                </slot>
             </div>
         </div>
     {/if}

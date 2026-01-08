@@ -1,11 +1,12 @@
 // Drawer.flin - FlinUI Drawer Component
-// A slide-out panel from any edge of the screen
+// A slide-out panel from any edge of the screen with slot support
 
 // Props with defaults
 open = props.open || false
 position = props.position || "right"
 size = props.size || "md"
 title = props.title || ""
+closable = props.closable || true
 onClose = props.onClose
 
 // Internal state for animations
@@ -69,23 +70,33 @@ displayClass = match open { true -> "flin-drawer-container", _ -> "flin-drawer-c
         keydown={handleKeyDown}
     >
         <div class="drawer-header">
-            {if title != ""}
-                <h2 id="drawer-title" class="drawer-title">{title}</h2>
+            <div class="drawer-header__content">
+                <slot name="header">
+                    {if title != ""}
+                        <h2 id="drawer-title" class="drawer-title">{title}</h2>
+                    {/if}
+                </slot>
+            </div>
+            {if closable}
+                <button
+                    class="drawer-close"
+                    click={handleClose}
+                    aria-label="Close drawer"
+                    type="button"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             {/if}
-            <button
-                class="drawer-close"
-                click={handleClose}
-                aria-label="Close drawer"
-                type="button"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
         </div>
 
         <div class="drawer-content">
-            {children}
+            <slot />
+        </div>
+
+        <div class="drawer-footer">
+            <slot name="footer" />
         </div>
     </div>
 </div>
@@ -304,6 +315,15 @@ displayClass = match open { true -> "flin-drawer-container", _ -> "flin-drawer-c
     flex-shrink: 0;
 }
 
+.drawer-header__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.drawer-header__content:empty {
+    display: none;
+}
+
 .drawer-title {
     margin: 0;
     font-size: var(--flin-text-lg);
@@ -348,6 +368,25 @@ displayClass = match open { true -> "flin-drawer-container", _ -> "flin-drawer-c
     -webkit-overflow-scrolling: touch;
 }
 
+.drawer-content:empty {
+    display: none;
+}
+
+/* Footer */
+.drawer-footer {
+    padding: var(--flin-space-4) var(--flin-space-6);
+    border-top: 1px solid var(--flin-neutral-200);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--flin-space-3);
+    flex-shrink: 0;
+}
+
+.drawer-footer:empty {
+    display: none;
+    border-top: none;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 640px) {
     .drawer-left.drawer-md,
@@ -372,5 +411,9 @@ displayClass = match open { true -> "flin-drawer-container", _ -> "flin-drawer-c
 
 [data-theme="dark"] .drawer-close:hover {
     background-color: var(--flin-neutral-700);
+}
+
+[data-theme="dark"] .drawer-footer {
+    border-top-color: var(--flin-neutral-700);
 }
 </style>

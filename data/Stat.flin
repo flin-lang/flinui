@@ -1,5 +1,5 @@
 // FlinUI Stat Component
-// Statistics display with label, value, help text, and trend indicator
+// Statistics display with label, value, help text, and trend indicator with slot support
 
 // Props with defaults
 label = props.label || ""
@@ -13,32 +13,46 @@ trendDown = trend == "down"
 hasTrend = trendUp || trendDown
 
 <div class="flin-stat">
-    {if label != ""}
-        <dt class="flin-stat__label">{label}</dt>
-    {/if}
+    <dt class="flin-stat__label">
+        <slot name="label">
+            {if label != ""}{label}{/if}
+        </slot>
+    </dt>
 
     <dd class="flin-stat__value">
-        <span class="flin-stat__number">{value}</span>
+        <span class="flin-stat__number">
+            <slot name="value">{value}</slot>
+        </span>
 
-        {if hasTrend}
-            <span class="flin-stat__trend {if trendUp { 'flin-stat__trend--up' }} {if trendDown { 'flin-stat__trend--down' }}">
-                {if trendUp}
-                    <svg class="flin-stat__trend-icon" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                    </svg>
+        <span class="flin-stat__trend-wrapper">
+            <slot name="trend">
+                {if hasTrend}
+                    <span class="flin-stat__trend {if trendUp { 'flin-stat__trend--up' }} {if trendDown { 'flin-stat__trend--down' }}">
+                        {if trendUp}
+                            <svg class="flin-stat__trend-icon" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        {/if}
+                        {if trendDown}
+                            <svg class="flin-stat__trend-icon" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        {/if}
+                    </span>
                 {/if}
-                {if trendDown}
-                    <svg class="flin-stat__trend-icon" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                {/if}
-            </span>
-        {/if}
+            </slot>
+        </span>
     </dd>
 
-    {if helpText != ""}
-        <p class="flin-stat__help">{helpText}</p>
-    {/if}
+    <p class="flin-stat__help">
+        <slot name="help">
+            {if helpText != ""}{helpText}{/if}
+        </slot>
+    </p>
+
+    <div class="flin-stat__extra">
+        <slot />
+    </div>
 </div>
 
 <style scoped>
@@ -53,6 +67,10 @@ hasTrend = trendUp || trendDown
     font-weight: var(--flin-font-medium);
     color: var(--flin-fg-muted);
     margin: 0;
+}
+
+.flin-stat__label:empty {
+    display: none;
 }
 
 .flin-stat__value {
@@ -93,11 +111,27 @@ hasTrend = trendUp || trendDown
     height: var(--flin-icon-sm);
 }
 
+.flin-stat__trend-wrapper:empty {
+    display: none;
+}
+
 .flin-stat__help {
     font-size: var(--flin-text-sm);
     color: var(--flin-fg-muted);
     margin: var(--flin-space-1) 0 0 0;
     line-height: 1.4;
+}
+
+.flin-stat__help:empty {
+    display: none;
+}
+
+.flin-stat__extra {
+    margin-top: var(--flin-space-2);
+}
+
+.flin-stat__extra:empty {
+    display: none;
 }
 
 /* Dark theme support */
