@@ -1,0 +1,367 @@
+// ============================================================================
+// ProductCardList — FlinUI PRO E-commerce
+// List view layout with larger images and detailed product info
+// ============================================================================
+// Props:
+//   products: array of product objects (required)
+//     Each product: { id, name, image, price, currency, description, rating, reviews, inStock }
+//   showDescription: boolean (default: true)
+//   showRating: boolean (default: true)
+//   descriptionLength: number (default: 150)
+// ============================================================================
+
+products = props.products || []
+showDescription = props.showDescription != false
+showRating = props.showRating != false
+descriptionLength = props.descriptionLength || 150
+
+function truncateText(text, maxLength) {
+    if text == none || text.len <= maxLength {
+        return text
+    }
+    return text.substring(0, maxLength) + "..."
+}
+
+function renderStars(rating) {
+    stars = []
+    fullStars = Math.floor(rating)
+    hasHalf = rating % 1 >= 0.5
+
+    for i in range(0, 5) {
+        if i < fullStars {
+            stars.push("★")
+        } else if i == fullStars && hasHalf {
+            stars.push("⯨")
+        } else {
+            stars.push("☆")
+        }
+    }
+
+    return stars.join("")
+}
+
+function handleProductClick(product) {
+    if props.onProductClick != none {
+        props.onProductClick(product)
+    }
+}
+
+function handleAddToCart(product) {
+    if props.onAddToCart != none {
+        props.onAddToCart(product)
+    }
+}
+
+function handleQuickView(product) {
+    if props.onQuickView != none {
+        props.onQuickView(product)
+    }
+}
+
+<div class="product-card-list">
+    <style>
+        .product-card-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-4);
+        }
+
+        .product-list-item {
+            display: flex;
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-lg);
+            overflow: hidden;
+            transition: all var(--flin-transition-normal);
+            cursor: pointer;
+        }
+
+        .product-list-item:hover {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateX(4px);
+        }
+
+        .list-item-image-container {
+            flex-shrink: 0;
+            width: 280px;
+            height: 280px;
+            overflow: hidden;
+            background: var(--flin-bg-deep);
+            position: relative;
+        }
+
+        .list-item-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--flin-transition-slow);
+        }
+
+        .product-list-item:hover .list-item-image {
+            transform: scale(1.05);
+        }
+
+        .stock-badge {
+            position: absolute;
+            top: var(--flin-space-3);
+            left: var(--flin-space-3);
+            padding: var(--flin-space-1) var(--flin-space-3);
+            border-radius: var(--flin-radius-badge);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+            text-transform: uppercase;
+        }
+
+        .stock-badge.in-stock {
+            background: var(--flin-success);
+            color: white;
+        }
+
+        .stock-badge.out-of-stock {
+            background: var(--flin-danger);
+            color: white;
+        }
+
+        .stock-badge.low-stock {
+            background: var(--flin-warning);
+            color: var(--flin-bg-deep);
+        }
+
+        .list-item-content {
+            flex: 1;
+            padding: var(--flin-space-6);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-width: 0;
+        }
+
+        .list-item-header {
+            margin-bottom: var(--flin-space-3);
+        }
+
+        .list-item-name {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .list-item-rating {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            margin-bottom: var(--flin-space-3);
+        }
+
+        .stars {
+            color: var(--flin-accent-gold);
+            font-size: var(--flin-text-base);
+            letter-spacing: 2px;
+        }
+
+        .rating-value {
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        .reviews-count {
+            color: var(--flin-text-muted);
+            font-size: var(--flin-text-sm);
+        }
+
+        .list-item-description {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .list-item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .list-item-price {
+            font-size: var(--flin-text-3xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-accent-gold);
+        }
+
+        .list-item-actions {
+            display: flex;
+            gap: var(--flin-space-3);
+        }
+
+        .action-btn {
+            padding: var(--flin-space-3) var(--flin-space-6);
+            border-radius: var(--flin-radius-button);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            border: none;
+        }
+
+        .add-to-cart-btn {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-deep);
+        }
+
+        .add-to-cart-btn:hover {
+            background: var(--flin-accent-gold-bright);
+            box-shadow: var(--flin-shadow-glow-gold);
+        }
+
+        .add-to-cart-btn:disabled {
+            background: var(--flin-bg-hover);
+            color: var(--flin-text-muted);
+            cursor: not-allowed;
+        }
+
+        .quick-view-btn {
+            background: var(--flin-bg-elevated);
+            color: var(--flin-text-primary);
+            border: 1px solid var(--flin-border-medium);
+        }
+
+        .quick-view-btn:hover {
+            background: var(--flin-bg-hover);
+            border-color: var(--flin-accent-gold);
+            color: var(--flin-accent-gold);
+        }
+
+        .empty-state {
+            padding: var(--flin-space-12);
+            text-align: center;
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-lg);
+            color: var(--flin-text-muted);
+        }
+
+        @media (max-width: 1024px) {
+            .list-item-image-container {
+                width: 220px;
+                height: 220px;
+            }
+
+            .list-item-name {
+                font-size: var(--flin-text-xl);
+            }
+
+            .list-item-price {
+                font-size: var(--flin-text-2xl);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .product-list-item {
+                flex-direction: column;
+            }
+
+            .list-item-image-container {
+                width: 100%;
+                height: 240px;
+            }
+
+            .list-item-content {
+                padding: var(--flin-space-4);
+            }
+
+            .list-item-footer {
+                flex-direction: column;
+                gap: var(--flin-space-3);
+                align-items: stretch;
+            }
+
+            .list-item-actions {
+                width: 100%;
+            }
+
+            .action-btn {
+                flex: 1;
+            }
+        }
+    </style>
+
+    {if products.len > 0}
+        {for product in products}
+            <div class="product-list-item" click={() => handleProductClick(product)}>
+                <div class="list-item-image-container">
+                    <img src={product.image} alt={product.name} class="list-item-image" />
+                    {if product.inStock != none}
+                        {if product.inStock == true}
+                            <div class="stock-badge in-stock">In Stock</div>
+                        {else if product.inStock == "low"}
+                            <div class="stock-badge low-stock">Low Stock</div>
+                        {else}
+                            <div class="stock-badge out-of-stock">Out of Stock</div>
+                        {/if}
+                    {/if}
+                </div>
+
+                <div class="list-item-content">
+                    <div class="list-item-header">
+                        <h3 class="list-item-name">{product.name}</h3>
+
+                        {if showRating && product.rating != none}
+                            <div class="list-item-rating">
+                                <span class="stars">{renderStars(product.rating)}</span>
+                                <span class="rating-value">{product.rating}</span>
+                                {if product.reviews != none}
+                                    <span class="reviews-count">({product.reviews} reviews)</span>
+                                {/if}
+                            </div>
+                        {/if}
+
+                        {if showDescription && product.description != none}
+                            <p class="list-item-description">
+                                {truncateText(product.description, descriptionLength)}
+                            </p>
+                        {/if}
+                    </div>
+
+                    <div class="list-item-footer">
+                        <div class="list-item-price">
+                            {product.currency || "$"}{product.price}
+                        </div>
+                        <div class="list-item-actions">
+                            <button
+                                class="action-btn quick-view-btn"
+                                click={(e) => {
+                                    e.stopPropagation()
+                                    handleQuickView(product)
+                                }}
+                            >
+                                Quick View
+                            </button>
+                            <button
+                                class="action-btn add-to-cart-btn"
+                                disabled={product.inStock == false}
+                                click={(e) => {
+                                    e.stopPropagation()
+                                    handleAddToCart(product)
+                                }}
+                            >
+                                {if product.inStock == false}
+                                    Out of Stock
+                                {else}
+                                    Add to Cart
+                                {/if}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {/for}
+    {else}
+        <div class="empty-state">
+            <p>No products available.</p>
+        </div>
+    {/if}
+</div>

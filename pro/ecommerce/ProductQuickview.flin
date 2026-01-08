@@ -1,0 +1,567 @@
+// ProductQuickview.flin
+// FlinUI PRO E-Commerce Component
+//
+// Props:
+//   - isOpen: Modal open state (boolean)
+//   - onClose: Close handler (function or none)
+//   - product: Product object with all details (object or none)
+//   - onAddToCart: Add to cart handler (function or none)
+//   - onViewFullDetails: View full product page handler (function or none)
+
+// Extract props with defaults
+isOpen = props.isOpen || false
+onClose = props.onClose || none
+product = props.product || none
+onAddToCart = props.onAddToCart || none
+onViewFullDetails = props.onViewFullDetails || none
+
+// State
+selectedQuantity = 1
+selectedVariant = none
+showAddedConfirmation = false
+
+// Computed values
+hasProduct = product != none
+currency = hasProduct ? (product.currency || "USD") : "USD"
+price = hasProduct ? product.price : 0
+originalPrice = hasProduct ? product.originalPrice : none
+hasDiscount = originalPrice != none && originalPrice > price
+images = hasProduct ? (product.images || [{ url: product.image || "/placeholder.png", alt: product.title }]) : []
+variants = hasProduct ? (product.variants || []) : []
+hasVariants = variants.length > 0
+
+// Format currency
+formatPrice = fn(amount) {
+    if currency == "USD" {
+        return "$" + amount.toFixed(2)
+    }
+    if currency == "EUR" {
+        return "€" + amount.toFixed(2)
+    }
+    if currency == "GBP" {
+        return "£" + amount.toFixed(2)
+    }
+    return currency + " " + amount.toFixed(2)
+}
+
+// Handlers
+handleClose = fn() {
+    if onClose != none {
+        selectedQuantity = 1
+        selectedVariant = none
+        showAddedConfirmation = false
+        onClose()
+    }
+}
+
+handleBackdropClick = fn(event) {
+    if event.target == event.currentTarget {
+        handleClose()
+    }
+}
+
+handleAddToCart = fn() {
+    if onAddToCart != none && hasProduct {
+        cartData = {
+            product: product,
+            quantity: selectedQuantity,
+            variant: selectedVariant
+        }
+        onAddToCart(cartData)
+        showAddedConfirmation = true
+
+        setTimeout(fn() {
+            showAddedConfirmation = false
+            handleClose()
+        }, 1500)
+    }
+}
+
+handleViewFullDetails = fn() {
+    if onViewFullDetails != none && hasProduct {
+        onViewFullDetails(product)
+        handleClose()
+    }
+}
+
+incrementQuantity = fn() {
+    selectedQuantity = selectedQuantity + 1
+}
+
+decrementQuantity = fn() {
+    if selectedQuantity > 1 {
+        selectedQuantity = selectedQuantity - 1
+    }
+}
+
+selectVariant = fn(variant) {
+    selectedVariant = variant
+}
+
+// Keyboard handling
+handleKeyDown = fn(event) {
+    if event.key == "Escape" {
+        handleClose()
+    }
+}
+
+onMount {
+    if isOpen {
+        document.addEventListener("keydown", handleKeyDown)
+    }
+}
+
+onDestroy {
+    document.removeEventListener("keydown", handleKeyDown)
+}
+
+{if isOpen && hasProduct}
+    <div class="flin-quickview-overlay" click={handleBackdropClick}>
+        <style>
+            .flin-quickview-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: var(--flin-z-modal);
+                padding: var(--flin-space-4);
+                animation: fadeIn 0.2s ease-out;
+                backdrop-filter: blur(4px);
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+                to {
+                    opacity: 1;
+                }
+            }
+
+            .quickview-modal {
+                background: var(--flin-bg-surface);
+                border: 1px solid var(--flin-border-medium);
+                border-radius: var(--flin-radius-modal);
+                max-width: 1000px;
+                width: 100%;
+                max-height: 90vh;
+                overflow-y: auto;
+                animation: slideUp 0.3s ease-out;
+                box-shadow: var(--flin-shadow-2xl);
+            }
+
+            @keyframes slideUp {
+                from {
+                    transform: translateY(40px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+
+            /* Header */
+            .quickview-header {
+                position: sticky;
+                top: 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: var(--flin-space-5) var(--flin-space-6);
+                border-bottom: 1px solid var(--flin-border-subtle);
+                background: var(--flin-bg-surface);
+                z-index: var(--flin-z-10);
+            }
+
+            .quickview-title {
+                font-size: var(--flin-text-xl);
+                font-weight: var(--flin-font-semibold);
+                color: var(--flin-text-primary);
+                margin: 0;
+            }
+
+            .close-button {
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: transparent;
+                border: 1px solid var(--flin-border-medium);
+                border-radius: var(--flin-radius-button);
+                color: var(--flin-text-secondary);
+                font-size: var(--flin-text-2xl);
+                cursor: pointer;
+                transition: all var(--flin-transition-normal);
+            }
+
+            .close-button:hover {
+                background: var(--flin-bg-hover);
+                color: var(--flin-text-primary);
+                transform: rotate(90deg);
+            }
+
+            /* Content */
+            .quickview-content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: var(--flin-space-8);
+                padding: var(--flin-space-6);
+            }
+
+            /* Left Column - Gallery */
+            .quickview-gallery {
+                position: sticky;
+                top: var(--flin-space-6);
+                align-self: start;
+            }
+
+            /* Right Column - Details */
+            .quickview-details {
+                display: flex;
+                flex-direction: column;
+                gap: var(--flin-space-5);
+            }
+
+            .product-name {
+                font-size: var(--flin-text-3xl);
+                font-weight: var(--flin-font-bold);
+                color: var(--flin-text-primary);
+                line-height: var(--flin-leading-tight);
+                margin: 0;
+            }
+
+            .product-rating {
+                display: flex;
+                align-items: center;
+                gap: var(--flin-space-2);
+            }
+
+            .rating-stars {
+                color: var(--flin-accent-gold);
+                font-size: var(--flin-text-lg);
+                letter-spacing: 2px;
+            }
+
+            .rating-count {
+                font-size: var(--flin-text-sm);
+                color: var(--flin-text-muted);
+            }
+
+            .price-section {
+                display: flex;
+                align-items: baseline;
+                gap: var(--flin-space-3);
+                padding: var(--flin-space-4) 0;
+                border-top: 1px solid var(--flin-border-subtle);
+                border-bottom: 1px solid var(--flin-border-subtle);
+            }
+
+            .current-price {
+                font-size: var(--flin-text-4xl);
+                font-weight: var(--flin-font-bold);
+                color: var(--flin-accent-gold);
+            }
+
+            .original-price {
+                font-size: var(--flin-text-xl);
+                color: var(--flin-text-muted);
+                text-decoration: line-through;
+            }
+
+            .discount-badge {
+                padding: var(--flin-space-1) var(--flin-space-3);
+                background: var(--flin-accent-emerald);
+                color: var(--flin-text-inverse);
+                border-radius: var(--flin-radius-badge);
+                font-size: var(--flin-text-sm);
+                font-weight: var(--flin-font-semibold);
+            }
+
+            .product-description {
+                font-size: var(--flin-text-base);
+                color: var(--flin-text-secondary);
+                line-height: var(--flin-leading-relaxed);
+            }
+
+            /* Variant Selector */
+            .variant-section {
+                display: flex;
+                flex-direction: column;
+                gap: var(--flin-space-3);
+            }
+
+            .variant-label {
+                font-size: var(--flin-text-sm);
+                font-weight: var(--flin-font-semibold);
+                color: var(--flin-text-primary);
+                text-transform: uppercase;
+                letter-spacing: var(--flin-tracking-wide);
+            }
+
+            /* Quantity Selector */
+            .quantity-section {
+                display: flex;
+                flex-direction: column;
+                gap: var(--flin-space-3);
+            }
+
+            .quantity-selector {
+                display: flex;
+                align-items: center;
+                gap: var(--flin-space-2);
+            }
+
+            .quantity-button {
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: var(--flin-bg-elevated);
+                border: 1px solid var(--flin-border-medium);
+                border-radius: var(--flin-radius-button);
+                color: var(--flin-text-primary);
+                font-size: var(--flin-text-xl);
+                cursor: pointer;
+                transition: all var(--flin-transition-normal);
+            }
+
+            .quantity-button:hover {
+                background: var(--flin-bg-hover);
+                border-color: var(--flin-accent-gold);
+            }
+
+            .quantity-button:active {
+                transform: scale(0.95);
+            }
+
+            .quantity-button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .quantity-value {
+                width: 60px;
+                text-align: center;
+                font-size: var(--flin-text-lg);
+                font-weight: var(--flin-font-semibold);
+                color: var(--flin-text-primary);
+            }
+
+            /* Action Buttons */
+            .action-buttons {
+                display: flex;
+                gap: var(--flin-space-3);
+                margin-top: var(--flin-space-4);
+            }
+
+            .add-to-cart-button {
+                flex: 2;
+                padding: var(--flin-space-4) var(--flin-space-6);
+                background: var(--flin-accent-gold);
+                color: var(--flin-text-inverse);
+                border: none;
+                border-radius: var(--flin-radius-button);
+                font-size: var(--flin-text-lg);
+                font-weight: var(--flin-font-semibold);
+                cursor: pointer;
+                transition: all var(--flin-transition-normal);
+            }
+
+            .add-to-cart-button:hover {
+                background: var(--flin-accent-gold-bright);
+                box-shadow: var(--flin-shadow-glow-gold);
+                transform: translateY(-2px);
+            }
+
+            .add-to-cart-button:active {
+                transform: translateY(0);
+            }
+
+            .add-to-cart-button.added {
+                background: var(--flin-accent-emerald);
+            }
+
+            .view-details-button {
+                flex: 1;
+                padding: var(--flin-space-4) var(--flin-space-6);
+                background: transparent;
+                color: var(--flin-text-primary);
+                border: 1px solid var(--flin-border-medium);
+                border-radius: var(--flin-radius-button);
+                font-size: var(--flin-text-base);
+                font-weight: var(--flin-font-medium);
+                cursor: pointer;
+                transition: all var(--flin-transition-normal);
+            }
+
+            .view-details-button:hover {
+                border-color: var(--flin-accent-gold);
+                color: var(--flin-accent-gold);
+            }
+
+            /* Stock Status */
+            .stock-status {
+                display: flex;
+                align-items: center;
+                gap: var(--flin-space-2);
+                padding: var(--flin-space-3);
+                background: var(--flin-bg-elevated);
+                border-radius: var(--flin-radius-lg);
+                font-size: var(--flin-text-sm);
+                font-weight: var(--flin-font-medium);
+            }
+
+            .stock-status.in-stock {
+                color: var(--flin-accent-emerald);
+            }
+
+            .stock-status.low-stock {
+                color: var(--flin-accent-orange);
+            }
+
+            .stock-status.out-of-stock {
+                color: var(--flin-accent-rose);
+            }
+
+            .stock-indicator {
+                width: 8px;
+                height: 8px;
+                border-radius: var(--flin-radius-full);
+                background: currentColor;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .quickview-content {
+                    grid-template-columns: 1fr;
+                    gap: var(--flin-space-6);
+                }
+
+                .quickview-gallery {
+                    position: static;
+                }
+
+                .product-name {
+                    font-size: var(--flin-text-2xl);
+                }
+
+                .current-price {
+                    font-size: var(--flin-text-3xl);
+                }
+
+                .action-buttons {
+                    flex-direction: column;
+                }
+
+                .add-to-cart-button,
+                .view-details-button {
+                    flex: 1;
+                }
+            }
+        </style>
+
+        <div class="quickview-modal" click={(e) => e.stopPropagation()}>
+            <!-- Header -->
+            <div class="quickview-header">
+                <h2 class="quickview-title">Quick View</h2>
+                <button class="close-button" click={handleClose}>×</button>
+            </div>
+
+            <!-- Content -->
+            <div class="quickview-content">
+                <!-- Left: Gallery -->
+                <div class="quickview-gallery">
+                    <ProductGallery
+                        images={images}
+                        aspectRatio="square"
+                        thumbnailPosition="bottom"
+                        showZoom={true}
+                        showFullscreen={true}
+                    />
+                </div>
+
+                <!-- Right: Details -->
+                <div class="quickview-details">
+                    <h1 class="product-name">{product.title}</h1>
+
+                    {if product.rating && product.rating > 0}
+                        <div class="product-rating">
+                            <span class="rating-stars">★★★★★</span>
+                            {if product.reviewCount}
+                                <span class="rating-count">({product.reviewCount} reviews)</span>
+                            {/if}
+                        </div>
+                    {/if}
+
+                    <div class="price-section">
+                        <span class="current-price">{formatPrice(price)}</span>
+                        {if hasDiscount}
+                            <span class="original-price">{formatPrice(originalPrice)}</span>
+                            <span class="discount-badge">SAVE {math_round((originalPrice - price) / originalPrice * 100)}%</span>
+                        {/if}
+                    </div>
+
+                    {if product.description}
+                        <p class="product-description">{product.description}</p>
+                    {/if}
+
+                    {if hasVariants}
+                        <div class="variant-section">
+                            <label class="variant-label">Select Options</label>
+                            <ProductVariantSelector
+                                variants={variants}
+                                selected={selectedVariant}
+                                onSelect={selectVariant}
+                            />
+                        </div>
+                    {/if}
+
+                    <div class="quantity-section">
+                        <label class="variant-label">Quantity</label>
+                        <div class="quantity-selector">
+                            <button class="quantity-button" click={decrementQuantity} disabled={selectedQuantity <= 1}>−</button>
+                            <span class="quantity-value">{selectedQuantity}</span>
+                            <button class="quantity-button" click={incrementQuantity}>+</button>
+                        </div>
+                    </div>
+
+                    {if product.inStock != false}
+                        <div class="stock-status in-stock">
+                            <span class="stock-indicator"></span>
+                            In Stock - Ready to Ship
+                        </div>
+                    {else}
+                        <div class="stock-status out-of-stock">
+                            <span class="stock-indicator"></span>
+                            Out of Stock
+                        </div>
+                    {/if}
+
+                    <div class="action-buttons">
+                        <button
+                            class="add-to-cart-button {showAddedConfirmation ? 'added' : ''}"
+                            click={handleAddToCart}
+                            disabled={product.inStock == false}
+                        >
+                            {showAddedConfirmation ? "✓ Added to Cart!" : "Add to Cart"}
+                        </button>
+
+                        {if onViewFullDetails != none}
+                            <button class="view-details-button" click={handleViewFullDetails}>
+                                Full Details
+                            </button>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}

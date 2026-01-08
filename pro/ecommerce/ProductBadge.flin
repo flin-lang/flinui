@@ -1,0 +1,181 @@
+// ============================================================================
+// ProductBadge — FlinUI PRO E-commerce
+// Badge component for product labels (Sale, New, Out of Stock, etc.)
+// ============================================================================
+// Props:
+//   variant: "sale" | "new" | "out-of-stock" | "best-seller" | "limited" | "featured" (default: "sale")
+//   text: text (optional) - Custom text (overrides default)
+//   size: "sm" | "md" | "lg" (default: "md")
+//   position: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "none" (default: "top-right")
+//   rounded: bool (default: true)
+// ============================================================================
+
+variant = props.variant || "sale"
+customText = props.text || none
+size = props.size || "md"
+position = props.position || "top-right"
+rounded = props.rounded || true
+
+badgeText = ""
+icon = ""
+
+onMount {
+    if customText != none {
+        badgeText = customText
+    } else {
+        if variant == "sale" {
+            badgeText = "SALE"
+            icon = "🔥"
+        } else if variant == "new" {
+            badgeText = "NEW"
+            icon = "✨"
+        } else if variant == "out-of-stock" {
+            badgeText = "OUT OF STOCK"
+            icon = "⚠️"
+        } else if variant == "best-seller" {
+            badgeText = "BEST SELLER"
+            icon = "⭐"
+        } else if variant == "limited" {
+            badgeText = "LIMITED"
+            icon = "⏰"
+        } else if variant == "featured" {
+            badgeText = "FEATURED"
+            icon = "💎"
+        } else {
+            badgeText = variant.toUpperCase()
+        }
+    }
+}
+
+<div
+    class="product-badge"
+    data-variant={variant}
+    data-size={size}
+    data-position={position}
+    data-rounded={rounded}
+>
+    <style>
+        .product-badge {
+            font-family: var(--flin-font-body);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--flin-space-1);
+            font-weight: var(--flin-font-bold);
+            letter-spacing: var(--flin-tracking-wide);
+            text-transform: uppercase;
+            white-space: nowrap;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+            box-shadow: var(--flin-shadow-md);
+        }
+
+        .product-badge[data-rounded="true"] {
+            border-radius: var(--flin-radius-badge);
+        }
+
+        .product-badge[data-rounded="false"] {
+            border-radius: var(--flin-radius-sm);
+        }
+
+        /* Sizes */
+        .product-badge[data-size="sm"] {
+            font-size: var(--flin-text-2xs);
+            padding: var(--flin-space-1) var(--flin-space-2);
+        }
+
+        .product-badge[data-size="md"] {
+            font-size: var(--flin-text-xs);
+            padding: var(--flin-space-1-5) var(--flin-space-3);
+        }
+
+        .product-badge[data-size="lg"] {
+            font-size: var(--flin-text-sm);
+            padding: var(--flin-space-2) var(--flin-space-4);
+        }
+
+        /* Positioning */
+        .product-badge[data-position="top-left"] {
+            position: absolute;
+            top: var(--flin-space-3);
+            left: var(--flin-space-3);
+        }
+
+        .product-badge[data-position="top-right"] {
+            position: absolute;
+            top: var(--flin-space-3);
+            right: var(--flin-space-3);
+        }
+
+        .product-badge[data-position="bottom-left"] {
+            position: absolute;
+            bottom: var(--flin-space-3);
+            left: var(--flin-space-3);
+        }
+
+        .product-badge[data-position="bottom-right"] {
+            position: absolute;
+            bottom: var(--flin-space-3);
+            right: var(--flin-space-3);
+        }
+
+        .product-badge[data-position="none"] {
+            position: relative;
+        }
+
+        /* Variant Styles */
+        .product-badge[data-variant="sale"] {
+            background: linear-gradient(135deg, #f43f5e 0%, #dc2626 100%);
+            color: #ffffff;
+        }
+
+        .product-badge[data-variant="new"] {
+            background: var(--flin-accent-cyan);
+            color: var(--flin-bg-deep);
+        }
+
+        .product-badge[data-variant="out-of-stock"] {
+            background: var(--flin-bg-elevated);
+            color: var(--flin-text-muted);
+            border: 1px solid var(--flin-border-medium);
+        }
+
+        .product-badge[data-variant="best-seller"] {
+            background: var(--flin-gradient-gold);
+            color: var(--flin-bg-deep);
+        }
+
+        .product-badge[data-variant="limited"] {
+            background: var(--flin-accent-violet);
+            color: #ffffff;
+        }
+
+        .product-badge[data-variant="featured"] {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-deep);
+        }
+
+        .product-badge__icon {
+            font-size: 1em;
+            line-height: 1;
+        }
+
+        .product-badge__text {
+            font-family: var(--flin-font-body);
+            font-weight: var(--flin-font-bold);
+            line-height: 1;
+        }
+
+        /* Hover effect for positioned badges */
+        .product-badge[data-position="top-left"]:hover,
+        .product-badge[data-position="top-right"]:hover,
+        .product-badge[data-position="bottom-left"]:hover,
+        .product-badge[data-position="bottom-right"]:hover {
+            transform: scale(1.05);
+        }
+    </style>
+
+    {if icon != ""}
+        <span class="product-badge__icon">{icon}</span>
+    {/if}
+    <span class="product-badge__text">{badgeText}</span>
+</div>

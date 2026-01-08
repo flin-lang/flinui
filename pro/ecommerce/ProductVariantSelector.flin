@@ -1,0 +1,380 @@
+// ProductVariantSelector.flin
+// FlinUI PRO E-Commerce Component
+//
+// Props:
+//   - variants: Array of variant options (array)
+//     Each variant: { type: "color|size|material", name: string, value: string, available: boolean, color: string (for color type) }
+//   - selected: Currently selected variant (object or none)
+//   - onSelect: Selection handler (function or none)
+//   - layout: Display layout (string: "inline", "grid", "dropdown")
+//   - showUnavailable: Show unavailable options (boolean)
+//   - size: Swatch size (string: "sm", "md", "lg")
+
+// Extract props with defaults
+variants = props.variants || []
+selected = props.selected || none
+onSelect = props.onSelect || none
+layout = props.layout || "inline"
+showUnavailable = props.showUnavailable != false
+size = props.size || "md"
+
+// State
+hoveredVariant = none
+
+// Group variants by type
+variantsByType = {}
+for variant in variants {
+    type = variant.type || "option"
+    if !variantsByType[type] {
+        variantsByType[type] = []
+    }
+    variantsByType[type].push(variant)
+}
+
+// Get variant types
+variantTypes = Object.keys(variantsByType)
+
+// Check if variant is selected
+isSelected = fn(variant) {
+    return selected != none && selected.value == variant.value
+}
+
+// Handle variant selection
+handleSelect = fn(variant) {
+    if variant.available != false && onSelect != none {
+        onSelect(variant)
+    }
+}
+
+// Format variant type label
+formatTypeLabel = fn(type) {
+    if type == "color" { return "Color" }
+    if type == "size" { return "Size" }
+    if type == "material" { return "Material" }
+    return type.charAt(0).toUpperCase() + type.slice(1)
+}
+
+<div class="flin-variant-selector layout-{layout} size-{size}">
+    <style>
+        .flin-variant-selector {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-5);
+        }
+
+        /* Variant Group */
+        .variant-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-3);
+        }
+
+        .variant-type-label {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            text-transform: uppercase;
+            letter-spacing: var(--flin-tracking-wide);
+        }
+
+        .selected-variant-name {
+            color: var(--flin-accent-gold);
+            font-weight: var(--flin-font-bold);
+        }
+
+        /* Variant Options */
+        .variant-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--flin-space-2);
+        }
+
+        .layout-grid .variant-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: var(--flin-space-3);
+        }
+
+        /* Color Swatches */
+        .color-swatch {
+            position: relative;
+            width: var(--swatch-size);
+            height: var(--swatch-size);
+            border-radius: var(--flin-radius-lg);
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+            border: 2px solid transparent;
+            box-shadow: var(--flin-shadow-sm);
+        }
+
+        .size-sm .color-swatch {
+            --swatch-size: 32px;
+        }
+
+        .size-md .color-swatch {
+            --swatch-size: 48px;
+        }
+
+        .size-lg .color-swatch {
+            --swatch-size: 64px;
+        }
+
+        .color-swatch-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            background: var(--swatch-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+            border-color: var(--flin-border-medium);
+        }
+
+        .color-swatch.selected {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-glow-gold);
+            transform: scale(1.05);
+        }
+
+        .color-swatch.unavailable {
+            opacity: 0.4;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .color-swatch.unavailable::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: var(--flin-text-muted);
+            transform: translateY(-50%) rotate(-45deg);
+        }
+
+        .color-swatch.unavailable:hover {
+            transform: none;
+            border-color: transparent;
+        }
+
+        .checkmark {
+            color: white;
+            font-size: var(--flin-text-lg);
+            text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Size & Material Options */
+        .option-button {
+            padding: var(--flin-space-3) var(--flin-space-4);
+            background: var(--flin-bg-elevated);
+            border: 2px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-button);
+            color: var(--flin-text-primary);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .size-sm .option-button {
+            padding: var(--flin-space-2) var(--flin-space-3);
+            font-size: var(--flin-text-xs);
+            min-width: 48px;
+        }
+
+        .size-lg .option-button {
+            padding: var(--flin-space-4) var(--flin-space-6);
+            font-size: var(--flin-text-base);
+            min-width: 80px;
+        }
+
+        .option-button:hover {
+            border-color: var(--flin-border-medium);
+            background: var(--flin-bg-hover);
+            transform: translateY(-2px);
+        }
+
+        .option-button.selected {
+            border-color: var(--flin-accent-gold);
+            background: var(--flin-accent-gold-muted);
+            color: var(--flin-accent-gold);
+            font-weight: var(--flin-font-semibold);
+        }
+
+        .option-button.unavailable {
+            opacity: 0.4;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .option-button.unavailable::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: var(--flin-text-muted);
+            transform: translateY(-50%);
+        }
+
+        .option-button.unavailable:hover {
+            transform: none;
+            border-color: var(--flin-border-subtle);
+            background: var(--flin-bg-elevated);
+        }
+
+        /* Dropdown Layout */
+        .layout-dropdown .variant-options {
+            flex-direction: column;
+        }
+
+        .variant-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        .dropdown-button {
+            width: 100%;
+            padding: var(--flin-space-3) var(--flin-space-4);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-button);
+            color: var(--flin-text-primary);
+            font-size: var(--flin-text-base);
+            text-align: left;
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dropdown-button:hover {
+            border-color: var(--flin-accent-gold);
+        }
+
+        .dropdown-arrow {
+            transition: transform var(--flin-transition-normal);
+        }
+
+        .dropdown-button.open .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Tooltip */
+        .variant-tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            padding: var(--flin-space-2) var(--flin-space-3);
+            background: var(--flin-bg-deep);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-lg);
+            color: var(--flin-text-primary);
+            font-size: var(--flin-text-xs);
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity var(--flin-transition-fast);
+            z-index: var(--flin-z-tooltip);
+        }
+
+        .color-swatch:hover .variant-tooltip,
+        .option-button:hover .variant-tooltip {
+            opacity: 1;
+        }
+
+        .variant-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: var(--flin-border-medium);
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .layout-grid .variant-options {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            }
+
+            .option-button {
+                padding: var(--flin-space-2) var(--flin-space-3);
+                font-size: var(--flin-text-xs);
+                min-width: 48px;
+            }
+        }
+    </style>
+
+    {for type in variantTypes}
+        <div class="variant-group">
+            <div class="variant-type-label">
+                {formatTypeLabel(type)}
+                {if selected != none && selected.type == type}
+                    <span class="selected-variant-name">: {selected.name}</span>
+                {/if}
+            </div>
+
+            <div class="variant-options">
+                {for variant in variantsByType[type]}
+                    {if showUnavailable || variant.available != false}
+                        {if type == "color"}
+                            <!-- Color Swatch -->
+                            <div
+                                class="color-swatch {isSelected(variant) ? 'selected' : ''} {variant.available == false ? 'unavailable' : ''}"
+                                style="--swatch-color: {variant.color || '#cccccc'};"
+                                click={() => handleSelect(variant)}
+                                mouseenter={() => { hoveredVariant = variant }}
+                                mouseleave={() => { hoveredVariant = none }}
+                                title={variant.name}
+                            >
+                                <div class="color-swatch-inner">
+                                    {if isSelected(variant)}
+                                        <span class="checkmark">✓</span>
+                                    {/if}
+                                </div>
+
+                                {if hoveredVariant != none && hoveredVariant.value == variant.value}
+                                    <div class="variant-tooltip">
+                                        {variant.name}
+                                        {if variant.available == false}
+                                            <br />(Unavailable)
+                                        {/if}
+                                    </div>
+                                {/if}
+                            </div>
+                        {else}
+                            <!-- Size / Material Button -->
+                            <button
+                                class="option-button {isSelected(variant) ? 'selected' : ''} {variant.available == false ? 'unavailable' : ''}"
+                                click={() => handleSelect(variant)}
+                                mouseenter={() => { hoveredVariant = variant }}
+                                mouseleave={() => { hoveredVariant = none }}
+                                disabled={variant.available == false}
+                            >
+                                {variant.name}
+
+                                {if hoveredVariant != none && hoveredVariant.value == variant.value && variant.available == false}
+                                    <div class="variant-tooltip">
+                                        Unavailable
+                                    </div>
+                                {/if}
+                            </button>
+                        {/if}
+                    {/if}
+                {/for}
+            </div>
+        </div>
+    {/for}
+</div>

@@ -1,0 +1,10 @@
+// ============================================================================
+// FlinUI PRO E-commerce Components — Index
+// Export all e-commerce components
+// ============================================================================
+
+export ProductCompare from "./ProductCompare.flin"
+export ProductCardList from "./ProductCardList.flin"
+export ProductImageZoom from "./ProductImageZoom.flin"
+export ProductRecommendations from "./ProductRecommendations.flin"
+export RecentlyViewed from "./RecentlyViewed.flin"

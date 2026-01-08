@@ -1,0 +1,256 @@
+// ============================================================================
+// RecentlyViewed — FlinUI PRO E-commerce
+// Horizontal scrolling carousel of recently viewed products
+// ============================================================================
+// Props:
+//   products: array of product objects (required)
+//     Each product: { id, name, image, price, currency }
+//   title: text (default: "Recently Viewed")
+//   storageKey: text (default: "flinui_recently_viewed")
+//   maxItems: number (default: 12)
+// ============================================================================
+
+products = props.products || []
+title = props.title || "Recently Viewed"
+storageKey = props.storageKey || "flinui_recently_viewed"
+maxItems = props.maxItems || 12
+
+scrollContainer = none
+canScrollLeft = false
+canScrollRight = false
+
+function updateScrollButtons() {
+    if scrollContainer != none {
+        canScrollLeft = scrollContainer.scrollLeft > 0
+        canScrollRight = scrollContainer.scrollLeft < (scrollContainer.scrollWidth - scrollContainer.clientWidth - 10)
+    }
+}
+
+function scrollLeft() {
+    if scrollContainer != none {
+        scrollContainer.scrollBy({
+            left: -300,
+            behavior: "smooth"
+        })
+    }
+}
+
+function scrollRight() {
+    if scrollContainer != none {
+        scrollContainer.scrollBy({
+            left: 300,
+            behavior: "smooth"
+        })
+    }
+}
+
+function handleProductClick(product) {
+    if props.onProductClick != none {
+        props.onProductClick(product)
+    }
+}
+
+onMount {
+    scrollContainer = document.querySelector(".recently-viewed-scroll")
+    if scrollContainer != none {
+        scrollContainer.addEventListener("scroll", updateScrollButtons)
+        updateScrollButtons()
+    }
+}
+
+<div class="recently-viewed">
+    <style>
+        .recently-viewed {
+            width: 100%;
+            background: var(--flin-bg-surface);
+            border-radius: var(--flin-radius-card);
+            border: 1px solid var(--flin-border-subtle);
+            padding: var(--flin-space-6);
+        }
+
+        .recently-viewed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .recently-viewed-header h3 {
+            margin: 0;
+            font-size: var(--flin-text-xl);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        .scroll-controls {
+            display: flex;
+            gap: var(--flin-space-2);
+        }
+
+        .scroll-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-icon);
+            color: var(--flin-text-primary);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+        }
+
+        .scroll-btn:hover:not(:disabled) {
+            background: var(--flin-bg-hover);
+            border-color: var(--flin-accent-gold);
+            color: var(--flin-accent-gold);
+        }
+
+        .scroll-btn:disabled {
+            opacity: var(--flin-opacity-30);
+            cursor: not-allowed;
+        }
+
+        .recently-viewed-scroll {
+            display: flex;
+            gap: var(--flin-space-4);
+            overflow-x: auto;
+            overflow-y: visible;
+            scroll-behavior: smooth;
+            padding-bottom: var(--flin-space-2);
+            margin: 0 calc(-1 * var(--flin-space-2));
+            padding: 0 var(--flin-space-2);
+        }
+
+        .recently-viewed-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .recently-viewed-scroll::-webkit-scrollbar-track {
+            background: var(--flin-bg-deep);
+            border-radius: var(--flin-radius-full);
+        }
+
+        .recently-viewed-scroll::-webkit-scrollbar-thumb {
+            background: var(--flin-accent-gold-dim);
+            border-radius: var(--flin-radius-full);
+        }
+
+        .recently-viewed-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--flin-accent-gold);
+        }
+
+        .product-card {
+            flex-shrink: 0;
+            width: 180px;
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-lg);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .product-card:hover {
+            border-color: var(--flin-accent-gold);
+            transform: translateY(-4px);
+            box-shadow: var(--flin-shadow-card-hover);
+        }
+
+        .product-image-container {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            background: var(--flin-bg-deep);
+            position: relative;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--flin-transition-slow);
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-details {
+            padding: var(--flin-space-3);
+        }
+
+        .product-name {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-2);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .product-price {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-accent-gold);
+        }
+
+        .empty-state {
+            padding: var(--flin-space-8);
+            text-align: center;
+            color: var(--flin-text-muted);
+        }
+
+        @media (max-width: 640px) {
+            .product-card {
+                width: 140px;
+            }
+
+            .product-image-container {
+                height: 140px;
+            }
+
+            .scroll-controls {
+                display: none;
+            }
+        }
+    </style>
+
+    {if products.len > 0}
+        <div class="recently-viewed-header">
+            <h3>{title}</h3>
+            <div class="scroll-controls">
+                <button class="scroll-btn" click={scrollLeft} disabled={!canScrollLeft}>
+                    ←
+                </button>
+                <button class="scroll-btn" click={scrollRight} disabled={!canScrollRight}>
+                    →
+                </button>
+            </div>
+        </div>
+
+        <div class="recently-viewed-scroll">
+            {for product in products}
+                <div class="product-card" click={() => handleProductClick(product)}>
+                    <div class="product-image-container">
+                        <img src={product.image} alt={product.name} class="product-image" />
+                    </div>
+                    <div class="product-details">
+                        <div class="product-name" title={product.name}>
+                            {product.name}
+                        </div>
+                        <div class="product-price">
+                            {product.currency || "$"}{product.price}
+                        </div>
+                    </div>
+                </div>
+            {/for}
+        </div>
+    {else}
+        <div class="empty-state">
+            <p>No recently viewed products yet.</p>
+        </div>
+    {/if}
+</div>

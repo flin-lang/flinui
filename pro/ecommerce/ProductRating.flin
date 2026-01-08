@@ -1,0 +1,208 @@
+// ============================================================================
+// ProductRating — FlinUI PRO E-commerce
+// Displays star rating with average score and review count
+// ============================================================================
+// Props:
+//   rating: number (required) - Average rating (0-5)
+//   reviewCount: number (default: 0) - Number of reviews
+//   maxStars: number (default: 5) - Maximum rating value
+//   size: "sm" | "md" | "lg" (default: "md")
+//   showNumber: bool (default: true) - Show numeric rating
+//   showCount: bool (default: true) - Show review count
+//   linkToReviews: text (optional) - URL or section ID to link to
+//   interactive: bool (default: false) - Allow clicking stars to filter
+// ============================================================================
+
+rating = props.rating || 0
+reviewCount = props.reviewCount || 0
+maxStars = props.maxStars || 5
+size = props.size || "md"
+showNumber = props.showNumber || true
+showCount = props.showCount || true
+linkToReviews = props.linkToReviews || none
+interactive = props.interactive || false
+
+stars = []
+fullStars = 0
+hasHalfStar = false
+emptyStars = 0
+
+onMount {
+    fullStars = Math.floor(rating)
+    decimal = rating - fullStars
+    hasHalfStar = decimal >= 0.25 && decimal < 0.75
+
+    if hasHalfStar {
+        emptyStars = maxStars - fullStars - 1
+    } else {
+        if decimal >= 0.75 {
+            fullStars = fullStars + 1
+        }
+        emptyStars = maxStars - fullStars
+    }
+
+    stars = []
+    for i = 0; i < fullStars; i++ {
+        stars.push(["type": "full", "index": i])
+    }
+    if hasHalfStar {
+        stars.push(["type": "half", "index": fullStars])
+    }
+    for i = 0; i < emptyStars; i++ {
+        stars.push(["type": "empty", "index": fullStars + (hasHalfStar ? 1 : 0) + i])
+    }
+}
+
+fn handleStarClick(index) {
+    if interactive && props.onRatingFilter {
+        props.onRatingFilter(index + 1)
+    }
+}
+
+<div class="product-rating" data-size={size} data-interactive={interactive}>
+    <style>
+        .product-rating {
+            font-family: var(--flin-font-body);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .product-rating__stars {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-0-5);
+        }
+
+        .product-rating__star {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .product-rating[data-interactive="true"] .product-rating__star {
+            cursor: pointer;
+        }
+
+        .product-rating[data-interactive="true"] .product-rating__star:hover {
+            transform: scale(1.2);
+        }
+
+        .product-rating[data-size="sm"] .product-rating__star {
+            font-size: var(--flin-text-sm);
+        }
+
+        .product-rating[data-size="md"] .product-rating__star {
+            font-size: var(--flin-text-lg);
+        }
+
+        .product-rating[data-size="lg"] .product-rating__star {
+            font-size: var(--flin-text-2xl);
+        }
+
+        .product-rating__star--full {
+            color: var(--flin-accent-gold);
+        }
+
+        .product-rating__star--half {
+            color: var(--flin-accent-gold);
+            position: relative;
+        }
+
+        .product-rating__star--empty {
+            color: var(--flin-text-muted);
+            opacity: 0.4;
+        }
+
+        .product-rating__number {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        .product-rating[data-size="lg"] .product-rating__number {
+            font-size: var(--flin-text-base);
+        }
+
+        .product-rating__count {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-normal);
+            color: var(--flin-text-secondary);
+        }
+
+        .product-rating[data-size="lg"] .product-rating__count {
+            font-size: var(--flin-text-base);
+        }
+
+        .product-rating__link {
+            color: var(--flin-text-secondary);
+            text-decoration: none;
+            transition: color var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .product-rating__link:hover {
+            color: var(--flin-accent-gold);
+            text-decoration: underline;
+        }
+
+        .product-rating__separator {
+            width: 1px;
+            height: 1em;
+            background: var(--flin-border-subtle);
+            margin: 0 var(--flin-space-1);
+        }
+    </style>
+
+    <div class="product-rating__stars" role="img" aria-label="Rating: {rating} out of {maxStars} stars">
+        {for star in stars}
+            {if star.type == "full"}
+                <span
+                    class="product-rating__star product-rating__star--full"
+                    click={handleStarClick(star.index)}
+                    title="{star.index + 1} stars"
+                >
+                    ★
+                </span>
+            {else if star.type == "half"}
+                <span
+                    class="product-rating__star product-rating__star--half"
+                    click={handleStarClick(star.index)}
+                    title="{rating} stars"
+                >
+                    ★
+                </span>
+            {else}
+                <span
+                    class="product-rating__star product-rating__star--empty"
+                    click={handleStarClick(star.index)}
+                    title="{star.index + 1} stars"
+                >
+                    ★
+                </span>
+            {/if}
+        {/for}
+    </div>
+
+    {if showNumber}
+        <span class="product-rating__number">
+            {rating.toFixed(1)}
+        </span>
+    {/if}
+
+    {if showCount && reviewCount > 0}
+        {if showNumber}
+            <span class="product-rating__separator"></span>
+        {/if}
+
+        {if linkToReviews != none}
+            <a href={linkToReviews} class="product-rating__link product-rating__count">
+                ({reviewCount} {reviewCount == 1 ? "review" : "reviews"})
+            </a>
+        {else}
+            <span class="product-rating__count">
+                ({reviewCount} {reviewCount == 1 ? "review" : "reviews"})
+            </span>
+        {/if}
+    {/if}
+</div>

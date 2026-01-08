@@ -1,0 +1,460 @@
+// ProductCard.flin
+// FlinUI PRO E-Commerce Component
+//
+// Props:
+//   - image: Product image URL (string)
+//   - imageAlt: Alt text for image (string)
+//   - title: Product name (string)
+//   - description: Product description (string)
+//   - price: Product price (number)
+//   - originalPrice: Original price for discount display (number or none)
+//   - currency: Currency code (string, default "USD")
+//   - rating: Product rating 0-5 (number)
+//   - reviewCount: Number of reviews (number)
+//   - badge: Badge text (e.g., "Sale", "New") (string or none)
+//   - badgeVariant: Badge color variant (string: "gold", "emerald", "rose")
+//   - inStock: Stock status (boolean)
+//   - onAddToCart: Add to cart handler (function or none)
+//   - onQuickView: Quick view handler (function or none)
+//   - variant: Card style variant (string: "default", "compact", "minimal")
+//   - showRating: Show rating display (boolean)
+//   - showDescription: Show description text (boolean)
+
+// Extract props with defaults
+image = props.image || "/placeholder-product.png"
+imageAlt = props.imageAlt || props.title || "Product image"
+title = props.title || "Product Name"
+description = props.description || ""
+price = props.price || 0
+originalPrice = props.originalPrice || none
+currency = props.currency || "USD"
+rating = props.rating || 0
+reviewCount = props.reviewCount || 0
+badge = props.badge || none
+badgeVariant = props.badgeVariant || "gold"
+inStock = props.inStock != false
+onAddToCart = props.onAddToCart || none
+onQuickView = props.onQuickView || none
+variant = props.variant || "default"
+showRating = props.showRating != false
+showDescription = props.showDescription != false
+
+// State
+isHovered = false
+imageLoaded = false
+
+// Computed values
+hasDiscount = originalPrice != none && originalPrice > price
+discountPercent = 0
+if hasDiscount {
+    discountPercent = math_round((originalPrice - price) / originalPrice * 100)
+}
+
+// Format currency
+formatPrice = fn(amount) {
+    if currency == "USD" {
+        return "$" + amount.toFixed(2)
+    }
+    if currency == "EUR" {
+        return "€" + amount.toFixed(2)
+    }
+    if currency == "GBP" {
+        return "£" + amount.toFixed(2)
+    }
+    return currency + " " + amount.toFixed(2)
+}
+
+// Generate star rating HTML
+generateStars = fn(ratingValue) {
+    stars = ""
+    fullStars = math_floor(ratingValue)
+    hasHalfStar = (ratingValue - fullStars) >= 0.5
+
+    for i in 1..5 {
+        if i <= fullStars {
+            stars = stars + "★"
+        } else if i == fullStars + 1 && hasHalfStar {
+            stars = stars + "⯨"
+        } else {
+            stars = stars + "☆"
+        }
+    }
+    return stars
+}
+
+handleAddToCart = fn() {
+    if onAddToCart != none && inStock {
+        onAddToCart()
+    }
+}
+
+handleQuickView = fn() {
+    if onQuickView != none {
+        onQuickView()
+    }
+}
+
+handleImageLoad = fn() {
+    imageLoaded = true
+}
+
+<div
+    class="flin-product-card {variant}"
+    mouseenter={() => { isHovered = true }}
+    mouseleave={() => { isHovered = false }}
+>
+    <style>
+        .flin-product-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-card);
+            overflow: hidden;
+            transition: all var(--flin-transition-normal);
+            height: 100%;
+        }
+
+        .flin-product-card:hover {
+            border-color: var(--flin-border-medium);
+            box-shadow: var(--flin-shadow-card-hover);
+            transform: translateY(-4px);
+        }
+
+        .flin-product-card.compact {
+            flex-direction: row;
+            max-width: 600px;
+        }
+
+        .flin-product-card.minimal {
+            border: none;
+            background: transparent;
+        }
+
+        .flin-product-card.minimal:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Image Container */
+        .product-image-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            background: var(--flin-bg-elevated);
+        }
+
+        .flin-product-card.compact .product-image-container {
+            width: 180px;
+            aspect-ratio: 1 / 1;
+            flex-shrink: 0;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--flin-transition-slow);
+        }
+
+        .flin-product-card:hover .product-image {
+            transform: scale(1.08);
+        }
+
+        .product-image.loading {
+            opacity: 0;
+        }
+
+        .product-image.loaded {
+            opacity: 1;
+            transition: opacity var(--flin-transition-normal), transform var(--flin-transition-slow);
+        }
+
+        /* Badge */
+        .product-badge {
+            position: absolute;
+            top: var(--flin-space-3);
+            left: var(--flin-space-3);
+            padding: var(--flin-space-1) var(--flin-space-3);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-semibold);
+            border-radius: var(--flin-radius-badge);
+            text-transform: uppercase;
+            letter-spacing: var(--flin-tracking-wide);
+            z-index: var(--flin-z-10);
+        }
+
+        .product-badge.gold {
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+        }
+
+        .product-badge.emerald {
+            background: var(--flin-accent-emerald);
+            color: var(--flin-text-inverse);
+        }
+
+        .product-badge.rose {
+            background: var(--flin-accent-rose);
+            color: var(--flin-text-inverse);
+        }
+
+        /* Quick View Button */
+        .quick-view-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: var(--flin-space-3) var(--flin-space-6);
+            background: var(--flin-bg-surface);
+            color: var(--flin-text-primary);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-button);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            cursor: pointer;
+            opacity: 0;
+            transition: all var(--flin-transition-normal);
+            backdrop-filter: blur(8px);
+            z-index: var(--flin-z-10);
+        }
+
+        .flin-product-card:hover .quick-view-btn {
+            opacity: 1;
+        }
+
+        .quick-view-btn:hover {
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+            border-color: var(--flin-accent-gold);
+        }
+
+        /* Content */
+        .product-content {
+            display: flex;
+            flex-direction: column;
+            padding: var(--flin-space-5);
+            flex: 1;
+        }
+
+        .flin-product-card.compact .product-content {
+            padding: var(--flin-space-4);
+        }
+
+        .flin-product-card.minimal .product-content {
+            padding: var(--flin-space-4) var(--flin-space-2);
+        }
+
+        .product-title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin: 0 0 var(--flin-space-2) 0;
+            line-height: var(--flin-leading-tight);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .flin-product-card.compact .product-title {
+            font-size: var(--flin-text-base);
+        }
+
+        .product-description {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+            margin: 0 0 var(--flin-space-4) 0;
+            line-height: var(--flin-leading-normal);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        /* Rating */
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .rating-stars {
+            color: var(--flin-accent-gold);
+            font-size: var(--flin-text-base);
+            letter-spacing: 2px;
+        }
+
+        .rating-count {
+            font-size: var(--flin-text-xs);
+            color: var(--flin-text-muted);
+        }
+
+        /* Price Section */
+        .product-price-section {
+            display: flex;
+            align-items: baseline;
+            gap: var(--flin-space-3);
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .product-price {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-accent-gold);
+        }
+
+        .flin-product-card.compact .product-price {
+            font-size: var(--flin-text-xl);
+        }
+
+        .product-original-price {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-muted);
+            text-decoration: line-through;
+        }
+
+        .product-discount {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-accent-emerald);
+        }
+
+        /* Stock Status */
+        .stock-status {
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-muted);
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .stock-status.in-stock {
+            color: var(--flin-accent-emerald);
+        }
+
+        .stock-status.out-of-stock {
+            color: var(--flin-accent-rose);
+        }
+
+        /* Add to Cart Button */
+        .add-to-cart-btn {
+            width: 100%;
+            padding: var(--flin-space-3) var(--flin-space-4);
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+            border: none;
+            border-radius: var(--flin-radius-button);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+            margin-top: auto;
+        }
+
+        .add-to-cart-btn:hover {
+            background: var(--flin-accent-gold-bright);
+            box-shadow: var(--flin-shadow-glow-gold);
+        }
+
+        .add-to-cart-btn:active {
+            transform: translateY(1px);
+        }
+
+        .add-to-cart-btn:disabled {
+            background: var(--flin-bg-hover);
+            color: var(--flin-text-muted);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .flin-product-card.compact .add-to-cart-btn {
+            padding: var(--flin-space-2) var(--flin-space-4);
+            font-size: var(--flin-text-sm);
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .flin-product-card.compact {
+                flex-direction: column;
+            }
+
+            .flin-product-card.compact .product-image-container {
+                width: 100%;
+            }
+
+            .product-title {
+                font-size: var(--flin-text-base);
+            }
+
+            .product-price {
+                font-size: var(--flin-text-xl);
+            }
+        }
+    </style>
+
+    <!-- Image Container -->
+    <div class="product-image-container">
+        <img
+            src={image}
+            alt={imageAlt}
+            class="product-image {imageLoaded ? 'loaded' : 'loading'}"
+            load={handleImageLoad}
+        />
+
+        {if badge != none}
+            <div class="product-badge {badgeVariant}">
+                {badge}
+            </div>
+        {/if}
+
+        {if onQuickView != none && isHovered}
+            <button class="quick-view-btn" click={handleQuickView}>
+                Quick View
+            </button>
+        {/if}
+    </div>
+
+    <!-- Content -->
+    <div class="product-content">
+        <h3 class="product-title">{title}</h3>
+
+        {if showDescription && description != ""}
+            <p class="product-description">{description}</p>
+        {/if}
+
+        {if showRating && rating > 0}
+            <div class="product-rating">
+                <span class="rating-stars">{generateStars(rating)}</span>
+                {if reviewCount > 0}
+                    <span class="rating-count">({reviewCount})</span>
+                {/if}
+            </div>
+        {/if}
+
+        <div class="product-price-section">
+            <span class="product-price">{formatPrice(price)}</span>
+
+            {if hasDiscount}
+                <span class="product-original-price">{formatPrice(originalPrice)}</span>
+                <span class="product-discount">-{discountPercent}%</span>
+            {/if}
+        </div>
+
+        <div class="stock-status {inStock ? 'in-stock' : 'out-of-stock'}">
+            {inStock ? "In Stock" : "Out of Stock"}
+        </div>
+
+        {if onAddToCart != none}
+            <button
+                class="add-to-cart-btn"
+                click={handleAddToCart}
+                disabled={!inStock}
+            >
+                {inStock ? "Add to Cart" : "Out of Stock"}
+            </button>
+        {/if}
+    </div>
+</div>

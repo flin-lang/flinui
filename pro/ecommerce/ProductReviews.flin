@@ -1,0 +1,404 @@
+// ============================================================================
+// ProductReviews — FlinUI PRO E-commerce
+// Review list with filters, sorting, and pagination
+// ============================================================================
+// Props:
+//   reviews: array (required) - Array of review objects
+//   reviewsPerPage: number (default: 10)
+//   showFilters: bool (default: true)
+//   showPhotos: bool (default: true)
+//   verifiedBadge: bool (default: true)
+//   onLoadMore: function (optional) - Load more callback
+// ============================================================================
+// Review object structure:
+//   {
+//     id: text,
+//     author: text,
+//     rating: number,
+//     date: text,
+//     title: text,
+//     content: text,
+//     verified: bool,
+//     helpful: number,
+//     photos: array (optional)
+//   }
+// ============================================================================
+
+reviews = props.reviews || []
+reviewsPerPage = props.reviewsPerPage || 10
+showFilters = props.showFilters || true
+showPhotos = props.showPhotos || true
+verifiedBadge = props.verifiedBadge || true
+onLoadMore = props.onLoadMore || none
+
+entity ReviewState {
+    sortBy: text
+    filterRating: number
+    currentPage: number
+    visibleReviews: array
+    hasMore: bool
+}
+
+state = ReviewState {
+    sortBy: "most-helpful",
+    filterRating: 0,
+    currentPage: 1,
+    visibleReviews: [],
+    hasMore: false
+}
+
+onMount {
+    updateVisibleReviews()
+}
+
+fn updateVisibleReviews() {
+    filtered = reviews
+
+    if state.filterRating > 0 {
+        filtered = filtered.filter(r => Math.floor(r.rating) == state.filterRating)
+    }
+
+    if state.sortBy == "most-helpful" {
+        filtered = filtered.sort((a, b) => (b.helpful || 0) - (a.helpful || 0))
+    } else if state.sortBy == "recent" {
+        filtered = filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    } else if state.sortBy == "highest-rated" {
+        filtered = filtered.sort((a, b) => b.rating - a.rating)
+    } else if state.sortBy == "lowest-rated" {
+        filtered = filtered.sort((a, b) => a.rating - b.rating)
+    }
+
+    endIndex = state.currentPage * reviewsPerPage
+    state.visibleReviews = filtered.slice(0, endIndex)
+    state.hasMore = endIndex < filtered.length
+}
+
+fn handleSortChange(newSort) {
+    state.sortBy = newSort
+    state.currentPage = 1
+    updateVisibleReviews()
+}
+
+fn handleFilterChange(rating) {
+    state.filterRating = rating
+    state.currentPage = 1
+    updateVisibleReviews()
+}
+
+fn handleLoadMore() {
+    state.currentPage = state.currentPage + 1
+    updateVisibleReviews()
+    if onLoadMore != none {
+        onLoadMore(state.currentPage)
+    }
+}
+
+fn formatDate(dateString) {
+    date = new Date(dateString)
+    return date.toLocaleDateString("en-US", ["month": "long", "day": "numeric", "year": "numeric"])
+}
+
+<div class="product-reviews">
+    <style>
+        .product-reviews {
+            font-family: var(--flin-font-body);
+            width: 100%;
+        }
+
+        .product-reviews__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--flin-space-4);
+            margin-bottom: var(--flin-space-6);
+            flex-wrap: wrap;
+        }
+
+        .product-reviews__filters {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            flex-wrap: wrap;
+        }
+
+        .product-reviews__filter-group {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .product-reviews__filter-label {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-secondary);
+        }
+
+        .product-reviews__select {
+            padding: var(--flin-space-2) var(--flin-space-3);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-md);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .product-reviews__select:hover {
+            border-color: var(--flin-accent-gold);
+        }
+
+        .product-reviews__select:focus {
+            outline: none;
+            border-color: var(--flin-accent-gold);
+            box-shadow: 0 0 0 3px var(--flin-accent-gold-muted);
+        }
+
+        .product-reviews__list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-6);
+        }
+
+        .product-reviews__item {
+            padding: var(--flin-space-6);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-card);
+            transition: border-color var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .product-reviews__item:hover {
+            border-color: var(--flin-border-medium);
+        }
+
+        .product-reviews__item-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--flin-space-4);
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .product-reviews__author-section {
+            display: flex;
+            flex-direction: column;
+            gap: var(--flin-space-2);
+        }
+
+        .product-reviews__author {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+        }
+
+        .product-reviews__author-name {
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+        }
+
+        .product-reviews__verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-1);
+            padding: var(--flin-space-0-5) var(--flin-space-2);
+            font-size: var(--flin-text-2xs);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-accent-emerald);
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid var(--flin-accent-emerald);
+            border-radius: var(--flin-radius-badge);
+            text-transform: uppercase;
+            letter-spacing: var(--flin-tracking-wide);
+        }
+
+        .product-reviews__date {
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-muted);
+        }
+
+        .product-reviews__title {
+            font-size: var(--flin-text-lg);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-3);
+            line-height: var(--flin-leading-tight);
+        }
+
+        .product-reviews__content {
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-secondary);
+            line-height: var(--flin-leading-relaxed);
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .product-reviews__photos {
+            display: flex;
+            gap: var(--flin-space-3);
+            margin-bottom: var(--flin-space-4);
+            flex-wrap: wrap;
+        }
+
+        .product-reviews__photo {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: var(--flin-radius-md);
+            border: 1px solid var(--flin-border-subtle);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .product-reviews__photo:hover {
+            transform: scale(1.05);
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-glow-gold);
+        }
+
+        .product-reviews__helpful {
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+
+        .product-reviews__helpful-button {
+            padding: var(--flin-space-2) var(--flin-space-3);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-secondary);
+            background: transparent;
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-md);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .product-reviews__helpful-button:hover {
+            background: var(--flin-bg-hover);
+            border-color: var(--flin-accent-gold);
+            color: var(--flin-accent-gold);
+        }
+
+        .product-reviews__load-more {
+            display: flex;
+            justify-content: center;
+            margin-top: var(--flin-space-8);
+        }
+
+        .product-reviews__load-more-button {
+            padding: var(--flin-space-3) var(--flin-space-6);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-button);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .product-reviews__load-more-button:hover {
+            background: var(--flin-bg-hover);
+            border-color: var(--flin-accent-gold);
+            color: var(--flin-accent-gold);
+        }
+
+        .product-reviews__empty {
+            padding: var(--flin-space-12);
+            text-align: center;
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-muted);
+        }
+    </style>
+
+    {if showFilters}
+        <div class="product-reviews__header">
+            <div class="product-reviews__filters">
+                <div class="product-reviews__filter-group">
+                    <label class="product-reviews__filter-label">Sort by:</label>
+                    <select class="product-reviews__select" change={handleSortChange(event.target.value)}>
+                        <option value="most-helpful">Most Helpful</option>
+                        <option value="recent">Most Recent</option>
+                        <option value="highest-rated">Highest Rated</option>
+                        <option value="lowest-rated">Lowest Rated</option>
+                    </select>
+                </div>
+
+                <div class="product-reviews__filter-group">
+                    <label class="product-reviews__filter-label">Filter:</label>
+                    <select class="product-reviews__select" change={handleFilterChange(parseInt(event.target.value))}>
+                        <option value="0">All Ratings</option>
+                        <option value="5">5 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="2">2 Stars</option>
+                        <option value="1">1 Star</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    {if state.visibleReviews.length > 0}
+        <div class="product-reviews__list">
+            {for review in state.visibleReviews}
+                <div class="product-reviews__item">
+                    <div class="product-reviews__item-header">
+                        <div class="product-reviews__author-section">
+                            <div class="product-reviews__author">
+                                <span class="product-reviews__author-name">{review.author}</span>
+                                {if verifiedBadge && review.verified}
+                                    <span class="product-reviews__verified-badge">
+                                        ✓ Verified Purchase
+                                    </span>
+                                {/if}
+                            </div>
+                            <span class="product-reviews__date">{formatDate(review.date)}</span>
+                        </div>
+                        <ProductRating rating={review.rating} showCount={false} size="sm" />
+                    </div>
+
+                    {if review.title}
+                        <h3 class="product-reviews__title">{review.title}</h3>
+                    {/if}
+
+                    <p class="product-reviews__content">{review.content}</p>
+
+                    {if showPhotos && review.photos && review.photos.length > 0}
+                        <div class="product-reviews__photos">
+                            {for photo in review.photos}
+                                <img src={photo} alt="Review photo" class="product-reviews__photo" />
+                            {/for}
+                        </div>
+                    {/if}
+
+                    {if review.helpful}
+                        <div class="product-reviews__helpful">
+                            <button class="product-reviews__helpful-button">
+                                👍 Helpful ({review.helpful})
+                            </button>
+                        </div>
+                    {/if}
+                </div>
+            {/for}
+        </div>
+
+        {if state.hasMore}
+            <div class="product-reviews__load-more">
+                <button class="product-reviews__load-more-button" click={handleLoadMore()}>
+                    Load More Reviews
+                </button>
+            </div>
+        {/if}
+    {else}
+        <div class="product-reviews__empty">
+            No reviews match your filters. Try adjusting your selection.
+        </div>
+    {/if}
+</div>

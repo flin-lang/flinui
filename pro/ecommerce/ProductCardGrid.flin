@@ -1,0 +1,286 @@
+// ProductCardGrid.flin
+// FlinUI PRO E-Commerce Component
+//
+// Props:
+//   - products: Array of product objects (array)
+//   - columns: Number of columns (number: 2, 3, 4)
+//   - gap: Gap between cards (string: "sm", "md", "lg")
+//   - cardVariant: Variant for all cards (string: "default", "compact", "minimal")
+//   - showRating: Show ratings on all cards (boolean)
+//   - showDescription: Show descriptions on all cards (boolean)
+//   - onProductClick: Handler when product is clicked (function or none)
+//   - onAddToCart: Handler when add to cart is clicked (function or none)
+//   - onQuickView: Handler when quick view is clicked (function or none)
+//   - loading: Show loading skeleton (boolean)
+//   - emptyMessage: Message when no products (string)
+//   - minCardWidth: Minimum card width for responsive (string, e.g., "280px")
+
+// Extract props with defaults
+products = props.products || []
+columns = props.columns || 3
+gap = props.gap || "md"
+cardVariant = props.cardVariant || "default"
+showRating = props.showRating != false
+showDescription = props.showDescription != false
+onProductClick = props.onProductClick || none
+onAddToCart = props.onAddToCart || none
+onQuickView = props.onQuickView || none
+loading = props.loading || false
+emptyMessage = props.emptyMessage || "No products found"
+minCardWidth = props.minCardWidth || "280px"
+
+// State
+currentPage = 1
+itemsPerPage = 12
+
+// Computed
+hasProducts = products.length > 0
+displayProducts = products
+
+// Get gap size
+getGapSize = fn() {
+    if gap == "sm" { return "var(--flin-space-3)" }
+    if gap == "lg" { return "var(--flin-space-6)" }
+    return "var(--flin-space-4)"
+}
+
+// Handle product card click
+handleProductClick = fn(product) {
+    if onProductClick != none {
+        onProductClick(product)
+    }
+}
+
+// Handle add to cart
+handleAddToCart = fn(product) {
+    if onAddToCart != none {
+        onAddToCart(product)
+    }
+}
+
+// Handle quick view
+handleQuickView = fn(product) {
+    if onQuickView != none {
+        onQuickView(product)
+    }
+}
+
+<div class="flin-product-grid-container">
+    <style>
+        .flin-product-grid-container {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Grid Layout */
+        .flin-product-grid {
+            display: grid;
+            grid-template-columns: repeat(var(--grid-columns), minmax(var(--min-card-width), 1fr));
+            gap: var(--grid-gap);
+            width: 100%;
+        }
+
+        .flin-product-grid.cols-2 {
+            --grid-columns: 2;
+        }
+
+        .flin-product-grid.cols-3 {
+            --grid-columns: 3;
+        }
+
+        .flin-product-grid.cols-4 {
+            --grid-columns: 4;
+        }
+
+        /* Empty State */
+        .grid-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--flin-space-16) var(--flin-space-8);
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--flin-text-muted);
+            margin-bottom: var(--flin-space-4);
+        }
+
+        .empty-message {
+            font-size: var(--flin-text-lg);
+            color: var(--flin-text-secondary);
+            font-weight: var(--flin-font-medium);
+        }
+
+        /* Loading Skeleton */
+        .grid-loading {
+            display: grid;
+            grid-template-columns: repeat(var(--grid-columns), minmax(var(--min-card-width), 1fr));
+            gap: var(--grid-gap);
+        }
+
+        .skeleton-card {
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-card);
+            overflow: hidden;
+            animation: skeleton-pulse 1.5s ease-in-out infinite;
+        }
+
+        .skeleton-image {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: var(--flin-bg-elevated);
+        }
+
+        .skeleton-content {
+            padding: var(--flin-space-5);
+        }
+
+        .skeleton-title {
+            height: 24px;
+            background: var(--flin-bg-elevated);
+            border-radius: var(--flin-radius-md);
+            margin-bottom: var(--flin-space-3);
+            width: 80%;
+        }
+
+        .skeleton-text {
+            height: 16px;
+            background: var(--flin-bg-elevated);
+            border-radius: var(--flin-radius-md);
+            margin-bottom: var(--flin-space-2);
+            width: 100%;
+        }
+
+        .skeleton-text.short {
+            width: 60%;
+        }
+
+        .skeleton-price {
+            height: 32px;
+            background: var(--flin-bg-elevated);
+            border-radius: var(--flin-radius-md);
+            margin-top: var(--flin-space-4);
+            width: 40%;
+        }
+
+        @keyframes skeleton-pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1280px) {
+            .flin-product-grid.cols-4 {
+                --grid-columns: 3;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .flin-product-grid.cols-4,
+            .flin-product-grid.cols-3 {
+                --grid-columns: 2;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .flin-product-grid {
+                --grid-columns: 1;
+            }
+
+            .grid-loading {
+                --grid-columns: 1;
+            }
+        }
+
+        /* Fade In Animation */
+        .grid-item {
+            animation: fadeInUp 0.4s ease-out backwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stagger animation delay for grid items */
+        .grid-item:nth-child(1) { animation-delay: 0ms; }
+        .grid-item:nth-child(2) { animation-delay: 50ms; }
+        .grid-item:nth-child(3) { animation-delay: 100ms; }
+        .grid-item:nth-child(4) { animation-delay: 150ms; }
+        .grid-item:nth-child(5) { animation-delay: 200ms; }
+        .grid-item:nth-child(6) { animation-delay: 250ms; }
+        .grid-item:nth-child(7) { animation-delay: 300ms; }
+        .grid-item:nth-child(8) { animation-delay: 350ms; }
+        .grid-item:nth-child(9) { animation-delay: 400ms; }
+        .grid-item:nth-child(10) { animation-delay: 450ms; }
+        .grid-item:nth-child(11) { animation-delay: 500ms; }
+        .grid-item:nth-child(12) { animation-delay: 550ms; }
+    </style>
+
+    {if loading}
+        <!-- Loading Skeleton -->
+        <div class="grid-loading cols-{columns}" style="--grid-gap: {getGapSize()}; --min-card-width: {minCardWidth};">
+            {for i in 1..8}
+                <div class="skeleton-card">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-content">
+                        <div class="skeleton-title"></div>
+                        <div class="skeleton-text"></div>
+                        <div class="skeleton-text short"></div>
+                        <div class="skeleton-price"></div>
+                    </div>
+                </div>
+            {/for}
+        </div>
+    {else}
+        {if !hasProducts}
+            <!-- Empty State -->
+            <div class="grid-empty-state">
+                <div class="empty-icon">📦</div>
+                <p class="empty-message">{emptyMessage}</p>
+            </div>
+        {else}
+            <!-- Product Grid -->
+            <div class="flin-product-grid cols-{columns}" style="--grid-gap: {getGapSize()}; --min-card-width: {minCardWidth};">
+                {for product in displayProducts}
+                    <div class="grid-item">
+                        <ProductCard
+                            image={product.image}
+                            imageAlt={product.imageAlt}
+                            title={product.title}
+                            description={product.description}
+                            price={product.price}
+                            originalPrice={product.originalPrice}
+                            currency={product.currency}
+                            rating={product.rating}
+                            reviewCount={product.reviewCount}
+                            badge={product.badge}
+                            badgeVariant={product.badgeVariant}
+                            inStock={product.inStock}
+                            variant={cardVariant}
+                            showRating={showRating}
+                            showDescription={showDescription}
+                            onAddToCart={() => handleAddToCart(product)}
+                            onQuickView={() => handleQuickView(product)}
+                        />
+                    </div>
+                {/for}
+            </div>
+        {/if}
+    {/if}
+</div>

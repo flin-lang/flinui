@@ -1,0 +1,556 @@
+// ============================================================================
+// ProductReviewForm — FlinUI PRO E-commerce
+// Submit review form with rating selector, text input, and validation
+// ============================================================================
+// Props:
+//   onSubmit: function (required) - Callback with review data
+//   requireName: bool (default: true)
+//   requireEmail: bool (default: false)
+//   requireTitle: bool (default: true)
+//   allowPhotos: bool (default: true)
+//   maxPhotos: number (default: 5)
+//   submitButtonText: text (default: "Submit Review")
+//   isLoggedIn: bool (default: false)
+// ============================================================================
+
+onSubmit = props.onSubmit || none
+requireName = props.requireName || true
+requireEmail = props.requireEmail || false
+requireTitle = props.requireTitle || true
+allowPhotos = props.allowPhotos || true
+maxPhotos = props.maxPhotos || 5
+submitButtonText = props.submitButtonText || "Submit Review"
+isLoggedIn = props.isLoggedIn || false
+
+entity ReviewFormState {
+    rating: number
+    hoveredRating: number
+    title: text
+    content: text
+    name: text
+    email: text
+    photos: array
+    isSubmitting: bool
+    errors: map
+}
+
+state = ReviewFormState {
+    rating: 0,
+    hoveredRating: 0,
+    title: "",
+    content: "",
+    name: "",
+    email: "",
+    photos: [],
+    isSubmitting: false,
+    errors: [:]
+}
+
+fn handleStarHover(index) {
+    state.hoveredRating = index
+}
+
+fn handleStarLeave() {
+    state.hoveredRating = 0
+}
+
+fn handleStarClick(index) {
+    state.rating = index
+    state.errors.rating = none
+}
+
+fn handlePhotoUpload(files) {
+    if files.length + state.photos.length > maxPhotos {
+        state.errors.photos = "Maximum " + maxPhotos + " photos allowed"
+        return
+    }
+
+    for file in files {
+        if state.photos.length < maxPhotos {
+            reader = new FileReader()
+            reader.onload = fn(e) {
+                state.photos.push(e.target.result)
+            }
+            reader.readAsDataURL(file)
+        }
+    }
+    state.errors.photos = none
+}
+
+fn removePhoto(index) {
+    state.photos.splice(index, 1)
+    state.errors.photos = none
+}
+
+fn validateForm() {
+    errors = [:]
+
+    if state.rating == 0 {
+        errors.rating = "Please select a rating"
+    }
+
+    if requireTitle && state.title.trim() == "" {
+        errors.title = "Title is required"
+    }
+
+    if state.content.trim() == "" {
+        errors.content = "Review content is required"
+    }
+
+    if state.content.trim().length < 10 {
+        errors.content = "Review must be at least 10 characters"
+    }
+
+    if !isLoggedIn && requireName && state.name.trim() == "" {
+        errors.name = "Name is required"
+    }
+
+    if !isLoggedIn && requireEmail && state.email.trim() == "" {
+        errors.email = "Email is required"
+    }
+
+    if !isLoggedIn && requireEmail && state.email.includes("@") == false {
+        errors.email = "Please enter a valid email"
+    }
+
+    state.errors = errors
+    return Object.keys(errors).length == 0
+}
+
+fn handleSubmit() {
+    if !validateForm() {
+        return
+    }
+
+    if onSubmit == none {
+        return
+    }
+
+    state.isSubmitting = true
+
+    reviewData = [
+        "rating": state.rating,
+        "title": state.title,
+        "content": state.content,
+        "photos": state.photos
+    ]
+
+    if !isLoggedIn {
+        reviewData.name = state.name
+        if requireEmail {
+            reviewData.email = state.email
+        }
+    }
+
+    onSubmit(reviewData)
+
+    state.rating = 0
+    state.title = ""
+    state.content = ""
+    state.name = ""
+    state.email = ""
+    state.photos = []
+    state.isSubmitting = false
+}
+
+<div class="product-review-form">
+    <style>
+        .product-review-form {
+            font-family: var(--flin-font-body);
+            width: 100%;
+            padding: var(--flin-space-8);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-card);
+        }
+
+        .product-review-form__title {
+            font-size: var(--flin-text-2xl);
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .product-review-form__field {
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .product-review-form__label {
+            display: block;
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            margin-bottom: var(--flin-space-2);
+        }
+
+        .product-review-form__label--required::after {
+            content: " *";
+            color: var(--flin-accent-rose);
+        }
+
+        .product-review-form__rating-selector {
+            display: flex;
+            gap: var(--flin-space-2);
+        }
+
+        .product-review-form__star {
+            font-size: var(--flin-text-3xl);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+            color: var(--flin-text-muted);
+        }
+
+        .product-review-form__star--filled {
+            color: var(--flin-accent-gold);
+            transform: scale(1.1);
+        }
+
+        .product-review-form__star:hover {
+            transform: scale(1.2);
+        }
+
+        .product-review-form__rating-label {
+            display: block;
+            margin-top: var(--flin-space-2);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-secondary);
+        }
+
+        .product-review-form__input {
+            width: 100%;
+            padding: var(--flin-space-3);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-deep);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-input);
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .product-review-form__input:focus {
+            outline: none;
+            border-color: var(--flin-accent-gold);
+            box-shadow: 0 0 0 3px var(--flin-accent-gold-muted);
+        }
+
+        .product-review-form__input--error {
+            border-color: var(--flin-accent-rose);
+        }
+
+        .product-review-form__textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: var(--flin-space-3);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-deep);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-input);
+            resize: vertical;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .product-review-form__textarea:focus {
+            outline: none;
+            border-color: var(--flin-accent-gold);
+            box-shadow: 0 0 0 3px var(--flin-accent-gold-muted);
+        }
+
+        .product-review-form__textarea--error {
+            border-color: var(--flin-accent-rose);
+        }
+
+        .product-review-form__error {
+            display: block;
+            margin-top: var(--flin-space-2);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-accent-rose);
+        }
+
+        .product-review-form__hint {
+            display: block;
+            margin-top: var(--flin-space-2);
+            font-size: var(--flin-text-sm);
+            color: var(--flin-text-muted);
+        }
+
+        .product-review-form__photo-upload {
+            margin-bottom: var(--flin-space-6);
+        }
+
+        .product-review-form__photo-upload-button {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--flin-space-2);
+            padding: var(--flin-space-3) var(--flin-space-4);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-text-primary);
+            background: var(--flin-bg-elevated);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-button);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .product-review-form__photo-upload-button:hover {
+            background: var(--flin-bg-hover);
+            border-color: var(--flin-accent-gold);
+        }
+
+        .product-review-form__photo-preview-list {
+            display: flex;
+            gap: var(--flin-space-3);
+            margin-top: var(--flin-space-4);
+            flex-wrap: wrap;
+        }
+
+        .product-review-form__photo-preview {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .product-review-form__photo-preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--flin-radius-md);
+            border: 1px solid var(--flin-border-subtle);
+        }
+
+        .product-review-form__photo-remove {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-accent-rose);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .product-review-form__photo-remove:hover {
+            transform: scale(1.1);
+        }
+
+        .product-review-form__two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--flin-space-4);
+        }
+
+        .product-review-form__submit {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--flin-space-3);
+            margin-top: var(--flin-space-8);
+        }
+
+        .product-review-form__submit-button {
+            padding: var(--flin-space-4) var(--flin-space-8);
+            font-family: var(--flin-font-body);
+            font-size: var(--flin-text-base);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-bg-deep);
+            background: var(--flin-accent-gold);
+            border: none;
+            border-radius: var(--flin-radius-button);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast) var(--flin-ease-out);
+        }
+
+        .product-review-form__submit-button:hover {
+            background: var(--flin-accent-gold-bright);
+            transform: translateY(-2px);
+            box-shadow: var(--flin-shadow-glow-gold);
+        }
+
+        .product-review-form__submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 768px) {
+            .product-review-form__two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <h2 class="product-review-form__title">Write a Review</h2>
+
+    <form submit={handleSubmit()}>
+        <div class="product-review-form__field">
+            <label class="product-review-form__label product-review-form__label--required">
+                Your Rating
+            </label>
+            <div class="product-review-form__rating-selector">
+                {for i = 1; i <= 5; i++}
+                    <span
+                        class="product-review-form__star"
+                        data-filled={i <= (state.hoveredRating > 0 ? state.hoveredRating : state.rating)}
+                        mouseenter={handleStarHover(i)}
+                        mouseleave={handleStarLeave()}
+                        click={handleStarClick(i)}
+                    >
+                        {i <= (state.hoveredRating > 0 ? state.hoveredRating : state.rating) ? "★" : "☆"}
+                    </span>
+                {/for}
+            </div>
+            {if state.rating > 0}
+                <span class="product-review-form__rating-label">
+                    {state.rating} out of 5 stars
+                </span>
+            {/if}
+            {if state.errors.rating}
+                <span class="product-review-form__error">{state.errors.rating}</span>
+            {/if}
+        </div>
+
+        {if requireTitle}
+            <div class="product-review-form__field">
+                <label class="product-review-form__label product-review-form__label--required">
+                    Review Title
+                </label>
+                <input
+                    type="text"
+                    class="product-review-form__input"
+                    placeholder="Sum up your experience in a few words"
+                    value={state.title}
+                    input={state.title = event.target.value}
+                />
+                {if state.errors.title}
+                    <span class="product-review-form__error">{state.errors.title}</span>
+                {/if}
+            </div>
+        {/if}
+
+        <div class="product-review-form__field">
+            <label class="product-review-form__label product-review-form__label--required">
+                Your Review
+            </label>
+            <textarea
+                class="product-review-form__textarea"
+                placeholder="Tell us about your experience with this product..."
+                value={state.content}
+                input={state.content = event.target.value}
+            ></textarea>
+            <span class="product-review-form__hint">
+                Minimum 10 characters ({state.content.length} characters)
+            </span>
+            {if state.errors.content}
+                <span class="product-review-form__error">{state.errors.content}</span>
+            {/if}
+        </div>
+
+        {if !isLoggedIn}
+            <div class="product-review-form__two-column">
+                <div class="product-review-form__field">
+                    <label class="product-review-form__label {requireName ? 'product-review-form__label--required' : ''}">
+                        Your Name
+                    </label>
+                    <input
+                        type="text"
+                        class="product-review-form__input"
+                        placeholder="Enter your name"
+                        value={state.name}
+                        input={state.name = event.target.value}
+                    />
+                    {if state.errors.name}
+                        <span class="product-review-form__error">{state.errors.name}</span>
+                    {/if}
+                </div>
+
+                {if requireEmail}
+                    <div class="product-review-form__field">
+                        <label class="product-review-form__label product-review-form__label--required">
+                            Your Email
+                        </label>
+                        <input
+                            type="email"
+                            class="product-review-form__input"
+                            placeholder="your@email.com"
+                            value={state.email}
+                            input={state.email = event.target.value}
+                        />
+                        <span class="product-review-form__hint">
+                            Your email will not be published
+                        </span>
+                        {if state.errors.email}
+                            <span class="product-review-form__error">{state.errors.email}</span>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+        {/if}
+
+        {if allowPhotos}
+            <div class="product-review-form__photo-upload">
+                <label class="product-review-form__label">
+                    Add Photos (Optional)
+                </label>
+                <button
+                    type="button"
+                    class="product-review-form__photo-upload-button"
+                    click={document.getElementById('photo-upload').click()}
+                >
+                    📷 Upload Photos
+                </button>
+                <input
+                    id="photo-upload"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    style="display: none"
+                    change={handlePhotoUpload(event.target.files)}
+                />
+                <span class="product-review-form__hint">
+                    Maximum {maxPhotos} photos ({state.photos.length}/{maxPhotos})
+                </span>
+                {if state.errors.photos}
+                    <span class="product-review-form__error">{state.errors.photos}</span>
+                {/if}
+
+                {if state.photos.length > 0}
+                    <div class="product-review-form__photo-preview-list">
+                        {for photo, index in state.photos}
+                            <div class="product-review-form__photo-preview">
+                                <img src={photo} alt="Upload preview" class="product-review-form__photo-preview-img" />
+                                <button
+                                    type="button"
+                                    class="product-review-form__photo-remove"
+                                    click={removePhoto(index)}
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        {/for}
+                    </div>
+                {/if}
+            </div>
+        {/if}
+
+        <div class="product-review-form__submit">
+            <button
+                type="submit"
+                class="product-review-form__submit-button"
+                disabled={state.isSubmitting}
+            >
+                {state.isSubmitting ? "Submitting..." : submitButtonText}
+            </button>
+        </div>
+    </form>
+</div>

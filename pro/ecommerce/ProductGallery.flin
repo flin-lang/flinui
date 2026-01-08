@@ -1,0 +1,471 @@
+// ProductGallery.flin
+// FlinUI PRO E-Commerce Component
+//
+// Props:
+//   - images: Array of image objects with {url, alt, thumbnail} (array)
+//   - variant: Gallery layout variant (string: "default", "slider", "grid")
+//   - aspectRatio: Main image aspect ratio (string: "square", "portrait", "landscape")
+//   - thumbnailPosition: Position of thumbnails (string: "bottom", "left", "right")
+//   - showZoom: Enable zoom on hover (boolean)
+//   - showFullscreen: Show fullscreen button (boolean)
+//   - autoplay: Autoplay slideshow (boolean)
+//   - autoplayDelay: Delay between slides in ms (number)
+
+// Extract props with defaults
+images = props.images || []
+variant = props.variant || "default"
+aspectRatio = props.aspectRatio || "square"
+thumbnailPosition = props.thumbnailPosition || "bottom"
+showZoom = props.showZoom != false
+showFullscreen = props.showFullscreen != false
+autoplay = props.autoplay || false
+autoplayDelay = props.autoplayDelay || 3000
+
+// State
+selectedIndex = 0
+isZoomed = false
+isFullscreen = false
+zoomPosition = { x: 50, y: 50 }
+autoplayTimer = none
+
+// Computed
+selectedImage = images.length > 0 ? images[selectedIndex] : { url: "/placeholder.png", alt: "No image", thumbnail: "/placeholder.png" }
+hasMultipleImages = images.length > 1
+
+// Navigation
+goToImage = fn(index) {
+    if index >= 0 && index < images.length {
+        selectedIndex = index
+        resetAutoplay()
+    }
+}
+
+nextImage = fn() {
+    selectedIndex = (selectedIndex + 1) % images.length
+    resetAutoplay()
+}
+
+prevImage = fn() {
+    selectedIndex = (selectedIndex - 1 + images.length) % images.length
+    resetAutoplay()
+}
+
+// Zoom handling
+handleMouseMove = fn(event) {
+    if !showZoom { return }
+
+    rect = event.currentTarget.getBoundingClientRect()
+    x = ((event.clientX - rect.left) / rect.width) * 100
+    y = ((event.clientY - rect.top) / rect.height) * 100
+
+    zoomPosition = { x: x, y: y }
+}
+
+handleMouseEnter = fn() {
+    if showZoom {
+        isZoomed = true
+    }
+}
+
+handleMouseLeave = fn() {
+    isZoomed = false
+}
+
+// Fullscreen
+toggleFullscreen = fn() {
+    isFullscreen = !isFullscreen
+}
+
+closeFullscreen = fn() {
+    isFullscreen = false
+}
+
+// Keyboard navigation
+handleKeyDown = fn(event) {
+    if event.key == "ArrowLeft" {
+        prevImage()
+    } else if event.key == "ArrowRight" {
+        nextImage()
+    } else if event.key == "Escape" {
+        closeFullscreen()
+    }
+}
+
+// Autoplay
+startAutoplay = fn() {
+    if autoplay && hasMultipleImages {
+        autoplayTimer = setInterval(nextImage, autoplayDelay)
+    }
+}
+
+stopAutoplay = fn() {
+    if autoplayTimer != none {
+        clearInterval(autoplayTimer)
+        autoplayTimer = none
+    }
+}
+
+resetAutoplay = fn() {
+    stopAutoplay()
+    startAutoplay()
+}
+
+// Lifecycle
+onMount {
+    document.addEventListener("keydown", handleKeyDown)
+    startAutoplay()
+}
+
+onDestroy {
+    document.removeEventListener("keydown", handleKeyDown)
+    stopAutoplay()
+}
+
+<div class="flin-product-gallery {variant} thumbnail-{thumbnailPosition}" mouseenter={stopAutoplay} mouseleave={startAutoplay}>
+    <style>
+        .flin-product-gallery {
+            display: flex;
+            gap: var(--flin-space-4);
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .flin-product-gallery.thumbnail-bottom {
+            flex-direction: column;
+        }
+
+        .flin-product-gallery.thumbnail-left {
+            flex-direction: row-reverse;
+        }
+
+        .flin-product-gallery.thumbnail-right {
+            flex-direction: row;
+        }
+
+        /* Main Image Container */
+        .main-image-container {
+            position: relative;
+            flex: 1;
+            overflow: hidden;
+            border-radius: var(--flin-radius-card);
+            background: var(--flin-bg-elevated);
+        }
+
+        .main-image-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .main-image-wrapper.square {
+            aspect-ratio: 1 / 1;
+        }
+
+        .main-image-wrapper.portrait {
+            aspect-ratio: 3 / 4;
+        }
+
+        .main-image-wrapper.landscape {
+            aspect-ratio: 4 / 3;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--flin-transition-normal);
+        }
+
+        .main-image.zoomed {
+            transform: scale(2);
+            transform-origin: var(--zoom-x) var(--zoom-y);
+            cursor: zoom-out;
+        }
+
+        .main-image:not(.zoomed) {
+            cursor: zoom-in;
+        }
+
+        /* Navigation Arrows */
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: var(--flin-z-10);
+        }
+
+        .gallery-nav.prev {
+            left: var(--flin-space-3);
+        }
+
+        .gallery-nav.next {
+            right: var(--flin-space-3);
+        }
+
+        .nav-button {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-full);
+            color: var(--flin-text-primary);
+            font-size: var(--flin-text-xl);
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+        }
+
+        .flin-product-gallery:hover .nav-button {
+            opacity: 1;
+        }
+
+        .nav-button:hover {
+            background: var(--flin-accent-gold);
+            border-color: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+            transform: scale(1.1);
+        }
+
+        .nav-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Fullscreen Button */
+        .fullscreen-button {
+            position: absolute;
+            top: var(--flin-space-3);
+            right: var(--flin-space-3);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-button);
+            color: var(--flin-text-primary);
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            z-index: var(--flin-z-10);
+        }
+
+        .flin-product-gallery:hover .fullscreen-button {
+            opacity: 1;
+        }
+
+        .fullscreen-button:hover {
+            background: var(--flin-accent-gold);
+            border-color: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+        }
+
+        /* Thumbnails */
+        .thumbnails-container {
+            display: flex;
+            gap: var(--flin-space-2);
+        }
+
+        .thumbnail-bottom .thumbnails-container {
+            flex-direction: row;
+            overflow-x: auto;
+            padding: var(--flin-space-1);
+        }
+
+        .thumbnail-left .thumbnails-container,
+        .thumbnail-right .thumbnails-container {
+            flex-direction: column;
+            overflow-y: auto;
+            max-height: 600px;
+            padding: var(--flin-space-1);
+        }
+
+        .thumbnail {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+            border-radius: var(--flin-radius-lg);
+            overflow: hidden;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+            background: var(--flin-bg-elevated);
+        }
+
+        .thumbnail:hover {
+            border-color: var(--flin-border-medium);
+            transform: scale(1.05);
+        }
+
+        .thumbnail.selected {
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-glow-gold);
+        }
+
+        .thumbnail-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Fullscreen Modal */
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: var(--flin-z-modal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--flin-space-8);
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fullscreen-image-container {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+
+        .fullscreen-image {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .fullscreen-close {
+            position: absolute;
+            top: var(--flin-space-4);
+            right: var(--flin-space-4);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-full);
+            color: var(--flin-text-primary);
+            font-size: var(--flin-text-2xl);
+            cursor: pointer;
+            transition: all var(--flin-transition-normal);
+        }
+
+        .fullscreen-close:hover {
+            background: var(--flin-accent-gold);
+            color: var(--flin-text-inverse);
+            transform: rotate(90deg);
+        }
+
+        /* Image Counter */
+        .image-counter {
+            position: absolute;
+            bottom: var(--flin-space-3);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-badge);
+            padding: var(--flin-space-2) var(--flin-space-4);
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+            backdrop-filter: blur(8px);
+            z-index: var(--flin-z-10);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .thumbnail-left .thumbnails-container,
+            .thumbnail-right .thumbnails-container {
+                flex-direction: row;
+                max-height: none;
+                overflow-x: auto;
+            }
+
+            .flin-product-gallery.thumbnail-left,
+            .flin-product-gallery.thumbnail-right {
+                flex-direction: column;
+            }
+
+            .nav-button {
+                width: 40px;
+                height: 40px;
+                opacity: 1;
+            }
+
+            .fullscreen-button {
+                opacity: 1;
+            }
+        }
+    </style>
+
+    <!-- Main Image Container -->
+    <div class="main-image-container">
+        <div class="main-image-wrapper {aspectRatio}">
+            <img
+                src={selectedImage.url}
+                alt={selectedImage.alt}
+                class="main-image {isZoomed ? 'zoomed' : ''}"
+                style="--zoom-x: {zoomPosition.x}%; --zoom-y: {zoomPosition.y}%;"
+                mousemove={handleMouseMove}
+                mouseenter={handleMouseEnter}
+                mouseleave={handleMouseLeave}
+            />
+
+            {if hasMultipleImages}
+                <div class="gallery-nav prev">
+                    <button class="nav-button" click={prevImage}>‹</button>
+                </div>
+
+                <div class="gallery-nav next">
+                    <button class="nav-button" click={nextImage}>›</button>
+                </div>
+
+                <div class="image-counter">
+                    {selectedIndex + 1} / {images.length}
+                </div>
+            {/if}
+
+            {if showFullscreen}
+                <button class="fullscreen-button" click={toggleFullscreen}>⛶</button>
+            {/if}
+        </div>
+    </div>
+
+    <!-- Thumbnails -->
+    {if hasMultipleImages}
+        <div class="thumbnails-container">
+            {for image, index in images}
+                <div
+                    class="thumbnail {selectedIndex == index ? 'selected' : ''}"
+                    click={() => goToImage(index)}
+                >
+                    <img src={image.thumbnail || image.url} alt={image.alt} class="thumbnail-image" />
+                </div>
+            {/for}
+        </div>
+    {/if}
+
+    <!-- Fullscreen Modal -->
+    {if isFullscreen}
+        <div class="fullscreen-overlay" click={closeFullscreen}>
+            <div class="fullscreen-image-container" click={(e) => e.stopPropagation()}>
+                <img src={selectedImage.url} alt={selectedImage.alt} class="fullscreen-image" />
+                <button class="fullscreen-close" click={closeFullscreen}>×</button>
+            </div>
+        </div>
+    {/if}
+</div>

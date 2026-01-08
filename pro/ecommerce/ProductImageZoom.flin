@@ -1,0 +1,321 @@
+// ============================================================================
+// ProductImageZoom — FlinUI PRO E-commerce
+// Interactive image zoom with magnifier lens on hover
+// ============================================================================
+// Props:
+//   image: text URL (required)
+//   alt: text (default: "Product image")
+//   zoomLevel: number (default: 2.5)
+//   lensSize: number in pixels (default: 150)
+//   enableFullscreen: boolean (default: true)
+// ============================================================================
+
+image = props.image || ""
+alt = props.alt || "Product image"
+zoomLevel = props.zoomLevel || 2.5
+lensSize = props.lensSize || 150
+enableFullscreen = props.enableFullscreen != false
+
+isZooming = false
+isFullscreen = false
+lensX = 0
+lensY = 0
+imageContainer = none
+lensElement = none
+zoomImage = none
+
+function handleMouseEnter() {
+    isZooming = true
+}
+
+function handleMouseLeave() {
+    isZooming = false
+}
+
+function handleMouseMove(e) {
+    if imageContainer == none || lensElement == none {
+        return
+    }
+
+    rect = imageContainer.getBoundingClientRect()
+    x = e.clientX - rect.left
+    y = e.clientY - rect.top
+
+    lensHalf = lensSize / 2
+    lensX = Math.max(lensHalf, Math.min(x, rect.width - lensHalf))
+    lensY = Math.max(lensHalf, Math.min(y, rect.height - lensHalf))
+
+    if zoomImage != none {
+        bgX = (lensX / rect.width) * 100
+        bgY = (lensY / rect.height) * 100
+        zoomImage.style.transformOrigin = bgX + "% " + bgY + "%"
+    }
+}
+
+function toggleFullscreen() {
+    isFullscreen = !isFullscreen
+    if isFullscreen {
+        document.body.style.overflow = "hidden"
+    } else {
+        document.body.style.overflow = ""
+    }
+}
+
+function handleFullscreenClick(e) {
+    if e.target.classList.contains("fullscreen-overlay") {
+        toggleFullscreen()
+    }
+}
+
+onMount {
+    imageContainer = document.querySelector(".zoom-container")
+    lensElement = document.querySelector(".zoom-lens")
+    zoomImage = document.querySelector(".zoom-image")
+}
+
+<div class="product-image-zoom">
+    <style>
+        .product-image-zoom {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .zoom-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            overflow: hidden;
+            border-radius: var(--flin-radius-lg);
+            border: 1px solid var(--flin-border-subtle);
+            background: var(--flin-bg-deep);
+            cursor: crosshair;
+        }
+
+        .zoom-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform var(--flin-transition-normal);
+        }
+
+        .zoom-container:hover .zoom-image {
+            transform: scale(var(--zoom-level));
+        }
+
+        .zoom-lens {
+            position: absolute;
+            border: 2px solid var(--flin-accent-gold);
+            border-radius: var(--flin-radius-full);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity var(--flin-transition-fast);
+            background: var(--flin-accent-gold-muted);
+            backdrop-filter: blur(4px);
+            box-shadow:
+                0 0 0 1px rgba(0, 0, 0, 0.1),
+                0 4px 12px rgba(212, 168, 83, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .zoom-container:hover .zoom-lens {
+            opacity: 1;
+        }
+
+        .lens-crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+        }
+
+        .lens-crosshair::before,
+        .lens-crosshair::after {
+            content: "";
+            position: absolute;
+            background: var(--flin-accent-gold);
+        }
+
+        .lens-crosshair::before {
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            transform: translateY(-50%);
+        }
+
+        .lens-crosshair::after {
+            top: 0;
+            left: 50%;
+            width: 1px;
+            height: 100%;
+            transform: translateX(-50%);
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            top: var(--flin-space-4);
+            right: var(--flin-space-4);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-icon);
+            color: var(--flin-text-primary);
+            cursor: pointer;
+            transition: all var(--flin-transition-fast);
+            z-index: var(--flin-z-10);
+        }
+
+        .fullscreen-btn:hover {
+            background: var(--flin-accent-gold);
+            color: var(--flin-bg-deep);
+            border-color: var(--flin-accent-gold);
+            box-shadow: var(--flin-shadow-glow-gold);
+        }
+
+        .zoom-info {
+            margin-top: var(--flin-space-4);
+            padding: var(--flin-space-3);
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-subtle);
+            border-radius: var(--flin-radius-md);
+            text-align: center;
+            color: var(--flin-text-secondary);
+            font-size: var(--flin-text-sm);
+        }
+
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: var(--flin-z-modal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--flin-space-8);
+            cursor: zoom-out;
+            animation: fadeIn var(--flin-transition-normal);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .fullscreen-image-container {
+            max-width: 90vw;
+            max-height: 90vh;
+            position: relative;
+            cursor: default;
+        }
+
+        .fullscreen-image {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: var(--flin-radius-lg);
+            box-shadow: var(--flin-shadow-2xl);
+        }
+
+        .fullscreen-close {
+            position: absolute;
+            top: var(--flin-space-4);
+            right: var(--flin-space-4);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--flin-bg-surface);
+            border: 1px solid var(--flin-border-medium);
+            border-radius: var(--flin-radius-full);
+            color: var(--flin-text-primary);
+            cursor: pointer;
+            font-size: var(--flin-text-xl);
+            transition: all var(--flin-transition-fast);
+        }
+
+        .fullscreen-close:hover {
+            background: var(--flin-danger);
+            color: white;
+            border-color: var(--flin-danger);
+            transform: rotate(90deg);
+        }
+
+        @media (max-width: 768px) {
+            .zoom-container {
+                height: 400px;
+            }
+
+            .zoom-lens {
+                display: none;
+            }
+
+            .zoom-container:hover .zoom-image {
+                transform: none;
+            }
+
+            .zoom-info {
+                display: none;
+            }
+        }
+    </style>
+
+    <div
+        class="zoom-container"
+        mouseenter={handleMouseEnter}
+        mouseleave={handleMouseLeave}
+        mousemove={handleMouseMove}
+        style="--zoom-level: {zoomLevel};"
+    >
+        <img src={image} alt={alt} class="zoom-image" />
+
+        {if isZooming}
+            <div
+                class="zoom-lens"
+                style="
+                    width: {lensSize}px;
+                    height: {lensSize}px;
+                    left: {lensX - lensSize / 2}px;
+                    top: {lensY - lensSize / 2}px;
+                "
+            >
+                <div class="lens-crosshair"></div>
+            </div>
+        {/if}
+
+        {if enableFullscreen}
+            <button class="fullscreen-btn" click={toggleFullscreen} title="View fullscreen">
+                ⛶
+            </button>
+        {/if}
+    </div>
+
+    <div class="zoom-info">
+        Hover over image to zoom • Click fullscreen icon for larger view
+    </div>
+
+    {if isFullscreen}
+        <div class="fullscreen-overlay" click={handleFullscreenClick}>
+            <div class="fullscreen-image-container">
+                <img src={image} alt={alt} class="fullscreen-image" />
+                <button class="fullscreen-close" click={toggleFullscreen} title="Close">
+                    ×
+                </button>
+            </div>
+        </div>
+    {/if}
+</div>

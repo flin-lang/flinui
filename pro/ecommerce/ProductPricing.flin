@@ -1,0 +1,175 @@
+// ============================================================================
+// ProductPricing — FlinUI PRO E-commerce
+// Displays product pricing with sale price, original price, and discount badge
+// ============================================================================
+// Props:
+//   price: number (required) - Original/current price
+//   salePrice: number (optional) - Sale price (shows if lower than price)
+//   currency: text (default: "$")
+//   showCents: bool (default: true)
+//   size: "sm" | "md" | "lg" | "xl" (default: "md")
+//   discountPosition: "badge" | "inline" (default: "badge")
+// ============================================================================
+
+price = props.price || 0
+salePrice = props.salePrice || none
+currency = props.currency || "$"
+showCents = props.showCents || true
+size = props.size || "md"
+discountPosition = props.discountPosition || "badge"
+
+showSalePrice = false
+discountPercent = 0
+formattedPrice = ""
+formattedSalePrice = ""
+
+onMount {
+    if salePrice != none && salePrice < price {
+        showSalePrice = true
+        discountPercent = Math.round(((price - salePrice) / price) * 100)
+    }
+
+    if showCents {
+        formattedPrice = currency + price.toFixed(2)
+        if showSalePrice {
+            formattedSalePrice = currency + salePrice.toFixed(2)
+        }
+    } else {
+        formattedPrice = currency + Math.round(price)
+        if showSalePrice {
+            formattedSalePrice = currency + Math.round(salePrice)
+        }
+    }
+}
+
+<div class="product-pricing" data-size={size} data-has-sale={showSalePrice}>
+    <style>
+        .product-pricing {
+            font-family: var(--flin-font-body);
+            display: flex;
+            align-items: center;
+            gap: var(--flin-space-3);
+            flex-wrap: wrap;
+        }
+
+        .product-pricing__container {
+            display: flex;
+            align-items: baseline;
+            gap: var(--flin-space-2);
+        }
+
+        .product-pricing__sale-price {
+            font-weight: var(--flin-font-bold);
+            color: var(--flin-accent-gold);
+            letter-spacing: var(--flin-tracking-tight);
+        }
+
+        .product-pricing[data-size="sm"] .product-pricing__sale-price {
+            font-size: var(--flin-text-lg);
+        }
+
+        .product-pricing[data-size="md"] .product-pricing__sale-price {
+            font-size: var(--flin-text-2xl);
+        }
+
+        .product-pricing[data-size="lg"] .product-pricing__sale-price {
+            font-size: var(--flin-text-3xl);
+        }
+
+        .product-pricing[data-size="xl"] .product-pricing__sale-price {
+            font-size: var(--flin-text-4xl);
+        }
+
+        .product-pricing__original-price {
+            font-weight: var(--flin-font-medium);
+            color: var(--flin-text-primary);
+        }
+
+        .product-pricing[data-has-sale="true"] .product-pricing__original-price {
+            color: var(--flin-text-muted);
+            text-decoration: line-through;
+            text-decoration-thickness: 2px;
+            font-weight: var(--flin-font-normal);
+        }
+
+        .product-pricing[data-size="sm"] .product-pricing__original-price {
+            font-size: var(--flin-text-base);
+        }
+
+        .product-pricing[data-size="md"] .product-pricing__original-price {
+            font-size: var(--flin-text-lg);
+        }
+
+        .product-pricing[data-size="lg"] .product-pricing__original-price {
+            font-size: var(--flin-text-xl);
+        }
+
+        .product-pricing[data-size="xl"] .product-pricing__original-price {
+            font-size: var(--flin-text-2xl);
+        }
+
+        .product-pricing__discount-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--flin-space-1) var(--flin-space-2);
+            background: var(--flin-accent-emerald);
+            color: var(--flin-bg-deep);
+            font-size: var(--flin-text-xs);
+            font-weight: var(--flin-font-bold);
+            border-radius: var(--flin-radius-badge);
+            letter-spacing: var(--flin-tracking-wide);
+            text-transform: uppercase;
+        }
+
+        .product-pricing[data-size="lg"] .product-pricing__discount-badge,
+        .product-pricing[data-size="xl"] .product-pricing__discount-badge {
+            font-size: var(--flin-text-sm);
+            padding: var(--flin-space-1-5) var(--flin-space-3);
+        }
+
+        .product-pricing__discount-inline {
+            font-size: var(--flin-text-sm);
+            font-weight: var(--flin-font-semibold);
+            color: var(--flin-accent-emerald);
+        }
+
+        .product-pricing[data-size="lg"] .product-pricing__discount-inline,
+        .product-pricing[data-size="xl"] .product-pricing__discount-inline {
+            font-size: var(--flin-text-base);
+        }
+
+        .product-pricing__cents {
+            font-size: 0.6em;
+            vertical-align: super;
+            font-weight: var(--flin-font-medium);
+        }
+    </style>
+
+    <div class="product-pricing__container">
+        {if showSalePrice}
+            <span class="product-pricing__sale-price">
+                {formattedSalePrice}
+            </span>
+            <span class="product-pricing__original-price">
+                {formattedPrice}
+            </span>
+        {else}
+            <span class="product-pricing__original-price">
+                {formattedPrice}
+            </span>
+        {/if}
+    </div>
+
+    {if showSalePrice && discountPercent > 0}
+        {if discountPosition == "badge"}
+            <span class="product-pricing__discount-badge">
+                Save {discountPercent}%
+            </span>
+        {else}
+            <span class="product-pricing__discount-inline">
+                ({discountPercent}% off)
+            </span>
+        {/if}
+    {/if}
+</div>
