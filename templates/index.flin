@@ -81,10 +81,18 @@
 // PricingTable, FeaturesGrid, SettingsLayout, ProfileCard, ErrorPage,
 // BankingDashboard, EcommerceDashboard, EmailClient, CRMDashboard,
 // MonitoringDashboard, AnalyticsDashboard
+//
+// Navigation Templates (NEW):
+// - NavbarFull        - Full-featured navbar with dropdowns and mobile menu
+// - HeaderFull        - Complete header with branding and navigation
+// - SidebarDashboard  - Dashboard sidebar with collapsible sections
+// - SidebarModern     - Modern sidebar with icons and tooltips
+// - StacksSidebar     - Stacked sidebar with multiple sections
+// - AppTopBar         - Application top bar with actions
 
 <div class="flinui-templates-info">
     <h2>FlinUI Templates</h2>
-    <p>16 production-ready page templates for building complete applications.</p>
+    <p>22 production-ready page templates for building complete applications.</p>
 </div>
 
 <style scoped>

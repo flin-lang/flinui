@@ -16,9 +16,10 @@
 // See: flinui/FLIN-COMPONENT-GUIDE.md for full documentation
 // ============================================================================
 
-// Available Components (25 total):
+// Available Components (26 total):
 
-// ═══ CHAT UI (10) ═══
+// ═══ CHAT UI (11) ═══
+// <AIChat />                   — Simple AI chat component
 // <AIChatbot />                — Full ChatGPT-style interface
 // <ChatMessages />             — Conversation thread
 // <ChatBubble />               — Individual message bubble

@@ -3,8 +3,10 @@
 // Analytics, metrics, layouts, and data visualization for admin dashboards
 // ============================================================================
 
-// Dashboard Layout (10 components)
+// Dashboard Layout (12 components)
 export AdminSidebar from "./AdminSidebar.flin"
+export AdminHeader from "./AdminHeader.flin"
+export DashboardSidebar from "./DashboardSidebar.flin"
 export DashboardHeader from "./DashboardHeader.flin"
 export DashboardGrid from "./DashboardGrid.flin"
 export DashboardCard from "./DashboardCard.flin"

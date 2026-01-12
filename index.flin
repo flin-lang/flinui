@@ -1,15 +1,15 @@
 // FlinUI - Official Component Library for FLIN
-// 241 production-ready components. No npm install. No dependencies. Just FLIN.
-// Version 2.0.0
+// 589 production-ready components. No npm install. No dependencies. Just FLIN.
+// Version 2.1.1
 
 // ============================================================================
 // FLINUI COMPONENT LIBRARY
 // ============================================================================
 //
-// 241 production-ready components for building modern web applications.
+// 589 production-ready components for building modern web applications.
 // All components use theme tokens for consistent styling and dark mode support.
 //
-// NEW in v2.0: FlinUI PRO with 25 AI & Chat components!
+// NEW in v2.1.1: Expanded PRO library with 237 components across 11 categories!
 //
 // Usage:
 //   Components are auto-imported when used in .flin files.
@@ -21,34 +21,28 @@
 //
 // ============================================================================
 
-// Component Categories:
+// Component Categories (352 core components):
 //
-// BASIC (45 components)
+// BASIC (33 components including 14 icon sets)
 //   Button, Input, Textarea, Select, Checkbox, Radio, Switch, Slider
-//   Text, Link, Icon (1572 Lucide icons - auto-routed to 14 category files), Image, Avatar, Badge, Tag
-//   IconButton, CloseButton, ButtonGroup, ThemeToggle, WhatsAppWidget, WalletCard
-//   ImageUpload, MiniCart, Header, AppTopBar, DashboardSidebar, StacksSidebar
-//   Sidebar, SidebarModern, Navbar, AdminHeader, and more...
+//   Text, Link, Icon, Image, Avatar, Badge, Tag, IconButton, CloseButton
+//   ButtonGroup, ThemeToggle, and 14 icon sets in icons/
 //
 // LAYOUT (24 components)
 //   Container, Stack, Grid, Flex, Box, Divider, Spacer, Center
 //   AspectRatio, Wrap, ResizablePanels, Header, Footer, Collapse
-//   Section, Hero, PageContainer, Affix, BackTop, ScrollArea, Splitter
-//   FooterBranded, and more...
+//   Section, Hero, PageContainer, and more...
 //
-// DATA DISPLAY (34 components)
+// DATA DISPLAY (33 components)
 //   Card, CardHeader, CardBody, CardFooter, Table, List, ListItem
 //   Progress, Spinner, Skeleton, Empty, Code, Kbd, Stat, Accordion
-//   Calendar, Carousel, Timeline, DataTable, AvatarGroup, BadgeGroup
-//   Comment, StatsGrid, WalletCard, Descriptions, QRCode, Watermark, Segmented
-//   InfiniteScroll, Masonry, AdvancedDataTable, Tree, Highlight
+//   Calendar, Carousel, Timeline, DataTable, and more...
 //
-// FORMS (22 components)
+// FORMS (39 components)
 //   Form, FormField, FormError, FormHelp, DatePicker, TimePicker
 //   ColorPicker, FileUpload, Autocomplete, PinInput, NumberInput
 //   PasswordInput, TagsInput, RatingInput, SearchInput, OTPInput
-//   RichTextEditor, DateRangePicker, MultiSelect, ImageCropper
-//   Mentions, InputMask
+//   RichTextEditor, DateRangePicker, MultiSelect, ImageUpload, and more...
 //
 // FEEDBACK (17 components)
 //   Alert, Toast, Modal, ModalHeader, ModalBody, ModalFooter
@@ -57,8 +51,7 @@
 //
 // NAVIGATION (19 components)
 //   Navbar, NavbarBrand, NavbarMenu, NavbarItem, Sidebar, SidebarItem
-//   Tabs, Tab, Breadcrumb, Pagination, Menu, Stepper, BottomNav, SkipNav
-//   Dropdown, ContextMenu, SpeedDial, UserMenu, LinkBox
+//   Tabs, Tab, Breadcrumb, Pagination, Menu, Stepper, BottomNav, and more...
 //
 // CHARTS (13 components)
 //   BarChart, LineChart, PieChart, AreaChart, SparkLine
@@ -72,54 +65,125 @@
 //   Combobox, Listbox, TreeView, VirtualList, TransferList
 //   DragDrop, Sortable, Kanban
 //
-// TEMPLATES (16 templates)
+// TEMPLATES (22 templates)
 //   DashboardLayout, AuthLayout, LoginForm, RegisterForm, LandingHero
 //   PricingTable, FeaturesGrid, SettingsLayout, ProfileCard, ErrorPage
-//   EcommerceDashboard, BankingDashboard, CRMDashboard, AnalyticsDashboard
-//   EmailClient, MonitoringDashboard
+//   NavbarFull, SidebarDashboard, HeaderFull, SidebarModern, and more...
 //
-// PRO (25 AI & Chat components) - NEW IN V2.0! 🎉
-//   AIChatbot, ChatInput, ChatMessages, ChatBubble, ChatTypingIndicator
-//   ChatStreamingText, ChatConversationList, ChatModelSelector, ChatReasoningPanel
-//   ChatSourceCitations, AIPromptInput, AIPromptLibrary, AIResponseCard
-//   AILoadingState, AIFeedbackButtons, AIToolCall, AICodeBlock, AIMarkdownRenderer
-//   AIAgentStatus, AIImageGenerator, AIChartGenerator, AITableGenerator
-//   AIFormGenerator, AIDocumentSummary, AIVoiceInput
+// DASHBOARD (37 components)
+//   Analytics widgets, stats cards, activity feeds, dashboard layouts
+//   AdminHeader, DashboardSidebar, and more...
+//
+// ECOMMERCE (46 components)
+//   Product cards, cart, checkout, payment forms, shop components, MiniCart
+//
+// MARKETING (40 components)
+//   Landing pages, CTAs, testimonials, pricing tables, and hero sections
 //
 // FLIN-NATIVE (2 components) - UNIQUE TO FLIN!
 //   TimeTravel - Navigate through variable history (memory-native)
 //   MemoryInspector - Visual FlinDB debugger (zero-config persistence)
 //
-// THEME (8 files)
+// THEME (7 files)
 //   tokens.flin - Design tokens and CSS variables (185+ tokens)
 //   variables.flin - CSS custom properties
 //   dark.flin - Dark mode support
 //   animations.flin - Animation utilities
 //   responsive.flin - Responsive breakpoints
 //   shadows.flin - Shadow system
-//   custom.flin - Theme customization
 //   index.flin - Theme provider
 //
+// UTILITIES (3 components)
+//   Helper utilities, shared functionality, and WhatsAppWidget
+//
+// TOKENS (1 file)
+//   Core design token definitions
+//
+// ============================================================================
+// PRO COMPONENTS (237 components) - PREMIUM COLLECTION
+// ============================================================================
+//
+// PRO/AI (26 components)
+//   AIChat, AIChatbot, ChatInput, ChatMessages, ChatBubble, ChatTypingIndicator
+//   ChatStreamingText, AIPromptInput, AIResponseCard, AICodeBlock
+//   AIAgentStatus, AIImageGenerator, and more...
+//
+// PRO/AUTH (20 components)
+//   LoginCard, RegisterCard, SocialLogin, PasswordStrength, OTPInput
+//   SessionTimeout, UserMenu, AccountSwitcher, and more...
+//
+// PRO/CONTENT (20 components)
+//   BlogPostCard, ArticleContent, AuthorCard, TableOfContents
+//   ReadingProgress, ShareButtons, and more...
+//
+// PRO/DATA (35 components)
+//   Advanced data tables, virtualized lists, tree views, and data grids
+//
+// PRO/ECOMMERCE (15 components)
+//   ProductCard, ProductGallery, ProductReviews, ProductCompare
+//   ProductRecommendations, and more...
+//
+// PRO/FEEDBACK (25 components)
+//   ModalFullscreen, ToastStack, SkeletonCard, Dropdown
+//   Tooltip, and more...
+//
+// PRO/FORMS (6 components)
+//   LoginForm, RegisterForm, ProfileForm, SettingsForm
+//   SearchForm, PasswordResetForm
+//
+// PRO/NAVIGATION (25 components)
+//   NavbarSimple, NavbarWithSearch, SidebarSimple, SidebarCollapsible
+//   MegaMenu, Breadcrumbs, Pagination, and more...
+//
+// PRO/PAGES (30 components)
+//   Full page templates and layouts
+//
+// PRO/SHELLS (20 components)
+//   AppShellSidebar, AppShellStacked, DashboardLayout, SettingsLayout
+//   InboxLayout, MasterDetail, and more...
+//
+// PRO/UTILITIES (15 components)
+//   Pro-level utility components and helpers
+//
 
-version = "2.0.0"
-componentCount = 241
-categories = ["basic", "layout", "data", "forms", "feedback", "navigation", "charts", "typography", "collections", "templates", "pro", "flin-native", "theme"]
+version = "2.1.1"
+componentCount = 589
+categories = ["basic", "layout", "data", "forms", "feedback", "navigation", "charts", "typography", "collections", "templates", "dashboard", "ecommerce", "marketing", "flin-native", "theme", "utilities", "tokens", "pro"]
 
-// Category stats
+// Category stats (core: 352 components)
 stats = [
-    "basic": 45,
+    "basic": 33,
     "layout": 24,
-    "data": 34,
-    "forms": 22,
+    "data": 33,
+    "forms": 39,
     "feedback": 17,
     "navigation": 19,
     "charts": 13,
     "typography": 8,
     "collections": 8,
-    "templates": 16,
-    "pro": 25,
+    "templates": 22,
+    "dashboard": 37,
+    "ecommerce": 46,
+    "marketing": 40,
     "flin-native": 2,
-    "theme": 8
+    "theme": 7,
+    "utilities": 3,
+    "tokens": 1
+]
+
+// PRO stats (237 components)
+proStats = [
+    "ai": 26,
+    "auth": 20,
+    "content": 20,
+    "data": 35,
+    "ecommerce": 15,
+    "feedback": 25,
+    "forms": 6,
+    "navigation": 25,
+    "pages": 30,
+    "shells": 20,
+    "utilities": 15
 ]
 
 <div class="flinui-root">
@@ -138,10 +202,17 @@ count = 0
 &lt;/Button&gt;
     </code></pre>
 
-    <h2>Categories</h2>
+    <h2>Core Categories (352 components)</h2>
     <ul>
-        {for category in categories}
-            <li>{category}: {stats[category]} components</li>
+        {for category, count in stats}
+            <li>{category}: {count} components</li>
+        {/for}
+    </ul>
+
+    <h2>PRO Categories (237 components)</h2>
+    <ul class="pro-list">
+        {for category, count in proStats}
+            <li>pro/{category}: {count} components</li>
         {/for}
     </ul>
 </div>
@@ -191,5 +262,9 @@ li {
     background: var(--flin-bg-subtle);
     border-radius: var(--flin-radius-sm);
     border-left: 3px solid var(--flin-primary);
+}
+
+.pro-list li {
+    border-left-color: var(--flin-accent, #8b5cf6);
 }
 </style>
