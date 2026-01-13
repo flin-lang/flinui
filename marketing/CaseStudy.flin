@@ -3,14 +3,14 @@
 // Success story card showcasing client results with metrics
 // ============================================================================
 // Props:
-//   - title: Case study title (string)
-//   - company: Company name (string)
-//   - logo: Company logo URL (string or none)
-//   - challenge: The problem faced (string)
-//   - solution: How it was solved (string)
+//   - title: Case study title (text)
+//   - company: Company name (text)
+//   - logo: Company logo URL (text or none)
+//   - challenge: The problem faced (text)
+//   - solution: How it was solved (text)
 //   - results: List of result strings (list)
 //   - metric: Featured metric object with value and label (object or none)
-//   - link: Link to full case study (string or none)
+//   - link: Link to full case study (text or none)
 
 title = props.title || "How TechCorp Increased Productivity by 300%"
 company = props.company || "TechCorp"

@@ -3,7 +3,7 @@
 // News and press releases page with media kit and contact info
 // ============================================================================
 // Props:
-//   - companyName: Company name (string)
+//   - companyName: Company name (text)
 //   - pressReleases: List of press release objects (list)
 //   - mediaLogos: List of media outlet logos (list)
 //   - pressContact: Press contact information (object)

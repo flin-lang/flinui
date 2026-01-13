@@ -3,7 +3,7 @@
 // Sequential timeline display for features or process steps
 // ============================================================================
 // Props:
-//   - title: Section title (string or none)
+//   - title: Section title (text or none)
 //   - items: List of timeline items with title, description, icon (list)
 
 title = props.title || none

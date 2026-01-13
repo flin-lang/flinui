@@ -3,9 +3,9 @@
 // CSS-only conversion funnel with trapezoid shapes
 // ============================================================================
 // Props:
-//   - title: Chart title (string or none)
+//   - title: Chart title (text or none)
 //   - stages: List of stage objects with name, value, and color (list)
-//   - showPercent: Display percentage conversion rates (boolean)
+//   - showPercent: Display percentage conversion rates (bool)
 
 title = props.title || none
 stages = props.stages || [

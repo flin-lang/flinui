@@ -3,12 +3,12 @@
 // Large feature showcase with prominent image and feature list
 // ============================================================================
 // Props:
-//   - title: Main title (string)
-//   - description: Description text (string or none)
-//   - image: Showcase image URL (string)
-//   - imageAlt: Alt text for image (string)
+//   - title: Main title (text)
+//   - description: Description text (text or none)
+//   - image: Showcase image URL (text)
+//   - imageAlt: Alt text for image (text)
 //   - features: List of feature strings (list)
-//   - ctaLabel: CTA button text (string or none)
+//   - ctaLabel: CTA button text (text or none)
 //   - onCtaClick: CTA click handler (function or none)
 
 title = props.title || "Everything You Need in One Place"

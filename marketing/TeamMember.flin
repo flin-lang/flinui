@@ -3,13 +3,13 @@
 // Individual team member profile card with full details and social links
 // ============================================================================
 // Props:
-//   - name: Team member name (string)
-//   - role: Job title/role (string)
-//   - avatar: Avatar image URL (string or none)
-//   - bio: Biography text (string or none)
+//   - name: Team member name (text)
+//   - role: Job title/role (text)
+//   - avatar: Avatar image URL (text or none)
+//   - bio: Biography text (text or none)
 //   - social: Social links object with twitter, linkedin, github (object or none)
-//   - email: Email address (string or none)
-//   - large: Display as large card (boolean)
+//   - email: Email address (text or none)
+//   - large: Display as large card (bool)
 
 name = props.name || "Team Member"
 role = props.role || "Team Role"

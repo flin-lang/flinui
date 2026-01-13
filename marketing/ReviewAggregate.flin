@@ -6,8 +6,8 @@
 //   - rating: Overall rating value (number)
 //   - totalReviews: Total number of reviews (number)
 //   - breakdown: List of rating breakdown with stars and count (list)
-//   - source: Rating source name (string or none)
-//   - sourceLogo: Rating source logo URL (string or none)
+//   - source: Rating source name (text or none)
+//   - sourceLogo: Rating source logo URL (text or none)
 
 rating = props.rating || 4.8
 totalReviews = props.totalReviews || 1247

@@ -5,9 +5,9 @@
 // Props:
 //   - steps: List of step objects with title, description, icon (list)
 //   - currentStep: Current active step (1-indexed) (number)
-//   - variant: Style variant - default, numbered, icons (string)
-//   - size: Size - sm, md, lg (string)
-//   - clickable: Allow clicking on steps to navigate (boolean)
+//   - variant: Style variant - default, numbered, icons (text)
+//   - size: Size - sm, md, lg (text)
+//   - clickable: Allow clicking on steps to navigate (bool)
 //   - onStepClick: Callback when step is clicked (function or none)
 
 steps = props.steps || [

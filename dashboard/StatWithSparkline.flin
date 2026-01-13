@@ -3,12 +3,12 @@
 // Stat card with inline mini sparkline chart for trend visualization
 // ============================================================================
 // Props:
-//   - title: Metric title/label (string)
-//   - value: Main metric value (string or number)
+//   - title: Metric title/label (text)
+//   - value: Main metric value (text or number)
 //   - data: List of numbers for sparkline (list)
-//   - color: Sparkline color "gold" | "success" | "error" | "info" (string)
-//   - trend: Trend direction "up" | "down" | "neutral" (string)
-//   - trendValue: Trend percentage (string or none)
+//   - color: Sparkline color "gold" | "success" | "error" | "info" (text)
+//   - trend: Trend direction "up" | "down" | "neutral" (text)
+//   - trendValue: Trend percentage (text or none)
 
 title = props.title || "Metric"
 value = props.value || "0"

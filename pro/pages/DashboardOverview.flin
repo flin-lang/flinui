@@ -3,7 +3,7 @@
 // Main dashboard overview with stats, charts, and recent activity
 // ============================================================================
 // Props:
-//   - userName: User's name (string)
+//   - userName: User's name (text)
 //   - stats: List of stat objects (list)
 //   - recentActivity: List of activity objects (list)
 //   - tasks: List of task objects (list)

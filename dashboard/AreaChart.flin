@@ -3,12 +3,12 @@
 // CSS-only filled area chart with gradient visualization
 // ============================================================================
 // Props:
-//   - title: Chart title (string or none)
+//   - title: Chart title (text or none)
 //   - data: List of data points with label and value (list)
-//   - color: Primary color for the area (string)
+//   - color: Primary color for the area (text)
 //   - height: Chart height in pixels (number)
-//   - showGrid: Display background grid lines (boolean)
-//   - showLabels: Display x-axis labels (boolean)
+//   - showGrid: Display background grid lines (bool)
+//   - showLabels: Display x-axis labels (bool)
 
 title = props.title || none
 data = props.data || [

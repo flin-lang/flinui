@@ -3,11 +3,11 @@
 // Horizontal funnel visualization showing user journey with dropoff rates
 // ============================================================================
 // Props:
-//   - title: Diagram title (string)
+//   - title: Diagram title (text)
 //   - steps: List of step objects with name, count, dropoff (list)
-//   - showDropoff: Show dropoff percentages (boolean)
-//   - showCount: Show absolute counts (boolean)
-//   - animated: Enable animation (boolean)
+//   - showDropoff: Show dropoff percentages (bool)
+//   - showCount: Show absolute counts (bool)
+//   - animated: Enable animation (bool)
 
 title = props.title || "User Journey"
 steps = props.steps || [

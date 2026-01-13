@@ -4,10 +4,10 @@
 // ============================================================================
 // Props:
 //   - testimonials: List of testimonial objects (list)
-//   - autoplay: Enable auto-sliding (boolean)
+//   - autoplay: Enable auto-sliding (bool)
 //   - interval: Autoplay interval in ms (number)
-//   - showDots: Show navigation dots (boolean)
-//   - showArrows: Show prev/next arrows (boolean)
+//   - showDots: Show navigation dots (bool)
+//   - showArrows: Show prev/next arrows (bool)
 
 testimonials = props.testimonials || [
     ["quote": "FLIN changed how we build apps", "author": "Sarah Chen", "role": "CTO", "company": "TechCorp", "rating": 5],

@@ -3,11 +3,11 @@
 // Pre-launch coming soon page with countdown and email capture
 // ============================================================================
 // Props:
-//   - title: Page title (string)
-//   - subtitle: Page subtitle (string)
-//   - launchDate: Launch date string (string)
+//   - title: Page title (text)
+//   - subtitle: Page subtitle (text)
+//   - launchDate: Launch date string (text)
 //   - features: List of upcoming feature highlights (list)
-//   - backgroundStyle: Background style "gradient" | "particles" | "simple" (string)
+//   - backgroundStyle: Background style "gradient" | "particles" | "simple" (text)
 //   - socialLinks: List of social links (list)
 //   - onSubscribe: Subscribe callback (function or none)
 

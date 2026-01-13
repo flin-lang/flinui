@@ -3,11 +3,11 @@
 // Ultra-minimal text-only hero for focused messaging
 // ============================================================================
 // Props:
-//   - headline: Main headline text (string)
-//   - subtitle: Subtitle text (string or none)
-//   - ctaLabel: Call-to-action button text (string or none)
+//   - headline: Main headline text (text)
+//   - subtitle: Subtitle text (text or none)
+//   - ctaLabel: Call-to-action button text (text or none)
 //   - onCtaClick: CTA click handler (function or none)
-//   - alignment: Text alignment "left", "center", or "right" (string)
+//   - alignment: Text alignment "left", "center", or "right" (text)
 
 headline = props.headline || "Less is More"
 subtitle = props.subtitle || none

@@ -3,8 +3,8 @@
 // Grid layout displaying features with icons, titles, and descriptions
 // ============================================================================
 // Props:
-//   - title: Section title (string or none)
-//   - subtitle: Section subtitle (string or none)
+//   - title: Section title (text or none)
+//   - subtitle: Section subtitle (text or none)
 //   - features: List of feature objects with icon, title, description (list)
 //   - columns: Number of columns 2-4 (number)
 

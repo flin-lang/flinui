@@ -5,12 +5,12 @@
 // Props:
 //   - steps: List of step objects with label, description, icon (list)
 //   - currentStep: Current active step (1-indexed) (number)
-//   - variant: Orientation - horizontal, vertical (string)
-//   - size: Size variant - sm, md, lg (string)
-//   - showLabels: Show step labels (boolean)
-//   - clickable: Allow clicking on steps (boolean)
+//   - variant: Orientation - horizontal, vertical (text)
+//   - size: Size variant - sm, md, lg (text)
+//   - showLabels: Show step labels (bool)
+//   - clickable: Allow clicking on steps (bool)
 //   - onStepClick: Callback when step is clicked (function or none)
-//   - color: Accent color - gold, blue, green, purple (string)
+//   - color: Accent color - gold, blue, green, purple (text)
 
 steps = props.steps || [
     ["label": "Account", "description": "Create your account"],

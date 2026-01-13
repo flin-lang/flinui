@@ -3,10 +3,10 @@
 // CSS-only correlation display with positioned dots
 // ============================================================================
 // Props:
-//   - title: Chart title (string or none)
+//   - title: Chart title (text or none)
 //   - data: List of data points with x, y, and label (list)
-//   - xLabel: X-axis label (string)
-//   - yLabel: Y-axis label (string)
+//   - xLabel: X-axis label (text)
+//   - yLabel: Y-axis label (text)
 //   - size: Chart size in pixels (number)
 
 title = props.title || none

@@ -3,12 +3,12 @@
 // Before/after comparison display with change indicator
 // ============================================================================
 // Props:
-//   - title: Comparison title (string)
-//   - current: Current value (number or string)
-//   - previous: Previous value (number or string)
-//   - label: Period label like "vs last month" (string or none)
-//   - format: Display format "number" | "currency" | "percent" (string)
-//   - currencySymbol: Currency symbol for currency format (string)
+//   - title: Comparison title (text)
+//   - current: Current value (number or text)
+//   - previous: Previous value (number or text)
+//   - label: Period label like "vs last month" (text or none)
+//   - format: Display format "number" | "currency" | "percent" (text)
+//   - currencySymbol: Currency symbol for currency format (text)
 
 title = props.title || "Comparison"
 current = props.current || 0

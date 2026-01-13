@@ -5,12 +5,12 @@
 // Props:
 //   - value: Current progress value 0-100 (number)
 //   - label: Label text above the bar (string or none)
-//   - showValue: Show percentage value (boolean)
-//   - size: Bar height - sm, md, lg (string)
-//   - color: Bar color - default, success, warning, danger, info (string)
-//   - striped: Show striped pattern (boolean)
-//   - animated: Animate stripes (boolean)
-//   - indeterminate: Show loading animation (boolean)
+//   - showValue: Show percentage value (bool)
+//   - size: Bar height - sm, md, lg (text)
+//   - color: Bar color - default, success, warning, danger, info (text)
+//   - striped: Show striped pattern (bool)
+//   - animated: Animate stripes (bool)
+//   - indeterminate: Show loading animation (bool)
 
 value = props.value || 0
 label = props.label || none

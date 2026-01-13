@@ -3,11 +3,11 @@
 // Minimal footer with just copyright and optional links in a single line
 // ============================================================================
 // Props:
-//   - companyName: Company/brand name for copyright (string)
-//   - copyright: Additional copyright text (string)
+//   - companyName: Company/brand name for copyright (text)
+//   - copyright: Additional copyright text (text)
 //   - links: Array of footer links [{ label, href }] (array)
-//   - variant: Color scheme - light, dark (string)
-//   - align: Content alignment - left, center, right (string)
+//   - variant: Color scheme - light, dark (text)
+//   - align: Content alignment - left, center, right (text)
 
 companyName = props.companyName || "Company"
 copyright = props.copyright || "All rights reserved."

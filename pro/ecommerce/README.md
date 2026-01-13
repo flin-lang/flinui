@@ -129,44 +129,44 @@ Built with FLIN's zero-import philosophy and African Dusk design system.
 ## 📋 Props Reference
 
 ### ProductCard Props
-- `image` - Product image URL (string)
-- `title` - Product name (string)
-- `description` - Product description (string)
+- `image` - Product image URL (text)
+- `title` - Product name (text)
+- `description` - Product description (text)
 - `price` - Product price (number)
 - `originalPrice` - Original price for discount display (number or none)
-- `currency` - Currency code (string, default "USD")
+- `currency` - Currency code (text, default "USD")
 - `rating` - Product rating 0-5 (number)
 - `reviewCount` - Number of reviews (number)
-- `badge` - Badge text (string or none)
-- `badgeVariant` - Badge color: "gold", "emerald", "rose" (string)
-- `inStock` - Stock status (boolean)
+- `badge` - Badge text (text or none)
+- `badgeVariant` - Badge color: "gold", "emerald", "rose" (text)
+- `inStock` - Stock status (bool)
 - `onAddToCart` - Add to cart handler (function or none)
 - `onQuickView` - Quick view handler (function or none)
-- `variant` - Card style: "default", "compact", "minimal" (string)
-- `showRating` - Show rating display (boolean)
-- `showDescription` - Show description text (boolean)
+- `variant` - Card style: "default", "compact", "minimal" (text)
+- `showRating` - Show rating display (bool)
+- `showDescription` - Show description text (bool)
 
 ### ProductCardGrid Props
 - `products` - Array of product objects (array)
 - `columns` - Number of columns: 2, 3, 4 (number)
-- `gap` - Gap between cards: "sm", "md", "lg" (string)
-- `cardVariant` - Variant for all cards (string)
-- `loading` - Show loading skeleton (boolean)
-- `emptyMessage` - Message when no products (string)
+- `gap` - Gap between cards: "sm", "md", "lg" (text)
+- `cardVariant` - Variant for all cards (text)
+- `loading` - Show loading skeleton (bool)
+- `emptyMessage` - Message when no products (text)
 - `onProductClick`, `onAddToCart`, `onQuickView` - Event handlers
 
 ### ProductGallery Props
 - `images` - Array of image objects with url, alt, thumbnail (array)
-- `variant` - Layout: "default", "slider", "grid" (string)
-- `aspectRatio` - Main image ratio: "square", "portrait", "landscape" (string)
-- `thumbnailPosition` - Position: "bottom", "left", "right" (string)
-- `showZoom` - Enable zoom on hover (boolean)
-- `showFullscreen` - Show fullscreen button (boolean)
-- `autoplay` - Autoplay slideshow (boolean)
+- `variant` - Layout: "default", "slider", "grid" (text)
+- `aspectRatio` - Main image ratio: "square", "portrait", "landscape" (text)
+- `thumbnailPosition` - Position: "bottom", "left", "right" (text)
+- `showZoom` - Enable zoom on hover (bool)
+- `showFullscreen` - Show fullscreen button (bool)
+- `autoplay` - Autoplay slideshow (bool)
 - `autoplayDelay` - Delay between slides in ms (number)
 
 ### ProductQuickview Props
-- `isOpen` - Modal open state (boolean)
+- `isOpen` - Modal open state (bool)
 - `onClose` - Close handler (function or none)
 - `product` - Product object with all details (object or none)
 - `onAddToCart` - Add to cart handler (function or none)
@@ -176,9 +176,9 @@ Built with FLIN's zero-import philosophy and African Dusk design system.
 - `variants` - Array of variant options (array)
 - `selected` - Currently selected variant (object or none)
 - `onSelect` - Selection handler (function or none)
-- `layout` - Display layout: "inline", "grid", "dropdown" (string)
-- `showUnavailable` - Show unavailable options (boolean)
-- `size` - Swatch size: "sm", "md", "lg" (string)
+- `layout` - Display layout: "inline", "grid", "dropdown" (text)
+- `showUnavailable` - Show unavailable options (bool)
+- `size` - Swatch size: "sm", "md", "lg" (text)
 
 ---
 

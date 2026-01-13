@@ -5,10 +5,10 @@
 // Props:
 //   - images: List of image objects with src, alt, thumbnail, caption (list)
 //   - columns: Number of columns - 2, 3, 4, 5, 6 (number)
-//   - gap: Gap between images - sm, md, lg (string)
-//   - aspectRatio: Image aspect ratio - square, video, portrait, auto (string)
-//   - showCaptions: Show image captions (boolean)
-//   - enableLightbox: Enable lightbox on click (boolean)
+//   - gap: Gap between images - sm, md, lg (text)
+//   - aspectRatio: Image aspect ratio - square, video, portrait, auto (text)
+//   - showCaptions: Show image captions (bool)
+//   - enableLightbox: Enable lightbox on click (bool)
 
 images = props.images || [
     ["src": "https://picsum.photos/800/600?random=1", "thumbnail": "https://picsum.photos/400/300?random=1", "alt": "Mountain landscape", "caption": "Beautiful mountain vista"],

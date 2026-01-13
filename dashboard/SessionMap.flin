@@ -3,9 +3,9 @@
 // Geographic visitor distribution with country list and percentage bars
 // ============================================================================
 // Props:
-//   - title: Section title (string)
+//   - title: Section title (text)
 //   - locations: List of location objects with country, count, percent, code (list)
-//   - showTotal: Show total visitors count (boolean)
+//   - showTotal: Show total visitors count (bool)
 //   - total: Total visitor count (number or none)
 //   - maxItems: Maximum items to display (number)
 

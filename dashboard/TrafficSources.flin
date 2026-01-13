@@ -3,10 +3,10 @@
 // Referral channels breakdown with icons, visits, and trend indicators
 // ============================================================================
 // Props:
-//   - title: Section title (string)
+//   - title: Section title (text)
 //   - sources: List of source objects with name, icon, visits, percent, trend (list)
-//   - showTrend: Show trend indicators (boolean)
-//   - period: Time period label (string or none)
+//   - showTrend: Show trend indicators (bool)
+//   - period: Time period label (text or none)
 
 title = props.title || "Traffic Sources"
 sources = props.sources || [

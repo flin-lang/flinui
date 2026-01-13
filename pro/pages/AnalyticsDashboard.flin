@@ -3,7 +3,7 @@
 // Analytics dashboard with charts, metrics, and detailed insights
 // ============================================================================
 // Props:
-//   - dateRange: Current date range (string)
+//   - dateRange: Current date range (text)
 //   - metrics: List of metric objects (list)
 //   - trafficSources: List of traffic source objects (list)
 //   - topPages: List of top pages (list)

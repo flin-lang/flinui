@@ -3,13 +3,13 @@
 // Coming soon signup with countdown timer and email capture
 // ============================================================================
 // Props:
-//   - title: Form headline (string)
-//   - description: Supporting text (string or none)
-//   - launchDate: Target launch date ISO string (string or none)
-//   - placeholder: Email input placeholder (string)
-//   - buttonText: Submit button text (string)
+//   - title: Form headline (text)
+//   - description: Supporting text (text or none)
+//   - launchDate: Target launch date ISO string (text or none)
+//   - placeholder: Email input placeholder (text)
+//   - buttonText: Submit button text (text)
 //   - onSubmit: Form submission handler (function or none)
-//   - showCount: Show waitlist count (boolean)
+//   - showCount: Show waitlist count (bool)
 //   - count: Current waitlist count (number)
 
 title = props.title || "Something amazing is coming"

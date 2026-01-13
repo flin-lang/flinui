@@ -3,10 +3,10 @@
 // CSS-only bar chart with horizontal/vertical orientation
 // ============================================================================
 // Props:
-//   - title: Chart title (string or none)
+//   - title: Chart title (text or none)
 //   - data: List of data points with label, value, and optional color (list)
-//   - orientation: Bar direction "horizontal" or "vertical" (string)
-//   - showValues: Display value labels on bars (boolean)
+//   - orientation: Bar direction "horizontal" or "vertical" (text)
+//   - showValues: Display value labels on bars (bool)
 //   - maxValue: Maximum value for scaling (number or none for auto)
 
 title = props.title || none

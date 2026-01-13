@@ -3,11 +3,11 @@
 // Display company numbers with large values, labels, and optional count-up animation
 // ============================================================================
 // Props:
-//   - title: Section title (string or none)
-//   - subtitle: Section subtitle (string or none)
+//   - title: Section title (text or none)
+//   - subtitle: Section subtitle (text or none)
 //   - stats: List of stat objects with value, label, suffix, prefix (list)
 //   - columns: Number of columns 2-4 (number)
-//   - animated: Enable count-up animation on scroll (boolean)
+//   - animated: Enable count-up animation on scroll (bool)
 
 title = props.title || none
 subtitle = props.subtitle || none

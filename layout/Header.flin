@@ -1,6 +1,6 @@
 // FlinUI Header Component
 // Page header with title, description, and actions area
-// Props: title (string), description (string), sticky (bool), bordered (bool), actions (slot)
+// Props: title (text), description (text), sticky (bool), bordered (bool), actions (slot)
 
 title = props.title || ""
 description = props.description || ""

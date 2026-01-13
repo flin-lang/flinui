@@ -4,12 +4,12 @@
 // ============================================================================
 // Props:
 //   - tabs: List of tab objects with id, label, icon, count (list)
-//   - activeTab: Currently active tab id (string)
+//   - activeTab: Currently active tab id (text)
 //   - onChange: Callback when tab changes (function)
-//   - size: Size variant - sm, md, lg (string)
-//   - variant: Style variant - solid, soft, outline (string)
-//   - fullWidth: Stretch pills to full width (boolean)
-//   - color: Accent color - gold, blue, green, purple (string)
+//   - size: Size variant - sm, md, lg (text)
+//   - variant: Style variant - solid, soft, outline (text)
+//   - fullWidth: Stretch pills to full width (bool)
+//   - color: Accent color - gold, blue, green, purple (text)
 
 tabs = props.tabs || [
     ["id": "all", "label": "All", "count": 120],

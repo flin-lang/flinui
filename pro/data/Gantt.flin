@@ -4,10 +4,10 @@
 // ============================================================================
 // Props:
 //   - tasks: List of task objects with id, name, start, end, progress, color, dependencies (list)
-//   - startDate: Chart start date (string)
-//   - endDate: Chart end date (string)
-//   - showProgress: Show progress bars (boolean)
-//   - showToday: Show today marker (boolean)
+//   - startDate: Chart start date (text)
+//   - endDate: Chart end date (text)
+//   - showProgress: Show progress bars (bool)
+//   - showToday: Show today marker (bool)
 //   - dayWidth: Width per day in pixels (number)
 
 tasks = props.tasks || [

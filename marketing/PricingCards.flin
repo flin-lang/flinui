@@ -3,8 +3,8 @@
 // Individual plan cards with vertical layout, features list, and CTA buttons
 // ============================================================================
 // Props:
-//   - title: Section title (string or none)
-//   - subtitle: Section subtitle (string or none)
+//   - title: Section title (text or none)
+//   - subtitle: Section subtitle (text or none)
 //   - plans: List of plan objects with name, price, period, features, cta, description (list)
 //   - highlight: Index of the popular/highlighted plan (number or none)
 

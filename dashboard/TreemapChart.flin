@@ -3,9 +3,9 @@
 // CSS-only hierarchical rectangle visualization
 // ============================================================================
 // Props:
-//   - title: Chart title (string or none)
+//   - title: Chart title (text or none)
 //   - data: List of items with name, value, color, and optional children (list)
-//   - showLabels: Display labels on rectangles (boolean)
+//   - showLabels: Display labels on rectangles (bool)
 
 title = props.title || none
 data = props.data || [

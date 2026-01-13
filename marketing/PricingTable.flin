@@ -3,8 +3,8 @@
 // Plan comparison table with side-by-side pricing columns and feature checklist
 // ============================================================================
 // Props:
-//   - title: Section title (string or none)
-//   - subtitle: Section subtitle (string or none)
+//   - title: Section title (text or none)
+//   - subtitle: Section subtitle (text or none)
 //   - plans: List of plan objects with name, price, period, features, cta, popular (list)
 
 title = props.title || none

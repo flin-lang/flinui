@@ -3,10 +3,10 @@
 // CSS-only financial OHLC candlestick chart
 // ============================================================================
 // Props:
-//   - title: Chart title (string or none)
+//   - title: Chart title (text or none)
 //   - data: List of candle data with date, open, high, low, close (list)
-//   - bullColor: Color for bullish candles (string)
-//   - bearColor: Color for bearish candles (string)
+//   - bullColor: Color for bullish candles (text)
+//   - bearColor: Color for bearish candles (text)
 
 title = props.title || none
 data = props.data || [

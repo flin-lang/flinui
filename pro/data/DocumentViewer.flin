@@ -4,9 +4,9 @@
 // ============================================================================
 // Props:
 //   - documents: List of document objects with name, type, size, url, thumbnail, date (list)
-//   - viewMode: Display mode - grid, list (string)
-//   - showPreview: Show document thumbnail/preview (boolean)
-//   - showDetails: Show file details (size, date) (boolean)
+//   - viewMode: Display mode - grid, list (text)
+//   - showPreview: Show document thumbnail/preview (bool)
+//   - showDetails: Show file details (size, date) (bool)
 //   - onView: Callback when document is viewed (function or none)
 //   - onDownload: Callback when document is downloaded (function or none)
 

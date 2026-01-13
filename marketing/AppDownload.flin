@@ -3,13 +3,13 @@
 // App store download buttons with optional QR code and stats
 // ============================================================================
 // Props:
-//   - title: Section headline (string)
-//   - description: Supporting text (string or none)
-//   - appStoreUrl: Apple App Store URL (string or none)
-//   - playStoreUrl: Google Play Store URL (string or none)
-//   - qrCode: QR code image URL for direct download (string or none)
+//   - title: Section headline (text)
+//   - description: Supporting text (text or none)
+//   - appStoreUrl: Apple App Store URL (text or none)
+//   - playStoreUrl: Google Play Store URL (text or none)
+//   - qrCode: QR code image URL for direct download (text or none)
 //   - rating: App rating out of 5 (number or none)
-//   - downloads: Download count display text (string or none)
+//   - downloads: Download count display text (text or none)
 
 title = props.title || "Download our app"
 description = props.description || "Get the best experience on mobile. Available on iOS and Android."

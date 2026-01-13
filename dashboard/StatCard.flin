@@ -3,13 +3,13 @@
 // Single metric display with icon, value, and trend indicator
 // ============================================================================
 // Props:
-//   - title: Metric title/label (string)
-//   - value: Main metric value (string or number)
-//   - icon: Icon to display (string or none)
-//   - trend: Trend direction "up" | "down" | "neutral" (string)
-//   - trendValue: Trend percentage or value (string or none)
-//   - suffix: Value suffix like "%" or "k" (string or none)
-//   - prefix: Value prefix like "$" or "#" (string or none)
+//   - title: Metric title/label (text)
+//   - value: Main metric value (text or number)
+//   - icon: Icon to display (text or none)
+//   - trend: Trend direction "up" | "down" | "neutral" (text)
+//   - trendValue: Trend percentage or value (text or none)
+//   - suffix: Value suffix like "%" or "k" (text or none)
+//   - prefix: Value prefix like "$" or "#" (text or none)
 
 title = props.title || "Metric"
 value = props.value || "0"

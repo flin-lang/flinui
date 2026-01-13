@@ -1,6 +1,6 @@
 // FlinUI ScrollArea Component
 // Custom scrollbar container with styled scrollbar, thumb, and track
-// Props: maxHeight (string), orientation (vertical/horizontal/both), alwaysShow (bool)
+// Props: maxHeight (text), orientation (vertical/horizontal/both), alwaysShow (bool)
 
 // Props with defaults
 maxHeight = props.maxHeight || "auto"

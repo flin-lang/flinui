@@ -3,12 +3,12 @@
 // Pricing display page with plan comparison, features, and FAQs
 // ============================================================================
 // Props:
-//   - title: Page title (string)
-//   - subtitle: Page subtitle (string)
+//   - title: Page title (text)
+//   - subtitle: Page subtitle (text)
 //   - plans: List of pricing plan objects (list)
 //   - features: List of feature comparison objects (list)
 //   - faqs: List of FAQ objects (list)
-//   - billingCycle: Current billing cycle "monthly" or "yearly" (string)
+//   - billingCycle: Current billing cycle "monthly" or "yearly" (text)
 //   - onSelectPlan: Plan selection callback (function or none)
 
 title = props.title || "Simple, transparent pricing"

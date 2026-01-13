@@ -3,12 +3,12 @@
 // Hero with bold gradient background and centered content
 // ============================================================================
 // Props:
-//   - headline: Main headline text (string)
-//   - subtitle: Subtitle text (string or none)
-//   - ctaLabel: Call-to-action button text (string)
+//   - headline: Main headline text (text)
+//   - subtitle: Subtitle text (text or none)
+//   - ctaLabel: Call-to-action button text (text)
 //   - onCtaClick: CTA click handler (function or none)
-//   - gradientStart: Gradient start color (string)
-//   - gradientEnd: Gradient end color (string)
+//   - gradientStart: Gradient start color (text)
+//   - gradientEnd: Gradient end color (text)
 
 headline = props.headline || "Unleash Your Potential"
 subtitle = props.subtitle || "Join thousands of teams building the future"

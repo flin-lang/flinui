@@ -3,9 +3,9 @@
 // Command-K style search interface for quick navigation and actions
 // ============================================================================
 // Props:
-//   - placeholder: Search input placeholder text (string)
+//   - placeholder: Search input placeholder text (text)
 //   - commands: List of command objects with icon, label, shortcut, action, category (list)
-//   - open: Control palette visibility externally (boolean)
+//   - open: Control palette visibility externally (bool)
 //   - onClose: Callback when palette closes (function or none)
 
 placeholder = props.placeholder || "Type a command or search..."

@@ -3,10 +3,10 @@
 // Vertical timeline displaying recent activities and events
 // ============================================================================
 // Props:
-//   - title: Feed section title (string or none)
+//   - title: Feed section title (text or none)
 //   - activities: List of activity objects with icon, title, description, time, user (list)
 //   - maxItems: Maximum number of items to display (number or none)
-//   - showMore: Show "View More" button (boolean)
+//   - showMore: Show "View More" button (bool)
 
 title = props.title || "Recent Activity"
 activities = props.activities || [

@@ -1,6 +1,6 @@
 // FlinUI Footer Component
 // Page footer with copyright and social links
-// Props: copyright (string), variant (simple/columns)
+// Props: copyright (text), variant (simple/columns)
 
 copyright = props.copyright || ""
 variant = props.variant || "simple"

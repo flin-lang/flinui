@@ -3,15 +3,15 @@
 // Basic responsive navbar with logo, nav links, and CTA button
 // ============================================================================
 // Props:
-//   - logo: Logo image URL or none for default (string)
-//   - logoText: Text to show with/instead of logo (string)
-//   - logoHref: Link for logo click (string)
+//   - logo: Logo image URL or none for default (text)
+//   - logoText: Text to show with/instead of logo (text)
+//   - logoHref: Link for logo click (text)
 //   - links: Array of nav links [{ label, href, active }] (array)
-//   - ctaLabel: CTA button text (string)
-//   - ctaHref: CTA button link (string)
+//   - ctaLabel: CTA button text (text)
+//   - ctaHref: CTA button link (text)
 //   - ctaOnClick: CTA button click handler (function)
-//   - variant: Color scheme - light, dark (string)
-//   - size: Height - sm, md, lg (string)
+//   - variant: Color scheme - light, dark (text)
+//   - size: Height - sm, md, lg (text)
 
 logo = props.logo || none
 logoText = props.logoText || "Brand"

@@ -3,12 +3,12 @@
 // Hero showcasing app screenshot with floating mockup
 // ============================================================================
 // Props:
-//   - headline: Main headline text (string)
-//   - subtitle: Subtitle text (string or none)
-//   - ctaLabel: Call-to-action button text (string)
+//   - headline: Main headline text (text)
+//   - subtitle: Subtitle text (text or none)
+//   - ctaLabel: Call-to-action button text (text)
 //   - onCtaClick: CTA click handler (function or none)
-//   - appScreenshot: App screenshot URL (string)
-//   - appScreenshotAlt: Alt text for screenshot (string)
+//   - appScreenshot: App screenshot URL (text)
+//   - appScreenshotAlt: Alt text for screenshot (text)
 //   - features: List of feature highlights (list of strings)
 
 headline = props.headline || "Your App, Beautifully Designed"

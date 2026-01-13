@@ -5,7 +5,7 @@
 // Props:
 //   - currencies: Available currencies (list)
 //     Each item: { code, name, symbol, flag (optional) }
-//   - value: Currently selected currency code (string)
+//   - value: Currently selected currency code (text)
 //   - variant: Display variant - dropdown, compact (string, default: "dropdown")
 //   - showSymbol: Show currency symbol (boolean, default: true)
 //   - showFlag: Show country flag (boolean, default: false)

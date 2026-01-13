@@ -1,6 +1,6 @@
 // FlinUI Hero Component
 // Hero section for landing pages with multiple layout variants
-// Props: title (string), subtitle (string), image (string), actions (slot), variant (centered/split/full), height (sm/md/lg/full), overlay (bool)
+// Props: title (text), subtitle (text), image (text), actions (slot), variant (centered/split/full), height (sm/md/lg/full), overlay (bool)
 
 title = props.title || ""
 subtitle = props.subtitle || ""

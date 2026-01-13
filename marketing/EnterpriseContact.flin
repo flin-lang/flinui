@@ -3,13 +3,13 @@
 // Custom pricing CTA card for enterprise customers with gradient styling
 // ============================================================================
 // Props:
-//   - title: Main headline (string)
-//   - description: Descriptive text (string)
+//   - title: Main headline (text)
+//   - description: Descriptive text (text)
 //   - features: List of enterprise features (list of strings)
-//   - buttonText: CTA button text (string)
-//   - buttonHref: CTA button link (string)
-//   - badge: Optional badge text (string or none)
-//   - contactEmail: Contact email for display (string or none)
+//   - buttonText: CTA button text (text)
+//   - buttonHref: CTA button link (text)
+//   - badge: Optional badge text (text or none)
+//   - contactEmail: Contact email for display (text or none)
 
 title = props.title || "Need a custom solution?"
 description = props.description || "Our enterprise plan is tailored to your organization's unique needs with dedicated support, custom integrations, and flexible pricing."

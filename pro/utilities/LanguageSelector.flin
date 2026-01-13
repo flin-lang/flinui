@@ -5,7 +5,7 @@
 // Props:
 //   - languages: Available languages (list)
 //     Each item: { code, name, flag (optional), native (optional) }
-//   - value: Currently selected language code (string)
+//   - value: Currently selected language code (text)
 //   - variant: Display variant - dropdown, buttons, minimal (string, default: "dropdown")
 //   - showFlag: Show flag emoji/icon (boolean, default: true)
 //   - showNative: Show native language name (boolean, default: false)

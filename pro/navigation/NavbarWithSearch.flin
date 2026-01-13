@@ -3,16 +3,16 @@
 // Navbar with integrated search input and expandable mobile search
 // ============================================================================
 // Props:
-//   - logo: Logo image URL or none for default (string)
-//   - logoText: Text to show with/instead of logo (string)
-//   - logoHref: Link for logo click (string)
+//   - logo: Logo image URL or none for default (text)
+//   - logoText: Text to show with/instead of logo (text)
+//   - logoHref: Link for logo click (text)
 //   - links: Array of nav links [{ label, href, active }] (array)
-//   - searchPlaceholder: Placeholder text for search (string)
+//   - searchPlaceholder: Placeholder text for search (text)
 //   - onSearch: Search submit handler (function)
-//   - ctaLabel: CTA button text (string)
-//   - ctaHref: CTA button link (string)
-//   - variant: Color scheme - light, dark (string)
-//   - searchPosition: Position of search - center, right (string)
+//   - ctaLabel: CTA button text (text)
+//   - ctaHref: CTA button link (text)
+//   - variant: Color scheme - light, dark (text)
+//   - searchPosition: Position of search - center, right (text)
 
 logo = props.logo || none
 logoText = props.logoText || "Brand"

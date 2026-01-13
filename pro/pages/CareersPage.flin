@@ -3,9 +3,9 @@
 // Job listings page with positions, benefits, and company culture
 // ============================================================================
 // Props:
-//   - title: Page title (string)
-//   - subtitle: Page subtitle (string)
-//   - companyName: Company name (string)
+//   - title: Page title (text)
+//   - subtitle: Page subtitle (text)
+//   - companyName: Company name (text)
 //   - positions: List of job position objects (list)
 //   - benefits: List of benefit objects (list)
 //   - departments: List of departments for filtering (list)

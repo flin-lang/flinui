@@ -3,7 +3,7 @@
 // Week/day schedule view with time slots
 // ============================================================================
 // Props:
-//   - view: Current view - day, week (string)
+//   - view: Current view - day, week (text)
 //   - selectedDate: Selected date (Date or none)
 //   - events: List of event objects with date, startTime, endTime, title, color (list)
 //   - startHour: First hour to display (number)

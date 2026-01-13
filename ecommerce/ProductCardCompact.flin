@@ -3,14 +3,14 @@
 // Horizontal compact product card layout for lists and sidebars
 // ============================================================================
 // Props:
-//   - image: Product image URL (string)
-//   - imageAlt: Alt text for image (string)
-//   - title: Product name (string)
+//   - image: Product image URL (text)
+//   - imageAlt: Alt text for image (text)
+//   - title: Product name (text)
 //   - price: Product price (number)
 //   - originalPrice: Original price for discount display (number or none)
 //   - currency: Currency code (string, default "USD")
 //   - rating: Product rating 0-5 (number)
-//   - inStock: Stock status (boolean, default true)
+//   - inStock: Stock status (bool, default true)
 //   - stockCount: Quantity in stock (number, optional)
 //   - badge: Badge text (e.g., "Sale", "New") (string or none)
 //   - badgeColor: Badge color variant (string: "gold", "emerald", "rose")

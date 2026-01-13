@@ -3,13 +3,13 @@
 // Simple centered hero with minimal design
 // ============================================================================
 // Props:
-//   - headline: Main headline text (string)
-//   - subtitle: Subtitle text (string or none)
-//   - ctaLabel: Primary CTA button text (string)
-//   - ctaSecondaryLabel: Secondary CTA text (string or none)
+//   - headline: Main headline text (text)
+//   - subtitle: Subtitle text (text or none)
+//   - ctaLabel: Primary CTA button text (text)
+//   - ctaSecondaryLabel: Secondary CTA text (text or none)
 //   - onCtaClick: Primary CTA click handler (function or none)
 //   - onSecondaryCtaClick: Secondary CTA click handler (function or none)
-//   - badge: Optional badge text (string or none)
+//   - badge: Optional badge text (text or none)
 
 headline = props.headline || "Welcome to the Future"
 subtitle = props.subtitle || "The most powerful tool for modern teams"

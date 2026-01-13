@@ -3,15 +3,15 @@
 // Transparent navbar that transitions to solid background on scroll
 // ============================================================================
 // Props:
-//   - logo: Logo image URL or none for default (string)
-//   - logoLight: Light version of logo for transparent state (string)
-//   - logoText: Text to show with/instead of logo (string)
-//   - logoHref: Link for logo click (string)
+//   - logo: Logo image URL or none for default (text)
+//   - logoLight: Light version of logo for transparent state (text)
+//   - logoText: Text to show with/instead of logo (text)
+//   - logoHref: Link for logo click (text)
 //   - links: Array of nav links [{ label, href, active }] (array)
-//   - ctaLabel: CTA button text (string)
-//   - ctaHref: CTA button link (string)
+//   - ctaLabel: CTA button text (text)
+//   - ctaHref: CTA button link (text)
 //   - scrollThreshold: Scroll distance before background appears (number)
-//   - solidBackground: Background color when scrolled - light, dark (string)
+//   - solidBackground: Background color when scrolled - light, dark (text)
 
 logo = props.logo || none
 logoLight = props.logoLight || none

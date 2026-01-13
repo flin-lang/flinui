@@ -1,6 +1,6 @@
 // FlinUI Section Component
 // Content section with title, description, and optional dividers
-// Props: title (string), description (string), divider (top/bottom/both/none), spacing (sm/md/lg/xl)
+// Props: title (text), description (text), divider (top/bottom/both/none), spacing (sm/md/lg/xl)
 
 title = props.title || ""
 description = props.description || ""

@@ -7,9 +7,9 @@
 //   - totalPages: Total number of pages (number)
 //   - onPrevious: Callback for previous button (function)
 //   - onNext: Callback for next button (function)
-//   - showPageInfo: Show "Page X of Y" text (boolean)
-//   - size: Size variant - sm, md, lg (string)
-//   - variant: Style variant - default, outline, minimal (string)
+//   - showPageInfo: Show "Page X of Y" text (bool)
+//   - size: Size variant - sm, md, lg (text)
+//   - variant: Style variant - default, outline, minimal (text)
 //   - labels: Custom labels object with prev, next keys (object)
 
 currentPage = props.currentPage || 1

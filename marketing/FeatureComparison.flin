@@ -3,13 +3,13 @@
 // Side-by-side comparison of features or products
 // ============================================================================
 // Props:
-//   - title: Section title (string or none)
-//   - leftTitle: Left column title (string)
-//   - rightTitle: Right column title (string)
+//   - title: Section title (text or none)
+//   - leftTitle: Left column title (text)
+//   - rightTitle: Right column title (text)
 //   - leftFeatures: List of features for left side (list of strings)
 //   - rightFeatures: List of features for right side (list of strings)
-//   - highlightLeft: Highlight left column (boolean)
-//   - highlightRight: Highlight right column (boolean)
+//   - highlightLeft: Highlight left column (bool)
+//   - highlightRight: Highlight right column (bool)
 
 title = props.title || "Choose Your Plan"
 leftTitle = props.leftTitle || "Basic"

@@ -3,14 +3,14 @@
 // Large CTA section with background image/gradient and centered content
 // ============================================================================
 // Props:
-//   - title: Main headline (string)
-//   - subtitle: Supporting text (string or none)
-//   - buttonText: Primary CTA button text (string)
-//   - buttonHref: Primary CTA link (string)
-//   - secondaryText: Secondary button text (string or none)
-//   - secondaryHref: Secondary button link (string or none)
-//   - backgroundImage: Background image URL (string or none)
-//   - overlay: Overlay style "dark", "gradient", or "none" (string)
+//   - title: Main headline (text)
+//   - subtitle: Supporting text (text or none)
+//   - buttonText: Primary CTA button text (text)
+//   - buttonHref: Primary CTA link (text)
+//   - secondaryText: Secondary button text (text or none)
+//   - secondaryHref: Secondary button link (text or none)
+//   - backgroundImage: Background image URL (text or none)
+//   - overlay: Overlay style "dark", "gradient", or "none" (text)
 
 title = props.title || "Ready to transform your workflow?"
 subtitle = props.subtitle || "Join thousands of teams already using our platform to build better products faster."

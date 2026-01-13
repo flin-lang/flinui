@@ -3,12 +3,12 @@
 // Key Performance Indicator with progress toward target and status
 // ============================================================================
 // Props:
-//   - title: KPI title/name (string)
+//   - title: KPI title/name (text)
 //   - value: Current value (number)
 //   - target: Target value (number)
-//   - unit: Unit suffix like "users", "sales", "$" (string or none)
-//   - status: Status indicator "on-track" | "at-risk" | "behind" (string)
-//   - showPercentage: Show percentage of target (boolean)
+//   - unit: Unit suffix like "users", "sales", "$" (text or none)
+//   - status: Status indicator "on-track" | "at-risk" | "behind" (text)
+//   - showPercentage: Show percentage of target (bool)
 
 title = props.title || "KPI"
 value = props.value || 0

@@ -3,12 +3,12 @@
 // Hover-triggered dropdown menu for single nav items with icons and descriptions
 // ============================================================================
 // Props:
-//   - trigger: Trigger button text (string)
+//   - trigger: Trigger button text (text)
 //   - items: Array of menu items [{ label, href, description, icon, badge }] (array)
-//   - placement: Menu placement - bottom-start, bottom-center, bottom-end (string)
-//   - showArrow: Show arrow indicator on trigger (boolean)
-//   - variant: Color scheme - light, dark (string)
-//   - width: Menu width - auto, sm, md, lg (string)
+//   - placement: Menu placement - bottom-start, bottom-center, bottom-end (text)
+//   - showArrow: Show arrow indicator on trigger (bool)
+//   - variant: Color scheme - light, dark (text)
+//   - width: Menu width - auto, sm, md, lg (text)
 
 trigger = props.trigger || "Menu"
 items = props.items || []

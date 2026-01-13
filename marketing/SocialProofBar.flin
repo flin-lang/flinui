@@ -4,8 +4,8 @@
 // ============================================================================
 // Props:
 //   - items: List of proof items with icon, value, label (list)
-//   - variant: Color variant "dark" or "light" (string)
-//   - animated: Enable count-up animation (boolean)
+//   - variant: Color variant "dark" or "light" (text)
+//   - animated: Enable count-up animation (bool)
 
 items = props.items || [
     ["icon": "👥", "value": "10,000+", "label": "Happy Customers"],

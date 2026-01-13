@@ -3,15 +3,15 @@
 // Navbar that sticks to top on scroll with smooth shadow animation
 // ============================================================================
 // Props:
-//   - logo: Logo image URL or none for default (string)
-//   - logoText: Text to show with/instead of logo (string)
-//   - logoHref: Link for logo click (string)
+//   - logo: Logo image URL or none for default (text)
+//   - logoText: Text to show with/instead of logo (text)
+//   - logoHref: Link for logo click (text)
 //   - links: Array of nav links [{ label, href, active }] (array)
-//   - ctaLabel: CTA button text (string)
-//   - ctaHref: CTA button link (string)
-//   - variant: Color scheme - light, dark (string)
+//   - ctaLabel: CTA button text (text)
+//   - ctaHref: CTA button link (text)
+//   - variant: Color scheme - light, dark (text)
 //   - stickyOffset: Scroll offset before becoming sticky (number)
-//   - showProgress: Show scroll progress bar (boolean)
+//   - showProgress: Show scroll progress bar (bool)
 
 logo = props.logo || none
 logoText = props.logoText || "Brand"

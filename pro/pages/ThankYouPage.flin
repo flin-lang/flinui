@@ -3,13 +3,13 @@
 // Post-submit thank you page with next steps
 // ============================================================================
 // Props:
-//   - title: Thank you title (string)
-//   - message: Thank you message (string)
-//   - type: Page type "contact" | "purchase" | "subscribe" | "download" (string)
+//   - title: Thank you title (text)
+//   - message: Thank you message (text)
+//   - type: Page type "contact" | "purchase" | "subscribe" | "download" (text)
 //   - userName: User's name (string or none)
 //   - nextSteps: List of next steps (list or none)
 //   - shareMessage: Social share message (string or none)
-//   - showShare: Show social share options (boolean)
+//   - showShare: Show social share options (bool)
 //   - redirectUrl: Auto-redirect URL (string or none)
 //   - redirectDelay: Redirect delay in seconds (number)
 

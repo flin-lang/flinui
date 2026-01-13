@@ -3,11 +3,11 @@
 // Single testimonial card with quote, author info, and optional rating
 // ============================================================================
 // Props:
-//   - quote: The testimonial text (string)
-//   - author: Author's name (string)
-//   - role: Author's job title (string or none)
-//   - company: Author's company (string or none)
-//   - avatar: Author's avatar URL (string or none)
+//   - quote: The testimonial text (text)
+//   - author: Author's name (text)
+//   - role: Author's job title (text or none)
+//   - company: Author's company (text or none)
+//   - avatar: Author's avatar URL (text or none)
 //   - rating: Star rating 1-5 (number or none)
 
 quote = props.quote || "This product transformed how we work. Incredible experience!"

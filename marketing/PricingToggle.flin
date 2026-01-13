@@ -3,12 +3,12 @@
 // Monthly/annual billing toggle switch with discount badge
 // ============================================================================
 // Props:
-//   - monthly: Monthly price label (string)
-//   - annual: Annual price label (string)
+//   - monthly: Monthly price label (text)
+//   - annual: Annual price label (text)
 //   - onToggle: Callback when toggled (function or none)
 //   - discount: Discount percentage for annual (number)
-//   - isAnnual: Current state - true for annual (boolean)
-//   - title: Optional title above toggle (string or none)
+//   - isAnnual: Current state - true for annual (bool)
+//   - title: Optional title above toggle (text or none)
 
 monthly = props.monthly || "Monthly"
 annual = props.annual || "Annual"

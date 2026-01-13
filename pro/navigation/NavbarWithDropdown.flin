@@ -3,13 +3,13 @@
 // Navbar with dropdown menus for navigation items with nested options
 // ============================================================================
 // Props:
-//   - logo: Logo image URL or none for default (string)
-//   - logoText: Text to show with/instead of logo (string)
-//   - logoHref: Link for logo click (string)
+//   - logo: Logo image URL or none for default (text)
+//   - logoText: Text to show with/instead of logo (text)
+//   - logoHref: Link for logo click (text)
 //   - links: Array of nav links [{ label, href, active, dropdown: [{ label, href, description, icon }] }] (array)
-//   - ctaLabel: CTA button text (string)
-//   - ctaHref: CTA button link (string)
-//   - variant: Color scheme - light, dark (string)
+//   - ctaLabel: CTA button text (text)
+//   - ctaHref: CTA button link (text)
+//   - variant: Color scheme - light, dark (text)
 
 logo = props.logo || none
 logoText = props.logoText || "Brand"

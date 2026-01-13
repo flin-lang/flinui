@@ -3,14 +3,14 @@
 // Live updating number display with pulse animation effect
 // ============================================================================
 // Props:
-//   - title: Counter title/label (string)
-//   - value: Current counter value (number or string)
-//   - label: Subtitle label (string or none)
-//   - pulseOnChange: Enable pulse animation (boolean)
-//   - format: Number format "number" | "currency" | "compact" (string)
-//   - prefix: Value prefix (string or none)
-//   - suffix: Value suffix (string or none)
-//   - live: Show live indicator dot (boolean)
+//   - title: Counter title/label (text)
+//   - value: Current counter value (number or text)
+//   - label: Subtitle label (text or none)
+//   - pulseOnChange: Enable pulse animation (bool)
+//   - format: Number format "number" | "currency" | "compact" (text)
+//   - prefix: Value prefix (text or none)
+//   - suffix: Value suffix (text or none)
+//   - live: Show live indicator dot (bool)
 
 title = props.title || "Active Now"
 value = props.value || 0

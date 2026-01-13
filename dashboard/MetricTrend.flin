@@ -3,12 +3,12 @@
 // Compact percentage change indicator badge with arrow
 // ============================================================================
 // Props:
-//   - value: Percentage change value (number or string)
-//   - period: Time period label like "7d", "30d", "YoY" (string or none)
-//   - direction: Trend direction "up" | "down" (string)
-//   - positive: Whether this trend is good (boolean) - determines color
-//   - size: Badge size "sm" | "md" | "lg" (string)
-//   - showIcon: Show arrow icon (boolean)
+//   - value: Percentage change value (number or text)
+//   - period: Time period label like "7d", "30d", "YoY" (text or none)
+//   - direction: Trend direction "up" | "down" (text)
+//   - positive: Whether this trend is good (bool) - determines color
+//   - size: Badge size "sm" | "md" | "lg" (text)
+//   - showIcon: Show arrow icon (bool)
 
 value = props.value || 0
 period = props.period || none

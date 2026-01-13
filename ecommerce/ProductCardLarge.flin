@@ -3,10 +3,10 @@
 // Detailed product card with features list, full specs, and multiple CTAs
 // ============================================================================
 // Props:
-//   - image: Product image URL (string)
-//   - imageAlt: Alt text for image (string)
-//   - title: Product name (string)
-//   - description: Product description (string)
+//   - image: Product image URL (text)
+//   - imageAlt: Alt text for image (text)
+//   - title: Product name (text)
+//   - description: Product description (text)
 //   - price: Product price (number)
 //   - originalPrice: Original price for discount display (number or none)
 //   - currency: Currency code (string, default "USD")
@@ -15,7 +15,7 @@
 //   - features: Array of feature strings (array or none)
 //   - badge: Badge text (e.g., "Sale", "New") (string or none)
 //   - badgeColor: Badge color variant (string: "gold", "emerald", "rose")
-//   - inStock: Stock status (boolean, default true)
+//   - inStock: Stock status (bool, default true)
 //   - onAddToCart: Add to cart handler (function or none)
 //   - onQuickView: Quick view handler (function or none)
 //   - onViewDetails: View details handler (function or none)

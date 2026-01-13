@@ -3,11 +3,11 @@
 // Hero with animated text effects and gradient background
 // ============================================================================
 // Props:
-//   - headline: Main headline text (string)
-//   - highlightWord: Word to highlight in headline (string or none)
-//   - subtitle: Subtitle text (string or none)
-//   - ctaLabel: Call-to-action button text (string)
-//   - ctaSecondaryLabel: Secondary CTA text (string or none)
+//   - headline: Main headline text (text)
+//   - highlightWord: Word to highlight in headline (text or none)
+//   - subtitle: Subtitle text (text or none)
+//   - ctaLabel: Call-to-action button text (text)
+//   - ctaSecondaryLabel: Secondary CTA text (text or none)
 //   - onCtaClick: Primary CTA click handler (function or none)
 //   - onSecondaryCtaClick: Secondary CTA click handler (function or none)
 

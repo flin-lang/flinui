@@ -3,8 +3,8 @@
 // Partner showcase page with logos, partner tiers, and CTA
 // ============================================================================
 // Props:
-//   - title: Page title (string)
-//   - subtitle: Page subtitle (string)
+//   - title: Page title (text)
+//   - subtitle: Page subtitle (text)
 //   - partners: List of partner objects (list)
 //   - partnerTypes: List of partner type categories (list)
 //   - benefits: List of partner benefits (list)

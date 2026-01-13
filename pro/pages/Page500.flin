@@ -3,12 +3,12 @@
 // Server error (500) page with retry and support options
 // ============================================================================
 // Props:
-//   - title: Error title (string)
-//   - message: Error message (string)
+//   - title: Error title (text)
+//   - message: Error message (text)
 //   - errorCode: Error code to display (string or none)
-//   - showRetry: Show retry button (boolean)
-//   - supportUrl: Support page URL (string)
-//   - homeUrl: Home page URL (string)
+//   - showRetry: Show retry button (bool)
+//   - supportUrl: Support page URL (text)
+//   - homeUrl: Home page URL (text)
 //   - onRetry: Retry callback (function or none)
 
 title = props.title || "Something went wrong"

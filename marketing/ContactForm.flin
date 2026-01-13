@@ -3,10 +3,10 @@
 // Full contact form with validation states
 // ============================================================================
 // Props:
-//   - title: Form headline (string)
-//   - description: Supporting text (string or none)
+//   - title: Form headline (text)
+//   - description: Supporting text (text or none)
 //   - fields: Enabled fields configuration (object)
-//   - buttonText: Submit button text (string)
+//   - buttonText: Submit button text (text)
 //   - onSubmit: Form submission handler (function or none)
 
 title = props.title || "Get in touch"

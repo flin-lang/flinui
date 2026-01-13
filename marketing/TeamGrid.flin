@@ -3,8 +3,8 @@
 // Responsive grid layout for displaying team members with cards and hover effects
 // ============================================================================
 // Props:
-//   - title: Section title (string or none)
-//   - subtitle: Section subtitle (string or none)
+//   - title: Section title (text or none)
+//   - subtitle: Section subtitle (text or none)
 //   - members: List of member objects with name, role, avatar, bio, social (list)
 //   - columns: Number of columns 2-4 (number)
 

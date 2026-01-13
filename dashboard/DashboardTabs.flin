@@ -4,9 +4,9 @@
 // ============================================================================
 // Props:
 //   - tabs: List of tab objects with id, label, icon, badge (list)
-//   - activeTab: Currently active tab id (string)
+//   - activeTab: Currently active tab id (text)
 //   - onTabChange: Callback when tab changes (function or none)
-//   - variant: Tab style variant (default, pills, underline) (string)
+//   - variant: Tab style variant (default, pills, underline) (text)
 
 tabs = props.tabs || [
     ["id": "overview", "label": "Overview", "icon": "📊"],

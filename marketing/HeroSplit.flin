@@ -3,15 +3,15 @@
 // Hero section with split layout: text on left, image on right
 // ============================================================================
 // Props:
-//   - headline: Main headline text (string)
-//   - subheading: Secondary heading (string or none)
-//   - description: Description text (string or none)
-//   - ctaLabel: Call-to-action button text (string)
-//   - ctaUrl: CTA button URL (string or none)
+//   - headline: Main headline text (text)
+//   - subheading: Secondary heading (text or none)
+//   - description: Description text (text or none)
+//   - ctaLabel: Call-to-action button text (text)
+//   - ctaUrl: CTA button URL (text or none)
 //   - onCtaClick: CTA click handler (function or none)
-//   - imageSrc: Hero image URL (string)
-//   - imageAlt: Alt text for image (string)
-//   - imagePosition: Image position "right" or "left" (string)
+//   - imageSrc: Hero image URL (text)
+//   - imageAlt: Alt text for image (text)
+//   - imagePosition: Image position "right" or "left" (text)
 
 headline = props.headline || "Build Faster with Modern Tools"
 subheading = props.subheading || none

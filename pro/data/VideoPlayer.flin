@@ -3,14 +3,14 @@
 // Video player with custom controls (play, pause, volume, fullscreen)
 // ============================================================================
 // Props:
-//   - src: Video source URL (string)
+//   - src: Video source URL (text)
 //   - poster: Poster image URL (string or none)
 //   - title: Video title (string or none)
-//   - autoplay: Auto-play video (boolean)
-//   - muted: Start muted (boolean)
-//   - loop: Loop video (boolean)
-//   - showControls: Show custom controls (boolean)
-//   - aspectRatio: Aspect ratio - 16:9, 4:3, 1:1, 21:9 (string)
+//   - autoplay: Auto-play video (bool)
+//   - muted: Start muted (bool)
+//   - loop: Loop video (bool)
+//   - showControls: Show custom controls (bool)
+//   - aspectRatio: Aspect ratio - 16:9, 4:3, 1:1, 21:9 (text)
 
 src = props.src || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
 poster = props.poster || none

@@ -3,10 +3,10 @@
 // Browser and device breakdown with horizontal bars and icons
 // ============================================================================
 // Props:
-//   - title: Section title (string)
+//   - title: Section title (text)
 //   - browsers: List of browser objects with name, icon, percent, count (list)
-//   - showCount: Show visit counts (boolean)
-//   - animated: Enable bar animation (boolean)
+//   - showCount: Show visit counts (bool)
+//   - animated: Enable bar animation (bool)
 
 title = props.title || "Browser Statistics"
 browsers = props.browsers || [

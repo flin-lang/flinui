@@ -3,9 +3,9 @@
 // Expandable accordion for feature details
 // ============================================================================
 // Props:
-//   - title: Section title (string or none)
+//   - title: Section title (text or none)
 //   - items: List of accordion items with title, content (list)
-//   - allowMultiple: Allow multiple items open at once (boolean)
+//   - allowMultiple: Allow multiple items open at once (bool)
 
 title = props.title || none
 items = props.items || [

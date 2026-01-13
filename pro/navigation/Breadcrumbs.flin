@@ -4,11 +4,11 @@
 // ============================================================================
 // Props:
 //   - items: List of breadcrumb items with label, href (list)
-//   - separator: Custom separator character or element (string)
+//   - separator: Custom separator character or element (text)
 //   - maxItems: Max items to show before collapsing (number)
-//   - showHomeIcon: Show home icon for first item (boolean)
-//   - homeHref: Link for home icon (string)
-//   - size: Size variant - sm, md, lg (string)
+//   - showHomeIcon: Show home icon for first item (bool)
+//   - homeHref: Link for home icon (text)
+//   - size: Size variant - sm, md, lg (text)
 
 items = props.items || [
     ["label": "Home", "href": "/"],

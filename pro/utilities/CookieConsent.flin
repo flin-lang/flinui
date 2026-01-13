@@ -4,7 +4,7 @@
 // ============================================================================
 // Props:
 //   - title: Banner title (string, default: "Cookie Settings")
-//   - description: Banner description (string)
+//   - description: Banner description (text)
 //   - position: Banner position - bottom, top, bottom-left, bottom-right (string, default: "bottom")
 //   - variant: Style variant - bar, modal, floating (string, default: "bar")
 //   - showManage: Show manage preferences button (boolean, default: true)

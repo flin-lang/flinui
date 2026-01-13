@@ -3,13 +3,13 @@
 // Progress toward target with milestones and deadline tracking
 // ============================================================================
 // Props:
-//   - title: Goal title (string)
+//   - title: Goal title (text)
 //   - current: Current progress value (number)
 //   - target: Target value (number)
-//   - unit: Unit label (string or none)
-//   - deadline: Deadline date string (string or none)
+//   - unit: Unit label (text or none)
+//   - deadline: Deadline date text (text or none)
 //   - milestones: List of milestone objects with value and label (list or none)
-//   - showMilestones: Show milestone markers (boolean)
+//   - showMilestones: Show milestone markers (bool)
 
 title = props.title || "Goal Progress"
 current = props.current || 0

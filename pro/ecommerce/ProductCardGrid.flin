@@ -6,13 +6,13 @@
 //   - columns: Number of columns (number: 2, 3, 4)
 //   - gap: Gap between cards (string: "sm", "md", "lg")
 //   - cardVariant: Variant for all cards (string: "default", "compact", "minimal")
-//   - showRating: Show ratings on all cards (boolean)
-//   - showDescription: Show descriptions on all cards (boolean)
+//   - showRating: Show ratings on all cards (bool)
+//   - showDescription: Show descriptions on all cards (bool)
 //   - onProductClick: Handler when product is clicked (function or none)
 //   - onAddToCart: Handler when add to cart is clicked (function or none)
 //   - onQuickView: Handler when quick view is clicked (function or none)
-//   - loading: Show loading skeleton (boolean)
-//   - emptyMessage: Message when no products (string)
+//   - loading: Show loading skeleton (bool)
+//   - emptyMessage: Message when no products (text)
 //   - minCardWidth: Minimum card width for responsive (string, e.g., "280px")
 
 // Extract props with defaults

@@ -7,7 +7,7 @@
 //   - events: List of event objects with date, title, time, color, description (list)
 //   - onDateSelect: Callback when date is selected (function or none)
 //   - onEventClick: Callback when event is clicked (function or none)
-//   - showWeekNumbers: Show week numbers (boolean)
+//   - showWeekNumbers: Show week numbers (bool)
 //   - firstDayOfWeek: 0 = Sunday, 1 = Monday (number)
 
 selectedDate = props.selectedDate || new Date()

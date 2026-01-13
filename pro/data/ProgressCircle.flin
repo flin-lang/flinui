@@ -6,10 +6,10 @@
 //   - value: Current progress value 0-100 (number)
 //   - size: Circle size in pixels - also accepts sm, md, lg (number or string)
 //   - strokeWidth: Stroke width in pixels (number)
-//   - color: Progress color - default, success, warning, danger, info (string)
-//   - showValue: Show percentage in center (boolean)
+//   - color: Progress color - default, success, warning, danger, info (text)
+//   - showValue: Show percentage in center (bool)
 //   - label: Label text below percentage (string or none)
-//   - animated: Animate on mount (boolean)
+//   - animated: Animate on mount (bool)
 
 value = props.value || 0
 size = props.size || "md"

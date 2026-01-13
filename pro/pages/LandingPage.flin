@@ -4,15 +4,15 @@
 // ============================================================================
 // Props:
 //   - logo: Logo image URL (string or none)
-//   - companyName: Company name (string)
-//   - heroTitle: Hero section title (string)
-//   - heroSubtitle: Hero section subtitle (string)
-//   - heroCta: Primary CTA text (string)
-//   - heroCtaSecondary: Secondary CTA text (string)
+//   - companyName: Company name (text)
+//   - heroTitle: Hero section title (text)
+//   - heroSubtitle: Hero section subtitle (text)
+//   - heroCta: Primary CTA text (text)
+//   - heroCtaSecondary: Secondary CTA text (text)
 //   - heroImage: Hero image URL (string or none)
 //   - features: List of feature objects (list)
 //   - testimonials: List of testimonial objects (list)
-//   - pricingUrl: URL for pricing page (string)
+//   - pricingUrl: URL for pricing page (text)
 //   - onPrimaryCta: Primary CTA click handler (function or none)
 //   - onSecondaryCta: Secondary CTA click handler (function or none)
 

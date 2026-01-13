@@ -2,7 +2,7 @@
 // FlinUI PRO E-Commerce Component
 //
 // Props:
-//   - isOpen: Modal open state (boolean)
+//   - isOpen: Modal open state (bool)
 //   - onClose: Close handler (function or none)
 //   - product: Product object with all details (object or none)
 //   - onAddToCart: Add to cart handler (function or none)

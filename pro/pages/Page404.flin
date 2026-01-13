@@ -3,10 +3,10 @@
 // Not found (404) error page with search and navigation options
 // ============================================================================
 // Props:
-//   - title: Error title (string)
-//   - message: Error message (string)
-//   - homeUrl: Home page URL (string)
-//   - showSearch: Show search input (boolean)
+//   - title: Error title (text)
+//   - message: Error message (text)
+//   - homeUrl: Home page URL (text)
+//   - showSearch: Show search input (bool)
 //   - suggestedLinks: List of suggested links (list)
 //   - onSearch: Search callback (function or none)
 

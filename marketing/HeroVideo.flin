@@ -3,13 +3,13 @@
 // Full-screen video hero with text overlay
 // ============================================================================
 // Props:
-//   - headline: Main headline text (string)
-//   - subtitle: Subtitle text (string or none)
-//   - ctaLabel: Call-to-action button text (string)
-//   - ctaUrl: CTA button URL (string or none)
+//   - headline: Main headline text (text)
+//   - subtitle: Subtitle text (text or none)
+//   - ctaLabel: Call-to-action button text (text)
+//   - ctaUrl: CTA button URL (text or none)
 //   - onCtaClick: CTA click handler (function or none)
-//   - videoSrc: Video source URL (string)
-//   - videoPoster: Video poster image (string or none)
+//   - videoSrc: Video source URL (text)
+//   - videoPoster: Video poster image (text or none)
 //   - overlayOpacity: Overlay opacity 0-1 (number)
 
 headline = props.headline || "Experience the Future"

@@ -3,11 +3,11 @@
 // Collapsible navigation sidebar with icons, badges, and nested items
 // ============================================================================
 // Props:
-//   - logo: Logo image URL or text (string or none)
+//   - logo: Logo image URL or text (text or none)
 //   - items: Navigation items list with icon, label, href, badge, children (list)
-//   - collapsed: Sidebar collapsed state (boolean)
+//   - collapsed: Sidebar collapsed state (bool)
 //   - onToggle: Callback when collapse toggle clicked (function or none)
-//   - activeItem: Currently active item identifier (string or none)
+//   - activeItem: Currently active item identifier (text or none)
 
 logo = props.logo || none
 items = props.items || [

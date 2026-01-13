@@ -7,7 +7,7 @@
 //   - selected: Currently selected variant (object or none)
 //   - onSelect: Selection handler (function or none)
 //   - layout: Display layout (string: "inline", "grid", "dropdown")
-//   - showUnavailable: Show unavailable options (boolean)
+//   - showUnavailable: Show unavailable options (bool)
 //   - size: Swatch size (string: "sm", "md", "lg")
 
 // Extract props with defaults

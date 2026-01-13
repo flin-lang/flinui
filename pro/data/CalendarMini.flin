@@ -6,8 +6,8 @@
 //   - selectedDate: Currently selected date (Date or none)
 //   - events: List of event objects with date property (list)
 //   - onDateSelect: Callback when date is selected (function or none)
-//   - highlightToday: Highlight today's date (boolean)
-//   - showHeader: Show month/year header with navigation (boolean)
+//   - highlightToday: Highlight today's date (bool)
+//   - showHeader: Show month/year header with navigation (bool)
 
 selectedDate = props.selectedDate || new Date()
 events = props.events || []

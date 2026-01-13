@@ -3,10 +3,10 @@
 // Top navigation bar with user menu, notifications, search, and actions
 // ============================================================================
 // Props:
-//   - title: Page title or breadcrumb text (string or none)
+//   - title: Page title or breadcrumb text (text or none)
 //   - user: User object with name, avatar, role (object or none)
 //   - notifications: List of notification objects (list or none)
-//   - search: Enable search input (boolean)
+//   - search: Enable search input (bool)
 //   - actions: List of action buttons with icon, label, onClick (list or none)
 
 title = props.title || "Dashboard"

@@ -3,11 +3,11 @@
 // Company about page with team, mission, values, and story sections
 // ============================================================================
 // Props:
-//   - companyName: Company name (string)
-//   - mission: Mission statement (string)
-//   - vision: Vision statement (string)
-//   - story: Company story text (string)
-//   - foundedYear: Year founded (string)
+//   - companyName: Company name (text)
+//   - mission: Mission statement (text)
+//   - vision: Vision statement (text)
+//   - story: Company story text (text)
+//   - foundedYear: Year founded (text)
 //   - teamMembers: List of team member objects (list)
 //   - values: List of company value objects (list)
 //   - stats: List of stat objects (list)

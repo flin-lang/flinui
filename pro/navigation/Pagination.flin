@@ -7,10 +7,10 @@
 //   - totalPages: Total number of pages (number)
 //   - onPageChange: Callback when page changes (function)
 //   - siblingCount: Number of siblings on each side (number)
-//   - showFirstLast: Show first/last buttons (boolean)
-//   - showPrevNext: Show prev/next buttons (boolean)
-//   - size: Size variant - sm, md, lg (string)
-//   - variant: Style variant - default, outline, ghost (string)
+//   - showFirstLast: Show first/last buttons (bool)
+//   - showPrevNext: Show prev/next buttons (bool)
+//   - size: Size variant - sm, md, lg (text)
+//   - variant: Style variant - default, outline, ghost (text)
 
 currentPage = props.currentPage || 1
 totalPages = props.totalPages || 10

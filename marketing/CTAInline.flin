@@ -3,12 +3,12 @@
 // Inline newsletter/signup CTA with horizontal layout
 // ============================================================================
 // Props:
-//   - title: Main headline (string)
-//   - description: Supporting text (string or none)
-//   - placeholder: Input placeholder text (string)
-//   - buttonText: Submit button text (string)
+//   - title: Main headline (text)
+//   - description: Supporting text (text or none)
+//   - placeholder: Input placeholder text (text)
+//   - buttonText: Submit button text (text)
 //   - onSubmit: Form submission handler (function or none)
-//   - compact: Use compact styling (boolean)
+//   - compact: Use compact styling (bool)
 
 title = props.title || "Stay in the loop"
 description = props.description || "Get the latest updates delivered to your inbox."

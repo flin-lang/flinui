@@ -3,12 +3,12 @@
 // CSS-only time series line chart with dots and grid
 // ============================================================================
 // Props:
-//   - title: Chart title (string or none)
+//   - title: Chart title (text or none)
 //   - data: List of data points with label and value (list)
-//   - color: Line and dot color (string)
+//   - color: Line and dot color (text)
 //   - height: Chart height in pixels (number)
-//   - showDots: Display data point dots (boolean)
-//   - showGrid: Display background grid lines (boolean)
+//   - showDots: Display data point dots (bool)
+//   - showGrid: Display background grid lines (bool)
 
 title = props.title || none
 data = props.data || [

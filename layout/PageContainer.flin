@@ -1,6 +1,6 @@
 // FlinUI PageContainer Component
 // Full page layout container with optional sidebar, header, and footer
-// Props: sidebar (slot), sidebarPosition (left/right), sidebarWidth (string), header (slot), footer (slot), maxWidth (sm/md/lg/xl/full)
+// Props: sidebar (slot), sidebarPosition (left/right), sidebarWidth (text), header (slot), footer (slot), maxWidth (sm/md/lg/xl/full)
 
 sidebarPosition = props.sidebarPosition || "left"
 sidebarWidth = props.sidebarWidth || "280px"

@@ -3,9 +3,9 @@
 // Hero-style mission statement with vision and values grid display
 // ============================================================================
 // Props:
-//   - title: Section title (string or none)
-//   - mission: Mission statement text (string or none)
-//   - vision: Vision statement text (string or none)
+//   - title: Section title (text or none)
+//   - mission: Mission statement text (text or none)
+//   - vision: Vision statement text (text or none)
 //   - values: List of value objects with icon, title, description (list)
 
 title = props.title || "Our Mission"

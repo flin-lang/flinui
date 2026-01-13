@@ -3,12 +3,12 @@
 // Full-width call-to-action banner with prominent CTA button
 // ============================================================================
 // Props:
-//   - title: Main headline text (string)
-//   - description: Supporting description (string or none)
-//   - buttonText: CTA button label (string)
-//   - buttonHref: CTA button link (string)
-//   - variant: Style variant "primary", "gradient", or "dark" (string)
-//   - dismissible: Show close button (boolean)
+//   - title: Main headline text (text)
+//   - description: Supporting description (text or none)
+//   - buttonText: CTA button label (text)
+//   - buttonHref: CTA button link (text)
+//   - variant: Style variant "primary", "gradient", or "dark" (text)
+//   - dismissible: Show close button (bool)
 //   - onDismiss: Callback when dismissed (function or none)
 
 title = props.title || "Ready to get started?"

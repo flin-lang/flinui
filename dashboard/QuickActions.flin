@@ -4,7 +4,7 @@
 // ============================================================================
 // Props:
 //   - actions: List of action objects with icon, label, onClick, color (list)
-//   - position: Button position (bottom-right, bottom-left, top-right, top-left) (string)
+//   - position: Button position (bottom-right, bottom-left, top-right, top-left) (text)
 
 actions = props.actions || [
     ["icon": "✏️", "label": "New Task", "onClick": none, "color": "blue"],

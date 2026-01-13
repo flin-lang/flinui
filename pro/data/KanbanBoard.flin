@@ -7,8 +7,8 @@
 //   - onCardMove: Callback when card is moved (function or none)
 //   - onCardClick: Callback when card is clicked (function or none)
 //   - onAddCard: Callback when add button is clicked (function or none)
-//   - showAddButton: Show add card button (boolean)
-//   - draggable: Enable drag and drop (boolean)
+//   - showAddButton: Show add card button (bool)
+//   - draggable: Enable drag and drop (bool)
 
 columns = props.columns || [
     [

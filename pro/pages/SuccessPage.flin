@@ -3,13 +3,13 @@
 // Action complete/success page with confirmation and next steps
 // ============================================================================
 // Props:
-//   - title: Success title (string)
-//   - message: Success message (string)
-//   - type: Success type "default" | "payment" | "signup" | "order" (string)
+//   - title: Success title (text)
+//   - message: Success message (text)
+//   - type: Success type "default" | "payment" | "signup" | "order" (text)
 //   - details: Additional details object (object or none)
 //   - primaryAction: Primary action object (object or none)
 //   - secondaryAction: Secondary action object (object or none)
-//   - showConfetti: Show confetti animation (boolean)
+//   - showConfetti: Show confetti animation (bool)
 
 title = props.title || "Success!"
 message = props.message || "Your action has been completed successfully."

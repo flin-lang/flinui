@@ -3,8 +3,8 @@
 // Vertical timeline for company history with alternating sides and connecting line
 // ============================================================================
 // Props:
-//   - title: Section title (string or none)
-//   - subtitle: Section subtitle (string or none)
+//   - title: Section title (text or none)
+//   - subtitle: Section subtitle (text or none)
 //   - events: List of event objects with year, title, description, icon (list)
 
 title = props.title || none

@@ -7,7 +7,7 @@
 //   - selectedId: Currently selected item ID (string or none)
 //   - showMasterHeader: Show header in master panel (boolean, default: true)
 //   - showDetailHeader: Show header in detail panel (boolean, default: true)
-//   - emptyText: Text to show when no item selected (string)
+//   - emptyText: Text to show when no item selected (text)
 //   - onSelect: Callback when item is selected (function or none)
 // ============================================================================
 

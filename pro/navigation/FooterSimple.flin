@@ -3,12 +3,12 @@
 // Basic footer with logo, copyright text, and horizontal links
 // ============================================================================
 // Props:
-//   - logo: Logo image URL or none for text (string)
-//   - logoText: Text to show with/instead of logo (string)
-//   - logoHref: Link for logo click (string)
+//   - logo: Logo image URL or none for text (text)
+//   - logoText: Text to show with/instead of logo (text)
+//   - logoHref: Link for logo click (text)
 //   - links: Array of footer links [{ label, href }] (array)
-//   - copyright: Copyright text (string)
-//   - variant: Color scheme - light, dark (string)
+//   - copyright: Copyright text (text)
+//   - variant: Color scheme - light, dark (text)
 
 logo = props.logo || none
 logoText = props.logoText || "Brand"

@@ -3,8 +3,8 @@
 // CSS Grid container for responsive dashboard widget layout
 // ============================================================================
 // Props:
-//   - columns: Number of columns (1-6 or auto) (number or string)
-//   - gap: Gap size between widgets (sm, md, lg, xl) (string)
+//   - columns: Number of columns (1-6 or auto) (number or text)
+//   - gap: Gap size between widgets (sm, md, lg, xl) (text)
 //   - children: Widget components to render (slot)
 
 columns = props.columns || 3

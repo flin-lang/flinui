@@ -4,12 +4,12 @@
 // ============================================================================
 // Props:
 //   - tabs: List of tab objects with id, label, icon, disabled (list)
-//   - activeTab: Currently active tab id (string)
+//   - activeTab: Currently active tab id (text)
 //   - onChange: Callback when tab changes (function)
-//   - variant: Style variant - default, pills, underline, enclosed (string)
-//   - size: Size variant - sm, md, lg (string)
-//   - fullWidth: Stretch tabs to full width (boolean)
-//   - centered: Center tabs (boolean)
+//   - variant: Style variant - default, pills, underline, enclosed (text)
+//   - size: Size variant - sm, md, lg (text)
+//   - fullWidth: Stretch tabs to full width (bool)
+//   - centered: Center tabs (bool)
 
 tabs = props.tabs || [
     ["id": "tab1", "label": "Overview", "icon": none],

@@ -2,10 +2,10 @@
 // FlinUI PRO E-Commerce Component
 //
 // Props:
-//   - image: Product image URL (string)
-//   - imageAlt: Alt text for image (string)
-//   - title: Product name (string)
-//   - description: Product description (string)
+//   - image: Product image URL (text)
+//   - imageAlt: Alt text for image (text)
+//   - title: Product name (text)
+//   - description: Product description (text)
 //   - price: Product price (number)
 //   - originalPrice: Original price for discount display (number or none)
 //   - currency: Currency code (string, default "USD")
@@ -13,12 +13,12 @@
 //   - reviewCount: Number of reviews (number)
 //   - badge: Badge text (e.g., "Sale", "New") (string or none)
 //   - badgeVariant: Badge color variant (string: "gold", "emerald", "rose")
-//   - inStock: Stock status (boolean)
+//   - inStock: Stock status (bool)
 //   - onAddToCart: Add to cart handler (function or none)
 //   - onQuickView: Quick view handler (function or none)
 //   - variant: Card style variant (string: "default", "compact", "minimal")
-//   - showRating: Show rating display (boolean)
-//   - showDescription: Show description text (boolean)
+//   - showRating: Show rating display (bool)
+//   - showDescription: Show description text (bool)
 
 // Extract props with defaults
 image = props.image || "/placeholder-product.png"

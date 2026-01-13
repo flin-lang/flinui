@@ -3,8 +3,8 @@
 // Feature by plan comparison matrix with plans as columns and features as rows
 // ============================================================================
 // Props:
-//   - title: Section title (string or none)
-//   - subtitle: Section subtitle (string or none)
+//   - title: Section title (text or none)
+//   - subtitle: Section subtitle (text or none)
 //   - plans: List of plan names (list of strings)
 //   - features: List of feature objects with name and tiers (list of booleans/strings)
 //   - highlightPlan: Index of plan to highlight (number or none)

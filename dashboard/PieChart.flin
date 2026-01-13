@@ -3,10 +3,10 @@
 // CSS-only pie chart using conic-gradient with legend
 // ============================================================================
 // Props:
-//   - title: Chart title (string or none)
+//   - title: Chart title (text or none)
 //   - data: List of segments with label, value, and color (list)
-//   - showLegend: Display legend below chart (boolean)
-//   - showPercent: Display percentage in legend (boolean)
+//   - showLegend: Display legend below chart (bool)
+//   - showPercent: Display percentage in legend (bool)
 //   - size: Chart diameter in pixels (number)
 
 title = props.title || none

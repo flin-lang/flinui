@@ -6,9 +6,9 @@
 //   - variant: Gallery layout variant (string: "default", "slider", "grid")
 //   - aspectRatio: Main image aspect ratio (string: "square", "portrait", "landscape")
 //   - thumbnailPosition: Position of thumbnails (string: "bottom", "left", "right")
-//   - showZoom: Enable zoom on hover (boolean)
-//   - showFullscreen: Show fullscreen button (boolean)
-//   - autoplay: Autoplay slideshow (boolean)
+//   - showZoom: Enable zoom on hover (bool)
+//   - showFullscreen: Show fullscreen button (bool)
+//   - autoplay: Autoplay slideshow (bool)
 //   - autoplayDelay: Delay between slides in ms (number)
 
 // Extract props with defaults

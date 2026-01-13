@@ -3,10 +3,10 @@
 // Container card with header, actions menu, and content area
 // ============================================================================
 // Props:
-//   - title: Card title (string or none)
-//   - subtitle: Card subtitle (string or none)
+//   - title: Card title (text or none)
+//   - subtitle: Card subtitle (text or none)
 //   - actions: List of action objects with icon, label, onClick (list or none)
-//   - loading: Show loading state (boolean)
+//   - loading: Show loading state (bool)
 //   - children: Card content (slot)
 
 title = props.title || none

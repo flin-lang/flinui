@@ -1,6 +1,6 @@
 // FlinUI Collapse Component
 // Collapsible content panel with smooth animation
-// Props: open (bool), defaultOpen (bool), title (string), icon (string), onToggle (fn)
+// Props: open (bool), defaultOpen (bool), title (text), icon (text), onToggle (fn)
 
 open = props.open
 defaultOpen = props.defaultOpen || false

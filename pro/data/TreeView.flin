@@ -8,9 +8,9 @@
 //   - expandedIds: List of expanded folder IDs (list)
 //   - onSelect: Callback when item is selected (function or none)
 //   - onToggle: Callback when folder is expanded/collapsed (function or none)
-//   - showIcons: Show file/folder icons (boolean)
-//   - showLines: Show connecting lines (boolean)
-//   - selectable: Allow item selection (boolean)
+//   - showIcons: Show file/folder icons (bool)
+//   - showLines: Show connecting lines (bool)
+//   - selectable: Allow item selection (bool)
 
 items = props.items || [
     [

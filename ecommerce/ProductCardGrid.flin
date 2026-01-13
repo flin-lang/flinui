@@ -10,10 +10,10 @@
 //   - onProductClick: Handler when product is clicked (function or none)
 //   - onAddToCart: Handler when add to cart is clicked (function or none)
 //   - onQuickView: Handler when quick view is clicked (function or none)
-//   - loading: Show loading skeleton (boolean)
+//   - loading: Show loading skeleton (bool)
 //   - emptyMessage: Message when no products (string, default "No products found")
 //   - minCardWidth: Minimum card width for responsive (string, e.g., "280px")
-//   - autoColumns: Enable auto-flow columns based on container (boolean, default false)
+//   - autoColumns: Enable auto-flow columns based on container (bool, default false)
 
 products = props.products || []
 columns = props.columns || 3

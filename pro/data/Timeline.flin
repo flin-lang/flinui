@@ -4,9 +4,9 @@
 // ============================================================================
 // Props:
 //   - events: List of event objects with date, title, content, icon, color (list)
-//   - variant: Style variant - default, alternating, compact (string)
-//   - showConnector: Show connecting line (boolean)
-//   - animated: Animate events on scroll (boolean)
+//   - variant: Style variant - default, alternating, compact (text)
+//   - showConnector: Show connecting line (bool)
+//   - animated: Animate events on scroll (bool)
 
 events = props.events || [
     ["date": "Jan 15, 2024", "time": "10:30 AM", "title": "Project Kickoff", "content": "Initial meeting with stakeholders to discuss project scope and objectives.", "icon": "🚀", "color": "gold"],

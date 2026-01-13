@@ -3,11 +3,11 @@
 // CSS-only color-coded matrix visualization
 // ============================================================================
 // Props:
-//   - title: Chart title (string or none)
+//   - title: Chart title (text or none)
 //   - rows: List of row labels (list)
 //   - columns: List of column labels (list)
 //   - data: 2D list of values (list of lists)
-//   - colorScale: Color scheme "gold", "blue", "green", "red" (string)
+//   - colorScale: Color scheme "gold", "blue", "green", "red" (text)
 
 title = props.title || none
 rows = props.rows || ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]

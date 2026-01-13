@@ -3,11 +3,11 @@
 // Contact page with form, company info, and support options
 // ============================================================================
 // Props:
-//   - title: Page title (string)
-//   - subtitle: Page subtitle (string)
-//   - email: Contact email (string)
-//   - phone: Contact phone (string)
-//   - address: Company address (string)
+//   - title: Page title (text)
+//   - subtitle: Page subtitle (text)
+//   - email: Contact email (text)
+//   - phone: Contact phone (text)
+//   - address: Company address (text)
 //   - socialLinks: List of social media links (list)
 //   - onSubmit: Form submission callback (function or none)
 

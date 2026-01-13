@@ -3,9 +3,9 @@
 // Essential product card with image, title, price, rating, and add to cart
 // ============================================================================
 // Props:
-//   - image: Product image URL (string)
-//   - imageAlt: Alt text for image (string)
-//   - title: Product name (string)
+//   - image: Product image URL (text)
+//   - imageAlt: Alt text for image (text)
+//   - title: Product name (text)
 //   - price: Product price (number)
 //   - originalPrice: Original price for discount display (number or none)
 //   - currency: Currency code (string, default "USD")
@@ -13,7 +13,7 @@
 //   - reviewCount: Number of reviews (number)
 //   - badge: Badge text (e.g., "Sale", "New") (string or none)
 //   - badgeColor: Badge color variant (string: "gold", "emerald", "rose")
-//   - inStock: Stock status (boolean, default true)
+//   - inStock: Stock status (bool, default true)
 //   - onAddToCart: Add to cart handler (function or none)
 
 image = props.image || "/placeholder-product.png"

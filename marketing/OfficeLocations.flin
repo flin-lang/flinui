@@ -3,8 +3,8 @@
 // Display office location cards with contact info and optional map links
 // ============================================================================
 // Props:
-//   - title: Section title (string or none)
-//   - subtitle: Section subtitle (string or none)
+//   - title: Section title (text or none)
+//   - subtitle: Section subtitle (text or none)
 //   - locations: List of location objects with city, country, address, phone, email, image, mapUrl (list)
 
 title = props.title || none
