@@ -31,15 +31,15 @@ Five production-ready, pixel-perfect e-commerce product card components built wi
 
 **Props:**
 ```flin
-image: string (URL)
-imageAlt: string
-title: string
+image: text (URL)
+imageAlt: text
+title: text
 price: number
 originalPrice: number | none
-currency: string (USD, EUR, GBP)
+currency: text (USD, EUR, GBP)
 rating: number (0-5)
 reviewCount: number
-badge: string | none
+badge: text | none
 badgeColor: "gold" | "emerald" | "rose"
 inStock: boolean
 onAddToCart: function | none
@@ -81,16 +81,16 @@ onAddToCart: function | none
 
 **Props:**
 ```flin
-image: string
-imageAlt: string
-title: string
+image: text
+imageAlt: text
+title: text
 price: number
 originalPrice: number | none
-currency: string
+currency: text
 rating: number
 reviewCount: number
-category: string
-badge: string | none
+category: text
+badge: text | none
 badgeColor: "gold" | "emerald" | "rose"
 inStock: boolean
 onAddToCart: function | none
@@ -135,16 +135,16 @@ onWishlist: function | none
 
 **Props:**
 ```flin
-image: string
-imageAlt: string
-title: string
+image: text
+imageAlt: text
+title: text
 price: number
 originalPrice: number | none
-currency: string
+currency: text
 rating: number
 inStock: boolean
 stockCount: number | none
-badge: string | none
+badge: text | none
 badgeColor: "gold" | "emerald" | "rose"
 onAddToCart: function | none
 onRemove: function | none
@@ -190,17 +190,17 @@ onRemove: function | none
 
 **Props:**
 ```flin
-image: string
-imageAlt: string
-title: string
-description: string
+image: text
+imageAlt: text
+title: text
+description: text
 price: number
 originalPrice: number | none
-currency: string
+currency: text
 rating: number
 reviewCount: number
-features: array<string> | none
-badge: string | none
+features: array<text> | none
+badge: text | none
 badgeColor: "gold" | "emerald" | "rose"
 inStock: boolean
 onAddToCart: function | none
@@ -266,8 +266,8 @@ onProductClick: function | none
 onAddToCart: function | none
 onQuickView: function | none
 loading: boolean
-emptyMessage: string
-minCardWidth: string (e.g., "280px")
+emptyMessage: text
+minCardWidth: text (e.g., "280px")
 autoColumns: boolean
 ```
 

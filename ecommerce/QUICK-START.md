@@ -80,14 +80,14 @@
 ### All Cards Support
 
 ```flin
-image          : string          // Image URL
-imageAlt       : string          // Alt text
-title          : string          // Product name
+image          : text            // Image URL
+imageAlt       : text            // Alt text
+title          : text            // Product name
 price          : number          // Current price
 originalPrice  : number | none    // Original (for discount)
-currency       : string          // "USD", "EUR", "GBP"
+currency       : text            // "USD", "EUR", "GBP"
 rating         : number (0-5)    // Star rating
-badge          : string | none   // "Sale", "New", etc.
+badge          : text | none     // "Sale", "New", etc.
 badgeColor     : "gold" | "emerald" | "rose"
 inStock        : boolean         // Stock status
 ```
@@ -97,9 +97,9 @@ inStock        : boolean         // Stock status
 **Hover/Compact/Large:**
 ```flin
 reviewCount    : number          // Number of reviews
-category       : string          // Product category (Hover only)
-description    : string          // Full description (Large only)
-features       : array<string>   // Feature list (Large only)
+category       : text            // Product category (Hover only)
+description    : text            // Full description (Large only)
+features       : array<text>     // Feature list (Large only)
 stockCount     : number | none    // Qty in stock (Compact only)
 ```
 
@@ -121,8 +121,8 @@ columns        : 2 | 3 | 4        // Grid columns
 gap            : "sm" | "md" | "lg" // Gap size
 cardVariant    : "basic" | "hover" | "compact" | "large"
 loading        : boolean          // Show skeleton
-emptyMessage   : string           // Empty state text
-minCardWidth   : string           // Min card width
+emptyMessage   : text             // Empty state text
+minCardWidth   : text             // Min card width
 autoColumns    : boolean          // Auto-fit columns
 ```
 

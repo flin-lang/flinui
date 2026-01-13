@@ -168,14 +168,14 @@ All components automatically adjust. Compact card switches from horizontal to ve
 ### Common Props (All Components)
 
 ```flin
-image: string              // Image URL
-imageAlt: string           // Alt text
-title: string              // Product name
+image: text                // Image URL
+imageAlt: text             // Alt text
+title: text                // Product name
 price: number              // Current price
 originalPrice: number      // For discount display
 currency: "USD" | "EUR" | "GBP"
 rating: number (0-5)       // Star rating
-badge: string | none       // "Sale", "New", etc.
+badge: text | none         // "Sale", "New", etc.
 badgeColor: "gold" | "emerald" | "rose"
 inStock: boolean           // Stock status
 onAddToCart: function      // Handler
@@ -184,7 +184,7 @@ onAddToCart: function      // Handler
 ### Card-Specific Props
 
 **ProductCardHover**
-- `category: string` - Product category label
+- `category: text` - Product category label
 - `reviewCount: number` - Number of reviews
 - `onQuickView: function` - Quick view handler
 - `onWishlist: function` - Wishlist handler
@@ -194,7 +194,7 @@ onAddToCart: function      // Handler
 - `onRemove: function` - Remove handler
 
 **ProductCardLarge**
-- `description: string` - Full description
+- `description: text` - Full description
 - `reviewCount: number` - Review count
 - `features: array` - Feature list
 - `onQuickView: function` - Quick view
@@ -204,9 +204,9 @@ onAddToCart: function      // Handler
 - `products: array` - Product array
 - `columns: 2 | 3 | 4` - Grid columns
 - `gap: "sm" | "md" | "lg"` - Gap size
-- `cardVariant: string` - Card type
+- `cardVariant: text` - Card type
 - `loading: boolean` - Show skeleton
-- `emptyMessage: string` - Empty state text
+- `emptyMessage: text` - Empty state text
 
 ---
 
